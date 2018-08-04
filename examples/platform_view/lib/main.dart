@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const MethodChannel _methodChannel =
-      const MethodChannel('samples.flutter.io/platform_view');
+      MethodChannel('samples.flutter.io/platform_view');
 
   int _counter = 0;
 
@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       scale: 1.5),
                   const Text(
                     'Flutter',
-                    style: const TextStyle(fontSize: 30.0),
+                    style: TextStyle(fontSize: 30.0),
                   ),
                 ],
               ),

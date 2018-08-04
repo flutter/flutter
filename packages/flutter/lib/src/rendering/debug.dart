@@ -10,7 +10,7 @@ export 'package:flutter/foundation.dart' show debugPrint;
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
 
-const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
+const HSVColor _kDebugDefaultRepaintColor = HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
 /// Causes each RenderBox to paint a box around its bounds, and some extra
 /// boxes, such as [RenderPadding], to draw construction lines.

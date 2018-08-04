@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(children: const <Widget>[const Center()])
+        child: new ListView(children: const <Widget>[Center()])
       ),
     );
   });

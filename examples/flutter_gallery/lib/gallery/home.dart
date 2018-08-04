@@ -13,9 +13,9 @@ import 'backdrop.dart';
 import 'demos.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
-const Color _kFlutterBlue = const Color(0xFF003D75);
+const Color _kFlutterBlue = Color(0xFF003D75);
 const double _kDemoItemHeight = 64.0;
-const Duration _kFrontLayerSwitchDuration = const Duration(milliseconds: 300);
+const Duration _kFrontLayerSwitchDuration = Duration(milliseconds: 300);
 
 class _FlutterLogo extends StatelessWidget {
   const _FlutterLogo({ Key key }) : super(key: key);
@@ -27,8 +27,8 @@ class _FlutterLogo extends StatelessWidget {
         width: 34.0,
         height: 34.0,
         decoration: const BoxDecoration(
-          image: const DecorationImage(
-            image: const AssetImage(
+          image: DecorationImage(
+            image: AssetImage(
               'logos/flutter_white/logo.png',
               package: _kGalleryAssetsPackage,
             ),
@@ -245,7 +245,7 @@ class _DemosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // When overriding ListView.padding, it's necessary to manually handle
+    // When overriding ListView.padding, it is necessary to manually handle
     // safe areas.
     final double windowBottomPadding = MediaQuery.of(context).padding.bottom;
     return new KeyedSubtree(
@@ -325,8 +325,8 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     final MediaQueryData media = MediaQuery.of(context);
     final bool centerHome = media.orientation == Orientation.portrait && media.size.height < 800.0;
 
-    const Curve switchOutCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
-    const Curve switchInCurve = const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    const Curve switchOutCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
+    const Curve switchInCurve = Interval(0.4, 1.0, curve: Curves.fastOutSlowIn);
 
     Widget home = new Scaffold(
       key: _scaffoldKey,

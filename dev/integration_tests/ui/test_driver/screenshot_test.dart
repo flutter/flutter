@@ -41,6 +41,6 @@ void main() {
 
         imageBefore = imageAfter;
       }
-    }, timeout: const Timeout(const Duration(minutes: 2)));
+    }, timeout: const Timeout(Duration(minutes: 2)));
   });
 }

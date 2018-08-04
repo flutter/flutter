@@ -72,10 +72,10 @@ void main() {
   });
 
   test('Compound borders', () {
-    const BorderSide side1 = const BorderSide(color: const Color(0xFF00FF00));
-    const BorderSide side2 = const BorderSide(color: const Color(0xFF0000FF));
-    const BorderDirectional b1 = const BorderDirectional(top: side1, start: side1, end: side1, bottom: side1);
-    const BorderDirectional b2 = const BorderDirectional(top: side2, start: side2, end: side2, bottom: side2);
+    const BorderSide side1 = BorderSide(color: Color(0xFF00FF00));
+    const BorderSide side2 = BorderSide(color: Color(0xFF0000FF));
+    const BorderDirectional b1 = BorderDirectional(top: side1, start: side1, end: side1, bottom: side1);
+    const BorderDirectional b2 = BorderDirectional(top: side2, start: side2, end: side2, bottom: side2);
     expect(
       (b1 + b2).toString(),
       'BorderDirectional(top: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), start: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), end: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid), bottom: BorderSide(Color(0xff00ff00), 1.0, BorderStyle.solid)) + '

@@ -354,9 +354,9 @@ class DataTable extends StatelessWidget {
   static const double _columnSpacing = 56.0;
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
-  static const Duration _sortArrowAnimationDuration = const Duration(milliseconds: 150);
-  static const Color _grey100Opacity = const Color(0x0A000000); // Grey 100 as opacity instead of solid color
-  static const Color _grey300Opacity = const Color(0x1E000000); // Dark theme variant is just a guess.
+  static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
+  static const Color _grey100Opacity = Color(0x0A000000); // Grey 100 as opacity instead of solid color
+  static const Color _grey300Opacity = Color(0x1E000000); // Dark theme variant is just a guess.
 
   Widget _buildCheckbox({
     Color color,
@@ -364,13 +364,16 @@ class DataTable extends StatelessWidget {
     VoidCallback onRowTap,
     ValueChanged<bool> onCheckboxChanged
   }) {
-    Widget contents = new Padding(
-      padding: const EdgeInsetsDirectional.only(start: _tablePadding, end: _tablePadding / 2.0),
-      child: new Center(
-        child: new Checkbox(
-          activeColor: color,
-          value: checked,
-          onChanged: onCheckboxChanged,
+    Widget contents = new Semantics(
+      container: true,
+      child: new Padding(
+        padding: const EdgeInsetsDirectional.only(start: _tablePadding, end: _tablePadding / 2.0),
+        child: new Center(
+          child: new Checkbox(
+            activeColor: color,
+            value: checked,
+            onChanged: onCheckboxChanged,
+          ),
         ),
       ),
     );
@@ -402,7 +405,7 @@ class DataTable extends StatelessWidget {
         down: sorted ? ascending : null,
         duration: _sortArrowAnimationDuration,
       );
-      const Widget arrowPadding = const SizedBox(width: _sortArrowPadding);
+      const Widget arrowPadding = SizedBox(width: _sortArrowPadding);
       label = new Row(
         textDirection: numeric ? TextDirection.rtl : null,
         children: <Widget>[ label, arrowPadding, arrow ],
@@ -454,7 +457,7 @@ class DataTable extends StatelessWidget {
   }) {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
-      const Widget icon = const Icon(Icons.edit, size: 18.0);
+      const Widget icon = Icon(Icons.edit, size: 18.0);
       label = new Expanded(child: label);
       label = new Row(
         textDirection: numeric ? TextDirection.rtl : null,

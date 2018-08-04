@@ -18,7 +18,7 @@ FlutterTestDriver _flutter;
 /// This duration is arbitrary but is ideally:
 /// a) long enough to ensure that if the app is crashing at startup, we notice
 /// b) as short as possible, to avoid inflating build times
-const Duration requiredLifespan = const Duration(seconds: 5);
+const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
   group('flutter run', () {
@@ -44,6 +44,6 @@ void main() {
       await new Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-    // Skip on Windows due to https://github.com/flutter/flutter/issues/17833
+    // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
   }, timeout: const Timeout.factor(3), skip: platform.isWindows);
 }

@@ -75,11 +75,11 @@ void main() {
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
-   const Size size = const Size(2.0, 4.0);
+   const Size size = Size(2.0, 4.0);
    const double devicePixelRatio = 2.0;
    const double textScaleFactor = 1.2;
-   const EdgeInsets padding = const EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-   const EdgeInsets viewInsets = const EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+   const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+   const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
    MediaQueryData unpadded;
    await tester.pumpWidget(
@@ -121,11 +121,11 @@ void main() {
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
-    const Size size = const Size(2.0, 4.0);
+    const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = const EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewInsets = const EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
     MediaQueryData unpadded;
     await tester.pumpWidget(
