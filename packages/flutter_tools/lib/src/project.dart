@@ -76,7 +76,12 @@ class FlutterProject {
   IosProject get ios => new IosProject(directory.childDirectory('ios'));
 
   /// The Android sub project of this project.
-  AndroidProject get android => new AndroidProject(directory.childDirectory('android'));
+  AndroidProject get android {
+    if (manifest.isModule) {
+      return new AndroidProject(directory.childDirectory('.android'));
+    }
+    return new AndroidProject(directory.childDirectory('android'));
+  }
 
   /// The generated AndroidModule sub project of this module project.
   AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('.android'));
