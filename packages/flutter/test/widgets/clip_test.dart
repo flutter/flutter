@@ -440,29 +440,31 @@ void main() {
   // have, paths are always drawn in anti-alias).
   const double physicalRotatianRadians = 0.0;
 
-  final Center Function(Clip) genPhysicalModel = (Clip clipBehavior) => new Center(
-    child: new RepaintBoundary(
-      child: new Container(
-        color: Colors.white,
-        child: new Padding(
-          padding: const EdgeInsets.all(100.0),
-          child: new SizedBox(
-            height: 100.0,
-            width: 100.0,
-            child: new Transform.rotate(
-              angle: physicalRotatianRadians,
-              child: new PhysicalModel(
-                borderRadius: new BorderRadius.circular(20.0),
-                color: Colors.red,
-                clipBehavior: clipBehavior,
-                child: new Container(
-                  color: Colors.white,
-                  child: new RepaintBoundary(
-                    child: new Center(
-                      child: new Container(
-                        color: Colors.black,
-                        height: 10.0,
-                        width: 10.0,
+  Center genPhysicalModel(Clip clipBehavior) {
+    return new Center(
+      child: new RepaintBoundary(
+        child: new Container(
+          color: Colors.white,
+          child: new Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: new SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: new Transform.rotate(
+                angle: physicalRotatianRadians,
+                child: new PhysicalModel(
+                  borderRadius: new BorderRadius.circular(20.0),
+                  color: Colors.red,
+                  clipBehavior: clipBehavior,
+                  child: new Container(
+                    color: Colors.white,
+                    child: new RepaintBoundary(
+                      child: new Center(
+                        child: new Container(
+                          color: Colors.black,
+                          height: 10.0,
+                          width: 10.0,
+                        ),
                       ),
                     ),
                   ),
@@ -472,9 +474,8 @@ void main() {
           ),
         ),
       ),
-    ),
-  );
-
+    );
+  }
 
   testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
@@ -542,33 +543,35 @@ void main() {
     );
   });
 
-  final Center Function(Clip) genPhysicalShape = (Clip clipBehavior) => new Center(
-    child: new RepaintBoundary(
-      child: new Container(
-        color: Colors.white,
-        child: new Padding(
-          padding: const EdgeInsets.all(100.0),
-          child: new SizedBox(
-            height: 100.0,
-            width: 100.0,
-            child: new Transform.rotate(
-              angle: physicalRotatianRadians,
-              child: new PhysicalShape(
-                clipper: new ShapeBorderClipper(
-                  shape: new BeveledRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0),
+  Center genPhysicalShape(Clip clipBehavior) {
+    return new Center(
+      child: new RepaintBoundary(
+        child: new Container(
+          color: Colors.white,
+          child: new Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: new SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: new Transform.rotate(
+                angle: physicalRotatianRadians,
+                child: new PhysicalShape(
+                  clipper: new ShapeBorderClipper(
+                    shape: new BeveledRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20.0),
+                    ),
                   ),
-                ),
-                clipBehavior: clipBehavior,
-                color: Colors.red,
-                child: new Container(
-                  color: Colors.white,
-                  child: new RepaintBoundary(
-                    child: new Center(
-                      child: new Container(
-                        color: Colors.black,
-                        height: 10.0,
-                        width: 10.0,
+                  clipBehavior: clipBehavior,
+                  color: Colors.red,
+                  child: new Container(
+                    color: Colors.white,
+                    child: new RepaintBoundary(
+                      child: new Center(
+                        child: new Container(
+                          color: Colors.black,
+                          height: 10.0,
+                          width: 10.0,
+                        ),
                       ),
                     ),
                   ),
@@ -578,9 +581,8 @@ void main() {
           ),
         ),
       ),
-    ),
-  );
-
+    );
+  }
 
   testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));

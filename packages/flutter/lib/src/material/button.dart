@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui';
+import 'dart:ui' show Clip;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
