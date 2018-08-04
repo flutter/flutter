@@ -145,7 +145,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new Container(
-  ///       child: new SegmentedControl<int>(
+  ///       child: new CupertinoSegmentedControl<int>(
   ///         children: children,
   ///         onValueChanged: (int newValue) {
   ///           setState(() {

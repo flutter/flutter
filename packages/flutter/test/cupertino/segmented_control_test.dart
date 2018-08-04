@@ -298,32 +298,25 @@ void main() {
     children[1] = const Text('Child 2');
 
     await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Align(
+          alignment: Alignment.topLeft,
+          child: new SizedBox(
+            width: 200.0,
+            height: 200.0,
             child: new CupertinoSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
               children: children,
               onValueChanged: (int newValue) {},
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
 
-    final Offset topLeft = tester.getTopLeft(
-        find.byKey(const ValueKey<String>('Segmented Control'))).translate(16.0, 0.0);
-
-    expect(tester.getCenter(find.text('Child 1')),
-        getRenderSegmentedControl(tester).getChildrenAsList()[0]
-            .parentData.surroundingRect.center + topLeft);
-
-    topLeft.translate(getRenderSegmentedControl(tester).getChildrenAsList()[0]
-        .parentData.surroundingRect.width, 0.0);
-
-    expect(tester.getCenter(find.text('Child 2')),
-        getRenderSegmentedControl(tester).getChildrenAsList()[1]
-          .parentData.surroundingRect.center + topLeft);
+    // Widgets are centered taking into account 16px of horizontal padding
+    expect(tester.getCenter(find.text('Child 1')), const Offset(58.0, 100.0));
+    expect(tester.getCenter(find.text('Child 2')), const Offset(142.0, 100.0));
   });
 
   testWidgets('Tap calls onValueChanged', (WidgetTester tester) async {
