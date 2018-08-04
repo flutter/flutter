@@ -47,7 +47,7 @@ part 'nav_bar/nav_bar_private_transition.dart';
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
-class CupertinoNavigationBar extends StatelessWidget implements ObstructingPreferredSizeWidget {
+class CupertinoNavigationBar extends StatefulWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
@@ -167,6 +167,24 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// iOS standard design.
   final Color actionsForegroundColor;
 
+  // RenderBox get _renderBox {
+  //   final RenderBox renderBox = _boxKey.currentContext?.findRenderObject();
+  //   assert(
+  //     renderBox != null,
+  //     '_renderBox getter called before the navigation bar is inserted in the tree',
+  //   );
+  //   return renderBox;
+  // }
+
+  // _CupertinoNavigationBarComponents get _components {
+  //   final _CupertinoNavigationBarState state = _boxKey.currentState;
+  //   assert(
+  //     state != null,
+  //     '_components getter called before the navigation bar is inserted in the tree',
+  //   );
+  //   return state._components;
+  // }
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool get fullObstruction => backgroundColor.alpha == 0xFF;
@@ -176,17 +194,38 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     return const Size.fromHeight(_kNavBarPersistentHeight);
   }
 
-  _CupertinoNavigationBarComponents _components(ModalRoute<dynamic> route) {
-    return new _CupertinoNavigationBarComponents(
-      route: route,
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      automaticallyImplyTitle: automaticallyImplyMiddle,
-      previousPageTitle: previousPageTitle,
-      middle: middle,
-      trailing: trailing,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
+  @override
+  _CupertinoNavigationBarState createState() {
+    return new _CupertinoNavigationBarState();
+  }
+}
+
+class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
+  _CupertinoNavigationBarComponents _components;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    updateComponents();
+  }
+
+  @override
+  void didUpdateWidget(CupertinoNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    updateComponents();
+  }
+
+  void updateComponents() {
+    _components = new _CupertinoNavigationBarComponents(
+      route: ModalRoute.of(context),
+      leading: widget.leading,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
+      automaticallyImplyTitle: widget.automaticallyImplyMiddle,
+      previousPageTitle: widget.previousPageTitle,
+      middle: widget.middle,
+      trailing: widget.trailing,
+      padding: widget.padding,
+      actionsForegroundColor: widget.actionsForegroundColor,
       large: false,
     );
   }
@@ -194,11 +233,11 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   @override
   Widget build(BuildContext context) {
     return _wrapWithBackground(
-      border: border,
-      backgroundColor: backgroundColor,
+      border: widget.border,
+      backgroundColor: widget.backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
-        components: _components(ModalRoute.of(context)),
-        padding: padding,
+        components: _components,
+        padding: widget.padding,
       ),
     );
   }
@@ -237,7 +276,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
 ///    pages.
-class CupertinoSliverNavigationBar extends StatelessWidget {
+class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///
   /// The [largeTitle] argument is required and must not be null.
@@ -330,18 +369,39 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
-  _CupertinoNavigationBarComponents _components(ModalRoute<dynamic> route) {
-    return new _CupertinoNavigationBarComponents(
-      route: route,
-      largeTitle: largeTitle,
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      automaticallyImplyTitle: automaticallyImplyTitle,
-      previousPageTitle: previousPageTitle,
-      middle: middle,
-      trailing: trailing,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
+  @override
+  _CupertinoSliverNavigationBarState createState() {
+    return new _CupertinoSliverNavigationBarState();
+  }
+}
+
+class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
+  _CupertinoNavigationBarComponents _components;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    updateComponents();
+  }
+
+  @override
+  void didUpdateWidget(CupertinoSliverNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    updateComponents();
+  }
+
+  void updateComponents() {
+    _components = new _CupertinoNavigationBarComponents(
+      route: ModalRoute.of(context),
+      largeTitle: widget.largeTitle,
+      leading: widget.leading,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
+      automaticallyImplyTitle: widget.automaticallyImplyTitle,
+      previousPageTitle: widget.previousPageTitle,
+      middle: widget.middle,
+      trailing: widget.trailing,
+      padding: widget.padding,
+      actionsForegroundColor: widget.actionsForegroundColor,
       large: true,
     );
   }
@@ -351,12 +411,12 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
-        components: _components(ModalRoute.of(context)),
+        components: _components,
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-        padding: padding,
-        border: border,
-        backgroundColor: backgroundColor,
-        alwaysShowMiddle: middle != null,
+        padding: widget.padding,
+        border: widget.border,
+        backgroundColor: widget.backgroundColor,
+        alwaysShowMiddle: widget.middle != null,
       ),
     );
   }
@@ -401,7 +461,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
 
   final _BackChevron _backChevron;
 
-  final _BackLabel _backLabel;
+  final Widget _backLabel;
 
   @override
   Widget build(BuildContext context) {

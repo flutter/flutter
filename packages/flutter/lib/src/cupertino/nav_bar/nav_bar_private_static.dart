@@ -278,13 +278,37 @@ class _CupertinoNavigationBarComponents {
     Color actionsForegroundColor,
     bool large,
   }) : _route = route,
-       _leading = leading,
+       leading = createLeading(
+         userLeading: leading,
+         route: route,
+         automaticallyImplyLeading: automaticallyImplyLeading,
+         padding: padding,
+         actionsForegroundColor: actionsForegroundColor,
+        ),
        _automaticallyImplyLeading = automaticallyImplyLeading,
        _automaticallyImplyTitle = automaticallyImplyTitle,
        _previousPageTitle = previousPageTitle,
-       _middle = middle,
-       _trailing = trailing,
-       _largeTitle = largeTitle,
+       backChevron = createBackChevron(
+         userLeading: leading,
+         route: route,
+         automaticallyImplyLeading: automaticallyImplyLeading,
+         actionsForegroundColor: actionsForegroundColor,
+       ),
+       backLabel = createBackLabel(
+         userLeading: leading,
+         route: route,
+         previousPageTitle: previousPageTitle,
+         automaticallyImplyLeading: automaticallyImplyLeading,
+       ),
+       middle = createMiddle(
+         userMiddle: middle,
+         userLargeTitle: largeTitle,
+         route: route,
+         automaticallyImplyTitle: automaticallyImplyTitle,
+         large: large,
+       ),
+       _userTrailing = trailing,
+       _userLargeTitle = largeTitle,
        _padding = padding,
        _actionsForegroundColor = actionsForegroundColor,
        _large = large,
@@ -305,27 +329,30 @@ class _CupertinoNavigationBarComponents {
   }
 
   final TextStyle _actionsStyle;
-
   final ModalRoute<dynamic> _route;
 
-  final Widget _leading;
-  Widget get leading {
+  final _RenderObjectFindingWidget leading;
+  static _RenderObjectFindingWidget createLeading({
+    @required Widget userLeading,
+    @required ModalRoute<dynamic> route,
+    @required bool automaticallyImplyLeading,
+    @required EdgeInsetsDirectional padding,
+    @required Color actionsForegroundColor
+  }) {
     Widget leadingContent;
-    // Final allows implicit casting inside statements.
-    final ModalRoute<dynamic> currentRoute = _route;
 
-    if (_leading != null) {
-      leadingContent = _leading;
+    if (userLeading != null) {
+      leadingContent = userLeading;
     } else if (
-      _automaticallyImplyLeading &&
-      currentRoute.canPop &&
-      currentRoute is PageRoute &&
-      currentRoute.fullscreenDialog
+      automaticallyImplyLeading &&
+      route.canPop &&
+      route is PageRoute &&
+      route.fullscreenDialog
     ) {
       leadingContent = new CupertinoButton(
         child: const Text('Close'),
         padding: EdgeInsets.zero,
-        onPressed: () { currentRoute.navigator.maybePop(); },
+        onPressed: () { route.navigator.maybePop(); },
       );
     }
 
@@ -333,49 +360,63 @@ class _CupertinoNavigationBarComponents {
       return null;
     }
 
-    return new Padding(
-      padding: new EdgeInsetsDirectional.only(
-        start: _padding?.start ?? _kNavBarEdgePadding,
-      ),
-      child: new DefaultTextStyle(
-        style: _actionsStyle,
-        child: leadingContent,
+    return new _RenderObjectFindingWidget(
+      child: new Padding(
+        padding: new EdgeInsetsDirectional.only(
+          start: padding?.start ?? _kNavBarEdgePadding,
+        ),
+        child: new DefaultTextStyle(
+          style: _navBarItemStyle(actionsForegroundColor),
+          child: leadingContent,
+        ),
       ),
     );
   }
 
-  Widget get backChevron {
-    // Final allows implicit casting inside statements.
-    final ModalRoute<dynamic> currentRoute = _route;
-
-    if (
-      _leading != null ||
-      !_automaticallyImplyLeading ||
-      !currentRoute.canPop ||
-      (currentRoute is PageRoute && currentRoute.fullscreenDialog)
-    ) {
-      return null;
-    }
-
-    return new _BackChevron(color: _actionsForegroundColor);
+  RenderBox get leadingRenderBox {
+    return leading?.renderObject;
   }
 
-  Widget get backLabel {
-    // Final allows implicit casting inside statements.
-    final ModalRoute<dynamic> currentRoute = _route;
-
+  final Widget backChevron;
+  static Widget createBackChevron({
+    @required Widget userLeading,
+    @required ModalRoute<dynamic> route,
+    @required bool automaticallyImplyLeading,
+    @required Color actionsForegroundColor,
+  }) {
     if (
-      _leading != null ||
-      !_automaticallyImplyLeading ||
-      !currentRoute.canPop ||
-      (currentRoute is PageRoute && currentRoute.fullscreenDialog)
+      userLeading != null ||
+      !automaticallyImplyLeading ||
+      !route.canPop ||
+      (route is PageRoute && route.fullscreenDialog)
     ) {
       return null;
     }
 
-    return new _BackLabel(
-      specifiedPreviousTitle: _previousPageTitle,
-      route: currentRoute,
+    return new _BackChevron(color: actionsForegroundColor);
+  }
+
+  final _RenderObjectFindingWidget backLabel;
+  static _RenderObjectFindingWidget createBackLabel({
+    @required Widget userLeading,
+    @required ModalRoute<dynamic> route,
+    @required bool automaticallyImplyLeading,
+    @required String previousPageTitle,
+  }) {
+    if (
+      userLeading != null ||
+      !automaticallyImplyLeading ||
+      !route.canPop ||
+      (route is PageRoute && route.fullscreenDialog)
+    ) {
+      return null;
+    }
+
+    return new _RenderObjectFindingWidget(
+      child: new _BackLabel(
+        specifiedPreviousTitle: previousPageTitle,
+        route: route,
+      ),
     );
   }
 
@@ -383,25 +424,41 @@ class _CupertinoNavigationBarComponents {
   final bool _automaticallyImplyTitle;
   final String _previousPageTitle;
 
-  final Widget _middle;
-  Widget get middle {
-    Widget middleContent = _middle;
+  final _RenderObjectFindingWidget middle;
+  static _RenderObjectFindingWidget createMiddle({
+    @required Widget userMiddle,
+    @required Widget userLargeTitle,
+    @required bool large,
+    @required bool automaticallyImplyTitle,
+    @required ModalRoute<dynamic> route,
+  }) {
+    Widget middleContent = userMiddle;
 
-    if (_large) {
-      middleContent ??= _largeTitle;
+    if (large) {
+      middleContent ??= userLargeTitle;
     }
 
     middleContent ??= _derivedTitle(
-      automaticallyImplyTitle: _automaticallyImplyTitle,
-      currentRoute: _route,
+      automaticallyImplyTitle: automaticallyImplyTitle,
+      currentRoute: route,
     );
 
-    return middleContent;
+    if (middleContent == null) {
+      return null;
+    }
+
+    return new _RenderObjectFindingWidget(
+      child: middleContent,
+    );
   }
 
-  final Widget _trailing;
+  RenderBox get middleRenderBox {
+    return middle.renderObject;
+  }
+
+  final Widget _userTrailing;
   Widget get trailing {
-    if (_trailing == null) {
+    if (_userTrailing == null) {
       return null;
     }
 
@@ -411,18 +468,18 @@ class _CupertinoNavigationBarComponents {
       ),
       child: new DefaultTextStyle(
         style: _actionsStyle,
-        child: _trailing,
+        child: _userTrailing,
       ),
     );
   }
 
-  final Widget _largeTitle;
+  final Widget _userLargeTitle;
   Widget get largeTitle {
     if (!_large) {
       return null;
     }
 
-    final Widget effectiveLargeTitle = _largeTitle ?? _derivedTitle(
+    final Widget effectiveLargeTitle = _userLargeTitle ?? _derivedTitle(
       automaticallyImplyTitle: _automaticallyImplyTitle,
       currentRoute: _route,
     );
@@ -455,6 +512,29 @@ class _CupertinoNavigationBarComponents {
   final EdgeInsetsDirectional _padding;
   final Color _actionsForegroundColor;
   final bool _large;
+}
+
+class _RenderObjectFindingWidget extends StatelessWidget {
+  _RenderObjectFindingWidget({ this.child }) : super(key: new GlobalKey());
+
+  final Widget child;
+
+  RenderObject get renderObject {
+    final GlobalKey globalKey = key;
+    final RenderObject renderObject = globalKey.currentContext?.findRenderObject();
+    assert(
+      renderObject != null,
+      'The renderObject getter should only be called after the widget is added to the tree',
+    );
+    return renderObject;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new KeyedSubtree(
+      child: child,
+    );
+  }
 }
 
 class _BackChevron extends StatelessWidget {

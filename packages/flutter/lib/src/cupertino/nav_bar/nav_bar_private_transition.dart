@@ -123,6 +123,7 @@ class _CupertinoNavigationBarComponentsTransition {
     final Widget topBackLabel = topNavBarComponents.backLabel;
 
     if (bottomMiddle != null && topBackLabel != null) {
+      // bottomNavBarComponents.middleRenderBox.globalToLocal(point)
       return new DefaultTextStyleTransition(
         style: TextStyleTween(
           begin: _kMiddleTitleTextStyle,
