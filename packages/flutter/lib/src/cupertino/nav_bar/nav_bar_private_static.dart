@@ -102,6 +102,7 @@ Widget _wrapWithBackground({
 class _CupertinoLargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _CupertinoLargeTitleNavigationBarSliverDelegate({
+    @required this.boxKey,
     @required this.components,
     @required this.persistentHeight,
     this.padding,
@@ -109,6 +110,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.backgroundColor,
     this.alwaysShowMiddle,
   }) : assert(persistentHeight != null);
+
+  final GlobalKey boxKey;
 
   final _CupertinoNavigationBarComponents components;
 
@@ -141,40 +144,43 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
       middleVisible: alwaysShowMiddle ? null : !showLargeTitle,
     );
 
-    return _wrapWithBackground(
-      border: border,
-      backgroundColor: backgroundColor,
-      child: new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new Positioned(
-            top: persistentHeight,
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: new ClipRect(
-              // The large title starts at the persistent bar.
-              // It's aligned with the bottom of the sliver and expands clipped
-              // and behind the persistent bar.
-              child: new OverflowBox(
-                minHeight: 0.0,
-                maxHeight: double.infinity,
-                alignment: AlignmentDirectional.bottomStart,
-                child: new AnimatedOpacity(
-                  opacity: showLargeTitle ? 1.0 : 0.0,
-                  duration: _kNavBarTitleFadeDuration,
-                  child: components.largeTitle,
+    return new KeyedSubtree(
+      key: boxKey,
+      child: _wrapWithBackground(
+        border: border,
+        backgroundColor: backgroundColor,
+        child: new Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            new Positioned(
+              top: persistentHeight,
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: new ClipRect(
+                // The large title starts at the persistent bar.
+                // It's aligned with the bottom of the sliver and expands clipped
+                // and behind the persistent bar.
+                child: new OverflowBox(
+                  minHeight: 0.0,
+                  maxHeight: double.infinity,
+                  alignment: AlignmentDirectional.bottomStart,
+                  child: new AnimatedOpacity(
+                    opacity: showLargeTitle ? 1.0 : 0.0,
+                    duration: _kNavBarTitleFadeDuration,
+                    child: components.largeTitle,
+                  ),
                 ),
               ),
             ),
-          ),
-          new Positioned(
-            left: 0.0,
-            right: 0.0,
-            top: 0.0,
-            child: persistentNavigationBar,
-          ),
-        ],
+            new Positioned(
+              left: 0.0,
+              right: 0.0,
+              top: 0.0,
+              child: persistentNavigationBar,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -374,7 +380,7 @@ class _CupertinoNavigationBarComponents {
   }
 
   RenderBox get leadingRenderBox {
-    return leading?.renderObject;
+    return leading?.renderBox;
   }
 
   final Widget backChevron;
@@ -453,7 +459,7 @@ class _CupertinoNavigationBarComponents {
   }
 
   RenderBox get middleRenderBox {
-    return middle.renderObject;
+    return middle.renderBox;
   }
 
   final Widget _userTrailing;
@@ -519,21 +525,19 @@ class _RenderObjectFindingWidget extends StatelessWidget {
 
   final Widget child;
 
-  RenderObject get renderObject {
+  RenderBox get renderBox {
     final GlobalKey globalKey = key;
-    final RenderObject renderObject = globalKey.currentContext?.findRenderObject();
+    final RenderBox renderBox = globalKey.currentContext?.findRenderObject();
     assert(
-      renderObject != null,
-      'The renderObject getter should only be called after the widget is added to the tree',
+      renderBox != null && renderBox.attached,
+      'The renderBox getter should only be called after the widget is added to the tree',
     );
-    return renderObject;
+    return renderBox;
   }
 
   @override
   Widget build(BuildContext context) {
-    return new KeyedSubtree(
-      child: child,
-    );
+    return child;
   }
 }
 

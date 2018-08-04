@@ -376,7 +376,14 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 }
 
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
+  GlobalKey _boxKey;
   _CupertinoNavigationBarComponents _components;
+
+  @override
+  void initState() {
+    super.initState();
+    _boxKey = new GlobalKey();
+  }
 
   @override
   void didChangeDependencies() {
@@ -411,6 +418,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
+        boxKey: _boxKey,
         components: _components,
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
         padding: widget.padding,
