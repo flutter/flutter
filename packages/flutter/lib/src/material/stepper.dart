@@ -137,6 +137,7 @@ class Stepper extends StatefulWidget {
     @required this.steps,
     this.type = StepperType.vertical,
     this.currentStep = 0,
+    this.showControls: true,
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
@@ -159,6 +160,9 @@ class Stepper extends StatefulWidget {
 
   /// The index into [steps] of the current step whose content is displayed.
   final int currentStep;
+
+  /// Wheter to show navigation controls
+  final bool showControls;
 
   /// The callback called when a step is tapped, with its index passed as
   /// an argument.
@@ -325,6 +329,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVerticalControls() {
+    if (!widget.showControls){
+	return new Container();
+	}
+
     Color cancelColor;
 
     switch (Theme.of(context).brightness) {
