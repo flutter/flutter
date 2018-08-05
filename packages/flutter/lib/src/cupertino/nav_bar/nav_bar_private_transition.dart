@@ -33,9 +33,9 @@ class _NavigationBarTransition extends StatelessWidget {
        ),
        componentsTransition = new _NavigationBarComponentsTransition(
          animation: animation,
-         bottomNavBarComponents: bottomNavBar.components,
+         bottomComponents: bottomNavBar.components,
          bottomNavBarBox: bottomNavBar.renderBox,
-         topNavBarComponents: topNavBar.components,
+         topComponents: topNavBar.components,
          topNavBarBox: topNavBar.renderBox,
        );
 
@@ -62,18 +62,21 @@ class _NavigationBarTransition extends StatelessWidget {
             backgroundColor: backgroundTween.evaluate(animation),
             border: borderTween.evaluate(animation),
             child: new SizedBox(
-              height: heightTween.evaluate(animation) + MediaQuery.of(context).padding.top,
+              height: heightTween.evaluate(animation),
               width: double.infinity,
             ),
           );
         },
       ),
+      componentsTransition.bottomBackChevron,
       componentsTransition.bottomLeading,
       componentsTransition.bottomMiddle,
-      componentsTransition.bottomBackChevron,
+      componentsTransition.bottomLargeTitle,
+      componentsTransition.bottomTrailing,
       componentsTransition.topBackChevron,
       componentsTransition.topMiddle,
       componentsTransition.topLargeTitle,
+      componentsTransition.topTrailing,
     ];
 
     children.removeWhere((Widget child) => child == null);
@@ -92,8 +95,8 @@ class _NavigationBarTransition extends StatelessWidget {
 class _NavigationBarComponentsTransition {
   _NavigationBarComponentsTransition({
     this.animation,
-    this.bottomNavBarComponents,
-    this.topNavBarComponents,
+    this.bottomComponents,
+    this.topComponents,
     this.bottomNavBarBox,
     this.topNavBarBox,
   }) : transitionBox = bottomNavBarBox.paintBounds.expandToInclude(topNavBarBox.paintBounds);
@@ -108,8 +111,8 @@ class _NavigationBarComponentsTransition {
   );
 
   final Animation<double> animation;
-  final _NavigationBarComponents bottomNavBarComponents;
-  final _NavigationBarComponents topNavBarComponents;
+  final _NavigationBarComponents bottomComponents;
+  final _NavigationBarComponents topComponents;
   final RenderBox bottomNavBarBox;
   final RenderBox topNavBarBox;
 
@@ -138,7 +141,7 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget get bottomLeading {
-    final _RenderObjectFindingWidget bottomLeading = bottomNavBarComponents.leading;
+    final _RenderObjectFindingWidget bottomLeading = bottomComponents.leading;
 
     if (bottomLeading == null) {
       return null;
@@ -154,7 +157,7 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget get bottomBackChevron {
-    final _RenderObjectFindingWidget bottomBackChevron = bottomNavBarComponents.backChevron;
+    final _RenderObjectFindingWidget bottomBackChevron = bottomComponents.backChevron;
 
     if (bottomBackChevron == null) {
       return null;
@@ -170,8 +173,15 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget get bottomMiddle {
-    final _RenderObjectFindingWidget bottomMiddle = bottomNavBarComponents.middle;
-    final _RenderObjectFindingWidget topBackLabel = topNavBarComponents.backLabel;
+    final _RenderObjectFindingWidget bottomMiddle = bottomComponents.middle;
+    final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
+
+    // The middle component is non-null when the nav bar is a large title
+    // nav bar but would be invisible when expanded.
+    // TODO
+    if (bottomComponents.large && !bottomComponents.hasUserMiddle) {
+      return null;
+    }
 
     if (bottomMiddle != null && topBackLabel != null) {
       final RelativeRect from = positionInTransitionBox(bottomMiddle, from: bottomNavBarBox);
@@ -184,11 +194,6 @@ class _NavigationBarComponentsTransition {
             - bottomMiddle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2
           ) & bottomMiddle.renderBox.size;
 
-       positionInTransitionBox(topBackLabel, from: topNavBarBox)
-          .shift(new Offset(
-            0.0,
-            -bottomMiddle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2),
-          );
       final RelativeRectTween positionTween = new RelativeRectTween(
         begin: from,
         end: new RelativeRect.fromRect(to, transitionBox),
@@ -201,7 +206,7 @@ class _NavigationBarComponentsTransition {
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kMiddleTitleTextStyle,
-              end: topNavBarComponents._actionsStyle,
+              end: topComponents._actionsStyle,
             ).animate(animation),
             child: bottomMiddle.child,
           ),
@@ -216,8 +221,78 @@ class _NavigationBarComponentsTransition {
     return null;
   }
 
+  Widget get bottomLargeTitle {
+    final _RenderObjectFindingWidget bottomLargeTitle = bottomComponents.largeTitle;
+    final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
+
+    if (bottomLargeTitle != null && topBackLabel != null) {
+      final RelativeRect from = positionInTransitionBox(bottomLargeTitle, from: bottomNavBarBox);
+      final Rect to =
+          topBackLabel.renderBox.localToGlobal(
+            Offset.zero,
+            ancestor: topNavBarBox,
+          ).translate(
+            0.0,
+            - bottomLargeTitle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2
+          ) & bottomLargeTitle.renderBox.size;
+      print(from);
+      print('going to');
+      print(topBackLabel.renderBox.localToGlobal(
+            Offset.zero,
+            ancestor: topNavBarBox,
+          ));
+      print('then move up by ${- bottomLargeTitle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2}');
+      print('then size to ${bottomLargeTitle.renderBox.size}');
+      print('which give a rect of $to');
+      print(new RelativeRect.fromRect(to, transitionBox));
+
+      final RelativeRectTween positionTween = new RelativeRectTween(
+        begin: from,
+        end: new RelativeRect.fromRect(to, transitionBox),
+      );
+
+      return new PositionedTransition(
+        rect: positionTween.animate(animation),
+        child: new FadeTransition(
+          opacity: fadeOut.animate(animation),
+          child: new DefaultTextStyleTransition(
+            style: TextStyleTween(
+              begin: _kLargeTitleTextStyle,
+              end: topComponents._actionsStyle,
+            ).animate(animation),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            child: bottomLargeTitle.child,
+          ),
+        ),
+      );
+    }
+
+    if (bottomLargeTitle != null && topBackLabel == null) {
+      return bottomLargeTitle.child;
+    }
+
+    return null;
+  }
+
+  Widget get bottomTrailing {
+    final _RenderObjectFindingWidget bottomTrailing = bottomComponents.trailing;
+
+    if (bottomTrailing == null) {
+      return null;
+    }
+
+    return new Positioned.fromRelativeRect(
+      rect: positionInTransitionBox(bottomTrailing, from: bottomNavBarBox),
+      child: new FadeTransition(
+        opacity: fadeOutBy(0.6),
+        child: bottomTrailing.child,
+      ),
+    );
+  }
+
   Widget get topBackChevron {
-    final _RenderObjectFindingWidget topBackChevron = topNavBarComponents.backChevron;
+    final _RenderObjectFindingWidget topBackChevron = topComponents.backChevron;
 
     if (topBackChevron == null) {
       return null;
@@ -226,7 +301,7 @@ class _NavigationBarComponentsTransition {
     final RelativeRect to = positionInTransitionBox(topBackChevron, from: topNavBarBox);
     RelativeRect from = to;
 
-    if (bottomNavBarComponents.backChevron == null) {
+    if (bottomComponents.backChevron == null) {
       from = to.shift(new Offset(topBackChevron.renderBox.size.width, 0.0));
     }
 
@@ -245,9 +320,15 @@ class _NavigationBarComponentsTransition {
   }
 
   Widget get topMiddle {
-    final _RenderObjectFindingWidget topMiddle = topNavBarComponents.middle;
+    final _RenderObjectFindingWidget topMiddle = topComponents.middle;
 
     if (topMiddle == null) {
+      return null;
+    }
+
+    // The middle component is non-null when the nav bar is a large title
+    // nav bar but would be invisible when expanded.
+    if (topComponents.large && !topComponents.hasUserMiddle) {
       return null;
     }
 
@@ -262,13 +343,16 @@ class _NavigationBarComponentsTransition {
       rect: positionTween.animate(animation),
       child: new FadeTransition(
         opacity: fadeInFrom(0.25),
-        child: topMiddle.child,
+        child: new DefaultTextStyle(
+          style: _kMiddleTitleTextStyle,
+          child: topMiddle.child,
+        ),
       ),
     );
   }
 
   Widget get topLargeTitle {
-    final _RenderObjectFindingWidget topLargeTitle = topNavBarComponents.largeTitle;
+    final _RenderObjectFindingWidget topLargeTitle = topComponents.largeTitle;
 
     if (topLargeTitle == null) {
       return null;
@@ -286,6 +370,22 @@ class _NavigationBarComponentsTransition {
       child: new FadeTransition(
         opacity: fadeInFrom(0.25),
         child: topLargeTitle.child,
+      ),
+    );
+  }
+
+  Widget get topTrailing {
+    final _RenderObjectFindingWidget topTrailing = topComponents.trailing;
+
+    if (topTrailing == null) {
+      return null;
+    }
+
+    return new Positioned.fromRelativeRect(
+      rect: positionInTransitionBox(topTrailing, from: topNavBarBox),
+      child: new FadeTransition(
+        opacity: fadeInFrom(0.4),
+        child: topTrailing.child,
       ),
     );
   }
@@ -337,5 +437,3 @@ HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
       );
   }
 };
-
-

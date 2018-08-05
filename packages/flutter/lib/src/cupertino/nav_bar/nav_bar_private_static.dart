@@ -166,7 +166,15 @@ class _LargeTitleNavigationBarSliverDelegate
                 child: new AnimatedOpacity(
                   opacity: showLargeTitle ? 1.0 : 0.0,
                   duration: _kNavBarTitleFadeDuration,
-                  child: components.largeTitle,
+                  child: new Semantics(
+                    header: true,
+                    child: new DefaultTextStyle(
+                      style: _kLargeTitleTextStyle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      child: components.largeTitle,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -189,6 +197,9 @@ class _LargeTitleNavigationBarSliverDelegate
       tag: _heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      // This is all the way down here instead of being at the top level of
+      // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
+      // needs to wrap the top level RenderBox rather than a RenderSliver.
       child: new _TransitionableNavigationBar(
         components: components,
         child: navBar,
@@ -295,7 +306,7 @@ class _NavigationBarComponents {
     @required Widget largeTitle,
     @required EdgeInsetsDirectional padding,
     @required Color actionsForegroundColor,
-    @required bool large,
+    @required this.large,
   }) : _route = route,
        leading = createLeading(
          userLeading: leading,
@@ -316,6 +327,7 @@ class _NavigationBarComponents {
          previousPageTitle: previousPageTitle,
          automaticallyImplyLeading: automaticallyImplyLeading,
        ),
+       hasUserMiddle = middle != null,
        middle = createMiddle(
          userMiddle: middle,
          userLargeTitle: largeTitle,
@@ -336,7 +348,6 @@ class _NavigationBarComponents {
        ),
        _padding = padding,
        _actionsForegroundColor = actionsForegroundColor,
-       _large = large,
        _actionsStyle = _navBarItemStyle(actionsForegroundColor);
 
   static Widget _derivedTitle({
@@ -452,6 +463,7 @@ class _NavigationBarComponents {
     );
   }
 
+  final bool hasUserMiddle;
   final _RenderObjectFindingWidget middle;
   static _RenderObjectFindingWidget createMiddle({
     @required Widget userMiddle,
@@ -542,15 +554,7 @@ class _NavigationBarComponents {
         child: new SafeArea(
           top: false,
           bottom: false,
-          child: new Semantics(
-            header: true,
-            child: new DefaultTextStyle(
-              style: _kLargeTitleTextStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              child: largeTitleContent,
-            ),
-          ),
+          child: largeTitleContent,
         ),
       ),
     );
@@ -558,7 +562,7 @@ class _NavigationBarComponents {
 
   final EdgeInsetsDirectional _padding;
   final Color _actionsForegroundColor;
-  final bool _large;
+  final bool large;
 }
 
 class _RenderObjectFindingWidget extends StatelessWidget {
