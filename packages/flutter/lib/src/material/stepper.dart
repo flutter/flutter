@@ -137,7 +137,7 @@ class Stepper extends StatefulWidget {
     @required this.steps,
     this.type = StepperType.vertical,
     this.currentStep = 0,
-    this.showControls: true,
+    this.showControls = true,
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
