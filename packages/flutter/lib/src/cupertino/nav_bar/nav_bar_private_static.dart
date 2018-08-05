@@ -99,10 +99,10 @@ Widget _wrapWithBackground({
   );
 }
 
-class _CupertinoLargeTitleNavigationBarSliverDelegate
+class _LargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
-  _CupertinoLargeTitleNavigationBarSliverDelegate({
-    @required this.boxKey,
+  _LargeTitleNavigationBarSliverDelegate({
+    @required this.transitionBetweenRoutes,
     @required this.components,
     @required this.persistentHeight,
     this.padding,
@@ -111,9 +111,9 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.alwaysShowMiddle,
   }) : assert(persistentHeight != null);
 
-  final GlobalKey boxKey;
+  final bool transitionBetweenRoutes;
 
-  final _CupertinoNavigationBarComponents components;
+  final _NavigationBarComponents components;
 
   final double persistentHeight;
 
@@ -135,8 +135,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
-    final _CupertinoPersistentNavigationBar persistentNavigationBar =
-        new _CupertinoPersistentNavigationBar(
+    final _PersistentNavigationBar persistentNavigationBar =
+        new _PersistentNavigationBar(
       components: components,
       padding: padding,
       // If a user specified middle exists, always show it. Otherwise, show
@@ -144,49 +144,60 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
       middleVisible: alwaysShowMiddle ? null : !showLargeTitle,
     );
 
-    return new KeyedSubtree(
-      key: boxKey,
-      child: _wrapWithBackground(
-        border: border,
-        backgroundColor: backgroundColor,
-        child: new Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            new Positioned(
-              top: persistentHeight,
-              left: 0.0,
-              right: 0.0,
-              bottom: 0.0,
-              child: new ClipRect(
-                // The large title starts at the persistent bar.
-                // It's aligned with the bottom of the sliver and expands clipped
-                // and behind the persistent bar.
-                child: new OverflowBox(
-                  minHeight: 0.0,
-                  maxHeight: double.infinity,
-                  alignment: AlignmentDirectional.bottomStart,
-                  child: new AnimatedOpacity(
-                    opacity: showLargeTitle ? 1.0 : 0.0,
-                    duration: _kNavBarTitleFadeDuration,
-                    child: components.largeTitle,
-                  ),
+    final Widget navBar = _wrapWithBackground(
+      border: border,
+      backgroundColor: backgroundColor,
+      child: new Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          new Positioned(
+            top: persistentHeight,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: new ClipRect(
+              // The large title starts at the persistent bar.
+              // It's aligned with the bottom of the sliver and expands clipped
+              // and behind the persistent bar.
+              child: new OverflowBox(
+                minHeight: 0.0,
+                maxHeight: double.infinity,
+                alignment: AlignmentDirectional.bottomStart,
+                child: new AnimatedOpacity(
+                  opacity: showLargeTitle ? 1.0 : 0.0,
+                  duration: _kNavBarTitleFadeDuration,
+                  child: components.largeTitle,
                 ),
               ),
             ),
-            new Positioned(
-              left: 0.0,
-              right: 0.0,
-              top: 0.0,
-              child: persistentNavigationBar,
-            ),
-          ],
-        ),
+          ),
+          new Positioned(
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            child: persistentNavigationBar,
+          ),
+        ],
+      ),
+    );
+
+    if (!transitionBetweenRoutes) {
+      return navBar;
+    }
+
+    return new Hero(
+      tag: _heroTag,
+      createRectTween: _linearTranslateWithLargestRectSizeTween,
+      flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      child: new _TransitionableNavigationBar(
+        components: components,
+        child: navBar,
       ),
     );
   }
 
   @override
-  bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
+  bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
     return components != oldDelegate.components
         || persistentHeight != oldDelegate.persistentHeight
         || border != oldDelegate.border
@@ -199,15 +210,15 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
 /// Consists of the entire navigation bar without background and border when used
 /// without large titles. With large titles, it's the top static half that
 /// doesn't scroll.
-class _CupertinoPersistentNavigationBar extends StatelessWidget {
-  const _CupertinoPersistentNavigationBar({
+class _PersistentNavigationBar extends StatelessWidget {
+  const _PersistentNavigationBar({
     Key key,
     this.components,
     this.padding,
     this.middleVisible,
   }) : super(key: key);
 
-  final _CupertinoNavigationBarComponents components;
+  final _NavigationBarComponents components;
 
   final EdgeInsetsDirectional padding;
   /// Whether the middle widget has a visible animated opacity. A null value
@@ -270,19 +281,21 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget {
 }
 
 @immutable
-class _CupertinoNavigationBarComponents {
-  _CupertinoNavigationBarComponents({
-    ModalRoute<dynamic> route,
-    Widget leading,
-    bool automaticallyImplyLeading,
-    bool automaticallyImplyTitle,
-    String previousPageTitle,
-    Widget middle,
-    Widget trailing,
-    Widget largeTitle,
-    EdgeInsetsDirectional padding,
-    Color actionsForegroundColor,
-    bool large,
+class _NavigationBarComponents {
+  _NavigationBarComponents({
+    @required ModalRoute<dynamic> route,
+    @required this.backgroundColor,
+    @required this.border,
+    @required Widget leading,
+    @required bool automaticallyImplyLeading,
+    @required bool automaticallyImplyTitle,
+    @required String previousPageTitle,
+    @required Widget middle,
+    @required Widget trailing,
+    @required Widget largeTitle,
+    @required EdgeInsetsDirectional padding,
+    @required Color actionsForegroundColor,
+    @required bool large,
   }) : _route = route,
        leading = createLeading(
          userLeading: leading,
@@ -291,9 +304,6 @@ class _CupertinoNavigationBarComponents {
          padding: padding,
          actionsForegroundColor: actionsForegroundColor,
         ),
-       _automaticallyImplyLeading = automaticallyImplyLeading,
-       _automaticallyImplyTitle = automaticallyImplyTitle,
-       _previousPageTitle = previousPageTitle,
        backChevron = createBackChevron(
          userLeading: leading,
          route: route,
@@ -313,7 +323,11 @@ class _CupertinoNavigationBarComponents {
          automaticallyImplyTitle: automaticallyImplyTitle,
          large: large,
        ),
-       _userTrailing = trailing,
+       trailing = createTrailing(
+         userTrailing: trailing,
+         padding: padding,
+         actionsForegroundColor: actionsForegroundColor,
+       ),
        largeTitle = createLargeTitle(
          userLargeTitle: largeTitle,
          route: route,
@@ -338,6 +352,9 @@ class _CupertinoNavigationBarComponents {
 
     return null;
   }
+
+  final Color backgroundColor;
+  final Border border;
 
   final TextStyle _actionsStyle;
   final ModalRoute<dynamic> _route;
@@ -390,10 +407,6 @@ class _CupertinoNavigationBarComponents {
     );
   }
 
-  RenderBox get leadingRenderBox {
-    return leading?.renderBox;
-  }
-
   final _RenderObjectFindingWidget backChevron;
   static _RenderObjectFindingWidget createBackChevron({
     @required Widget userLeading,
@@ -439,10 +452,6 @@ class _CupertinoNavigationBarComponents {
     );
   }
 
-  final bool _automaticallyImplyLeading;
-  final bool _automaticallyImplyTitle;
-  final String _previousPageTitle;
-
   final _RenderObjectFindingWidget middle;
   static _RenderObjectFindingWidget createMiddle({
     @required Widget userMiddle,
@@ -475,24 +484,30 @@ class _CupertinoNavigationBarComponents {
     return middle.renderBox;
   }
 
-  final Widget _userTrailing;
-  Widget get trailing {
-    if (_userTrailing == null) {
+  final _RenderObjectFindingWidget trailing;
+  static _RenderObjectFindingWidget createTrailing({
+    @required Widget userTrailing,
+    @required EdgeInsetsDirectional padding,
+    @required Color actionsForegroundColor,
+  }) {
+    if (userTrailing == null) {
       return null;
     }
 
-    return new Padding(
-      padding: new EdgeInsetsDirectional.only(
-        end: _padding?.end ?? _kNavBarEdgePadding,
-      ),
-      child: new DefaultTextStyle(
-        style: _actionsStyle,
-        child: IconTheme.merge(
-          data: new IconThemeData(
-            // color: actionsForegroundColor,
-            size: 32.0,
+    return new _RenderObjectFindingWidget(
+      child: new Padding(
+        padding: new EdgeInsetsDirectional.only(
+          end: padding?.end ?? _kNavBarEdgePadding,
+        ),
+        child: new DefaultTextStyle(
+          style: _navBarItemStyle(actionsForegroundColor),
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: actionsForegroundColor,
+              size: 32.0,
+            ),
+            child: userTrailing,
           ),
-          child: _userTrailing,
         ),
       ),
     );
@@ -547,7 +562,9 @@ class _CupertinoNavigationBarComponents {
 }
 
 class _RenderObjectFindingWidget extends StatelessWidget {
-  _RenderObjectFindingWidget({ this.child }) : super(key: new GlobalKey());
+  _RenderObjectFindingWidget({ @required this.child }) :
+    assert(child != null),
+    super(key: new GlobalKey());
 
   final Widget child;
 
@@ -562,9 +579,7 @@ class _RenderObjectFindingWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return child;
-  }
+  Widget build(BuildContext context) => child;
 }
 
 class _BackChevron extends StatelessWidget {

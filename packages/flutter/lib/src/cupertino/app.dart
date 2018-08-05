@@ -320,13 +320,10 @@ class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
 }
 
 class _CupertinoAppState extends State<CupertinoApp> {
-  HeroController _heroController;
-  List<NavigatorObserver> _navigatorObservers;
 
   @override
   void initState() {
     super.initState();
-    _heroController = new HeroController(); // Linear tweening.
     _updateNavigator();
   }
 
@@ -342,9 +339,6 @@ class _CupertinoAppState extends State<CupertinoApp> {
                      widget.routes.isNotEmpty ||
                      widget.onGenerateRoute != null ||
                      widget.onUnknownRoute != null;
-    _navigatorObservers =
-        new List<NavigatorObserver>.from(widget.navigatorObservers)
-          ..add(_heroController);
   }
 
   Widget defaultBuilder(BuildContext context, Widget child) {
@@ -361,7 +355,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         routes: widget.routes,
         onGenerateRoute: widget.onGenerateRoute,
         onUnknownRoute: widget.onUnknownRoute,
-        navigatorObservers: _navigatorObservers,
+        navigatorObservers: widget.navigatorObservers,
       );
       if (widget.builder != null) {
         return widget.builder(context, navigator);

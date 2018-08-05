@@ -4,134 +4,52 @@
 
 part of nav_bar;
 
-class CupertinoNavigationBarTransition extends StatelessWidget {
-  CupertinoNavigationBarTransition({
-    this.animation,
-    this.topNavBar,
-    this.bottomNavBar,
-    this.topContext,
-    this.bottomContext,
-  }) : assert(
-         topNavBar is CupertinoNavigationBar || topNavBar is CupertinoSliverNavigationBar,
-         typeError,
-       ),
-       assert(
-         bottomNavBar is CupertinoNavigationBar || bottomNavBar is CupertinoSliverNavigationBar,
-         typeError,
-       ),
-       assert(topContext != null),
-       assert(bottomContext != null),
-       assert(topNavBar == topContext.widget),
-       assert(bottomNavBar == bottomContext.widget),
-       heightTween = new Tween<double>(
-         begin: getNavBarHeight(bottomNavBar),
-         end: getNavBarHeight(topNavBar),
+class _TransitionableNavigationBar extends _RenderObjectFindingWidget {
+  _TransitionableNavigationBar({
+    @required this.components,
+    @required Widget child,
+  }) : assert(components != null),
+       super(child: child);
+
+  final _NavigationBarComponents components;
+}
+
+class _NavigationBarTransition extends StatelessWidget {
+  _NavigationBarTransition({
+    @required this.animation,
+    @required this.topNavBar,
+    @required this.bottomNavBar,
+  }) : heightTween = new Tween<double>(
+         begin: bottomNavBar.renderBox.size.height,
+         end: topNavBar.renderBox.size.height,
        ),
        backgroundTween = new ColorTween(
-         begin: getNavBarBackgroundColor(bottomNavBar),
-         end: getNavBarBackgroundColor(topNavBar),
+         begin: bottomNavBar.components.backgroundColor,
+         end: topNavBar.components.backgroundColor,
        ),
        borderTween = new BorderTween(
-         begin: getNavBarBorder(bottomNavBar),
-         end: getNavBarBorder(topNavBar),
+         begin: bottomNavBar.components.border,
+         end: topNavBar.components.border,
        ),
-       componentsTransition = new _CupertinoNavigationBarComponentsTransition(
+       componentsTransition = new _NavigationBarComponentsTransition(
          animation: animation,
-         bottomNavBarComponents: getNavBarComponents(bottomContext),
-         bottomNavBarBox: getNavBarBox(bottomContext),
-         topNavBarComponents: getNavBarComponents(topContext),
-         topNavBarBox: getNavBarBox(topContext),
+         bottomNavBarComponents: bottomNavBar.components,
+         bottomNavBarBox: bottomNavBar.renderBox,
+         topNavBarComponents: topNavBar.components,
+         topNavBarBox: topNavBar.renderBox,
        );
 
   static const String typeError =
       'Can only transition between CupertinoNavigationBars and CupertinoSliverNavigationBars';
 
   final Animation<double> animation;
-  final Widget topNavBar;
-  final Widget bottomNavBar;
-  final BuildContext topContext;
-  final BuildContext bottomContext;
-  final _CupertinoNavigationBarComponentsTransition componentsTransition;
+  final _TransitionableNavigationBar topNavBar;
+  final _TransitionableNavigationBar bottomNavBar;
+  final _NavigationBarComponentsTransition componentsTransition;
 
   final Tween<double> heightTween;
   final ColorTween backgroundTween;
   final BorderTween borderTween;
-
-  static double getNavBarHeight(Widget navBar) {
-    if (navBar is CupertinoNavigationBar) {
-      return _kNavBarPersistentHeight;
-    } else if (navBar is CupertinoSliverNavigationBar) {
-      return _kNavBarPersistentHeight + _kNavBarLargeTitleHeightExtension;
-    }
-
-    assert(
-      false,
-      typeError,
-    );
-    return null;
-  }
-
-  static Color getNavBarBackgroundColor(Widget navBar) {
-    if (navBar is CupertinoNavigationBar) {
-      return navBar.backgroundColor;
-    } else if (navBar is CupertinoSliverNavigationBar) {
-      return navBar.backgroundColor;
-    }
-
-    assert(
-      false,
-      typeError,
-    );
-    return null;
-  }
-
-  static Border getNavBarBorder(Widget navBar) {
-    if (navBar is CupertinoNavigationBar) {
-      return navBar.border;
-    } else if (navBar is CupertinoSliverNavigationBar) {
-      return navBar.border;
-    }
-
-    assert(
-      false,
-      typeError,
-    );
-    return null;
-  }
-
-  static _CupertinoNavigationBarComponents getNavBarComponents(BuildContext context) {
-    if (context is StatefulElement) {
-      final State state = context.state;
-      if (state is _CupertinoNavigationBarState) {
-        return state._components;
-      } else if (state is _CupertinoSliverNavigationBarState) {
-        return state._components;
-      }
-    }
-
-    assert(
-      false,
-      typeError,
-    );
-    return null;
-  }
-
-  static RenderBox getNavBarBox(BuildContext context) {
-    if (context is StatefulElement) {
-      final State state = context.state;
-      if (state is _CupertinoNavigationBarState) {
-        return context.findRenderObject();
-      } else if (state is _CupertinoSliverNavigationBarState) {
-        return state._boxKey.currentContext.findRenderObject();
-      }
-    }
-
-    assert(
-      false,
-      typeError,
-    );
-    return null;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,8 +89,8 @@ class CupertinoNavigationBarTransition extends StatelessWidget {
 }
 
 @immutable
-class _CupertinoNavigationBarComponentsTransition {
-  _CupertinoNavigationBarComponentsTransition({
+class _NavigationBarComponentsTransition {
+  _NavigationBarComponentsTransition({
     this.animation,
     this.bottomNavBarComponents,
     this.topNavBarComponents,
@@ -190,8 +108,8 @@ class _CupertinoNavigationBarComponentsTransition {
   );
 
   final Animation<double> animation;
-  final _CupertinoNavigationBarComponents bottomNavBarComponents;
-  final _CupertinoNavigationBarComponents topNavBarComponents;
+  final _NavigationBarComponents bottomNavBarComponents;
+  final _NavigationBarComponents topNavBarComponents;
   final RenderBox bottomNavBarBox;
   final RenderBox topNavBarBox;
 
@@ -372,3 +290,52 @@ class _CupertinoNavigationBarComponentsTransition {
     );
   }
 }
+
+CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect begin, Rect end) {
+  final Size largestSize = new Size(
+    math.max(begin.size.width, end.size.width),
+    math.max(begin.size.height, end.size.height),
+  );
+  return new RectTween(
+    begin: begin.topLeft & largestSize,
+    end: end.topLeft & largestSize,
+  );
+};
+
+HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
+  Animation<double> animation,
+  HeroFlightDirection flightDirection,
+  Hero fromWidget,
+  Hero toWidget,
+) {
+  assert(animation != null);
+  assert(flightDirection != null);
+  assert(fromWidget != null);
+  assert(toWidget != null);
+  assert(fromWidget.child is _TransitionableNavigationBar);
+  assert(toWidget.child is _TransitionableNavigationBar);
+  final _TransitionableNavigationBar fromNavBar = fromWidget.child;
+  final _TransitionableNavigationBar toNavBar = toWidget.child;
+  assert(fromNavBar.components != null);
+  assert(toNavBar.components != null);
+  assert(fromNavBar.renderBox != null);
+  assert(toNavBar.renderBox != null);
+
+  switch (flightDirection) {
+    case HeroFlightDirection.push:
+      return new _NavigationBarTransition(
+        animation: animation,
+        bottomNavBar: fromNavBar,
+        topNavBar: toNavBar,
+      );
+      break;
+    case HeroFlightDirection.pop:
+      return new _NavigationBarTransition(
+        animation: animation,
+        bottomNavBar: toNavBar,
+        topNavBar: fromNavBar,
+      );
+  }
+};
+
+
