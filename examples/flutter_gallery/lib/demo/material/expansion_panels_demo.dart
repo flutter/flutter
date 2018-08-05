@@ -250,39 +250,24 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Radio<_Location>(
-                                value: _Location.Bahamas,
-                                groupValue: field.value,
-                                onChanged: field.didChange,
-                              ),
-                              const Text('Bahamas')
-                            ]
+                          RadioListTile<_Location>(
+                            value: _Location.Bahamas,
+                            title: const Text('Bahamas'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Radio<_Location>(
-                                value: _Location.Barbados,
-                                groupValue: field.value,
-                                onChanged: field.didChange,
-                              ),
-                              const Text('Barbados')
-                            ]
+                          RadioListTile<_Location>(
+                            value: _Location.Barbados,
+                            title: const Text('Barbados'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Radio<_Location>(
-                                value: _Location.Bermuda,
-                                groupValue: field.value,
-                                onChanged: field.didChange,
-                              ),
-                              const Text('Bermuda')
-                            ]
-                          )
+                          RadioListTile<_Location>(
+                            value: _Location.Bermuda,
+                            title: const Text('Bermuda'),
+                            groupValue: field.value,
+                            onChanged: field.didChange,
+                          ),
                         ]
                       );
                     }
