@@ -48,12 +48,12 @@ DART="$DART_BIN/dart"
 PUB="$DART_BIN/pub"
 export PATH="$FLUTTER_BIN:$DART_BIN:$PATH"
 
-# Make sure Dart is installed (by Flutter)
+# Make sure dart is installed by invoking flutter to download it.
 "$FLUTTER" --version
 
 # If the pub cache directory exists in the root, then use that.
 FLUTTER_PUB_CACHE="$FLUTTER_ROOT/.pub-cache"
-if [ -d "$FLUTTER_PUB_CACHE" ]; then
+if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
   # This has to be exported, because pub interprets setting it
   # to the empty string in the same way as setting it to ".".
   export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_PUB_CACHE"}"
