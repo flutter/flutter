@@ -245,7 +245,7 @@ class _DemosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // When overriding ListView.padding, it's necessary to manually handle
+    // When overriding ListView.padding, it is necessary to manually handle
     // safe areas.
     final double windowBottomPadding = MediaQuery.of(context).padding.bottom;
     return new KeyedSubtree(
