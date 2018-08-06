@@ -65,6 +65,12 @@ class TranslationBundle {
   String get dialogLabel => parent?.dialogLabel;
   String get alertDialogLabel => parent?.alertDialogLabel;
   String get searchFieldLabel => parent?.searchFieldLabel;
+  String get reorderItemToStart => parent?.reorderItemToStart;
+  String get reorderItemToEnd => parent?.reorderItemToEnd;
+  String get reorderItemUp => parent?.reorderItemUp;
+  String get reorderItemDown => parent?.reorderItemDown;
+  String get reorderItemLeft => parent?.reorderItemLeft;
+  String get reorderItemRight => parent?.reorderItemRight;
 }
 
 // ignore: camel_case_types
@@ -115,6 +121,12 @@ class _Bundle_ar extends TranslationBundle {
   @override String get dialogLabel => r'مربع حوار';
   @override String get alertDialogLabel => r'مربع حوار التنبيه';
   @override String get searchFieldLabel => r'بحث';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -161,6 +173,12 @@ class _Bundle_bg extends TranslationBundle {
   @override String get dialogLabel => r'Диалогов прозорец';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -208,6 +226,12 @@ class _Bundle_bs extends TranslationBundle {
   @override String get dialogLabel => r'Dijalog';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -254,6 +278,12 @@ class _Bundle_ca extends TranslationBundle {
   @override String get dialogLabel => r'Diàleg';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -302,6 +332,12 @@ class _Bundle_cs extends TranslationBundle {
   @override String get dialogLabel => r'Dialogové okno';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -348,6 +384,12 @@ class _Bundle_da extends TranslationBundle {
   @override String get dialogLabel => r'Dialogboks';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -395,6 +437,12 @@ class _Bundle_de extends TranslationBundle {
   @override String get dialogLabel => r'Dialogfeld';
   @override String get alertDialogLabel => r'Aufmerksam';
   @override String get searchFieldLabel => r'Suchen';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -441,6 +489,12 @@ class _Bundle_el extends TranslationBundle {
   @override String get dialogLabel => r'Παράθυρο διαλόγου';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -488,6 +542,12 @@ class _Bundle_en extends TranslationBundle {
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'Alert';
   @override String get searchFieldLabel => r'Search';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -535,6 +595,12 @@ class _Bundle_es extends TranslationBundle {
   @override String get dialogLabel => r'Cuadro de diálogo';
   @override String get alertDialogLabel => r'Alerta';
   @override String get searchFieldLabel => r'Buscar';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -581,6 +647,12 @@ class _Bundle_et extends TranslationBundle {
   @override String get dialogLabel => r'Dialoog';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -627,6 +699,12 @@ class _Bundle_fa extends TranslationBundle {
   @override String get dialogLabel => r'کادر گفتگو';
   @override String get alertDialogLabel => r'هشدار';
   @override String get searchFieldLabel => r'جستجو کردن';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -673,6 +751,12 @@ class _Bundle_fi extends TranslationBundle {
   @override String get dialogLabel => r'Valintaikkuna';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -719,6 +803,12 @@ class _Bundle_fil extends TranslationBundle {
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -766,6 +856,12 @@ class _Bundle_fr extends TranslationBundle {
   @override String get dialogLabel => r'Boîte de dialogue';
   @override String get alertDialogLabel => r'Alerte';
   @override String get searchFieldLabel => r'Chercher';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -812,6 +908,12 @@ class _Bundle_gsw extends TranslationBundle {
   @override String get dialogLabel => r'Dialogfeld';
   @override String get alertDialogLabel => r'Aufmerksam';
   @override String get searchFieldLabel => r'Suchen';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -860,6 +962,12 @@ class _Bundle_he extends TranslationBundle {
   @override String get dialogLabel => r'תיבת דו-שיח';
   @override String get alertDialogLabel => r'עֵרָנִי';
   @override String get searchFieldLabel => r'לחפש';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -906,6 +1014,12 @@ class _Bundle_hi extends TranslationBundle {
   @override String get dialogLabel => r'संवाद';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -953,6 +1067,12 @@ class _Bundle_hr extends TranslationBundle {
   @override String get dialogLabel => r'Dijalog';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -999,6 +1119,12 @@ class _Bundle_hu extends TranslationBundle {
   @override String get dialogLabel => r'Párbeszédablak';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1045,6 +1171,12 @@ class _Bundle_id extends TranslationBundle {
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'Waspada';
   @override String get searchFieldLabel => r'Pencarian';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1091,6 +1223,12 @@ class _Bundle_it extends TranslationBundle {
   @override String get dialogLabel => r'Finestra di dialogo';
   @override String get alertDialogLabel => r'Mettere in guardia';
   @override String get searchFieldLabel => r'Ricerca';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1137,6 +1275,12 @@ class _Bundle_ja extends TranslationBundle {
   @override String get dialogLabel => r'ダイアログ';
   @override String get alertDialogLabel => r'アラート';
   @override String get searchFieldLabel => r'サーチ';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1183,6 +1327,12 @@ class _Bundle_ko extends TranslationBundle {
   @override String get dialogLabel => r'대화상자';
   @override String get alertDialogLabel => r'경보';
   @override String get searchFieldLabel => r'수색';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1231,6 +1381,12 @@ class _Bundle_lt extends TranslationBundle {
   @override String get dialogLabel => r'Dialogo langas';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1278,6 +1434,12 @@ class _Bundle_lv extends TranslationBundle {
   @override String get dialogLabel => r'Dialoglodziņš';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1325,6 +1487,12 @@ class _Bundle_ms extends TranslationBundle {
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'Amaran';
   @override String get searchFieldLabel => r'Carian';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1371,6 +1539,12 @@ class _Bundle_nb extends TranslationBundle {
   @override String get dialogLabel => r'Dialogboks';
   @override String get alertDialogLabel => r'Varsling';
   @override String get searchFieldLabel => r'Søke';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1417,6 +1591,12 @@ class _Bundle_nl extends TranslationBundle {
   @override String get dialogLabel => r'Dialoogvenster';
   @override String get alertDialogLabel => r'Alarm';
   @override String get searchFieldLabel => r'Zoeken';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1465,6 +1645,12 @@ class _Bundle_pl extends TranslationBundle {
   @override String get dialogLabel => r'Okno dialogowe';
   @override String get alertDialogLabel => r'Alarm';
   @override String get searchFieldLabel => r'Szukaj';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1508,6 +1694,12 @@ class _Bundle_ps extends TranslationBundle {
   @override String get dialogLabel => r'خبرې اترې';
   @override String get alertDialogLabel => r'خبرتیا';
   @override String get searchFieldLabel => r'لټون';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1554,6 +1746,12 @@ class _Bundle_pt extends TranslationBundle {
   @override String get dialogLabel => r'Caixa de diálogo';
   @override String get alertDialogLabel => r'Alerta';
   @override String get searchFieldLabel => r'Pesquisa';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1602,6 +1800,12 @@ class _Bundle_ro extends TranslationBundle {
   @override String get dialogLabel => r'Casetă de dialog';
   @override String get alertDialogLabel => r'Alerta';
   @override String get searchFieldLabel => r'Căutare';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1651,6 +1855,12 @@ class _Bundle_ru extends TranslationBundle {
   @override String get dialogLabel => r'Диалоговое окно';
   @override String get alertDialogLabel => r'бдительный';
   @override String get searchFieldLabel => r'Поиск';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1699,6 +1909,12 @@ class _Bundle_sk extends TranslationBundle {
   @override String get dialogLabel => r'Dialógové okno';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1747,6 +1963,12 @@ class _Bundle_sl extends TranslationBundle {
   @override String get dialogLabel => r'Pogovorno okno';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1794,6 +2016,12 @@ class _Bundle_sr extends TranslationBundle {
   @override String get dialogLabel => r'Дијалог';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1840,6 +2068,12 @@ class _Bundle_sv extends TranslationBundle {
   @override String get dialogLabel => r'Dialogruta';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1886,6 +2120,12 @@ class _Bundle_th extends TranslationBundle {
   @override String get dialogLabel => r'กล่องโต้ตอบ';
   @override String get alertDialogLabel => r'เตือนภัย';
   @override String get searchFieldLabel => r'ค้นหา';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1932,6 +2172,12 @@ class _Bundle_tl extends TranslationBundle {
   @override String get dialogLabel => r'Dialog';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -1978,6 +2224,12 @@ class _Bundle_tr extends TranslationBundle {
   @override String get dialogLabel => r'İletişim kutusu';
   @override String get alertDialogLabel => r'Alarm';
   @override String get searchFieldLabel => r'Arama';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -2026,6 +2278,12 @@ class _Bundle_uk extends TranslationBundle {
   @override String get dialogLabel => r'Вікно';
   @override String get alertDialogLabel => r'TBD';
   @override String get searchFieldLabel => r'TBD';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -2072,6 +2330,12 @@ class _Bundle_ur extends TranslationBundle {
   @override String get dialogLabel => r'ڈائلاگ';
   @override String get alertDialogLabel => r'انتباہ';
   @override String get searchFieldLabel => r'تلاش کریں';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -2118,6 +2382,12 @@ class _Bundle_vi extends TranslationBundle {
   @override String get dialogLabel => r'Hộp thoại';
   @override String get alertDialogLabel => r'Hộp thoại';
   @override String get searchFieldLabel => r'Tìm kiếm';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
@@ -2164,6 +2434,12 @@ class _Bundle_zh extends TranslationBundle {
   @override String get dialogLabel => r'对话框';
   @override String get alertDialogLabel => r'警报';
   @override String get searchFieldLabel => r'搜索';
+  @override String get reorderItemToStart => r'Move to the start';
+  @override String get reorderItemToEnd => r'Move to the end';
+  @override String get reorderItemUp => r'Move up';
+  @override String get reorderItemDown => r'Move down';
+  @override String get reorderItemLeft => r'Move left';
+  @override String get reorderItemRight => r'Move right';
 }
 
 // ignore: camel_case_types
