@@ -1764,6 +1764,145 @@ void main() {
     semantics.dispose();
   });
 
+  void sendFakeKeyEvent(Map<String, dynamic> data) {
+    BinaryMessages.handlePlatformMessage(
+      SystemChannels.keyEvent.name,
+      SystemChannels.keyEvent.codec.encodeMessage(data),
+          (ByteData data) { },
+    );
+  }
+
+  void sendKeyEventWithCode(int code, [bool down = true]) {
+    sendFakeKeyEvent(<String, dynamic>{
+      'type': down ? 'keydown' : 'keyup',
+      'keymap': 'android',
+      'keyCode' : code,
+      'hidUsage': 0x04,
+      'codePoint': 0x64,
+      'modifiers': 0x08,
+    });
+  }
+
+
+  // Need to test
+  // -Control + arrow keys
+  // -Shift + arrow keys
+  // -Control + shift + arrow keys
+  // -Up and down arrows
+
+  group('Keyboard Tests', (){
+    List<RawKeyEvent> events;
+    TextEditingController controller;
+
+    setUp( () {
+      events = <RawKeyEvent>[];
+      controller = new TextEditingController();
+    });
+
+    MaterialApp setupWidget() {
+
+      final FocusNode focusNode = new FocusNode();
+
+      return new MaterialApp(
+        home:  Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: events.add,
+            child: DefaultTextStyle(
+              style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+              child: Center(
+                child: TextField(
+                  maxLength: 10,
+                  controller: controller,
+                ),
+              ) ,
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('Shift test 1', (WidgetTester tester) async{
+
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'your mom';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      sendKeyEventWithCode(59);
+      sendKeyEventWithCode(22);
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+    });
+
+    testWidgets('Control Shift test', (WidgetTester tester) async{
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'your mom';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      sendKeyEventWithCode(59);
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(113);
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(22);
+
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 4);
+    });
+
+    testWidgets('Down and up test', (WidgetTester tester) async{
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'your mom';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      sendKeyEventWithCode(59);
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 8);
+      sendKeyEventWithCode(20, false);
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+    });
+
+
+    testWidgets('Down and up test 2', (WidgetTester tester) async{
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'your mom\nis a person';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      for (int i = 0; i < 5; i += 1) {
+        sendKeyEventWithCode(22);
+        await tester.pumpAndSettle();
+      }
+      sendKeyEventWithCode(59, false);
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20, false);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+    });
+  });
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
 
