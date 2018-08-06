@@ -1,7 +1,7 @@
 Contributing to the Flutter engine
 ==================================
 
-[![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
+[![Build Status](https://cirrus-ci.com/flutter/engine.svg)](https://cirrus-ci.com/flutter/engine)
 
 _See also: [Flutter's code of conduct](https://flutter.io/design-principles/#code-of-conduct)_
 

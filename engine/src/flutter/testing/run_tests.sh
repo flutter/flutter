@@ -5,7 +5,7 @@ set -ex
 out/host_debug_unopt/fxl_unittests
 out/host_debug_unopt/synchronization_unittests
 
-flutter/travis/analyze.sh
+flutter/ci/analyze.sh
 
 pushd flutter/testing/dart
 pub get
@@ -20,5 +20,5 @@ for TEST_SCRIPT in flutter/testing/dart/*.dart; do
 done
 
 pushd flutter
-travis/test.sh
+ci/test.sh
 popd
