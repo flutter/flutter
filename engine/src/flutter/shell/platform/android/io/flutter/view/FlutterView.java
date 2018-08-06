@@ -602,41 +602,20 @@ public class FlutterView extends SurfaceView
     private void postRun() {
     }
 
-    public void runFromBundle(FlutterRunArguments args) {
-      assertAttached();
-      preRun();
-      mNativeView.runFromBundle(args);
-      postRun();
-    }
-
-    /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`. Parameter
-     * `snapshotOverride` has no effect.
-     */
     public void runFromBundle(String bundlePath, String snapshotOverride) {
         runFromBundle(bundlePath, snapshotOverride, "main", false);
     }
 
-    /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`. Parameter
-     * `snapshotOverride` has no effect.
-     */
     public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint) {
         runFromBundle(bundlePath, snapshotOverride, entrypoint, false);
     }
 
-    /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`. Parameters
-     * `snapshotOverride` and `reuseRuntimeController` have no effect.
-     */
-    public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint, boolean reuseRuntimeController) {
-        FlutterRunArguments args = new FlutterRunArguments();
-        args.bundlePath = bundlePath;
-        args.entrypoint = entrypoint;
-        runFromBundle(args);
+    public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint,
+            boolean reuseRuntimeController) {
+        assertAttached();
+        preRun();
+        mNativeView.runFromBundle(bundlePath, snapshotOverride, entrypoint, reuseRuntimeController);
+        postRun();
     }
 
     /**
