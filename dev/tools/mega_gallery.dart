@@ -18,8 +18,7 @@ void main(List<String> args) {
     Directory.current = Directory.current.parent.parent;
 
   final ArgParser argParser = new ArgParser();
-  // ../mega_gallery? dev/benchmarks/mega_gallery?
-  argParser.addOption('out', defaultsTo: _normalize('dev/benchmarks/mega_gallery'));
+  argParser.addOption('out');
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
   argParser.addFlag('help', abbr: 'h', negatable: false);
@@ -43,6 +42,12 @@ void main(List<String> args) {
     }
 
     exit(0);
+  }
+
+  if (!results.wasParsed('out')) {
+    print('The --out parameter is required.');
+    print(argParser.usage);
+    exit(1);
   }
 
   int copies;
@@ -128,7 +133,7 @@ void _copyGallery(Directory galleryDir, int index) {
 
 void _copy(Directory source, Directory target) {
   if (!target.existsSync())
-    target.createSync();
+    target.createSync(recursive: true);
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
