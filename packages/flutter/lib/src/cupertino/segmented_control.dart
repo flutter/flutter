@@ -63,7 +63,7 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
-class CupertinoSegmentedControl<T> extends StatefulWidget {
+class SegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
   /// The [children], [onValueChanged], [unselectedColor], [selectedColor],
@@ -80,7 +80,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// If no [groupValue] is provided, or the [groupValue] is null, no widget will
   /// appear as selected. The [groupValue] must be either null or one of the keys
   /// in the [children] map.
-  CupertinoSegmentedControl({
+  SegmentedControl({
     Key key,
     @required this.children,
     @required this.onValueChanged,
@@ -93,8 +93,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
         assert(children.length >= 2),
         assert(onValueChanged != null),
         assert(groupValue == null || children.keys.any((T child) => child == groupValue),
-          'The groupValue must be either null or one of the keys in the children map.'
-        ),
+        'The groupValue must be either null or one of the keys in the children map.'),
         assert(unselectedColor != null),
         assert(selectedColor != null),
         assert(borderColor != null),
@@ -145,7 +144,7 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new Container(
-  ///       child: new CupertinoSegmentedControl<int>(
+  ///       child: new SegmentedControl<int>(
   ///         children: children,
   ///         onValueChanged: (int newValue) {
   ///           setState(() {
@@ -199,8 +198,8 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
-    with TickerProviderStateMixin<CupertinoSegmentedControl<T>> {
+class _SegmentedControlState<T> extends State<SegmentedControl<T>>
+    with TickerProviderStateMixin<SegmentedControl<T>> {
   T _pressedKey;
 
   final List<AnimationController> _selectionControllers = <AnimationController>[];
@@ -309,7 +308,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   @override
-  void didUpdateWidget(CupertinoSegmentedControl<T> oldWidget) {
+  void didUpdateWidget(SegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.children.length != widget.children.length) {
@@ -350,7 +349,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       );
 
       Widget child = new Center(
-          child: widget.children[currentKey],
+        child: widget.children[currentKey],
       );
 
       child = new GestureDetector(
