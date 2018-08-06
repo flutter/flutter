@@ -21,8 +21,7 @@ namespace shell {
 class AndroidShellHolder {
  public:
   AndroidShellHolder(blink::Settings settings,
-                     fml::jni::JavaObjectWeakGlobalRef java_object,
-                     bool is_background_view);
+                     fml::jni::JavaObjectWeakGlobalRef java_object);
 
   ~AndroidShellHolder();
 

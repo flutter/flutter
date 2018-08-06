@@ -24,13 +24,6 @@ class PlatformViewAndroid final : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
 
-  // Creates a PlatformViewAndroid with no rendering surface for use with
-  // background execution.
-  PlatformViewAndroid(PlatformView::Delegate& delegate,
-                      blink::TaskRunners task_runners,
-                      fml::jni::JavaObjectWeakGlobalRef java_object);
-
-  // Creates a PlatformViewAndroid with a rendering surface.
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       blink::TaskRunners task_runners,
                       fml::jni::JavaObjectWeakGlobalRef java_object,
