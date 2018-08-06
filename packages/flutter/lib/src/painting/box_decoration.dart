@@ -70,6 +70,7 @@ class BoxDecoration extends Decoration {
   ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
+  /// * If [backgroundBlendMode] is null, this decoration paints with [BlendMode.srcOver]
   ///
   /// The [shape] argument must not be null.
   const BoxDecoration({
@@ -79,13 +80,20 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
+    this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
-  }) : assert(shape != null);
+  }) : assert(shape != null),
+  // TODO(mattcarroll): Use "backgroundBlendMode == null" when Dart #31140 is in.
+        assert(
+        identical(backgroundBlendMode, null) || color != null || gradient != null,
+        'backgroundBlendMode applies to BoxDecoration\'s background color or'
+            'gradient, but no color or gradient were provided.'
+        );
 
   @override
   bool debugAssertIsValid() {
     assert(shape != BoxShape.circle ||
-           borderRadius == null); // Can't have a border radius if you're a circle.
+        borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 
@@ -135,6 +143,14 @@ class BoxDecoration extends Decoration {
   ///
   /// The [gradient] is drawn under the [image].
   final Gradient gradient;
+
+  /// The blend mode applied to the [color] or [gradient] background of the box.
+  ///
+  /// If no [backgroundBlendMode] is provided then the default painting blend
+  /// mode is used.
+  ///
+  /// If no [color] or [gradient] is provided then blend mode has no impact.
+  final BlendMode backgroundBlendMode;
 
   /// The shape to fill the background [color], [gradient], and [image] into and
   /// to cast as the [boxShadow].
@@ -250,12 +266,12 @@ class BoxDecoration extends Decoration {
       return false;
     final BoxDecoration typedOther = other;
     return color == typedOther.color &&
-           image == typedOther.image &&
-           border == typedOther.border &&
-           borderRadius == typedOther.borderRadius &&
-           boxShadow == typedOther.boxShadow &&
-           gradient == typedOther.gradient &&
-           shape == typedOther.shape;
+        image == typedOther.image &&
+        border == typedOther.border &&
+        borderRadius == typedOther.borderRadius &&
+        boxShadow == typedOther.boxShadow &&
+        gradient == typedOther.gradient &&
+        shape == typedOther.shape;
   }
 
   @override
@@ -299,7 +315,7 @@ class BoxDecoration extends Decoration {
         }
         return true;
       case BoxShape.circle:
-        // Circles are inscribed into our smallest dimension.
+      // Circles are inscribed into our smallest dimension.
         final Offset center = size.center(Offset.zero);
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
@@ -318,8 +334,8 @@ class BoxDecoration extends Decoration {
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
   _BoxDecorationPainter(this._decoration, VoidCallback onChanged)
-    : assert(_decoration != null),
-      super(onChanged);
+      : assert(_decoration != null),
+        super(onChanged);
 
   final BoxDecoration _decoration;
 
@@ -332,6 +348,8 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_cachedBackgroundPaint == null ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = new Paint();
+      if (_decoration.backgroundBlendMode != null)
+        paint.blendMode = _decoration.backgroundBlendMode;
       if (_decoration.color != null)
         paint.color = _decoration.color;
       if (_decoration.gradient != null) {

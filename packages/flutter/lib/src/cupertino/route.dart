@@ -686,12 +686,12 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
 class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   _CupertinoModalPopupRoute({
-    this.child,
+    this.builder,
     this.barrierLabel,
     RouteSettings settings,
   }) : super(settings: settings);
 
-  final Widget child;
+  final WidgetBuilder builder;
 
   @override
   final String barrierLabel;
@@ -703,9 +703,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   bool get barrierDismissible => true;
 
   @override
-  Duration get transitionDuration => _kModalPopupTransitionDuration;
+  bool get semanticsDismissible => false;
 
-  AnimationController _animationController;
+  @override
+  Duration get transitionDuration => _kModalPopupTransitionDuration;
 
   Animation<double> _animation;
 
@@ -713,7 +714,7 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   Animation<double> createAnimation() {
     assert(_animation == null);
     _animation = new CurvedAnimation(
-      parent: _animationController,
+      parent: super.createAnimation(),
       curve: Curves.ease,
       reverseCurve: Curves.ease.flipped,
     );
@@ -721,24 +722,15 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  AnimationController createAnimationController() {
-    assert(_animationController == null);
-    _animationController = new AnimationController(
-      duration: _kModalPopupTransitionDuration,
-      vsync: navigator.overlay,
-    );
-    return _animationController;
-  }
-
-  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return new SafeArea(
-      child: child,
-    );
+    return builder(context);
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (_animation.value == 1.0) {
+      context.findRenderObject().markNeedsSemanticsUpdate();
+    }
     return new Align(
       alignment: Alignment.bottomCenter,
       child: new FractionalTranslation(
@@ -757,26 +749,32 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// Such a popup is an alternative to a menu or a dialog and prevents the user
 /// from interacting with the rest of the app.
 ///
-/// The 'context' argument is used to look up the [Navigator] for the popup.
+/// The `context` argument is used to look up the [Navigator] for the popup.
 /// It is only used when the method is called. Its corresponding widget can be
 /// safely removed from the tree before the popup is closed.
 ///
-/// Returns a 'Future' that resolves to the value that was passed to
+/// The `builder` argument typically builds a [ActionSheet] widget. Content
+/// below the widget is dimmed with a [ModalBarrier]. The widget built by the
+/// `builder` does not share a context with the location that
+/// `showCupertinoModalPopup` is originally called from. Use a
+/// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
+/// update dynamically.
+///
+/// Returns a `Future` that resolves to the value that was passed to
 /// [Navigator.pop] when the popup was closed.
 ///
 /// See also:
 ///
-///  * [ActionSheet], which is the widget usually passed as the 'child'
+///  * [ActionSheet], which is the widget usually returned by the `builder`
 ///    argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
-  @required Widget child,
+  @required WidgetBuilder builder,
 }) {
-  return Navigator.push(
-    context,
+  return Navigator.of(context, rootNavigator: true).push(
     new _CupertinoModalPopupRoute<T>(
-      child: child,
+      builder: builder,
       barrierLabel: 'Dismiss',
     ),
   );
