@@ -27,7 +27,7 @@ import 'typography.dart';
 //    flutter_localizations package, you must first add it to the English
 //    translations (lib/src/l10n/material_en.arb), including a description, then
 //    you must add it to every other language (all the other *.arb files in that
-//    same directory), listing the translation as `TBD`. After that you have to 
+//    same directory), listing the translation as `TBD`. After that you have to
 //    re-generate lib/src/l10n/localizations.dart by running
 //    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
 //    file with further information in the lib/src/l10n/ directory.
