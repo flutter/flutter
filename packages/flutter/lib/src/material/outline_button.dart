@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Clip;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -53,7 +51,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 class OutlineButton extends StatefulWidget {
   /// Create a filled button.
   ///
-  /// The [highlightElevation], and [borderWidth]
+  /// The [highlightElevation], [borderWidth], and [clipBehavior]
   /// arguments must not be null.
   const OutlineButton({
     Key key,
@@ -82,7 +80,8 @@ class OutlineButton extends StatefulWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [highlightElevation], [icon], and [label] must not be null.
+  /// The [highlightElevation], [icon], [label], and [clipBehavior] must not be
+  /// null.
   OutlineButton.icon({
     Key key,
     @required this.onPressed,
@@ -103,7 +102,7 @@ class OutlineButton extends StatefulWidget {
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(icon != null),
        assert(label != null),
-       assert(clipBehavior != Clip.none),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,

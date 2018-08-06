@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show Clip;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -30,8 +29,8 @@ import 'theme_data.dart';
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
-  /// The [shape], [elevation], [padding], and [constraints] arguments
-  /// must not be null.
+  /// The [shape], [elevation], [padding], [constraints], and [clipBehavior]
+  /// arguments must not be null.
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
@@ -252,6 +251,8 @@ class MaterialButton extends StatelessWidget {
   /// Rather than creating a material button directly, consider using
   /// [FlatButton] or [RaisedButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
+  ///
+  /// The [clipBehavior] argument must not be null.
   const MaterialButton({
     Key key,
     this.colorBrightness,
@@ -269,7 +270,7 @@ class MaterialButton extends StatelessWidget {
     this.clipBehavior = Clip.none,
     @required this.onPressed,
     this.child
-  }) : super(key: key);
+  }) : assert(clipBehavior != null), super(key: key);
 
   /// The theme brightness to use for this button.
   ///

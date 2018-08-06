@@ -1046,8 +1046,9 @@ class _IsMethodCall extends Matcher {
 /// [RenderClipPath].
 const Matcher clipsWithBoundingRect = _ClipsWithBoundingRect();
 
-/// Asserts that a [Finder] locates a single object whose root RenderObject
-/// is not a [ClipRect], [ClipRRect], [ClipOval], or [ClipPath].
+/// Asserts that a [Finder] locates a single object whose root RenderObject is
+/// not a [RenderClipRect], [RenderClipRRect], [RenderClipOval], or
+/// [RenderClipPath].
 const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
@@ -1122,7 +1123,7 @@ abstract class _FailWithDescriptionMatcher extends Matcher {
       Description mismatchDescription,
       Map<dynamic, dynamic> matchState,
       bool verbose
-      ) {
+  ) {
     return mismatchDescription.add(matchState['failure']);
   }
 }
@@ -1136,7 +1137,6 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
     if (nodes.length != 1)
       return failWithDescription(matchState, 'did not have a exactly one child element');
     final RenderObject renderObject = nodes.single.renderObject;
-
 
     switch (renderObject.runtimeType) {
       case RenderClipPath:

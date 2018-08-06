@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
-import 'dart:ui' show Clip, Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';

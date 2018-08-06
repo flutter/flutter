@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'dart:ui' as ui show ImageFilter, Gradient, Image;
-import 'dart:ui' show Clip;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -1223,7 +1222,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
   ///
-  /// [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
@@ -1278,7 +1277,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
   ///
-  /// [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
@@ -1350,7 +1349,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
   ///
-  /// [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
@@ -1425,7 +1424,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
   ///
-  /// [clipBehavior] cannot be [Clip.none].
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,

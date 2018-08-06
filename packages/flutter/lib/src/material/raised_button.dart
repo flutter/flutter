@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Clip;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -46,8 +44,8 @@ import 'theme_data.dart';
 class RaisedButton extends StatelessWidget {
   /// Create a filled button.
   ///
-  /// The [elevation], [highlightElevation], and [disabledElevation]
-  /// arguments must not be null.
+  /// The [elevation], [highlightElevation], [disabledElevation], and
+  /// [clipBehavior] arguments must not be null.
   const RaisedButton({
     Key key,
     @required this.onPressed,
@@ -82,8 +80,8 @@ class RaisedButton extends StatelessWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [elevation], [highlightElevation], [disabledElevation], [icon], and
-  /// [label] arguments must not be null.
+  /// The [elevation], [highlightElevation], [disabledElevation], [icon],
+  /// [label], and [clipBehavior] arguments must not be null.
   RaisedButton.icon({
     Key key,
     @required this.onPressed,

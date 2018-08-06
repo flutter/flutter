@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Image, ImageFilter;
-import 'dart:ui' show Clip;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
