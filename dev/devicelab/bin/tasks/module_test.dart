@@ -31,7 +31,7 @@ Future<Null> main() async {
         );
       });
 
-      section('Build Android .aar');
+      section('Build Flutter module library archive');
 
       await inDirectory(new Directory(path.join(directory.path, 'hello', '.android')), () async {
         await exec(
@@ -54,6 +54,30 @@ Future<Null> main() async {
 
       if (!aarBuilt) {
         return new TaskResult.failure('Failed to build .aar');
+      }
+
+      section('Build ephemeral host app');
+
+      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+        await flutter(
+          'build',
+          options: <String>['apk'],
+        );
+      });
+
+      final bool apkBuilt = exists(new File(path.join(
+        directory.path,
+        'hello',
+        'build',
+        'host',
+        'outputs',
+        'apk',
+        'release',
+        'app-release.apk',
+      )));
+
+      if (!apkBuilt) {
+        return new TaskResult.failure('Failed to build ephemeral host .apk');
       }
 
       section('Add to Android app');
@@ -81,7 +105,7 @@ Future<Null> main() async {
         );
       });
 
-      final bool appBuilt = exists(new File(path.join(
+      final bool existingAppBuilt = exists(new File(path.join(
         hostApp.path,
         'app',
         'build',
@@ -91,8 +115,8 @@ Future<Null> main() async {
         'app-debug.apk',
       )));
 
-      if (!appBuilt) {
-        return new TaskResult.failure('Failed to build .apk');
+      if (!existingAppBuilt) {
+        return new TaskResult.failure('Failed to build existing app .apk');
       }
       return new TaskResult.success(null);
     } catch (e) {
