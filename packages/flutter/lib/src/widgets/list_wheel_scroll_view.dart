@@ -79,7 +79,7 @@ class FixedExtentScrollController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<Null> animateToItem(int itemIndex, {
+  Future<List<Null>> animateToItem(int itemIndex, {
     @required Duration duration,
     @required Curve curve,
   }) {
