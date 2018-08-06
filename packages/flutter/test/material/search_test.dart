@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Can open and close search', (WidgetTester tester) async {
@@ -476,6 +479,109 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+  });
+
+  group('contributes semantics', () {
+    TestSemantics buildExpected({String routeName}) {
+      return new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 7,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.scopesRoute,
+                  SemanticsFlag.namesRoute,
+                ],
+                label: routeName,
+                textDirection: TextDirection.ltr,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    id: 8,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Suggestions',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    id: 9,
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        id: 10,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        label: 'Back',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        id: 11,
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isTextField,
+                          SemanticsFlag.isFocused,
+                          SemanticsFlag.isHeader,
+                          SemanticsFlag.namesRoute,
+                        ],
+                        actions: <SemanticsAction>[
+                          SemanticsAction.tap,
+                          SemanticsAction.setSelection,
+                          SemanticsAction.paste,
+                        ],
+                        label: 'Search',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    testWidgets('includes routeName on Android', (WidgetTester tester) async {
+      final SemanticsTester semantics = new SemanticsTester(tester);
+      final _TestSearchDelegate delegate = new _TestSearchDelegate();
+      await tester.pumpWidget(new TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(buildExpected(routeName: 'Search'),
+          ignoreId: true, ignoreRect: true, ignoreTransform: true));
+
+      semantics.dispose();
+    });
+
+    testWidgets('does not include routeName on iOS', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final SemanticsTester semantics = new SemanticsTester(tester);
+      final _TestSearchDelegate delegate = new _TestSearchDelegate();
+      await tester.pumpWidget(new TestHomePage(
+        delegate: delegate,
+      ));
+
+      await tester.tap(find.byTooltip('Search'));
+      await tester.pumpAndSettle();
+
+      expect(semantics, hasSemantics(buildExpected(routeName: ''),
+          ignoreId: true, ignoreRect: true, ignoreTransform: true));
+
+      debugDefaultTargetPlatformOverride = null;
+      semantics.dispose();
+    });
   });
 }
 

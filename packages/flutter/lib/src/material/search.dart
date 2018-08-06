@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -389,6 +390,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = widget.delegate.appBarTheme(context);
+    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -404,32 +406,47 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         );
         break;
     }
+    String routeName;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        routeName = '';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        routeName = searchFieldLabel;
+    }
 
-    return new Scaffold(
-      appBar: new AppBar(
-        backgroundColor: theme.primaryColor,
-        iconTheme: theme.primaryIconTheme,
-        textTheme: theme.primaryTextTheme,
-        brightness: theme.primaryColorBrightness,
-        leading: widget.delegate.buildLeading(context),
-        title: new TextField(
-          controller: queryTextController,
-          focusNode: widget.delegate._focusNode,
-          style: theme.textTheme.title,
-          textInputAction: TextInputAction.search,
-          onSubmitted: (String _) {
-            widget.delegate.showResults(context);
-          },
-          decoration: new InputDecoration(
-            border: InputBorder.none,
-            hintText: MaterialLocalizations.of(context).searchFieldLabel,
+    return new Semantics(
+      explicitChildNodes: true,
+      scopesRoute: true,
+      namesRoute: true,
+      label: routeName,
+      child: new Scaffold(
+        appBar: new AppBar(
+          backgroundColor: theme.primaryColor,
+          iconTheme: theme.primaryIconTheme,
+          textTheme: theme.primaryTextTheme,
+          brightness: theme.primaryColorBrightness,
+          leading: widget.delegate.buildLeading(context),
+          title: new TextField(
+            controller: queryTextController,
+            focusNode: widget.delegate._focusNode,
+            style: theme.textTheme.title,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (String _) {
+              widget.delegate.showResults(context);
+            },
+            decoration: new InputDecoration(
+              border: InputBorder.none,
+              hintText: searchFieldLabel,
+            ),
           ),
+          actions: widget.delegate.buildActions(context),
         ),
-        actions: widget.delegate.buildActions(context),
-      ),
-      body: new AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: body,
+        body: new AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: body,
+        ),
       ),
     );
   }

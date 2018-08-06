@@ -337,14 +337,19 @@ Matcher matchesSemanticsData({
   bool hasShowOnScreenAction = false,
   bool hasMoveCursorForwardByCharacterAction = false,
   bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasMoveCursorForwardByWordAction = false,
+  bool hasMoveCursorBackwardByWordAction = false,
   bool hasSetSelectionAction = false,
   bool hasCopyAction = false,
   bool hasCutAction = false,
   bool hasPasteAction = false,
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
-  bool hasCustomAction = false,
   bool hasDismissAction = false,
+  // Custom actions and overrides
+  String onTapHint,
+  String onLongPressHint,
+  List<CustomSemanticsAction> customActions,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -419,10 +424,20 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.didGainAccessibilityFocus);
   if (hasDidLoseAccessibilityFocusAction)
     actions.add(SemanticsAction.didLoseAccessibilityFocus);
-  if (hasCustomAction)
+  if (customActions != null && customActions.isNotEmpty)
     actions.add(SemanticsAction.customAction);
   if (hasDismissAction)
     actions.add(SemanticsAction.dismiss);
+  if (hasMoveCursorForwardByWordAction)
+    actions.add(SemanticsAction.moveCursorForwardByWord);
+  if (hasMoveCursorBackwardByWordAction)
+    actions.add(SemanticsAction.moveCursorBackwardByWord);
+  SemanticsHintOverrides hintOverrides;
+  if (onTapHint != null || onLongPressHint != null)
+    hintOverrides = new SemanticsHintOverrides(
+      onTapHint: onTapHint,
+      onLongPressHint: onLongPressHint,
+    );
 
   return new _MatchesSemanticsData(
     label: label,
@@ -432,6 +447,8 @@ Matcher matchesSemanticsData({
     flags: flags,
     textDirection: textDirection,
     rect: rect,
+    customActions: customActions,
+    hintOverrides: hintOverrides,
   );
 }
 
@@ -1461,12 +1478,16 @@ class _MatchesSemanticsData extends Matcher {
     this.actions,
     this.textDirection,
     this.rect,
+    this.customActions,
+    this.hintOverrides,
   });
 
   final String label;
   final String value;
   final String hint;
+  final SemanticsHintOverrides hintOverrides;
   final List<SemanticsAction> actions;
+  final List<CustomSemanticsAction> customActions;
   final List<SemanticsFlag> flags;
   final TextDirection textDirection;
   final Rect rect;
@@ -1488,6 +1509,10 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with textDirection: $textDirection ');
     if (rect != null)
       description.add('with rect: $rect');
+    if (customActions != null)
+      description.add('with custom actions: $customActions');
+    if (hintOverrides != null)
+      description.add('with custom hints: $hintOverrides');
     return description;
   }
 
@@ -1505,7 +1530,7 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'value was: ${data.value}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
-    if (rect != null && rect == data.rect) {
+    if (rect != null && rect != data.rect) {
       return failWithDescription(matchState, 'rect was: $rect');
     }
     if (actions != null) {
@@ -1519,6 +1544,27 @@ class _MatchesSemanticsData extends Matcher {
             actionSummary.add(describeEnum(action));
         }
         return failWithDescription(matchState, 'actions were: $actionSummary');
+      }
+    }
+    if (customActions != null || hintOverrides != null) {
+      final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
+        return CustomSemanticsAction.getAction(id);
+      }).toList();
+      final List<CustomSemanticsAction> expectedCustomActions = new List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      if (hintOverrides?.onTapHint != null)
+        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+      if (hintOverrides?.onLongPressHint != null)
+        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+      if (expectedCustomActions.length != providedCustomActions.length)
+        return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
+      int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
+        return CustomSemanticsAction.getIdentifier(left) - CustomSemanticsAction.getIdentifier(right);
+      }
+      expectedCustomActions.sort(sortActions);
+      providedCustomActions.sort(sortActions);
+      for (int i = 0; i < expectedCustomActions.length; i++) {
+        if (expectedCustomActions[i] != providedCustomActions[i])
+          return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       }
     }
     if (flags != null) {

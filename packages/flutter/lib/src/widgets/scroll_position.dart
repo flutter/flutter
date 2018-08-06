@@ -562,6 +562,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @override
   void jumpTo(double value);
 
+  @override
+  bool get allowImplicitScrolling => physics.allowImplicitScrolling;
+
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
   @Deprecated('This will lead to bugs.')
   void jumpToWithoutSettling(double value);

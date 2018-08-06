@@ -58,6 +58,8 @@ void main() {
         stdout.removeAt(0);
       if (stdout.first == 'Initializing gradle...')
         stdout.removeAt(0);
+      if (stdout.first == 'Resolving dependencies...')
+        stdout.removeAt(0);
       if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))
         throw 'flutter run --release had unexpected first line: ${stdout.first}';
       stdout.removeAt(0);

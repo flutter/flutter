@@ -289,7 +289,7 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -311,7 +311,7 @@ Information about project "Runner":
         trackWidgetCreation: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -332,7 +332,7 @@ Information about project "Runner":
         previewDart2: true,
         targetPlatform: TargetPlatform.ios,
       );
-      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -354,7 +354,7 @@ Information about project "Runner":
         targetPlatform: TargetPlatform.ios,
       );
 
-      final FlutterProject project = new FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -405,7 +405,7 @@ Information about project "Runner":
       writeSchemaFile(fs, schemaData);
 
       await updateGeneratedXcodeProperties(
-        project: new FlutterProject.fromPath('path/to/project'),
+        project: await FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
         previewDart2: false,
       );
