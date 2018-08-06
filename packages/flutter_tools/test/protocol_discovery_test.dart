@@ -66,7 +66,7 @@ void main() {
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
-      testUsingContext('discovers uri even if logs has ESC Ascii', () async {
+      testUsingContext('discovers uri even if logs has Ascii Esc code', () async {
         initialize();
         logReader.addLine('Observatory listening on http://127.0.0.1:3333\x1b[');
         final Uri uri = await discoverer.uri;
@@ -188,6 +188,26 @@ void main() {
         // Get next port future.
         final Future<Uri> nextUri = discoverer.uri;
         logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        final Uri uri = await nextUri;
+        expect(uri.port, 54777);
+        expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
+
+        discoverer.cancel();
+        logReader.dispose();
+      });
+      
+      testUsingContext('ipv6 with Ascii Escape code', () async {
+        final MockDeviceLogReader logReader = new MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+          logReader,
+          portForwarder: new MockPortForwarder(99),
+          hostPort: 54777,
+          ipv6: true,
+        );
+
+        // Get next port future.
+        final Future<Uri> nextUri = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/\x1b[');
         final Uri uri = await nextUri;
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
