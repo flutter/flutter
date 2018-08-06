@@ -5,6 +5,18 @@
 import 'dart:convert' show json;
 import 'dart:io';
 
+// The first suffix in kPluralSuffixes must be "Other". "Other" is special
+// because it's the only one that is required.
+const List<String> kPluralSuffixes = <String>['Other', 'Zero', 'One', 'Two', 'Few', 'Many'];
+final RegExp kPluralRegexp = new RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
+
+class ValidationError implements Exception {
+  ValidationError(this. message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
 /// Sanity checking of the @foo metadata in the English translations,
 /// material_en.arb.
 ///
@@ -14,13 +26,13 @@ import 'dart:io';
 /// - Each @foo resource must have a Map value with a String valued
 ///   description entry.
 ///
-/// Returns an error message upon failure, null on success.
-String validateEnglishLocalizations(File file) {
+/// Throws an exception upon failure.
+void validateEnglishLocalizations(File file) {
   final StringBuffer errorMessages = new StringBuffer();
 
   if (!file.existsSync()) {
     errorMessages.writeln('English localizations do not exist: $file');
-    return errorMessages.toString();
+    throw new ValidationError(errorMessages.toString());
   }
 
   final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
@@ -36,7 +48,7 @@ String validateEnglishLocalizations(File file) {
       final int suffixIndex = resourceId.indexOf(suffix);
       return suffixIndex != -1 && bundle['@${resourceId.substring(0, suffixIndex)}'] != null;
     }
-    if (<String>['Zero', 'One', 'Two', 'Few', 'Many', 'Other'].any(checkPluralResource))
+    if (kPluralSuffixes.any(checkPluralResource))
       continue;
 
     errorMessages.writeln('A value was not specified for @$resourceId');
@@ -70,7 +82,8 @@ String validateEnglishLocalizations(File file) {
     }
   }
 
-  return errorMessages.isEmpty ? null : errorMessages.toString();
+  if (errorMessages.isNotEmpty)
+    throw new ValidationError(errorMessages.toString());
 }
 
 /// Enforces the following invariants in our localizations:
@@ -81,8 +94,8 @@ String validateEnglishLocalizations(File file) {
 /// Uses "en" localizations as the canonical source of locale keys that other
 /// locales are compared against.
 ///
-/// If validation fails, return an error message, otherwise return null.
-String validateLocalizations(
+/// If validation fails, throws an exception.
+void validateLocalizations(
   Map<String, Map<String, String>> localeToResources,
   Map<String, Map<String, dynamic>> localeToAttributes,
 ) {
@@ -99,12 +112,9 @@ String validateLocalizations(
     // Many languages require only a subset of these variations, so we do not
     // require them so long as the "Other" variation exists.
     bool isPluralVariation(String key) {
-      final RegExp pluralRegexp = new RegExp(r'(\w*)(Zero|One|Two|Few|Many)$');
-      final Match pluralMatch = pluralRegexp.firstMatch(key);
-
+      final Match pluralMatch = kPluralRegexp.firstMatch(key);
       if (pluralMatch == null)
         return false;
-
       final String prefix = pluralMatch[1];
       return resources.containsKey('${prefix}Other');
     }
@@ -151,7 +161,6 @@ String validateLocalizations(
           ..writeln('  "notUsed": "Sindhi time format does not use a.m. indicator"')
           ..writeln('}');
     }
-    return errorMessages.toString();
+    throw new ValidationError(errorMessages.toString());
   }
-  return null;
 }

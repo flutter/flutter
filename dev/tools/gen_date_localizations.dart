@@ -6,7 +6,8 @@
 /// package for the subset of locales supported by the flutter_localizations
 /// package.
 ///
-/// The extracted data is written into packages/flutter_localizations/lib/src/l10n/date_localizations.dart.
+/// The extracted data is written into:
+///   packages/flutter_localizations/lib/src/l10n/date_localizations.dart
 ///
 /// ## Usage
 ///
@@ -89,7 +90,7 @@ Future<Null> main(List<String> rawArgs) async {
   });
   buffer.writeln('};');
 
-  // Note: code that uses datePatterns expects it to contain values of type
+  // Code that uses datePatterns expects it to contain values of type
   // Map<String, String> not Map<String, dynamic>.
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = const <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
