@@ -401,7 +401,7 @@ class EditableText extends StatefulWidget {
 
   /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
   /// This property is most useful for testing purposes.
-  /// 
+  ///
   /// Defaults to false, resulting in a typical blinking cursor.
   static bool debugDeterministicCursor = false;
 
