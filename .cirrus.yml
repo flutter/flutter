@@ -43,6 +43,6 @@ format_and_dart_test_task:
     cp $CIRRUS_WORKING_DIR -r ./flutter
     gclient sync
 
-  format_script: cd $ENGINE_PATH/src/flutter && ./travis/format.sh
-  build_script: cd $ENGINE_PATH/src/flutter && ./travis/build.sh
-  test_script: cd $ENGINE_PATH/src/flutter && ./travis/test.sh
+  format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
+  build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
+  test_script: cd $ENGINE_PATH/src/flutter && ./ci/test.sh
