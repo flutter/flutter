@@ -1311,7 +1311,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.0.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !Platform.isMacOS);
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1349,5 +1349,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('segmented_control_test.1.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !Platform.isMacOS);
 }
