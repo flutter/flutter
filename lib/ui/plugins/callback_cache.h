@@ -15,7 +15,6 @@
 #include "third_party/dart/runtime/include/dart_api.h"
 
 #define DART_CALLBACK_INVALID_HANDLE -1
-#define LOCK_UNLOCK(m) FML_ACQUIRE(m) FML_RELEASE(m)
 
 namespace blink {
 
@@ -30,12 +29,12 @@ class DartCallbackCache {
   static int64_t GetCallbackHandle(const std::string& name,
                                    const std::string& class_name,
                                    const std::string& library_path)
-      LOCK_UNLOCK(mutex_);
+      FML_LOCKS_EXCLUDED(mutex_);
 
-  static Dart_Handle GetCallback(int64_t handle) LOCK_UNLOCK(mutex_);
+  static Dart_Handle GetCallback(int64_t handle) FML_LOCKS_EXCLUDED(mutex_);
 
   static std::unique_ptr<DartCallbackRepresentation> GetCallbackInformation(
-      int64_t handle) LOCK_UNLOCK(mutex_);
+      int64_t handle) FML_LOCKS_EXCLUDED(mutex_);
 
  private:
   static Dart_Handle LookupDartClosure(const std::string& name,
