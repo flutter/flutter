@@ -399,14 +399,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
-  static bool get debugDeterministicCursor => _debugDeterministicCursor;
-  static bool _debugDeterministicCursor = false;
-  static set debugDeterministicCursor(bool value) {
-    if (_debugDeterministicCursor == value) {
-      return;
-    }
-    _debugDeterministicCursor = value;
-  }
+  static bool debugDeterministicCursor = false;
 
   @override
   EditableTextState createState() => new EditableTextState();
