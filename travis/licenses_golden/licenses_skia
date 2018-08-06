@@ -1,4 +1,4 @@
-Signature: 1c3b1fdc80cef394e3f8a065aed59a32
+Signature: 49141c6e499a85d947a3b6be8fd7065b
 
 UNUSED LICENSES:
 
@@ -1270,9 +1270,11 @@ LIBRARY: skcms
 LIBRARY: skia
 LIBRARY: vulkan
 LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/bench/GrCCGeometryBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/CompositingImagesBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
 FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
+FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
 FILE: ../../../third_party/skia/bench/JSONBench.cpp
 FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
@@ -1477,6 +1479,9 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
@@ -3797,7 +3802,6 @@ FILE: ../../../third_party/skia/bench/ClipMaskBench.cpp
 FILE: ../../../third_party/skia/bench/ClipStrategyBench.cpp
 FILE: ../../../third_party/skia/bench/ColorCanvasDrawBitmapBench.cpp
 FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
-FILE: ../../../third_party/skia/bench/MultitextureImageBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
