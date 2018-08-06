@@ -60,7 +60,7 @@ class ProtocolDiscovery {
   void _handleLine(String line) {
     Uri uri;
 
-    final RegExp r = new RegExp('${RegExp.escape(serviceName)} listening on (http://[^ \n]+)');
+    final RegExp r = new RegExp('${RegExp.escape(serviceName)} listening on ((http:|[/][/]|www.)([a-z]|[A-Z]|[:0-9]|[/.])*)');
     final Match match = r.firstMatch(line);
 
     if (match != null) {
