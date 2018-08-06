@@ -431,13 +431,6 @@ void main() {
     );
   });
 
-  // We should not rotate here if we want to test different bleeding edge
-  // artifacts. If rotated, the inner container will draw a rotated rect in
-  // anti-alias and that will cause some bleeding edges due to anti-aliasing
-  // regardless of what clip we have (i.e., not matter what clipBehavior we
-  // have, paths are always drawn in anti-alias).
-  const double physicalRotatianRadians = 0.0;
-
   Center genPhysicalModel(Clip clipBehavior) {
     return new Center(
       child: new RepaintBoundary(
@@ -449,7 +442,7 @@ void main() {
               height: 100.0,
               width: 100.0,
               child: new Transform.rotate(
-                angle: physicalRotatianRadians,
+                angle: 1.0, // radians
                 child: new PhysicalModel(
                   borderRadius: new BorderRadius.circular(20.0),
                   color: Colors.red,
@@ -491,6 +484,8 @@ void main() {
     );
   });
 
+  // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
+  // round corners.
   testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
@@ -511,7 +506,7 @@ void main() {
                 height: 100.0,
                 width: 100.0,
                 child: new Transform.rotate(
-                  angle: physicalRotatianRadians,
+                  angle: 1.0, // radians
                   child: new PhysicalModel(
                     borderRadius: new BorderRadius.circular(20.0),
                     color: Colors.red,
@@ -552,7 +547,7 @@ void main() {
               height: 100.0,
               width: 100.0,
               child: new Transform.rotate(
-                angle: physicalRotatianRadians,
+                angle: 1.0, // radians
                 child: new PhysicalShape(
                   clipper: new ShapeBorderClipper(
                     shape: new BeveledRectangleBorder(
@@ -618,7 +613,7 @@ void main() {
                 height: 100.0,
                 width: 100.0,
                 child: new Transform.rotate(
-                  angle: physicalRotatianRadians,
+                  angle: 1.0, // radians
                   child: new PhysicalShape(
                     clipper: new ShapeBorderClipper(
                       shape: new BeveledRectangleBorder(
