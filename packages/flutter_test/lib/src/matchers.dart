@@ -306,6 +306,7 @@ Matcher matchesSemanticsData({
   String value,
   TextDirection textDirection,
   Rect rect,
+  Size size,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -447,6 +448,7 @@ Matcher matchesSemanticsData({
     flags: flags,
     textDirection: textDirection,
     rect: rect,
+    size: size,
     customActions: customActions,
     hintOverrides: hintOverrides,
   );
@@ -1478,6 +1480,7 @@ class _MatchesSemanticsData extends Matcher {
     this.actions,
     this.textDirection,
     this.rect,
+    this.size,
     this.customActions,
     this.hintOverrides,
   });
@@ -1491,6 +1494,7 @@ class _MatchesSemanticsData extends Matcher {
   final List<SemanticsFlag> flags;
   final TextDirection textDirection;
   final Rect rect;
+  final Size size;
 
   @override
   Description describe(Description description) {
@@ -1509,6 +1513,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with textDirection: $textDirection ');
     if (rect != null)
       description.add('with rect: $rect');
+    if (size != null)
+      description.add('with size: $size');
     if (customActions != null)
       description.add('with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1530,9 +1536,10 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'value was: ${data.value}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
-    if (rect != null && rect != data.rect) {
-      return failWithDescription(matchState, 'rect was: $rect');
-    }
+    if (rect != null && rect != data.rect)
+      return failWithDescription(matchState, 'rect was: ${data.rect}');
+    if (size != null && size != data.rect.size)
+      return failWithDescription(matchState, 'size was: ${data.rect.size}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)

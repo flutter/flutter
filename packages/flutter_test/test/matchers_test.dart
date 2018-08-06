@@ -483,11 +483,11 @@ void main() {
       final SemanticsData data = new SemanticsData(
         flags: flags,
         actions: actions,
-        label: '',
-        increasedValue: '',
-        value: '',
-        decreasedValue: '',
-        hint: '',
+        label: 'a',
+        increasedValue: 'b',
+        value: 'c',
+        decreasedValue: 'd',
+        hint: 'e',
         textDirection: TextDirection.ltr,
         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         textSelection: null,
@@ -498,6 +498,8 @@ void main() {
       );
 
       expect(data, matchesSemanticsData(
+         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+         size: const Size(10.0, 10.0),
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
