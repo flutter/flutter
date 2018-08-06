@@ -279,6 +279,7 @@ class SemanticsFlag {
   static const int _kIsLiveRegionIndex = 1 << 15;
   static const int _kHasToggledStateIndex = 1 << 16;
   static const int _kIsToggledIndex = 1 << 17;
+  static const int _kHasImplicitScrollingIndex = 1 << 18;
 
   const SemanticsFlag._(this.index);
 
@@ -465,6 +466,15 @@ class SemanticsFlag {
   ///   * [SemanticsFlag.hasToggledState], which enables a toggled state.
   static const SemanticsFlag isToggled = const SemanticsFlag._(_kIsToggledIndex);
 
+  /// Whether the platform can scroll the semantics node when the user attempts
+  /// to move focus to an offscreen child.
+  ///
+  /// For example, a [ListView] widget has implicit scrolling so that users can
+  /// easily move to the next visible set of children. A [TabBar] widget does
+  /// not have implicit scrolling, so that users can navigate into the tab
+  /// body when reaching the end of the tab bar.
+  static const SemanticsFlag hasImplicitScrolling = const SemanticsFlag._(_kHasImplicitScrollingIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -487,6 +497,7 @@ class SemanticsFlag {
     _kIsLiveRegionIndex: isLiveRegion,
     _kHasToggledStateIndex: hasToggledState,
     _kIsToggledIndex: isToggled,
+    _kHasImplicitScrollingIndex: hasImplicitScrolling,
   };
 
   @override
@@ -528,6 +539,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.hasToggledState';
       case _kIsToggledIndex:
         return 'SemanticsFlag.isToggled';
+      case _kHasImplicitScrollingIndex:
+        return 'SemanticsFlag.hasImplicitScrolling';
     }
     return null;
   }

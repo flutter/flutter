@@ -92,7 +92,8 @@ class AccessibilityBridge
         IS_IMAGE(1 << 14),
         IS_LIVE_REGION(1 << 15),
         HAS_TOGGLED_STATE(1 << 16),
-        IS_TOGGLED(1 << 17);
+        IS_TOGGLED(1 << 17),
+        HAS_IMPLICIT_SCROLLING(1 << 18);
 
         Flag(int value) {
             this.value = value;
@@ -256,8 +257,15 @@ class AccessibilityBridge
                 || object.hasAction(Action.SCROLL_RIGHT) || object.hasAction(Action.SCROLL_DOWN)) {
             result.setScrollable(true);
             // This tells Android's a11y to send scroll events when reaching the end of
-            // the visible viewport of a scrollable.
-            result.setClassName("android.widget.ScrollView");
+            // the visible viewport of a scrollable, unless the node itself does not
+            // allow implicit scrolling - then we leave the className as view.View.
+            if (object.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
+                if (object.hasAction(Action.SCROLL_LEFT) || object.hasAction(Action.SCROLL_RIGHT)) {
+                    result.setClassName("android.widget.HorizontalScrollView");
+                } else {
+                    result.setClassName("android.widget.ScrollView");
+                }
+            }
             // TODO(ianh): Once we're on SDK v23+, call addAction to
             // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
             // _UP, and _DOWN when appropriate.
