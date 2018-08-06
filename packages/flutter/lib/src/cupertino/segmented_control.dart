@@ -62,7 +62,7 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
-class SegmentedControl<T> extends StatefulWidget {
+class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
   /// The [children], [onValueChanged], [unselectedColor], [selectedColor],
@@ -79,7 +79,7 @@ class SegmentedControl<T> extends StatefulWidget {
   /// The [groupValue] is the currently selected value for the segmented control.
   /// If no [groupValue] is provided, or the [groupValue] is null, no widget will
   /// appear as selected.
-  SegmentedControl({
+  CupertinoSegmentedControl({
     Key key,
     @required this.children,
     @required this.onValueChanged,
@@ -142,7 +142,7 @@ class SegmentedControl<T> extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new Container(
-  ///       child: new SegmentedControl<int>(
+  ///       child: new CupertinoSegmentedControl<int>(
   ///         children: children,
   ///         onValueChanged: (int newValue) {
   ///           setState(() {
@@ -196,8 +196,8 @@ class SegmentedControl<T> extends StatefulWidget {
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<SegmentedControl<T>>
-    with TickerProviderStateMixin<SegmentedControl<T>> {
+class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
+    with TickerProviderStateMixin<CupertinoSegmentedControl<T>> {
   T _pressedKey;
 
   final List<AnimationController> _selectionControllers = <AnimationController>[];
@@ -306,7 +306,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   @override
-  void didUpdateWidget(SegmentedControl<T> oldWidget) {
+  void didUpdateWidget(CupertinoSegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.children.length != widget.children.length) {
