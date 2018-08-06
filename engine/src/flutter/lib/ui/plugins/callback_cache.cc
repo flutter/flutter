@@ -14,7 +14,7 @@ std::mutex DartCallbackCache::mutex_;
 std::map<int64_t, DartCallbackRepresentation> DartCallbackCache::cache_;
 
 Dart_Handle DartCallbackCache::GetCallback(int64_t handle) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   auto iterator = cache_.find(handle);
   if (iterator != cache_.end()) {
     DartCallbackRepresentation cb = iterator->second;
@@ -26,7 +26,7 @@ Dart_Handle DartCallbackCache::GetCallback(int64_t handle) {
 int64_t DartCallbackCache::GetCallbackHandle(const std::string& name,
                                              const std::string& class_name,
                                              const std::string& library_path) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   std::hash<std::string> hasher;
   int64_t hash = hasher(name);
   hash += hasher(class_name);
@@ -40,7 +40,7 @@ int64_t DartCallbackCache::GetCallbackHandle(const std::string& name,
 
 std::unique_ptr<DartCallbackRepresentation>
 DartCallbackCache::GetCallbackInformation(int64_t handle) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   auto iterator = cache_.find(handle);
   if (iterator != cache_.end()) {
     return std::make_unique<DartCallbackRepresentation>(iterator->second);

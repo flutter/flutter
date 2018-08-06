@@ -7,7 +7,7 @@
 namespace blink {
 
 Dart_Port IsolateNameServer::LookupIsolatePortByName(const std::string& name) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   return LookupIsolatePortByNameUnprotected(name);
 }
 
@@ -22,7 +22,7 @@ Dart_Port IsolateNameServer::LookupIsolatePortByNameUnprotected(
 
 bool IsolateNameServer::RegisterIsolatePortWithName(Dart_Port port,
                                                     const std::string& name) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   if (LookupIsolatePortByNameUnprotected(name) != ILLEGAL_PORT) {
     // Name is already registered.
     return false;
@@ -32,7 +32,7 @@ bool IsolateNameServer::RegisterIsolatePortWithName(Dart_Port port,
 }
 
 bool IsolateNameServer::RemoveIsolateNameMapping(const std::string& name) {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   auto port_iterator = port_mapping_.find(name);
   if (port_iterator == port_mapping_.end()) {
     return false;
