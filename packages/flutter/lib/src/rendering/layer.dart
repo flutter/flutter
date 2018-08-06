@@ -216,6 +216,7 @@ class TextureLayer extends Layer {
   TextureLayer({
     @required this.rect,
     @required this.textureId,
+    this.freeze = false,
   }): assert(rect != null), assert(textureId != null);
 
   /// Bounding rectangle of this layer.
@@ -223,6 +224,8 @@ class TextureLayer extends Layer {
 
   /// The identity of the backend texture.
   final int textureId;
+
+  final bool freeze;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -232,6 +235,7 @@ class TextureLayer extends Layer {
       offset: shiftedRect.topLeft,
       width: shiftedRect.width,
       height: shiftedRect.height,
+      freeze: freeze,
     );
   }
 

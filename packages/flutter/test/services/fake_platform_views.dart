@@ -25,6 +25,8 @@ class FakePlatformViewsController {
 
   int _textureCounter = 0;
 
+  Completer<void> resizeCompleter;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -86,7 +88,7 @@ class FakePlatformViewsController {
     return new Future<Null>.sync(() => null);
   }
 
-  Future<dynamic> _resize(MethodCall call) {
+  Future<dynamic> _resize(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     final double width = args['width'];
@@ -98,6 +100,9 @@ class FakePlatformViewsController {
         message: 'Trying to resize a platform view with unknown id: $id',
       );
 
+    if (resizeCompleter != null) {
+      await resizeCompleter.future;
+    }
     _views[id].size = new Size(width, height);
 
     return new Future<Null>.sync(() => null);
