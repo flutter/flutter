@@ -44,10 +44,10 @@
   "dialogLabel": "مربع حوار",
   "alertDialogLabel": "مربع حوار التنبيه",
   "searchFieldLabel": "بحث",
-  "reorderItemToStart": "Move to the start",
-  "reorderItemToEnd": "Move to the end",
-  "reorderItemUp": "Move up",
-  "reorderItemDown": "Move down",
-  "reorderItemLeft": "Move left",
-  "reorderItemRight": "Move right"
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }
