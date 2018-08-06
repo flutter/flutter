@@ -67,7 +67,7 @@ abstract class _Benchmark {
   List<String> get options {
     final List<String> result = <String>[ '--benchmark' ];
     if (watch)
-      options.add('--watch');
+      result.add('--watch');
     return result;
   }
 
