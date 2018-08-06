@@ -51,6 +51,11 @@ const int kBackMouseButton = 0x08;
 /// be reconfigured to be a different physical button.
 const int kForwardMouseButton = 0x10;
 
+/// The largest SMI value.
+///
+/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
+const int _kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
+
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
 ///
 /// The number argument can be at most 62.
@@ -58,7 +63,7 @@ const int kForwardMouseButton = 0x10;
 /// See [kPrimaryMouseButton], [kSecondaryMouseButton], [kMiddleMouseButton],
 /// [kBackMouseButton], and [kForwardMouseButton] for semantic names for some
 /// mouse buttons.
-int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUnsignedSMI;
+int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & _kMaxUnsignedSMI;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth stylus button.
 ///
@@ -66,7 +71,7 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 ///
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.
-int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
+int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & _kMaxUnsignedSMI;
 
 /// Base class for touch, stylus, or mouse events.
 ///
