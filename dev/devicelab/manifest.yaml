@@ -110,7 +110,6 @@ tasks:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac/android"]
 
   flavors_test:
