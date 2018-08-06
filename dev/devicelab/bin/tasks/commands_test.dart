@@ -85,7 +85,7 @@ void main() {
       final Future<String> restartStartingText =
         stdout.stream.firstWhere((String line) => line.endsWith('hot restart...'));
       final Future<String> restartEndingText =
-        stdout.stream.firstWhere((String line) => line.contains('Restart performed in '));
+        stdout.stream.firstWhere((String line) => line.contains('Hot restart performed in '));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
       await restartStartingText;

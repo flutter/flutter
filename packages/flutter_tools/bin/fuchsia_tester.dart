@@ -38,12 +38,13 @@ void main(List<String> args) {
   });
 }
 
-Iterable<String> _findTests(Directory directory) {
+List<String> _findTests(Directory directory) {
   return directory
       .listSync(recursive: true, followLinks: false)
       .where((FileSystemEntity entity) =>
           entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path))
-      .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
+      .map((FileSystemEntity entity) => fs.path.absolute(entity.path))
+      .toList();
 }
 
 Future<Null> run(List<String> args) async {
@@ -71,7 +72,7 @@ Future<Null> run(List<String> args) async {
     Cache.flutterRoot = tempDirectory.path;
     final Directory testDirectory =
         fs.directory(argResults[_kOptionTestDirectory]);
-    final Iterable<String> tests = _findTests(testDirectory);
+    final List<String> tests = _findTests(testDirectory);
 
     final List<String> testArgs = <String>[];
     testArgs.add('--');

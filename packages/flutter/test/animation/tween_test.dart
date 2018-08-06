@@ -74,4 +74,13 @@ void main() {
       moreOrLessEquals(0.0)
     );
   }, skip: Platform.isWindows); // floating point math not quite deterministic on Windows?
+
+  test('ConstantTween', () {
+    final ConstantTween<double> tween = new ConstantTween<double>(100.0);
+    expect(tween.begin, 100.0);
+    expect(tween.end, 100.0);
+    expect(tween.lerp(0.0), 100.0);
+    expect(tween.lerp(0.5), 100.0);
+    expect(tween.lerp(1.0), 100.0);
+  });
 }

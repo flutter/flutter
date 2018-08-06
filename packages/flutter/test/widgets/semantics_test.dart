@@ -416,6 +416,8 @@ void main() {
     );
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+      ..remove(SemanticsAction.moveCursorForwardByWord)
+      ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
@@ -629,6 +631,51 @@ void main() {
     expect(semanticsUpdateCount, 1);
 
     handle.dispose();
+    semantics.dispose();
+  });
+
+  testWidgets('onTapHint and onLongPressHint create custom actions', (WidgetTester tester) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    await tester.pumpWidget(new Semantics(
+      container: true,
+      onTap: () {},
+      onTapHint: 'test',
+    ));
+
+    expect(tester.getSemanticsData(find.byType(Semantics)), matchesSemanticsData(
+      hasTapAction: true,
+      onTapHint: 'test'
+    ));
+
+    await tester.pumpWidget(new Semantics(
+      container: true,
+      onLongPress: () {},
+      onLongPressHint: 'foo',
+    ));
+
+    expect(tester.getSemanticsData(find.byType(Semantics)), matchesSemanticsData(
+      hasLongPressAction: true,
+      onLongPressHint: 'foo'
+    ));
+    semantics.dispose();
+  });
+
+  testWidgets('CustomSemanticsActions can be added to a Semantics widget', (WidgetTester tester) async {
+    final SemanticsHandle semantics = tester.ensureSemantics();
+    await tester.pumpWidget(new Semantics(
+      container: true,
+      customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+        const CustomSemanticsAction(label: 'foo'): () {},
+        const CustomSemanticsAction(label: 'bar'): () {}
+      },
+    ));
+
+    expect(tester.getSemanticsData(find.byType(Semantics)), matchesSemanticsData(
+      customActions: <CustomSemanticsAction>[
+        const CustomSemanticsAction(label: 'bar'),
+        const CustomSemanticsAction(label: 'foo'),
+      ],
+    ));
     semantics.dispose();
   });
 
