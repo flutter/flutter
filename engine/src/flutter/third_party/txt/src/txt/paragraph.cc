@@ -417,7 +417,7 @@ void Paragraph::Layout(double width, bool force) {
   }
   needs_layout_ = false;
 
-  width_ = width;
+  width_ = floor(width);
 
   if (!ComputeLineBreaks())
     return;
