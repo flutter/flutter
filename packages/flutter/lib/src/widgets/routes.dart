@@ -898,7 +898,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   bool get barrierDismissible;
 
-  /// Whether the semantics of the modal barrier are excluded from the
+  /// Whether the semantics of the modal barrier are included in the
   /// semantics tree.
   ///
   /// The modal barrier is the scrim that is rendered behind each route, which
@@ -906,12 +906,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// current route, and normally partially obscures such routes.
   ///
   /// If [semanticsDismissible] is true, then modal barrier semantics are
-  /// excluded from the semantics tree and tapping on the barrier will have no
-  /// effect.
+  /// included in the semantics tree.
   ///
   /// If [semanticsDismissible] is false, then modal barrier semantics are
-  /// included in the semantics tree.
-  bool get semanticsDismissible => false;
+  /// excluded from the the semantics tree and tapping on the modal barrier
+  /// has no effect.
+  bool get semanticsDismissible => true;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
@@ -1188,6 +1188,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        barrierSemanticsDismissible: semanticsDismissible,
       );
     } else {
       barrier = new ModalBarrier(
