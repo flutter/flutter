@@ -17,7 +17,7 @@
 # * stage: one of "devicelab", "devicelab_ios", "devicelab_win"
 #       tasks are grouped by stage so they appear next to each on the dashboard and have a distinct
 #       icon attached to them. Stages can be used to create dependencies, e.g. we may decide to not
-#       run device tests on red Travis.
+#       run device tests on red Cirrus builds.
 # * required_agent_capabilities: a list of strings
 #       list of capabilities a devicelab agent must have to be able to run this task.
 #

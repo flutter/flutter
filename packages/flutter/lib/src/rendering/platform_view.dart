@@ -6,12 +6,29 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
 
+
+/// How an embedded platform view behave during hit tests.
+enum PlatformViewHitTestBehavior {
+  /// Opaque targets can be hit by hit tests, causing them to both receive
+  /// events within their bounds and prevent targets visually behind them from
+  /// also receiving events.
+  opaque,
+
+  /// Translucent targets both receive events within their bounds and permit
+  /// targets visually behind them to also receive events.
+  translucent,
+
+  /// Transparent targets don't receive events within their bounds and permit
+  /// targets visually behind them to receive events.
+  transparent,
+}
 
 enum _PlatformViewState {
   uninitialized,
@@ -21,7 +38,8 @@ enum _PlatformViewState {
 
 /// A render object for an Android view.
 ///
-/// [RenderAndroidView] is responsible for sizing and displaying an Android [View](https://developer.android.com/reference/android/view/View).
+/// [RenderAndroidView] is responsible for sizing, displaying and passing touch events to an
+/// Android [View](https://developer.android.com/reference/android/view/View).
 ///
 /// The render object's layout behavior is to fill all available space, the parent of this object must
 /// provide bounded layout constraints
@@ -34,8 +52,12 @@ class RenderAndroidView extends RenderBox {
   /// Creates a render object for an Android view.
   RenderAndroidView({
     @required AndroidViewController viewController,
+    @required this.hitTestBehavior,
   }) : assert(viewController != null),
-       _viewController = viewController;
+       assert(hitTestBehavior != null),
+       _viewController = viewController {
+    _motionEventsDispatcher = new _MotionEventsDispatcher(globalToLocal, viewController);
+  }
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
 
@@ -47,9 +69,16 @@ class RenderAndroidView extends RenderBox {
   /// `viewController` must not be null.
   set viewController(AndroidViewController viewController) {
     assert(_viewController != null);
+    if (_viewController == viewController)
+      return;
     _viewController = viewController;
     _sizePlatformView();
   }
+
+  /// How to behave during hit testing.
+  // The implicit setter is enough here as changing this value will just affect
+  // any newly arriving events there's nothing we need to invalidate.
+  PlatformViewHitTestBehavior hitTestBehavior;
 
   @override
   bool get sizedByParent => true;
@@ -59,6 +88,8 @@ class RenderAndroidView extends RenderBox {
 
   @override
   bool get isRepaintBoundary => true;
+
+  _MotionEventsDispatcher _motionEventsDispatcher;
 
   @override
   void performResize() {
@@ -96,4 +127,160 @@ class RenderAndroidView extends RenderBox {
       textureId: _viewController.textureId,
     ));
   }
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position))
+      return false;
+    result.add(new BoxHitTestEntry(this, position));
+    return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    _motionEventsDispatcher.handlePointerEvent(event);
+  }
 }
+
+typedef Offset _GlobalToLocal(Offset point);
+
+// Composes a stream of PointerEvent objects into AndroidMotionEvent objects
+// and dispatches them to the associated embedded Android view.
+class _MotionEventsDispatcher {
+  _MotionEventsDispatcher(this.globalToLocal, this.viewController);
+
+  final Map<int, AndroidPointerCoords> pointerPositions = <int, AndroidPointerCoords>{};
+  final Map<int, AndroidPointerProperties> pointerProperties = <int, AndroidPointerProperties>{};
+  final _GlobalToLocal globalToLocal;
+  final AndroidViewController viewController;
+
+  int nextPointerId = 0;
+  int downTimeMillis;
+
+  void handlePointerEvent(PointerEvent event) {
+    if (event is PointerDownEvent) {
+      if (nextPointerId == 0)
+        downTimeMillis = event.timeStamp.inMilliseconds;
+      pointerProperties[event.pointer] = propertiesFor(event, nextPointerId++);
+    }
+    pointerPositions[event.pointer] = coordsFor(event);
+
+    dispatchPointerEvent(event);
+
+    if (event is PointerUpEvent) {
+      pointerPositions.remove(event.pointer);
+      pointerProperties.remove(event.pointer);
+      if (pointerProperties.isEmpty) {
+        nextPointerId = 0;
+        downTimeMillis = null;
+      }
+    }
+    if (event is PointerCancelEvent) {
+      pointerPositions.clear();
+      pointerProperties.clear();
+      nextPointerId = 0;
+      downTimeMillis = null;
+    }
+  }
+
+  void dispatchPointerEvent(PointerEvent event) {
+    final List<int> pointers = pointerPositions.keys.toList();
+    final int pointerIdx = pointers.indexOf(event.pointer);
+    final int numPointers = pointers.length;
+
+    // Android MotionEvent objects can batch information on multiple pointers.
+    // Flutter breaks these such batched events into multiple PointerEvent objects.
+    // When there are multiple active pointers we accumulate the information for all pointers
+    // as we get PointerEvents, and only send it to the embedded Android view when
+    // we see the last pointer. This way we achieve the same batching as Android.
+    if(isSinglePointerAction(event) && pointerIdx < numPointers - 1)
+      return;
+
+    int action;
+    switch(event.runtimeType){
+      case PointerDownEvent:
+        action = numPointers == 1 ? AndroidViewController.kActionDown
+            : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerDown);
+        break;
+      case PointerUpEvent:
+        action = numPointers == 1 ? AndroidViewController.kActionUp
+            : AndroidViewController.pointerAction(pointerIdx, AndroidViewController.kActionPointerUp);
+        break;
+      case PointerMoveEvent:
+        action = AndroidViewController.kActionMove;
+        break;
+      case PointerCancelEvent:
+        action = AndroidViewController.kActionCancel;
+        break;
+      default:
+        return;
+    }
+
+    final AndroidMotionEvent androidMotionEvent = new AndroidMotionEvent(
+        downTime: downTimeMillis,
+        eventTime: event.timeStamp.inMilliseconds,
+        action: action,
+        pointerCount: pointerPositions.length,
+        pointerProperties: pointers.map((int i) => pointerProperties[i]).toList(),
+        pointerCoords: pointers.map((int i) => pointerPositions[i]).toList(),
+        metaState: 0,
+        buttonState: 0,
+        xPrecision: 1.0,
+        yPrecision: 1.0,
+        deviceId: 0,
+        edgeFlags: 0,
+        source: 0,
+        flags: 0
+    );
+    viewController.sendMotionEvent(androidMotionEvent);
+  }
+
+  AndroidPointerCoords coordsFor(PointerEvent event) {
+    final Offset position = globalToLocal(event.position);
+    return new AndroidPointerCoords(
+        orientation: event.orientation,
+        pressure: event.pressure,
+        // Currently the engine omits the pointer size, for now I'm fixing this to 0.33 which is roughly
+        // what I typically see on Android.
+        //
+        // TODO(amirh): Use the original pointer's size.
+        // https://github.com/flutter/flutter/issues/20300
+        size: 0.333,
+        toolMajor: event.radiusMajor,
+        toolMinor: event.radiusMinor,
+        touchMajor: event.radiusMajor,
+        touchMinor: event.radiusMinor,
+        x: position.dx,
+        y: position.dy
+    );
+  }
+
+  AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
+    int toolType = AndroidPointerProperties.kToolTypeUnknown;
+    switch(event.kind) {
+      case PointerDeviceKind.touch:
+        toolType = AndroidPointerProperties.kToolTypeFinger;
+        break;
+      case PointerDeviceKind.mouse:
+        toolType = AndroidPointerProperties.kToolTypeMouse;
+        break;
+      case PointerDeviceKind.stylus:
+        toolType = AndroidPointerProperties.kToolTypeStylus;
+        break;
+      case PointerDeviceKind.invertedStylus:
+        toolType = AndroidPointerProperties.kToolTypeEraser;
+        break;
+      case PointerDeviceKind.unknown:
+        toolType = AndroidPointerProperties.kToolTypeUnknown;
+        break;
+    }
+    return new AndroidPointerProperties(id: pointerId, toolType: toolType);
+  }
+
+  bool isSinglePointerAction(PointerEvent event) =>
+      !(event is PointerDownEvent) && !(event is PointerUpEvent);
+}
+

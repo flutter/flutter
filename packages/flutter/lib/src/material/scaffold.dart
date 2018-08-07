@@ -1162,12 +1162,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    _snackBarController.reverse().then<void>((Null _) {
-      assert(mounted);
-      if (!completer.isCompleted)
-        completer.complete(reason);
-    });
+    if (mediaQuery.accessibleNavigation) {
+      _snackBarController.value = 0.0;
+      completer.complete(reason);
+    } else {
+      _snackBarController.reverse().then<void>((Null _) {
+        assert(mounted);
+        if (!completer.isCompleted)
+          completer.complete(reason);
+      });
+    }
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }
@@ -1480,12 +1486,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
-        if (_snackBarController.isCompleted && _snackBarTimer == null)
-          _snackBarTimer = new Timer(_snackBars.first._widget.duration, () {
+        if (_snackBarController.isCompleted && _snackBarTimer == null) {
+          final SnackBar snackBar = _snackBars.first._widget;
+          _snackBarTimer = new Timer.periodic(snackBar.duration, (Timer timer) {
             assert(_snackBarController.status == AnimationStatus.forward ||
-              _snackBarController.status == AnimationStatus.completed);
+                   _snackBarController.status == AnimationStatus.completed);
+            // Look up MediaQuery again in case the setting changed.
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
+            if (mediaQuery.accessibleNavigation && snackBar.action != null)
+              return;
+            timer.cancel();
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
+        }
       } else {
         _snackBarTimer?.cancel();
         _snackBarTimer = null;

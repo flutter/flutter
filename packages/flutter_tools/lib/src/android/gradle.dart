@@ -43,8 +43,6 @@ final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory
   r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
-
-
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.directory.childFile(
       fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
@@ -60,6 +58,9 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
+        return FlutterPluginVersion.managed;
+      }
+      if (line.contains("def flutterPluginVersion = 'managed'")) {
         return FlutterPluginVersion.managed;
       }
     }
@@ -199,22 +200,26 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
   }
 }
 
-/// Overwrite android/local.properties in the specified Flutter project, if needed.
+/// Overwrite local.properties in the specified Flutter project's Android
+/// sub-project, if needed.
 ///
-/// Throws, if `pubspec.yaml` or Android SDK cannot be located.
+/// Throws tool exit, if `pubspec.yaml` is invalid.
 ///
-/// If [requireSdk] is `true` this will fail with a tool-exit if no Android Sdk
+/// If [requireSdk] is `true` this will fail with a tool exit if no Android Sdk
 /// is found.
 Future<void> updateLocalProperties({
   @required FlutterProject project,
   BuildInfo buildInfo,
   bool requireAndroidSdk = true,
 }) async {
+  if (project.manifest == null) {
+    throwToolExit('Invalid `pubspec.yaml`');
+  }
   if (requireAndroidSdk && androidSdk == null) {
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
 
-  final File localProperties = project.androidLocalPropertiesFile;
+  final File localProperties = project.android.localPropertiesFile;
   bool changed = false;
 
   SettingsFile settings;
@@ -360,11 +365,11 @@ Future<Null> _buildGradleProjectV2(
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
-      command,
-      workingDirectory: flutterProject.android.directory.path,
-      allowReentrantFlutter: true,
-      environment: _gradleEnv,
-      filter: logger.isVerbose ? null : ndkMessageFilter,
+    command,
+    workingDirectory: flutterProject.android.directory.path,
+    allowReentrantFlutter: true,
+    environment: _gradleEnv,
+    filter: logger.isVerbose ? null : ndkMessageFilter,
   );
   status.stop();
 
