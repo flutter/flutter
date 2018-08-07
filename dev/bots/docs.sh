@@ -32,6 +32,9 @@ function script_location() {
 
 # So that users can run this script from anywhere and it will work as expected.
 SCRIPT_LOCATION="$(script_location)"
+# Sets the Flutter root to be "$(script_location)/../..": This script assumes
+# that it resides two directory levels down from the root, so if that changes,
+# then this line will need to as well.
 FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
 
 echo "Running docs.sh"
