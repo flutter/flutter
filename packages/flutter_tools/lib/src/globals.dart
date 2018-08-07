@@ -64,13 +64,17 @@ void printStatus(
 
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.
-void printTrace(String message) => logger.printTrace(wrapText(message));
+void printTrace(String message) => logger.printTrace(message);
 
 /// The terminal width used by the [wrapText] function if there is no terminal
 /// attached to [io.Stdio].
 const int kDefaultTerminalColumns = 100;
 
-/// Wraps a block of text into lines no longer than [length].
+// Smallest column that will be used. If the requested column width is smaller
+// than this, then this is what will be used.
+const int _kMinColumnWidth = 10;
+
+/// Wraps a block of text into lines no longer than [columnWidth].
 ///
 /// Tries to split at whitespace, but if that's not good enough to keep it
 /// under the limit, then it splits in the middle of a word.
@@ -83,8 +87,8 @@ const int kDefaultTerminalColumns = 100;
 /// heading prefix (e.g. "Usage: "):
 ///
 /// ```dart
-/// var prefix = "Usage: ";
-/// print(prefix + wrapText(invocation, hangingIndent: prefix.length, length: 40));
+/// String prefix = "Usage: ";
+/// print(prefix + wrapText(invocation, hangingIndent: prefix.length, columnWidth: 40));
 /// ```
 ///
 /// yields:
@@ -93,14 +97,20 @@ const int kDefaultTerminalColumns = 100;
 ///        [arguments]
 /// ```
 ///
-/// If [length] is not specified, then no wrapping occurs, and the original
-/// [text] is returned unchanged.
-String wrapText(String text, {int length, int hangingIndent, int indent}) {
-  if (length == null) {
-    return text;
+/// If [columnWidth] is not specified, then the column width will be the width of the
+/// terminal window by default. If the stdout is not a terminal window, then the
+/// default will be [kDefaultTerminalColumns].
+///
+/// The [indent] must be smaller than [columnWidth].
+String wrapText(String text, {int columnWidth, int hangingIndent, int indent}) {
+  if (text == null || text.isEmpty) {
+    return '';
   }
-  hangingIndent ??= 0;
   indent ??= 0;
+  columnWidth ??= (const io.Stdio().terminalColumns ?? kDefaultTerminalColumns) - indent;
+  assert(columnWidth >= 0);
+
+  hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
   final List<String> result = <String>[];
   for (String line in splitText) {
@@ -112,22 +122,22 @@ String wrapText(String text, {int length, int hangingIndent, int indent}) {
       // When we have a hanging indent, we want to wrap the first line at one
       // width, and the rest at another (offset by hangingIndent), so we wrap
       // them twice and recombine.
-      final List<String> firstLineWrap = wrapTextAsLines(
+      final List<String> firstLineWrap = _wrapTextAsLines(
         trimmedText,
-        length: length - leadingWhitespace.length,
+        columnWidth: columnWidth - leadingWhitespace.length,
       );
       notIndented = <String>[firstLineWrap.removeAt(0)];
       trimmedText = trimmedText.substring(notIndented[0].length).trimLeft();
       if (firstLineWrap.isNotEmpty) {
-        notIndented.addAll(wrapTextAsLines(
+        notIndented.addAll(_wrapTextAsLines(
           trimmedText,
-          length: length - leadingWhitespace.length - hangingIndent,
+          columnWidth: columnWidth - leadingWhitespace.length - hangingIndent,
         ));
       }
     } else {
-      notIndented = wrapTextAsLines(
+      notIndented = _wrapTextAsLines(
         trimmedText,
-        length: length - leadingWhitespace.length,
+        columnWidth: columnWidth - leadingWhitespace.length,
       );
     }
     String hangingIndentString;
@@ -147,17 +157,22 @@ String wrapText(String text, {int length, int hangingIndent, int indent}) {
   return result.join('\n');
 }
 
-/// Wraps a block of text into lines no longer than [length],
-/// starting at the [start] column, and returns the result as a list of strings.
+/// Wraps a block of text into lines no longer than [columnWidth], starting at the
+/// [start] column, and returning the result as a list of strings.
 ///
 /// Tries to split at whitespace, but if that's not good enough to keep it
 /// under the limit, then splits in the middle of a word. Preserves embedded
 /// newlines, but not indentation (it trims whitespace from each line).
 ///
-/// If [length] is not specified, then no wrapping occurs, and the original
-/// [text] is returned after splitting it on newlines. Whitespace is not trimmed
-/// in this case.
-List<String> wrapTextAsLines(String text, {int start = 0, int length}) {
+/// If [columnWidth] is not specified, then the column width will be the width of the
+/// terminal window by default. If the stdout is not a terminal window, then the
+/// default will be [kDefaultTerminalColumns].
+List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth}) {
+  if (text == null || text.isEmpty) {
+    return <String>[];
+  }
+  columnWidth ??= const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+  assert(columnWidth >= 0);
   assert(start >= 0);
 
   /// Returns true if the code unit at [index] in [text] is a whitespace
@@ -180,12 +195,8 @@ List<String> wrapTextAsLines(String text, {int start = 0, int length}) {
         || rune == 0xFEFF;
   }
 
-  if (length == null) {
-    return text.split('\n');
-  }
-
   final List<String> result = <String>[];
-  final int effectiveLength = math.max(length - start, 10);
+  final int effectiveLength = math.max(columnWidth - start, _kMinColumnWidth);
   for (String line in text.split('\n')) {
     line = line.trim();
     if (line.length <= effectiveLength) {
