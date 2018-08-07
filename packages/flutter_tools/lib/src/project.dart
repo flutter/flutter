@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:meta/meta.dart';
 
 import 'android/gradle.dart' as gradle;
