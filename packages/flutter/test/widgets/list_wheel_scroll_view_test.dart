@@ -312,6 +312,43 @@ void main() {
       controller.jumpTo(-10000.0);
       await tester.pump();
     });
+
+    testWidgets('only visible children are maintained as children of the rendered viewport', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            children: List<Widget>.generate(16, (int index) {
+              return new Text(index.toString());
+            }),
+          ),
+        )
+      );
+
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent;
+
+      // Item 0 is in the middle. There are 3 children visible after it, so the
+      // value of childCount should be 4.
+      expect(viewport.childCount, 4);
+
+      controller.jumpToItem(8);
+      await tester.pump();
+      // Item 8 is in the middle. There are 3 children visible before it and 3
+      // after it, so the value of childCount should be 7.
+      expect(viewport.childCount, 7);
+
+      controller.jumpToItem(15);
+      await tester.pump();
+      // Item 15 is in the middle. There are 3 children visible before it, so the
+      // value of childCount should be 4.
+      expect(viewport.childCount, 4);
+    });
   });
 
   group('pre-transform viewport', () {
