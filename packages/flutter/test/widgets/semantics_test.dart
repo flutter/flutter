@@ -486,7 +486,6 @@ void main() {
     );
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
-      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.hasToggledState)
       ..remove(SemanticsFlag.isToggled)
       ..remove(SemanticsFlag.hasImplicitScrolling);
