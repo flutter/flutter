@@ -18,20 +18,20 @@ void main() {
     viewsController.registerViewType('webview');
 
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview'),
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'webview'),
+        ),
+      ),
     );
 
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
         new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
-      ])
+      ]),
     );
   });
 
@@ -40,30 +40,30 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview'),
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'webview'),
+        ),
+      ),
     );
 
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 400.0,
-              height: 200.0,
-              child: AndroidView(viewType: 'webview'),
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 400.0,
+          height: 200.0,
+          child: AndroidView(viewType: 'webview'),
+        ),
+      ),
     );
 
     expect(
-        viewsController.views,
-        unorderedEquals(<FakePlatformView>[
-          new FakePlatformView(currentViewId + 1, 'webview', const Size(400.0, 200.0))
-        ])
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(400.0, 200.0))
+      ]),
     );
   });
 
@@ -73,30 +73,30 @@ void main() {
     viewsController.registerViewType('webview');
     viewsController.registerViewType('maps');
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview'),
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'webview'),
+        ),
+      ),
     );
 
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'maps'),
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'maps'),
+        ),
+      ),
     );
 
     expect(
-        viewsController.views,
-        unorderedEquals(<FakePlatformView>[
-          new FakePlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0))
-        ])
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0))
+      ]),
     );
   });
 
@@ -104,22 +104,22 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview'),
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'webview'),
+        ),
+      ),
     );
 
     await tester.pumpWidget(
-        const Center(
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-            )
-        )
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+        ),
+      ),
     );
 
     expect(
@@ -134,13 +134,13 @@ void main() {
     viewsController.registerViewType('webview');
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
-        new Center(
-            child: new SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: new AndroidView(viewType: 'webview', key: key),
-            )
-        )
+      new Center(
+        child: new SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: new AndroidView(viewType: 'webview', key: key),
+        ),
+      ),
     );
 
     await tester.pumpWidget(
@@ -156,10 +156,10 @@ void main() {
     );
 
     expect(
-        viewsController.views,
-        unorderedEquals(<FakePlatformView>[
-          new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
-        ])
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
+      ]),
     );
   });
 
@@ -168,14 +168,14 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-        const Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview'),
-            )
-        )
+      const Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'webview'),
+        ),
+      ),
     );
 
     final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
@@ -186,7 +186,7 @@ void main() {
       orderedEquals(<FakeMotionEvent> [
         const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
         const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-      ])
+      ]),
     );
   });
 
@@ -206,14 +206,14 @@ void main() {
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
             ),
             const Positioned(
-                child: SizedBox(
-                  width: 200.0,
-                  height: 100.0,
-                  child: AndroidView(
-                    viewType: 'webview',
-                    hitTestBehavior: PlatformViewHitTestBehavior.transparent,
-                  ),
-                )
+              child: SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(
+                  viewType: 'webview',
+                  hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+                ),
+              ),
             ),
           ],
         ),
@@ -223,12 +223,12 @@ void main() {
     await tester.startGesture(const Offset(50.0, 50.0));
 
     expect(
-        viewsController.motionEvents[currentViewId + 1],
-        isNull,
+      viewsController.motionEvents[currentViewId + 1],
+      isNull,
     );
     expect(
-      numPointerDownsOnParent,
-      1
+        numPointerDownsOnParent,
+        1
     );
   });
 
@@ -248,14 +248,14 @@ void main() {
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
             ),
             const Positioned(
-                child: SizedBox(
-                  width: 200.0,
-                  height: 100.0,
-                  child: AndroidView(
-                    viewType: 'webview',
-                    hitTestBehavior: PlatformViewHitTestBehavior.translucent,
-                  ),
-                )
+              child: SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(
+                  viewType: 'webview',
+                  hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+                ),
+              ),
             ),
           ],
         ),
@@ -266,9 +266,9 @@ void main() {
 
     expect(
       viewsController.motionEvents[currentViewId + 1],
-        orderedEquals(<FakeMotionEvent> [
-          const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-        ])
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      ]),
     );
     expect(
         numPointerDownsOnParent,
@@ -292,14 +292,14 @@ void main() {
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
             ),
             const Positioned(
-                child: SizedBox(
-                  width: 200.0,
-                  height: 100.0,
-                  child: AndroidView(
-                    viewType: 'webview',
-                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-                  ),
-                )
+              child: SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(
+                  viewType: 'webview',
+                  hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                ),
+              ),
             ),
           ],
         ),
@@ -309,10 +309,10 @@ void main() {
     await tester.startGesture(const Offset(50.0, 50.0));
 
     expect(
-        viewsController.motionEvents[currentViewId + 1],
-        orderedEquals(<FakeMotionEvent> [
-          const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
-        ])
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      ]),
     );
     expect(
         numPointerDownsOnParent,
@@ -325,28 +325,28 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-        new Align(
-          alignment: Alignment.topLeft,
-          child: new Container(
-            margin: const EdgeInsets.all(10.0),
-            child: const SizedBox(
-              width: 200.0,
-              height: 100.0,
-              child: AndroidView(viewType: 'webview'),
-            ),
+      new Align(
+        alignment: Alignment.topLeft,
+        child: new Container(
+          margin: const EdgeInsets.all(10.0),
+          child: const SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(viewType: 'webview'),
           ),
-        )
+        ),
+      ),
     );
 
     final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
     await gesture.up();
 
     expect(
-        viewsController.motionEvents[currentViewId + 1],
-        orderedEquals(<FakeMotionEvent> [
-          const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(40.0, 40.0)]),
-          const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(40.0, 40.0)]),
-        ])
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(40.0, 40.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(40.0, 40.0)]),
+      ]),
     );
   });
 }
