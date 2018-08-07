@@ -369,24 +369,6 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @protected
   TimeOfDayFormat get timeOfDayFormatRaw;
 
-  @override
-  String get reorderItemToStart => _translationBundle.reorderItemToStart;
-
-  @override
-  String get reorderItemToEnd => _translationBundle.reorderItemToEnd;
-
-  @override
-  String get reorderItemUp => _translationBundle.reorderItemUp;
-
-  @override
-  String get reorderItemDown => _translationBundle.reorderItemDown;
-
-  @override
-  String get reorderItemLeft => _translationBundle.reorderItemLeft;
-
-  @override
-  String get reorderItemRight => _translationBundle.reorderItemRight;
-
   /// The [TimeOfDayFormat] corresponding to one of the following supported
   /// patterns:
   ///
