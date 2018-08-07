@@ -93,7 +93,7 @@ class BoxDecoration extends Decoration {
   @override
   bool debugAssertIsValid() {
     assert(shape != BoxShape.circle ||
-        borderRadius == null); // Can't have a border radius if you're a circle.
+          borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 
@@ -266,12 +266,12 @@ class BoxDecoration extends Decoration {
       return false;
     final BoxDecoration typedOther = other;
     return color == typedOther.color &&
-        image == typedOther.image &&
-        border == typedOther.border &&
-        borderRadius == typedOther.borderRadius &&
-        boxShadow == typedOther.boxShadow &&
-        gradient == typedOther.gradient &&
-        shape == typedOther.shape;
+           image == typedOther.image &&
+           border == typedOther.border &&
+           borderRadius == typedOther.borderRadius &&
+           boxShadow == typedOther.boxShadow &&
+           gradient == typedOther.gradient &&
+           shape == typedOther.shape;
   }
 
   @override
@@ -315,7 +315,7 @@ class BoxDecoration extends Decoration {
         }
         return true;
       case BoxShape.circle:
-      // Circles are inscribed into our smallest dimension.
+        // Circles are inscribed into our smallest dimension.
         final Offset center = size.center(Offset.zero);
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
@@ -334,8 +334,8 @@ class BoxDecoration extends Decoration {
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
   _BoxDecorationPainter(this._decoration, VoidCallback onChanged)
-      : assert(_decoration != null),
-        super(onChanged);
+    : assert(_decoration != null),
+      super(onChanged);
 
   final BoxDecoration _decoration;
 

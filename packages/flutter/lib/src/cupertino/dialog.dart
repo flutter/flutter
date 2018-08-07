@@ -428,7 +428,7 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       final List<Widget> buttons = <Widget>[children.first];
       buttons.addAll(
         children.sublist(1).map<Widget>(
-              (Widget child) {
+          (Widget child) {
             return new CustomPaint(
               painter: new _CupertinoVerticalDividerPainter(),
               child: child,
