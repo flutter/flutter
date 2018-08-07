@@ -82,10 +82,10 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => new IosProject._(_iosDirectory, isModule);
+  IosProject get ios => new IosProject._(this);
 
   /// The Android sub project of this project.
-  AndroidProject get android => new AndroidProject._(_androidDirectory, isModule);
+  AndroidProject get android => new AndroidProject._(this);
 
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
@@ -104,19 +104,13 @@ class FlutterProject {
   /// The directory that will contain the example if an example exists.
   static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
 
-  /// The directory that contains the Android app to be launched by `flutter run`.
-  Directory get _androidDirectory => directory.childDirectory(isModule ? '.android' : 'android');
-
-  /// The directory that contains the iOS app to be launched by `flutter run`.
-  Directory get _iosDirectory => directory.childDirectory(isModule ? '.ios' : 'ios');
-
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp)
       return;
-    await android.ensureReadyForPlatformSpecificTooling(this);
-    await ios.ensureReadyForPlatformSpecificTooling(this);
+    await android.ensureReadyForPlatformSpecificTooling();
+    await ios.ensureReadyForPlatformSpecificTooling();
     await injectPlugins(this);
   }
 }
@@ -127,13 +121,17 @@ class FlutterProject {
 /// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
   static final RegExp _productBundleIdPattern = new RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
-  IosProject._(this.directory, this.isModule);
 
-  /// The directory of this iOS sub-project.
-  final Directory directory;
+  IosProject._(this.parent);
+
+  /// The parent of this project.
+  final FlutterProject parent;
+
+  /// The directory of this project.
+  Directory get directory => parent.directory.childDirectory(isModule ? '.ios' : 'ios');
 
   /// True, if the parent Flutter project is a module.
-  final bool isModule;
+  bool get isModule => parent.isModule;
 
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => directory.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -152,7 +150,7 @@ class IosProject {
     return _firstMatchInFile(projectFile, _productBundleIdPattern).then((Match match) => match?.group(1));
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject parent) async {
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'ios'));
       template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
@@ -190,13 +188,16 @@ class AndroidProject {
   static final RegExp _applicationIdPattern = new RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
   static final RegExp _groupPattern = new RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
-  AndroidProject._(this.directory, this.isModule);
+  AndroidProject._(this.parent);
 
-  /// The directory of this Android sub-project.
-  final Directory directory;
+  /// The parent of this project.
+  final FlutterProject parent;
+
+  /// The directory of this project.
+  Directory get directory => parent.directory.childDirectory(isModule ? '.android' : 'android');
 
   /// True, if the parent Flutter project is a module.
-  final bool isModule;
+  bool get isModule => parent.isModule;
 
   File get gradleManifestFile {
     return isUsingGradle()
@@ -224,7 +225,7 @@ class AndroidProject {
     return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject parent) async {
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'android'));
       template.render(
