@@ -234,10 +234,10 @@ void main() {
           return semantics.properties.customSemanticsActions;
         }
 
-        const CustomSemanticsAction moveToStart = const CustomSemanticsAction(label: 'Move to the start');
-        const CustomSemanticsAction moveToEnd = const CustomSemanticsAction(label: 'Move to the end');
-        const CustomSemanticsAction moveUp = const CustomSemanticsAction(label: 'Move up');
-        const CustomSemanticsAction moveDown = const CustomSemanticsAction(label: 'Move down');
+        const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
+        const CustomSemanticsAction moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+        const CustomSemanticsAction moveUp = CustomSemanticsAction(label: 'Move up');
+        const CustomSemanticsAction moveDown = CustomSemanticsAction(label: 'Move down');
 
         testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
           // The a11y actions for a vertical list are the same in LTR and RTL modes.
@@ -533,10 +533,10 @@ void main() {
           return semantics.properties.customSemanticsActions;
         }
 
-        const CustomSemanticsAction moveToStart = const CustomSemanticsAction(label: 'Move to the start');
-        const CustomSemanticsAction moveToEnd = const CustomSemanticsAction(label: 'Move to the end');
-        const CustomSemanticsAction moveLeft = const CustomSemanticsAction(label: 'Move left');
-        const CustomSemanticsAction moveRight = const CustomSemanticsAction(label: 'Move right');
+        const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
+        const CustomSemanticsAction moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+        const CustomSemanticsAction moveLeft = CustomSemanticsAction(label: 'Move left');
+        const CustomSemanticsAction moveRight = CustomSemanticsAction(label: 'Move right');
 
         testWidgets('Provides the correct accessibility actions in LTR mode', (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
