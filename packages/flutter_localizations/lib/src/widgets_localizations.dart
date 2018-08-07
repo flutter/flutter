@@ -31,7 +31,7 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   }
 
   // See http://en.wikipedia.org/wiki/Right-to-left
-  static const List<String> _rtlLanguages = const <String>[
+  static const List<String> _rtlLanguages = <String>[
     'ar', // Arabic
     'fa', // Farsi
     'he', // Hebrew
@@ -60,7 +60,7 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// to create an instance of this class.
   ///
   /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
-  static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 
 class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {

@@ -170,7 +170,7 @@ class AppContext {
 class _Key {
   const _Key();
 
-  static const _Key key = const _Key();
+  static const _Key key = _Key();
 
   @override
   String toString() => 'context';
@@ -180,5 +180,5 @@ class _Key {
 class _BoxedNull {
   const _BoxedNull();
 
-  static const _BoxedNull instance = const _BoxedNull();
+  static const _BoxedNull instance = _BoxedNull();
 }

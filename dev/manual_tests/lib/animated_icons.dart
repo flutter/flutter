@@ -10,7 +10,7 @@ class AnimatedIconsTestApp extends StatelessWidget {
     return new MaterialApp(
       title: 'Animated Icons Test',
       home: const Scaffold(
-        body: const IconsList(),
+        body: IconsList(),
       ),
     );
   }
@@ -76,27 +76,27 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   }
 }
 
-const List<IconSample> samples = const <IconSample> [
-  const IconSample(AnimatedIcons.arrow_menu, 'arrow_menu'),
-  const IconSample(AnimatedIcons.menu_arrow, 'menu_arrow'),
+const List<IconSample> samples = <IconSample> [
+  IconSample(AnimatedIcons.arrow_menu, 'arrow_menu'),
+  IconSample(AnimatedIcons.menu_arrow, 'menu_arrow'),
 
-  const IconSample(AnimatedIcons.close_menu, 'close_menu'),
-  const IconSample(AnimatedIcons.menu_close, 'menu_close'),
+  IconSample(AnimatedIcons.close_menu, 'close_menu'),
+  IconSample(AnimatedIcons.menu_close, 'menu_close'),
 
-  const IconSample(AnimatedIcons.home_menu, 'home_menu'),
-  const IconSample(AnimatedIcons.menu_home, 'menu_home'),
+  IconSample(AnimatedIcons.home_menu, 'home_menu'),
+  IconSample(AnimatedIcons.menu_home, 'menu_home'),
 
-  const IconSample(AnimatedIcons.play_pause, 'play_pause'),
-  const IconSample(AnimatedIcons.pause_play, 'pause_play'),
+  IconSample(AnimatedIcons.play_pause, 'play_pause'),
+  IconSample(AnimatedIcons.pause_play, 'pause_play'),
 
-  const IconSample(AnimatedIcons.list_view, 'list_view'),
-  const IconSample(AnimatedIcons.view_list, 'view_list'),
+  IconSample(AnimatedIcons.list_view, 'list_view'),
+  IconSample(AnimatedIcons.view_list, 'view_list'),
 
-  const IconSample(AnimatedIcons.add_event, 'add_event'),
-  const IconSample(AnimatedIcons.event_add, 'event_add'),
+  IconSample(AnimatedIcons.add_event, 'add_event'),
+  IconSample(AnimatedIcons.event_add, 'event_add'),
 
-  const IconSample(AnimatedIcons.ellipsis_search, 'ellipsis_search'),
-  const IconSample(AnimatedIcons.search_ellipsis, 'search_ellipsis'),
+  IconSample(AnimatedIcons.ellipsis_search, 'ellipsis_search'),
+  IconSample(AnimatedIcons.search_ellipsis, 'search_ellipsis'),
 ];
 
 class IconSample {

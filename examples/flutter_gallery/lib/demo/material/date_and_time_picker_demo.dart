@@ -141,7 +141,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 enabled: true,
                 decoration: const InputDecoration(
                   labelText: 'Event name',
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(),
                 ),
                 style: Theme.of(context).textTheme.display1,
               ),

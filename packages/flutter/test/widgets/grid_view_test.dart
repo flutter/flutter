@@ -383,7 +383,7 @@ void main() {
   });
 
   testWidgets('One-line GridView paints', (WidgetTester tester) async {
-    const Color green = const Color(0xFF00FF00);
+    const Color green = Color(0xFF00FF00);
 
     final Container container = new Container(
       decoration: const BoxDecoration(

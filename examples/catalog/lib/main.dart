@@ -8,8 +8,8 @@ void main() {
   runApp(
     const Directionality(
       textDirection: TextDirection.ltr,
-      child: const Center(
-        child: const Text('flutter run -t lib/xxx.dart'),
+      child: Center(
+        child: Text('flutter run -t lib/xxx.dart'),
       ),
     ),
   );
