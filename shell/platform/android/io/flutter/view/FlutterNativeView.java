@@ -29,9 +29,13 @@ public class FlutterNativeView implements BinaryMessenger {
     private boolean applicationIsRunning;
 
     public FlutterNativeView(Context context) {
+        this(context, false);
+    }
+
+    public FlutterNativeView(Context context, boolean isBackgroundView) {
         mContext = context;
         mPluginRegistry = new FlutterPluginRegistry(this, context);
-        attach(this);
+        attach(this, isBackgroundView);
         assertAttached();
         mMessageHandlers = new HashMap<>();
     }
@@ -68,22 +72,44 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     public void assertAttached() {
-        if (!isAttached())
-            throw new AssertionError("Platform view is not attached");
+        if (!isAttached()) throw new AssertionError("Platform view is not attached");
     }
 
-    public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint, boolean reuseRuntimeController) {
+    public void runFromBundle(FlutterRunArguments args) {
+        if (args.bundlePath == null) {
+          throw new AssertionError("A bundlePath must be specified");
+        } else if (args.entrypoint == null) {
+          throw new AssertionError("An entrypoint must be specified");
+        }
+      runFromBundleInternal(args.bundlePath, args.entrypoint,
+          args.libraryPath, null);
+    }
+
+    /**
+     * @deprecated
+     * Please use runFromBundle with `FlutterRunArguments`. Parameters
+     * `snapshotOverride` and `reuseRuntimeController` have no effect.
+     */
+    public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint,
+            boolean reuseRuntimeController) {
+        runFromBundleInternal(bundlePath, entrypoint, null, null);
+    }
+
+    private void runFromBundleInternal(String bundlePath, String entrypoint,
+        String libraryPath, String snapshotOverride) {
         assertAttached();
         if (applicationIsRunning)
-            throw new AssertionError("This Flutter engine instance is already running an application");
-
-        nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride, entrypoint, reuseRuntimeController, mContext.getResources().getAssets());
+            throw new AssertionError(
+                    "This Flutter engine instance is already running an application");
+        nativeRunBundleAndSnapshotFromLibrary(mNativePlatformView, bundlePath,
+            snapshotOverride, entrypoint, libraryPath,
+            mContext.getResources().getAssets());
 
         applicationIsRunning = true;
     }
 
     public boolean isApplicationRunning() {
-      return applicationIsRunning;
+        return applicationIsRunning;
     }
 
     public static String getObservatoryUri() {
@@ -92,7 +118,7 @@ public class FlutterNativeView implements BinaryMessenger {
 
     @Override
     public void send(String channel, ByteBuffer message) {
-      send(channel, message, null);
+        send(channel, message, null);
     }
 
     @Override
@@ -110,8 +136,8 @@ public class FlutterNativeView implements BinaryMessenger {
         if (message == null) {
             nativeDispatchEmptyPlatformMessage(mNativePlatformView, channel, replyId);
         } else {
-            nativeDispatchPlatformMessage(mNativePlatformView, channel, message,
-                message.position(), replyId);
+            nativeDispatchPlatformMessage(
+                    mNativePlatformView, channel, message, message.position(), replyId);
         }
     }
 
@@ -124,8 +150,8 @@ public class FlutterNativeView implements BinaryMessenger {
         }
     }
 
-    private void attach(FlutterNativeView view) {
-        mNativePlatformView = nativeAttach(view);
+    private void attach(FlutterNativeView view, boolean isBackgroundView) {
+        mNativePlatformView = nativeAttach(view, isBackgroundView);
     }
 
     // Called by native to send us a platform message.
@@ -135,27 +161,28 @@ public class FlutterNativeView implements BinaryMessenger {
         if (handler != null) {
             try {
                 final ByteBuffer buffer = (message == null ? null : ByteBuffer.wrap(message));
-                handler.onMessage(buffer,
-                    new BinaryReply() {
-                        private final AtomicBoolean done = new AtomicBoolean(false);
-                        @Override
-                        public void reply(ByteBuffer reply) {
-                            if (!isAttached()) {
-                                Log.d(TAG, "handlePlatformMessage replying to a detached view, channel=" + channel);
-                                return;
-                            }
-                            if (done.getAndSet(true)) {
-                                throw new IllegalStateException("Reply already submitted");
-                            }
-                            if (reply == null) {
-                                nativeInvokePlatformMessageEmptyResponseCallback(mNativePlatformView,
-                                    replyId);
-                            } else {
-                                nativeInvokePlatformMessageResponseCallback(mNativePlatformView,
-                                    replyId, reply, reply.position());
-                            }
+                handler.onMessage(buffer, new BinaryReply() {
+                    private final AtomicBoolean done = new AtomicBoolean(false);
+                    @Override
+                    public void reply(ByteBuffer reply) {
+                        if (!isAttached()) {
+                            Log.d(TAG,
+                                    "handlePlatformMessage replying to a detached view, channel="
+                                            + channel);
+                            return;
                         }
-                    });
+                        if (done.getAndSet(true)) {
+                            throw new IllegalStateException("Reply already submitted");
+                        }
+                        if (reply == null) {
+                            nativeInvokePlatformMessageEmptyResponseCallback(
+                                    mNativePlatformView, replyId);
+                        } else {
+                            nativeInvokePlatformMessageResponseCallback(
+                                    mNativePlatformView, replyId, reply, reply.position());
+                        }
+                    }
+                });
             } catch (Exception ex) {
                 Log.e(TAG, "Uncaught exception in binary message listener", ex);
                 nativeInvokePlatformMessageEmptyResponseCallback(mNativePlatformView, replyId);
@@ -179,8 +206,7 @@ public class FlutterNativeView implements BinaryMessenger {
 
     // Called by native to update the semantics/accessibility tree.
     private void updateSemantics(ByteBuffer buffer, String[] strings) {
-        if (mFlutterView == null)
-            return;
+        if (mFlutterView == null) return;
         mFlutterView.updateSemantics(buffer, strings);
     }
 
@@ -193,8 +219,7 @@ public class FlutterNativeView implements BinaryMessenger {
 
     // Called by native to notify first Flutter frame rendered.
     private void onFirstFrame() {
-        if (mFlutterView == null)
-            return;
+        if (mFlutterView == null) return;
         mFlutterView.onFirstFrame();
     }
 
@@ -206,32 +231,30 @@ public class FlutterNativeView implements BinaryMessenger {
         mPluginRegistry.onPreEngineRestart();
     }
 
-    private static native long nativeAttach(FlutterNativeView view);
+    private static native long nativeAttach(FlutterNativeView view, boolean isBackgroundView);
     private static native void nativeDestroy(long nativePlatformViewAndroid);
     private static native void nativeDetach(long nativePlatformViewAndroid);
 
-    private static native void nativeRunBundleAndSnapshot(long nativePlatformViewAndroid,
-        String bundlePath,
-        String snapshotOverride,
-        String entrypoint,
-        boolean reuseRuntimeController,
-        AssetManager manager);
+    private static native void nativeRunBundleAndSnapshotFromLibrary(
+            long nativePlatformViewAndroid, String bundlePath,
+            String snapshotOverride, String entrypoint, String libraryUrl,
+            AssetManager manager);
 
     private static native String nativeGetObservatoryUri();
 
     // Send an empty platform message to Dart.
-    private static native void nativeDispatchEmptyPlatformMessage(long nativePlatformViewAndroid,
-        String channel, int responseId);
+    private static native void nativeDispatchEmptyPlatformMessage(
+            long nativePlatformViewAndroid, String channel, int responseId);
 
     // Send a data-carrying platform message to Dart.
     private static native void nativeDispatchPlatformMessage(long nativePlatformViewAndroid,
-        String channel, ByteBuffer message, int position, int responseId);
+            String channel, ByteBuffer message, int position, int responseId);
 
     // Send an empty response to a platform message received from Dart.
     private static native void nativeInvokePlatformMessageEmptyResponseCallback(
-        long nativePlatformViewAndroid, int responseId);
+            long nativePlatformViewAndroid, int responseId);
 
     // Send a data-carrying response to a platform message received from Dart.
     private static native void nativeInvokePlatformMessageResponseCallback(
-        long nativePlatformViewAndroid, int responseId, ByteBuffer message, int position);
+            long nativePlatformViewAndroid, int responseId, ByteBuffer message, int position);
 }
