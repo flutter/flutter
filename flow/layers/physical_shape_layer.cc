@@ -87,6 +87,13 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
                SkColorGetA(color_) != 0xff, device_pixel_ratio_);
   }
 
+  // Call drawPath without clip if possible for better performance.
+  SkPaint paint;
+  paint.setColor(color_);
+  if (clip_behavior_ != Clip::antiAliasWithSaveLayer) {
+    context.canvas.drawPath(path_, paint);
+  }
+
   int saveCount = context.canvas.save();
   switch (clip_behavior_) {
     case Clip::hardEdge:
@@ -103,11 +110,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
       break;
   }
 
-  SkPaint paint;
-  paint.setColor(color_);
-  if (clip_behavior_ == Clip::none) {
-    context.canvas.drawPath(path_, paint);
-  } else {
+  if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
     // If we want to avoid the bleeding edge artifact
     // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
     // using saveLayer, we have to call drawPaint instead of drawPath as
