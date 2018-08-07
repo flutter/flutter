@@ -1,4 +1,4 @@
-Signature: 7d60646cc789255e676f6dec518b10d9
+Signature: 42b166482c76a9b2cf87ed4d26e2421a
 
 UNUSED LICENSES:
 
@@ -1270,9 +1270,11 @@ LIBRARY: skcms
 LIBRARY: skia
 LIBRARY: vulkan
 LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/bench/GrCCGeometryBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/CompositingImagesBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
 FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
+FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
 FILE: ../../../third_party/skia/bench/JSONBench.cpp
 FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
@@ -1324,6 +1326,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGColorFilter.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGGradient.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGImage.h
@@ -1334,6 +1337,7 @@ FILE: ../../../third_party/skia/modules/sksg/include/SkSGRoundEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGScene.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGText.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGClipEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGColorFilter.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryTransform.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGGradient.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGImage.cpp
@@ -2773,12 +2777,10 @@ FILE: ../../../third_party/skia/src/gpu/GrGpuResourceCacheAccess.h
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPathRendering.h
 FILE: ../../../third_party/skia/src/gpu/GrPendingIOResource.h
-FILE: ../../../third_party/skia/src/gpu/GrPendingProgramElement.h
 FILE: ../../../third_party/skia/src/gpu/GrPrimitiveProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorAnalysis.h
 FILE: ../../../third_party/skia/src/gpu/GrProgramDesc.h
-FILE: ../../../third_party/skia/src/gpu/GrProgramElement.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer_pow2.h
 FILE: ../../../third_party/skia/src/gpu/GrRectanizer_skyline.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceCache.cpp
@@ -3801,8 +3803,8 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/ClipMaskBench.cpp
 FILE: ../../../third_party/skia/bench/ClipStrategyBench.cpp
 FILE: ../../../third_party/skia/bench/ColorCanvasDrawBitmapBench.cpp
+FILE: ../../../third_party/skia/bench/ColorSpaceXformBench.cpp
 FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
-FILE: ../../../third_party/skia/bench/MultitextureImageBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
