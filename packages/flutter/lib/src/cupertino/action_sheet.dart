@@ -29,12 +29,12 @@ const TextStyle _kActionSheetContentStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-// _kCupertinoAlertBlurOverlayDecoration is applied to the blurred backdrop to
-// lighten the blurred image. Brightening is done to counteract the dark modal
-// barrier that appears behind the alert. The overlay blend mode does the
-// brightening. The white color doesn't paint any white, it's just the basis
-// for the overlay blend mode.
-const BoxDecoration _kCupertinoAlertBlurOverlayDecoration = BoxDecoration(
+// This decoration is applied to the blurred backdrop to lighten the blurred
+// image. Brightening is done to counteract the dark modal barrier that
+// appears behind the alert. The overlay blend mode does the brightening.
+// The white color doesn't paint any white, it's just the basis for the
+// overlay blend mode.
+const BoxDecoration _kAlertBlurOverlayDecoration = BoxDecoration(
   color: CupertinoColors.white,
   backgroundBlendMode: BlendMode.overlay,
 );
@@ -66,7 +66,7 @@ const double _kDividerThickness = 1.0;
 
 /// An iOS-style action sheet.
 ///
-/// An action sheet is a specific style of alert that present the user
+/// An action sheet is a specific style of alert that presents the user
 /// with a set of two or more choices related to the current context.
 /// An action sheet can have a title, an additional message, and a list
 /// of actions. The title is displayed above the message and the actions
@@ -76,10 +76,10 @@ const double _kDividerThickness = 1.0;
 /// sheet title and message text style.
 ///
 /// To display action buttons that look like standard iOS action sheet buttons,
-/// provide [ActionSheetAction]s for the [actions] given to this action shet.
+/// provide [CupertinoActionSheetAction]s for the [actions] given to this action sheet.
 ///
 /// To include a iOS-style cancel button separate from the other buttons,
-/// provide an [ActionSheetAction] for the [cancelButton] given to this
+/// provide an [CupertinoActionSheetAction] for the [cancelButton] given to this
 /// action sheet.
 ///
 /// An action sheet is typically passed as the child widget to
@@ -88,7 +88,7 @@ const double _kDividerThickness = 1.0;
 ///
 /// See also:
 ///
-///  * [ActionSheetAction], which is an iOS-style action sheet button.
+///  * [CupertinoActionSheetAction], which is an iOS-style action sheet button.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
 class CupertinoActionSheet extends StatelessWidget {
   /// Creates an iOS-style action sheet.
@@ -109,13 +109,13 @@ class CupertinoActionSheet extends StatelessWidget {
   })  : assert(actions != null || title != null || message != null || cancelButton != null),
         super(key: key);
 
-  /// The optional title of the action sheet. When the [message] is non-null,
+  /// An optional title of the action sheet. When the [message] is non-null,
   /// the font of the [title] is bold.
   ///
   /// Typically a [Text] widget.
   final Widget title;
 
-  /// The optional descriptive message that provides more details about the
+  /// An optional descriptive message that provides more details about the
   /// reason for the alert.
   ///
   /// Typically a [Text] widget.
@@ -123,7 +123,7 @@ class CupertinoActionSheet extends StatelessWidget {
 
   /// The set of actions that are displayed for the user to select.
   ///
-  /// Typically this is a list of [ActionSheetAction] widgets.
+  /// Typically this is a list of [CupertinoActionSheetAction] widgets.
   final List<Widget> actions;
 
   /// A scroll controller that can be used to control the scrolling of the
@@ -142,7 +142,7 @@ class CupertinoActionSheet extends StatelessWidget {
   /// The optional cancel button that is grouped separately from the other
   /// actions.
   ///
-  /// Typically this is an [ActionSheetAction] widget.
+  /// Typically this is an [CupertinoActionSheetAction] widget.
   final Widget cancelButton;
 
   Widget _buildContent() {
@@ -200,7 +200,7 @@ class CupertinoActionSheet extends StatelessWidget {
         child: new BackdropFilter(
           filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
           child: new Container(
-            decoration: _kCupertinoAlertBlurOverlayDecoration,
+            decoration: _kAlertBlurOverlayDecoration,
             child: new _CupertinoAlertRenderWidget(
               contentSection: _buildContent(),
               actionsSection: _buildActions(),
@@ -248,17 +248,17 @@ class CupertinoActionSheet extends StatelessWidget {
   }
 }
 
-/// A button typically used in an [CupertinoActionSheet].
+/// A button typically used in a [CupertinoActionSheet].
 ///
 /// See also:
 ///
 ///  * [CupertinoActionSheet], an alert that presents the user with a set of two or
 ///    more choices related to the current context.
-class ActionSheetAction extends StatelessWidget {
+class CupertinoActionSheetAction extends StatelessWidget {
   ///Creates an action for an iOS-style action sheet.
   ///
   /// The [child] and [onPressed] arguments must not be null.
-  const ActionSheetAction({
+  const CupertinoActionSheetAction({
     @required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
@@ -488,22 +488,21 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   }
 }
 
-// iOS style layout policy for sizing an alert's content section and action
+// An iOS-style layout policy for sizing an alert's content section and action
 // button section.
 //
 // The policy is as follows:
 //
-// If all content and buttons fit on screen:
+// If all content and buttons fit on the screen:
 // The content section and action button section are sized intrinsically.
 //
-// If all content and buttons do not fit on screen:
+// If all content and buttons do not fit on the screen:
 // A minimum height for the action button section is calculated. The action
 // button section will not be rendered shorter than this minimum.  See
-// [_RenderCupertinoAlertActions] for the minimum height calculation.
+// _RenderCupertinoAlertActions for the minimum height calculation.
 //
-// With the minimum action button section calculated, the content section is
-// laid out as tall as it wants to be, up to the point that it hits the
-// minimum button height at the bottom.
+// With the minimum action button section calculated, the content section can
+// take up as much of the remaining space as it needs.
 //
 // After the content section is laid out, the action button section is allowed
 // to take up any remaining space that was not consumed by the content section.
@@ -732,10 +731,10 @@ enum _AlertSections {
   actionsSection,
 }
 
-// The "content section" of an [ActionSheet].
+// The "content section" of a CupertinoActionSheet.
 //
 // If title is missing, then only content is added.  If content is
-// missing, then only title is added. If both are missing, then it returns
+// missing, then only a title is added. If both are missing, then it returns
 // a SingleChildScrollView with a zero-sized Container.
 class _CupertinoAlertContentSection extends StatelessWidget {
   const _CupertinoAlertContentSection({
@@ -745,13 +744,13 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     this.scrollController,
   }) : super(key: key);
 
-  // The optional title of the action sheet. When the message is non-null,
+  // An optional title of the action sheet. When the message is non-null,
   // the font of the title is bold.
   //
   // Typically a Text widget.
   final Widget title;
 
-  // The optional descriptive message that provides more details about the
+  // An optional descriptive message that provides more details about the
   // reason for the alert.
   //
   // Typically a Text widget.
@@ -831,9 +830,9 @@ class _CupertinoAlertContentSection extends StatelessWidget {
   }
 }
 
-// The "actions section" of an [ActionSheet].
+// The "actions section" of a CupertinoActionSheet.
 //
-// See [_RenderCupertinoAlertActions] for details about action button sizing
+// See _RenderCupertinoAlertActions for details about action button sizing
 // and layout.
 class _CupertinoAlertActionSection extends StatefulWidget {
   const _CupertinoAlertActionSection({
@@ -886,7 +885,7 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
   }
 }
 
-// Button that updates its render state when pressed.
+// A button that updates its render state when pressed.
 //
 // The pressed state is forwarded to an _ActionButtonParentDataWidget. The
 // corresponding _ActionButtonParentData is then interpreted and rendered
@@ -929,7 +928,7 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
 // the alert can correctly render the button. The pressed state is held within
 // _ActionButtonParentData. _ActionButtonParentDataWidget is responsible for
 // updating the pressed state of an _ActionButtonParentData based on the
-// incoming [isPressed] property.
+// incoming isPressed property.
 class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoAlertActionsRenderWidget> {
   const _ActionButtonParentDataWidget({
     Key key,
@@ -964,9 +963,9 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
   bool isPressed;
 }
 
-// iOS style alert action button layout.
+// An iOS-style alert action button layout.
 //
-// See [_RenderCupertinoAlertActions] for specific layout policy details.
+// See _RenderCupertinoAlertActions for specific layout policy details.
 class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   _CupertinoAlertActionsRenderWidget({
     Key key,
@@ -995,7 +994,8 @@ class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
   }
 }
 
-// iOS-style layout policy for sizing and positioning an action sheet's buttons.
+// An iOS-style layout policy for sizing and positioning an action sheet's
+// buttons.
 //
 // The policy is as follows:
 //

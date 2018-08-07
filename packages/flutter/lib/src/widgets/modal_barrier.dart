@@ -33,7 +33,7 @@ class ModalBarrier extends StatelessWidget {
     this.color,
     this.dismissible = true,
     this.semanticsLabel,
-    this.barrierSemanticsDismissible,
+    this.barrierSemanticsDismissible = false,
   }) : super(key: key);
 
   /// If non-null, fill the barrier with this color.

@@ -146,10 +146,10 @@ class BoxDecoration extends Decoration {
 
   /// The blend mode applied to the [color] or [gradient] background of the box.
   ///
-  /// If no [backgroundBlendMode] is provided then the default painting blend
+  /// If no [backgroundBlendMode] is provided, then the default painting blend
   /// mode is used.
   ///
-  /// If no [color] or [gradient] is provided then blend mode has no impact.
+  /// If no [color] or [gradient] is provided, then blend mode has no impact.
   final BlendMode backgroundBlendMode;
 
   /// The shape to fill the background [color], [gradient], and [image] into and

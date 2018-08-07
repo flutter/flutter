@@ -787,9 +787,9 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 /// It is only used when the method is called. Its corresponding widget can be
 /// safely removed from the tree before the popup is closed.
 ///
-/// The `builder` argument typically builds a [ActionSheet] widget. Content
-/// below the widget is dimmed with a [ModalBarrier]. The widget built by the
-/// `builder` does not share a context with the location that
+/// The `builder` argument typically builds a [CupertinoActionSheet] widget.
+/// Content below the widget is dimmed with a [ModalBarrier]. The widget built
+/// by the `builder` does not share a context with the location that
 /// `showCupertinoModalPopup` is originally called from. Use a
 /// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
 /// update dynamically.

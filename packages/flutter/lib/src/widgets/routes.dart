@@ -910,8 +910,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// effect.
   ///
   /// If [semanticsDismissible] is false, then modal barrier semantics are
-  /// .
-  bool get semanticsDismissible => true;
+  /// included in the semantics tree.
+  bool get semanticsDismissible => false;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
