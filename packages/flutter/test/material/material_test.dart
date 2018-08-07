@@ -190,7 +190,7 @@ void main() {
         new Material(
           key: materialKey,
           type: MaterialType.transparency,
-          borderRadius: const BorderRadius.all(const Radius.circular(10.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(10.0)),
           child: const SizedBox(width: 100.0, height: 100.0)
         )
       );
@@ -198,7 +198,7 @@ void main() {
       expect(
         find.byKey(materialKey),
         clipsWithBoundingRRect(
-          borderRadius: const BorderRadius.all(const Radius.circular(10.0))
+          borderRadius: const BorderRadius.all(Radius.circular(10.0))
         ),
       );
     });
@@ -247,7 +247,7 @@ void main() {
         new Material(
           key: materialKey,
           type: MaterialType.canvas,
-          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
         )
@@ -255,7 +255,7 @@ void main() {
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
-          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 1.0,
       ));
     });
@@ -290,7 +290,7 @@ void main() {
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
-          borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(2.0)),
           elevation: 0.0,
       ));
     });
@@ -301,7 +301,7 @@ void main() {
         new Material(
           key: materialKey,
           type: MaterialType.card,
-          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
         )
@@ -309,7 +309,7 @@ void main() {
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
-          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
           elevation: 5.0,
       ));
     });
@@ -362,7 +362,7 @@ void main() {
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
-          borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(2.0)),
           elevation: 0.0,
       ));
     });
@@ -375,14 +375,14 @@ void main() {
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
-          borderRadius: const BorderRadius.all(const Radius.circular(6.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
         )
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
           shape: BoxShape.rectangle,
-          borderRadius: const BorderRadius.all(const Radius.circular(6.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(6.0)),
           elevation: 4.0,
       ));
     });
@@ -417,9 +417,9 @@ void main() {
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           shape: const CircleBorder(
-            side: const BorderSide(
+            side: BorderSide(
               width: 2.0,
-              color: const Color(0xFF0000FF),
+              color: Color(0xFF0000FF),
             )
           ),
         )
@@ -437,9 +437,9 @@ void main() {
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),
           shape: const CircleBorder(
-            side: const BorderSide(
+            side: BorderSide(
               width: 2.0,
-              color: const Color(0xFF0000FF),
+              color: Color(0xFF0000FF),
             )
           ),
         )

@@ -10,9 +10,9 @@ import 'common_matchers.dart';
 
 void main() {
   test('CircleBorder', () {
-    const CircleBorder c10 = const CircleBorder(side: const BorderSide(width: 10.0));
-    const CircleBorder c15 = const CircleBorder(side: const BorderSide(width: 15.0));
-    const CircleBorder c20 = const CircleBorder(side: const BorderSide(width: 20.0));
+    const CircleBorder c10 = CircleBorder(side: BorderSide(width: 10.0));
+    const CircleBorder c15 = CircleBorder(side: BorderSide(width: 15.0));
+    const CircleBorder c20 = CircleBorder(side: BorderSide(width: 20.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);

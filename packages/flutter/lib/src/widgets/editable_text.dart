@@ -29,7 +29,7 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// (including the cursor location).
 typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
 
-const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
+const Duration _kCursorBlinkHalfPeriod = Duration(milliseconds: 500);
 
 // Number of cursor ticks during which the most recently entered character
 // is shown in an obscured text field.
@@ -399,6 +399,12 @@ class EditableText extends StatefulWidget {
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
+  /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
+  /// This property is most useful for testing purposes.
+  ///
+  /// Defaults to false, resulting in a typical blinking cursor.
+  static bool debugDeterministicCursor = false;
+
   @override
   EditableTextState createState() => new EditableTextState();
 
@@ -691,7 +697,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   // Animation configuration for scrolling the caret back on screen.
-  static const Duration _caretAnimationDuration = const Duration(milliseconds: 100);
+  static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
 
   bool _showCaretOnScreenScheduled = false;
@@ -881,7 +887,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              showCursor: _showCursor,
+              showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,

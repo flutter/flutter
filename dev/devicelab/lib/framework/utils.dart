@@ -244,7 +244,7 @@ Future<Null> forceQuitRunningProcesses() async {
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
-    print('Force quitting process:\n$p');
+    print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
       print('Failed to force quit process');
     }
@@ -528,8 +528,6 @@ int parseServicePort(String line, {
   // e.g. "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
   final RegExp pattern = new RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
   final Match match = pattern.firstMatch(line);
-  print(pattern);
-  print(match);
   return match == null ? null : int.parse(match.group(2));
 }
 
@@ -541,7 +539,7 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       // If engine flavor was not specified explicitly then scan options looking
       // for flags that specify the engine flavor (--release, --profile or
       // --debug). Default flavor to debug if no flags were found.
-      const Map<String, String> optionToFlavor = const <String, String>{
+      const Map<String, String> optionToFlavor = <String, String>{
         '--release': 'release',
         '--debug': 'debug',
         '--profile': 'profile',
@@ -557,7 +555,7 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       flavor ??= 'debug';
     }
 
-    const Map<DeviceOperatingSystem, String> osNames = const <DeviceOperatingSystem, String>{
+    const Map<DeviceOperatingSystem, String> osNames = <DeviceOperatingSystem, String>{
       DeviceOperatingSystem.ios: 'ios',
       DeviceOperatingSystem.android: 'android',
     };

@@ -43,8 +43,6 @@ final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory
   r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
-
-
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   final File plugin = project.directory.childFile(
       fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
@@ -60,6 +58,9 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
+        return FlutterPluginVersion.managed;
+      }
+      if (line.contains("def flutterPluginVersion = 'managed'")) {
         return FlutterPluginVersion.managed;
       }
     }
@@ -90,7 +91,7 @@ Future<GradleProject> _gradleProject() async {
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
-  final FlutterProject flutterProject =  new FlutterProject(fs.currentDirectory);
+  final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   await updateLocalProperties(project: flutterProject);
   final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
@@ -214,7 +215,7 @@ Future<void> updateLocalProperties({
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
 
-  final File localProperties = await project.androidLocalPropertiesFile;
+  final File localProperties = project.androidLocalPropertiesFile;
   bool changed = false;
 
   SettingsFile settings;
@@ -232,7 +233,7 @@ Future<void> updateLocalProperties({
     }
   }
 
-  final FlutterManifest manifest = await project.manifest;
+  final FlutterManifest manifest = project.manifest;
 
   if (androidSdk != null)
     changeIfNecessary('sdk.dir', escapePath(androidSdk.directory));
@@ -360,11 +361,11 @@ Future<Null> _buildGradleProjectV2(
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
-      command,
-      workingDirectory: flutterProject.android.directory.path,
-      allowReentrantFlutter: true,
-      environment: _gradleEnv,
-      filter: logger.isVerbose ? null : ndkMessageFilter,
+    command,
+    workingDirectory: flutterProject.android.directory.path,
+    allowReentrantFlutter: true,
+    environment: _gradleEnv,
+    filter: logger.isVerbose ? null : ndkMessageFilter,
   );
   status.stop();
 

@@ -129,7 +129,7 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
     return new Stack(
       children: <Widget>[
         new VideoPlayer(widget.controller),
-        const Center(child: const CircularProgressIndicator()),
+        const Center(child: CircularProgressIndicator()),
       ],
       fit: StackFit.expand,
     );
@@ -184,12 +184,12 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
             }
             if (controller.value.isPlaying) {
               imageFadeAnimation = const FadeAnimation(
-                child: const Icon(Icons.pause, size: 100.0),
+                child: Icon(Icons.pause, size: 100.0),
               );
               controller.pause();
             } else {
               imageFadeAnimation = const FadeAnimation(
-                child: const Icon(Icons.play_arrow, size: 100.0),
+                child: Icon(Icons.play_arrow, size: 100.0),
               );
               controller.play();
             }
@@ -283,11 +283,11 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   StreamSubscription<ConnectivityResult> connectivitySubscription;
   bool connected = true;
 
-  static const Widget errorSnackBar = const SnackBar(
+  static const Widget errorSnackBar = SnackBar(
     backgroundColor: Colors.red,
-    content: const ListTile(
-      title: const Text('No network'),
-      subtitle: const Text(
+    content: ListTile(
+      title: Text('No network'),
+      subtitle: Text(
         'To load the videos you must have an active network connection',
       ),
     ),
@@ -420,7 +420,7 @@ class _VideoDemoState extends State<VideoDemo>
               scaffoldKey: scaffoldKey,
             )
           : const Center(
-              child: const Text(
+              child: Text(
                 'Video playback not supported on the iOS Simulator.',
               ),
             ),

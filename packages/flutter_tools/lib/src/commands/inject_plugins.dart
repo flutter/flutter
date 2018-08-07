@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../base/file_system.dart';
 import '../globals.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -26,7 +25,7 @@ class InjectPluginsCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    final FlutterProject project = new FlutterProject(fs.currentDirectory);
+    final FlutterProject project = await FlutterProject.current();
     await injectPlugins(project);
     final bool result = hasPlugins(project);
     if (result) {

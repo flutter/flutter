@@ -17,8 +17,7 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.ipv6,
-  }) : assert(logReader != null),
-       _prefix = '$serviceName listening on ' {
+  }) : assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
 
@@ -30,7 +29,8 @@ class ProtocolDiscovery {
   }) {
     const String kObservatoryService = 'Observatory';
     return new ProtocolDiscovery._(
-      logReader, kObservatoryService,
+      logReader,
+      kObservatoryService,
       portForwarder: portForwarder,
       hostPort: hostPort,
       ipv6: ipv6,
@@ -43,7 +43,6 @@ class ProtocolDiscovery {
   final int hostPort;
   final bool ipv6;
 
-  final String _prefix;
   final Completer<Uri> _completer = new Completer<Uri>();
 
   StreamSubscription<String> _deviceLogSubscription;
@@ -60,10 +59,13 @@ class ProtocolDiscovery {
 
   void _handleLine(String line) {
     Uri uri;
-    final int index = line.indexOf(_prefix + 'http://');
-    if (index >= 0) {
+
+    final RegExp r = new RegExp('${RegExp.escape(serviceName)} listening on (http://[^ \n]+)');
+    final Match match = r.firstMatch(line);
+
+    if (match != null) {
       try {
-        uri = Uri.parse(line.substring(index + _prefix.length));
+        uri = Uri.parse(match[1]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
@@ -75,6 +77,7 @@ class ProtocolDiscovery {
       _stopScrapingLogs();
       _completer.complete(_forwardPort(uri));
     }
+
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {

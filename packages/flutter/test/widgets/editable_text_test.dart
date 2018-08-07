@@ -18,8 +18,8 @@ void main() {
   final TextEditingController controller = new TextEditingController();
   final FocusNode focusNode = new FocusNode();
   final FocusScopeNode focusScopeNode = new FocusScopeNode();
-  const TextStyle textStyle = const TextStyle();
-  const Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const TextStyle textStyle = TextStyle();
+  const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
   setUp(() {
     debugResetSemanticsIdCounter();

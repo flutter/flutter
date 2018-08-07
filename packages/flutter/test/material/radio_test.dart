@@ -166,7 +166,7 @@ void main() {
     ), ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(const Material(
-      child: const Radio<int>(
+      child: Radio<int>(
         value: 1,
         groupValue: 2,
         onChanged: null,
@@ -187,7 +187,7 @@ void main() {
     ), ignoreRect: true, ignoreTransform: true));
 
     await tester.pumpWidget(const Material(
-      child: const Radio<int>(
+      child: Radio<int>(
         value: 2,
         groupValue: 2,
         onChanged: null,

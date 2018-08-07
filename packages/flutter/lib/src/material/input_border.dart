@@ -33,7 +33,7 @@ abstract class InputBorder extends ShapeBorder {
   /// Use this value with [InputDecoration.border] to specify that no border
   /// should be drawn. The [InputDecoration.shrinkWrap] constructor sets
   /// its border to this value.
-  static const InputBorder none = const _NoInputBorder();
+  static const InputBorder none = _NoInputBorder();
 
   /// Creates a border for an [InputDecorator].
   ///
@@ -141,8 +141,8 @@ class UnderlineInputBorder extends InputBorder {
   const UnderlineInputBorder({
     BorderSide borderSide = BorderSide.none,
     this.borderRadius = const BorderRadius.only(
-      topLeft: const Radius.circular(4.0),
-      topRight: const Radius.circular(4.0),
+      topLeft: Radius.circular(4.0),
+      topRight: Radius.circular(4.0),
     ),
   }) : assert(borderRadius != null),
        super(borderSide: borderSide);
@@ -267,7 +267,7 @@ class OutlineInputBorder extends InputBorder {
   /// [Radius.x] and [Radius.y] values must be the same.
   const OutlineInputBorder({
     BorderSide borderSide = BorderSide.none,
-    this.borderRadius = const BorderRadius.all(const Radius.circular(4.0)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.gapPadding = 4.0,
   }) : assert(borderRadius != null),
        assert(gapPadding != null && gapPadding >= 0.0),

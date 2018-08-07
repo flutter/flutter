@@ -303,6 +303,19 @@ class StepTween extends Tween<int> {
   int lerp(double t) => (begin + (end - begin) * t).floor();
 }
 
+/// A tween with a constant value.
+class ConstantTween<T> extends Tween<T> {
+  /// Create a tween whose [begin] and [end] values equal [value].
+  ConstantTween(T value) : super(begin: value, end: value);
+
+  /// This tween doesn't interpolate, it always returns [value].
+  @override
+  T lerp(double t) => begin;
+
+  @override
+  String toString() => '$runtimeType(value: begin)';
+}
+
 /// Transforms the value of the given animation by the given curve.
 ///
 /// This class differs from [CurvedAnimation] in that [CurvedAnimation] applies
