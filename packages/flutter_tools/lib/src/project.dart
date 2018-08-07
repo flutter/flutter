@@ -114,9 +114,8 @@ class FlutterProject {
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (!directory.existsSync() || hasExampleApp) {
+    if (!directory.existsSync() || hasExampleApp)
       return;
-    }
     await android.ensureReadyForPlatformSpecificTooling(this);
     await ios.ensureReadyForPlatformSpecificTooling(this);
     await injectPlugins(this);
@@ -155,6 +154,10 @@ class IosProject {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject parent) async {
+    if (isModule && _shouldRegenerateFromTemplate()) {
+      final Template template = new Template.fromName(fs.path.join('module', 'ios'));
+      template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
+    }
     if (!directory.existsSync())
       return;
     if (Cache.instance.fileOlderThanToolsStamp(generatedXcodePropertiesFile)) {
@@ -164,11 +167,6 @@ class IosProject {
         targetOverride: bundle.defaultMainPath,
         previewDart2: true,
       );
-    }
-
-    if (isModule && _shouldRegenerateFromTemplate()) {
-      final Template template = new Template.fromName(fs.path.join('module', 'ios'));
-      template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
     }
   }
 
@@ -228,9 +226,6 @@ class AndroidProject {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject parent) async {
-    if (!directory.existsSync())
-      return;
-    await gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
     if (isModule && _shouldRegenerateFromTemplate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'android'));
       template.render(
@@ -242,6 +237,9 @@ class AndroidProject {
       );
       gradle.injectGradleWrapper(directory);
     }
+    if (!directory.existsSync())
+      return;
+    await gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
   }
 
   bool _shouldRegenerateFromTemplate() {

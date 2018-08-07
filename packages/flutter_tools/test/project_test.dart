@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:test/test.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-
 import 'src/context.dart';
 
 void main() {
@@ -29,10 +30,14 @@ void main() {
         fs.currentDirectory.absolute.path,
       );
     });
-    
+
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
-        final FlutterProject project = someProject();
+        final FlutterProject project = new FlutterProject(
+          fs.directory('not_created'),
+          FlutterManifest.empty(),
+          FlutterManifest.empty(),
+        );
         await project.ensureReadyForPlatformSpecificTooling();
         expect(project.directory.existsSync(), isFalse);
       });
@@ -40,17 +45,42 @@ void main() {
         final FlutterProject project = aPluginProject();
         await project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isFalse);
+        expect(project.android.directory.childFile(
+          'app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        ).existsSync(), isFalse);
         expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isFalse);
+        expect(project.android.directory.childFile('local.properties').existsSync(), isFalse);
       });
-      testInMemory('injects plugins', () async {
-        final FlutterProject project = aProjectWithIos();
+      testInMemory('injects plugins for iOS', () async {
+        final FlutterProject project = someProject();
         await project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isTrue);
       });
-      testInMemory('generates Xcode configuration', () async {
-        final FlutterProject project = aProjectWithIos();
+      testInMemory('generates Xcode configuration for iOS', () async {
+        final FlutterProject project = someProject();
         await project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isTrue);
+      });
+      testInMemory('injects plugins for Android', () async {
+        final FlutterProject project = someProject();
+        await project.ensureReadyForPlatformSpecificTooling();
+        expect(project.android.directory.childFile(
+          'app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        ).existsSync(), isTrue);
+      });
+      testInMemory('updates local properties for Android', () async {
+        final FlutterProject project = someProject();
+        await project.ensureReadyForPlatformSpecificTooling();
+        expect(project.android.directory.childFile('local.properties').existsSync(), isTrue);
+      });
+      testInMemory('creates Android library in module', () async {
+        final FlutterProject project = aModuleProject();
+        await project.ensureReadyForPlatformSpecificTooling();
+        expect(project.android.directory.childFile('local.properties').existsSync(), isTrue);
+        expect(project.android.directory.childFile('settings.gradle').existsSync(), isTrue);
+        expect(project.android.directory.childFile(
+          'Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        ).existsSync(), isTrue);
       });
     });
 
@@ -58,10 +88,18 @@ void main() {
       testInMemory('is known for module', () async {
         final FlutterProject project = aModuleProject();
         expect(project.isModule, isTrue);
+        expect(project.android.isModule, isTrue);
+        expect(project.ios.isModule, isTrue);
+        expect(project.android.directory.path, startsWith('module_project/.android'));
+        expect(project.ios.directory.path, startsWith('module_project/.ios'));
       });
       testInMemory('is known for non-module', () async {
         final FlutterProject project = someProject();
         expect(project.isModule, isFalse);
+        expect(project.android.isModule, isFalse);
+        expect(project.ios.isModule, isFalse);
+        expect(project.android.directory.path, startsWith('some_project/android'));
+        expect(project.ios.directory.path, startsWith('some_project/ios'));
       });
     });
 
@@ -130,24 +168,25 @@ void main() {
   });
 }
 
-FlutterProject someProject() => new FlutterProject(
-  fs.directory('some_project'),
-  FlutterManifest.empty(),
-  FlutterManifest.empty(),
-);
-
-FlutterProject aProjectWithIos() {
-  final Directory directory = fs.directory('ios_project');
+FlutterProject someProject() {
+  final Directory directory = fs.directory('some_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childDirectory('ios').createSync(recursive: true);
-  return new FlutterProject(directory, FlutterManifest.empty(), FlutterManifest.empty());
+  directory.childDirectory('android').createSync(recursive: true);
+  return new FlutterProject(
+    directory,
+    FlutterManifest.empty(),
+    FlutterManifest.empty(),
+  );
 }
 
 FlutterProject aPluginProject() {
-  final Directory directory = fs.directory('plugin_project/example');
-  directory.createSync(recursive: true);
+  final Directory directory = fs.directory('plugin_project');
+  directory.childDirectory('ios').createSync(recursive: true);
+  directory.childDirectory('android').createSync(recursive: true);
+  directory.childDirectory('example').createSync(recursive: true);
   return new FlutterProject(
-    directory.parent,
+    directory,
     FlutterManifest.mock(const <String, dynamic>{
       'flutter': <String, dynamic>{
         'plugin': <String, dynamic>{}
@@ -158,11 +197,15 @@ FlutterProject aPluginProject() {
 }
 
 FlutterProject aModuleProject() {
+  final Directory directory = fs.directory('module_project');
+  directory.childFile('.packages').createSync(recursive: true);
   return new FlutterProject(
-    fs.directory('module_project'),
+    directory,
     FlutterManifest.mock(const <String, dynamic>{
       'flutter': <String, dynamic>{
-        'module': <String, dynamic>{}
+        'module': <String, dynamic>{
+          'androidPackage': 'com.example'
+        }
       }
     }),
     FlutterManifest.empty(),
@@ -170,11 +213,34 @@ FlutterProject aModuleProject() {
 }
 
 void testInMemory(String description, Future<Null> testMethod()) {
+  Cache.flutterRoot = 'flutter';
+  final FileSystem fs = new MemoryFileSystem();
+  // Pretend we have a project template.
+  fs.directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childDirectory('templates')
+      .childDirectory('module')
+      .childDirectory('android')
+      .childFile('settings.gradle.tmpl')
+      .createSync(recursive: true);
+
+  // Sets up cache in a text execution context where fs is the FileSystem.
+  Cache cacheCreator() {
+    final Cache cache = new Cache(rootOverride: fs.directory('flutter'));
+    cache.getArtifactDirectory('gradle_wrapper')
+        .childDirectory('gradle')
+        .childDirectory('wrapper')
+        .childFile('gradle-wrapper.properties')
+        .createSync(recursive: true);
+    return cache;
+  }
   testUsingContext(
     description,
     testMethod,
     overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
+      FileSystem: () => fs,
+      Cache: cacheCreator,
     },
   );
 }
