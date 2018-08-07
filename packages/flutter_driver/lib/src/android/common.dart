@@ -118,7 +118,7 @@ class AndroidSemanticsNode  {
 
 /// A Dart VM implementation of a rectangle.
 ///
-/// Created to mirror the implementation of `Rect` from 'dart:ui';
+/// Created to mirror the implementation of [ui.Rect].
 @immutable
 class Rect {
   /// Creates a new rectangle.
@@ -159,7 +159,7 @@ class Rect {
 
 /// A Dart VM implementation of a Size.
 ///
-/// Created to mirror the implementation of `Size` from 'dart:ui'
+/// Created to mirror the implementation [ui.Size].
 @immutable
 class Size {
   /// Creates a new [Size] object.

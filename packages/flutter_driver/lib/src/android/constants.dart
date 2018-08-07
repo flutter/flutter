@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 
 /// Class name constants which correspond to the class names used by the
-/// Android AccessibilityBridge.
+/// Android accessibility bridge.
 class AndroidClassName {
   /// The class name used for checkboxes.
   static const String checkBox = 'android.widget.CheckBox';
