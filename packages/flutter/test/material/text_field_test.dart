@@ -1809,11 +1809,11 @@ void main() {
             focusNode: focusNode,
             onKey: events.add,
             child: DefaultTextStyle(
-              style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+              style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0), maxLines: 10,
               child: Center(
                 child: TextField(
-                  maxLength: 10,
                   controller: controller,
+                  maxLines: 10,
                 ),
               ) ,
             ),
@@ -1895,12 +1895,36 @@ void main() {
         sendKeyEventWithCode(22);
         await tester.pumpAndSettle();
       }
-      sendKeyEventWithCode(59, false);
+      sendKeyEventWithCode(59);
       await tester.pumpAndSettle();
+      sendKeyEventWithCode(20);
+      await tester.pumpAndSettle();
+      // 'mom\nis ap'
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 10);
+
+      sendKeyEventWithCode(20);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 15);
+
       sendKeyEventWithCode(20, false);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+      sendKeyEventWithCode(19);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 10);
+
+      sendKeyEventWithCode(19);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+
+      sendKeyEventWithCode(19);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+
     });
   });
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
