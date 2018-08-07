@@ -403,10 +403,11 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   const CupertinoNavigationBarBackButton._assemble(
     this._backChevron,
     this._backLabel,
-  ) : color = null,
-      previousPageTitle = null;
+    this.color,
+  ) : previousPageTitle = null,
+      assert(color != null);
 
-  /// The [Color] of the back chevron.
+  /// The [Color] of the back button.
   ///
   /// Must not be null.
   final Color color;
@@ -436,20 +437,23 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
         button: true,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
-          child: new Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
-              _backChevron ?? new _BackChevron(color: color),
-              const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
-              new Flexible(
-                child: _backLabel ?? new _BackLabel(
-                  specifiedPreviousTitle: previousPageTitle,
-                  route: currentRoute,
+          child: new DefaultTextStyle(
+            style: _navBarItemStyle(color),
+            child: new Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
+                _backChevron ?? const _BackChevron(),
+                const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
+                new Flexible(
+                  child: _backLabel ?? new _BackLabel(
+                    specifiedPreviousTitle: previousPageTitle,
+                    route: currentRoute,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

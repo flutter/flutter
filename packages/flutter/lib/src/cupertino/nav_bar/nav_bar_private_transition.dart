@@ -69,11 +69,13 @@ class _NavigationBarTransition extends StatelessWidget {
         },
       ),
       componentsTransition.bottomBackChevron,
+      componentsTransition.bottomBackLabel,
       componentsTransition.bottomLeading,
       componentsTransition.bottomMiddle,
       componentsTransition.bottomLargeTitle,
       componentsTransition.bottomTrailing,
       componentsTransition.topBackChevron,
+      componentsTransition.topBackLabel,
       componentsTransition.topMiddle,
       componentsTransition.topLargeTitle,
       componentsTransition.topTrailing,
@@ -128,7 +130,7 @@ class _NavigationBarComponentsTransition {
     );
   }
 
-  RelativeRectTween slideLeadingEdge({
+  RelativeRectTween slideFromLeadingEdge({
     @required _RenderObjectFindingWidget from,
     @required RenderBox fromNavBarBox,
     @required _RenderObjectFindingWidget to,
@@ -150,13 +152,37 @@ class _NavigationBarComponentsTransition {
       );
   }
 
-  Animation<double> fadeInFrom(double t, { Curve curve = Curves.linear }) {
+  RelativeRectTween slideToLeadingEdge({
+    @required _RenderObjectFindingWidget from,
+    @required RenderBox fromNavBarBox,
+    @required _RenderObjectFindingWidget to,
+    @required RenderBox toNavBarBox,
+  }) {
+    // Put the 'to' widget with the 'to' render box's size at the position
+    // offset where its leading center is at the leading center of the 'from'
+    // render box.
+    final Rect fromRect = from.renderBox.localToGlobal(
+          Offset.zero,
+          ancestor: fromNavBarBox,
+        ).translate(
+          0.0,
+          - to.renderBox.size.height / 2 + from.renderBox.size.height / 2
+        ) & to.renderBox.size;
+    final RelativeRect toRect = positionInTransitionBox(to, from: toNavBarBox);
+
+    return new RelativeRectTween(
+      begin: new RelativeRect.fromRect(fromRect, transitionBox),
+      end: toRect,
+    );
+  }
+
+  Animation<double> fadeInFrom(double t, { Curve curve = Curves.easeIn }) {
     return fadeIn.animate(
       new CurvedAnimation(curve: new Interval(t, 1.0, curve: curve), parent: animation),
     );
   }
 
-  Animation<double> fadeOutBy(double t, { Curve curve = Curves.linear }) {
+  Animation<double> fadeOutBy(double t, { Curve curve = Curves.easeOut }) {
     return fadeOut.animate(
       new CurvedAnimation(curve: new Interval(0.0, t, curve: curve), parent: animation),
     );
@@ -189,7 +215,36 @@ class _NavigationBarComponentsTransition {
       rect: positionInTransitionBox(bottomBackChevron, from: bottomNavBarBox),
       child: new FadeTransition(
         opacity: fadeOutBy(0.6),
-        child: bottomBackChevron.child,
+        child: new DefaultTextStyle(
+          style: bottomComponents.actionsStyle,
+          child: bottomBackChevron.child,
+        ),
+      ),
+    );
+  }
+
+  Widget get bottomBackLabel {
+    final _RenderObjectFindingWidget bottomBackLabel = bottomComponents.backLabel;
+
+    if (bottomBackLabel == null) {
+      return null;
+    }
+
+    final RelativeRect from = positionInTransitionBox(bottomBackLabel, from: bottomNavBarBox);
+
+    final RelativeRectTween positionTween = new RelativeRectTween(
+      begin: from,
+      end: from.shift(new Offset(-bottomNavBarBox.size.width / 2.0, 0.0)),
+    );
+
+    return new PositionedTransition(
+      rect: positionTween.animate(animation),
+      child: new FadeTransition(
+        opacity: fadeOutBy(0.2),
+        child: new DefaultTextStyle(
+          style: topComponents.actionsStyle,
+          child: bottomBackLabel.child,
+        ),
       ),
     );
   }
@@ -207,20 +262,25 @@ class _NavigationBarComponentsTransition {
 
     if (bottomMiddle != null && topBackLabel != null) {
       return new PositionedTransition(
-        rect: slideLeadingEdge(
+        rect: slideFromLeadingEdge(
           from: bottomMiddle,
           fromNavBarBox: bottomNavBarBox,
           to: topBackLabel,
           toNavBarBox: topNavBarBox,
         ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeOutBy(0.9),
-          child: new DefaultTextStyleTransition(
-            style: TextStyleTween(
-              begin: _kMiddleTitleTextStyle,
-              end: topComponents.actionsStyle,
-            ).animate(animation),
-            child: bottomMiddle.child,
+          opacity: fadeOutBy(bottomComponents.hasUserMiddle ? 0.4 : 0.7),
+          child: new Align(
+            // As the text shrinks, make sure it's still anchored to the leading
+            // edge.
+            alignment: AlignmentDirectional.centerStart,
+            child: new DefaultTextStyleTransition(
+              style: TextStyleTween(
+                begin: _kMiddleTitleTextStyle,
+                end: topComponents.actionsStyle,
+              ).animate(animation),
+              child: bottomMiddle.child,
+            ),
           ),
         ),
       );
@@ -239,22 +299,27 @@ class _NavigationBarComponentsTransition {
 
     if (bottomLargeTitle != null && topBackLabel != null) {
       return new PositionedTransition(
-        rect: slideLeadingEdge(
+        rect: slideFromLeadingEdge(
           from: bottomLargeTitle,
           fromNavBarBox: bottomNavBarBox,
           to: topBackLabel,
           toNavBarBox: topNavBarBox,
         ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeOutBy(0.9),
-          child: new DefaultTextStyleTransition(
-            style: TextStyleTween(
-              begin: _kLargeTitleTextStyle,
-              end: topComponents.actionsStyle,
-            ).animate(animation),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            child: bottomLargeTitle.child,
+          opacity: fadeOutBy(0.6),
+          child: new Align(
+            // As the text shrinks, make sure it's still anchored to the leading
+            // edge.
+            alignment: AlignmentDirectional.centerStart,
+            child: new DefaultTextStyleTransition(
+              style: TextStyleTween(
+                begin: _kLargeTitleTextStyle,
+                end: topComponents.actionsStyle,
+              ).animate(animation),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              child: bottomLargeTitle.child,
+            ),
           ),
         ),
       );
@@ -306,9 +371,68 @@ class _NavigationBarComponentsTransition {
       rect: positionTween.animate(animation),
       child: new FadeTransition(
         opacity: fadeInFrom(0.4),
-        child: topBackChevron.child,
+        child: new DefaultTextStyle(
+          style: topComponents.actionsStyle,
+          child: topBackChevron.child,
+        ),
       ),
     );
+  }
+
+  Widget get topBackLabel {
+    final _RenderObjectFindingWidget bottomMiddle = bottomComponents.middle;
+    final _RenderObjectFindingWidget bottomLargeTitle = bottomComponents.largeTitle;
+    final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
+
+    if (bottomLargeTitle != null && topBackLabel != null) {
+      return new PositionedTransition(
+        rect: slideFromLeadingEdge(
+          from: bottomLargeTitle,
+          fromNavBarBox: bottomNavBarBox,
+          to: topBackLabel,
+          toNavBarBox: topNavBarBox,
+        ).animate(animation),
+        child: new FadeTransition(
+          opacity: fadeInFrom(bottomComponents.hasUserMiddle ? 0.6 : 0.4),
+          child: new DefaultTextStyleTransition(
+            style: TextStyleTween(
+              begin: _kLargeTitleTextStyle,
+              end: topComponents.actionsStyle,
+            ).animate(animation),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            child: topBackLabel.child,
+          ),
+        ),
+      );
+    }
+
+    if (bottomMiddle != null && topBackLabel != null) {
+      return new PositionedTransition(
+        rect: slideFromLeadingEdge(
+          from: bottomMiddle,
+          fromNavBarBox: bottomNavBarBox,
+          to: topBackLabel,
+          toNavBarBox: topNavBarBox,
+        ).animate(animation),
+        child: new FadeTransition(
+          opacity: fadeInFrom(0.3),
+          child: new DefaultTextStyleTransition(
+            style: TextStyleTween(
+              begin: _kMiddleTitleTextStyle,
+              end: topComponents.actionsStyle,
+            ).animate(animation),
+            child: topBackLabel.child,
+          ),
+        ),
+      );
+    }
+
+    if (bottomMiddle != null && topBackLabel == null) {
+      return topBackLabel.child;
+    }
+
+    return null;
   }
 
   Widget get topMiddle {
@@ -343,6 +467,22 @@ class _NavigationBarComponentsTransition {
     );
   }
 
+  Widget get topTrailing {
+    final _RenderObjectFindingWidget topTrailing = topComponents.trailing;
+
+    if (topTrailing == null) {
+      return null;
+    }
+
+    return new Positioned.fromRelativeRect(
+      rect: positionInTransitionBox(topTrailing, from: topNavBarBox),
+      child: new FadeTransition(
+        opacity: fadeInFrom(0.4),
+        child: topTrailing.child,
+      ),
+    );
+  }
+
   Widget get topLargeTitle {
     final _RenderObjectFindingWidget topLargeTitle = topComponents.largeTitle;
 
@@ -360,24 +500,13 @@ class _NavigationBarComponentsTransition {
     return new PositionedTransition(
       rect: positionTween.animate(animation),
       child: new FadeTransition(
-        opacity: fadeInFrom(0.25),
-        child: topLargeTitle.child,
-      ),
-    );
-  }
-
-  Widget get topTrailing {
-    final _RenderObjectFindingWidget topTrailing = topComponents.trailing;
-
-    if (topTrailing == null) {
-      return null;
-    }
-
-    return new Positioned.fromRelativeRect(
-      rect: positionInTransitionBox(topTrailing, from: topNavBarBox),
-      child: new FadeTransition(
-        opacity: fadeInFrom(0.4),
-        child: topTrailing.child,
+        opacity: fadeInFrom(0.3),
+        child: new DefaultTextStyle(
+          style: _kLargeTitleTextStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          child: topLargeTitle.child,
+        ),
       ),
     );
   }

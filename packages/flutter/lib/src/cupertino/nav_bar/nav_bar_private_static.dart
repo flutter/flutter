@@ -190,16 +190,26 @@ class _LargeTitleNavigationBarSliverDelegate
                 minHeight: 0.0,
                 maxHeight: double.infinity,
                 alignment: AlignmentDirectional.bottomStart,
-                child: new AnimatedOpacity(
-                  opacity: showLargeTitle ? 1.0 : 0.0,
-                  duration: _kNavBarTitleFadeDuration,
-                  child: new Semantics(
-                    header: true,
-                    child: new DefaultTextStyle(
-                      style: _kLargeTitleTextStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      child: components.largeTitle,
+                child: new Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: 8.0, // Bottom has a different padding.
+                  ),
+                  child: new SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: new AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: new Semantics(
+                        header: true,
+                        child: new DefaultTextStyle(
+                          style: _kLargeTitleTextStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          child: components.largeTitle,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -297,7 +307,11 @@ class _PersistentNavigationBar extends StatelessWidget {
     final Widget backLabel = components.backLabel;
 
     if (leading == null && backChevron != null && backLabel != null) {
-      leading = new CupertinoNavigationBarBackButton._assemble(backChevron, backLabel);
+      leading = new CupertinoNavigationBarBackButton._assemble(
+        backChevron,
+        backLabel,
+        components.actionsStyle.color,
+      );
     }
 
     Widget paddedToolbar = new NavigationToolbar(
@@ -356,7 +370,6 @@ class _NavigationBarComponents {
          userLeading: leading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
-         actionsForegroundColor: actionsForegroundColor,
        ),
        backLabel = createBackLabel(
          userLeading: leading,
@@ -456,7 +469,6 @@ class _NavigationBarComponents {
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
-    @required Color actionsForegroundColor,
   }) {
     if (
       userLeading != null ||
@@ -468,7 +480,7 @@ class _NavigationBarComponents {
     }
 
     return new _RenderObjectFindingWidget(
-      child: new _BackChevron(color: actionsForegroundColor),
+      child: const _BackChevron(),
     );
   }
 
@@ -575,17 +587,7 @@ class _NavigationBarComponents {
     }
 
     return new _RenderObjectFindingWidget(
-      child: new Padding(
-        padding: const EdgeInsetsDirectional.only(
-          start: _kNavBarEdgePadding,
-          bottom: 8.0, // Bottom has a different padding.
-        ),
-        child: new SafeArea(
-          top: false,
-          bottom: false,
-          child: largeTitleContent,
-        ),
-      ),
+      child: largeTitleContent,
     );
   }
 
@@ -618,9 +620,9 @@ class _RenderObjectFindingWidget extends StatelessWidget {
           assert(
             ancestor.widget.runtimeType != _NavigationBarTransition,
             '_RenderObjectFindingWidget should never appear inside '
-            '_NavigationBarTransition since we only want to put the child of the '
-            'keyed _RenderObjectFindingWidget into Hero flights rather than '
-            'the _RenderObjectFindingWidget itself.',
+            '_NavigationBarTransition. Keyed _RenderObjectFindingWidgets should '
+            'only serve as anchor points in _TransitionableNavigationBars rather '
+            'than appearing inside Hero flights themselves.',
           );
         }
         return true;
@@ -632,15 +634,12 @@ class _RenderObjectFindingWidget extends StatelessWidget {
 }
 
 class _BackChevron extends StatelessWidget {
-  const _BackChevron({
-    @required this.color,
-  }) : assert(color != null);
-
-  final Color color;
+  const _BackChevron();
 
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
+    final TextStyle textStyle = DefaultTextStyle.of(context).style;
 
     // Replicate the Icon logic here to get a tightly sized icon and add
     // custom non-square padding.
@@ -649,7 +648,7 @@ class _BackChevron extends StatelessWidget {
         text: new String.fromCharCode(CupertinoIcons.back.codePoint),
         style: new TextStyle(
           inherit: false,
-          color: color,
+          color: textStyle.color,
           fontSize: 34.0,
           fontFamily: CupertinoIcons.back.fontFamily,
           package: CupertinoIcons.back.fontPackage,
@@ -691,11 +690,16 @@ class _BackLabel extends StatelessWidget {
       return const SizedBox(height: 0.0, width: 0.0);
     }
 
+    Text textWidget = new Text(previousTitle, maxLines: 1);
+
     if (previousTitle.length > 15) {
-      return const Text('Back');
+      textWidget = const Text('Back');
     }
 
-    return new Text(previousTitle, maxLines: 1);
+    return new Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: textWidget,
+    );
   }
 
   @override
