@@ -130,6 +130,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// To control how long the [SnackBar] remains visible, specify a [duration].
 ///
+/// A SnackBar with an action will not time out when TalkBack or VoiceOver are
+/// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
+///
 /// See also:
 ///
 ///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
