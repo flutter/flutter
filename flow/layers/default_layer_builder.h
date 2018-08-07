@@ -70,7 +70,8 @@ class DefaultLayerBuilder final : public LayerBuilder {
   // |flow::LayerBuilder|
   void PushTexture(const SkPoint& offset,
                    const SkSize& size,
-                   int64_t texture_id) override;
+                   int64_t texture_id,
+                   bool freeze) override;
 
 #if defined(OS_FUCHSIA)
   // |flow::LayerBuilder|

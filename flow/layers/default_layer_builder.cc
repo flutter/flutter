@@ -163,7 +163,8 @@ void DefaultLayerBuilder::PushPicture(const SkPoint& offset,
 
 void DefaultLayerBuilder::PushTexture(const SkPoint& offset,
                                       const SkSize& size,
-                                      int64_t texture_id) {
+                                      int64_t texture_id,
+                                      bool freeze) {
   if (!current_layer_) {
     return;
   }
@@ -171,6 +172,7 @@ void DefaultLayerBuilder::PushTexture(const SkPoint& offset,
   layer->set_offset(offset);
   layer->set_size(size);
   layer->set_texture_id(texture_id);
+  layer->set_freeze(freeze);
   current_layer_->Add(std::move(layer));
 }
 

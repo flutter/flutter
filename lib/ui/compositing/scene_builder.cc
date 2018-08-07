@@ -138,9 +138,10 @@ void SceneBuilder::addTexture(double dx,
                               double dy,
                               double width,
                               double height,
-                              int64_t textureId) {
+                              int64_t textureId,
+                              bool freeze) {
   layer_builder_->PushTexture(SkPoint::Make(dx, dy),
-                              SkSize::Make(width, height), textureId);
+                              SkSize::Make(width, height), textureId, freeze);
 }
 
 void SceneBuilder::addChildScene(double dx,
