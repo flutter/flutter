@@ -904,7 +904,7 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 ///
 /// Typically used with [ListWheelScrollView], this viewport is similar to
 /// [Viewport] in that it shows a subset of children in a scrollable based
-/// on the scrolling offset and the childrens' dimensions. But uses
+/// on the scrolling offset and the children's dimensions. But uses
 /// [RenderListWheelViewport] to display the children on a wheel.
 ///
 /// See also:
