@@ -583,7 +583,24 @@ class _RenderObjectFindingWidget extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(BuildContext context) {
+    assert(() {
+      context.visitAncestorElements((Element ancestor) {
+        if (ancestor is StatelessElement) {
+          assert(
+            ancestor.widget.runtimeType != _NavigationBarTransition,
+            '_RenderObjectFindingWidget should never appear inside '
+            '_NavigationBarTransition since we only want to put the child of the '
+            'keyed _RenderObjectFindingWidget into Hero flights rather than '
+            'the _RenderObjectFindingWidget itself.',
+          );
+        }
+        return true;
+      });
+      return true;
+    }());
+    return child;
+  }
 }
 
 class _BackChevron extends StatelessWidget {
@@ -646,7 +663,7 @@ class _BackLabel extends StatelessWidget {
       return const SizedBox(height: 0.0, width: 0.0);
     }
 
-    if (previousTitle.length > 10) {
+    if (previousTitle.length > 15) {
       return const Text('Back');
     }
 

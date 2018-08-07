@@ -485,12 +485,12 @@ class HeroController extends NavigatorObserver {
 
   @override
   void didStartUserGesture() {
-    _questsEnabled = false;
+    // _questsEnabled = false;
   }
 
   @override
   void didStopUserGesture() {
-    _questsEnabled = true;
+    // _questsEnabled = true;
   }
 
   // If we're transitioning between different page routes, start a hero transition5
@@ -536,7 +536,6 @@ class HeroController extends NavigatorObserver {
     // At this point the toHeroes may have been built and laid out for the first time.
     final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext);
     final Map<Object, _HeroState> toHeroes = Hero._allHeroesFor(to.subtreeContext);
-    print('all heroes $fromHeroes, $toHeroes');
 
     // If the `to` route was offstage, then we're implicitly restoring its
     // animation value back to what it was before it was "moved" offstage.

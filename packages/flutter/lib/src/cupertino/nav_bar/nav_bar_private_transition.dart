@@ -128,6 +128,28 @@ class _NavigationBarComponentsTransition {
     );
   }
 
+  RelativeRectTween slideLeadingEdge({
+    @required _RenderObjectFindingWidget from,
+    @required RenderBox fromNavBarBox,
+    @required _RenderObjectFindingWidget to,
+    @required RenderBox toNavBarBox,
+  }) {
+    final RelativeRect fromRect = positionInTransitionBox(from, from: fromNavBarBox);
+    final Rect toRect =
+        to.renderBox.localToGlobal(
+          Offset.zero,
+          ancestor: toNavBarBox,
+        ).translate(
+          0.0,
+          - from.renderBox.size.height / 2 + to.renderBox.size.height / 2
+        ) & from.renderBox.size; // Keep the from render object's size.
+
+    return new RelativeRectTween(
+        begin: fromRect,
+        end: new RelativeRect.fromRect(toRect, transitionBox),
+      );
+  }
+
   Animation<double> fadeInFrom(double t, { Curve curve = Curves.linear }) {
     return fadeIn.animate(
       new CurvedAnimation(curve: new Interval(t, 1.0, curve: curve), parent: animation),
@@ -184,25 +206,15 @@ class _NavigationBarComponentsTransition {
     }
 
     if (bottomMiddle != null && topBackLabel != null) {
-      final RelativeRect from = positionInTransitionBox(bottomMiddle, from: bottomNavBarBox);
-      final Rect to =
-          topBackLabel.renderBox.localToGlobal(
-            Offset.zero,
-            ancestor: topNavBarBox,
-          ).translate(
-            0.0,
-            - bottomMiddle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2
-          ) & bottomMiddle.renderBox.size;
-
-      final RelativeRectTween positionTween = new RelativeRectTween(
-        begin: from,
-        end: new RelativeRect.fromRect(to, transitionBox),
-      );
-
       return new PositionedTransition(
-        rect: positionTween.animate(animation),
+        rect: slideLeadingEdge(
+          from: bottomMiddle,
+          fromNavBarBox: bottomNavBarBox,
+          to: topBackLabel,
+          toNavBarBox: topNavBarBox,
+        ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeOut.animate(animation),
+          opacity: fadeOutBy(0.9),
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kMiddleTitleTextStyle,
@@ -226,35 +238,15 @@ class _NavigationBarComponentsTransition {
     final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
 
     if (bottomLargeTitle != null && topBackLabel != null) {
-      final RelativeRect from = positionInTransitionBox(bottomLargeTitle, from: bottomNavBarBox);
-      final Rect to =
-          topBackLabel.renderBox.localToGlobal(
-            Offset.zero,
-            ancestor: topNavBarBox,
-          ).translate(
-            0.0,
-            - bottomLargeTitle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2
-          ) & bottomLargeTitle.renderBox.size;
-      print(from);
-      print('going to');
-      print(topBackLabel.renderBox.localToGlobal(
-            Offset.zero,
-            ancestor: topNavBarBox,
-          ));
-      print('then move up by ${- bottomLargeTitle.renderBox.size.height / 2 + topBackLabel.renderBox.size.height / 2}');
-      print('then size to ${bottomLargeTitle.renderBox.size}');
-      print('which give a rect of $to');
-      print(new RelativeRect.fromRect(to, transitionBox));
-
-      final RelativeRectTween positionTween = new RelativeRectTween(
-        begin: from,
-        end: new RelativeRect.fromRect(to, transitionBox),
-      );
-
       return new PositionedTransition(
-        rect: positionTween.animate(animation),
+        rect: slideLeadingEdge(
+          from: bottomLargeTitle,
+          fromNavBarBox: bottomNavBarBox,
+          to: topBackLabel,
+          toNavBarBox: topNavBarBox,
+        ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeOut.animate(animation),
+          opacity: fadeOutBy(0.9),
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kLargeTitleTextStyle,
