@@ -228,7 +228,7 @@ FlutterProject aModuleProject() {
 void testInMemory(String description, Future<Null> testMethod()) {
   Cache.flutterRoot = 'flutter';
   final FileSystem fs = new MemoryFileSystem();
-  // Pretend we have a project template.
+  // Pretend we have a Flutter module project template.
   fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
@@ -247,7 +247,7 @@ void testInMemory(String description, Future<Null> testMethod()) {
       .childFile('template_content.copy.tmpl')
       .createSync(recursive: true);
 
-  // Sets up cache in a text execution context where fs is the FileSystem.
+  // Sets up cache in a test execution context where `fs` is the file system.
   Cache cacheCreator() {
     final Cache cache = new Cache(rootOverride: fs.directory('flutter'));
     cache.getArtifactDirectory('gradle_wrapper')
