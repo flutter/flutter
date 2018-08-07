@@ -1580,8 +1580,8 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
     @required this.id,
     @required Widget child
   }) : assert(child != null),
-        assert(id != null),
-        super(key: key ?? new ValueKey<Object>(id), child: child);
+       assert(id != null),
+       super(key: key ?? new ValueKey<Object>(id), child: child);
 
   /// An object representing the identity of this child.
   ///

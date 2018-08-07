@@ -87,8 +87,7 @@ void main() {
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
   });
 
-  testWidgets('Message is scrollable, has correct padding with large text sizes',
-      (WidgetTester tester) async {
+  testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -186,8 +185,7 @@ void main() {
     );
   });
 
-  testWidgets('Button list is scrollable, has correct position with large text sizes.',
-      (WidgetTester tester) async {
+  testWidgets('Button list is scrollable, has correct position with large text sizes.', (WidgetTester tester) async {
     final ScrollController actionScrollController = new ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -247,8 +245,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')).height, equals(148.0));
   });
 
-  testWidgets('Title Section is empty, Button section is not empty.',
-      (WidgetTester tester) async {
+  testWidgets('Title Section is empty, Button section is not empty.', (WidgetTester tester) async {
     const double textScaleFactor = 1.0;
     final ScrollController actionScrollController = new ScrollController();
     await tester.pumpWidget(
@@ -299,8 +296,7 @@ void main() {
         equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height));
   });
 
-  testWidgets('Button section is empty, Title section is not empty.',
-      (WidgetTester tester) async {
+  testWidgets('Button section is empty, Title section is not empty.', (WidgetTester tester) async {
     const double textScaleFactor = 1.0;
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
@@ -341,8 +337,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions section height for 1 button is height of button.',
-          (WidgetTester tester) async {
+  testWidgets('Actions section height for 1 button is height of button.', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
@@ -371,8 +366,7 @@ void main() {
     expect(okButtonBox.size.height, actionsSectionBox.size.height);
   });
 
-  testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.',
-          (WidgetTester tester) async {
+  testWidgets('Actions section height for 2 side-by-side buttons is height of tallest button.', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     double dividerWidth; // Will be set when the dialog builder runs. Needs a BuildContext.
     await tester.pumpWidget(
@@ -533,8 +527,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions section height for 3 buttons without enough room is 1.5 buttons tall.',
-          (WidgetTester tester) async {
+  testWidgets('Actions section height for 3 buttons without enough room is 1.5 buttons tall.', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
