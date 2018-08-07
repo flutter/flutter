@@ -5,8 +5,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:meta/meta.dart';
+
 import 'android/gradle.dart' as gradle;
 import 'base/file_system.dart';
+import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'flutter_manifest.dart';
@@ -16,21 +20,27 @@ import 'template.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 ///
-/// Instances should be treated as immutable snapshots, to be replaced by new
-/// instances on changes to `pubspec.yaml` files.
+/// [FlutterManifest] information is read from `pubspec.yaml` and
+/// `example/pubspec.yaml` files on construction of a [FlutterProject] instance.
+/// The constructed instance carries an immutable snapshot representation of the
+/// presence and content of those files. Accordingly, [FlutterProject] instances
+/// should be discarded upon changes to the `pubspec.yaml` files, but can be
+/// used across changes to other files, as no other file-level information is
+/// cached.
 class FlutterProject {
-  FlutterProject._(this.directory, this.manifest, this._exampleManifest);
+  @visibleForTesting
+  FlutterProject(this.directory, this.manifest, this._exampleManifest);
 
   /// Returns a future that completes with a FlutterProject view of the given directory.
   static Future<FlutterProject> fromDirectory(Directory directory) async {
     final FlutterManifest manifest = await FlutterManifest.createFromPath(
       directory.childFile(bundle.defaultManifestPath).path,
     );
-    final Directory exampleDirectory = directory.childDirectory('example');
+    final Directory exampleDirectory = _exampleDirectory(directory);
     final FlutterManifest exampleManifest = await FlutterManifest.createFromPath(
       exampleDirectory.childFile(bundle.defaultManifestPath).path,
     );
-    return new FlutterProject._(directory, manifest, exampleManifest);
+    return new FlutterProject(directory, manifest, exampleManifest);
   }
 
   /// Returns a future that completes with a FlutterProject view of the current directory.
@@ -73,61 +83,33 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => new IosProject(directory.childDirectory('ios'));
+  IosProject get ios => new IosProject._(_iosDirectory, isModule);
 
   /// The Android sub project of this project.
-  AndroidProject get android {
-    if (manifest.isModule) {
-      return new AndroidProject(directory.childDirectory('.android'));
-    }
-    return new AndroidProject(directory.childDirectory('android'));
-  }
-
-  /// The generated AndroidModule sub project of this module project.
-  AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('.android'));
-
-  /// The generated IosModule sub project of this module project.
-  IosModuleProject get iosModule => new IosModuleProject(directory.childDirectory('.ios'));
-
-  File get androidLocalPropertiesFile {
-    return directory
-        .childDirectory(manifest.isModule ? '.android' : 'android')
-        .childFile('local.properties');
-  }
-
-  File get generatedXcodePropertiesFile {
-    return directory
-        .childDirectory(manifest.isModule ? '.ios' : 'ios')
-        .childDirectory('Flutter')
-        .childFile('Generated.xcconfig');
-  }
+  AndroidProject get android => new AndroidProject._(_androidDirectory, isModule);
 
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
-  Directory get androidPluginRegistrantHost {
-    return manifest.isModule
-        ? directory.childDirectory('.android').childDirectory('Flutter')
-        : directory.childDirectory('android').childDirectory('app');
-  }
-
-  Directory get iosPluginRegistrantHost {
-    // In a module create the GeneratedPluginRegistrant as a pod to be included
-    // from a hosting app.
-    // For a non-module create the GeneratedPluginRegistrant as source files
-    // directly in the iOS project.
-    return manifest.isModule
-        ? directory.childDirectory('.ios').childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
-        : directory.childDirectory('ios').childDirectory('Runner');
-  }
-
   /// The example sub-project of this project.
-  FlutterProject get example => new FlutterProject._(_exampleDirectory, _exampleManifest, FlutterManifest.empty());
+  FlutterProject get example => new FlutterProject(
+    _exampleDirectory(directory),
+    _exampleManifest,
+    FlutterManifest.empty(),
+  );
 
-  /// True, if this project has an example application
-  bool get hasExampleApp => _exampleDirectory.childFile('pubspec.yaml').existsSync();
+  bool get isModule => manifest != null && manifest.isModule;
+
+  /// True, if this project has an example application.
+  bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
   /// The directory that will contain the example if an example exists.
-  Directory get _exampleDirectory => directory.childDirectory('example');
+  static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
+
+  /// The directory that contains the Android app to be launched by `flutter run`.
+  Directory get _androidDirectory => directory.childDirectory(isModule ? '.android' : 'android');
+
+  /// The directory that contains the iOS app to be launched by `flutter run`.
+  Directory get _iosDirectory => directory.childDirectory(isModule ? '.ios' : 'ios');
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
@@ -135,21 +117,25 @@ class FlutterProject {
     if (!directory.existsSync() || hasExampleApp) {
       return;
     }
-    if (manifest.isModule) {
-      await androidModule.ensureReadyForPlatformSpecificTooling(this);
-      await iosModule.ensureReadyForPlatformSpecificTooling();
-    }
-    await xcode.generateXcodeProperties(project: this);
+    await android.ensureReadyForPlatformSpecificTooling(this);
+    await ios.ensureReadyForPlatformSpecificTooling(this);
     await injectPlugins(this);
   }
 }
 
-/// Represents the contents of the ios/ folder of a Flutter project.
+/// Represents the iOS sub-project of a Flutter project.
+///
+/// Instances will reflect the contents of the `ios/` sub-folder of
+/// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
   static final RegExp _productBundleIdPattern = new RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
-  IosProject(this.directory);
+  IosProject._(this.directory, this.isModule);
 
+  /// The directory of this iOS sub-project.
   final Directory directory;
+
+  /// True, if the parent Flutter project is a module.
+  final bool isModule;
 
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => directory.childDirectory('Flutter').childFile('$mode.xcconfig');
@@ -167,33 +153,53 @@ class IosProject {
     final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
     return _firstMatchInFile(projectFile, _productBundleIdPattern).then((Match match) => match?.group(1));
   }
-}
 
-/// Represents the contents of the .ios/ folder of a Flutter module
-/// project.
-class IosModuleProject {
-  IosModuleProject(this.directory);
+  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject parent) async {
+    if (!directory.existsSync())
+      return;
+    if (Cache.instance.fileOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+      await xcode.updateGeneratedXcodeProperties(
+        project: parent,
+        buildInfo: BuildInfo.debug,
+        targetOverride: bundle.defaultMainPath,
+        previewDart2: true,
+      );
+    }
 
-  final Directory directory;
-
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (_shouldRegenerate()) {
+    if (isModule && _shouldRegenerateFromTemplate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'ios'));
       template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
     }
   }
 
-  bool _shouldRegenerate() {
+  bool _shouldRegenerateFromTemplate() {
     return Cache.instance.fileOlderThanToolsStamp(directory.childFile('podhelper.rb'));
+  }
+
+  File get generatedXcodePropertiesFile => directory.childDirectory('Flutter').childFile('Generated.xcconfig');
+
+  Directory get pluginRegistrantHost {
+    return isModule
+        ? directory.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
+        : directory.childDirectory('Runner');
   }
 }
 
-/// Represents the contents of the android/ folder of a Flutter project.
+/// Represents the Android sub-project of a Flutter project.
+///
+/// Instances will reflect the contents of the `android/` sub-folder of
+/// Flutter applications and the `.android/` sub-folder of Flutter modules.
 class AndroidProject {
   static final RegExp _applicationIdPattern = new RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
   static final RegExp _groupPattern = new RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
-  AndroidProject(this.directory);
+  AndroidProject._(this.directory, this.isModule);
+
+  /// The directory of this Android sub-project.
+  final Directory directory;
+
+  /// True, if the parent Flutter project is a module.
+  final bool isModule;
 
   File get gradleManifestFile {
     return isUsingGradle()
@@ -211,8 +217,6 @@ class AndroidProject {
     return directory.childFile('build.gradle').existsSync();
   }
 
-  final Directory directory;
-
   Future<String> applicationId() {
     final File gradleFile = directory.childDirectory('app').childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _applicationIdPattern).then((Match match) => match?.group(1));
@@ -222,32 +226,31 @@ class AndroidProject {
     final File gradleFile = directory.childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
   }
-}
 
-/// Represents the contents of the .android/ folder of a Flutter module project.
-class AndroidModuleProject {
-  AndroidModuleProject(this.directory);
-
-  final Directory directory;
-
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject project) async {
-    if (_shouldRegenerate()) {
+  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject parent) async {
+    if (!directory.existsSync())
+      return;
+    await gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    if (isModule && _shouldRegenerateFromTemplate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'android'));
       template.render(
         directory,
         <String, dynamic>{
-          'androidIdentifier': project.manifest.androidPackage,
+          'androidIdentifier': parent.manifest.androidPackage,
         },
         printStatusWhenWriting: false,
       );
       gradle.injectGradleWrapper(directory);
     }
-    await gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
   }
 
-  bool _shouldRegenerate() {
+  bool _shouldRegenerateFromTemplate() {
     return Cache.instance.fileOlderThanToolsStamp(directory.childFile('build.gradle'));
   }
+
+  File get localPropertiesFile => directory.childFile('local.properties');
+
+  Directory get pluginRegistrantHost => directory.childDirectory(isModule ? 'Flutter' : 'app');
 }
 
 /// Asynchronously returns the first line-based match for [regExp] in [file].
