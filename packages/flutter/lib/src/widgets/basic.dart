@@ -1545,27 +1545,11 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 /// The [MultiChildLayoutDelegate.hasChild],
 /// [MultiChildLayoutDelegate.layoutChild], and
 /// [MultiChildLayoutDelegate.positionChild] methods use these identifiers.
-class LayoutId extends BaseLayoutId<CustomMultiChildLayout, MultiChildLayoutParentData> {
+class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Marks a child with a layout identifier.
   ///
   /// Both the child and the id arguments must not be null.
   LayoutId({
-    Key key,
-    @required Object id,
-    @required Widget child
-  }) : super(key: key, id: id, child: child);
-}
-
-/// Metadata for identifying children in a [ParentType] that extends
-/// [RenderObjectWidget].
-///
-/// See also:
-///  * [LayoutId], which is used within a [CustomMultiChildLayout].
-class BaseLayoutId<ParentType extends RenderObjectWidget, ParentDataType extends MultiChildLayoutParentData> extends ParentDataWidget<ParentType> {
-  /// Marks a child with a layout identifier.
-  ///
-  /// Both the child and the id arguments must not be null.
-  BaseLayoutId({
     Key key,
     @required this.id,
     @required Widget child
@@ -1576,13 +1560,13 @@ class BaseLayoutId<ParentType extends RenderObjectWidget, ParentDataType extends
   /// An object representing the identity of this child.
   ///
   /// The [id] needs to be unique among the children that the
-  /// [ParentType] manages.
+  /// [CustomMultiChildLayout] manages.
   final Object id;
 
   @override
   void applyParentData(RenderObject renderObject) {
-    assert(renderObject.parentData is ParentDataType);
-    final ParentDataType parentData = renderObject.parentData;
+    assert(renderObject.parentData is MultiChildLayoutParentData);
+    final MultiChildLayoutParentData parentData = renderObject.parentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode targetParent = renderObject.parent;

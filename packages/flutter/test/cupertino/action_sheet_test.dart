@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
+  testWidgets('Verify that a tap on modal barrier dismisses an action sheet',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -29,7 +31,8 @@ void main() {
     expect(find.text('Action Sheet'), findsNothing);
   });
 
-  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
+  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -80,7 +83,8 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Action sheet text styles are correct when both title and message are included', (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when both title and message are included',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -93,14 +97,17 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'Action Sheet'));
-    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'An action sheet'));
+    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
+        'Action Sheet'));
+    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
+        'An action sheet'));
 
     expect(titleStyle.style.fontWeight, FontWeight.w600);
     expect(messageStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when title but no message is included', (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when title but no message is included',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -112,12 +119,14 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'Action Sheet'));
+    final DefaultTextStyle titleStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
+        'Action Sheet'));
 
     expect(titleStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when message but no title is included', (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when message but no title is included',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -129,7 +138,8 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle, 'An action sheet'));
+    final DefaultTextStyle messageStyle = tester.firstWidget(find.widgetWithText(DefaultTextStyle,
+        'An action sheet'));
 
     expect(messageStyle.style.fontWeight, FontWeight.w600);
   });
@@ -347,7 +357,8 @@ void main() {
     expect(find.text('One'), findsNothing);
   });
 
-  testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
+  testWidgets('Action sheet width is correct when given infinite horizontal space',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         new Row(
@@ -375,7 +386,8 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoActionSheet)).width, 600.0);
   });
 
-  testWidgets('Action sheet height is correct when given infinite vertical space', (WidgetTester tester) async {
+  testWidgets('Action sheet height is correct when given infinite vertical space',
+          (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         new Column(
@@ -400,33 +412,184 @@ void main() {
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, 132.66666666666669);
+    expect(tester.getSize(find.byType(CupertinoActionSheet)).height, 132.33333333333334);
   });
 
-  testWidgets('Button section height is correct when content and actions together are too big', (WidgetTester tester) async {
+  testWidgets('1 action button with cancel button', (WidgetTester tester) async {
     await tester.pumpWidget(
-        createAppWithButtonThatLaunchesActionSheet(
-            new CupertinoActionSheet(
-                title: const Text('The title'),
-                message: new Text('Very long content' * 200),
-                actions: <Widget>[
-                  ActionSheetAction(
-                    child: const Text('One'),
-                    onPressed: () {},
-                  ),
-                  ActionSheetAction(
-                    child: const Text('Two'),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: new Text('Very long content' * 200),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
             ),
+          ],
+          cancelButton: ActionSheetAction(
+            child: const Text('Cancel'),
+            onPressed: () {},
+          ),
+        ),
+      ),
     );
 
     await tester.tap(find.text('Go'));
     await tester.pump();
 
-    expect(getRenderActionSection(tester).size.height, 112.66666666666667);
+    // Action section is size of one action button.
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 56.0);
+  });
+
+  testWidgets('2 action buttons with cancel button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: new Text('Very long content' * 200),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Two'),
+              onPressed: () {},
+            ),
+          ],
+          cancelButton: ActionSheetAction(
+            child: const Text('Cancel'),
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 112.33333333333331);
+  });
+
+  testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: new Text('Very long content' * 200),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Two'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Three'),
+              onPressed: () {},
+            ),
+          ],
+          cancelButton: ActionSheetAction(
+            child: const Text('Cancel'),
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 168.66666666666669);
+  });
+
+  testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: new Text('Very long content' * 200),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Two'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Three'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Four'),
+              onPressed: () {},
+            ),
+          ],
+          cancelButton: ActionSheetAction(
+            child: const Text('Cancel'),
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 84.33333333333337);
+  });
+
+  testWidgets('1 action button without cancel button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: new Text('Very long content' * 200),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 56.0);
+  });
+
+  testWidgets('2+ action buttons without cancel button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: new Text('Very long content' * 200),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Two'),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(findScrollableActionsSectionRenderBox(tester).size.height, 84.33333333333337);
   });
 
   testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {
@@ -550,43 +713,43 @@ void main() {
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(532.8, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(530.9, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(431.6, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(426.7, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(371.7, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(365.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(341.6, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(334.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(329.0, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(321.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(327.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
 
     // Action sheet has reached final height
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(327.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
 
     // Exit animation
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump();
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(327.3, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(319.3, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(394.4, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(388.4, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(495.6, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(492.6, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(555.5, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(554.2, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
-    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(585.6, 0.1));
+    expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(585.2, 0.1));
 
     await tester.pump(const Duration(milliseconds: 60));
     expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(598.2, 0.1));
@@ -627,23 +790,23 @@ void main() {
       expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
 
       await tester.pump(const Duration(milliseconds: 60));
-      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(532.8, 0.1));
+      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(530.9, 0.1));
 
       await tester.pump(const Duration(milliseconds: 60));
-      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(431.6, 0.1));
+      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(426.7, 0.1));
 
       await tester.pump(const Duration(milliseconds: 60));
-      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(371.7, 0.1));
+      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(365.0, 0.1));
 
       // Exit animation
       await tester.tapAt(const Offset(20.0, 20.0));
       await tester.pump(const Duration(milliseconds: 60));
 
       await tester.pump(const Duration(milliseconds: 60));
-      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(431.6, 0.1));
+      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(426.7, 0.1));
 
       await tester.pump(const Duration(milliseconds: 60));
-      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(532.8, 0.1));
+      expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, closeTo(530.9, 0.1));
 
       await tester.pump(const Duration(milliseconds: 60));
       expect(tester.getTopLeft(find.byType(CupertinoActionSheet)).dy, 600.0);
@@ -652,14 +815,116 @@ void main() {
       await tester.pump(const Duration(milliseconds: 60));
       expect(find.byType(CupertinoActionSheet), findsNothing);
   });
+
+
+  testWidgets('Action sheet semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        new CupertinoActionSheet(
+          title: const Text('The title'),
+          message: const Text('The message'),
+          actions: <Widget>[
+            ActionSheetAction(
+              child: const Text('One'),
+              onPressed: () {},
+            ),
+            ActionSheetAction(
+              child: const Text('Two'),
+              onPressed: () {},
+            ),
+          ],
+          cancelButton: ActionSheetAction(
+            child: const Text('Cancel'),
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pump();
+
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics.root(
+          children: <TestSemantics>[
+            new TestSemantics(
+              children: <TestSemantics>[
+                new TestSemantics(
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.scopesRoute,
+                    SemanticsFlag.namesRoute,
+                  ],
+                  label: 'Alert',
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: 'The title',
+                        ),
+                        new TestSemantics(
+                          label: 'The message',
+                        ),
+                      ],
+                    ),
+                    new TestSemantics(
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                          ],
+                          label: 'One',
+                        ),
+                        new TestSemantics(
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isButton,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                          ],
+                          label: 'Two',
+                        ),
+                      ],
+                    ),
+                    new TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.isButton,
+                      ],
+                      actions: <SemanticsAction>[
+                        SemanticsAction.tap,
+                      ],
+                      label: 'Cancel',
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
 }
 
-dynamic getRenderActionSection(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere(
-        (RenderObject currentObject) {
-      return currentObject.toStringShort().contains('_RenderCupertinoAlertActions');
-    },
+RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
+  final RenderObject actionsSection = tester.renderObject(find.byElementPredicate(
+          (Element element) {
+        return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
+      }),
   );
+  assert(actionsSection is RenderBox);
+  return actionsSection;
 }
 
 Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
@@ -671,7 +936,9 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
             onPressed: () {
               showCupertinoModalPopup<void>(
                 context: context,
-                child: actionSheet,
+                builder: (BuildContext context) {
+                  return actionSheet;
+                },
               );
             },
             child: const Text('Go'),

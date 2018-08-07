@@ -55,11 +55,11 @@ const Color _kButtonDividerColor = const Color(0x403F3F3F);
 const Color _kContentTextColor = const Color(0xFF8F8F8F);
 const Color _kCancelButtonPressedColor = const Color(0xFFEAEAEA);
 
+const double _kBlurAmount = 20.0;
 const double _kEdgeHorizontalPadding = 8.0;
 const double _kEdgeVerticalPadding = 10.0;
 const double _kContentHorizontalPadding = 40.0;
 const double _kContentVerticalPadding = 14.0;
-
 const double _kButtonHeight = 56.0;
 const double _kCornerRadius = 14.0;
 const double _kDividerThickness = 1.0;
@@ -157,7 +157,6 @@ class CupertinoActionSheet extends StatelessWidget {
     }
 
     return new Container(
-      key: const Key('cupertino_action_sheet_content_section'),
       color: _kBackgroundColor,
       child: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -177,12 +176,14 @@ class CupertinoActionSheet extends StatelessWidget {
       child: _CupertinoAlertActionSection(
         children: actions,
         scrollController: actionScrollController,
+        hasCancelButton: cancelButton != null,
       ),
     );
   }
 
   Widget _buildCancelButton() {
-    final double cancelPadding = (actions != null || message != null || title != null) ? _kEdgeHorizontalPadding : 0.0;
+    final double cancelPadding = (actions != null || message != null || title != null)
+        ? _kEdgeHorizontalPadding : 0.0;
     return Padding(
       padding: new EdgeInsets.only(top: cancelPadding),
       child: new _CupertinoActionSheetCancelButton(
@@ -195,23 +196,14 @@ class CupertinoActionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[
       new Flexible(child: ClipRRect(
-        key: const Key('cupertino_action_sheet_modal'),
         borderRadius: BorderRadius.circular(12.0),
         child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+          filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
           child: new Container(
             decoration: _kCupertinoAlertBlurOverlayDecoration,
             child: new _CupertinoAlertRenderWidget(
-              children: <Widget>[
-                new BaseLayoutId<_CupertinoAlertRenderWidget, MultiChildLayoutParentData>(
-                  id: _AlertSections.actionsSection,
-                  child: _buildActions(),
-                ),
-                new BaseLayoutId<_CupertinoAlertRenderWidget, MultiChildLayoutParentData>(
-                  id: _AlertSections.contentSection,
-                  child: _buildContent(),
-                ),
-              ],
+              contentSection: _buildContent(),
+              actionsSection: _buildActions(),
             ),
           ),
         ),
@@ -241,7 +233,10 @@ class CupertinoActionSheet extends StatelessWidget {
         label: 'Alert',
         child: new Container(
           width: actionSheetWidth,
-          margin: const EdgeInsets.symmetric(horizontal: _kEdgeHorizontalPadding, vertical: _kEdgeVerticalPadding),
+          margin: const EdgeInsets.symmetric(
+            horizontal: _kEdgeHorizontalPadding,
+            vertical: _kEdgeVerticalPadding,
+          ),
           child: new Column(
             children: children,
             mainAxisSize: MainAxisSize.min,
@@ -261,6 +256,8 @@ class CupertinoActionSheet extends StatelessWidget {
 ///    more choices related to the current context.
 class ActionSheetAction extends StatelessWidget {
   ///Creates an action for an iOS-style action sheet.
+  ///
+  /// The [child] and [onPressed] arguments must not be null.
   const ActionSheetAction({
     @required this.onPressed,
     this.isDefaultAction = false,
@@ -311,16 +308,17 @@ class ActionSheetAction extends StatelessWidget {
         child: new Semantics(
           button: true,
           child: new Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(
-                vertical: 16.0,
-                horizontal: 10.0,
-              ),
-              child: new DefaultTextStyle(
-                style: style,
-                child: child,
-                textAlign: TextAlign.center,
-              )),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16.0,
+              horizontal: 10.0,
+            ),
+            child: new DefaultTextStyle(
+              style: style,
+              child: child,
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );
@@ -369,6 +367,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
+      excludeFromSemantics: true,
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
@@ -383,21 +382,109 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
   }
 }
 
-class _CupertinoAlertRenderWidget extends MultiChildRenderObjectWidget {
-  _CupertinoAlertRenderWidget({
+class _CupertinoAlertRenderWidget extends RenderObjectWidget {
+  const _CupertinoAlertRenderWidget({
     Key key,
-    @required List<Widget> children,
-  }) : super(key: key, children: children);
+    @required this.contentSection,
+    @required this.actionsSection,
+  }) : super(key: key);
 
+  final Widget contentSection;
+  final Widget actionsSection;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderCupertinoAlert();
+    return new _RenderCupertinoAlert(
+      dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
+    );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoAlert renderObject) {
-    // NO-OP
+  RenderObjectElement createElement() {
+    return _CupertinoAlertRenderElement(this);
+  }
+}
+
+class _CupertinoAlertRenderElement extends RenderObjectElement {
+  _CupertinoAlertRenderElement(_CupertinoAlertRenderWidget widget) : super(widget);
+
+  Element _contentElement;
+  Element _actionsElement;
+
+  @override
+  _CupertinoAlertRenderWidget get widget => super.widget;
+
+  @override
+  _RenderCupertinoAlert get renderObject => super.renderObject;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (_contentElement != null) {
+      visitor(_contentElement);
+    }
+    if (_actionsElement != null) {
+      visitor(_actionsElement);
+    }
+  }
+
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    _contentElement = updateChild(_contentElement,
+        widget.contentSection, _AlertSections.contentSection);
+    _actionsElement = updateChild(_actionsElement,
+        widget.actionsSection, _AlertSections.actionsSection);
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child, _AlertSections slot) {
+    _placeChildInSlot(child, slot);
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child, _AlertSections slot) {
+    _placeChildInSlot(child, slot);
+  }
+
+  @override
+  void update(RenderObjectWidget newWidget) {
+    super.update(newWidget);
+    _contentElement = updateChild(_contentElement,
+        widget.contentSection, _AlertSections.contentSection);
+    _actionsElement = updateChild(_actionsElement,
+        widget.actionsSection, _AlertSections.actionsSection);
+  }
+
+  @override
+  void forgetChild(Element child) {
+    assert(child == _contentElement || child == _actionsElement);
+    if (_contentElement == child) {
+      _contentElement = null;
+    } else if (_actionsElement == child) {
+      _actionsElement = null;
+    }
+  }
+
+  @override
+  void removeChildRenderObject(RenderObject child) {
+    assert(child == renderObject.contentSection || child == renderObject.actionsSection);
+    if (renderObject.contentSection == child) {
+      renderObject.contentSection = null;
+    } else if (renderObject.actionsSection == child) {
+      renderObject.actionsSection = null;
+    }
+  }
+
+  void _placeChildInSlot(RenderObject child, _AlertSections slot) {
+    assert(slot != null);
+    switch (slot) {
+      case _AlertSections.contentSection:
+        renderObject.contentSection = child;
+        break;
+      case _AlertSections.actionsSection:
+        renderObject.actionsSection = child;
+        break;
+    }
   }
 }
 
@@ -420,17 +507,78 @@ class _CupertinoAlertRenderWidget extends MultiChildRenderObjectWidget {
 //
 // After the content section is laid out, the action button section is allowed
 // to take up any remaining space that was not consumed by the content section.
-class _RenderCupertinoAlert extends RenderBox with ContainerRenderObjectMixin<RenderBox,
-    MultiChildLayoutParentData>, RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
+class _RenderCupertinoAlert extends RenderBox {
   _RenderCupertinoAlert({
     RenderBox contentSection,
     RenderBox actionsSection,
-  }) {
+    double dividerThickness = 0.0,
+  }) :  _contentSection = contentSection,
+        _actionsSection = actionsSection,
+        _dividerThickness = dividerThickness;
+
+  RenderBox get contentSection => _contentSection;
+  RenderBox _contentSection;
+  set contentSection(RenderBox newContentSection) {
+    if (newContentSection != _contentSection) {
+      if (null != _contentSection) {
+        dropChild(_contentSection);
+      }
+      _contentSection = newContentSection;
+      if (null != _contentSection) {
+        adoptChild(_contentSection);
+      }
+    }
+  }
+
+  RenderBox get actionsSection => _actionsSection;
+  RenderBox _actionsSection;
+  set actionsSection(RenderBox newActionsSection) {
+    if (newActionsSection != _actionsSection) {
+      if (null != _actionsSection) {
+        dropChild(_actionsSection);
+      }
+      _actionsSection = newActionsSection;
+      if (null != _actionsSection) {
+        adoptChild(_actionsSection);
+      }
+    }
+  }
+
+  final double _dividerThickness;
+
+  final Paint _dividerPaint = new Paint()
+    ..color = _kButtonDividerColor
+    ..style = PaintingStyle.fill;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
     if (null != contentSection) {
-      add(contentSection);
+      contentSection.attach(owner);
     }
     if (null != actionsSection) {
-      add(actionsSection);
+      actionsSection.attach(owner);
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    if (null != contentSection) {
+      contentSection.detach();
+    }
+    if (null != actionsSection) {
+      actionsSection.detach();
+    }
+  }
+
+  @override
+  void redepthChildren() {
+    if (null != contentSection) {
+      redepthChild(contentSection);
+    }
+    if (null != actionsSection) {
+      redepthChild(actionsSection);
     }
   }
 
@@ -439,6 +587,28 @@ class _RenderCupertinoAlert extends RenderBox with ContainerRenderObjectMixin<Re
     if (child.parentData is! MultiChildLayoutParentData) {
       child.parentData = new MultiChildLayoutParentData();
     }
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    if (contentSection != null) {
+      visitor(contentSection);
+    }
+    if (actionsSection != null) {
+      visitor(actionsSection);
+    }
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
+    if (contentSection != null) {
+      value.add(contentSection.toDiagnosticsNode(name: 'content'));
+    }
+    if (actionsSection != null) {
+      value.add(actionsSection.toDiagnosticsNode(name: 'actions'));
+    }
+    return value;
   }
 
   @override
@@ -453,111 +623,105 @@ class _RenderCupertinoAlert extends RenderBox with ContainerRenderObjectMixin<Re
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    // Obtain references to the specific children we need lay out.
-    final _AlertChildren dialogChildren = _findDialogChildren();
-    final RenderBox content = dialogChildren.content;
-    final RenderBox actions = dialogChildren.actions;
+    final double contentHeight = contentSection.getMinIntrinsicHeight(width);
+    final double actionsHeight = actionsSection.getMinIntrinsicHeight(width);
+    final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
+    double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
-    final double contentHeight = content.getMinIntrinsicHeight(width);
-    final double actionsHeight = actions.getMinIntrinsicHeight(width);
-    double height = contentHeight + actionsHeight;
-
-    if (actionsHeight > 0 || contentHeight > 0) {
+    if (actionsHeight > 0 || contentHeight > 0)
       height -= 2 * _kEdgeHorizontalPadding;
-    }
-    if (height.isFinite) {
+    if (height.isFinite)
       return height;
-    }
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    // Obtain references to the specific children we need lay out.
-    final _AlertChildren dialogChildren = _findDialogChildren();
-    final RenderBox content = dialogChildren.content;
-    final RenderBox actions = dialogChildren.actions;
+    final double contentHeight = contentSection.getMaxIntrinsicHeight(width);
+    final double actionsHeight = actionsSection.getMaxIntrinsicHeight(width);
+    final bool hasDivider = contentHeight > 0.0 && actionsHeight > 0.0;
+    double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
-    final double contentHeight = content.getMaxIntrinsicHeight(width);
-    final double actionsHeight = actions.getMaxIntrinsicHeight(width);
-    double height = contentHeight + actionsHeight;
-
-    if (actionsHeight > 0 || contentHeight > 0) {
+    if (actionsHeight > 0 || contentHeight > 0)
       height -= 2 * _kEdgeHorizontalPadding;
-    }
-    if (height.isFinite) {
+    if (height.isFinite)
       return height;
-    }
     return 0.0;
   }
 
   @override
   void performLayout() {
-    // Obtain references to the specific children we need lay out.
-    final _AlertChildren dialogChildren = _findDialogChildren();
-    final RenderBox content = dialogChildren.content;
-    final RenderBox actions = dialogChildren.actions;
+    final bool hasDivider = contentSection.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0
+        && actionsSection.getMaxIntrinsicHeight(constraints.maxWidth) > 0.0;
+    final double dividerThickness = hasDivider ? _dividerThickness : 0.0;
 
-    final double minActionsHeight = actions.getMinIntrinsicHeight(constraints.maxWidth);
-
-    final Size maxActionSheetSize = constraints.biggest;
+    final double minActionsHeight = actionsSection.getMinIntrinsicHeight(constraints.maxWidth);
 
     // Size alert content.
-    content.layout(
-      constraints.deflate(new EdgeInsets.only(bottom: minActionsHeight)),
+    contentSection.layout(
+      constraints.deflate(new EdgeInsets.only(bottom: minActionsHeight + dividerThickness)),
       parentUsesSize: true,
     );
-    final Size contentSize = content.size;
+    final Size contentSize = contentSection.size;
 
     // Size alert actions.
-    actions.layout(
-      constraints.deflate(new EdgeInsets.only(top: contentSize.height)),
+    actionsSection.layout(
+      constraints.deflate(new EdgeInsets.only(top: contentSize.height + dividerThickness)),
       parentUsesSize: true,
     );
-    final Size actionsSize = actions.size;
+    final Size actionsSize = actionsSection.size;
 
     // Calculate overall alert height.
-    final double actionSheetHeight = contentSize.height + actionsSize.height;
+    final double actionSheetHeight = contentSize.height + dividerThickness + actionsSize.height;
 
     // Set our size now that layout calculations are complete.
-    size = new Size(maxActionSheetSize.width, actionSheetHeight);
+    size = new Size(constraints.maxWidth, actionSheetHeight);
 
     // Set the position of the actions box to sit at the bottom of the alert.
     // The content box defaults to the top left, which is where we want it.
-    assert(actions.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData actionParentData = actions.parentData;
-    actionParentData.offset = new Offset(0.0, contentSize.height);
-  }
-
-  _AlertChildren _findDialogChildren() {
-    RenderBox content;
-    RenderBox actions;
-    final List<RenderBox> children = getChildrenAsList();
-    for (RenderBox child in children) {
-      final MultiChildLayoutParentData parentData = child.parentData;
-      if (parentData.id == _AlertSections.contentSection) {
-        content = child;
-      } else if (parentData.id == _AlertSections.actionsSection) {
-        actions = child;
-      }
-    }
-    assert(content != null);
-    assert(actions != null);
-
-    return new _AlertChildren(
-      content: content,
-      actions: actions,
-    );
+    assert(actionsSection.parentData is MultiChildLayoutParentData);
+    final MultiChildLayoutParentData actionParentData = actionsSection.parentData;
+    actionParentData.offset = new Offset(0.0, contentSize.height + dividerThickness);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    defaultPaint(context, offset);
+    final MultiChildLayoutParentData contentParentData = contentSection.parentData;
+    contentSection.paint(context, offset + contentParentData.offset);
+
+    final bool hasDivider = contentSection.size.height > 0.0 && actionsSection.size.height > 0.0;
+    if (hasDivider) {
+      _paintDividerBetweenContentAndActions(context.canvas, offset);
+    }
+
+    final MultiChildLayoutParentData actionsParentData = actionsSection.parentData;
+    actionsSection.paint(context, offset + actionsParentData.offset);
+  }
+
+  void _paintDividerBetweenContentAndActions(Canvas canvas, Offset offset) {
+    canvas.drawRect(
+      Rect.fromLTWH(
+        offset.dx,
+        offset.dy + contentSection.size.height,
+        size.width,
+        _dividerThickness,
+      ),
+      _dividerPaint,
+    );
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, {Offset position}) {
-    return defaultHitTestChildren(result, position: position);
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
+    bool isHit = false;
+    final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData;
+    final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData;
+    if (contentSection.hitTest(result, position: position - contentSectionParentData.offset)) {
+      isHit = true;
+    } else if (actionsSection.hitTest(result,
+        position: position - actionsSectionParentData.offset)) {
+      isHit = true;
+    }
+    return isHit;
   }
 }
 
@@ -566,18 +730,6 @@ class _RenderCupertinoAlert extends RenderBox with ContainerRenderObjectMixin<Re
 enum _AlertSections {
   contentSection,
   actionsSection,
-}
-
-// Data structure used to pass around references to multiple alert pieces for
-// layout calculations.
-class _AlertChildren {
-  _AlertChildren({
-    this.content,
-    this.actions,
-  });
-
-  final RenderBox content;
-  final RenderBox actions;
 }
 
 // The "content section" of an [ActionSheet].
@@ -624,8 +776,8 @@ class _CupertinoAlertContentSection extends StatelessWidget {
           top: _kContentVerticalPadding,
         ),
         child: new DefaultTextStyle(
-          style: message == null ? _kActionSheetContentStyle :
-            _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
+          style: message == null ? _kActionSheetContentStyle
+              : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
           textAlign: TextAlign.center,
           child: title,
         ),
@@ -642,8 +794,8 @@ class _CupertinoAlertContentSection extends StatelessWidget {
             top: title == null ? _kContentVerticalPadding : 0.0,
           ),
           child: new DefaultTextStyle(
-            style: title == null ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600) :
-              _kActionSheetContentStyle,
+            style: title == null ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
+                : _kActionSheetContentStyle,
             textAlign: TextAlign.center,
             child: message,
           ),
@@ -654,7 +806,10 @@ class _CupertinoAlertContentSection extends StatelessWidget {
     if (titleContentGroup.isEmpty) {
       return new SingleChildScrollView(
         controller: scrollController,
-        child: new Container(width: 0.0, height: 0.0),
+        child: new Container(
+          width: 0.0,
+          height: 0.0,
+        ),
       );
     }
 
@@ -685,6 +840,7 @@ class _CupertinoAlertActionSection extends StatefulWidget {
     Key key,
     @required this.children,
     this.scrollController,
+    this.hasCancelButton,
   })  : assert(children != null),
         super(key: key);
 
@@ -697,29 +853,13 @@ class _CupertinoAlertActionSection extends StatefulWidget {
   // don't have many actions.
   final ScrollController scrollController;
 
+  final bool hasCancelButton;
+
   @override
-  _CupertinoAlertActionSectionState createState() {
-    return new _CupertinoAlertActionSectionState();
-  }
+  _CupertinoAlertActionSectionState createState() => new _CupertinoAlertActionSectionState();
 }
 
 class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSection> {
-  static _CupertinoAlertActionSectionState of(BuildContext context) {
-    return context.ancestorStateOfType(
-      const TypeMatcher<_CupertinoAlertActionSectionState>(),
-    );
-  }
-
-  final Set<int> _pressedButtons = new Set<int>();
-
-  void onButtonDown(int index) {
-    setState(() => _pressedButtons.add(index));
-  }
-
-  void onButtonUp(int index) {
-    setState(() => _pressedButtons.remove(index));
-  }
-
   @override
   Widget build(BuildContext context) {
     final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
@@ -727,16 +867,7 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
     final List<Widget> interactiveButtons = <Widget>[];
     for (int i = 0; i < widget.children.length; i += 1) {
       interactiveButtons.add(
-        new GestureDetector(
-          onTapDown: (TapDownDetails details) {
-            onButtonDown(i);
-          },
-          onTapUp: (TapUpDetails details) {
-            onButtonUp(i);
-          },
-          onTapCancel: () {
-            onButtonUp(i);
-          },
+        new _PressableActionButton(
           child: widget.children[i],
         ),
       );
@@ -745,45 +876,122 @@ class _CupertinoAlertActionSectionState extends State<_CupertinoAlertActionSecti
     return new CupertinoScrollbar(
       child: new SingleChildScrollView(
         controller: widget.scrollController,
-        child: new _CupertinoDialogActionsRenderWidget(
+        child: new _CupertinoAlertActionsRenderWidget(
           actionButtons: interactiveButtons,
-          pressedButtons: new Set<int>.from(_pressedButtons),
           dividerThickness: _kDividerThickness / devicePixelRatio,
+          hasCancelButton: widget.hasCancelButton,
         ),
       ),
     );
   }
 }
 
-// iOS style dialog action button layout.
+// Button that updates its render state when pressed.
 //
-// See [_RenderCupertinoDialogActions] for specific layout policy details.
-class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
-  _CupertinoDialogActionsRenderWidget({
+// The pressed state is forwarded to an _ActionButtonParentDataWidget. The
+// corresponding _ActionButtonParentData is then interpreted and rendered
+// appropriately by _RenderCupertinoAlertActions.
+class _PressableActionButton extends StatefulWidget {
+  const _PressableActionButton({
+    @required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  _PressableActionButtonState createState() => new _PressableActionButtonState();
+}
+
+class _PressableActionButtonState extends State<_PressableActionButton> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return new _ActionButtonParentDataWidget(
+      isPressed: _isPressed,
+      // TODO:(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
+      child: new GestureDetector(
+        excludeFromSemantics: true,
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (TapDownDetails details) => setState(() => _isPressed = true),
+        onTapUp: (TapUpDetails details) => setState(() => _isPressed = false),
+        // TODO(mattcarroll): Cancel is currently triggered when user moves past slop instead of off button: https://github.com/flutter/flutter/issues/19783
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ParentDataWidget that updates _ActionButtonParentData for an action button.
+//
+// Each action button requires knowledge of whether or not it is pressed so that
+// the alert can correctly render the button. The pressed state is held within
+// _ActionButtonParentData. _ActionButtonParentDataWidget is responsible for
+// updating the pressed state of an _ActionButtonParentData based on the
+// incoming [isPressed] property.
+class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoAlertActionsRenderWidget> {
+  const _ActionButtonParentDataWidget({
+    Key key,
+    this.isPressed,
+    @required Widget child,
+  }) : super(key: key, child: child);
+
+  final bool isPressed;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is _ActionButtonParentData);
+    final _ActionButtonParentData parentData = renderObject.parentData;
+    if (parentData.isPressed != isPressed) {
+      parentData.isPressed = isPressed;
+
+      // Force a repaint.
+      final AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsPaint();
+    }
+  }
+}
+
+// ParentData applied to individual action buttons that report whether or not
+// that button is currently pressed by the user.
+class _ActionButtonParentData extends MultiChildLayoutParentData {
+  _ActionButtonParentData({
+    this.isPressed = false,
+  });
+
+  bool isPressed;
+}
+
+// iOS style alert action button layout.
+//
+// See [_RenderCupertinoAlertActions] for specific layout policy details.
+class _CupertinoAlertActionsRenderWidget extends MultiChildRenderObjectWidget {
+  _CupertinoAlertActionsRenderWidget({
     Key key,
     @required List<Widget> actionButtons,
-    @required Set<int> pressedButtons,
     double dividerThickness = 0.0,
-  }) : assert(pressedButtons != null),
-        _pressedButtons = pressedButtons,
-        _dividerThickness = dividerThickness,
-      super(key: key, children: actionButtons);
+    bool hasCancelButton = false,
+  }) :  _dividerThickness = dividerThickness,
+        _hasCancelButton = hasCancelButton,
+        super(key: key, children: actionButtons);
 
-  final Set<int> _pressedButtons;
   final double _dividerThickness;
+  final bool _hasCancelButton;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new RenderCupertinoDialogActions(
-      pressedButtons: _pressedButtons,
+    return new _RenderCupertinoAlertActions(
       dividerThickness: _dividerThickness,
+      hasCancelButton: _hasCancelButton,
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderCupertinoDialogActions renderObject) {
-    renderObject.pressedButtons = _pressedButtons;
+  void updateRenderObject(BuildContext context, _RenderCupertinoAlertActions renderObject) {
     renderObject.dividerThickness = _dividerThickness;
+    renderObject.hasCancelButton = _hasCancelButton;
   }
 }
 
@@ -804,43 +1012,21 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
 //
 // If the user has not included a separate cancel button, the height of the
 // action section is at most 1.5 buttons tall.
-@visibleForTesting
-class RenderCupertinoDialogActions extends RenderBox
+class _RenderCupertinoAlertActions extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
-  /// Creates an iOS dialog actions section layout policy.
-  ///
-  /// [pressedButtons] must not be null.
-  RenderCupertinoDialogActions({
+  _RenderCupertinoAlertActions({
     List<RenderBox> children,
-    @required Set<int> pressedButtons,
     double dividerThickness = 0.0,
-  }) :  assert(pressedButtons != null),
-        _dividerThickness = dividerThickness,
-        _pressedButtons = pressedButtons {
+    bool hasCancelButton = false,
+  }) :  _dividerThickness = dividerThickness,
+        _hasCancelButton = hasCancelButton {
     addAll(children);
   }
 
-  Set<int> _pressedButtons;
-
-  /// The buttons which are currently pressed by the user.
-  Set<int> get pressedButtons => _pressedButtons;
-
-  set pressedButtons(Set<int> newValue) {
-    if (_pressedButtons.containsAll(newValue)
-        && newValue.containsAll(_pressedButtons)) {
-      return;
-    }
-
-    _pressedButtons = newValue;
-    markNeedsPaint();
-  }
-
-  double _dividerThickness;
-
-  /// The thickness of the divider between buttons.
+  // The thickness of the divider between buttons.
   double get dividerThickness => _dividerThickness;
-
+  double _dividerThickness;
   set dividerThickness(double newValue) {
     if (newValue == _dividerThickness) {
       return;
@@ -861,11 +1047,11 @@ class RenderCupertinoDialogActions extends RenderBox
     markNeedsLayout();
   }
 
-  final Paint _buttonBkPaint = new Paint()
+  final Paint _buttonBackgroundPaint = new Paint()
     ..color = _kBackgroundColor
     ..style = PaintingStyle.fill;
 
-  final Paint _pressedButtonBkPaint = new Paint()
+  final Paint _pressedButtonBackgroundPaint = new Paint()
     ..color = _kPressedColor
     ..style = PaintingStyle.fill;
 
@@ -875,8 +1061,8 @@ class RenderCupertinoDialogActions extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData)
-      child.parentData = new MultiChildLayoutParentData();
+    if (child.parentData is! _ActionButtonParentData)
+      child.parentData = new _ActionButtonParentData();
   }
 
   @override
@@ -891,55 +1077,75 @@ class RenderCupertinoDialogActions extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    if (childCount == 0) {
+    if (childCount == 0)
       return 0.0;
-    }
-    return _computeMinIntrinsicHeightStacked(width);
+    if (childCount == 1)
+      return firstChild.computeMaxIntrinsicHeight(width) + dividerThickness;
+    if (hasCancelButton && childCount < 4)
+      return _computeMinIntrinsicHeightWithCancel(width);
+    return _computeMinIntrinsicHeightWithoutCancel(width);
   }
 
-  // The minimum height for more than 2 buttons is the height of the 1st button
-  // + 50% the height of the 2nd button + 2 dividers.
-  double _computeMinIntrinsicHeightStacked(double width) {
-    final List<RenderBox> children = getChildrenAsList();
-    if (children.length == 1) {
-      return firstChild.computeMinIntrinsicHeight(width) + dividerThickness;
+  // The minimum height for more than 2-3 buttons when a cancel button is
+  // included is the full height of button stack.
+  double _computeMinIntrinsicHeightWithCancel(double width) {
+    assert(childCount == 2 || childCount == 3);
+    if (childCount == 2) {
+      return firstChild.getMinIntrinsicHeight(width)
+        + childAfter(firstChild).getMinIntrinsicHeight(width)
+        + dividerThickness;
     }
-    return (2 * dividerThickness)
-        + children[0].computeMinIntrinsicHeight(width)
-        + (0.5 * children[1].computeMinIntrinsicHeight(width));
+    return firstChild.getMinIntrinsicHeight(width)
+      + childAfter(firstChild).getMinIntrinsicHeight(width)
+      + childAfter(childAfter(firstChild)).getMinIntrinsicHeight(width)
+      + (dividerThickness * 2);
+  }
+
+  // The minimum height for more than 2 buttons when no cancel button or 4+
+  // buttons when a cancel button is included is the height of the 1st button
+  // + 50% the height of the 2nd button + 2 dividers.
+  double _computeMinIntrinsicHeightWithoutCancel(double width) {
+    assert(childCount >= 2);
+    return firstChild.getMinIntrinsicHeight(width)
+      + dividerThickness
+      + (0.5 * childAfter(firstChild).getMinIntrinsicHeight(width));
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    if (childCount == 0) {
-      // No buttons. Zero height.
+    if (childCount == 0)
       return 0.0;
-    }
+    if (childCount == 1)
+      return firstChild.computeMaxIntrinsicHeight(width) + dividerThickness;
     return _computeMaxIntrinsicHeightStacked(width);
   }
 
   // Max height of a stack of buttons is the sum of all button heights + a
   // divider for each button.
   double _computeMaxIntrinsicHeightStacked(double width) {
-    final double allDividersHeight = childCount * dividerThickness;
-    return getChildrenAsList().fold(allDividersHeight, (double heightAccum, RenderBox button) {
-      return heightAccum + button.computeMaxIntrinsicHeight(width);
-    });
+    assert(childCount >= 2);
+
+    final double allDividersHeight = (childCount - 1) * dividerThickness;
+    double heightAccumulation = allDividersHeight;
+    RenderBox button = firstChild;
+    while (button != null) {
+      heightAccumulation += button.getMaxIntrinsicHeight(width);
+      button = childAfter(button);
+    }
+    return heightAccumulation;
   }
 
   @override
   void performLayout() {
-    final double layoutWidth  = constraints.maxWidth;
-    // We need to stack buttons vertically, plus dividers above each button.
     final BoxConstraints perButtonConstraints = constraints.copyWith(
       minHeight: 0.0,
-      maxHeight: (constraints.maxHeight - (dividerThickness * childCount)) / childCount,
+      maxHeight: double.infinity,
     );
 
-    final List<RenderBox> children = getChildrenAsList();
-    double verticalOffset = dividerThickness;
-    for (int i = 0; i < children.length; ++i) {
-      final RenderBox child = children[i];
+    RenderBox child = firstChild;
+    int index = 0;
+    double verticalOffset = 0.0;
+    while (child != null) {
       child.layout(
         perButtonConstraints,
         parentUsesSize: true,
@@ -950,13 +1156,18 @@ class RenderCupertinoDialogActions extends RenderBox
       parentData.offset = new Offset(0.0, verticalOffset);
 
       verticalOffset += child.size.height;
-      if (i < children.length - 1) {
+      if (index < childCount - 1) {
         // Add a gap for the next divider.
         verticalOffset += dividerThickness;
       }
+
+      index += 1;
+      child = childAfter(child);
     }
-    // Our height is the accumulated height of all buttons and dividers.
-    size = new Size(layoutWidth, verticalOffset);
+
+    size = constraints.constrain(
+      new Size(constraints.maxWidth, verticalOffset)
+    );
   }
 
   @override
@@ -969,77 +1180,80 @@ class RenderCupertinoDialogActions extends RenderBox
   void _drawButtonBackgroundsAndDividersStacked(Canvas canvas, Offset offset) {
     final Offset dividerOffset = new Offset(0.0, dividerThickness);
 
-    final Path bkFillPath = new Path()
+    final Path backgroundFillPath = new Path()
       ..fillType = PathFillType.evenOdd
       ..addRect(Rect.largest);
 
-    final Path pressedBkFillPath = new Path();
+    final Path pressedBackgroundFillPath = new Path();
 
     final Path dividersPath = new Path();
 
     Offset accumulatingOffset = offset;
 
-    final List<RenderBox> children = getChildrenAsList();
-    for (int i = 0; i < children.length; i += 1) {
-      final bool isButtonPressed = pressedButtons.contains(i);
-      final bool isPrevButtonPressed = pressedButtons.contains(i - 1);
-      final bool dividerNeeded = i == 0 || !(isButtonPressed || isPrevButtonPressed);
+    RenderBox child = firstChild;
+    RenderBox prevChild;
+    while (child != null) {
+      assert(child.parentData is _ActionButtonParentData);
+      final _ActionButtonParentData currentButtonParentData = child.parentData;
+      final bool isButtonPressed = currentButtonParentData.isPressed;
 
+      bool isPrevButtonPressed = false;
+      if (prevChild != null) {
+        assert(prevChild.parentData is _ActionButtonParentData);
+        final _ActionButtonParentData previousButtonParentData = prevChild
+            .parentData;
+        isPrevButtonPressed = previousButtonParentData.isPressed;
+      }
+
+      final bool isDividerPresent = child != firstChild;
+      final bool isDividerPainted = isDividerPresent && !(isButtonPressed || isPrevButtonPressed);
       final Rect dividerRect = new Rect.fromLTWH(
         accumulatingOffset.dx,
         accumulatingOffset.dy,
         size.width,
-        dividerThickness,
+        _dividerThickness,
       );
 
-      final Rect buttonBkRect = new Rect.fromLTWH(
+      final Rect buttonBackgroundRect = new Rect.fromLTWH(
         accumulatingOffset.dx,
-        accumulatingOffset.dy + dividerThickness,
+        accumulatingOffset.dy + (isDividerPresent ? dividerThickness : 0.0),
         size.width,
-        children[i].size.height,
+        child.size.height,
       );
 
       // If this button is pressed, then we don't want a white background to be
       // painted, so we erase this button from the background path.
       if (isButtonPressed) {
-        bkFillPath.addRect(buttonBkRect);
-        pressedBkFillPath.addRect(buttonBkRect);
+        backgroundFillPath.addRect(buttonBackgroundRect);
+        pressedBackgroundFillPath.addRect(buttonBackgroundRect);
       }
 
       // If this divider is needed, then we erase the divider area from the
       // background path, and on top of that we paint a translucent gray to
       // darken the divider area.
-      if (dividerNeeded) {
-        bkFillPath.addRect(dividerRect);
+      if (isDividerPainted) {
+        backgroundFillPath.addRect(dividerRect);
         dividersPath.addRect(dividerRect);
       }
 
-      accumulatingOffset += dividerOffset + new Offset(0.0, children[i].size.height);
+      accumulatingOffset += (isDividerPresent ? dividerOffset : Offset.zero)
+          + new Offset(0.0, child.size.height);
+
+      prevChild = child;
+      child = childAfter(child);
     }
 
-    // Draw all of the button backgrounds.
-    canvas.drawPath(
-      bkFillPath,
-      _buttonBkPaint,
-    );
-
-    // Draw the pressed button backgrounds.
-    canvas.drawPath(
-      pressedBkFillPath,
-      _pressedButtonBkPaint,
-    );
-
-    // Draw all of the dividers.
-    canvas.drawPath(
-      dividersPath,
-      _dividerPaint,
-    );
+    canvas.drawPath(backgroundFillPath, _buttonBackgroundPaint);
+    canvas.drawPath(pressedBackgroundFillPath, _pressedButtonBackgroundPaint);
+    canvas.drawPath(dividersPath, _dividerPaint);
   }
 
   void _drawButtons(PaintingContext context, Offset offset) {
-    for (RenderBox child in getChildrenAsList()) {
+    RenderBox child = firstChild;
+    while (child != null) {
       final MultiChildLayoutParentData childParentData = child.parentData;
       context.paintChild(child, childParentData.offset + offset);
+      child = childAfter(child);
     }
   }
 
