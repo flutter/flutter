@@ -12,10 +12,10 @@ const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
 // Barrier color for a Cupertino modal popup.
-const Color _kModalBarrierColor = const Color(0x6604040F);
+const Color _kModalBarrierColor = Color(0x6604040F);
 
 // The duration of the transition used when a modal popup is shown.
-const Duration _kModalPopupTransitionDuration = const Duration(milliseconds: 335);
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
 // Offset from offscreen to the right to fully on screen.
 final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(

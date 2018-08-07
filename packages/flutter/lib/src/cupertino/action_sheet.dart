@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'scrollbar.dart';
 
-const TextStyle _kActionSheetActionStyle = const TextStyle(
+const TextStyle _kActionSheetActionStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 20.0,
@@ -20,7 +20,7 @@ const TextStyle _kActionSheetActionStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
-const TextStyle _kActionSheetContentStyle = const TextStyle(
+const TextStyle _kActionSheetContentStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 13.0,
@@ -41,19 +41,19 @@ const BoxDecoration _kCupertinoAlertBlurOverlayDecoration = BoxDecoration(
 
 // Translucent, very light gray that is painted on top of the blurred backdrop
 // as the action sheet's background color.
-const Color _kBackgroundColor = const Color(0xD1F8F8F8);
+const Color _kBackgroundColor = Color(0xD1F8F8F8);
 
 // Translucent, light gray that is painted on top of the blurred backdrop as
 // the background color of a pressed button.
-const Color _kPressedColor = const Color(0xA6E5E5EA);
+const Color _kPressedColor = Color(0xA6E5E5EA);
 
 // Translucent gray that is painted on top of the blurred backdrop in the gap
 // areas between the content section and actions section, as well as between
 // buttons.
-const Color _kButtonDividerColor = const Color(0x403F3F3F);
+const Color _kButtonDividerColor = Color(0x403F3F3F);
 
-const Color _kContentTextColor = const Color(0xFF8F8F8F);
-const Color _kCancelButtonPressedColor = const Color(0xFFEAEAEA);
+const Color _kContentTextColor = Color(0xFF8F8F8F);
+const Color _kCancelButtonPressedColor = Color(0xFFEAEAEA);
 
 const double _kBlurAmount = 20.0;
 const double _kEdgeHorizontalPadding = 8.0;
@@ -815,7 +815,7 @@ class _CupertinoAlertContentSection extends StatelessWidget {
 
     // Add padding between the widgets if necessary.
     if (titleContentGroup.length > 1) {
-      titleContentGroup.insert(1, const Padding(padding: const EdgeInsets.only(top: 8.0)));
+      titleContentGroup.insert(1, const Padding(padding: EdgeInsets.only(top: 8.0)));
     }
 
     return new CupertinoScrollbar(

@@ -16,7 +16,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
-          title: const Text('Action Sheet'),
+          title: Text('Action Sheet'),
         ),
       ),
     );
@@ -36,7 +36,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
-          title: const Text('Action Sheet'),
+          title: Text('Action Sheet'),
         ),
       ),
     );
@@ -88,8 +88,8 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
-          title: const Text('Action Sheet'),
-          message: const Text('An action sheet')
+          title: Text('Action Sheet'),
+          message: Text('An action sheet')
         ),
       ),
     );
@@ -111,7 +111,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
-          title: const Text('Action Sheet'),
+          title: Text('Action Sheet'),
         ),
       ),
     );
@@ -130,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
-          message: const Text('An action sheet'),
+          message: Text('An action sheet'),
         ),
       ),
     );
