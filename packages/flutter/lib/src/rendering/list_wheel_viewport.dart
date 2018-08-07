@@ -20,21 +20,24 @@ typedef double _ChildSizingFunction(RenderBox child);
 /// [RenderListWheelViewport] during layout will ask the delegate to create
 /// children that are visible in the viewport and remove those that are not.
 abstract class ListWheelChildManager {
-  /// The number of children that will be provided.
+  /// The maximum number of children that can be provided to
+  /// [RenderListWheelViewport].
   ///
   /// If non-null, the children will have index in the range [0, childCount - 1].
   ///
   /// If null, then there's no explicit limits to the range of the children
   /// except that it has to be contiguous. If [childExistsAt] for a certain
-  /// index returns false, that means the index is either a lower or upper limit.
+  /// index returns false, that index is already past the limit.
   int get childCount;
 
   /// Checks whether the delegate is able to provide a child widget at the given
   /// index (this function is not about whether the child at the given index is
-  /// active or not).
+  /// attached to the [RenderListWheelViewport] or not).
   bool childExistsAt(int index);
 
-  /// Creates and inserts a new child at the given index.
+  /// Creates a new child at the given index and updates it to the child list
+  /// of [RenderListWheelViewport]. If no child corresponds to `index`, then do
+  /// nothing.
   void createChild(int index, {@required RenderBox after});
 
   /// Removes the child element corresponding with the given RenderBox.
@@ -126,7 +129,7 @@ class RenderListWheelViewport
   ///
   /// All arguments must not be null. Optional arguments have reasonable defaults.
   RenderListWheelViewport({
-    @required ListWheelChildManager childManager,
+    @required this.childManager,
     @required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
@@ -156,7 +159,6 @@ class RenderListWheelViewport
          !renderChildrenOutsideViewport || !clipToSize,
          clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
-       _childManager = childManager,
        _offset = offset,
        _diameterRatio = diameterRatio,
        _perspective = perspective,
@@ -192,8 +194,7 @@ class RenderListWheelViewport
       'rendered outside will be clipped anyway.';
 
   /// The delegate that manages the children of this object.
-  ListWheelChildManager get childManager => _childManager;
-  final ListWheelChildManager _childManager;
+  final ListWheelChildManager childManager;
 
   /// The associated ViewportOffset object for the viewport describing the part
   /// of the content inside that's visible.
@@ -584,6 +585,7 @@ class RenderListWheelViewport
   void _layoutChild(RenderBox child, BoxConstraints constraints, int index) {
     child.layout(constraints, parentUsesSize: true);
     final ListWheelParentData childParentData = child.parentData;
+    // Centers the child horizontally.
     final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
     childParentData.offset = new Offset(crossPosition, indexToScrollOffset(index));
   }
@@ -609,9 +611,9 @@ class RenderListWheelViewport
     // The height, in pixel, that children will be visible and might be laid out
     // and painted.
     double visibleHeight = size.height;
-    // If renderChildrenOutsideViewport is true, we spawn a redundant amount
-    // of children, those that are in the backside of the cylinder won't be
-    // painted anyway.
+    // If renderChildrenOutsideViewport is true, we spawn extra children by
+    // doubling the visibility range, those that are in the backside of the
+    // cylinder won't be painted anyway.
     if (renderChildrenOutsideViewport)
       visibleHeight *= 2;
 
