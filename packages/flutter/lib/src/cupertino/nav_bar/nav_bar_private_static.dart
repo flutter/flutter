@@ -102,27 +102,37 @@ Widget _wrapWithBackground({
 class _LargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _LargeTitleNavigationBarSliverDelegate({
+    @required this.leading,
+    @required this.automaticallyImplyLeading,
+    @required this.automaticallyImplyTitle,
+    @required this.previousPageTitle,
+    @required this.middle,
+    @required this.trailing,
+    @required this.largeTitle,
+    @required this.backgroundColor,
+    @required this.border,
+    @required this.padding,
+    @required this.actionsForegroundColor,
     @required this.transitionBetweenRoutes,
-    @required this.components,
     @required this.persistentHeight,
-    this.padding,
-    this.border,
-    this.backgroundColor,
-    this.alwaysShowMiddle,
-  }) : assert(persistentHeight != null);
+    @required this.alwaysShowMiddle,
+  }) : assert(persistentHeight != null),
+       assert(alwaysShowMiddle != null),
+       assert(transitionBetweenRoutes != null);
 
-  final bool transitionBetweenRoutes;
-
-  final _NavigationBarComponents components;
-
-  final double persistentHeight;
-
-  final EdgeInsetsDirectional padding;
-
-  final Border border;
-
+  final Widget leading;
+  final bool automaticallyImplyLeading;
+  final bool automaticallyImplyTitle;
+  final String previousPageTitle;
+  final Widget middle;
+  final Widget trailing;
+  final Widget largeTitle;
   final Color backgroundColor;
-
+  final Border border;
+  final EdgeInsetsDirectional padding;
+  final Color actionsForegroundColor;
+  final bool transitionBetweenRoutes;
+  final double persistentHeight;
   final bool alwaysShowMiddle;
 
   @override
@@ -134,6 +144,23 @@ class _LargeTitleNavigationBarSliverDelegate
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
+
+    final _NavigationBarComponents components = new _NavigationBarComponents(
+      route: ModalRoute.of(context),
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      automaticallyImplyTitle: automaticallyImplyTitle,
+      previousPageTitle: previousPageTitle,
+      middle: middle,
+      trailing: trailing,
+      largeTitle: largeTitle,
+      padding: padding,
+      backgroundColor: backgroundColor,
+      border: border,
+      actionsForegroundColor: actionsForegroundColor,
+      large: true,
+      largeExpanded: showLargeTitle,
+    );
 
     final _PersistentNavigationBar persistentNavigationBar =
         new _PersistentNavigationBar(
@@ -209,10 +236,20 @@ class _LargeTitleNavigationBarSliverDelegate
 
   @override
   bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return components != oldDelegate.components
-        || persistentHeight != oldDelegate.persistentHeight
+    return leading != oldDelegate.leading
+        || automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading
+        || automaticallyImplyTitle != oldDelegate.automaticallyImplyTitle
+        || previousPageTitle != oldDelegate.previousPageTitle
+        || middle != oldDelegate.middle
+        || trailing != oldDelegate.trailing
+        || largeTitle != oldDelegate.largeTitle
+        || backgroundColor != oldDelegate.backgroundColor
         || border != oldDelegate.border
-        || backgroundColor != oldDelegate.backgroundColor;
+        || padding != oldDelegate.padding
+        || actionsForegroundColor != oldDelegate.actionsForegroundColor
+        || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
+        || persistentHeight != oldDelegate.persistentHeight
+        || alwaysShowMiddle != oldDelegate.alwaysShowMiddle;
   }
 }
 
@@ -295,8 +332,6 @@ class _PersistentNavigationBar extends StatelessWidget {
 class _NavigationBarComponents {
   _NavigationBarComponents({
     @required ModalRoute<dynamic> route,
-    @required this.backgroundColor,
-    @required this.border,
     @required Widget leading,
     @required bool automaticallyImplyLeading,
     @required bool automaticallyImplyTitle,
@@ -304,11 +339,13 @@ class _NavigationBarComponents {
     @required Widget middle,
     @required Widget trailing,
     @required Widget largeTitle,
+    @required this.backgroundColor,
+    @required this.border,
     @required EdgeInsetsDirectional padding,
     @required Color actionsForegroundColor,
     @required this.large,
-  }) : _route = route,
-       leading = createLeading(
+    this.largeExpanded,
+  }) : leading = createLeading(
          userLeading: leading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
@@ -346,9 +383,7 @@ class _NavigationBarComponents {
          automaticImplyTitle: automaticallyImplyTitle,
          large: large,
        ),
-       _padding = padding,
-       _actionsForegroundColor = actionsForegroundColor,
-       _actionsStyle = _navBarItemStyle(actionsForegroundColor);
+       actionsStyle = _navBarItemStyle(actionsForegroundColor);
 
   static Widget _derivedTitle({
     bool automaticallyImplyTitle,
@@ -366,9 +401,7 @@ class _NavigationBarComponents {
 
   final Color backgroundColor;
   final Border border;
-
-  final TextStyle _actionsStyle;
-  final ModalRoute<dynamic> _route;
+  final TextStyle actionsStyle;
 
   final _RenderObjectFindingWidget leading;
   static _RenderObjectFindingWidget createLeading({
@@ -492,10 +525,6 @@ class _NavigationBarComponents {
     );
   }
 
-  RenderBox get middleRenderBox {
-    return middle.renderBox;
-  }
-
   final _RenderObjectFindingWidget trailing;
   static _RenderObjectFindingWidget createTrailing({
     @required Widget userTrailing,
@@ -560,9 +589,8 @@ class _NavigationBarComponents {
     );
   }
 
-  final EdgeInsetsDirectional _padding;
-  final Color _actionsForegroundColor;
   final bool large;
+  final bool largeExpanded;
 }
 
 class _RenderObjectFindingWidget extends StatelessWidget {

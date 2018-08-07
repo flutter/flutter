@@ -218,7 +218,7 @@ class _NavigationBarComponentsTransition {
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kMiddleTitleTextStyle,
-              end: topComponents._actionsStyle,
+              end: topComponents.actionsStyle,
             ).animate(animation),
             child: bottomMiddle.child,
           ),
@@ -250,7 +250,7 @@ class _NavigationBarComponentsTransition {
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kLargeTitleTextStyle,
-              end: topComponents._actionsStyle,
+              end: topComponents.actionsStyle,
             ).animate(animation),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
