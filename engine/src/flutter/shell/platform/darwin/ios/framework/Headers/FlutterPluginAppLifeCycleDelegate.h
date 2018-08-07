@@ -15,7 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 FLUTTER_EXPORT
 @interface FlutterPluginAppLifeCycleDelegate : NSObject
 /**
- Registers `delegate` to receive life cycle callbacks via this FlutterPluginAppLifecycleDelegate as long as it is alive.
+ Registers `delegate` to receive life cycle callbacks via this FlutterPluginAppLifecycleDelegate as
+ long as it is alive.
 
  `delegate` will only referenced weakly.
 */
@@ -28,6 +29,14 @@ FLUTTER_EXPORT
  */
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+
+/**
+ Calls all plugins registered for `UIApplicationDelegate` callbacks.
+
+ - Returns: `NO` if any plugin vetoes application launch.
+ */
+- (BOOL)application:(UIApplication*)application
+    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
 
 /**
  Calls all plugins registered for `UIApplicationDelegate` callbacks.
@@ -74,8 +83,8 @@ FLUTTER_EXPORT
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
 
 /**
- Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
- the request.
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
+ some plugin handles the request.
 
   - Returns: `YES` if any plugin handles the request.
 */
@@ -84,16 +93,16 @@ FLUTTER_EXPORT
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
 
 /**
- Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
- the request.
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
+ some plugin handles the request.
 
   - Returns: `YES` if any plugin handles the request.
  */
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url;
 
 /**
- Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
- the request.
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
+ some plugin handles the request.
 
   - Returns: `YES` if any plugin handles the request.
 */
@@ -111,8 +120,8 @@ FLUTTER_EXPORT
     API_AVAILABLE(ios(9.0));
 
 /**
- Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
- the request.
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
+ some plugin handles the request.
 
   - Returns: `YES` if any plugin handles the request.
 */
@@ -121,8 +130,8 @@ FLUTTER_EXPORT
                       completionHandler:(nonnull void (^)(void))completionHandler;
 
 /**
- Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
- the request.
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
+ some plugin handles the request.
 
   - Returns: `YES` if any plugin handles the request.
 */
@@ -130,8 +139,8 @@ FLUTTER_EXPORT
     performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
 
 /**
- Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until some plugin handles
- the request.
+ Calls all plugins registered for `UIApplicationDelegate` callbacks in order of registration until
+ some plugin handles the request.
   - Returns: `YES` if any plugin handles the request.
 */
 - (BOOL)application:(UIApplication*)application

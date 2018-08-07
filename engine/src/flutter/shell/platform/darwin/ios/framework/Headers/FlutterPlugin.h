@@ -59,6 +59,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+
+/**
+ Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
+
+ - Returns: `NO` if this plugin vetoes application launch.
+ */
+- (BOOL)application:(UIApplication*)application
+    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+
 /**
  Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
  */
@@ -293,8 +302,8 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register themselves to the application
- life cycle events.
+ Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register themselves
+ to the application life cycle events.
 */
 @protocol FlutterAppLifeCycleProvider
 - (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate;

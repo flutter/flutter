@@ -15,6 +15,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/shell.h"
@@ -44,7 +45,8 @@ void FlutterMain::Init(JNIEnv* env,
                        jclass clazz,
                        jobject context,
                        jobjectArray jargs,
-                       jstring bundlePath) {
+                       jstring bundlePath,
+                       jstring appStoragePath) {
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -55,6 +57,11 @@ void FlutterMain::Init(JNIEnv* env,
   auto settings = SettingsFromCommandLine(command_line);
 
   settings.assets_path = fml::jni::JavaStringToString(env, bundlePath);
+
+  // Restore the callback cache.
+  blink::DartCallbackCache::SetCachePath(
+      fml::jni::JavaStringToString(env, appStoragePath));
+  blink::DartCallbackCache::LoadCacheFromDisk();
 
   if (!blink::DartVM::IsRunningPrecompiledCode()) {
     // Check to see if the appropriate kernel files are present and configure
@@ -97,7 +104,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;)V",
+                       "lang/String;Ljava/lang/String;)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {

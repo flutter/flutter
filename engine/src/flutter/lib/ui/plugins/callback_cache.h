@@ -14,8 +14,6 @@
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
-#define DART_CALLBACK_INVALID_HANDLE -1
-
 namespace blink {
 
 typedef struct {
@@ -26,6 +24,9 @@ typedef struct {
 
 class DartCallbackCache {
  public:
+  static void SetCachePath(const std::string& path);
+  static std::string GetCachePath() { return cache_path_; }
+
   static int64_t GetCallbackHandle(const std::string& name,
                                    const std::string& class_name,
                                    const std::string& library_path)
@@ -36,12 +37,17 @@ class DartCallbackCache {
   static std::unique_ptr<DartCallbackRepresentation> GetCallbackInformation(
       int64_t handle) FML_LOCKS_EXCLUDED(mutex_);
 
+  static void LoadCacheFromDisk() FML_LOCKS_EXCLUDED(mutex_);
+
  private:
   static Dart_Handle LookupDartClosure(const std::string& name,
                                        const std::string& class_name,
                                        const std::string& library_path);
 
+  static void SaveCacheToDisk() FML_EXCLUSIVE_LOCKS_REQUIRED(mutex_);
+
   static std::mutex mutex_;
+  static std::string cache_path_;
 
   static std::map<int64_t, DartCallbackRepresentation> cache_
       FML_GUARDED_BY(mutex_);

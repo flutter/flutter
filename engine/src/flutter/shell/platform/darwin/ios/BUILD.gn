@@ -46,6 +46,7 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterCallbackCache.mm",
+    "framework/Source/FlutterCallbackCache_Internal.h",
     "framework/Source/FlutterChannels.mm",
     "framework/Source/FlutterCodecs.mm",
     "framework/Source/FlutterDartProject.mm",
