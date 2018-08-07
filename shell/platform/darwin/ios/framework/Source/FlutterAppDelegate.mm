@@ -23,6 +23,11 @@
 }
 
 - (BOOL)application:(UIApplication*)application
+    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  return [_lifeCycleDelegate application:application willFinishLaunchingWithOptions:launchOptions];
+}
+
+- (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   return [_lifeCycleDelegate application:application didFinishLaunchingWithOptions:launchOptions];
 }
