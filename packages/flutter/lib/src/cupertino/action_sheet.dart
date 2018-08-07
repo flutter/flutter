@@ -57,6 +57,7 @@ const Color _kCancelButtonPressedColor = Color(0xFFEAEAEA);
 
 const double _kBlurAmount = 20.0;
 const double _kEdgeHorizontalPadding = 8.0;
+const double _kCancelButtonPadding = 8.0;
 const double _kEdgeVerticalPadding = 10.0;
 const double _kContentHorizontalPadding = 40.0;
 const double _kContentVerticalPadding = 14.0;
@@ -173,7 +174,7 @@ class CupertinoActionSheet extends StatelessWidget {
       );
     }
     return new Container(
-      child: _CupertinoAlertActionSection(
+      child: new _CupertinoAlertActionSection(
         children: actions,
         scrollController: actionScrollController,
         hasCancelButton: cancelButton != null,
@@ -183,7 +184,7 @@ class CupertinoActionSheet extends StatelessWidget {
 
   Widget _buildCancelButton() {
     final double cancelPadding = (actions != null || message != null || title != null)
-        ? _kEdgeHorizontalPadding : 0.0;
+        ? _kCancelButtonPadding : 0.0;
     return Padding(
       padding: new EdgeInsets.only(top: cancelPadding),
       child: new _CupertinoActionSheetCancelButton(
@@ -195,8 +196,8 @@ class CupertinoActionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[
-      new Flexible(child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.0),
+      new Flexible(child: new ClipRRect(
+        borderRadius: new BorderRadius.circular(12.0),
         child: new BackdropFilter(
           filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
           child: new Container(
@@ -374,7 +375,7 @@ class _CupertinoActionSheetCancelButtonState extends State<_CupertinoActionSheet
       child: new Container(
         decoration: new BoxDecoration(
           color: _backgroundColor,
-          borderRadius: BorderRadius.circular(_kCornerRadius),
+          borderRadius: new BorderRadius.circular(_kCornerRadius),
         ),
         child: widget.child,
       ),
@@ -628,7 +629,7 @@ class _RenderCupertinoAlert extends RenderBox {
     double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
     if (actionsHeight > 0 || contentHeight > 0)
-      height -= 2 * _kEdgeHorizontalPadding;
+      height -= 2 * _kEdgeVerticalPadding;
     if (height.isFinite)
       return height;
     return 0.0;
@@ -642,7 +643,7 @@ class _RenderCupertinoAlert extends RenderBox {
     double height = contentHeight + (hasDivider ? _dividerThickness : 0.0) + actionsHeight;
 
     if (actionsHeight > 0 || contentHeight > 0)
-      height -= 2 * _kEdgeHorizontalPadding;
+      height -= 2 * _kEdgeVerticalPadding;
     if (height.isFinite)
       return height;
     return 0.0;
