@@ -4,6 +4,8 @@
 
 package io.flutter.view;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Rect;
 import android.opengl.Matrix;
 import android.os.Build;
@@ -41,6 +43,8 @@ class AccessibilityBridge
     private SemanticsObject mHoveredObject;
     private int previousRouteId = ROOT_NODE_ID;
     private List<Integer> previousRoutes;
+    private final View mDecorView;
+    private Integer mLastLeftFrameInset = 0;
 
     private final BasicMessageChannel<Object> mFlutterAccessibilityChannel;
 
@@ -110,6 +114,7 @@ class AccessibilityBridge
         previousRoutes = new ArrayList<>();
         mFlutterAccessibilityChannel = new BasicMessageChannel<>(
                 owner, "flutter/accessibility", StandardMessageCodec.INSTANCE);
+        mDecorView = ((Activity) owner.getContext()).getWindow().getDecorView();
     }
 
     void setAccessibilityEnabled(boolean accessibilityEnabled) {
@@ -620,6 +625,19 @@ class AccessibilityBridge
         if (rootObject != null) {
             final float[] identity = new float[16];
             Matrix.setIdentityM(identity, 0);
+            // in android devices above AP 23, the system nav bar can be placed on the left side
+            // of the screen in landscape mode. We must handle the translation ourselves for the
+            // a11y nodes.
+            if (Build.VERSION.SDK_INT >= 23) {
+                Rect visibleFrame = new Rect();
+                mDecorView.getWindowVisibleDisplayFrame(visibleFrame);
+                if (!mLastLeftFrameInset.equals(visibleFrame.left)) {
+                    rootObject.globalGeometryDirty = true;
+                    rootObject.inverseTransformDirty = true;
+                }
+                mLastLeftFrameInset = visibleFrame.left;
+                Matrix.translateM(identity, 0, visibleFrame.left, 0, 0);
+            }
             rootObject.updateRecursively(identity, visitedObjects, false);
             rootObject.collectRoutes(newRoutes);
         }
