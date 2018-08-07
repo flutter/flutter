@@ -76,10 +76,23 @@ void main() {
       testInMemory('creates Android library in module', () async {
         final FlutterProject project = aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
+        expect(project.android.directory.childFile('template_content').existsSync(), isTrue);
         expect(project.android.directory.childFile('local.properties').existsSync(), isTrue);
-        expect(project.android.directory.childFile('settings.gradle').existsSync(), isTrue);
         expect(project.android.directory.childFile(
           'Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+        ).existsSync(), isTrue);
+      });
+      testInMemory('creates iOS pod in module', () async {
+        final FlutterProject project = aModuleProject();
+        await project.ensureReadyForPlatformSpecificTooling();
+        final Directory flutter = project.ios.directory.childDirectory('Flutter');
+        expect(flutter.childFile('template_content').existsSync(), isTrue);
+        expect(flutter.childFile('Generated.xcconfig').existsSync(), isTrue);
+        expect(flutter.childFile(
+          'FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.h',
+        ).existsSync(), isTrue);
+        expect(flutter.childFile(
+          'FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m',
         ).existsSync(), isTrue);
       });
     });
@@ -222,7 +235,16 @@ void testInMemory(String description, Future<Null> testMethod()) {
       .childDirectory('templates')
       .childDirectory('module')
       .childDirectory('android')
-      .childFile('settings.gradle.tmpl')
+      .childFile('template_content.copy.tmpl')
+      .createSync(recursive: true);
+  fs.directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childDirectory('templates')
+      .childDirectory('module')
+      .childDirectory('ios')
+      .childDirectory('Flutter.tmpl')
+      .childFile('template_content.copy.tmpl')
       .createSync(recursive: true);
 
   // Sets up cache in a text execution context where fs is the FileSystem.
