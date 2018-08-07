@@ -3,7 +3,7 @@
 This directory exists to support building Flutter on our build infrastructure.
 
 The results of such builds are viewable at:
-* https://build.chromium.org/p/client.flutter/waterfall
+* https://build.chromium.org/p/client.flutter/console
 * https://travis-ci.org/flutter/flutter/builds (limited checking used just for PRs on github)
 
 The external master pages for the chromium infra bots do not allow
