@@ -378,6 +378,10 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
+    if (ui.window.accessibilityFeatures.disableAnimations)
+      timeDilation = 0.05;
+    else
+      timeDilation = 1.0;
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
