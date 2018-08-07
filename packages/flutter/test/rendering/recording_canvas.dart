@@ -127,6 +127,13 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
   void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, {Rect childPaintBounds}) {
     painter(this, offset);
   }
