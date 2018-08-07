@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-
 import 'android/gradle.dart' as gradle;
 import 'base/file_system.dart';
 import 'bundle.dart' as bundle;
@@ -16,20 +15,39 @@ import 'plugins.dart';
 import 'template.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
+///
+/// Instances should be treated as immutable snapshots, to be replaced by new
+/// instances on changes to `pubspec.yaml` files.
 class FlutterProject {
+  FlutterProject._(this.directory, this.manifest, this._exampleManifest);
 
-  FlutterProject(this.directory);
-  FlutterProject.fromPath(String projectPath) : directory = fs.directory(projectPath);
+  /// Returns a future that completes with a FlutterProject view of the given directory.
+  static Future<FlutterProject> fromDirectory(Directory directory) async {
+    final FlutterManifest manifest = await FlutterManifest.createFromPath(
+      directory.childFile(bundle.defaultManifestPath).path,
+    );
+    final Directory exampleDirectory = directory.childDirectory('example');
+    final FlutterManifest exampleManifest = await FlutterManifest.createFromPath(
+      exampleDirectory.childFile(bundle.defaultManifestPath).path,
+    );
+    return new FlutterProject._(directory, manifest, exampleManifest);
+  }
+
+  /// Returns a future that completes with a FlutterProject view of the current directory.
+  static Future<FlutterProject> current() => fromDirectory(fs.currentDirectory);
+
+  /// Returns a future that completes with a FlutterProject view of the given directory.
+  static Future<FlutterProject> fromPath(String path) => fromDirectory(fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
 
-  Future<FlutterManifest> get manifest {
-    return _manifest ??= FlutterManifest.createFromPath(
-      directory.childFile(bundle.defaultManifestPath).path,
-    );
-  }
-  Future<FlutterManifest> _manifest;
+  /// The manifest of this project, or null, if `pubspec.yaml` is invalid.
+  final FlutterManifest manifest;
+
+  /// The manifest of the example sub-project of this project, or null, if
+  /// `example/pubspec.yaml` is invalid.
+  final FlutterManifest _exampleManifest;
 
   /// Asynchronously returns the organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -42,10 +60,9 @@ class FlutterProject {
       example.android.applicationId(),
       example.ios.productBundleIdentifier(),
     ]);
-    return new Set<String>.from(
-      candidates.map(_organizationNameFromPackageName)
-                .where((String name) => name != null)
-    );
+    return new Set<String>.from(candidates
+        .map(_organizationNameFromPackageName)
+        .where((String name) => name != null));
   }
 
   String _organizationNameFromPackageName(String packageName) {
@@ -59,7 +76,12 @@ class FlutterProject {
   IosProject get ios => new IosProject(directory.childDirectory('ios'));
 
   /// The Android sub project of this project.
-  AndroidProject get android => new AndroidProject(directory.childDirectory('android'));
+  AndroidProject get android {
+    if (manifest.isModule) {
+      return new AndroidProject(directory.childDirectory('.android'));
+    }
+    return new AndroidProject(directory.childDirectory('android'));
+  }
 
   /// The generated AndroidModule sub project of this module project.
   AndroidModuleProject get androidModule => new AndroidModuleProject(directory.childDirectory('.android'));
@@ -67,30 +89,58 @@ class FlutterProject {
   /// The generated IosModule sub project of this module project.
   IosModuleProject get iosModule => new IosModuleProject(directory.childDirectory('.ios'));
 
-  /// Returns true if this project has an example application
-  bool get hasExampleApp => _exampleDirectory.childFile('pubspec.yaml').existsSync();
+  File get androidLocalPropertiesFile {
+    return directory
+        .childDirectory(manifest.isModule ? '.android' : 'android')
+        .childFile('local.properties');
+  }
 
-  /// The example sub project of this (package or plugin) project.
-  FlutterProject get example => new FlutterProject(_exampleDirectory);
+  File get generatedXcodePropertiesFile {
+    return directory
+        .childDirectory(manifest.isModule ? '.ios' : 'ios')
+        .childDirectory('Flutter')
+        .childFile('Generated.xcconfig');
+  }
+
+  File get flutterPluginsFile => directory.childFile('.flutter-plugins');
+
+  Directory get androidPluginRegistrantHost {
+    return manifest.isModule
+        ? directory.childDirectory('.android').childDirectory('Flutter')
+        : directory.childDirectory('android').childDirectory('app');
+  }
+
+  Directory get iosPluginRegistrantHost {
+    // In a module create the GeneratedPluginRegistrant as a pod to be included
+    // from a hosting app.
+    // For a non-module create the GeneratedPluginRegistrant as source files
+    // directly in the iOS project.
+    return manifest.isModule
+        ? directory.childDirectory('.ios').childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
+        : directory.childDirectory('ios').childDirectory('Runner');
+  }
+
+  /// The example sub-project of this project.
+  FlutterProject get example => new FlutterProject._(_exampleDirectory, _exampleManifest, FlutterManifest.empty());
+
+  /// True, if this project has an example application
+  bool get hasExampleApp => _exampleDirectory.childFile('pubspec.yaml').existsSync();
 
   /// The directory that will contain the example if an example exists.
   Directory get _exampleDirectory => directory.childDirectory('example');
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  ///
-  /// Returns the number of files written.
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp) {
-      return 0;
+      return;
     }
-    final FlutterManifest manifest = await this.manifest;
     if (manifest.isModule) {
-      await androidModule.ensureReadyForPlatformSpecificTooling(manifest);
-      await iosModule.ensureReadyForPlatformSpecificTooling(manifest);
+      await androidModule.ensureReadyForPlatformSpecificTooling(this);
+      await iosModule.ensureReadyForPlatformSpecificTooling();
     }
-    xcode.generateXcodeProperties(projectPath: directory.path, manifest: manifest);
-    injectPlugins(projectPath: directory.path, manifest: manifest);
+    await xcode.generateXcodeProperties(project: this);
+    await injectPlugins(this);
   }
 }
 
@@ -100,6 +150,18 @@ class IosProject {
   IosProject(this.directory);
 
   final Directory directory;
+
+  /// The xcode config file for [mode].
+  File xcodeConfigFor(String mode) => directory.childDirectory('Flutter').childFile('$mode.xcconfig');
+
+  /// The 'Podfile'.
+  File get podfile => directory.childFile('Podfile');
+
+  /// The 'Podfile.lock'.
+  File get podfileLock => directory.childFile('Podfile.lock');
+
+  /// The 'Manifest.lock'.
+  File get podManifestLock => directory.childDirectory('Pods').childFile('Manifest.lock');
 
   Future<String> productBundleIdentifier() {
     final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
@@ -114,7 +176,7 @@ class IosModuleProject {
 
   final Directory directory;
 
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterManifest manifest) async {
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (_shouldRegenerate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'ios'));
       template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
@@ -133,6 +195,22 @@ class AndroidProject {
 
   AndroidProject(this.directory);
 
+  File get gradleManifestFile {
+    return isUsingGradle()
+        ? fs.file(fs.path.join(directory.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
+        : directory.childFile('AndroidManifest.xml');
+  }
+
+  File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
+
+  Directory get gradleAppOutV1Directory {
+    return fs.directory(fs.path.join(directory.path, 'app', 'build', 'outputs', 'apk'));
+  }
+
+  bool isUsingGradle() {
+    return directory.childFile('build.gradle').existsSync();
+  }
+
   final Directory directory;
 
   Future<String> applicationId() {
@@ -146,22 +224,25 @@ class AndroidProject {
   }
 }
 
-/// Represents the contents of the .android-generated/ folder of a Flutter module
-/// project.
+/// Represents the contents of the .android/ folder of a Flutter module project.
 class AndroidModuleProject {
   AndroidModuleProject(this.directory);
 
   final Directory directory;
 
-  Future<void> ensureReadyForPlatformSpecificTooling(FlutterManifest manifest) async {
+  Future<void> ensureReadyForPlatformSpecificTooling(FlutterProject project) async {
     if (_shouldRegenerate()) {
       final Template template = new Template.fromName(fs.path.join('module', 'android'));
-      template.render(directory, <String, dynamic>{
-        'androidIdentifier': manifest.moduleDescriptor['androidPackage'],
-      }, printStatusWhenWriting: false);
+      template.render(
+        directory,
+        <String, dynamic>{
+          'androidIdentifier': project.manifest.androidPackage,
+        },
+        printStatusWhenWriting: false,
+      );
       gradle.injectGradleWrapper(directory);
     }
-    gradle.updateLocalPropertiesSync(directory, manifest);
+    await gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
   }
 
   bool _shouldRegenerate() {

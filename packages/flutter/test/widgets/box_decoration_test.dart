@@ -104,7 +104,7 @@ Future<Null> main() async {
   });
 
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
-    const Key key = const Key('outerContainer');
+    const Key key = Key('outerContainer');
     await tester.pumpWidget(
       new Center(
         child: new Container(
@@ -123,7 +123,7 @@ Future<Null> main() async {
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
-    const Key key = const Key('Container with BoxDecoration');
+    const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       return new Center(
         child: new Container(
@@ -135,7 +135,7 @@ Future<Null> main() async {
       );
     }
 
-    const Color black = const Color(0xFF000000);
+    const Color black = Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(new Border.all()));
     expect(find.byKey(key), paints
@@ -145,8 +145,8 @@ Future<Null> main() async {
     expect(find.byKey(key), paints
       ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
-    const Color green = const Color(0xFF00FF00);
-    const BorderSide greenSide = const BorderSide(color: green, width: 10.0);
+    const Color green = Color(0xFF00FF00);
+    const BorderSide greenSide = BorderSide(color: green, width: 10.0);
 
     await tester.pumpWidget(buildFrame(const Border(top: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
@@ -160,8 +160,8 @@ Future<Null> main() async {
     await tester.pumpWidget(buildFrame(const Border(bottom: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    const Color blue = const Color(0xFF0000FF);
-    const BorderSide blueSide = const BorderSide(color: blue, width: 0.0);
+    const Color blue = Color(0xFF0000FF);
+    const BorderSide blueSide = BorderSide(color: blue, width: 0.0);
 
     await tester.pumpWidget(buildFrame(const Border(top: blueSide, right: greenSide, bottom: greenSide)));
     expect(find.byKey(key), paints
@@ -181,22 +181,22 @@ Future<Null> main() async {
             width: 100.0,
             height: 100.0,
             decoration: const BoxDecoration(
-              border: const Border(
-                top: const BorderSide(
+              border: Border(
+                top: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFEEEEEE),
+                  color: Color(0xFFEEEEEE),
                 ),
-                left: const BorderSide(
+                left: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
-                right: const BorderSide(
+                right: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
-                bottom: const BorderSide(
+                bottom: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
               ),
             ),
@@ -220,7 +220,7 @@ Future<Null> main() async {
                 color: const Color(0xFFFFFFFF),
               ),
               borderRadius: const BorderRadius.only(
-                topRight: const Radius.circular(10.0),
+                topRight: Radius.circular(10.0),
               ),
             ),
           ),
@@ -268,7 +268,7 @@ Future<Null> main() async {
 
     List<int> itemsTapped;
 
-    const Key key = const Key('Container with BoxDecoration');
+    const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(
@@ -305,7 +305,7 @@ Future<Null> main() async {
 
     List<int> itemsTapped;
 
-    const Key key = const Key('Container with BoxDecoration');
+    const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(

@@ -5,15 +5,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-const Color kTitleColor = const Color(0xFF333333);
+const Color kTitleColor = Color(0xFF333333);
 const String kTitleString = 'Hello World';
 
 Future<Null> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) async {
   await tester.pumpWidget(
     new WidgetsApp(
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('en', 'GB'),
+        Locale('en', 'US'),
+        Locale('en', 'GB'),
       ],
       title: kTitleString,
       color: kTitleColor,

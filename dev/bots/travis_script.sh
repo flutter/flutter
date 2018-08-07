@@ -59,5 +59,5 @@ elif [ "$SHARD" = "docs" ]; then
     ./dev/bots/docs.sh
   fi
 else
-  dart ./dev/bots/test.dart
+  TEST_COMMIT_RANGE="${TRAVIS_COMMIT_RANGE}" dart ./dev/bots/test.dart
 fi

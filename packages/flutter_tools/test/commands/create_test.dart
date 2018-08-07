@@ -344,8 +344,9 @@ void main() {
       );
       projectDir.childDirectory('ios').deleteSync(recursive: true);
       await _createProject(projectDir, <String>['--no-pub'], <String>[]);
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await new FlutterProject(projectDir).ios.productBundleIdentifier(),
+        await project.ios.productBundleIdentifier(),
         'com.bar.foo.flutterProject',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -370,8 +371,9 @@ void main() {
           'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
         ],
       );
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await new FlutterProject(projectDir).example.ios.productBundleIdentifier(),
+        await project.example.ios.productBundleIdentifier(),
         'com.bar.foo.flutterProjectExample',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -563,7 +565,7 @@ class LoggingProcessManager extends LocalProcessManager {
       Map<String, String> environment,
       bool includeParentEnvironment = true,
       bool runInShell = false,
-      ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+      ProcessStartMode mode = ProcessStartMode.normal,
     }) {
     commands.add(command);
     return super.start(

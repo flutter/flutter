@@ -25,12 +25,12 @@ import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
-const Duration _kTestStartupTimeout = const Duration(minutes: 1);
+const Duration _kTestStartupTimeout = Duration(minutes: 1);
 
 /// The timeout we give the test process to start executing Dart code. When the
 /// CPU is under severe load, this can take a while, but it's not indicative of
 /// any problem with Flutter, so we give it a large timeout.
-const Duration _kTestProcessTimeout = const Duration(minutes: 5);
+const Duration _kTestProcessTimeout = Duration(minutes: 5);
 
 /// Message logged by the test process to signal that its main method has begun
 /// execution.
@@ -52,8 +52,8 @@ const String _kProjectRootSentinel = 'pubspec.yaml';
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
-  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4, // ignore: deprecated_member_use
-  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6, // ignore: deprecated_member_use
+  InternetAddressType.IPv4: InternetAddress.loopbackIPv4,
+  InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
 };
 
 /// Configure the `test` package to work with Flutter.
@@ -73,7 +73,7 @@ void installHook({
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   int observatoryPort,
-  InternetAddressType serverType = InternetAddressType.IP_V4, // ignore: deprecated_member_use
+  InternetAddressType serverType = InternetAddressType.IPv4,
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -120,7 +120,7 @@ String generateTestBootstrap({
   assert(host != null);
   assert(updateGoldens != null);
 
-  final String websocketUrl = host.type == InternetAddressType.IP_V4 // ignore: deprecated_member_use
+  final String websocketUrl = host.type == InternetAddressType.IPv4
       ? 'ws://${host.address}'
       : 'ws://[${host.address}]';
   final String encodedWebsocketUrl = Uri.encodeComponent(websocketUrl);
@@ -796,7 +796,7 @@ class _FlutterPlatform extends PlatformPlugin {
     } else {
       command.add('--disable-observatory');
     }
-    if (host.type == InternetAddressType.IP_V6) // ignore: deprecated_member_use
+    if (host.type == InternetAddressType.IPv6)
       command.add('--ipv6');
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');

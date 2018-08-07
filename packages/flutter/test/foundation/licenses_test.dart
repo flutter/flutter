@@ -34,10 +34,10 @@ G
  H
  H]
 \u0020\u0020
-IJ
-K
+I\u000cJ
+\u000cK
 K
-
+\u000c
 L
 L L
 L  L

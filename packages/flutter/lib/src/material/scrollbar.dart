@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 const double _kScrollbarThickness = 6.0;
-const Duration _kScrollbarFadeDuration = const Duration(milliseconds: 300);
-const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 600);
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
 
 /// A material design scrollbar.
 ///

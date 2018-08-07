@@ -14,11 +14,11 @@ import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 // Reports success or failure to the native code.
-const MethodChannel _kTestChannel = const MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
+const MethodChannel _kTestChannel = MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
 
 // We don't want to wait for animations to complete before tapping the
 // back button in the demos with these titles.
-const List<String> _kUnsynchronizedDemoTitles = const <String>[
+const List<String> _kUnsynchronizedDemoTitles = <String>[
   'Progress indicators',
   'Activity Indicator',
   'Video',
@@ -26,7 +26,7 @@ const List<String> _kUnsynchronizedDemoTitles = const <String>[
 
 // These demos can't be backed out of by tapping a button whose
 // tooltip is 'Back'.
-const List<String> _kSkippedDemoTitles = const <String>[
+const List<String> _kSkippedDemoTitles = <String>[
   'Pull to refresh',
   'Progress indicators',
   'Activity Indicator',
@@ -44,7 +44,7 @@ Future<Null> main() async {
       fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
 
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = new _LiveWidgetController();
+    final _LiveWidgetController controller = new _LiveWidgetController(WidgetsBinding.instance);
     for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
       await controller.tap(find.text(category.name));
       for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
@@ -73,9 +73,8 @@ Future<Null> main() async {
   }
 }
 
-class _LiveWidgetController {
-
-  final WidgetController _controller = new WidgetController(WidgetsBinding.instance);
+class _LiveWidgetController extends LiveWidgetController {
+  _LiveWidgetController(WidgetsBinding binding) : super(binding);
 
   /// With [frameSync] enabled, Flutter Driver will wait to perform an action
   /// until there are no pending frames in the app under test.
@@ -107,8 +106,9 @@ class _LiveWidgetController {
     return finder;
   }
 
-  Future<Null> tap(Finder finder) async {
-    await _controller.tap(await _waitForElement(finder));
+  @override
+  Future<Null> tap(Finder finder, { int pointer }) async {
+    await tap(await _waitForElement(finder), pointer: pointer);
   }
 
   Future<Null> scrollIntoView(Finder finder, {double alignment}) async {

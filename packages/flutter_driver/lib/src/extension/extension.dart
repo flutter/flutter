@@ -63,7 +63,7 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 ///
 /// Optionally you can pass a [DataHandler] callback. It will be called if the
 /// test calls [FlutterDriver.requestData].
-/// 
+///
 /// `slienceErrors` will prevent exceptions from being logged. This is useful
 /// for tests where exceptions are expected. Defaults to false. Any errors
 /// will still be returned in the `response` field of the result json along
@@ -146,7 +146,7 @@ class FlutterDriverExtension {
 
   static final Logger _log = new Logger('FlutterDriverExtension');
 
-  final WidgetController _prober = new WidgetController(WidgetsBinding.instance);
+  final WidgetController _prober = new LiveWidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
   final Map<String, CommandDeserializerCallback> _commandDeserializers = <String, CommandDeserializerCallback>{};
   final Map<String, FinderConstructor> _finders = <String, FinderConstructor>{};

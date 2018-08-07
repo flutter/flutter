@@ -65,7 +65,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
-        child: const LinearProgressIndicator()
+        child: LinearProgressIndicator()
       ),
       const LinearProgressIndicator(),
       const LinearProgressIndicator(),

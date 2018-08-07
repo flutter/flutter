@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Color of the 'magnifier' lens border.
-const Color _kHighlighterBorder = const Color(0xFF7F7F7F);
-const Color _kDefaultBackground = const Color(0xFFD2D4DB);
+const Color _kHighlighterBorder = Color(0xFF7F7F7F);
+const Color _kDefaultBackground = Color(0xFFD2D4DB);
 /// Eyeballed value comparing with a native picker.
 const double _kDefaultDiameterRatio = 1.1;
 /// Opacity fraction value that hides the wheel above and below the 'magnifier'
@@ -42,12 +42,16 @@ class CupertinoPicker extends StatefulWidget {
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
+    this.offAxisFraction = 0.0,
+    this.useMagnifier = false,
+    this.magnification = 1.0,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        super(key: key);
@@ -68,6 +72,15 @@ class CupertinoPicker extends StatefulWidget {
   /// This can be set to null to disable the background painting entirely; this
   /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
+
+  /// {@macro flutter.rendering.wheelList.offAxisFraction}
+  final double offAxisFraction;
+
+  /// {@macro flutter.rendering.wheelList.useMagnifier}
+  final bool useMagnifier;
+
+  /// {@macro flutter.rendering.wheelList.magnification}
+  final double magnification;
 
   /// A [FixedExtentScrollController] to read and control the current item.
   ///
@@ -119,18 +132,18 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       child: new IgnorePointer(
         child: new Container(
           decoration: const BoxDecoration(
-            gradient: const LinearGradient(
-              colors: const <Color>[
-                const Color(0xFFFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xFFFFFFFF),
+            gradient: LinearGradient(
+              colors: <Color>[
+                Color(0xFFFFFFFF),
+                Color(0xF2FFFFFF),
+                Color(0xDDFFFFFF),
+                Color(0x00FFFFFF),
+                Color(0x00FFFFFF),
+                Color(0xDDFFFFFF),
+                Color(0xF2FFFFFF),
+                Color(0xFFFFFFFF),
               ],
-              stops: const <double>[
+              stops: <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
               ],
               begin: Alignment.topCenter,
@@ -159,12 +172,14 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
           ),
           new Container(
             decoration: const BoxDecoration(
-              border: const Border(
-                top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
+              border: Border(
+                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
+                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
               )
             ),
-            constraints: new BoxConstraints.expand(height: widget.itemExtent),
+            constraints: new BoxConstraints.expand(
+                height: widget.itemExtent * widget.magnification,
+            ),
           ),
           new Expanded(
             child: new Container(
@@ -185,6 +200,9 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
+            offAxisFraction: widget.offAxisFraction,
+            useMagnifier: widget.useMagnifier,
+            magnification: widget.magnification,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
             children: widget.children,

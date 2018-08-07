@@ -29,7 +29,7 @@ class Cache {
     }
   }
 
-  static const List<String> _hostsBlockedInChina = const <String> [
+  static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
   ];
 
@@ -74,7 +74,7 @@ class Cache {
     if (!_lockEnabled)
       return null;
     assert(_lock == null);
-    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.WRITE); // ignore: deprecated_member_use
+    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write);
     bool locked = false;
     bool printed = false;
     while (!locked) {
@@ -295,11 +295,15 @@ abstract class CachedArtifact {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
         final Status status = logger.startProgress(message, expectSlowOperation: true);
-        await _downloadFile(url, tempFile).then<Null>((_) {
+        try {
+          await _downloadFile(url, tempFile);
           status.stop();
-        }).whenComplete(status.cancel);
+        } catch (exception) {
+          status.cancel();
+          rethrow;
+        }
       } else {
-        logger.printStatus('$message(cached)');
+        logger.printTrace('$message (cached)');
       }
       _ensureExists(location);
       extractor(tempFile, location);

@@ -89,10 +89,12 @@ function upgrade_flutter () {
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
+    VERBOSITY=--verbosity=error
 
     echo Building flutter tool...
     if [[ "$TRAVIS" == "true" ]] || [[ "$BOT" == "true" ]] || [[ "$CONTINUOUS_INTEGRATION" == "true" ]] || [[ "$CHROME_HEADLESS" == "1" ]] || [[ "$APPVEYOR" == "true" ]] || [[ "$CI" == "true" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
+      VERBOSITY=--verbosity=all
     fi
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
 
@@ -102,7 +104,7 @@ function upgrade_flutter () {
 
     while : ; do
       cd "$FLUTTER_TOOLS_DIR"
-      "$PUB" upgrade --verbosity=error --no-packages-dir && break
+      "$PUB" upgrade $VERBOSITY --no-packages-dir && break
       echo Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
       sleep 5
     done

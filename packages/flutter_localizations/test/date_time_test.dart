@@ -10,19 +10,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group(GlobalMaterialLocalizations, () {
-    test('uses exact locale when exists', () {
-      final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('pt', 'PT'));
+    test('uses exact locale when exists', () async {
+      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'PT'));
       expect(localizations.formatDecimal(10000), '10\u00A0000');
     });
 
-    test('falls back to language code when exact locale is missing', () {
-      final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('pt', 'XX'));
+    test('falls back to language code when exact locale is missing', () async {
+      final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('pt', 'XX'));
       expect(localizations.formatDecimal(10000), '10.000');
     });
 
-    test('falls back to default format when neither language code nor exact locale are available', () {
-      final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('xx', 'XX'));
-      expect(localizations.formatDecimal(10000), '10,000');
+    test('fails when neither language code nor exact locale are available', () async {
+      await expectLater(() async {
+        await GlobalMaterialLocalizations.delegate.load(const Locale('xx', 'XX'));
+      }, throwsAssertionError);
     });
 
     group('formatHour', () {
@@ -65,8 +66,8 @@ void main() {
     });
 
     group('formatMinute', () {
-      test('formats English', () {
-        final GlobalMaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('en', 'US'));
+      test('formats English', () async {
+        final GlobalMaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'US'));
         expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
       });
     });
@@ -114,5 +115,47 @@ void main() {
         expect(await formatTimeOfDay(tester, const Locale('zh', ''), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
       });
     });
+
+    group('date formatters', () {
+      Future<Map<DateType, String>> formatDate(WidgetTester tester, Locale locale, DateTime dateTime) async {
+        final Completer<Map<DateType, String>> completer = new Completer<Map<DateType, String>>();
+        await tester.pumpWidget(new MaterialApp(
+          supportedLocales: <Locale>[locale],
+          locale: locale,
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            GlobalMaterialLocalizations.delegate,
+          ],
+          home: new Builder(builder: (BuildContext context) {
+            final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+            completer.complete(<DateType, String>{
+              DateType.year: localizations.formatYear(dateTime),
+              DateType.medium: localizations.formatMediumDate(dateTime),
+              DateType.full: localizations.formatFullDate(dateTime),
+              DateType.monthYear: localizations.formatMonthYear(dateTime),
+            });
+            return new Container();
+          }),
+        ));
+        return completer.future;
+      }
+
+      testWidgets('formats dates in English', (WidgetTester tester) async {
+       final Map<DateType, String> formatted = await formatDate(tester, const Locale('en', ''), new DateTime(2018, 8, 1));
+       expect(formatted[DateType.year], '2018');
+       expect(formatted[DateType.medium], 'Wed, Aug 1');
+       expect(formatted[DateType.full], 'Wednesday, August 1, 2018');
+       expect(formatted[DateType.monthYear], 'August 2018');
+      });
+
+      testWidgets('formats dates in German', (WidgetTester tester) async {
+        final Map<DateType, String> formatted = await formatDate(tester, const Locale('de', ''), new DateTime(2018, 8, 1));
+        expect(formatted[DateType.year], '2018');
+        expect(formatted[DateType.medium], 'Mi., 1. Aug.');
+        expect(formatted[DateType.full], 'Mittwoch, 1. August 2018');
+        expect(formatted[DateType.monthYear], 'August 2018');
+      });
+    });
   });
 }
+
+enum DateType { year, medium, full, monthYear }

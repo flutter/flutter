@@ -62,13 +62,13 @@ class Choice {
   final IconData icon;
 }
 
-const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Car', icon: Icons.directions_car),
-  const Choice(title: 'Bicycle', icon: Icons.directions_bike),
-  const Choice(title: 'Boat', icon: Icons.directions_boat),
-  const Choice(title: 'Bus', icon: Icons.directions_bus),
-  const Choice(title: 'Train', icon: Icons.directions_railway),
-  const Choice(title: 'Walk', icon: Icons.directions_walk),
+const List<Choice> choices = <Choice>[
+  Choice(title: 'Car', icon: Icons.directions_car),
+  Choice(title: 'Bicycle', icon: Icons.directions_bike),
+  Choice(title: 'Boat', icon: Icons.directions_boat),
+  Choice(title: 'Bus', icon: Icons.directions_bus),
+  Choice(title: 'Train', icon: Icons.directions_railway),
+  Choice(title: 'Walk', icon: Icons.directions_walk),
 ];
 
 class ChoiceCard extends StatelessWidget {

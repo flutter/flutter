@@ -34,7 +34,7 @@ import 'goldens.dart';
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
+const Matcher findsNothing = _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
 ///
@@ -49,7 +49,7 @@ const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-const Matcher findsWidgets = const _FindsWidgetMatcher(1, null);
+const Matcher findsWidgets = _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
 ///
@@ -64,7 +64,7 @@ const Matcher findsWidgets = const _FindsWidgetMatcher(1, null);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-const Matcher findsOneWidget = const _FindsWidgetMatcher(1, 1);
+const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
 ///
@@ -96,7 +96,7 @@ Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 /// See also:
 ///
 ///  * [isOnstage], the opposite.
-const Matcher isOffstage = const _IsOffstage();
+const Matcher isOffstage = _IsOffstage();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Offstage] widget ancestors.
@@ -104,7 +104,7 @@ const Matcher isOffstage = const _IsOffstage();
 /// See also:
 ///
 ///  * [isOffstage], the opposite.
-const Matcher isOnstage = const _IsOnstage();
+const Matcher isOnstage = _IsOnstage();
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Card] widget ancestor.
@@ -112,7 +112,7 @@ const Matcher isOnstage = const _IsOnstage();
 /// See also:
 ///
 ///  * [isNotInCard], the opposite.
-const Matcher isInCard = const _IsInCard();
+const Matcher isInCard = _IsInCard();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Card] widget ancestors.
@@ -122,14 +122,14 @@ const Matcher isInCard = const _IsInCard();
 /// See also:
 ///
 ///  * [isInCard], the opposite.
-const Matcher isNotInCard = const _IsNotInCard();
+const Matcher isNotInCard = _IsNotInCard();
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
 /// characters, and does not have leading or trailing whitespace, is not
 /// empty, and does not contain the default `Instance of ...` string.
-const Matcher hasOneLineDescription = const _HasOneLineDescription();
+const Matcher hasOneLineDescription = _HasOneLineDescription();
 
 /// Asserts that an object's toStringDeep() is a plausible multi-line
 /// description.
@@ -146,7 +146,7 @@ const Matcher hasOneLineDescription = const _HasOneLineDescription();
 ///  * Has multiple lines.
 ///  * The first line starts with `prefixLineOne`
 ///  * All subsequent lines start with `prefixOtherLines`.
-const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
+const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
@@ -306,6 +306,7 @@ Matcher matchesSemanticsData({
   String value,
   TextDirection textDirection,
   Rect rect,
+  Size size,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -321,6 +322,10 @@ Matcher matchesSemanticsData({
   bool namesRoute = false,
   bool scopesRoute = false,
   bool isHidden = false,
+  bool isImage = false,
+  bool isLiveRegion = false,
+  bool hasToggledState = false,
+  bool isToggled = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -333,13 +338,19 @@ Matcher matchesSemanticsData({
   bool hasShowOnScreenAction = false,
   bool hasMoveCursorForwardByCharacterAction = false,
   bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasMoveCursorForwardByWordAction = false,
+  bool hasMoveCursorBackwardByWordAction = false,
   bool hasSetSelectionAction = false,
   bool hasCopyAction = false,
   bool hasCutAction = false,
   bool hasPasteAction = false,
   bool hasDidGainAccessibilityFocusAction = false,
   bool hasDidLoseAccessibilityFocusAction = false,
-  bool hasCustomAction = false,
+  bool hasDismissAction = false,
+  // Custom actions and overrides
+  String onTapHint,
+  String onLongPressHint,
+  List<CustomSemanticsAction> customActions,
 }) {
   final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
@@ -370,6 +381,14 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.scopesRoute);
   if (isHidden)
     flags.add(SemanticsFlag.isHidden);
+  if (isImage)
+    flags.add(SemanticsFlag.isImage);
+  if (isLiveRegion)
+    flags.add(SemanticsFlag.isLiveRegion);
+  if (hasToggledState)
+    flags.add(SemanticsFlag.hasToggledState);
+  if (isToggled)
+    flags.add(SemanticsFlag.isToggled);
 
   final List<SemanticsAction> actions = <SemanticsAction>[];
   if (hasTapAction)
@@ -406,8 +425,20 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.didGainAccessibilityFocus);
   if (hasDidLoseAccessibilityFocusAction)
     actions.add(SemanticsAction.didLoseAccessibilityFocus);
-  if (hasCustomAction)
+  if (customActions != null && customActions.isNotEmpty)
     actions.add(SemanticsAction.customAction);
+  if (hasDismissAction)
+    actions.add(SemanticsAction.dismiss);
+  if (hasMoveCursorForwardByWordAction)
+    actions.add(SemanticsAction.moveCursorForwardByWord);
+  if (hasMoveCursorBackwardByWordAction)
+    actions.add(SemanticsAction.moveCursorBackwardByWord);
+  SemanticsHintOverrides hintOverrides;
+  if (onTapHint != null || onLongPressHint != null)
+    hintOverrides = new SemanticsHintOverrides(
+      onTapHint: onTapHint,
+      onLongPressHint: onLongPressHint,
+    );
 
   return new _MatchesSemanticsData(
     label: label,
@@ -417,6 +448,9 @@ Matcher matchesSemanticsData({
     flags: flags,
     textDirection: textDirection,
     rect: rect,
+    size: size,
+    customActions: customActions,
+    hintOverrides: hintOverrides,
   );
 }
 
@@ -800,7 +834,7 @@ typedef num DistanceFunction<T>(T a, T b);
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
 typedef num AnyDistanceFunction(Null a, Null b);
 
-const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
+const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
   HSVColor: _maxComponentHSVColorDistance,
   HSLColor: _maxComponentHSLColorDistance,
@@ -1007,7 +1041,7 @@ class _IsMethodCall extends Matcher {
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRect] with no clipper set, or an equivalent
 /// [RenderClipPath].
-const Matcher clipsWithBoundingRect = const _ClipsWithBoundingRect();
+const Matcher clipsWithBoundingRect = _ClipsWithBoundingRect();
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
@@ -1446,15 +1480,21 @@ class _MatchesSemanticsData extends Matcher {
     this.actions,
     this.textDirection,
     this.rect,
+    this.size,
+    this.customActions,
+    this.hintOverrides,
   });
 
   final String label;
   final String value;
   final String hint;
+  final SemanticsHintOverrides hintOverrides;
   final List<SemanticsAction> actions;
+  final List<CustomSemanticsAction> customActions;
   final List<SemanticsFlag> flags;
   final TextDirection textDirection;
   final Rect rect;
+  final Size size;
 
   @override
   Description describe(Description description) {
@@ -1473,6 +1513,12 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with textDirection: $textDirection ');
     if (rect != null)
       description.add('with rect: $rect');
+    if (size != null)
+      description.add('with size: $size');
+    if (customActions != null)
+      description.add('with custom actions: $customActions');
+    if (hintOverrides != null)
+      description.add('with custom hints: $hintOverrides');
     return description;
   }
 
@@ -1490,9 +1536,10 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'value was: ${data.value}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
-    if (rect != null && rect == data.rect) {
-      return failWithDescription(matchState, 'rect was: $rect');
-    }
+    if (rect != null && rect != data.rect)
+      return failWithDescription(matchState, 'rect was: ${data.rect}');
+    if (size != null && size != data.rect.size)
+      return failWithDescription(matchState, 'size was: ${data.rect.size}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)
@@ -1504,6 +1551,27 @@ class _MatchesSemanticsData extends Matcher {
             actionSummary.add(describeEnum(action));
         }
         return failWithDescription(matchState, 'actions were: $actionSummary');
+      }
+    }
+    if (customActions != null || hintOverrides != null) {
+      final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
+        return CustomSemanticsAction.getAction(id);
+      }).toList();
+      final List<CustomSemanticsAction> expectedCustomActions = new List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      if (hintOverrides?.onTapHint != null)
+        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+      if (hintOverrides?.onLongPressHint != null)
+        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+      if (expectedCustomActions.length != providedCustomActions.length)
+        return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
+      int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
+        return CustomSemanticsAction.getIdentifier(left) - CustomSemanticsAction.getIdentifier(right);
+      }
+      expectedCustomActions.sort(sortActions);
+      providedCustomActions.sort(sortActions);
+      for (int i = 0; i < expectedCustomActions.length; i++) {
+        if (expectedCustomActions[i] != providedCustomActions[i])
+          return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       }
     }
     if (flags != null) {

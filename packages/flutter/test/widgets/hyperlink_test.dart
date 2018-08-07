@@ -20,7 +20,7 @@ void main() {
         didTapRight = true;
       };
 
-    const Key textKey = const Key('text');
+    const Key textKey = Key('text');
 
     await tester.pumpWidget(
       new Center(

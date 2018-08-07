@@ -217,15 +217,15 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
-  /// 
+  ///
   /// If this label is not provided, a semantic label will be infered from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.alertDialogLabel].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
   final String semanticLabel;
@@ -475,15 +475,15 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
-  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
-  /// 
+  ///
   /// If this label is not provided, a semantic label will be infered from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.dialogLabel].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
   final String semanticLabel;

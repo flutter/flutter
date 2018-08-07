@@ -70,7 +70,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               );
             },
           ),
-          const Padding(padding: const EdgeInsets.all(8.0)),
+          const Padding(padding: EdgeInsets.all(8.0)),
           new CupertinoButton(
             child: const Text('Alert with Title'),
             color: CupertinoColors.activeBlue,
@@ -100,7 +100,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               );
             },
           ),
-          const Padding(padding: const EdgeInsets.all(8.0)),
+          const Padding(padding: EdgeInsets.all(8.0)),
           new CupertinoButton(
             child: const Text('Alert with Buttons'),
             color: CupertinoColors.activeBlue,
@@ -109,15 +109,15 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               showDemoDialog<String>(
                 context: context,
                 child: const CupertinoDessertDialog(
-                  title: const Text('Select Favorite Dessert'),
-                  content: const Text('Please select your favorite type of dessert from the '
+                  title: Text('Select Favorite Dessert'),
+                  content: Text('Please select your favorite type of dessert from the '
                       'list below. Your selection will be used to customize the suggested '
                       'list of eateries in your area.'),
                 ),
               );
             },
           ),
-          const Padding(padding: const EdgeInsets.all(8.0)),
+          const Padding(padding: EdgeInsets.all(8.0)),
           new CupertinoButton(
             child: const Text('Alert Buttons Only'),
             color: CupertinoColors.activeBlue,

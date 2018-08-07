@@ -24,7 +24,6 @@ class AnalyzeOnce extends AnalyzeBase {
     this.repoRoots,
     this.repoPackages, {
     this.workingDirectory,
-    this.previewDart2 = false,
   }) : super(argResults);
 
   final List<String> repoRoots;
@@ -32,8 +31,6 @@ class AnalyzeOnce extends AnalyzeBase {
 
   /// The working directory for testing analysis using dartanalyzer.
   final Directory workingDirectory;
-
-  final bool previewDart2;
 
   @override
   Future<Null> analyze() async {
@@ -47,9 +44,9 @@ class AnalyzeOnce extends AnalyzeBase {
       for (String directory in directories) {
         final FileSystemEntityType type = fs.typeSync(directory);
 
-        if (type == FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
+        if (type == FileSystemEntityType.notFound) {
           throwToolExit("'$directory' does not exist");
-        } else if (type != FileSystemEntityType.DIRECTORY) { // ignore: deprecated_member_use
+        } else if (type != FileSystemEntityType.directory) {
           throwToolExit("'$directory' is not a directory");
         }
       }
@@ -88,11 +85,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(
-      sdkPath,
-      directories.toList(),
-      previewDart2: previewDart2,
-    );
+    final AnalysisServer server = new AnalysisServer(sdkPath, directories.toList());
 
     StreamSubscription<bool> subscription;
     subscription = server.onAnalyzing.listen((bool isAnalyzing) {

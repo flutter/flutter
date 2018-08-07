@@ -33,7 +33,7 @@ class TextRange {
       end = offset;
 
   /// A text range that contains nothing and is not in the text.
-  static const TextRange empty = const TextRange(start: -1, end: -1);
+  static const TextRange empty = TextRange(start: -1, end: -1);
 
   /// The index of the first character in the range.
   ///

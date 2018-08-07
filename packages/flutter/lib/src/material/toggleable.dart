@@ -10,7 +10,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'constants.dart';
 
-const Duration _kToggleDuration = const Duration(milliseconds: 200);
+const Duration _kToggleDuration = Duration(milliseconds: 200);
 final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
 /// A base class for material style toggleable controls with toggle animations.
@@ -339,7 +339,6 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     config.isEnabled = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value == true;
   }
 
   @override

@@ -106,6 +106,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  tiles_scroll_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -159,21 +166,6 @@ tasks:
       Measures the performance of Dart VM hot patching feature.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-
-  hot_mode_dev_cycle__benchmark_dart1:
-    description: >
-      Measures the performance of Dart VM hot patching feature under
-      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-
-  hot_mode_dev_cycle_ios__benchmark_dart1:
-    description: >
-      Measures the performance of Dart VM hot patching feature under
-      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_scroll_perf__memory:
     description: >

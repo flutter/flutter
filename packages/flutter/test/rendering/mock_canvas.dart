@@ -603,7 +603,7 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
     return false;
   }
 
-  static const List<Symbol> _nonPaintingOperations = const <Symbol> [
+  static const List<Symbol> _nonPaintingOperations = <Symbol> [
     #save,
     #restore,
   ];
