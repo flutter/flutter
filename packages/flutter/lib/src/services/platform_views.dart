@@ -37,7 +37,7 @@ class PlatformViewsRegistry {
 /// Callback signature for when a platform view was created.
 ///
 /// `id` is the platform view's unique identifier.
-typedef void OnPlatformViewCreated(int id);
+typedef void PlatformViewCreatedCallback(int id);
 
 /// Provides access to the platform views service.
 ///
@@ -62,7 +62,7 @@ class PlatformViewsService {
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
-    OnPlatformViewCreated onPlatformViewCreated,
+    PlatformViewCreatedCallback onPlatformViewCreated,
   }) {
     assert(id != null);
     assert(viewType != null);
@@ -328,7 +328,7 @@ class AndroidViewController {
   AndroidViewController._(
     this.id,
     String viewType,
-    OnPlatformViewCreated onPlatformViewCreated,
+    PlatformViewCreatedCallback onPlatformViewCreated,
   ) : assert(id != null),
       assert(viewType != null),
       _viewType = viewType,
@@ -370,7 +370,7 @@ class AndroidViewController {
 
   final String _viewType;
 
-  final OnPlatformViewCreated _onPlatformViewCreated;
+  final PlatformViewCreatedCallback _onPlatformViewCreated;
 
   /// The texture entry id into which the Android view is rendered.
   int _textureId;

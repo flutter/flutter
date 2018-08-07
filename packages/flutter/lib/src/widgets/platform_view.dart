@@ -57,7 +57,7 @@ class AndroidView extends StatefulWidget {
   /// Callback to invoke after the Android view has been created.
   ///
   /// May be null.
-  final OnPlatformViewCreated onPlatformViewCreated;
+  final PlatformViewCreatedCallback onPlatformViewCreated;
 
   @override
   State createState() => new _AndroidViewState();
