@@ -26,7 +26,9 @@ void AndroidExternalTextureGL::MarkNewFrameAvailable() {
   new_frame_ready_ = true;
 }
 
-void AndroidExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
+void AndroidExternalTextureGL::Paint(SkCanvas& canvas,
+                                     const SkRect& bounds,
+                                     bool freeze) {
   if (state_ == AttachmentState::detached) {
     return;
   }
@@ -35,7 +37,7 @@ void AndroidExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
     Attach(static_cast<jint>(texture_name_));
     state_ = AttachmentState::attached;
   }
-  if (new_frame_ready_) {
+  if (!freeze && new_frame_ready_) {
     Update();
     new_frame_ready_ = false;
   }

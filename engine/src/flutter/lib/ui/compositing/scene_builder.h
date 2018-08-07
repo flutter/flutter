@@ -70,7 +70,8 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                   double dy,
                   double width,
                   double height,
-                  int64_t textureId);
+                  int64_t textureId,
+                  bool freeze);
 
   void addChildScene(double dx,
                      double dy,
