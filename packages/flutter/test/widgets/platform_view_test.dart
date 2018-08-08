@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -49,20 +51,36 @@ void main() {
       ),
     );
 
+    viewsController.resizeCompleter = new Completer<void>();
+
     await tester.pumpWidget(
       const Center(
         child: SizedBox(
-          width: 400.0,
-          height: 200.0,
+          width: 100.0,
+          height: 50.0,
           child: AndroidView(viewType: 'webview'),
         ),
       ),
     );
 
+    final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
+    expect(textureParentLayer, isInstanceOf<ClipRectLayer>());
+    final ClipRectLayer clipRect = textureParentLayer;
+    expect(clipRect.clipRect, new Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
-        new FakePlatformView(currentViewId + 1, 'webview', const Size(400.0, 200.0))
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
+      ]),
+    );
+
+    viewsController.resizeCompleter.complete();
+    await tester.pump();
+
+    expect(
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(100.0, 50.0))
       ]),
     );
   });
