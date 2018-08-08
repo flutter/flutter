@@ -192,7 +192,7 @@ class LinearProgressIndicator extends ProgressIndicator {
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  
+
   @override
   TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
 
