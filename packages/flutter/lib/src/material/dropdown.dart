@@ -347,7 +347,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     if (scrollController == null) {
       double scrollOffset = 0.0;
       if (preferredMenuHeight > maxMenuHeight)
-        scrollOffset = selectedItemOffset - (buttonTop - menuTop);
+        scrollOffset = math.max(0.0, selectedItemOffset - (buttonTop - menuTop));
       scrollController = new ScrollController(initialScrollOffset: scrollOffset);
     }
 
