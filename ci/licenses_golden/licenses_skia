@@ -1,4 +1,4 @@
-Signature: 0595bcaafb1e73b563dd5a4df23f8969
+Signature: b85d66b6a67024a57a638b5d390e3f58
 
 UNUSED LICENSES:
 
@@ -1482,12 +1482,19 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateDataManager.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateDataManager.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
