@@ -36,6 +36,8 @@ dependencies:
   web_socket_channel: 1.0.9
   xml: 3.0.1
   yaml: 2.1.15
+  flutter_goldens_client:
+    path: ../flutter_goldens_client
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
