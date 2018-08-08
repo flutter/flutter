@@ -34,7 +34,8 @@ class FlexibleSpaceBar extends StatefulWidget {
     Key key,
     this.title,
     this.background,
-    this.centerTitle
+    this.centerTitle,
+    this.padding,
   }) : super(key: key);
 
   /// The primary contents of the flexible space bar when expanded.
@@ -51,6 +52,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
+
+  /// Adds padding to the [title] before scaling is applied.
+  ///
+  /// Defaults to being the amount to exclude the leading.
+  final EdgeInsetsGeometry padding;
 
   /// Wraps a widget that contains an [AppBar] to convey sizing information down
   /// to the [FlexibleSpaceBar].
@@ -166,11 +172,14 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final Matrix4 scaleTransform = new Matrix4.identity()
           ..scale(scaleValue, scaleValue, 1.0);
         final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
-        children.add(new Container(
-          padding: new EdgeInsetsDirectional.only(
-            start: effectiveCenterTitle ? 0.0 : 72.0,
+        final EdgeInsetsGeometry titlePadding = widget.padding ??
+          new EdgeInsetsDirectional.only(
+            start: 72.0,
+            end: effectiveCenterTitle ? 72.0 : 0.0,
             bottom: 16.0
-          ),
+          );
+        children.add(new Container(
+          padding: titlePadding,
           child: new Transform(
             alignment: titleAlignment,
             transform: scaleTransform,
