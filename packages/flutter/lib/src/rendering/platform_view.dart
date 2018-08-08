@@ -97,17 +97,21 @@ class RenderAndroidView extends RenderBox {
     _sizePlatformView();
   }
 
+  Size _currentAndroidViewSize;
+
   Future<Null> _sizePlatformView() async {
     if (_state == _PlatformViewState.resizing) {
       return;
     }
 
     _state = _PlatformViewState.resizing;
+    markNeedsPaint();
 
     Size targetSize;
     do {
       targetSize = size;
-      await _viewController.setSize(size);
+      await _viewController.setSize(targetSize);
+      _currentAndroidViewSize = targetSize;
       // We've resized the platform view to targetSize, but it is possible that
       // while we were resizing the render object's size was changed again.
       // In that case we will resize the platform view again.
@@ -122,9 +126,30 @@ class RenderAndroidView extends RenderBox {
     if (_viewController.textureId == null)
       return;
 
+    // Clip the texture if it's going to paint out of the bounds of the renter box
+    // (see comment in _paintTexture for an explanation of when this happens).
+    if (size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) {
+      context.pushClipRect(true, offset, offset & size, _paintTexture);
+      return;
+    }
+
+    _paintTexture(context, offset);
+  }
+
+  void _paintTexture(PaintingContext context, Offset offset) {
+    // As resizing the Android view happens asynchronously we don't know exactly when is a
+    // texture frame with the new size is ready for consumption.
+    // TextureLayer is unaware of the texture frame's size and always maps it to the
+    // specified rect. If the rect we provide has a different size from the current texture frame's
+    // size the texture frame will be scaled.
+    // To prevent unwanted scaling artifacts while resizing we freeze the texture frame, until
+    // we know that a frame with the new size is in the buffer.
+    // This guarantees that the size of the texture frame we're painting is always
+    // _currentAndroidViewSize.
     context.addLayer(new TextureLayer(
-      rect: offset & size,
+      rect: offset & _currentAndroidViewSize,
       textureId: _viewController.textureId,
+      freeze: _state == _PlatformViewState.resizing,
     ));
   }
 
