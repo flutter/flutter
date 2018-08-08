@@ -239,7 +239,6 @@ class RenderEditable extends RenderBox {
     else if (pressedKeyCode == _downArrowCode)
       _downArrowDown = keyEvent is RawKeyDownEvent ? true : false;
 
-
     final bool arrowDown = _leftArrowDown || _rightArrowDown || _upArrowDown || _downArrowDown;
     if (arrowDown && _extentOffset != -1) {
       int newOffset = _extentOffset;

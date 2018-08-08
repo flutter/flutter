@@ -1797,6 +1797,11 @@ void main() {
     setUp( () {
       events = <RawKeyEvent>[];
       controller = new TextEditingController();
+      sendKeyEventWithCode(59, false);
+      sendKeyEventWithCode(19, false);
+      sendKeyEventWithCode(20, false);
+      sendKeyEventWithCode(21, false);
+      sendKeyEventWithCode(113, false);
     });
 
     MaterialApp setupWidget() {
@@ -1891,6 +1896,9 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
+      sendKeyEventWithCode(59, false);
+      await tester.pumpAndSettle();
+
       for (int i = 0; i < 5; i += 1) {
         sendKeyEventWithCode(22);
         await tester.pumpAndSettle();
@@ -1913,12 +1921,12 @@ void main() {
       sendKeyEventWithCode(19);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 10);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
 
       sendKeyEventWithCode(19);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 2);
 
       sendKeyEventWithCode(19);
       await tester.pumpAndSettle();
