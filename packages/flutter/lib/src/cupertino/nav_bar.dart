@@ -4,6 +4,8 @@
 
 library nav_bar;
 
+// This file contains the public classes of the Cupertino navigation bars.
+
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
@@ -20,6 +22,8 @@ import 'route.dart';
 part 'nav_bar/nav_bar_private_static.dart';
 part 'nav_bar/nav_bar_private_transition.dart';
 
+// There's a single tag for all instances of navigation bars because they can
+// all transition between each other (per Navigator) via Hero transitions.
 const Object _heroTag = const Object();
 
 /// An iOS-styled navigation bar.
@@ -44,6 +48,11 @@ const Object _heroTag = const Object();
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
 ///
+/// When [transitionBetweenRoutes] is true, this navigation bar will transition
+/// on top of the routes instead of inside it if the route being transitioned
+/// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
+/// with [transitionBetweenRoutes] set to true.
+///
 /// See also:
 ///
 ///  * [CupertinoPageScaffold], a page layout helper typically hosting the
@@ -67,6 +76,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.transitionBetweenRoutes = true,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyMiddle != null),
+       assert(transitionBetweenRoutes != null),
        super(key: key);
 
   /// {@template flutter.cupertino.navBar.leading}
@@ -171,6 +181,18 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// iOS standard design.
   final Color actionsForegroundColor;
 
+  /// {@template flutter.cupertino.navBar.transitionBetweenRoutes}
+  /// Whether to transition between navigation bars.
+  ///
+  /// When [transitionBetweenRoutes] is true, this navigation bar will transition
+  /// on top of the routes instead of inside it if the route being transitioned
+  /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
+  /// with [transitionBetweenRoutes] set to true.
+  ///
+  /// When set to true, only one navigation bar can be present per route.
+  ///
+  /// This value defaults to true and cannot be null.
+  /// {@endtemplate}
   final bool transitionBetweenRoutes;
 
   /// True if the navigation bar's background color has no transparency.
@@ -184,7 +206,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 
   @override
   Widget build(BuildContext context) {
-    final _NavigationBarComponents components = new _NavigationBarComponents(
+    final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
       route: ModalRoute.of(context),
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
@@ -253,6 +275,11 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 /// The [largeTitle] widget will automatically be a title text from the current
 /// route if none is provided and [automaticallyImplyTitle] is true (true by
 /// default).
+///
+/// When [transitionBetweenRoutes] is true, this navigation bar will transition
+/// on top of the routes instead of inside it if the route being transitioned
+/// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
+/// with [transitionBetweenRoutes] set to true.
 ///
 /// See also:
 ///
@@ -349,6 +376,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// iOS standard design.
   final Color actionsForegroundColor;
 
+  /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}
   final bool transitionBetweenRoutes;
 
   /// True if the navigation bar's background color has no transparency.

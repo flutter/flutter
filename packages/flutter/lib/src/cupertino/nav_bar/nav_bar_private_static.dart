@@ -4,6 +4,9 @@
 
 part of nav_bar;
 
+// This file contains all the code for building the Cupertino navigation
+// bars in their static states in the routes.
+
 /// Standard iOS navigation bar height without the status bar.
 ///
 /// This height is constant and independent of accessibility as is in iOS.
@@ -145,7 +148,7 @@ class _LargeTitleNavigationBarSliverDelegate
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
-    final _NavigationBarComponents components = new _NavigationBarComponents(
+    final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
       route: ModalRoute.of(context),
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
@@ -276,7 +279,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     this.middleVisible,
   }) : super(key: key);
 
-  final _NavigationBarComponents components;
+  final _NavigationBarStaticComponents components;
 
   final EdgeInsetsDirectional padding;
   /// Whether the middle widget has a visible animated opacity. A null value
@@ -300,7 +303,6 @@ class _PersistentNavigationBar extends StatelessWidget {
           child: middle,
         );
     }
-
 
     Widget leading = components.leading;
     final Widget backChevron = components.backChevron;
@@ -343,8 +345,8 @@ class _PersistentNavigationBar extends StatelessWidget {
 }
 
 @immutable
-class _NavigationBarComponents {
-  _NavigationBarComponents({
+class _NavigationBarStaticComponents {
+  _NavigationBarStaticComponents({
     @required ModalRoute<dynamic> route,
     @required Widget leading,
     @required bool automaticallyImplyLeading,
@@ -484,6 +486,8 @@ class _NavigationBarComponents {
     );
   }
 
+  /// This widget is not decorated with a font since the font style could
+  /// animate during transitions.
   final _RenderObjectFindingWidget backLabel;
   static _RenderObjectFindingWidget createBackLabel({
     @required Widget userLeading,
@@ -509,6 +513,8 @@ class _NavigationBarComponents {
   }
 
   final bool hasUserMiddle;
+  /// This widget is not decorated with a font since the font style could
+  /// animate during transitions.
   final _RenderObjectFindingWidget middle;
   static _RenderObjectFindingWidget createMiddle({
     @required Widget userMiddle,
@@ -566,6 +572,8 @@ class _NavigationBarComponents {
     );
   }
 
+  /// This widget is not decorated with a font since the font style could
+  /// animate during transitions.
   final _RenderObjectFindingWidget largeTitle;
   static _RenderObjectFindingWidget createLargeTitle({
     @required Widget userLargeTitle,
@@ -595,6 +603,11 @@ class _NavigationBarComponents {
   final bool largeExpanded;
 }
 
+/// The [_NavigationBarStaticComponents]'s widgets are all instances of this class.
+///
+/// This allows Hero transitions with references to instances of this widget
+/// class to be able to get this widget's [RenderBox] and build transitions
+/// based on the [RenderBox]'s existing layout.
 class _RenderObjectFindingWidget extends StatelessWidget {
   _RenderObjectFindingWidget({ @required this.child }) :
     assert(child != null),
@@ -615,6 +628,9 @@ class _RenderObjectFindingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(() {
+      // This instance is already a _TransitionableNavigationBars, don't
+      // check that it's inside another _TransitionableNavigationBars.
+      bool inTransitionableNavBar = runtimeType == _TransitionableNavigationBar;
       context.visitAncestorElements((Element ancestor) {
         if (ancestor is StatelessElement) {
           assert(
@@ -624,9 +640,16 @@ class _RenderObjectFindingWidget extends StatelessWidget {
             'only serve as anchor points in _TransitionableNavigationBars rather '
             'than appearing inside Hero flights themselves.',
           );
+          if (ancestor.widget.runtimeType == _TransitionableNavigationBar) {
+            inTransitionableNavBar = true;
+          }
         }
         return true;
       });
+      assert(
+        inTransitionableNavBar,
+        '_RenderObjectFindingWidget should only be used inside _TransitionableNavigationBars',
+      );
       return true;
     }());
     return child;

@@ -450,6 +450,7 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
+    debugDumpApp();
 
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
@@ -497,7 +498,7 @@ void main() {
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
-              previousPageTitle: '012345678901234',
+              previousPageTitle: '012345678901',
             ),
             child: Placeholder(),
           );
@@ -508,14 +509,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.widgetWithText(CupertinoButton, '012345678901234'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, '012345678901'), findsOneWidget);
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
       new CupertinoPageRoute<void>(
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
-              previousPageTitle: '0123456789012345',
+              previousPageTitle: '0123456789012',
             ),
             child: Placeholder(),
           );
