@@ -428,6 +428,7 @@ void _defineTests() {
     flags
       ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.hasToggledState)
+      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.isToggled);
     TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
@@ -473,6 +474,7 @@ void _defineTests() {
     flags
       ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.hasCheckedState)
+      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.isChecked);
 
     expectedSemantics = new TestSemantics.root(
