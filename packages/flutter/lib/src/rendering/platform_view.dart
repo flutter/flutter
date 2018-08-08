@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
@@ -131,7 +130,7 @@ class RenderAndroidView extends RenderBox {
     // (see comment in _paintTexture for an explanation of when this happens).
     if (size.width < _currentAndroidViewSize.width || size.height < _currentAndroidViewSize.height) {
       context.pushClipRect(true, offset, offset & size, _paintTexture);
-     return;
+      return;
     }
 
     _paintTexture(context, offset);
@@ -139,7 +138,7 @@ class RenderAndroidView extends RenderBox {
 
   void _paintTexture(PaintingContext context, Offset offset) {
     // As resizing the Android view happens asynchronously we don't know exactly when is a
-    // texture frame with the new size ready for consumption.
+    // texture frame with the new size is ready for consumption.
     // TextureLayer is unaware of the texture frame's size and always maps it to the
     // specified rect. If the rect we provide has a different size from the current texture frame's
     // size the texture frame will be scaled.
