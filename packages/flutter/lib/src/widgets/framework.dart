@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 
+import 'package:collection/collection.dart' show UnmodifiableSetView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -44,9 +45,6 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// widget's child be a widget such as [Row], [Column], or [Stack], which have a
 /// `children` property, and then provide the children to that widget.
 /// {@endtemplate}
-
-// TODO(hansmuller) - const UnmodifiableSetView<dynamic>.empty();
-final Set<dynamic> _kEmptySet = new HashSet<dynamic>();
 
 // KEYS
 
@@ -1820,7 +1818,7 @@ class InheritedModelElement<T> extends InheritedElement {
   // widget changes, regardless of which aspects have changed.
   void _addDependent(Element element, dynamic aspect) {
     if (aspect == null) {
-      _dependents[element] = new HashSet<T>(); // TBD _kEmptySet;
+      _dependents[element] = new UnmodifiableSetView<T>.empty();
     } else if (_dependents[element] == null) {
       _dependents[element] = new HashSet<_AspectDependency<T>>.of(
         <_AspectDependency<T>>[ _getAspectDependency(aspect) ]
@@ -1834,7 +1832,7 @@ class InheritedModelElement<T> extends InheritedElement {
   // new set that just contains the dependencies.
   Set<T> _getModelDependencies(Element dependent) {
     if (_dependents[dependent].isEmpty)
-      return new HashSet<T>(); // TBD  _kEmptySet;
+      return new UnmodifiableSetView<T>.empty();
     return new HashSet<T>.of(
       _dependents[dependent].map((dynamic aspectDependencyValue) {
         final _AspectDependency<T> aspectDependency = aspectDependencyValue;
@@ -3559,7 +3557,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // If we're ever called with aspect == null (the common case) then
       // InheritedElement.notifyClients will unconditionally rebuild all dependents.
       if (aspect == null) {
-        ancestor._dependents[this] = _kEmptySet;
+        ancestor._dependents[this] = new UnmodifiableSetView<dynamic>.empty();
       } else {
         assert(ancestor is InheritedModelElement);
         final InheritedModelElement<dynamic> modelElement = ancestor;
