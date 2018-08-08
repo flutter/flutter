@@ -45,6 +45,9 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   AnimationController _controller;
 
   @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
+
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
@@ -75,10 +78,6 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).disableAnimations)  {
-      _controller.value = 0.5;
-      _controller.stop();
-    }
     return new SizedBox(
       height: widget.radius * 2,
       width: widget.radius * 2,

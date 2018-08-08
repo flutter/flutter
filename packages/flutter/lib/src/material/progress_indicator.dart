@@ -192,6 +192,9 @@ class LinearProgressIndicator extends ProgressIndicator {
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
   AnimationController _controller;
+  
+  @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
 
   @override
   void initState() {
@@ -371,6 +374,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   AnimationController _controller;
 
   @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
+
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
@@ -526,12 +532,6 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   // starting from wherever we left it.
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).disableAnimations)  {
-      _controller.value = 0.5;
-      _controller.stop();
-      return _buildAnimation();
-    }
-
     if (widget.value != null)
       _controller.value = widget.value / 10.0;
     else if (!_controller.isAnimating)

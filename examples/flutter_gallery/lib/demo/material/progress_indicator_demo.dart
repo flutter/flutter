@@ -16,6 +16,9 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   Animation<double> _animation;
 
   @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
+
+  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
