@@ -76,7 +76,7 @@ class ServiceClient {
     final dynamic isolateId = event['isolate']['id'];
     switch (params['streamId']) {
       case 'Isolate':
-        if (event['kind'] == 'IsolateStarted') {
+        if (event['kind'] == 'IsolateStart') {
           isolateStartedId?.complete(isolateId);
         }
         break;
