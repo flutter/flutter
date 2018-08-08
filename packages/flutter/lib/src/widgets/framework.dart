@@ -1821,6 +1821,7 @@ class InheritedModelElement<T> extends InheritedElement {
   // widget changes, regardless of which aspects have changed.
   void _addDependent(Element element, dynamic aspect) {
     if (aspect == null) {
+      // ignore: prefer_const_constructors
       _dependents[element] = new UnmodifiableSetView<T>.empty();
     } else if (_dependents[element] == null) {
       _dependents[element] = new HashSet<_AspectDependency<T>>.of(
@@ -1834,8 +1835,10 @@ class InheritedModelElement<T> extends InheritedElement {
   // The value of _dependents[dependent] is a Set<_AspectDependency>. Return a
   // new set that just contains the dependencies.
   Set<T> _getModelDependencies(Element dependent) {
-    if (_dependents[dependent].isEmpty)
+    if (_dependents[dependent].isEmpty) {
+      // ignore: prefer_const_constructors
       return new UnmodifiableSetView<T>.empty();
+    }
     return new HashSet<T>.of(
       _dependents[dependent].map((dynamic aspectDependencyValue) {
         final _AspectDependency<T> aspectDependency = aspectDependencyValue;
@@ -3560,6 +3563,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       // If we're ever called with aspect == null (the common case) then
       // InheritedElement.notifyClients will unconditionally rebuild all dependents.
       if (aspect == null) {
+        // ignore: prefer_const_constructors
         ancestor._dependents[this] = new UnmodifiableSetView<dynamic>.empty();
       } else {
         assert(ancestor is InheritedModelElement);
