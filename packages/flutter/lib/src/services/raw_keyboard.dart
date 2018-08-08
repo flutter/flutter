@@ -239,18 +239,18 @@ class RawKeyboard {
     _listeners.remove(listener);
   }
 
-  final int _leftShiftCode = 59;
-  final int _rightShiftCode = 60;
-  final int _leftControlCode = 113;
-  final int _rightControlCode = 114;
+  static const int _kLeftShiftCode = 59;
+  static const int _kRightShiftCode = 60;
+  static const int _kLeftControlCode = 113;
+  static const int _kRightControlCode = 114;
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     if (message['keymap'] == 'android') {
       final int keyCode = message['keyCode'];
       final bool isDown = message['type'] == 'keydown';
-      if (keyCode == _leftShiftCode || keyCode == _rightShiftCode) {
+      if (keyCode == _kLeftShiftCode || keyCode == _kRightShiftCode) {
         shiftDown = isDown;
-      } else if (keyCode == _leftControlCode || keyCode == _rightControlCode)
+      } else if (keyCode == _kLeftControlCode || keyCode == _kRightControlCode)
         controlDown = isDown;
     }
     if (_listeners.isEmpty)

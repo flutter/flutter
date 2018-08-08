@@ -1830,7 +1830,7 @@ void main() {
     testWidgets('Shift test 1', (WidgetTester tester) async{
 
       await tester.pumpWidget(setupWidget());
-      const String testValue = 'your mom';
+      const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
@@ -1845,7 +1845,7 @@ void main() {
 
     testWidgets('Control Shift test', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
-      const String testValue = 'your mom';
+      const String testValue = 'their big house';
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
@@ -1860,12 +1860,12 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
     });
 
     testWidgets('Down and up test', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
-      const String testValue = 'your mom';
+      const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
@@ -1877,7 +1877,7 @@ void main() {
       sendKeyEventWithCode(20);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 8);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
       sendKeyEventWithCode(20, false);
       await tester.pumpAndSettle();
       sendKeyEventWithCode(19);
@@ -1889,46 +1889,60 @@ void main() {
 
     testWidgets('Down and up test 2', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
-      const String testValue = 'your mom\nis a person';
+      const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59, false);
+      sendKeyEventWithCode(59, false);        // SHIFT keyup
       await tester.pumpAndSettle();
 
       for (int i = 0; i < 5; i += 1) {
-        sendKeyEventWithCode(22);
+        sendKeyEventWithCode(22);             // RIGHT_ARROW keydown
+        await tester.pumpAndSettle();
+        sendKeyEventWithCode(22, false);      // RIGHT_ARROW keyup
         await tester.pumpAndSettle();
       }
-      sendKeyEventWithCode(59);
+      sendKeyEventWithCode(59);               // SHIFT keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20);
+      sendKeyEventWithCode(20);               // DOWN_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20, false);        // DOWN_ARROW keyup
       await tester.pumpAndSettle();
       // 'mom\nis ap'
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 10);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(20);
+      sendKeyEventWithCode(20);               // DOWN_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20, false);        // DOWN_ARROW keyup
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 15);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 26);
 
-      sendKeyEventWithCode(20, false);
+      sendKeyEventWithCode(20);               // DOWN_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20, false);        // DOWN_ARROW keyup
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(19);
+      sendKeyEventWithCode(19);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false);        // UP_ARROW keyup
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(19);
+      sendKeyEventWithCode(19);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false);        // UP_ARROW keyup
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 2);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
 
-      sendKeyEventWithCode(19);
+      sendKeyEventWithCode(19);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false);        // UP_ARROW keyup
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
