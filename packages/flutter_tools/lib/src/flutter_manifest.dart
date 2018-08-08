@@ -78,8 +78,10 @@ class FlutterManifest {
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
   Map<String, dynamic> _flutterDescriptor;
 
+  /// True if the `pubspec.yaml` file does not exist.
   bool get isEmpty => _descriptor.isEmpty;
 
+  /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] ?? '';
 
   /// The version String from the `pubspec.yaml` file.

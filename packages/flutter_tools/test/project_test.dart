@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -15,20 +16,72 @@ import 'src/context.dart';
 
 void main() {
   group('Project', () {
-    testInMemory('knows location', () async {
-      final Directory directory = fs.directory('myproject');
-      expect(
-        (await FlutterProject.fromDirectory(directory)).directory.absolute.path,
-        directory.absolute.path,
-      );
-      expect(
-        (await FlutterProject.fromPath(directory.path)).directory.absolute.path,
-        directory.absolute.path,
-      );
-      expect(
-        (await FlutterProject.current()).directory.absolute.path,
-        fs.currentDirectory.absolute.path,
-      );
+    group('construction', () {
+      testInMemory('fails on null directory', () async {
+        await expectLater(
+          FlutterProject.fromDirectory(null),
+          throwsA(const isInstanceOf<AssertionError>()),
+        );
+      });
+
+      testInMemory('fails on invalid pubspec.yaml', () async {
+        final Directory directory = fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(invalidPubspec);
+        await expectLater(
+          FlutterProject.fromDirectory(directory),
+          throwsA(const isInstanceOf<ToolExit>()),
+        );
+      });
+
+      testInMemory('fails on invalid example/pubspec.yaml', () async {
+        final Directory directory = fs.directory('myproject');
+        directory.childDirectory('example').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(invalidPubspec);
+        await expectLater(
+          FlutterProject.fromDirectory(directory),
+          throwsA(const isInstanceOf<ToolExit>()),
+        );
+      });
+
+      testInMemory('treats missing pubspec.yaml as empty', () async {
+        final Directory directory = fs.directory('myproject')
+          ..createSync(recursive: true);
+        expect(
+          (await FlutterProject.fromDirectory(directory)).manifest.isEmpty,
+          true,
+        );
+      });
+
+      testInMemory('reads valid pubspec.yaml', () async {
+        final Directory directory = fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(validPubspec);
+        expect(
+          (await FlutterProject.fromDirectory(directory)).manifest.appName,
+          'hello',
+        );
+      });
+
+      testInMemory('sets up location', () async {
+        final Directory directory = fs.directory('myproject');
+        expect(
+          (await FlutterProject.fromDirectory(directory)).directory.absolute.path,
+          directory.absolute.path,
+        );
+        expect(
+          (await FlutterProject.fromPath(directory.path)).directory.absolute.path,
+          directory.absolute.path,
+        );
+        expect(
+          (await FlutterProject.current()).directory.absolute.path,
+          fs.currentDirectory.absolute.path,
+        );
+      });
+
     });
 
     group('ensure ready for platform-specific tooling', () {
@@ -228,6 +281,14 @@ FlutterProject aModuleProject() {
 void testInMemory(String description, Future<Null> testMethod()) {
   Cache.flutterRoot = 'flutter';
   final FileSystem fs = new MemoryFileSystem();
+  // Pretend we have a pubspec.yaml schema
+  fs.directory(Cache.flutterRoot)
+      .childDirectory('packages')
+      .childDirectory('flutter_tools')
+      .childDirectory('schema')
+      .childFile('pubspec_yaml.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(pubspecSchema);
   // Pretend we have a Flutter module project template.
   fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
@@ -290,6 +351,36 @@ void addAndroidWithGroup(Directory directory, String id) {
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileWithGroupId(id));
 }
+
+String get pubspecSchema => '''
+{
+    "\$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "pubspec.yaml",
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {
+        "name": { "type": "string" },
+        "flutter": {
+            "oneOf": [
+                { "type": "object" },
+                { "type": "null" }
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+''';
+
+String get validPubspec => '''
+name: hello
+flutter:
+''';
+
+String get invalidPubspec => '''
+name: hello
+flutter:
+  invalid:
+''';
 
 String projectFileWithBundleId(String id) {
   return '''
