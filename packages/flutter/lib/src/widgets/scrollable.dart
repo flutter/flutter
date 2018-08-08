@@ -259,6 +259,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   ScrollPosition _position;
 
   @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
+
+  @override
   AxisDirection get axisDirection => widget.axisDirection;
 
   ScrollBehavior _configuration;
