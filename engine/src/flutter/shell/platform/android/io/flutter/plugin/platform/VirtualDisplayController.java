@@ -12,6 +12,7 @@ import android.hardware.display.VirtualDisplay;
 import android.os.Build;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 class VirtualDisplayController {
@@ -70,9 +71,8 @@ class VirtualDisplayController {
         mPresentation.show();
     }
 
-    public void resize(int width, int height) {
-        PlatformView view = mPresentation.detachView();
-        mPresentation.hide();
+    public void resize(final int width, final int height, final Runnable onNewSizeFrameAvailable) {
+        final PlatformView view = mPresentation.detachView();
         // We detach the surface to prevent it being destroyed when releasing the vd.
         //
         // setSurface is only available starting API 20. We could support API 19 by re-creating a new
@@ -91,6 +91,33 @@ class VirtualDisplayController {
                 mSurface,
                 0
         );
+
+        final View embeddedView = getView();
+        // There's a bug in Android version older than O where view tree observer onDrawListeners don't get properly
+        // merged when attaching to window, as a workaround we register the on draw listener after the view is attached.
+        embeddedView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                embeddedView.getViewTreeObserver().addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
+                    @Override
+                    public void onDraw() {
+                        // We need some delay here until the frame propagates through the vd surface to to the texture,
+                        // 128ms was picked pretty arbitrarily based on trial and error.
+                        // As long as we invoke the runnable after a new frame is available we avoid the scaling jank
+                        // described in: https://github.com/flutter/flutter/issues/19572
+                        // We should ideally run onNewSizeFrameAvailable ASAP to make the embedded view more responsive
+                        // following a resize.
+                        embeddedView.postDelayed(onNewSizeFrameAvailable, 128);
+                        embeddedView.getViewTreeObserver().removeOnDrawListener(this);
+                    }
+                });
+                embeddedView.removeOnAttachStateChangeListener(this);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {}
+        });
+
         mPresentation = new SingleViewPresentation(mContext, mVirtualDisplay.getDisplay(), view);
         mPresentation.show();
     }

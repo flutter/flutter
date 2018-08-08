@@ -171,7 +171,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         result.success(null);
     }
 
-    private void resizePlatformView(MethodCall call, MethodChannel.Result result) {
+    private void resizePlatformView(MethodCall call, final MethodChannel.Result result) {
         Map<String, Object> args = call.arguments();
         int id = (int) args.get("id");
         double width = (double) args.get("width");
@@ -188,9 +188,14 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         }
         vdController.resize(
                 toPhysicalPixels(width),
-                toPhysicalPixels(height)
+                toPhysicalPixels(height),
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        result.success(null);
+                    }
+                }
         );
-        result.success(null);
     }
 
     private void onTouch(MethodCall call, MethodChannel.Result result) {
