@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -106,6 +107,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isPrintPaths = argResults['paths'];
     final bool isPrintTransitiveClosure = argResults['transitive-closure'];
     final bool isVerifyOnly = argResults['verify-only'];
+
+    // The dev/integration_tests/android_views integration test depends on an assets
+    // package that is in the goldens repository. We need to make sure that the goldens
+    // repository is cloned locally before we verify or update pubspecs.
+    printStatus('Cloning goldens repository...');
+    final GoldensClient goldensClient = new GoldensClient();
+    await goldensClient.prepare();
 
     if (isVerifyOnly) {
       bool needsUpdate = false;
