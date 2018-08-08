@@ -614,6 +614,7 @@ public class FlutterView extends SurfaceView
      * Please use runFromBundle with `FlutterRunArguments`. Parameter
      * `snapshotOverride` has no effect.
      */
+    @Deprecated
     public void runFromBundle(String bundlePath, String snapshotOverride) {
         runFromBundle(bundlePath, snapshotOverride, "main", false);
     }
@@ -623,6 +624,7 @@ public class FlutterView extends SurfaceView
      * Please use runFromBundle with `FlutterRunArguments`. Parameter
      * `snapshotOverride` has no effect.
      */
+    @Deprecated
     public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint) {
         runFromBundle(bundlePath, snapshotOverride, entrypoint, false);
     }
@@ -632,6 +634,7 @@ public class FlutterView extends SurfaceView
      * Please use runFromBundle with `FlutterRunArguments`. Parameters
      * `snapshotOverride` and `reuseRuntimeController` have no effect.
      */
+    @Deprecated
     public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint, boolean reuseRuntimeController) {
         FlutterRunArguments args = new FlutterRunArguments();
         args.bundlePath = bundlePath;

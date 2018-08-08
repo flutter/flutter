@@ -90,6 +90,7 @@ public class FlutterNativeView implements BinaryMessenger {
      * Please use runFromBundle with `FlutterRunArguments`. Parameters
      * `snapshotOverride` and `reuseRuntimeController` have no effect.
      */
+    @Deprecated
     public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint,
             boolean reuseRuntimeController) {
         runFromBundleInternal(bundlePath, entrypoint, null, null);
