@@ -36,6 +36,20 @@ abstract class TickerProvider {
   ///
   /// The kind of ticker provided depends on the kind of ticker provider.
   Ticker createTicker(TickerCallback onTick);
+
+  /// The behavior of the created [Ticker]s in the presence of time dilation.
+  ///
+  /// Defaults to [TimeDilationBehavior.normal].
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
+}
+
+/// Configures how a [Timer] behaves in the presence of time dilation.
+enum TimeDilationBehavior {
+  /// The adjusted timestampts are accepted.
+  normal,
+
+  /// The adjusted timestamps are unscaled by reversing the time dilation.
+  unscaled,
 }
 
 /// Calls its callback once per animation frame.
@@ -59,7 +73,7 @@ class Ticker {
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
-  Ticker(this._onTick, { this.debugLabel }) {
+  Ticker(this._onTick, { this.debugLabel, this.timeDilationBehavior = TimeDilationBehavior.normal}) {
     assert(() {
       _debugCreationStack = StackTrace.current;
       return true;
@@ -67,6 +81,11 @@ class Ticker {
   }
 
   TickerFuture _future;
+
+  /// The behavior of the [Ticker] in the presence of time dilation.
+  ///
+  /// Defaults to [TimeDilationBehavior.normal].
+  TimeDilationBehavior timeDilationBehavior;
 
   /// Whether this ticker has been silenced.
   ///
@@ -225,8 +244,14 @@ class Ticker {
     _animationId = null;
 
     _startTime ??= timeStamp;
-
-    _onTick(timeStamp - _startTime);
+    if (timeDilationBehavior == TimeDilationBehavior.unscaled && timeDilation != 1.0) {
+      final double scale = 1 / timeDilation;
+      final Duration delta = timeStamp - _startTime;
+      final Duration tick = new Duration(microseconds: (delta.inMicroseconds / scale).round());
+      _onTick(tick);
+    } else {
+      _onTick(timeStamp - _startTime);
+    }
 
     // The onTick callback may have scheduled another tick already, for
     // example by calling stop then start again.
