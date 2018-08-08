@@ -690,14 +690,19 @@ class _BackLabel extends StatelessWidget {
       return const SizedBox(height: 0.0, width: 0.0);
     }
 
-    Text textWidget = new Text(previousTitle, maxLines: 1);
+    Text textWidget = new Text(
+      previousTitle,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
 
-    if (previousTitle.length > 15) {
+    if (previousTitle.length > 12) {
       textWidget = const Text('Back');
     }
 
     return new Align(
       alignment: AlignmentDirectional.centerStart,
+      widthFactor: 1.0,
       child: textWidget,
     );
   }

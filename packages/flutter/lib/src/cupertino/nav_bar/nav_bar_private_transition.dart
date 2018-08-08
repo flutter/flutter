@@ -74,6 +74,7 @@ class _NavigationBarTransition extends StatelessWidget {
       componentsTransition.bottomMiddle,
       componentsTransition.bottomLargeTitle,
       componentsTransition.bottomTrailing,
+      componentsTransition.topLeading,
       componentsTransition.topBackChevron,
       componentsTransition.topBackLabel,
       componentsTransition.topMiddle,
@@ -198,7 +199,7 @@ class _NavigationBarComponentsTransition {
     return new Positioned.fromRelativeRect(
       rect: positionInTransitionBox(bottomLeading, from: bottomNavBarBox),
       child: new FadeTransition(
-        opacity: fadeOutBy(0.6),
+        opacity: fadeOutBy(0.4),
         child: bottomLeading.child,
       ),
     );
@@ -252,11 +253,15 @@ class _NavigationBarComponentsTransition {
   Widget get bottomMiddle {
     final _RenderObjectFindingWidget bottomMiddle = bottomComponents.middle;
     final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
+    final _RenderObjectFindingWidget topLeading = topComponents.leading;
 
     // The middle component is non-null when the nav bar is a large title
     // nav bar but would be invisible when expanded.
     // TODO
-    if (bottomComponents.large && !bottomComponents.hasUserMiddle) {
+    if (bottomComponents.large &&
+        !bottomComponents.hasUserMiddle &&
+        bottomComponents.largeExpanded
+    ) {
       return null;
     }
 
@@ -286,8 +291,18 @@ class _NavigationBarComponentsTransition {
       );
     }
 
-    if (bottomMiddle != null && topBackLabel == null) {
-      return bottomMiddle.child;
+    if (bottomMiddle != null && topLeading != null) {
+      return new Positioned.fromRelativeRect(
+        rect: positionInTransitionBox(bottomMiddle, from: bottomNavBarBox),
+        child: new FadeTransition(
+          opacity: fadeOutBy(bottomComponents.hasUserMiddle ? 0.4 : 0.7),
+          // Keep the font when transitioning into a non-back label leading.
+          child: new DefaultTextStyle(
+            style: _kMiddleTitleTextStyle,
+            child: bottomMiddle.child,
+          ),
+        ),
+      );
     }
 
     return null;
@@ -296,6 +311,7 @@ class _NavigationBarComponentsTransition {
   Widget get bottomLargeTitle {
     final _RenderObjectFindingWidget bottomLargeTitle = bottomComponents.largeTitle;
     final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
+    final _RenderObjectFindingWidget topLeading = topComponents.leading;
 
     if (bottomLargeTitle != null && topBackLabel != null) {
       return new PositionedTransition(
@@ -325,8 +341,27 @@ class _NavigationBarComponentsTransition {
       );
     }
 
-    if (bottomLargeTitle != null && topBackLabel == null) {
-      return bottomLargeTitle.child;
+    if (bottomLargeTitle != null && topLeading != null) {
+      final RelativeRect from = positionInTransitionBox(bottomLargeTitle, from: bottomNavBarBox);
+
+      final RelativeRectTween positionTween = new RelativeRectTween(
+        begin: from,
+        end: from.shift(new Offset(bottomNavBarBox.size.width / 4.0, 0.0)),
+      );
+
+      // Just shift slightly towards the right instead of moving to the back
+      // label position.
+      return new PositionedTransition(
+        rect: positionTween.animate(animation),
+        child: new FadeTransition(
+          opacity: fadeOutBy(0.4),
+          // Keep the font when transitioning into a non-back label leading.
+          child: new DefaultTextStyle(
+            style: _kLargeTitleTextStyle,
+            child: bottomLargeTitle.child,
+          ),
+        ),
+      );
     }
 
     return null;
@@ -348,8 +383,25 @@ class _NavigationBarComponentsTransition {
     );
   }
 
+  Widget get topLeading {
+    final _RenderObjectFindingWidget topLeading = topComponents.leading;
+
+    if (topLeading == null) {
+      return null;
+    }
+
+    return new Positioned.fromRelativeRect(
+      rect: positionInTransitionBox(topLeading, from: topNavBarBox),
+      child: new FadeTransition(
+        opacity: fadeInFrom(0.6),
+        child: topLeading.child,
+      ),
+    );
+  }
+
   Widget get topBackChevron {
     final _RenderObjectFindingWidget topBackChevron = topComponents.backChevron;
+    final _RenderObjectFindingWidget bottomBackChevron = bottomComponents.backChevron;
 
     if (topBackChevron == null) {
       return null;
@@ -370,7 +422,7 @@ class _NavigationBarComponentsTransition {
     return new PositionedTransition(
       rect: positionTween.animate(animation),
       child: new FadeTransition(
-        opacity: fadeInFrom(0.4),
+        opacity: fadeInFrom(bottomBackChevron == null ? 0.7 : 0.4),
         child: new DefaultTextStyle(
           style: topComponents.actionsStyle,
           child: topBackChevron.child,
@@ -384,6 +436,10 @@ class _NavigationBarComponentsTransition {
     final _RenderObjectFindingWidget bottomLargeTitle = bottomComponents.largeTitle;
     final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
 
+    if (topBackLabel == null) {
+      return null;
+    }
+
     if (bottomLargeTitle != null && topBackLabel != null) {
       return new PositionedTransition(
         rect: slideFromLeadingEdge(
@@ -393,7 +449,7 @@ class _NavigationBarComponentsTransition {
           toNavBarBox: topNavBarBox,
         ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeInFrom(bottomComponents.hasUserMiddle ? 0.6 : 0.4),
+          opacity: fadeInFrom(0.4),
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kLargeTitleTextStyle,
@@ -426,10 +482,6 @@ class _NavigationBarComponentsTransition {
           ),
         ),
       );
-    }
-
-    if (bottomMiddle != null && topBackLabel == null) {
-      return topBackLabel.child;
     }
 
     return null;
