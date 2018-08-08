@@ -1837,8 +1837,8 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59);
-      sendKeyEventWithCode(22);
+      sendKeyEventWithCode(59);  // SHIFT keydown
+      sendKeyEventWithCode(22);  // RIGHT_ARROW keydown
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
@@ -1852,11 +1852,11 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59);
+      sendKeyEventWithCode(59);         // SHIFT keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(113);
+      sendKeyEventWithCode(113);        // CONTROL keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(22);
+      sendKeyEventWithCode(22);         // RIGHT_ARROW keydown
 
       await tester.pumpAndSettle();
 
@@ -1872,15 +1872,15 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59);
+      sendKeyEventWithCode(59);         // SHIFT keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20);
+      sendKeyEventWithCode(20);         // DOWN_ARROW keydown
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
-      sendKeyEventWithCode(20, false);
+      sendKeyEventWithCode(20, false);    // DOWN_ARROW keyup
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19);
+      sendKeyEventWithCode(19);           // UP_ARROW keydown
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
