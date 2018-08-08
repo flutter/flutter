@@ -1,4 +1,4 @@
-Signature: 7cd085644530226184f2303275192384
+Signature: e451900a1345f7d287e1032e5a26dac9
 
 UNUSED LICENSES:
 
@@ -4748,9 +4748,9 @@ FILE: ../../../third_party/dart/runtime/vm/heap/heap.h
 FILE: ../../../third_party/dart/runtime/vm/heap/heap_test.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/pages.cc
 FILE: ../../../third_party/dart/runtime/vm/heap/pages_test.cc
+FILE: ../../../third_party/dart/runtime/vm/heap/pointer_block.cc
+FILE: ../../../third_party/dart/runtime/vm/heap/pointer_block.h
 FILE: ../../../third_party/dart/runtime/vm/heap/scavenger.h
-FILE: ../../../third_party/dart/runtime/vm/heap/store_buffer.cc
-FILE: ../../../third_party/dart/runtime/vm/heap/store_buffer.h
 FILE: ../../../third_party/dart/runtime/vm/heap/verifier.cc
 FILE: ../../../third_party/dart/runtime/vm/instructions_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/instructions_ia32.h
@@ -5827,7 +5827,6 @@ FILE: ../../../third_party/dart/runtime/lib/stacktrace.dart
 FILE: ../../../third_party/dart/runtime/lib/symbol_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/timer_impl.dart
 FILE: ../../../third_party/dart/runtime/lib/typed_data.cc
-FILE: ../../../third_party/dart/runtime/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/uri.cc
 FILE: ../../../third_party/dart/runtime/lib/uri_patch.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/app/application.dart
@@ -16654,6 +16653,50 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: tonic
+ORIGIN: ../../../garnet/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/tonic/dart_list.cc
+FILE: ../../../third_party/tonic/dart_list.h
+FILE: ../../../third_party/tonic/file_loader/file_loader_fuchsia.cc
+FILE: ../../../third_party/tonic/file_loader/file_loader_posix.cc
+FILE: ../../../third_party/tonic/file_loader/file_loader_win.cc
+FILE: ../../../third_party/tonic/filesystem/filesystem/path_win.cc
+FILE: ../../../third_party/tonic/filesystem/filesystem/portable_unistd.h
+FILE: ../../../third_party/tonic/platform/platform_utils.h
+FILE: ../../../third_party/tonic/platform/platform_utils_posix.cc
+FILE: ../../../third_party/tonic/platform/platform_utils_win.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: tonic
 ORIGIN: ../../../third_party/tonic/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/tonic/common/build_config.h
@@ -16721,50 +16764,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/tonic/common/macros.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Fuchsia Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: tonic
-ORIGIN: ../../../third_party/tonic/file_loader/file_loader_fuchsia.cc + ../../../third_party/tonic/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/tonic/dart_list.cc
-FILE: ../../../third_party/tonic/dart_list.h
-FILE: ../../../third_party/tonic/file_loader/file_loader_fuchsia.cc
-FILE: ../../../third_party/tonic/file_loader/file_loader_posix.cc
-FILE: ../../../third_party/tonic/file_loader/file_loader_win.cc
-FILE: ../../../third_party/tonic/filesystem/filesystem/path_win.cc
-FILE: ../../../third_party/tonic/filesystem/filesystem/portable_unistd.h
-FILE: ../../../third_party/tonic/platform/platform_utils.h
-FILE: ../../../third_party/tonic/platform/platform_utils_posix.cc
-FILE: ../../../third_party/tonic/platform/platform_utils_win.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2017 The Fuchsia Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
