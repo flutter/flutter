@@ -1023,15 +1023,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   bool _endDrawerOpened = false;
 
   void _drawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _drawerOpened = isOpened;
-    });
+    _drawerOpened = isOpened;
+    if (hasEndDrawer) {
+      setState(() {});
+    }
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
-    setState(() {
-      _endDrawerOpened = isOpened;
-    });
+    _endDrawerOpened = isOpened;
+    if (hasDrawer) {
+      setState(() {});
+    }
   }
 
   /// Opens the [Drawer] (if any).
@@ -1075,6 +1077,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   final Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController _snackBarController;
   Timer _snackBarTimer;
+  bool _accessibleNavigation;
 
   /// Shows a [SnackBar] at the bottom of the scaffold.
   ///
@@ -1397,6 +1400,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    // If we transition from accessible navigation to non-accessible navigation
+    // and there is a SnackBar that would have timed out that has already
+    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
+    // yet, let it timeout as normal.
+    if (_accessibleNavigation == true
+      && !mediaQuery.accessibleNavigation
+      && _snackBarTimer != null
+      && !_snackBarTimer.isActive) {
+      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+    }
+    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
@@ -1482,20 +1502,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
+    _accessibleNavigation = mediaQuery.accessibleNavigation;
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
         if (_snackBarController.isCompleted && _snackBarTimer == null) {
           final SnackBar snackBar = _snackBars.first._widget;
-          _snackBarTimer = new Timer.periodic(snackBar.duration, (Timer timer) {
+          _snackBarTimer = new Timer(snackBar.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
             // Look up MediaQuery again in case the setting changed.
             final MediaQueryData mediaQuery = MediaQuery.of(context);
             if (mediaQuery.accessibleNavigation && snackBar.action != null)
               return;
-            timer.cancel();
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
         }
