@@ -1597,7 +1597,7 @@ abstract class InheritedWidget extends ProxyWidget {
 /// Typically the `inheritFrom` method is called from a model-specific
 /// static `of` method. For example:
 ///
-/// ```
+/// ```dart
 /// class MyModel extends InheritedModel<String> {
 ///   // ...
 ///   static MyModel of(BuildContext context, String dependency) {
@@ -1615,7 +1615,8 @@ abstract class InheritedWidget extends ProxyWidget {
 /// and decide if the model's changes correspond to any of the dependencies.
 ///
 /// For example:
-/// ```
+///
+/// ```dart
 /// class ABModel extends InheritedModel<String> {
 ///   ABModel({ this.a, this.b, Widget child }) : super(child: child);
 ///
@@ -1649,7 +1650,7 @@ abstract class InheritedWidget extends ProxyWidget {
 /// path dependency saves the value of the path so that
 /// `updateShouldNotifyDependent` can compare it with the current value.
 ///
-/// ```
+/// ```dart
 /// class IntegerTree {
 ///   int valueOf(String path) => _lookup(path);
 ///   // ...
@@ -1753,6 +1754,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// a `context` dependency on the first model ancestor that has a non-null
   /// value for the specified path.
   ///
+  /// ```dart
   /// class IntegerModel extends InheritedModel<String> {
   ///   // ...
   ///   int valueOf(String path) => _model.valueOf(path);
@@ -1766,6 +1768,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   ///     return value;
   ///   }
   /// }
+  /// ```
   ///
   /// If [aspect] and [visitor] are null this method is the same as:
   /// `context.inheritFromWidgetOfExactType(T)`.
