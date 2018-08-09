@@ -9,7 +9,7 @@ typedef void GestureArenaCallback(Object key);
 
 const int primaryKey = 4;
 
-class TestGestureArenaMember extends GestureArenaMember {
+class TestGestureArenaMember1 extends GestureArenaMember {
   bool acceptRan = false;
 
   @override
@@ -26,10 +26,13 @@ class TestGestureArenaMember extends GestureArenaMember {
   }
 }
 
+class TestGestureArenaMember2 extends TestGestureArenaMember1 {}
+
 class GestureTester {
   GestureArenaManager arena = new GestureArenaManager();
-  TestGestureArenaMember first = new TestGestureArenaMember();
-  TestGestureArenaMember second = new TestGestureArenaMember();
+  TestGestureArenaMember1 first = new TestGestureArenaMember1();
+  TestGestureArenaMember2 second = new TestGestureArenaMember2();
+  TestGestureArenaMember1 secondSame = new TestGestureArenaMember1();
 
   GestureArenaEntry firstEntry;
   void addFirst() {
@@ -39,6 +42,11 @@ class GestureTester {
   GestureArenaEntry secondEntry;
   void addSecond() {
     secondEntry = arena.add(primaryKey, second);
+  }
+
+  GestureArenaEntry secondSameEntry;
+  void addSecondSame() {
+    secondSameEntry = arena.add(primaryKey, secondSame);
   }
 
   void expectNothing() {
@@ -60,6 +68,13 @@ class GestureTester {
     expect(first.rejectRan, isTrue);
     expect(second.acceptRan, isTrue);
     expect(second.rejectRan, isFalse);
+  }
+
+  void expectHomogenerousFirstWin() {
+    expect(first.acceptRan, isTrue);
+    expect(first.rejectRan, isFalse);
+    expect(secondSame.acceptRan, isFalse);
+    expect(secondSame.rejectRan, isTrue);
   }
 }
 
@@ -167,5 +182,14 @@ void main() {
     tester.expectNothing();
     tester.arena.close(primaryKey);
     tester.expectSecondWin();
+  });
+
+  test('The first should win when the types are the same', () {
+    final GestureTester tester = new GestureTester();
+    tester.addFirst();
+    tester.addSecondSame();
+    tester.expectNothing();
+    tester.arena.close(primaryKey);
+    tester.expectHomogenerousFirstWin();
   });
 }

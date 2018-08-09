@@ -235,6 +235,8 @@ class GestureArenaManager {
     } else if (state.eagerWinner != null) {
       assert(_debugLogDiagnostic(pointer, 'Eager winner: ${state.eagerWinner}'));
       _resolveInFavorOf(pointer, state, state.eagerWinner);
+    } else {
+      _resolveIfHomogeneous(pointer, state);
     }
   }
 
@@ -261,6 +263,27 @@ class GestureArenaManager {
         rejectedMember.rejectGesture(pointer);
     }
     member.acceptGesture(pointer);
+  }
+
+  void _resolveIfHomogeneous(int pointer, _GestureArena state){
+    assert(state == _arenas[pointer]);
+    assert(!state.isOpen);
+    final List<GestureArenaMember> members = state.members;
+    assert(members.length > 1);
+    final GestureArenaMember defaultWinner = members[0];
+    bool isHomogeneous = true;
+    for (int i = 1; i < members.length; i++){
+      if (members[i].runtimeType != defaultWinner.runtimeType)
+        isHomogeneous = false;
+    }
+    if (isHomogeneous){
+      assert(_debugLogDiagnostic(pointer, 'Homogeneous winner: $defaultWinner'));
+      _arenas.remove(pointer);
+      for (int i = 1; i < members.length; i++){
+        members[i].rejectGesture(pointer);
+      }
+      defaultWinner.acceptGesture(pointer);
+    }
   }
 
   bool _debugLogDiagnostic(int pointer, String message, [ _GestureArena state ]) {
