@@ -1,5 +1,5 @@
 
-import 'package:flutter_driver/android_testing.dart';
+import 'package:android_testing/android_testing.dart';
 
 import 'package:test/test.dart';
 

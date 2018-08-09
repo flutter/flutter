@@ -6,6 +6,6 @@
 /// accessibility implementation in a flutter driver environment.
 library android_testing;
 
-export 'src/android/common.dart';
-export 'src/android/constants.dart';
-export 'src/android/matcher.dart';
+export 'src/common.dart';
+export 'src/constants.dart';
+export 'src/matcher.dart';
