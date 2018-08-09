@@ -8,6 +8,26 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
+class TestState extends StatefulWidget {
+  const TestState({ Key key, this.child, this.log }) : super(key: key);
+  final Widget child;
+  final List<String> log;
+  @override
+  State<TestState> createState() => new _TestStateState();
+}
+
+class _TestStateState extends State<TestState> {
+  @override
+  void initState() {
+    super.initState();
+    widget.log.add('created new state');
+  }
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
 void main() {
   testWidgets('Visibility', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
@@ -18,7 +38,10 @@ void main() {
       child: new Builder(
         builder: (BuildContext context) {
           final bool animating = TickerMode.of(context);
-          return new Text('a $animating', textDirection: TextDirection.rtl);
+          return new TestState(
+            log: log,
+            child: new Text('a $animating', textDirection: TextDirection.rtl),
+          );
         },
       ),
     );
@@ -40,15 +63,19 @@ void main() {
 
     final Matcher expectedSemanticsWhenAbsent = hasSemantics(new TestSemantics.root());
 
+    // We now run a sequence of pumpWidget calls one after the other. In
+    // addition to verifying that the right behaviour is seen in each case, this
+    // also verifies that the widget can dynamically change from state to state.
+
     await tester.pumpWidget(new Visibility(child: testChild));
     expect(find.byType(Text, skipOffstage: false), findsOneWidget);
     expect(find.text('a true', skipOffstage: false), findsOneWidget);
     expect(find.byType(Visibility), paints..paragraph());
     expect(tester.getSize(find.byType(Visibility)), const Size(800.0, 600.0));
     expect(semantics, expectedSemanticsWhenPresent);
-    expect(log, <String>[]);
+    expect(log, <String>['created new state']);
     await tester.tap(find.byType(Visibility));
-    expect(log, <String>['tap']);
+    expect(log, <String>['created new state', 'tap']);
     log.clear();
 
     await tester.pumpWidget(new Visibility(child: testChild, visible: false));
@@ -90,9 +117,9 @@ void main() {
     expect(find.byType(Visibility), paints..paragraph());
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
     expect(semantics, expectedSemanticsWhenPresent);
-    expect(log, <String>[]);
+    expect(log, <String>['created new state']);
     await tester.tap(find.byType(Visibility));
-    expect(log, <String>['tap']);
+    expect(log, <String>['created new state', 'tap']);
     log.clear();
 
     await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: true, maintainState: true, maintainAnimation: true, maintainSize: true, maintainInteractivity: true, maintainSemantics: true)));
@@ -102,9 +129,9 @@ void main() {
     expect(find.byType(Visibility), paints..paragraph());
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
     expect(semantics, expectedSemanticsWhenPresent);
-    expect(log, <String>[]);
+    expect(log, <String>['created new state']);
     await tester.tap(find.byType(Visibility));
-    expect(log, <String>['tap']);
+    expect(log, <String>['created new state', 'tap']);
     log.clear();
 
     await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false, maintainState: true, maintainAnimation: true, maintainSize: true, maintainInteractivity: true, maintainSemantics: true)));
@@ -138,9 +165,9 @@ void main() {
     expect(find.byType(Visibility), paintsNothing);
     expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
     expect(semantics, expectedSemanticsWhenPresent);
-    expect(log, <String>[]);
+    expect(log, <String>['created new state']);
     await tester.tap(find.byType(Visibility));
-    expect(log, <String>[]);
+    expect(log, <String>['created new state']);
     log.clear();
 
     await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false, maintainState: true, maintainAnimation: true, maintainSize: true)));
@@ -163,9 +190,36 @@ void main() {
     expect(find.byType(Visibility), paintsNothing);
     expect(tester.getSize(find.byType(Visibility)), Size.zero);
     expect(semantics, expectedSemanticsWhenAbsent);
+    expect(log, <String>['created new state']);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>['created new state']);
+    log.clear();
+
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false, maintainState: true)));
+    expect(find.byType(Text, skipOffstage: false), findsOneWidget);
+    expect(find.byType(Text, skipOffstage: true), findsNothing);
+    expect(find.text('a false', skipOffstage: false), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paintsNothing);
+    expect(tester.getSize(find.byType(Visibility)), Size.zero);
+    expect(semantics, expectedSemanticsWhenAbsent);
+    expect(log, <String>['created new state']);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>['created new state']);
+    log.clear();
+
+    // Now we toggle the visibility off and on a few times to make sure that works.
+
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: true, maintainState: true)));
+    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('a true', skipOffstage: false), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paints..paragraph());
+    expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
+    expect(semantics, expectedSemanticsWhenPresent);
     expect(log, <String>[]);
     await tester.tap(find.byType(Visibility));
-    expect(log, <String>[]);
+    expect(log, <String>['tap']);
     log.clear();
 
     await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false, maintainState: true)));
@@ -181,6 +235,33 @@ void main() {
     expect(log, <String>[]);
     log.clear();
 
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: true, maintainState: true)));
+    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('a true', skipOffstage: false), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paints..paragraph());
+    expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
+    expect(semantics, expectedSemanticsWhenPresent);
+    expect(log, <String>[]);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>['tap']);
+    log.clear();
+
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false, maintainState: true)));
+    expect(find.byType(Text, skipOffstage: false), findsOneWidget);
+    expect(find.byType(Text, skipOffstage: true), findsNothing);
+    expect(find.text('a false', skipOffstage: false), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paintsNothing);
+    expect(tester.getSize(find.byType(Visibility)), Size.zero);
+    expect(semantics, expectedSemanticsWhenAbsent);
+    expect(log, <String>[]);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>[]);
+    log.clear();
+
+    // Same but without maintainState.
+
     await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false)));
     expect(find.byType(Text, skipOffstage: false), findsNothing);
     expect(find.byType(Placeholder), findsNothing);
@@ -190,6 +271,41 @@ void main() {
     expect(log, <String>[]);
     await tester.tap(find.byType(Visibility));
     expect(log, <String>[]);
+    log.clear();
+
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: true)));
+    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('a true', skipOffstage: false), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paints..paragraph());
+    expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
+    expect(semantics, expectedSemanticsWhenPresent);
+    expect(log, <String>['created new state']);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>['created new state', 'tap']);
+    log.clear();
+
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: false)));
+    expect(find.byType(Text, skipOffstage: false), findsNothing);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paintsNothing);
+    expect(tester.getSize(find.byType(Visibility)), Size.zero);
+    expect(semantics, expectedSemanticsWhenAbsent);
+    expect(log, <String>[]);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>[]);
+    log.clear();
+
+    await tester.pumpWidget(new Center(child: new Visibility(child: testChild, visible: true)));
+    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('a true', skipOffstage: false), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
+    expect(find.byType(Visibility), paints..paragraph());
+    expect(tester.getSize(find.byType(Visibility)), const Size(84.0, 14.0));
+    expect(semantics, expectedSemanticsWhenPresent);
+    expect(log, <String>['created new state']);
+    await tester.tap(find.byType(Visibility));
+    expect(log, <String>['created new state', 'tap']);
     log.clear();
 
     semantics.dispose();

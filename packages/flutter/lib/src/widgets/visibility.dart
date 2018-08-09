@@ -15,6 +15,9 @@ import 'ticker_provider.dart';
 /// (typically a zero-sized box) is included instead.
 ///
 /// A variety of flags can be used to tweak exactly how the child is hidden.
+/// (Changing the flags dynamically is discouraged, as it can cause the [child]
+/// subtree to be rebuilt, with any state in the subtree being discarded.
+/// Typically, only the [visible] flag is changed dynamically.)
 ///
 /// These widgets provide some of the facets of this one:
 ///
@@ -26,8 +29,8 @@ import 'ticker_provider.dart';
 ///
 /// Using this widget is not necessary to hide children. The simplest way to
 /// hide a child is just to not include it, or, if a child _must_ be given (e.g.
-/// because this is a [StatelessWidget]) then to use [SizedBox.shrink] instead
-/// of the child that would otherwise be included.
+/// because the parent is a [StatelessWidget]) then to use [SizedBox.shrink]
+/// instead of the child that would otherwise be included.
 ///
 /// See also:
 ///
@@ -92,6 +95,9 @@ class Visibility extends StatelessWidget {
   /// (specifically, the state will be lost regardless of the state of
   /// [maintainState] whenever any of the `maintain` flags are changed, since
   /// doing so will result in a subtree shape change).
+  ///
+  /// Unless [maintainState] is set, the [child] subtree will be disposed
+  /// (removed from the tree) while hidden.
   final bool visible;
 
   /// Whether to maintain the [State] objects of the [child] subtree when it is
@@ -105,6 +111,12 @@ class Visibility extends StatelessWidget {
   ///
   /// If this is true, an [Offstage] widget is used to hide the child instead of
   /// replacing it with [replacement].
+  ///
+  /// If this is false, then [maintainAnimation] must also be false.
+  ///
+  /// Dynamically changing this value may cause the current state of the
+  /// subtree to be lost (and a new instance of the subtree, with new [State]
+  /// objects, to be immediately created if [visible] is true).
   final bool maintainState;
 
   /// Whether to maintain animations within the [child] subtree when it is
@@ -115,26 +127,41 @@ class Visibility extends StatelessWidget {
   /// Keeping animations active when the widget is not visible is even more
   /// expensive than only maintaining the state.
   ///
-  /// One example when this might be useful is if the subtree contains an
-  /// animated [Image] that must be kept synchronized with other animated images
-  /// elsewhere in the interface.
+  /// One example when this might be useful is if the subtree is animating its
+  /// layout in time with an [AnimationController], and the result of that
+  /// layout is being used to influence some other logic. If this flag is false,
+  /// then any [AnimationController]s hosted inside the [child] subtree will be
+  /// muted while the [visible] flag is false.
   ///
   /// If this is true, no [TickerMode] widget is used.
+  ///
+  /// If this is false, then [maintainSize] must also be false.
+  ///
+  /// Dynamically changing this value may cause the current state of the
+  /// subtree to be lost (and a new instance of the subtree, with new [State]
+  /// objects, to be immediately created if [visible] is true).
   final bool maintainAnimation;
 
   /// Whether to maintain space for where the widget would have been.
   ///
   /// To set this, [maintainAnimation] must also be set.
   ///
-  /// Maintaining the size when the widget is not [visible] is roughly as
-  /// expensive as keeping animations running, and may in some circumstances be
-  /// cheaper if the subtree is simple and the [visible] property is frequently
-  /// toggled, since it avoids triggering a layout change when the [visible]
-  /// property is toggled. However, if the [child] subtree is not trivial then
-  /// it is significantly cheaper to not even keep the state (see
-  /// [maintainState]).
+  /// Maintaining the size when the widget is not [visible] is not notably more
+  /// expensive than just keeping animations running without maintaining the
+  /// size, and may in some circumstances be slightly cheaper if the subtree is
+  /// simple and the [visible] property is frequently toggled, since it avoids
+  /// triggering a layout change when the [visible] property is toggled. If the
+  /// [child] subtree is not trivial then it is significantly cheaper to not
+  /// even keep the state (see [maintainState]).
   ///
   /// If this is true, [Opacity] is used instead of [Offstage].
+  ///
+  /// If this is false, then [maintainSemantics] and [maintainInteractivity]
+  /// must also be false.
+  ///
+  /// Dynamically changing this value may cause the current state of the
+  /// subtree to be lost (and a new instance of the subtree, with new [State]
+  /// objects, to be immediately created if [visible] is true).
   ///
   /// See also:
   ///
@@ -151,6 +178,10 @@ class Visibility extends StatelessWidget {
   /// visible to accessibility tools when it is hidden from the user. If this
   /// flag is set to true, then accessibility tools will report the widget as if
   /// it was present.
+  ///
+  /// Dynamically changing this value may cause the current state of the
+  /// subtree to be lost (and a new instance of the subtree, with new [State]
+  /// objects, to be immediately created if [visible] is true).
   final bool maintainSemantics;
 
   /// Whether to allow the widget to be interactive when hidden.
@@ -160,6 +191,10 @@ class Visibility extends StatelessWidget {
   /// By default, with [maintainInteractivity] set to false, touch events cannot
   /// reach the [child] when it is hidden from the user. If this flag is set to
   /// true, then touch events will nonetheless be passed through.
+  ///
+  /// Dynamically changing this value may cause the current state of the
+  /// subtree to be lost (and a new instance of the subtree, with new [State]
+  /// objects, to be immediately created if [visible] is true).
   final bool maintainInteractivity;
 
   @override

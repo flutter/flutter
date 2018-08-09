@@ -152,7 +152,8 @@ class Directionality extends InheritedWidget {
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
-///    subtly).
+///    subtly, because it is either visible or hidden, rather than allowing
+///    fractional opacity values).
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
