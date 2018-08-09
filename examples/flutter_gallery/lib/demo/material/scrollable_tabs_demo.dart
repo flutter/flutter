@@ -46,9 +46,6 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   bool _customIndicator = false;
 
   @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
-
-  @override
   void initState() {
     super.initState();
     _controller = new TabController(vsync: this, length: _allPages.length);
