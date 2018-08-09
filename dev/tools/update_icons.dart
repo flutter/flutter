@@ -33,6 +33,7 @@ const Map<String, String> kIdentifierRewrites = <String, String>{
   '7k': 'seven_k',
   '8k': 'eight_k',
   '9k': 'nine_k',
+  '10k': 'ten_k',
   '1mp': 'one_mp',
   '2mp': 'two_mp',
   '3mp': 'three_mp',
