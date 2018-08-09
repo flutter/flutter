@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
