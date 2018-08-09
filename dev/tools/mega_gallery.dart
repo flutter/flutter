@@ -92,11 +92,10 @@ void main(List<String> args) {
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
 void _createEntry(File mainFile, int copies) {
   final StringBuffer imports = new StringBuffer();
-  final StringBuffer importRefs = new StringBuffer();
 
   for (int i = 1; i < copies; i++) {
+    imports.writeln('// ignore: unused_import');
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
-    importRefs.writeln('  main_$i.main;');
   }
 
   final String contents = '''
@@ -110,9 +109,6 @@ import 'gallery/app.dart';
 ${imports.toString().trim()}
 
 void main() {
-  // Make sure the imports are not marked as unused.
-  ${importRefs.toString().trim()}
-
   runApp(const GalleryApp());
 }
 ''';

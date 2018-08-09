@@ -527,6 +527,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     yield DefaultWidgetsLocalizations.delegate;
   }
 
+  // ACCESSIBILITY
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    setState(() {
+      // The properties of ui.window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
 
   // METRICS
 

@@ -326,6 +326,7 @@ Matcher matchesSemanticsData({
   bool isLiveRegion = false,
   bool hasToggledState = false,
   bool isToggled = false,
+  bool hasImplicitScrolling = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -389,6 +390,8 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.hasToggledState);
   if (isToggled)
     flags.add(SemanticsFlag.isToggled);
+  if (hasImplicitScrolling)
+    flags.add(SemanticsFlag.hasImplicitScrolling);
 
   final List<SemanticsAction> actions = <SemanticsAction>[];
   if (hasTapAction)

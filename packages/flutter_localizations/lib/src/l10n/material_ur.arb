@@ -39,5 +39,11 @@
   "popupMenuLabel": "پاپ اپ مینو",
   "dialogLabel": "ڈائلاگ",
   "alertDialogLabel": "انتباہ",
-  "searchFieldLabel": "تلاش کریں"
+  "searchFieldLabel": "تلاش کریں",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }

@@ -40,5 +40,11 @@
   "popupMenuLabel": "Menu pop timbul",
   "dialogLabel": "Dialog",
   "alertDialogLabel": "Amaran",
-  "searchFieldLabel": "Carian"
+  "searchFieldLabel": "Carian",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }
