@@ -98,8 +98,8 @@ void main() {
 
     expect(avatarATopLeft.dx - topLeft.dx, equals(16.0 + 10.0)); // left padding
     expect(avatarATopLeft.dy - topLeft.dy, equals(16.0 + 20.0)); // add top padding
-    expect(topRight.dx - avatarDTopRight.dx, equals(16.0 + 34.0)); // right padding
-    expect(avatarDTopRight.dy - topRight.dy, equals(16.0 + 24.0)); // add top padding
+    expect(topRight.dx - avatarDTopRight.dx, equals(16.0 + 30.0)); // right padding
+    expect(avatarDTopRight.dy - topRight.dy, equals(16.0 + 20.0)); // add top padding
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
