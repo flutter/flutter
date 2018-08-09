@@ -15,7 +15,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
@@ -26,25 +25,6 @@ final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
-}
-
-/// Writes default Xcode properties files in the Flutter project at [projectPath],
-/// if project is an iOS project and such files are out of date or do not
-/// already exist.
-Future<void> generateXcodeProperties({FlutterProject project}) async {
-  if (project.manifest.isModule ||
-      project.ios.directory.existsSync()) {
-    if (!Cache.instance.fileOlderThanToolsStamp(project.generatedXcodePropertiesFile)) {
-      return;
-    }
-
-    await updateGeneratedXcodeProperties(
-      project: project,
-      buildInfo: BuildInfo.debug,
-      targetOverride: bundle.defaultMainPath,
-      previewDart2: true,
-    );
-  }
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -119,7 +99,7 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File generatedXcodePropertiesFile = project.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }

@@ -126,6 +126,24 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'الصفحة السابقة';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'عدد الصفوف في الصفحة:';
 
   @override
@@ -283,6 +301,24 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Предишната страница';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Редове на страница:';
@@ -444,6 +480,24 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prethodna stranica';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Redaka po stranici:';
 
   @override
@@ -601,6 +655,24 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Pàgina anterior';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Files per pàgina:';
@@ -762,6 +834,24 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Předchozí stránka';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Počet řádků na stránku:';
 
   @override
@@ -921,6 +1011,24 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Rækker pr. side:';
 
   @override
@@ -1078,6 +1186,24 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Vorherige Seite';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Zeilen pro Seite:';
@@ -1269,6 +1395,24 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Προηγούμενη σελίδα';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Σειρές ανά σελίδα:';
 
   @override
@@ -1426,6 +1570,24 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Previous page';
+
+  @override
+  String get reorderItemDown => r'Move down';
+
+  @override
+  String get reorderItemLeft => r'Move left';
+
+  @override
+  String get reorderItemRight => r'Move right';
+
+  @override
+  String get reorderItemToEnd => r'Move to the end';
+
+  @override
+  String get reorderItemToStart => r'Move to the start';
+
+  @override
+  String get reorderItemUp => r'Move up';
 
   @override
   String get rowsPerPageTitle => r'Rows per page:';
@@ -1846,6 +2008,24 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Página anterior';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Filas por página:';
@@ -3330,6 +3510,24 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Eelmine leht';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Ridu lehe kohta:';
 
   @override
@@ -3487,6 +3685,24 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'صفحه قبل';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'ردیف در هر صفحه:';
@@ -3648,6 +3864,24 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Edellinen sivu';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Riviä/sivu:';
 
   @override
@@ -3807,6 +4041,24 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Mga row bawat page:';
 
   @override
@@ -3964,6 +4216,24 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Page précédente';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Lignes par page :';
@@ -4152,6 +4422,24 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Vorherige Seite';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Zeilen pro Seite:';
 
   @override
@@ -4309,6 +4597,24 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'הדף הקודם';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'שורות בכל דף:';
@@ -4470,6 +4776,24 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'पिछला पेज';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'हर पेज में पंक्तियों की संख्या:';
 
   @override
@@ -4627,6 +4951,24 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Prethodna stranica';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Redaka po stranici:';
@@ -4788,6 +5130,24 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Előző oldal';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Oldalankénti sorszám:';
 
   @override
@@ -4945,6 +5305,24 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Halaman sebelumnya';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Baris per halaman:';
@@ -5106,6 +5484,24 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina precedente';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Righe per pagina:';
 
   @override
@@ -5263,6 +5659,24 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'前のページ';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'ページあたりの行数:';
@@ -5424,6 +5838,24 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'이전 페이지';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'페이지당 행 수:';
 
   @override
@@ -5581,6 +6013,24 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Ankstesnis puslapis';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Eilučių puslapyje:';
@@ -5742,6 +6192,24 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Iepriekšējā lapa';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Rindas lapā:';
 
   @override
@@ -5899,6 +6367,24 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Halaman sebelumnya';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Baris setiap halaman:';
@@ -6060,6 +6546,24 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Rader per side:';
 
   @override
@@ -6217,6 +6721,24 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Vorige pagina';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Rijen per pagina:';
@@ -6378,6 +6900,24 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Poprzednia strona';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Wiersze na stronie:';
 
   @override
@@ -6537,6 +7077,24 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'مخکینی مخ';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'د هرې پاڼې پاڼې:';
 
   @override
@@ -6694,6 +7252,24 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Página anterior';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Linhas por página:';
@@ -6924,6 +7500,24 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina anterioară';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Rânduri pe pagină:';
 
   @override
@@ -7081,6 +7675,24 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Предыдущая страница';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Строк на странице:';
@@ -7242,6 +7854,24 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Predchádzajúca stránka';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Počet riadkov na stránku:';
 
   @override
@@ -7401,6 +8031,24 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prejšnja stran';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Vrstice na stran:';
 
   @override
@@ -7558,6 +8206,24 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Претходна страница';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Редова по страници:';
@@ -7857,6 +8523,24 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Föregående sida';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Rader per sida:';
 
   @override
@@ -8014,6 +8698,24 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'หน้าก่อน';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'แถวต่อหน้า:';
@@ -8175,6 +8877,24 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Mga row bawat page:';
 
   @override
@@ -8332,6 +9052,24 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Önceki sayfa';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'Sayfa başına satır sayısı:';
@@ -8493,6 +9231,24 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Попередня сторінка';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Рядків на сторінці:';
 
   @override
@@ -8650,6 +9406,24 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'گزشتہ صفحہ';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'قطاریں فی صفحہ:';
@@ -8811,6 +9585,24 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Trang trước';
 
   @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
+
+  @override
   String get rowsPerPageTitle => r'Số hàng mỗi trang:';
 
   @override
@@ -8968,6 +9760,24 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'上一页';
+
+  @override
+  String get reorderItemDown => r'TBD';
+
+  @override
+  String get reorderItemLeft => r'TBD';
+
+  @override
+  String get reorderItemRight => r'TBD';
+
+  @override
+  String get reorderItemToEnd => r'TBD';
+
+  @override
+  String get reorderItemToStart => r'TBD';
+
+  @override
+  String get reorderItemUp => r'TBD';
 
   @override
   String get rowsPerPageTitle => r'每页行数：';
