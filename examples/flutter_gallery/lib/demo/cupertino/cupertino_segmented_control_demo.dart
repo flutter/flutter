@@ -59,7 +59,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
           ),
           new SizedBox(
             width: 600.0,
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
