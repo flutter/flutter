@@ -5,9 +5,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-const Color _kKeyUmbraOpacity = const Color(0x33000000); // alpha = 0.2
-const Color _kKeyPenumbraOpacity = const Color(0x24000000); // alpha = 0.14
-const Color _kAmbientShadowOpacity = const Color(0x1F000000); // alpha = 0.12
+const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
+const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
+const Color _kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
 
 class CupertinoSegmentedControlDemo extends StatefulWidget {
   static const String routeName = 'cupertino/segmented_control';
@@ -18,32 +18,26 @@ class CupertinoSegmentedControlDemo extends StatefulWidget {
 
 class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedControlDemo> {
   final Map<int, Widget> children = const <int, Widget>{
-    0: Center(
-      child: const Text('Midnight'),
-    ),
-    1: Center(
-      child: const Text('Viridian'),
-    ),
-    2: Center(
-      child: const Text('Cerulean'),
-    ),
+    0: Text('Midnight'),
+    1: Text('Viridian'),
+    2: Text('Cerulean'),
   };
 
   final Map<int, Widget> icons = const <int, Widget>{
     0: Center(
-      child: const FlutterLogo(
+      child: FlutterLogo(
         colors: Colors.indigo,
         size: 200.0,
       ),
     ),
     1: Center(
-      child: const FlutterLogo(
+      child: FlutterLogo(
         colors: Colors.teal,
         size: 200.0,
       ),
     ),
     2: Center(
-      child: const FlutterLogo(
+      child: FlutterLogo(
         colors: Colors.cyan,
         size: 200.0,
       ),
@@ -61,16 +55,19 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
       body: new Column(
         children: <Widget>[
           const Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(16.0),
           ),
-          new SegmentedControl<int>(
-            children: children,
-            onValueChanged: (int newValue) {
-              setState(() {
-                sharedValue = newValue;
-              });
-            },
-            groupValue: sharedValue,
+          new SizedBox(
+            width: 600.0,
+            child: new SegmentedControl<int>(
+              children: children,
+              onValueChanged: (int newValue) {
+                setState(() {
+                  sharedValue = newValue;
+                });
+              },
+              groupValue: sharedValue,
+            ),
           ),
           new Expanded(
             child: new Padding(
@@ -87,20 +84,20 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                   color: CupertinoColors.white,
                   borderRadius: new BorderRadius.circular(3.0),
                   boxShadow: const <BoxShadow>[
-                    const BoxShadow(
-                      offset: const Offset(0.0, 3.0),
+                    BoxShadow(
+                      offset: Offset(0.0, 3.0),
                       blurRadius: 5.0,
                       spreadRadius: -1.0,
                       color: _kKeyUmbraOpacity,
                     ),
-                    const BoxShadow(
-                      offset: const Offset(0.0, 6.0),
+                    BoxShadow(
+                      offset: Offset(0.0, 6.0),
                       blurRadius: 10.0,
                       spreadRadius: 0.0,
                       color: _kKeyPenumbraOpacity,
                     ),
-                    const BoxShadow(
-                      offset: const Offset(0.0, 1.0),
+                    BoxShadow(
+                      offset: Offset(0.0, 1.0),
                       blurRadius: 18.0,
                       spreadRadius: 0.0,
                       color: _kAmbientShadowOpacity,
