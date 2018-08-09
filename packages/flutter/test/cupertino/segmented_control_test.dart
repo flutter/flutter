@@ -265,27 +265,6 @@ void main() {
           },
       ),
     );
-    await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: new CupertinoSegmentedControl<int>(
-              children: children,
-              onValueChanged: (int newValue) {
-                setState(() {
-                  sharedValue = newValue;
-                });
-              },
-              groupValue: sharedValue,
-              unselectedColor: CupertinoColors.lightBackgroundGray,
-              selectedColor: CupertinoColors.activeGreen,
-              borderColor: CupertinoColors.black,
-              pressedColor: const Color(0x638CFC7B),
-            ),
-          );
-        },
-      ),
-    );
 
     DefaultTextStyle textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'Child 1'));
     IconTheme iconTheme = tester.widget(find.widgetWithIcon(IconTheme, const IconData(1)));
