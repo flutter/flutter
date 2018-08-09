@@ -43,21 +43,25 @@ void main() {
     ));
   });
 
-  testWidgets('Scrollbar is not smaller than minLength with large scroll views', (WidgetTester tester) async {
+  testWidgets('Scrollbar is not smaller than minLength with large scroll views',
+          (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new CupertinoScrollbar(
         child: new SingleChildScrollView(
-          child: const SizedBox(width: 4000.0, height: 20000.0),
+          child: const SizedBox(width: 800.0, height: 20000.0),
         ),
       ),
     ));
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -10.0));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Height is 36.0.
+    final Rect scrollbarRect = Rect.fromLTWH(795.0, 4.28659793814433, 2.5, 36.0);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      rrect: RRect.fromLTRBR(795.0, 4.3, 797.5, 40.3, Radius.circular(1.3)),
+      rrect: RRect.fromRectAndRadius(scrollbarRect, const Radius.circular(1.25)),
     ));
   });
 }

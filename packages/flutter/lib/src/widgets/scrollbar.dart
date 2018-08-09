@@ -92,7 +92,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final double minLength;
 
   /// The smallest size the scrollbar can shrink to when viewport is
-  /// overscrolled. Mustn't be null;
+  /// overscrolled. Mustn't be null.
   final double minOverscrollLength;
 
   ScrollMetrics _lastMetrics;
@@ -160,7 +160,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     double thumbExtent = math.min(viewport, minOverscrollLength);
 
     if (before + inside + after > 0.0) {
-      // Thumb extent reflects fraction of content visible, if possible.
+      // Thumb extent reflects fraction of content visible, as long as this
+      // isn't less than the absolute minimum size.
       final double fractionVisible = inside / (before + inside + after);
       thumbExtent = math.max(
         thumbExtent,
@@ -173,10 +174,18 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
           thumbExtent,
         );
       }
-      // Thumb extent is fraction of minLength if in overscroll. iOS behavior
-      // appears to be thumb reaching minimum size with ~20% of overscroll.
-      // Percentage of minLength maps from [0.8, 1.0] to [0.0, 1.0].
-      if (before == 0.0 || after == 0.0) {
+      // User is overscrolling. Thumb extent can be less than minLength
+      // but no smaller than minOverscrollLength. We can't use the
+      // fractionVisible to produce intermediate values between minLength and
+      // minOverscrollLength when the user is transitioning from regular
+      // scrolling to overscrolling, so we instead use the percentage of the
+      // content that is still in the viewport to determine the size of the
+      // thumb. iOS behavior appears to have the thumb reach its minimum size
+      // with ~20% of overscroll. We map the percentage of minLength from
+      // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
+      // values for the thumb that range between minLength and the smallest
+      // possible value, minOverscrollLength.
+      else {
         thumbExtent = math.max(
           thumbExtent,
           minLength * (((inside / viewport) - 0.8) / 0.2),
