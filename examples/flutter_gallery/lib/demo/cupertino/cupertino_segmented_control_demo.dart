@@ -58,7 +58,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
             padding: EdgeInsets.all(16.0),
           ),
           new SizedBox(
-            width: 600.0,
+            width: 500.0,
             child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
