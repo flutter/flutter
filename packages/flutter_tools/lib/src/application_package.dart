@@ -107,7 +107,7 @@ class AndroidApk extends ApplicationPackage {
       apkFile = fs.file(fs.path.join(getAndroidBuildDirectory(), 'app.apk'));
     }
 
-    final File manifest = androidProject.gradleManifestFile;
+    final File manifest = androidProject.appManifestFile;
 
     if (!manifest.existsSync())
       return null;

@@ -54,7 +54,7 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
     return FlutterPluginVersion.v1;
   }
   final File appGradle = project.directory.childFile(
-      fs.path.join('app','build.gradle'));
+      fs.path.join('app', 'build.gradle'));
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
       if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
