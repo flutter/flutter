@@ -1166,7 +1166,6 @@ class _TabBarViewState extends State<TabBarView> {
         controller: _pageController,
         physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
         children: _children,
-
       ),
     );
   }

@@ -246,7 +246,7 @@ void main() {
 
 class _FakeTickerProvider implements TickerProvider {
   @override
-  Ticker createTicker(TickerCallback onTick, [TimeDilationBehavior _]) {
+  Ticker createTicker(TickerCallback onTick) {
     return new _FakeTicker();
   }
 

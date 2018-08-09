@@ -42,9 +42,6 @@ class TabsFabDemo extends StatefulWidget {
 class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  @override
-  final TimeDilationBehavior timeDilationBehavior = TimeDilationBehavior.normal;
-
   TabController _controller;
   _Page _selectedPage;
   bool _extendedButtons = false;
