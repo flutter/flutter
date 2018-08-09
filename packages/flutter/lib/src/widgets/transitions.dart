@@ -347,9 +347,9 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// ```dart
 /// class TextFadeIn extends StatefulWidget {
+///   TextFadeIn(this.text, {@required this.duration});
 ///   final String text;
 ///   final Duration duration;
-///   TextFadeIn(this.text, {this.duration});
 ///
 ///   @override
 ///   createState() => _MyTextFadeInState();
@@ -358,6 +358,7 @@ class SizeTransition extends AnimatedWidget {
 /// class _MyTextFadeInState extends State<TextFadeIn>
 ///     with SingleTickerProviderStateMixin {
 ///   AnimationController _controller;
+///   Animation _animation;
 ///
 ///   @override
 ///   void initState() {
@@ -366,14 +367,25 @@ class SizeTransition extends AnimatedWidget {
 ///       vsync: this,
 ///       duration: widget.duration,
 ///     );
+///     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller);
 ///     _controller.forward();
 ///   }
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return FadeTransition(
-///         opacity: Tween(begin: 0.0, end: 1.0).animate(_controller),
+///         opacity: _animation,
 ///         child: Text(widget.text));
+///   }
+///
+///   @override
+///   void didUpdateWidget(TextFadeIn oldWidget) {
+///     if(oldWidget.duration != widget.duration) {
+///     _controller
+///       ..reset()
+///       ..forward();
+///     }
+///     super.didUpdateWidget(oldWidget);
 ///   }
 ///
 ///   @override
