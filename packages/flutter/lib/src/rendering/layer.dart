@@ -212,7 +212,8 @@ class PictureLayer extends Layer {
 ///   for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
-  /// identified by [textureId].
+  /// identified by [textureId], if [freeze] is true new texture frames will not be
+  /// populated to the texture.
   TextureLayer({
     @required this.rect,
     @required this.textureId,
@@ -225,6 +226,13 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
+  /// When true the texture that will not be updated with new frames.
+  ///
+  /// This is used when resizing an embedded  Android views: When resizing
+  /// there is a short period during which the framework cannot tell
+  /// if the newest texture frame has the previous or new size, to workaround this
+  /// the framework "freezes" the texture just before resizing the Android view and unfreezes
+  /// it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
   @override
