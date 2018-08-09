@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Image, ImageFilter;
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -692,7 +691,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,
@@ -780,7 +779,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   const PhysicalShape({
     Key key,
     @required this.clipper,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     this.elevation = 0.0,
     @required this.color,
     this.shadowColor = const Color(0xFF000000),
