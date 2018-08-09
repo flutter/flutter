@@ -31,14 +31,13 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
       .listen((String line) {
     print('attach:stdout: $line');
     stdout.add(line);
-    if (line.contains('Listening') && onListening != null) {
+    if (line.contains('Waiting') && onListening != null)
       listening.complete(onListening());
-    }
     if (line.contains('To quit, press "q".'))
       ready.complete();
     if (line.contains('Reloaded '))
       reloaded.complete();
-    if (line.contains('Restarted app in '))
+    if (line.contains('Restarted application in '))
       restarted.complete();
     if (line.contains('Application finished'))
       finished.complete();
@@ -91,7 +90,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      section('Build: starting...');
+      section('Building');
       final String buildStdout = await eval(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           <String>['--suppress-analytics', 'build', 'apk', '--debug', 'lib/main.dart'],
@@ -105,7 +104,7 @@ void main() {
       await device.adb(<String>['install', '-r', apkPath]);
 
       try {
-        section('Launching attach.');
+        section('Launching `flutter attach`');
         Process attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           <String>['--suppress-analytics', 'attach', '-d', device.deviceId],
@@ -113,7 +112,6 @@ void main() {
         );
 
         await testReload(attachProcess, onListening: () async {
-          section('Launching app.');
           await device.shellExec('am', <String>['start', '-n', kActivityId]);
         });
 
@@ -124,15 +122,16 @@ void main() {
 
         final String currentTime = (await device.shellEval('date', <String>['"+%F %R:%S.000"'])).trim();
         print('Start time on device: $currentTime');
-        section('Launching app');
+        section('Relaunching application');
         await device.shellExec('am', <String>['start', '-n', kActivityId]);
 
+        // If the next line fails, your device may not support regexp search.
         final String observatoryLine = await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
         print('Found observatory line: $observatoryLine');
         final String observatoryPort = new RegExp(r'Observatory listening on http://.*:([0-9]+)').firstMatch(observatoryLine)[1];
         print('Extracted observatory port: $observatoryPort');
 
-        section('Launching attach with given port.');
+        section('Launching attach with given port');
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
           <String>['--suppress-analytics', 'attach', '--debug-port', observatoryPort, '-d', device.deviceId],

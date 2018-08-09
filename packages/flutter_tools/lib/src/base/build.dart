@@ -199,6 +199,7 @@ class AOTSnapshotter {
       genSnapshotArgs.addAll(<String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
       ]);
     }
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
@@ -443,6 +444,7 @@ class CoreJITSnapshotter {
     final List<String> genSnapshotArgs = <String>[
       '--reify-generic-functions',
       '--strong',
+      '--sync-async',
     ];
     if (buildMode == BuildMode.debug) {
       genSnapshotArgs.add('--enable_asserts');

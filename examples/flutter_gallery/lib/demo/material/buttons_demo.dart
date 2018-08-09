@@ -141,7 +141,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const RaisedButton(
-                child: const Text('DISABLED'),
+                child: Text('DISABLED'),
                 onPressed: null,
               ),
             ],
@@ -184,7 +184,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const FlatButton(
-                child: const Text('DISABLED'),
+                child: Text('DISABLED'),
                 onPressed: null,
               ),
             ],
@@ -227,7 +227,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                 },
               ),
               const OutlineButton(
-                child: const Text('DISABLED'),
+                child: Text('DISABLED'),
                 onPressed: null,
               ),
             ],
@@ -352,7 +352,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             color: iconButtonToggle ? Theme.of(context).primaryColor : null,
           ),
           const IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.thumb_up,
               semanticLabel: 'Thumbs up',
             ),

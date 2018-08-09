@@ -33,19 +33,19 @@ class ShutdownStage implements Comparable<ShutdownStage> {
 
   /// The stage before the invocation recording (if one exists) is serialized
   /// to disk. Tasks performed during this stage *will* be recorded.
-  static const ShutdownStage STILL_RECORDING = const ShutdownStage._(1);
+  static const ShutdownStage STILL_RECORDING = ShutdownStage._(1);
 
   /// The stage during which the invocation recording (if one exists) will be
   /// serialized to disk. Invocations performed after this stage will not be
   /// recorded.
-  static const ShutdownStage SERIALIZE_RECORDING = const ShutdownStage._(2);
+  static const ShutdownStage SERIALIZE_RECORDING = ShutdownStage._(2);
 
   /// The stage during which a serialized recording will be refined (e.g.
   /// cleansed for tests, zipped up for bug reporting purposes, etc.).
-  static const ShutdownStage POST_PROCESS_RECORDING = const ShutdownStage._(3);
+  static const ShutdownStage POST_PROCESS_RECORDING = ShutdownStage._(3);
 
   /// The stage during which temporary files and directories will be deleted.
-  static const ShutdownStage CLEANUP = const ShutdownStage._(4);
+  static const ShutdownStage CLEANUP = ShutdownStage._(4);
 
   @override
   int compareTo(ShutdownStage other) => priority.compareTo(other.priority);
@@ -213,7 +213,7 @@ Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
   final Future<Process> proc = processManager.start(
     cmd,
-    mode: ProcessStartMode.DETACHED, // ignore: deprecated_member_use
+    mode: ProcessStartMode.detached,
   );
   return proc;
 }
@@ -302,10 +302,11 @@ String runSync(List<String> cmd, {
 
 void _traceCommand(List<String> args, { String workingDirectory }) {
   final String argsText = args.join(' ');
-  if (workingDirectory == null)
-    printTrace(argsText);
-  else
-    printTrace('[$workingDirectory${fs.path.separator}] $argsText');
+  if (workingDirectory == null) {
+    printTrace('executing: $argsText');
+  } else {
+    printTrace('executing: [$workingDirectory${fs.path.separator}] $argsText');
+  }
 }
 
 String _runWithLoggingSync(List<String> cmd, {

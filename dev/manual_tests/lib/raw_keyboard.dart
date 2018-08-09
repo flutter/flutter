@@ -13,7 +13,7 @@ void main() {
         title: const Text('Hardware Key Demo'),
       ),
       body: const Center(
-        child: const RawKeyboardDemo(),
+        child: RawKeyboardDemo(),
       ),
     ),
   ));

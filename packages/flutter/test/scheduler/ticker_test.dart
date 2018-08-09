@@ -107,7 +107,7 @@ void main() {
   testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
     final ByteData pausedMessage = const StringCodec().encodeMessage('AppLifecycleState.paused');
     await BinaryMessages.handlePlatformMessage('flutter/lifecycle', pausedMessage, (_) {});
-    
+
     int tickCount = 0;
     void handleTick(Duration duration) {
       tickCount += 1;
@@ -126,7 +126,7 @@ void main() {
 
     final ByteData resumedMessage = const StringCodec().encodeMessage('AppLifecycleState.resumed');
     await BinaryMessages.handlePlatformMessage('flutter/lifecycle', resumedMessage, (_) {});
-    
+
     await tester.pump(const Duration(milliseconds: 10));
 
     expect(tickCount, equals(1));

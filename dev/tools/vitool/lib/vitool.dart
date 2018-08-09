@@ -73,7 +73,7 @@ class PathAnimation {
 
   factory PathAnimation.fromFrameData(List<FrameData> frames, int pathIdx) {
     if (frames.isEmpty)
-      return const PathAnimation(const <PathCommandAnimation>[], opacities: const <double>[]);
+      return const PathAnimation(<PathCommandAnimation>[], opacities: <double>[]);
 
     final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
     for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx += 1) {
@@ -386,7 +386,7 @@ class SvgPathCommand {
 }
 
 class SvgPathCommandBuilder {
-  static const Map<String, Null> kRelativeCommands = const <String, Null> {
+  static const Map<String, Null> kRelativeCommands = <String, Null> {
     'c': null,
     'l': null,
     'm': null,

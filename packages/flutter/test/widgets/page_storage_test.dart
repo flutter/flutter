@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('PageStorage read and write', (WidgetTester tester) async {
-    const Key builderKey = const PageStorageKey<String>('builderKey');
+    const Key builderKey = PageStorageKey<String>('builderKey');
     StateSetter setState;
     int storedValue = 0;
 

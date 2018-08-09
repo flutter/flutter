@@ -217,15 +217,15 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
-  /// 
+  ///
   /// If this label is not provided, a semantic label will be infered from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.alertDialogLabel].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
   final String semanticLabel;
@@ -475,15 +475,15 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
-  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// The semantic label of the dialog used by accessibility frameworks to
   /// announce screen transitions when the dialog is opened and closed.
-  /// 
+  ///
   /// If this label is not provided, a semantic label will be infered from the
   /// [title] if it is not null.  If there is no title, the label will be taken
   /// from [MaterialLocalizations.dialogLabel].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
   final String semanticLabel;
@@ -543,70 +543,25 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-class _DialogRoute<T> extends PopupRoute<T> {
-  _DialogRoute({
-    @required this.theme,
-    bool barrierDismissible = true,
-    this.barrierLabel,
-    @required this.child,
-    RouteSettings settings,
-  }) : assert(barrierDismissible != null),
-       _barrierDismissible = barrierDismissible,
-       super(settings: settings);
-
-  final Widget child;
-  final ThemeData theme;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
-
-  @override
-  bool get barrierDismissible => _barrierDismissible;
-  final bool _barrierDismissible;
-
-  @override
-  Color get barrierColor => Colors.black54;
-
-  @override
-  final String barrierLabel;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return new SafeArea(
-      child: new Builder(
-        builder: (BuildContext context) {
-          final Widget annotatedChild = new Semantics(
-            child: child,
-            scopesRoute: true,
-            explicitChildNodes: true,
-          );
-          return theme != null
-            ? new Theme(data: theme, child: annotatedChild)
-            : annotatedChild;
-        }
-      ),
-    );
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return new FadeTransition(
-      opacity: new CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOut
-      ),
-      child: child
-    );
-  }
+Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return new FadeTransition(
+    opacity: new CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    ),
+    child: child,
+  );
 }
 
-/// Displays a dialog above the current contents of the app.
+/// Displays a Material dialog above the current contents of the app, with
+/// Material entrance and exit animations, modal barrier color, and modal
+/// barrier behavior (dialog is dismissible with a tap on the barrier).
 ///
 /// This function takes a `builder` which typically builds a [Dialog] widget.
-/// Content below the dialog is dimmed with a [ModalBarrier]. This widget does
-/// not share a context with the location that `showDialog` is originally
-/// called from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
-/// dialog needs to update dynamically.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
@@ -620,13 +575,15 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
-/// dialog rather just 'Navigator.pop(context, result)`.
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
 ///  * [SimpleDialog], which handles the scrolling of the contents and does
 ///    not show buttons below its body.
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://material.google.com/components/dialogs.html>
 Future<T> showDialog<T>({
   @required BuildContext context,
@@ -639,10 +596,25 @@ Future<T> showDialog<T>({
   WidgetBuilder builder,
 }) {
   assert(child == null || builder == null);
-  return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child ?? new Builder(builder: builder),
-    theme: Theme.of(context, shadowThemeOnly: true),
+  return showGeneralDialog(
+    context: context,
+    pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+      final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
+      final Widget pageChild =  child ?? new Builder(builder: builder);
+      return new SafeArea(
+        child: new Builder(
+          builder: (BuildContext context) {
+            return theme != null
+                ? new Theme(data: theme, child: pageChild)
+                : pageChild;
+          }
+        ),
+      );
+    },
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-  ));
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 150),
+    transitionBuilder: _buildMaterialDialogTransitions,
+  );
 }

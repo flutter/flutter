@@ -4,17 +4,22 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../build_info.dart';
 import '../globals.dart';
+import '../project.dart';
+
 import 'android_sdk.dart';
 import 'gradle.dart';
 
 Future<Null> buildApk({
-  String target,
+  @required FlutterProject project,
+  @required String target,
   BuildInfo buildInfo = BuildInfo.debug
 }) async {
-  if (!isProjectUsingGradle()) {
+  if (!project.android.isUsingGradle()) {
     throwToolExit(
         'The build process for Android has changed, and the current project configuration\n'
             'is no longer valid. Please consult\n\n'
@@ -33,5 +38,9 @@ Future<Null> buildApk({
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  return buildGradleProject(buildInfo, target);
+  return buildGradleProject(
+    project: project,
+    buildInfo: buildInfo,
+    target: target,
+  );
 }

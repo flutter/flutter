@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -11,10 +12,9 @@ import 'scaffold.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
-const Color _kSnackBackground = const Color(0xFF323232);
+const Color _kSnackBackground = Color(0xFF323232);
 
 // TODO(ianh): We should check if the given text and actions are going to fit on
 // one line or not, and if they are, use the single-line layout, and if not, use
@@ -22,10 +22,10 @@ const Color _kSnackBackground = const Color(0xFF323232);
 
 // TODO(ianh): Implement the Tablet version of snackbar if we're "on a tablet".
 
-const Duration _kSnackBarTransitionDuration = const Duration(milliseconds: 250);
-const Duration _kSnackBarDisplayDuration = const Duration(milliseconds: 1500);
+const Duration _kSnackBarTransitionDuration = Duration(milliseconds: 250);
+const Duration _kSnackBarDisplayDuration = Duration(milliseconds: 4000);
 const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
-const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [SnackBar] was closed.
 ///
@@ -46,6 +46,9 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 enum SnackBarClosedReason {
   /// The snack bar was closed after the user tapped a [SnackBarAction].
   action,
+
+  /// The snack bar was closed through a [SemanticAction.dismiss].
+  dismiss,
 
   /// The snack bar was closed by a user's swipe.
   swipe,
@@ -71,7 +74,7 @@ enum SnackBarClosedReason {
 /// See also:
 ///
 ///  * [SnackBar]
-///  * <https://material.google.com/components/snackbars-toasts.html>
+///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
   ///
@@ -127,6 +130,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///
 /// To control how long the [SnackBar] remains visible, specify a [duration].
 ///
+/// A SnackBar with an action will not time out when TalkBack or VoiceOver are
+/// enabled. This is controlled by [AccessibilityFeatures.accessibleNavigation].
+///
 /// See also:
 ///
 ///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
@@ -136,7 +142,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 ///    displayed snack bar, if any, and allows the next to be displayed.
 ///  * [SnackBarAction], which is used to specify an [action] button to show
 ///    on the snack bar.
-///  * <https://material.google.com/components/snackbars-toasts.html>
+///  * <https://material.io/design/components/snackbars.html>
 class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///
@@ -169,14 +175,14 @@ class SnackBar extends StatelessWidget {
 
   /// The amount of time the snack bar should be displayed.
   ///
-  /// Defaults to 1.5s.
+  /// Defaults to 4.0s.
   ///
   /// See also:
   ///
   ///  * [ScaffoldState.removeCurrentSnackBar], which abruptly hides the
   ///    currently displayed snack bar, if any, and allows the next to be
   ///    displayed.
-  ///  * <https://material.google.com/components/snackbars-toasts.html>
+  ///  * <https://material.io/design/components/snackbars.html>
   final Duration duration;
 
   /// The animation driving the entrance and exit of the snack bar.
@@ -184,6 +190,7 @@ class SnackBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(animation != null);
     final ThemeData theme = Theme.of(context);
     final ThemeData darkTheme = new ThemeData(
@@ -214,8 +221,41 @@ class SnackBar extends StatelessWidget {
     }
     final CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
+    Widget snackbar = new SafeArea(
+      top: false,
+      child: new Row(
+        children: children,
+        crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+    );
+    snackbar = new Semantics(
+      container: true,
+      liveRegion: true,
+      onDismiss: () {
+        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+      },
+      child: new Dismissible(
+        key: const Key('dismissible'),
+        direction: DismissDirection.down,
+        resizeDuration: null,
+        onDismissed: (DismissDirection direction) {
+          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+        },
+        child: new Material(
+          elevation: 6.0,
+          color: backgroundColor ?? _kSnackBackground,
+          child: new Theme(
+            data: darkTheme,
+            child: mediaQueryData.accessibleNavigation ? snackbar : new FadeTransition(
+              opacity: fadeAnimation,
+              child: snackbar,
+            ),
+          ),
+        ),
+      ),
+    );
     return new ClipRect(
-      child: new AnimatedBuilder(
+      child: mediaQueryData.accessibleNavigation ? snackbar : new AnimatedBuilder(
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(
@@ -224,34 +264,7 @@ class SnackBar extends StatelessWidget {
             child: child,
           );
         },
-        child: new Semantics(
-          container: true,
-          child: new Dismissible(
-            key: const Key('dismissible'),
-            direction: DismissDirection.down,
-            resizeDuration: null,
-            onDismissed: (DismissDirection direction) {
-              Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-            },
-            child: new Material(
-              elevation: 6.0,
-              color: backgroundColor ?? _kSnackBackground,
-              child: new Theme(
-                data: darkTheme,
-                child: new FadeTransition(
-                  opacity: fadeAnimation,
-                  child: new SafeArea(
-                    top: false,
-                    child: new Row(
-                      children: children,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: snackbar,
       ),
     );
   }

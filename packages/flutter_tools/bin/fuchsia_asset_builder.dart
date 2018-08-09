@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,15 +22,15 @@ const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionAssetManifestOut = 'asset-manifest-out';
-const List<String> _kRequiredOptions = const <String>[
+const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
   _kOptionAssetManifestOut,
 ];
 
 Future<Null> main(List<String> args) {
-  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
-    Usage: new DisabledUsage(),
+  return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+    Usage: () => new DisabledUsage(),
   });
 }
 

@@ -289,10 +289,13 @@ class RunCommand extends RunCommandBase {
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
+        final String applicationBinaryPath = argResults['use-application-binary'];
         app = await daemon.appDomain.startApp(
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
-          applicationBinary: argResults['use-application-binary'],
+          applicationBinary: applicationBinaryPath == null
+              ? null
+              : fs.file(applicationBinaryPath),
           trackWidgetCreation: argResults['track-widget-creation'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
@@ -361,13 +364,16 @@ class RunCommand extends RunCommandBase {
     }).toList();
 
     ResidentRunner runner;
+    final String applicationBinaryPath = argResults['use-application-binary'];
     if (hotMode) {
       runner = new HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
-        applicationBinary: argResults['use-application-binary'],
+        applicationBinary: applicationBinaryPath == null
+            ? null
+            : fs.file(applicationBinaryPath),
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
@@ -380,7 +386,9 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
-        applicationBinary: argResults['use-application-binary'],
+        applicationBinary: applicationBinaryPath == null
+            ? null
+            : fs.file(applicationBinaryPath),
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -391,7 +399,7 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics.
     //
     // Do not add more operations to the future.
-    final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
+    final Completer<void> appStartedTimeRecorder = new Completer<void>.sync();
     // This callback can't throw.
     appStartedTimeRecorder.future.then( // ignore: unawaited_futures
       (_) { appStartedTime = clock.now(); }

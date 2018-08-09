@@ -17,11 +17,11 @@ final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
-const ProcessManager _processManager = const LocalProcessManager();
+const ProcessManager _processManager = LocalProcessManager();
 
-const Duration _kIsolateFindTimeout = const Duration(minutes: 1);
+const Duration _kIsolateFindTimeout = Duration(minutes: 1);
 
-const Duration _kVmPollInterval = const Duration(milliseconds: 1500);
+const Duration _kVmPollInterval = Duration(milliseconds: 1500);
 
 final Logger _log = new Logger('FuchsiaRemoteConnection');
 
@@ -477,8 +477,8 @@ class FuchsiaRemoteConnection {
       final int lastSpace = trimmed.lastIndexOf(' ');
       final String lastWord = trimmed.substring(lastSpace + 1);
       if ((lastWord != '.') && (lastWord != '..')) {
-        // ignore: deprecated_member_use
-        final int value = int.parse(lastWord, onError: (_) => null);
+
+        final int value = int.tryParse(lastWord);
         if (value != null) {
           ports.add(value);
         }

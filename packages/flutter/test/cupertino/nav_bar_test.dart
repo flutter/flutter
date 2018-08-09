@@ -18,8 +18,8 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          leading: const CupertinoButton(child: const Text('Something'), onPressed: null,),
-          middle: const Text('Title'),
+          leading: CupertinoButton(child: Text('Something'), onPressed: null,),
+          middle: Text('Title'),
         ),
       ),
     );
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Title'),
+          middle: Text('Title'),
         ),
       ),
     );
@@ -40,7 +40,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
-          middle: const Text('Page 2'),
+          middle: Text('Page 2'),
         );
       },
     ));
@@ -56,8 +56,8 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Title'),
-          backgroundColor: const Color(0xFFE5E5E5),
+          middle: Text('Title'),
+          backgroundColor: Color(0xFFE5E5E5),
         ),
       ),
     );
@@ -68,7 +68,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Title'),
+          middle: Text('Title'),
         ),
       ),
     );
@@ -82,7 +82,7 @@ void main() {
         home: new Align(
           alignment: Alignment.topCenter,
           child: new CupertinoNavigationBar(
-            leading: const CupertinoButton(child: const Text('Cheetah'), onPressed: null),
+            leading: const CupertinoButton(child: Text('Cheetah'), onPressed: null),
             // Let the box take all the vertical space to test vertical padding but let
             // the nav bar position it horizontally.
             middle: new Align(
@@ -91,7 +91,7 @@ void main() {
               widthFactor: 1.0,
               child: const Text('Title')
             ),
-            trailing: const CupertinoButton(child: const Text('Puma'), onPressed: null),
+            trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
             padding: const EdgeInsetsDirectional.only(
               start: 10.0,
               end: 20.0,
@@ -123,15 +123,15 @@ void main() {
       new CupertinoApp(
         home: const Directionality(
           textDirection: TextDirection.rtl,
-          child: const Align(
+          child: Align(
             alignment: Alignment.topCenter,
-            child: const CupertinoNavigationBar(
-              leading: const CupertinoButton(child: const Text('Cheetah'), onPressed: null),
+            child: CupertinoNavigationBar(
+              leading: CupertinoButton(child: Text('Cheetah'), onPressed: null),
               // Let the box take all the vertical space to test vertical padding but let
               // the nav bar position it horizontally.
-              middle: const Text('Title'),
-              trailing: const CupertinoButton(child: const Text('Puma'), onPressed: null),
-              padding: const EdgeInsetsDirectional.only(
+              middle: Text('Title'),
+              trailing: CupertinoButton(child: Text('Puma'), onPressed: null),
+              padding: EdgeInsetsDirectional.only(
                 start: 10.0,
                 end: 20.0,
               ),
@@ -153,10 +153,10 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
-          middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
-          trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
-          actionsForegroundColor: const Color(0xFF001122),
+          leading: _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
+          middle: _ExpectStyles(color: Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
+          trailing: _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
+          actionsForegroundColor: Color(0xFF001122),
         ),
       ),
     );
@@ -167,10 +167,10 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoPageScaffold(
-          navigationBar: const CupertinoNavigationBar(
-            middle: const Text('Title'),
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('Title'),
           ),
-          child: const Center(),
+          child: Center(),
         ),
       ),
     );
@@ -188,7 +188,7 @@ void main() {
       new CupertinoApp(
         home: new MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               top: 10.0,
               left: 20.0,
               bottom: 30.0,
@@ -235,7 +235,7 @@ void main() {
             controller: scrollController,
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                largeTitle: const Text('Title'),
+                largeTitle: Text('Title'),
               ),
               new SliverToBoxAdapter(
                 child: new Container(
@@ -315,8 +315,8 @@ void main() {
             controller: scrollController,
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                middle: const Text('Different title'),
-                largeTitle: const Text('Title'),
+                middle: Text('Different title'),
+                largeTitle: Text('Title'),
               ),
               new SliverToBoxAdapter(
                 child: new Container(
@@ -374,7 +374,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Home page'),
+          middle: Text('Home page'),
         ),
       ),
     );
@@ -384,7 +384,7 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
-          middle: const Text('Page 2'),
+          middle: Text('Page 2'),
         );
       },
     ));
@@ -399,7 +399,7 @@ void main() {
       fullscreenDialog: true,
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
-          middle: const Text('Dialog page'),
+          middle: Text('Dialog page'),
         );
       },
     ));
@@ -430,7 +430,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Title'),
+          middle: Text('Title'),
         ),
       ),
     );
@@ -452,10 +452,10 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Title'),
-          border: const Border(
-            bottom: const BorderSide(
-              color: const Color(0xFFAABBCC),
+          middle: Text('Title'),
+          border: Border(
+            bottom: BorderSide(
+              color: Color(0xFFAABBCC),
               width: 0.0,
             ),
           ),
@@ -481,7 +481,7 @@ void main() {
     await tester.pumpWidget(
       new CupertinoApp(
         home: const CupertinoNavigationBar(
-          middle: const Text('Title'),
+          middle: Text('Title'),
           border: null,
         ),
       ),
@@ -505,8 +505,8 @@ void main() {
         home: new CupertinoPageScaffold(
           child: new CustomScrollView(
             slivers: const <Widget>[
-              const CupertinoSliverNavigationBar(
-                largeTitle: const Text('Large Title'),
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large Title'),
               ),
             ],
           ),
@@ -535,8 +535,8 @@ void main() {
         home: new CupertinoPageScaffold(
           child: new CustomScrollView(
             slivers: const <Widget>[
-              const CupertinoSliverNavigationBar(
-                largeTitle: const Text('Large Title'),
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large Title'),
                 border: null,
               ),
             ],
@@ -562,8 +562,8 @@ void main() {
       home: new CupertinoPageScaffold(
         child: new CustomScrollView(
           slivers: const <Widget>[
-            const CupertinoSliverNavigationBar(
-              largeTitle: const Text('Large Title'),
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Large Title'),
               border: null,
             ),
           ],
@@ -586,7 +586,7 @@ void main() {
     await tester.pumpWidget(new CupertinoApp(
       home: new CupertinoPageScaffold(
         navigationBar: const CupertinoNavigationBar(
-          middle: const Text('Fixed Title'),
+          middle: Text('Fixed Title'),
         ),
         child: new Container(),
       ),
@@ -609,11 +609,11 @@ void main() {
         home: new CupertinoPageScaffold(
           child: new CustomScrollView(
             slivers: const <Widget>[
-              const CupertinoSliverNavigationBar(
-                largeTitle: const Text('Large Title'),
-                border: const Border(
-                  bottom: const BorderSide(
-                    color: const Color(0xFFAABBCC),
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('Large Title'),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xFFAABBCC),
                     width: 0.0,
                   ),
                 ),
@@ -647,11 +647,11 @@ void main() {
       await tester.pumpWidget(
         new CupertinoApp(
           home: const RepaintBoundary(
-            child: const CupertinoPageScaffold(
-              navigationBar: const CupertinoNavigationBar(
-                middle: const Text('Bling bling'),
+            child: CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                middle: Text('Bling bling'),
               ),
-              child: const Center(),
+              child: Center(),
             ),
           ),
         ),
@@ -677,7 +677,7 @@ void main() {
               child: new CustomScrollView(
                 slivers: <Widget>[
                   const CupertinoSliverNavigationBar(
-                    largeTitle: const Text('Bling bling'),
+                    largeTitle: Text('Bling bling'),
                   ),
                   new SliverToBoxAdapter(
                     child: new Container(
@@ -711,8 +711,8 @@ void main() {
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
-                middle: const Text('Test'),
-                backgroundColor: const Color(0xFF000000),
+                middle: Text('Test'),
+                backgroundColor: Color(0xFF000000),
               );
             },
           );
@@ -731,8 +731,8 @@ void main() {
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
-                middle: const Text('Test'),
-                backgroundColor: const Color(0xFFFFFFFF),
+                middle: Text('Test'),
+                backgroundColor: Color(0xFFFFFFFF),
               );
             },
           );

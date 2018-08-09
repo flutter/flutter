@@ -195,6 +195,15 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// offset direction.
   ScrollDirection get userScrollDirection;
 
+  /// Whether a viewport is allowed to change [pixels] implicitly to respond to
+  /// a call to [RenderObject.showOnScreen].
+  ///
+  /// [RenderObject.showOnScreen] is for example used to bring a text field
+  /// fully on screen after it has received focus. This property controls
+  /// whether the viewport associated with this offset is allowed to change the
+  /// offset's [pixels] value to fulfill such a request.
+  bool get allowImplicitScrolling;
+
   @override
   String toString() {
     final List<String> description = <String>[];
@@ -250,4 +259,7 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   ScrollDirection get userScrollDirection => ScrollDirection.idle;
+
+  @override
+  bool get allowImplicitScrolling => false;
 }

@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: MediaQuery.of(context).size.height,
                 ),
                 const TextField(
-                  key: const ValueKey<String>(keys.kDefaultTextField),
+                  key: ValueKey<String>(keys.kDefaultTextField),
                 ),
               ],
             ),

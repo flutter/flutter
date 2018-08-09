@@ -622,7 +622,7 @@ class _NoDefaultValue {
 }
 
 /// Marker object indicating that a [DiagnosticsNode] has no default value.
-const _NoDefaultValue kNoDefaultValue = const _NoDefaultValue();
+const _NoDefaultValue kNoDefaultValue = _NoDefaultValue();
 
 /// Defines diagnostics data for a [value].
 ///

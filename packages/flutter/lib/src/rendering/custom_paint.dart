@@ -809,7 +809,9 @@ class RenderCustomPaint extends RenderProxyBox {
 
     final SemanticsProperties properties = newSemantics.properties;
     final SemanticsConfiguration config = new SemanticsConfiguration();
-
+    if (properties.sortKey != null) {
+      config.sortKey = properties.sortKey;
+    }
     if (properties.checked != null) {
       config.isChecked = properties.checked;
     }
@@ -845,6 +847,15 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.namesRoute != null) {
       config.namesRoute = properties.namesRoute;
+    }
+    if (properties.liveRegion != null) {
+      config.liveRegion = properties.liveRegion;
+    }
+    if (properties.toggled != null) {
+      config.isToggled = properties.toggled;
+    }
+    if (properties.image != null) {
+      config.isImage = properties.image;
     }
     if (properties.label != null) {
       config.label = properties.label;
@@ -911,6 +922,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onDidLoseAccessibilityFocus != null) {
       config.onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
+    }
+    if (properties.onDismiss != null) {
+      config.onDismiss = properties.onDismiss;
     }
 
     newChild.updateWith(

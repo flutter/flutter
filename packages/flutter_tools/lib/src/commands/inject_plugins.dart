@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import '../base/file_system.dart';
-import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../plugins.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class InjectPluginsCommand extends FlutterCommand {
@@ -26,10 +25,9 @@ class InjectPluginsCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    final String projectPath = fs.currentDirectory.path;
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(projectPath);
-    injectPlugins(projectPath: projectPath, manifest: manifest);
-    final bool result = hasPlugins();
+    final FlutterProject project = await FlutterProject.current();
+    await injectPlugins(project);
+    final bool result = hasPlugins(project);
     if (result) {
       printStatus('GeneratedPluginRegistrants successfully written.');
     } else {

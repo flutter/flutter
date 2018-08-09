@@ -15,8 +15,8 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../cache.dart';
-import '../flutter_manifest.dart';
 import '../globals.dart';
+import '../project.dart';
 import 'xcodeproj.dart';
 
 const String noCocoaPodsConsequence = '''
@@ -81,18 +81,18 @@ class CocoaPods {
   Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
   Future<bool> processPods({
-    @required Directory appIosDirectory,
+    @required IosProject iosProject,
     // For backward compatibility with previously created Podfile only.
     @required String iosEngineDir,
     bool isSwift = false,
     bool dependenciesChanged = true,
   }) async {
-    if (!(await appIosDirectory.childFile('Podfile').exists())) {
+    if (!(await iosProject.podfile.exists())) {
       throwToolExit('Podfile missing');
     }
     if (await _checkPodCondition()) {
-      if (_shouldRunPodInstall(appIosDirectory, dependenciesChanged)) {
-        await _runPodInstall(appIosDirectory, iosEngineDir);
+      if (_shouldRunPodInstall(iosProject, dependenciesChanged)) {
+        await _runPodInstall(iosProject, iosEngineDir);
         return true;
       }
     }
@@ -151,18 +151,18 @@ class CocoaPods {
   /// Ensures the `ios` sub-project of the Flutter project at [appDirectory]
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
-  void setupPodfile(String appDirectory, FlutterManifest manifest) {
+  void setupPodfile(IosProject iosProject) {
     if (!xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }
-    if (!fs.directory(fs.path.join(appDirectory, 'ios')).existsSync()) {
+    if (!iosProject.directory.existsSync()) {
       return;
     }
-    final String podfilePath = fs.path.join(appDirectory, 'ios', 'Podfile');
-    if (!fs.file(podfilePath).existsSync()) {
+    final File podfile = iosProject.podfile;
+    if (!podfile.existsSync()) {
       final bool isSwift = xcodeProjectInterpreter.getBuildSettings(
-        fs.path.join(appDirectory, 'ios', 'Runner.xcodeproj'),
+        iosProject.directory.childFile('Runner.xcodeproj').path,
         'Runner',
       ).containsKey('SWIFT_VERSION');
       final File podfileTemplate = fs.file(fs.path.join(
@@ -173,15 +173,14 @@ class CocoaPods {
         'cocoapods',
         isSwift ? 'Podfile-swift' : 'Podfile-objc',
       ));
-      podfileTemplate.copySync(podfilePath);
+      podfileTemplate.copySync(podfile.path);
     }
-
-    _addPodsDependencyToFlutterXcconfig(appDirectory, 'Debug');
-    _addPodsDependencyToFlutterXcconfig(appDirectory, 'Release');
+    _addPodsDependencyToFlutterXcconfig(iosProject, 'Debug');
+    _addPodsDependencyToFlutterXcconfig(iosProject, 'Release');
   }
 
-  void _addPodsDependencyToFlutterXcconfig(String appDirectory, String mode) {
-    final File file = fs.file(fs.path.join(appDirectory, 'ios', 'Flutter', '$mode.xcconfig'));
+  void _addPodsDependencyToFlutterXcconfig(IosProject iosProject, String mode) {
+    final File file = iosProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
       final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
@@ -192,12 +191,11 @@ class CocoaPods {
   }
 
   /// Ensures that pod install is deemed needed on next check.
-  void invalidatePodInstallOutput(String appDirectory) {
-    final File manifest = fs.file(
-      fs.path.join(appDirectory, 'ios', 'Pods', 'Manifest.lock'),
-    );
-    if (manifest.existsSync())
-      manifest.deleteSync();
+  void invalidatePodInstallOutput(IosProject iosProject) {
+    final File manifestLock = iosProject.podManifestLock;
+    if (manifestLock.existsSync()) {
+      manifestLock.deleteSync();
+    }
   }
 
   // Check if you need to run pod install.
@@ -206,24 +204,25 @@ class CocoaPods {
   // 2. Podfile.lock doesn't exist or is older than Podfile
   // 3. Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
   // 4. Podfile.lock doesn't match Pods/Manifest.lock.
-  bool _shouldRunPodInstall(Directory appIosDirectory, bool dependenciesChanged) {
+  bool _shouldRunPodInstall(IosProject iosProject, bool dependenciesChanged) {
     if (dependenciesChanged)
       return true;
-    final File podfileFile = appIosDirectory.childFile('Podfile');
-    final File podfileLockFile = appIosDirectory.childFile('Podfile.lock');
-    final File manifestLockFile =
-        appIosDirectory.childFile(fs.path.join('Pods', 'Manifest.lock'));
+
+    final File podfileFile = iosProject.podfile;
+    final File podfileLockFile = iosProject.podfileLock;
+    final File manifestLockFile = iosProject.podManifestLock;
+
     return !podfileLockFile.existsSync()
         || !manifestLockFile.existsSync()
         || podfileLockFile.statSync().modified.isBefore(podfileFile.statSync().modified)
         || podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
   }
 
-  Future<Null> _runPodInstall(Directory appIosDirectory, String engineDirectory) async {
+  Future<Null> _runPodInstall(IosProject iosProject, String engineDirectory) async {
     final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
-      workingDirectory: appIosDirectory.path,
+      workingDirectory: iosProject.directory.path,
       environment: <String, String>{
         // For backward compatibility with previously created Podfile only.
         'FLUTTER_FRAMEWORK_DIR': engineDirectory,
@@ -244,7 +243,7 @@ class CocoaPods {
       }
     }
     if (result.exitCode != 0) {
-      invalidatePodInstallOutput(appIosDirectory.parent.path);
+      invalidatePodInstallOutput(iosProject);
       _diagnosePodInstallFailure(result);
       throwToolExit('Error running pod install');
     }

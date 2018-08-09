@@ -27,10 +27,8 @@ import 'typography.dart';
 //    flutter_localizations package, you must first add it to the English
 //    translations (lib/src/l10n/material_en.arb), including a description, then
 //    you must add it to every other language (all the other *.arb files in that
-//    same directory), including a best guess as to the translation, e.g.
-//    obtained by optimistic use of Google Translate
-//    (https://translate.google.com/). After that you have to re-generate
-//    lib/src/l10n/localizations.dart by running
+//    same directory), listing the translation as `TBD`. After that you have to
+//    re-generate lib/src/l10n/localizations.dart by running
 //    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
 //    file with further information in the lib/src/l10n/ directory.
 //
@@ -144,19 +142,19 @@ abstract class MaterialLocalizations {
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
 
-  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// drawer widget is opened.
   String get drawerLabel;
- 
-  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// popup menu widget is opened.
   String get popupMenuLabel;
 
-  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
   /// dialog widget is opened.
   String get dialogLabel;
 
-  /// Label read out by accessibility tools (TalkBack or VoiceOver) when an 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when an
   /// alert dialog widget is opened.
   String get alertDialogLabel;
 
@@ -279,6 +277,30 @@ abstract class MaterialLocalizations {
   /// shows the list of accounts.
   String get showAccountsLabel;
 
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list to the start of the list.
+  String get reorderItemToStart;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list to the end of the list.
+  String get reorderItemToEnd;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space up the list.
+  String get reorderItemUp;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space down the list.
+  String get reorderItemDown;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space left in the list.
+  String get reorderItemLeft;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space right in the list.
+  String get reorderItemRight;
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -326,7 +348,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   const DefaultMaterialLocalizations();
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
-  static const List<String> _shortWeekdays = const <String>[
+  static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -337,7 +359,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ];
 
   // Ordered to match DateTime.monday=1, DateTime.sunday=6
-  static const List<String> _weekdays = const <String>[
+  static const List<String> _weekdays = <String>[
     'Monday',
     'Tuesday',
     'Wednesday',
@@ -347,7 +369,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sunday',
   ];
 
-  static const List<String> _narrowWeekdays = const <String>[
+  static const List<String> _narrowWeekdays = <String>[
     'S',
     'M',
     'T',
@@ -357,7 +379,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'S',
   ];
 
-  static const List<String> _shortMonths = const <String>[
+  static const List<String> _shortMonths = <String>[
     'Jan',
     'Feb',
     'Mar',
@@ -372,7 +394,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Dec',
   ];
 
-  static const List<String> _months = const <String>[
+  static const List<String> _months = <String>[
     'January',
     'February',
     'March',
@@ -641,6 +663,24 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String get showAccountsLabel => 'Show accounts';
 
+  @override
+  String get reorderItemUp => 'Move up';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
+
   /// Creates an object that provides US English resource values for the material
   /// library widgets.
   ///
@@ -656,5 +696,5 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
 }

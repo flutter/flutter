@@ -14,7 +14,7 @@ import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// The maximum amount of time a single microbenchmark is allowed to take.
-const Duration _kBenchmarkTimeout = const Duration(minutes: 10);
+const Duration _kBenchmarkTimeout = Duration(minutes: 10);
 
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
@@ -61,24 +61,6 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
-    // Run micro-benchmarks once again in --no-preview-dart-2 mode.
-    // Append "_dart1" suffix to the result keys to distinguish them from
-    // the original results.
-
-    void addDart1Results(Map<String, double> benchmarkResults) {
-      benchmarkResults.forEach((String key, double result) {
-        allResults[key + '_dart1'] = result;
-      });
-    }
-
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/layout_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/build_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/gestures/velocity_tracker_bench.dart', previewDart2: false));
-    addDart1Results(await _runMicrobench(
-        'lib/stocks/animation_bench.dart', previewDart2: false));
     return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
 }
@@ -114,7 +96,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
-      .listen((String line) {
+      .listen((String line) async {
     print(line);
 
     if (line.contains(jsonStart)) {
@@ -142,8 +124,14 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
       resultsHaveBeenParsed = true;
-      // ignore: deprecated_member_use
-      process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
+      // Sending a SIGINT/SIGTERM to the process here isn't reliable because [process] is
+      // the shell (flutter is a shell script) and doesn't pass the signal on.
+      // Sending a `q` is an instruction to quit using the console runner.
+      // See https://github.com/flutter/flutter/issues/19208
+      process.stdin.write('q');
+      await process.stdin.flush();
+      // Also send a kill signal in case the `q` above didn't work.
+      process.kill(ProcessSignal.sigint); // ignore: deprecated_member_use
       try {
         completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {

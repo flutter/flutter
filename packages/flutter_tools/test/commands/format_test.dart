@@ -38,5 +38,42 @@ void main() {
       final String formatted = srcFile.readAsStringSync();
       expect(formatted, original);
     });
+
+    testUsingContext('dry-run', () async {
+      final String projectPath = await createProject(temp);
+
+      final File srcFile = fs.file(
+          fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
+          'main()', 'main(  )');
+      srcFile.writeAsStringSync(nonFormatted);
+
+      final FormatCommand command = new FormatCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      await runner.run(<String>['format', '--dry-run', srcFile.path]);
+
+      final String shouldNotFormatted = srcFile.readAsStringSync();
+      expect(shouldNotFormatted, nonFormatted);
+    });
+
+    testUsingContext('dry-run with set-exit-if-changed', () async {
+      final String projectPath = await createProject(temp);
+
+      final File srcFile = fs.file(
+          fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted = srcFile.readAsStringSync().replaceFirst(
+          'main()', 'main(  )');
+      srcFile.writeAsStringSync(nonFormatted);
+
+      final FormatCommand command = new FormatCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      expect(runner.run(<String>[
+        'format', '--dry-run', '--set-exit-if-changed', srcFile.path
+      ]), throwsException);
+
+      final String shouldNotFormatted = srcFile.readAsStringSync();
+      expect(shouldNotFormatted, nonFormatted);
+    });
   });
 }

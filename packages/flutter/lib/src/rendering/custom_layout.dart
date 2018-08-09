@@ -58,24 +58,24 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 ///   leader,
 ///   follower,
 /// }
-/// 
+///
 /// class FollowTheLeader extends MultiChildLayoutDelegate {
 ///   @override
 ///   void performLayout(Size size) {
 ///     Size leaderSize = Size.zero;
-/// 
+///
 ///     if (hasChild(_Slot.leader)) {
 ///       leaderSize = layoutChild(_Slot.leader, new BoxConstraints.loose(size));
 ///       positionChild(_Slot.leader, Offset.zero);
 ///     }
-/// 
+///
 ///     if (hasChild(_Slot.follower)) {
 ///       layoutChild(_Slot.follower, new BoxConstraints.tight(leaderSize));
 ///       positionChild(_Slot.follower, new Offset(size.width - leaderSize.width,
 ///           size.height - leaderSize.height));
 ///     }
 ///   }
-/// 
+///
 ///   @override
 ///   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
 /// }

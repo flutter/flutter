@@ -372,6 +372,9 @@ class PageScrollPhysics extends ScrollPhysics {
       return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
     return null;
   }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 
 // Having this global (mutable) page controller is a bit of a hack. We need it
@@ -379,7 +382,7 @@ class PageScrollPhysics extends ScrollPhysics {
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = new PageController();
-const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
+const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///

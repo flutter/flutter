@@ -61,19 +61,21 @@ void main() {
   });
 
   testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xAA0000FF);
-    const Color fillColor = const Color(0xFFEF5350);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xAA0000FF);
+    const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      new RawMaterialButton(
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        onPressed: () {},
-        fillColor: fillColor,
-        highlightColor: highlightColor,
-        splashColor: splashColor,
-        child: const SizedBox(),
-      )
+      new Center(
+        child: new RawMaterialButton(
+          materialTapTargetSize: MaterialTapTargetSize.padded,
+          onPressed: () {},
+          fillColor: fillColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
+          child: const SizedBox(),
+        ),
+      ),
     );
 
     final Offset center = tester.getCenter(find.byType(InkWell));
@@ -88,19 +90,21 @@ void main() {
   });
 
   testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xAA0000FF);
-    const Color fillColor = const Color(0xFFEF5350);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xAA0000FF);
+    const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      new RawMaterialButton(
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        onPressed: () {},
-        fillColor: fillColor,
-        highlightColor: highlightColor,
-        splashColor: splashColor,
-        child: const SizedBox(),
-      )
+      new Center(
+        child: new RawMaterialButton(
+          materialTapTargetSize: MaterialTapTargetSize.padded,
+          onPressed: () {},
+          fillColor: fillColor,
+          highlightColor: highlightColor,
+          splashColor: splashColor,
+          child: const SizedBox(),
+        ),
+      ),
     );
 
     final Offset top = tester.getRect(find.byType(InkWell)).topCenter;
@@ -117,6 +121,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             new RawMaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.padded,
@@ -127,10 +132,10 @@ void main() {
               child: new Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: const <Widget>[
-                  const SizedBox(
+                  SizedBox(
                     height: 50.0,
                     width: 400.0,
-                    child: const Text('Material'),
+                    child: Text('Material'),
                   ),
                 ],
               ),
@@ -143,7 +148,7 @@ void main() {
   });
 
   testWidgets('smaller child is hit testable', (WidgetTester tester) async {
-    const Key key = const Key('test');
+    const Key key = Key('test');
     await tester.pumpWidget(
       new MaterialApp(
         home: new Column(
@@ -164,5 +169,25 @@ void main() {
       ),
     );
     expect(find.byKey(key).hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+    const Key key = Key('test');
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            new RawMaterialButton(
+              key: key,
+              onPressed: () {},
+              child: const SizedBox(),
+            )
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
   });
 }

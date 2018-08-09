@@ -2076,15 +2076,15 @@ class BuildOwner {
 
   /// Whether [_dirtyElements] need to be sorted again as a result of more
   /// elements becoming dirty during the build.
-  /// 
+  ///
   /// This is necessary to preserve the sort order defined by [Element._sort].
-  /// 
+  ///
   /// This field is set to null when [buildScope] is not actively rebuilding
   /// the widget tree.
   bool _dirtyElementsNeedsResorting;
 
   /// Whether [buildScope] is actively rebuilding the widget tree.
-  /// 
+  ///
   /// [scheduleBuildFor] should only be called when this value is true.
   bool get _debugIsInBuildScope => _dirtyElementsNeedsResorting != null;
 
