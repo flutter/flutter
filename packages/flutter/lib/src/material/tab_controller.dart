@@ -289,6 +289,9 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   TabController _controller;
 
   @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
+
+  @override
   void initState() {
     super.initState();
     _controller = new TabController(
