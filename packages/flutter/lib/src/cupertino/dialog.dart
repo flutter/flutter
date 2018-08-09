@@ -44,6 +44,9 @@ const TextStyle _kCupertinoDialogActionStyle = TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
+// iOS dialogs have a normal display width and another display width that is
+// used when the device is in accessibility mode. Each of these widths are
+// listed below.
 const double _kCupertinoDialogWidth = 270.0;
 const double _kAccessibilityCupertinoDialogWidth = 310.0;
 
@@ -80,16 +83,23 @@ const Color _kButtonDividerColor = Color(0x40FFFFFF);
 // The alert dialog layout policy changes depending on whether the user is using
 // a "regular" font size vs a "large" font size. This is a spectrum. There are
 // many "regular" font sizes and many "large" font sizes. But depending on which
-// spectrum is currently being used, a dialog is laid out differently.
+// policy is currently being used, a dialog is laid out differently.
 //
-// Empirically, the jump from one spectrum to the other occurs at the following text
+// Empirically, the jump from one policy to the other occurs at the following text
 // scale factors:
 // Largest regular scale factor:  1.3529411764705883
 // Smallest large scale factor:   1.6470588235294117
 //
 // The following constant represents a division in text scale factor beyond which
 // we want to change how the dialog is laid out.
-const double _kMaxRegularTextScaleFactor = 1.3529411764705883;
+const double _kMaxRegularTextScaleFactor = 1.4;
+
+// Accessibility mode on iOS is determined by the text scale factor that the
+// user has selected.
+bool _isInAccessibilityMode(BuildContext context) {
+  final MediaQueryData data = MediaQuery.of(context, nullOk: true);
+  return data != null && data.textScaleFactor > _kMaxRegularTextScaleFactor;
+}
 
 /// An iOS-style dialog.
 ///
@@ -249,64 +259,43 @@ class CupertinoAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    return new _CupertinoAccessibility(
-      textScaleFactor: textScaleFactor,
-      child: new MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          // iOS does not shrink dialog content below a 1.0 scale factor
-          textScaleFactor: math.max(textScaleFactor, 1.0),
-        ),
-        child: new LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return new Center(
-              child: new Container(
-                margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
-                width: _CupertinoAccessibility.of(context)?.isInAccessibilityMode ?? false
-                    ? _kAccessibilityCupertinoDialogWidth
-                    : _kCupertinoDialogWidth,
-                // The following clip is critical. The BackdropFilter needs to have
-                // rounded corners, but Skia cannot internally create a blurred rounded
-                // rect. Therefore, we have no choice but to clip, ourselves.
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(_kDialogCornerRadius),
-                  child: new BackdropFilter(
-                    filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-                    child: new Container(
-                      decoration: _kCupertinoDialogBlurOverlayDecoration,
-                      child: new _CupertinoDialogRenderWidget(
-                        contentSection: _buildContent(),
-                        actionsSection: _buildActions(),
-                      ),
+    return new MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        // iOS does not shrink dialog content below a 1.0 scale factor
+        textScaleFactor: math.max(textScaleFactor, 1.0),
+      ),
+      child: new LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return new Center(
+            child: new Container(
+              margin: const EdgeInsets.symmetric(vertical: _kEdgePadding),
+              width: isInAccessibilityMode
+                  ? _kAccessibilityCupertinoDialogWidth
+                  : _kCupertinoDialogWidth,
+              // The following clip is critical. The BackdropFilter needs to have
+              // rounded corners, but Skia cannot internally create a blurred rounded
+              // rect. Therefore, we have no choice but to clip, ourselves.
+              // TODO(mattcarroll): Skia bug filed: https://bugs.chromium.org/p/skia/issues/detail?id=8238
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(_kDialogCornerRadius),
+                child: new BackdropFilter(
+                  filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+                  child: new Container(
+                    decoration: _kCupertinoDialogBlurOverlayDecoration,
+                    child: new _CupertinoDialogRenderWidget(
+                      contentSection: _buildContent(),
+                      actionsSection: _buildActions(),
                     ),
                   ),
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
-  }
-}
-
-// Reports whether or not iOS is currently in accessibility mode.
-class _CupertinoAccessibility extends InheritedWidget {
-  const _CupertinoAccessibility({
-    @required double textScaleFactor,
-    Widget child,
-  }) : isInAccessibilityMode = textScaleFactor > _kMaxRegularTextScaleFactor,
-        super(child: child);
-
-  final bool isInAccessibilityMode;
-
-  static _CupertinoAccessibility of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(_CupertinoAccessibility);
-  }
-
-  @override
-  bool updateShouldNotify(_CupertinoAccessibility oldWidget) {
-    return isInAccessibilityMode != oldWidget.isInAccessibilityMode;
   }
 }
 
@@ -328,13 +317,13 @@ class _CupertinoDialogRenderWidget extends RenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) {
     return new _RenderCupertinoDialog(
       dividerThickness: _kDividerThickness / MediaQuery.of(context).devicePixelRatio,
-      isInAccessibilityMode: _CupertinoAccessibility.of(context)?.isInAccessibilityMode ?? false,
+      isInAccessibilityMode: _isInAccessibilityMode(context),
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoDialog renderObject) {
-    renderObject.isInAccessibilityMode = _CupertinoAccessibility.of(context)?.isInAccessibilityMode ?? false;
+    renderObject.isInAccessibilityMode = _isInAccessibilityMode(context);
   }
 
   @override
@@ -374,12 +363,20 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
 
   @override
   void insertChildRenderObject(RenderObject child, _AlertDialogSections slot) {
-    _placeChildInSlot(child, slot);
+    assert(slot != null);
+    switch (slot) {
+      case _AlertDialogSections.contentSection:
+        renderObject.contentSection = child;
+        break;
+      case _AlertDialogSections.actionsSection:
+        renderObject.actionsSection = child;
+        break;
+    }
   }
 
   @override
   void moveChildRenderObject(RenderObject child, _AlertDialogSections slot) {
-    _placeChildInSlot(child, slot);
+    assert(false);
   }
 
   @override
@@ -394,7 +391,8 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
     assert(child == _contentElement || child == _actionsElement);
     if (_contentElement == child) {
       _contentElement = null;
-    } else if (_actionsElement == child) {
+    } else {
+      assert(_actionsElement == child);
       _actionsElement = null;
     }
   }
@@ -404,20 +402,9 @@ class _CupertinoDialogRenderElement extends RenderObjectElement {
     assert(child == renderObject.contentSection || child == renderObject.actionsSection);
     if (renderObject.contentSection == child) {
       renderObject.contentSection = null;
-    } else if (renderObject.actionsSection == child) {
+    } else {
+      assert(renderObject.actionsSection == child);
       renderObject.actionsSection = null;
-    }
-  }
-
-  void _placeChildInSlot(RenderObject child, _AlertDialogSections slot) {
-    assert(slot != null);
-    switch (slot) {
-      case _AlertDialogSections.contentSection:
-        renderObject.contentSection = child;
-        break;
-      case _AlertDialogSections.actionsSection:
-        renderObject.actionsSection = child;
-        break;
     }
   }
 }
@@ -461,11 +448,11 @@ class _RenderCupertinoDialog extends RenderBox {
   RenderBox _contentSection;
   set contentSection(RenderBox newContentSection) {
     if (newContentSection != _contentSection) {
-      if (null != _contentSection) {
+      if (_contentSection != null) {
         dropChild(_contentSection);
       }
       _contentSection = newContentSection;
-      if (null != _contentSection) {
+      if (_contentSection != null) {
         adoptChild(_contentSection);
       }
     }
@@ -538,8 +525,8 @@ class _RenderCupertinoDialog extends RenderBox {
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData) {
-      child.parentData = new MultiChildLayoutParentData();
+    if (child.parentData is! BoxParentData) {
+      child.parentData = new BoxParentData();
     }
   }
 
@@ -644,8 +631,8 @@ class _RenderCupertinoDialog extends RenderBox {
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
-    assert(actionsSection.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData actionParentData = actionsSection.parentData;
+    assert(actionsSection.parentData is BoxParentData);
+    final BoxParentData actionParentData = actionsSection.parentData;
     actionParentData.offset = new Offset(0.0, contentSize.height + dividerThickness);
   }
 
@@ -706,14 +693,14 @@ class _RenderCupertinoDialog extends RenderBox {
 
     // Set the position of the actions box to sit at the bottom of the dialog.
     // The content box defaults to the top left, which is where we want it.
-    assert(actionsSection.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData actionParentData = actionsSection.parentData;
+    assert(actionsSection.parentData is BoxParentData);
+    final BoxParentData actionParentData = actionsSection.parentData;
     actionParentData.offset = new Offset(0.0, contentSize.height + dividerThickness);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final MultiChildLayoutParentData contentParentData = contentSection.parentData;
+    final BoxParentData contentParentData = contentSection.parentData;
     contentSection.paint(context, offset + contentParentData.offset);
 
     final bool hasDivider = contentSection.size.height > 0.0 && actionsSection.size.height > 0.0;
@@ -721,7 +708,7 @@ class _RenderCupertinoDialog extends RenderBox {
       _paintDividerBetweenContentAndActions(context.canvas, offset);
     }
 
-    final MultiChildLayoutParentData actionsParentData = actionsSection.parentData;
+    final BoxParentData actionsParentData = actionsSection.parentData;
     actionsSection.paint(context, offset + actionsParentData.offset);
   }
 
@@ -740,8 +727,8 @@ class _RenderCupertinoDialog extends RenderBox {
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     bool isHit = false;
-    final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData;
-    final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData;
+    final BoxParentData contentSectionParentData = contentSection.parentData;
+    final BoxParentData actionsSectionParentData = actionsSection.parentData;
     if (contentSection.hitTest(result, position: position - contentSectionParentData.offset)) {
       isHit = true;
     } else if (actionsSection.hitTest(result, position: position - actionsSectionParentData.offset)) {
@@ -922,11 +909,15 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
   Widget build(BuildContext context) {
     return new _ActionButtonParentDataWidget(
       isPressed: _isPressed,
-      // TODO:(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
+      // TODO(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: (TapDownDetails details) => setState(() => _isPressed = true),
-        onTapUp: (TapUpDetails details) => setState(() => _isPressed = false),
+        onTapDown: (TapDownDetails details) => setState(() {
+          _isPressed = true;
+        }),
+        onTapUp: (TapUpDetails details) => setState(() {
+          _isPressed = false;
+        }),
         // TODO(mattcarroll): Cancel is currently triggered when user moves past slop instead of off button: https://github.com/flutter/flutter/issues/19783
         onTapCancel: () => setState(() => _isPressed = false),
         child: widget.child,
@@ -1039,11 +1030,15 @@ class CupertinoDialogAction extends StatelessWidget {
     @required TextStyle textStyle,
     @required Widget content,
   }) {
-    final bool isInAccessibilityMode = _CupertinoAccessibility.of(context)?.isInAccessibilityMode ?? false;
+    final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double dialogWidth = isInAccessibilityMode
         ? _kAccessibilityCupertinoDialogWidth
         : _kCupertinoDialogWidth;
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    // The fontSizeRatio is the ratio of the current text size (including any
+    // iOS scale factor) vs the minimum text size that we allow in action
+    // buttons. This ratio information is used to automatically scale down action
+    // button text to fit the available space.
     final double fontSizeRatio = (textScaleFactor * textStyle.fontSize) / _kMinButtonFontSize;
     final double padding = _calculatePadding(context);
 
@@ -1099,10 +1094,10 @@ class CupertinoDialogAction extends StatelessWidget {
     // Apply a sizing policy to the action button's content based on whether or
     // not the device is in accessibility mode.
     // TODO(mattcarroll): The following logic is not entirely correct. It is also
-    // TODO(mattcarroll): the case that if content text does not contain a space,
-    // TODO(mattcarroll): it should also wrap instead of ellipsizing. We are
-    // TODO(mattcarroll): consciously not implementing that now due to complexity.
-    final Widget sizedContent = _CupertinoAccessibility.of(context)?.isInAccessibilityMode ?? false
+    // the case that if content text does not contain a space, it should also
+    // wrap instead of ellipsizing. We are consciously not implementing that
+    // now due to complexity.
+    final Widget sizedContent = _isInAccessibilityMode(context)
       ? _buildContentWithAccessibilitySizingPolicy(
           textStyle: style,
           content: child,
@@ -1150,15 +1145,18 @@ class _CupertinoDialogActionsRenderWidget extends MultiChildRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     return new _RenderCupertinoDialogActions(
-      dialogWidth: _CupertinoAccessibility.of(context)?.isInAccessibilityMode ?? false
-          ? _kAccessibilityCupertinoDialogWidth
-          : _kCupertinoDialogWidth,
+      dialogWidth: _isInAccessibilityMode(context)
+        ? _kAccessibilityCupertinoDialogWidth
+        : _kCupertinoDialogWidth,
       dividerThickness: _dividerThickness,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoDialogActions renderObject) {
+    renderObject.dialogWidth = _isInAccessibilityMode(context)
+      ? _kAccessibilityCupertinoDialogWidth
+      : _kCupertinoDialogWidth;
     renderObject.dividerThickness = _dividerThickness;
   }
 }
@@ -1222,12 +1220,10 @@ class _RenderCupertinoDialogActions extends RenderBox
   double get dividerThickness => _dividerThickness;
   double _dividerThickness;
   set dividerThickness(double newValue) {
-    if (newValue == _dividerThickness) {
-      return;
+    if (newValue != _dividerThickness) {
+      _dividerThickness = newValue;
+      markNeedsLayout();
     }
-
-    _dividerThickness = newValue;
-    markNeedsLayout();
   }
 
   final Paint _buttonBackgroundPaint = new Paint()
