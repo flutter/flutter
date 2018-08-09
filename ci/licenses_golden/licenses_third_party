@@ -1,4 +1,4 @@
-Signature: e451900a1345f7d287e1032e5a26dac9
+Signature: 350887638dbf5cdb4d0e1879ddb0cf33
 
 UNUSED LICENSES:
 
@@ -5827,6 +5827,7 @@ FILE: ../../../third_party/dart/runtime/lib/stacktrace.dart
 FILE: ../../../third_party/dart/runtime/lib/symbol_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/timer_impl.dart
 FILE: ../../../third_party/dart/runtime/lib/typed_data.cc
+FILE: ../../../third_party/dart/runtime/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/uri.cc
 FILE: ../../../third_party/dart/runtime/lib/uri_patch.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/app/application.dart

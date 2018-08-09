@@ -169,7 +169,7 @@ Dart_Handle DartCallbackCache::LookupDartClosure(
 
   Dart_Handle closure;
   if (Dart_IsNull(cls_name)) {
-    closure = Dart_GetClosure(library, closure_name);
+    closure = Dart_GetField(library, closure_name);
   } else {
     Dart_Handle cls = Dart_GetClass(library, cls_name);
     DART_CHECK_VALID(cls);
