@@ -253,8 +253,8 @@ void main() {
               onValueChanged: (int newValue) {
                 setState(() {
                   sharedValue = newValue;
-                  });
-                },
+                });
+              },
               groupValue: sharedValue,
               unselectedColor: CupertinoColors.lightBackgroundGray,
               selectedColor: CupertinoColors.activeGreen,
@@ -707,7 +707,7 @@ void main() {
     );
 
     expect(
-        semantics,
+      semantics,
         hasSemantics(
           new TestSemantics.root(
             children: <TestSemantics>[
@@ -737,7 +737,8 @@ void main() {
           ignoreId: true,
           ignoreRect: true,
           ignoreTransform: true,
-        ));
+        ),
+    );
 
     await tester.tap(find.text('Child 2'));
     await tester.pump();
