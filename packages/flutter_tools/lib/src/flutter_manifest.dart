@@ -28,14 +28,6 @@ class FlutterManifest {
     return manifest;
   }
 
-  /// Returns a mock manifest with the given contents.
-  static FlutterManifest mock(Map<String, dynamic> contents) {
-    final FlutterManifest manifest = new FlutterManifest._();
-    manifest._descriptor = contents ?? const <String, dynamic>{};
-    manifest._flutterDescriptor = manifest._descriptor['flutter'] ?? const <String, dynamic>{};
-    return manifest;
-  }
-
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static Future<FlutterManifest> createFromPath(String path) async {
     if (path == null || !fs.isFileSync(path))
