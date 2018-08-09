@@ -51,7 +51,7 @@ void debugPrintThrottled(String message, { int wrapWidth }) {
 }
 int _debugPrintedCharacters = 0;
 const int _kDebugPrintCapacity = 12 * 1024;
-const Duration _kDebugPrintPauseTime = const Duration(seconds: 1);
+const Duration _kDebugPrintPauseTime = Duration(seconds: 1);
 final Queue<String> _debugPrintBuffer = new Queue<String>();
 final Stopwatch _debugPrintStopwatch = new Stopwatch();
 Completer<Null> _debugPrintCompleter;
@@ -134,7 +134,8 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = 
         if ((index - startForLengthCalculations > width) || (index == message.length)) {
           // we are over the width line, so break
           if ((index - startForLengthCalculations <= width) || (lastWordEnd == null)) {
-            // we should use this point, before either it doesn't actually go over the end (last line), or it does, but there was no earlier break point
+            // we should use this point, because either it doesn't actually go over the
+            // end (last line), or it does, but there was no earlier break point
             lastWordEnd = index;
           }
           if (addPrefix) {

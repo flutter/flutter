@@ -288,7 +288,7 @@ void main() {
   });
 
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
-    const Key innerKey = const Key('inner');
+    const Key innerKey = Key('inner');
     final ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(
       new Directionality(

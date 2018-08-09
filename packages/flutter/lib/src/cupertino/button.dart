@@ -9,10 +9,10 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-const Color _kDisabledBackground = const Color(0xFFA9A9A9);
-const Color _kDisabledForeground = const Color(0xFFC4C4C4);
+const Color _kDisabledBackground = Color(0xFFA9A9A9);
+const Color _kDisabledForeground = Color(0xFFC4C4C4);
 
-const TextStyle _kButtonTextStyle = const TextStyle(
+const TextStyle _kButtonTextStyle = TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 17.5,
@@ -30,8 +30,8 @@ final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
   color: CupertinoColors.white,
 );
 
-const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
-const EdgeInsets _kBackgroundButtonPadding = const EdgeInsets.symmetric(
+const EdgeInsets _kButtonPadding = EdgeInsets.all(16.0);
+const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
   vertical: 14.0,
   horizontal: 64.0,
 );
@@ -53,7 +53,7 @@ class CupertinoButton extends StatefulWidget {
     this.disabledColor,
     this.minSize = 44.0,
     this.pressedOpacity = 0.1,
-    this.borderRadius = const BorderRadius.all(const Radius.circular(8.0)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0));
 
@@ -123,8 +123,8 @@ class CupertinoButton extends StatefulWidget {
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
-  static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
-  static const Duration kFadeInDuration = const Duration(milliseconds: 100);
+  static const Duration kFadeOutDuration = Duration(milliseconds: 10);
+  static const Duration kFadeInDuration = Duration(milliseconds: 100);
   Tween<double> _opacityTween;
 
   AnimationController _animationController;

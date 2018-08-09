@@ -26,7 +26,7 @@ cd "$FLUTTER_ROOT"
 
 if [[ "$SHARD" = "deploy_gallery" ]]; then
   version="$(<version)"
-  if [[ "$OS_NAME" == "linux" ]]; then
+  if [[ "$OS" == "linux" ]]; then
     echo "Building Flutter Gallery $version for Android..."
     export ANDROID_HOME="$PWD/android-sdk"
     (
@@ -44,7 +44,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
     else
       echo "Not deployed: Flutter Gallery is only deployed to the Play Store on merged and tagged dev branch commits"
     fi
-  elif [[ "$OS_NAME" == "macos" ]]; then
+  elif [[ "$OS" == "macos" ]]; then
     echo "Building Flutter Gallery $version for iOS..."
     (
       cd examples/flutter_gallery

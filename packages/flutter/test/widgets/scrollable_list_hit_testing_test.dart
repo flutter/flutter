@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
+const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
 void main() {
   testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {

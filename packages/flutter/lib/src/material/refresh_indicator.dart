@@ -20,11 +20,11 @@ const double _kDragSizeFactorLimit = 1.5;
 
 // When the scroll ends, the duration of the refresh indicator's animation
 // to the RefreshIndicator's displacement.
-const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
+const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
 
 // The duration of the ScaleTransition that starts when the refresh action
 // has completed.
-const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
+const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 
 /// The signature for a function that's called when the user has dragged a
 /// [RefreshIndicator] far enough to demonstrate that they want the app to
@@ -298,6 +298,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   // Stop showing the refresh indicator.
   Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
+    await new Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.

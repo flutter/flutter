@@ -39,5 +39,11 @@
   "popupMenuLabel": "Pop-upmenu",
   "dialogLabel": "Dialoogvenster",
   "alertDialogLabel": "Alarm",
-  "searchFieldLabel": "Zoeken"
+  "searchFieldLabel": "Zoeken",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }

@@ -111,7 +111,7 @@ void main() {
           appBar: new AppBar(
             title: const Text('X'),
             actions: const <Widget>[
-              const Icon(Icons.thumb_up),
+              Icon(Icons.thumb_up),
             ],
           ),
         ),
@@ -132,8 +132,8 @@ void main() {
           appBar: new AppBar(
             title: const Text('X'),
             actions: const <Widget>[
-              const Icon(Icons.thumb_up),
-              const Icon(Icons.thumb_up),
+              Icon(Icons.thumb_up),
+              Icon(Icons.thumb_up),
             ],
           ),
         ),
@@ -171,7 +171,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: const Placeholder(key: const Key('X')),
+            title: const Placeholder(key: Key('X')),
           ),
         ),
       ),
@@ -190,7 +190,7 @@ void main() {
           child: new Scaffold(
             appBar: new AppBar(
               centerTitle: false,
-              title: const Placeholder(key: const Key('X')),
+              title: const Placeholder(key: Key('X')),
             ),
           ),
         ),
@@ -209,7 +209,7 @@ void main() {
           appBar: new AppBar(
             centerTitle: false,
             titleSpacing: 32.0,
-            title: const Placeholder(key: const Key('X')),
+            title: const Placeholder(key: Key('X')),
           ),
         ),
       ),
@@ -229,7 +229,7 @@ void main() {
             appBar: new AppBar(
               centerTitle: false,
               titleSpacing: 32.0,
-              title: const Placeholder(key: const Key('X')),
+              title: const Placeholder(key: Key('X')),
             ),
           ),
         ),
@@ -453,7 +453,7 @@ void main() {
           child: new AppBar(
             leading: const Text('L'),
             title: const Text('No Scaffold'),
-            actions: const <Widget>[const Text('A1'), const Text('A2')],
+            actions: const <Widget>[Text('A1'), Text('A2')],
           ),
         ),
       ),
@@ -544,14 +544,14 @@ void main() {
           appBar: new AppBar(
             title: const Text('X'),
             actions: const <Widget> [
-              const IconButton(
-                icon: const Icon(Icons.share),
+              IconButton(
+                icon: Icon(Icons.share),
                 onPressed: null,
                 tooltip: 'Share',
                 iconSize: 20.0,
               ),
-              const IconButton(
-                icon: const Icon(Icons.add),
+              IconButton(
+                icon: Icon(Icons.add),
                 onPressed: null,
                 tooltip: 'Add',
                 iconSize: 60.0,
@@ -842,7 +842,7 @@ void main() {
   });
 
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
       new Directionality(
@@ -972,9 +972,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
             ],
           ),
         ),
@@ -993,9 +993,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
@@ -1023,9 +1023,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
@@ -1043,7 +1043,7 @@ void main() {
                 padding: const EdgeInsets.all(4.0),
                 child: const Placeholder(
                   strokeWidth: 2.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
               ),
             ),
@@ -1064,9 +1064,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: const <Widget>[
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
-              const Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
             ],
             bottom: new PreferredSize(
               preferredSize: const Size(0.0, kToolbarHeight),
@@ -1075,7 +1075,7 @@ void main() {
                 padding: const EdgeInsets.all(4.0),
                 child: const Placeholder(
                   strokeWidth: 2.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
               ),
             ),
@@ -1088,7 +1088,7 @@ void main() {
   });
 
   testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     final Key leadingKey = new UniqueKey();
     final Key titleKey = new UniqueKey();
@@ -1117,7 +1117,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     final Key leadingKey = new UniqueKey();
     final Key titleKey = new UniqueKey();
@@ -1148,7 +1148,7 @@ void main() {
   });
 
   testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0, bottom: 50.0));
+    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
 
     final Key leadingKey = new UniqueKey();
     final Key titleKey = new UniqueKey();
@@ -1187,13 +1187,13 @@ void main() {
             leading: const Text('Leading'),
             title: const Text('Title'),
             actions: const <Widget>[
-              const Text('Action 1'),
-              const Text('Action 2'),
-              const Text('Action 3'),
+              Text('Action 1'),
+              Text('Action 2'),
+              Text('Action 3'),
             ],
             bottom: const PreferredSize(
-              preferredSize: const Size(0.0, kToolbarHeight),
-              child: const Text('Bottom'),
+              preferredSize: Size(0.0, kToolbarHeight),
+              child: Text('Bottom'),
             ),
           ),
         ),
@@ -1268,13 +1268,13 @@ void main() {
                 leading: const Text('Leading'),
                 title: const Text('Title'),
                 actions: const <Widget>[
-                  const Text('Action 1'),
-                  const Text('Action 2'),
-                  const Text('Action 3'),
+                  Text('Action 1'),
+                  Text('Action 2'),
+                  Text('Action 3'),
                 ],
                 bottom: const PreferredSize(
-                  preferredSize: const Size(0.0, kToolbarHeight),
-                  child: const Text('Bottom'),
+                  preferredSize: Size(0.0, kToolbarHeight),
+                  child: Text('Bottom'),
                 ),
               ),
             ),

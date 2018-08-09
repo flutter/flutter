@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -21,6 +22,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  Cache.flutterRoot = getFlutterRoot();
   group('gradle build', () {
     test('do not crash if there is no Android SDK', () async {
       Exception shouldBeToolExit;
@@ -32,7 +34,7 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        await updateLocalProperties(project: new FlutterProject(fs.currentDirectory));
+        await updateLocalProperties(project: await FlutterProject.current());
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
@@ -190,7 +192,7 @@ someOtherProperty: someOtherValue
 
       try {
         await updateLocalProperties(
-          project: new FlutterProject.fromPath('path/to/project'),
+          project: await FlutterProject.fromPath('path/to/project'),
           buildInfo: buildInfo,
         );
 
@@ -212,7 +214,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -230,7 +232,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -248,7 +250,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -266,7 +268,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -284,7 +286,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -302,7 +304,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -319,7 +321,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,

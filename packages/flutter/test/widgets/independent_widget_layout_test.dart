@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-const Size _kTestViewSize = const Size(800.0, 600.0);
+const Size _kTestViewSize = Size(800.0, 600.0);
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(configuration: const ViewConfiguration(size: _kTestViewSize));

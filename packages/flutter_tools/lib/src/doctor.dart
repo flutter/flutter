@@ -145,9 +145,13 @@ class Doctor {
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = new Status.withSpinner();
-      await (validatorTask.result).then<void>((_) {
-        status.stop();
-      }).whenComplete(status.cancel);
+      try {
+        await validatorTask.result;
+      } catch (exception) {
+        status.cancel();
+        rethrow;
+      }
+      status.stop();
 
       final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {

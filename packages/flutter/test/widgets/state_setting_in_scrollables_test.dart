@@ -28,39 +28,39 @@ class FooState extends State<Foo> {
                   scrollController.animateTo(200.0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                 },
                 child: const DecoratedBox(
-                  decoration: const BoxDecoration(color: const Color(0)),
-                  child: const SizedBox(
+                  decoration: BoxDecoration(color: Color(0)),
+                  child: SizedBox(
                     height: 200.0,
                   ),
                 )
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),

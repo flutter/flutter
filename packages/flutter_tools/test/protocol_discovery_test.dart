@@ -66,6 +66,14 @@ void main() {
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
+      testUsingContext('discovers uri even if logs has ESC Ascii', () async {
+        initialize();
+        logReader.addLine('Observatory listening on http://127.0.0.1:3333 \x1b[');
+        final Uri uri = await discoverer.uri;
+        expect(uri.port, 3333);
+        expect('$uri', 'http://127.0.0.1:3333');
+      });
+
       testUsingContext('uri throws if logs produce bad line', () async {
         initialize();
         Timer.run(() {

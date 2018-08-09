@@ -8,10 +8,10 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedAlign.debugFillProperties', (WidgetTester tester) async {
-    const AnimatedAlign box = const AnimatedAlign(
+    const AnimatedAlign box = AnimatedAlign(
       alignment: Alignment.topCenter,
       curve: Curves.ease,
-      duration: const Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 200),
     );
     expect(box, hasOneLineDescription);
   });

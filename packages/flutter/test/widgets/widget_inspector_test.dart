@@ -63,9 +63,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -78,9 +78,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             selectButtonBuilder: null,
             child: new Stack(
               children: const <Widget>[
-                const Text('a', textDirection: TextDirection.ltr),
-                const Text('b', textDirection: TextDirection.ltr),
-                const Text('c', textDirection: TextDirection.ltr),
+                Text('a', textDirection: TextDirection.ltr),
+                Text('b', textDirection: TextDirection.ltr),
+                Text('c', textDirection: TextDirection.ltr),
               ],
             ),
           ),
@@ -173,9 +173,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
               transform: new Matrix4.identity()..scale(0.0),
               child: new Stack(
                 children: const <Widget>[
-                  const Text('a', textDirection: TextDirection.ltr),
-                  const Text('b', textDirection: TextDirection.ltr),
-                  const Text('c', textDirection: TextDirection.ltr),
+                  Text('a', textDirection: TextDirection.ltr),
+                  Text('b', textDirection: TextDirection.ltr),
+                  Text('c', textDirection: TextDirection.ltr),
                 ],
               ),
             ),
@@ -370,7 +370,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     test('WidgetInspectorService toObjectForSourceLocation', () {
       const String group = 'test-group';
-      const Text widget = const Text('a', textDirection: TextDirection.ltr);
+      const Text widget = Text('a', textDirection: TextDirection.ltr);
       service.disposeAllGroups();
       final String id = service.toId(widget, group);
       expect(service.toObjectForSourceLocation(id), equals(widget));
@@ -383,10 +383,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     test('WidgetInspectorService object id test', () {
-      const Text a = const Text('a', textDirection: TextDirection.ltr);
-      const Text b = const Text('b', textDirection: TextDirection.ltr);
-      const Text c = const Text('c', textDirection: TextDirection.ltr);
-      const Text d = const Text('d', textDirection: TextDirection.ltr);
+      const Text a = Text('a', textDirection: TextDirection.ltr);
+      const Text b = Text('b', textDirection: TextDirection.ltr);
+      const Text c = Text('c', textDirection: TextDirection.ltr);
+      const Text d = Text('d', textDirection: TextDirection.ltr);
 
       const String group1 = 'group-1';
       const String group2 = 'group-2';
@@ -420,9 +420,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -469,9 +469,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -540,9 +540,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -567,9 +567,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a'),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -627,9 +627,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a'),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -737,9 +737,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -786,9 +786,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -855,9 +855,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -883,9 +883,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -919,9 +919,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -957,9 +957,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -1040,9 +1040,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a', textDirection: TextDirection.ltr),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a', textDirection: TextDirection.ltr),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -1093,9 +1093,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a'),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),
@@ -1153,9 +1153,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           textDirection: TextDirection.ltr,
           child: new Stack(
             children: const <Widget>[
-              const Text('a'),
-              const Text('b', textDirection: TextDirection.ltr),
-              const Text('c', textDirection: TextDirection.ltr),
+              Text('a'),
+              Text('b', textDirection: TextDirection.ltr),
+              Text('c', textDirection: TextDirection.ltr),
             ],
           ),
         ),

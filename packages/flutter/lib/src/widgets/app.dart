@@ -82,7 +82,7 @@ class WidgetsApp extends StatefulWidget {
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
-    this.supportedLocales = const <Locale>[const Locale('en', 'US')],
+    this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.showPerformanceOverlay = false,
     this.checkerboardRasterCacheImages = false,
     this.checkerboardOffscreenLayers = false,
@@ -525,6 +525,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
     yield DefaultWidgetsLocalizations.delegate;
+  }
+
+  // ACCESSIBILITY
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    setState(() {
+      // The properties of ui.window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
   }
 
 
