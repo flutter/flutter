@@ -31,17 +31,17 @@ class _AccountPictures extends StatelessWidget {
           end: 0.0,
           child: new Row(
             children: (otherAccountsPictures ?? <Widget>[]).take(3).map((Widget picture) {
-              return new Container(
-                margin: const EdgeInsetsDirectional.only(start: 8.0),
-                width: 48.0,
-                height: 48.0,
+              return new Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: new Semantics(
                   container: true,
-                  child: new Padding(
+                  child: new Container(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+                    width: 48.0,
+                    height: 48.0,
                     child: picture,
-                    padding: const EdgeInsets.all(4.0),
-                  ),
-                ),
+                 ),
+                )
               );
             }).toList(),
           ),

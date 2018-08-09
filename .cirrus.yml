@@ -121,8 +121,8 @@ task:
   osx_instance:
     image: high-sierra-xcode-9.4.1
   git_fetch_script:
-  - git fetch origin
-  - git fetch origin master # To set FETCH_HEAD
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter update-packages

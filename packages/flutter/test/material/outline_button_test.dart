@@ -44,49 +44,72 @@ void main() {
   });
 
 
-  testWidgets('Outline shape and border overrides', (WidgetTester tester) async {
-    debugDisableShadows = false;
+  testWidgets('OutlineButton shape and border component overrides', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
     const Color borderColor = Color(0xFFFF0000);
     const Color highlightedBorderColor = Color(0xFF0000FF);
+    const Color disabledBorderColor = Color(0xFFFF00FF);
     const double borderWidth = 4.0;
 
-    await tester.pumpWidget(
-      new Directionality(
+    Widget buildFrame({VoidCallback onPressed}) {
+      return Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
           data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: new Container(
             alignment: Alignment.topLeft,
-            child: new OutlineButton(
+            child: OutlineButton(
               shape: const RoundedRectangleBorder(), // default border radius is 0
               color: fillColor,
               highlightedBorderColor: highlightedBorderColor,
+              disabledBorderColor: disabledBorderColor,
               borderSide: const BorderSide(
                 width: borderWidth,
                 color: borderColor,
               ),
-              onPressed: () { },
-              child: const Text('button')
+              onPressed: onPressed,
+              child: const Text('button'),
             ),
           ),
         ),
-      ),
-    );
-
-    final Finder outlineButton = find.byType(OutlineButton);
-    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
+      );
+    }
 
     final Rect clipRect = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
     final Path clipPath = new Path()..addRect(clipRect);
+
+    final Finder outlineButton = find.byType(OutlineButton);
+
+    // Pump a button with a null onPressed callback to make it disabled.
+    await tester.pumpWidget(
+      buildFrame(onPressed: null),
+    );
+
+    // Expect that the button is disabled and painted with the disabled border color.
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
+    expect(
+      outlineButton,
+      paints
+        ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
+        ..path(color: disabledBorderColor, strokeWidth: borderWidth));
+
+    // Pump a new button with a no-op onPressed callback to make it enabled.
+    await tester.pumpWidget(
+      buildFrame(onPressed: () { }),
+    );
+
+    // Wait for the border color to change from disabled to enabled.
+    await tester.pumpAndSettle();
+
+    // Expect that the button is disabled and painted with the enabled border color.
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     expect(
       outlineButton,
       paints
         // initially the interior of the button is transparent
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
-        ..path(color: borderColor, strokeWidth: borderWidth)
-    );
+        ..path(color: borderColor, strokeWidth: borderWidth));
 
     final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
@@ -99,8 +122,7 @@ void main() {
       paints
         ..path(color: fillColor.withAlpha(0xFF))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
-        ..path(color: highlightedBorderColor, strokeWidth: borderWidth)
-    );
+        ..path(color: highlightedBorderColor, strokeWidth: borderWidth));
 
     // Tap gesture completes, button returns to its initial configuration.
     await gesture.up();
@@ -110,11 +132,8 @@ void main() {
       paints
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
-        ..path(color: borderColor, strokeWidth: borderWidth)
-    );
-    debugDisableShadows = true;
+        ..path(color: borderColor, strokeWidth: borderWidth));
   });
-
 
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
@@ -125,7 +144,7 @@ void main() {
           child: new Center(
             child: new OutlineButton(
               onPressed: () { },
-              child: const Text('ABC')
+              child: const Text('ABC'),
             ),
           ),
         ),

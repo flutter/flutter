@@ -158,7 +158,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   };
 
   final String javaSourcePath = fs.path.join(
-    project.androidPluginRegistrantHost.path,
+    project.android.pluginRegistrantHost.path,
     'src',
     'main',
     'java',
@@ -247,8 +247,8 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'plugins': iosPlugins,
   };
 
-  final String registryDirectory = project.iosPluginRegistrantHost.path;
-  if (project.manifest.isModule) {
+  final String registryDirectory = project.ios.pluginRegistrantHost.path;
+  if (project.isModule) {
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _iosPluginRegistrantPodspecTemplate,

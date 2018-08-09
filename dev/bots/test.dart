@@ -33,8 +33,8 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
   'coverage': _runCoverage,
-  // 'docs': handled by travis_script.sh and docs.sh
-  // 'build_and_deploy_gallery': handled by travis_script.sh
+  // 'docs': handled by docs.sh
+  // 'build_and_deploy_gallery': handled by deploy_gallery.sh
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
