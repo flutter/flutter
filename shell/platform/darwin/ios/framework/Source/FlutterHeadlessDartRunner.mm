@@ -111,7 +111,7 @@ static std::string CreateShellLabel() {
 }
 
 - (void)runWithEntrypoint:(NSString*)entrypoint {
-  [self runWithEntrypointAndCallback:entrypoint libraryUri:nil completion:nil];
+  [self runWithEntrypointAndLibraryUri:entrypoint libraryUri:nil];
 }
 
 #pragma mark - FlutterBinaryMessenger
