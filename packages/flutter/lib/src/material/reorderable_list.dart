@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -153,6 +154,9 @@ class _ReorderableListContent extends StatefulWidget {
 }
 
 class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+  @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
+
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
   //
@@ -279,12 +283,18 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
     );
     final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+    // Work around to make the dragging work when animations are disabled (run at 20x speed)
+    Duration scrollAnimationDuration = _scrollAnimationDuration;
+    if (window.accessibilityFeatures.disableAnimations) {
+      scrollAnimationDuration *= 20;
+    }
+
     // If the context is off screen, then we request a scroll to make it visible.
     if (!onScreen) {
       _scrolling = true;
       _scrollController.position.animateTo(
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
-        duration: _scrollAnimationDuration,
+        duration: scrollAnimationDuration,
         curve: Curves.easeInOut,
       ).then((Null none) {
         setState(() {
@@ -424,7 +434,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     // We wrap the drag target in a Builder so that we can scroll to its specific context.
     return new KeyedSubtree(
       key: new Key('#$ReorderableListView|KeyedSubtree|${toWrap.key}'),
-      child:new Builder(builder: (BuildContext context) {
+      child: new Builder(builder: (BuildContext context) {
         return new DragTarget<Key>(
           builder: buildDragTarget,
           onWillAccept: (Key toAccept) {
