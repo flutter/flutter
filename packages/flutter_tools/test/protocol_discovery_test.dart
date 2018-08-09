@@ -207,7 +207,7 @@ void main() {
 
         // Get next port future.
         final Future<Uri> nextUri = discoverer.uri;
-        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/\x1b[');
+        logReader.addLine('I/flutter : Observatory listening on http://[::1]:54777/PTwjm8Ii8qg=/\x1b[');
         final Uri uri = await nextUri;
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
