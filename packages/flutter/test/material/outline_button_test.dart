@@ -45,10 +45,10 @@ void main() {
 
 
   testWidgets('OutlineButton shape and border component overrides', (WidgetTester tester) async {
-    const Color fillColor = const Color(0xFF00FF00);
-    const Color borderColor = const Color(0xFFFF0000);
-    const Color highlightedBorderColor = const Color(0xFF0000FF);
-    const Color disabledBorderColor = const Color(0xFFFF00FF);
+    Color fillColor = const Color(0xFF00FF00);
+    Color borderColor = const Color(0xFFFF0000);
+    Color highlightedBorderColor = const Color(0xFF0000FF);
+    Color disabledBorderColor = const Color(0xFFFF00FF);
     const double borderWidth = 4.0;
 
     Widget buildFrame({VoidCallback onPressed}) {
