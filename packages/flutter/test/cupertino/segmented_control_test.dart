@@ -269,7 +269,7 @@ void main() {
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return boilerplate(
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -328,7 +328,7 @@ void main() {
           child: new SizedBox(
             width: 200.0,
             height: 200.0,
-            child: new SegmentedControl<int>(
+            child: new CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {},
             ),
