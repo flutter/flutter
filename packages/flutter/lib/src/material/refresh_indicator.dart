@@ -298,6 +298,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   // Stop showing the refresh indicator.
   Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
+    await new Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
