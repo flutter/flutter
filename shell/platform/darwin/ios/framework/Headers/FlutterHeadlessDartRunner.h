@@ -45,12 +45,8 @@ FLUTTER_EXPORT
 
  - Parameter entrypoint: The name of a top-level function from a Dart library.
  - Parameter uri: The URI of the Dart library which contains entrypoint.
- - Parameter callback: The callback to be invoked when the new Isolate is
-   invoked.
 */
-- (void)runWithEntrypointAndCallback:(NSString*)entrypoint
-                          libraryUri:(NSString*)uri
-                          completion:(FlutterHeadlessDartRunnerCallback)callback;
+- (void)runWithEntrypointAndLibraryUri:(NSString*)entrypoint libraryUri:(NSString*)uri;
 
 @end
 

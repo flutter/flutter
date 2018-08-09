@@ -47,9 +47,7 @@ static std::string CreateShellLabel() {
   std::unique_ptr<shell::Shell> _shell;
 }
 
-- (void)runWithEntrypointAndCallback:(NSString*)entrypoint
-                          libraryUri:(NSString*)uri
-                          completion:(FlutterHeadlessDartRunnerCallback)callback {
+- (void)runWithEntrypointAndLibraryUri:(NSString*)entrypoint libraryUri:(NSString*)uri {
   if (_shell != nullptr || entrypoint.length == 0) {
     FML_LOG(ERROR) << "This headless dart runner was already used to run some code.";
     return;
@@ -100,8 +98,7 @@ static std::string CreateShellLabel() {
 
   // Override the default run configuration with the specified entrypoint.
   _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      fml::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config),
-                         callback = Block_copy(callback)]() mutable {
+      fml::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config)]() mutable {
         BOOL success = NO;
         FML_LOG(INFO) << "Attempting to launch background engine configuration...";
         if (!engine || !engine->Run(std::move(config))) {
@@ -109,10 +106,6 @@ static std::string CreateShellLabel() {
         } else {
           FML_LOG(INFO) << "Background Isolate successfully started and run.";
           success = YES;
-        }
-        if (callback != nil) {
-          callback(success);
-          Block_release(callback);
         }
       }));
 }
