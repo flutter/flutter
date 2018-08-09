@@ -3,16 +3,22 @@
 This directory exists to support building Flutter on our build infrastructure.
 
 The results of such builds are viewable at:
-* https://build.chromium.org/p/client.flutter/waterfall
-* https://travis-ci.org/flutter/flutter/builds (limited checking used just for PRs on github)
+* https://cirrus-ci.com/github/flutter/flutter/master
+  - Testing done on PRs and submitted changes on GitHub.
+* https://build.chromium.org/p/client.flutter/console
+  - Additional testing and processing done after changes are submitted.
 
-The external master pages for the chromium infra bots do not allow
+The external master pages for the Chromium infra bots do not allow
 forcing new builds. Contact @eseidelGoogle or another member of
 Google's Flutter team if you need to do that.
 
-The Travis-based bots are trivial, and just run a couple of shell
-scripts. The rest of this document discusses only the chromium infra
-bots.
+The [Cirrus](https://cirrus-ci.org)-based bots run the [`test.dart`](test.dart)
+script for each PR and submission. It does testing for the tools, for the
+framework, and (for submitted changes only) rebuilds and updates the master
+branch API docs staging site. For tagged dev and beta builds, it also builds and
+deploys the gallery app to the app stores.
+
+The rest of this document discusses only the Chromium infra bots.
 
 This infrastructure is broken into two parts. A buildbot master specified by our
 [builders.pyl](https://chromium.googlesource.com/chromium/tools/build.git/+/master/masters/master.client.flutter/builders.pyl)
@@ -63,7 +69,7 @@ The typical cycle for editing a recipe is:
    `//chrome_infra/build/scripts/slave/recipes/flutter`).
 2. Run `build/scripts/slave/recipes.py --use-bootstrap test train` to
    update expected files
-3. Run `build/scripts/tools/run_recipe.py flutter/<repo> slavename=<slavename>
+3. Run `build/scripts/slave/recipes.py run flutter/<repo> slavename=<slavename>
    mastername=client.flutter buildername=<buildername> buildnumber=1234` where `<repo>` is one
    of `flutter` or `engine`, and `slavename` and `buildername` can be looked up
    from the *Build Properties* section of a [recent

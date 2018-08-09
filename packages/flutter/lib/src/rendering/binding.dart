@@ -153,6 +153,12 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   @protected
   void handleTextScaleFactorChanged() { }
 
+  /// Called when the platform accessibility features change.
+  ///
+  /// See [Window.onAccessibilityFeaturesChanged].
+  @protected
+  void handleAccessibilityFeaturesChanged() {}
+
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
   ///

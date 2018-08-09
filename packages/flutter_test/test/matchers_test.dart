@@ -519,6 +519,7 @@ void main() {
          isLiveRegion: true,
          hasToggledState: true,
          isToggled: true,
+         hasImplicitScrolling: true,
          /* Actions */
          hasTapAction: true,
          hasLongPressAction: true,

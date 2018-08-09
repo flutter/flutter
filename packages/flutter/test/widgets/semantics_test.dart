@@ -487,7 +487,8 @@ void main() {
     final List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
       ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.isToggled);
+      ..remove(SemanticsFlag.isToggled)
+      ..remove(SemanticsFlag.hasImplicitScrolling);
 
     TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[

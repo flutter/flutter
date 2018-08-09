@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:collection/collection.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -14,10 +15,17 @@ class FakePlatformViewsController {
   }
 
   final TargetPlatform targetPlatform;
+
+  Iterable<FakePlatformView> get views => _views.values;
   final Map<int, FakePlatformView> _views = <int, FakePlatformView>{};
+
+  final Map<int, List<FakeMotionEvent>> motionEvents = <int, List<FakeMotionEvent>>{};
+
   final Set<String> _registeredViewTypes = new Set<String>();
 
   int _textureCounter = 0;
+
+  Completer<void> resizeCompleter;
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -37,6 +45,8 @@ class FakePlatformViewsController {
         return _dispose(call);
       case 'resize':
         return _resize(call);
+      case 'touch':
+        return _touch(call);
     }
     return new Future<Null>.sync(() => null);
   }
@@ -78,7 +88,7 @@ class FakePlatformViewsController {
     return new Future<Null>.sync(() => null);
   }
 
-  Future<dynamic> _resize(MethodCall call) {
+  Future<dynamic> _resize(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     final double width = args['width'];
@@ -90,12 +100,36 @@ class FakePlatformViewsController {
         message: 'Trying to resize a platform view with unknown id: $id',
       );
 
+    if (resizeCompleter != null) {
+      await resizeCompleter.future;
+    }
     _views[id].size = new Size(width, height);
 
     return new Future<Null>.sync(() => null);
   }
 
-  Iterable<FakePlatformView> get views => _views.values;
+  Future<dynamic> _touch(MethodCall call) {
+    final List<dynamic> args = call.arguments;
+    final int id = args[0];
+    final int action = args[3];
+    final List<List<dynamic>> pointerProperties = args[5].cast<List<dynamic>>();
+    final List<List<dynamic>> pointerCoords = args[6].cast<List<dynamic>>();
+    final List<Offset> pointerOffsets = <Offset> [];
+    final List<int> pointerIds = <int> [];
+    for (int i = 0; i < pointerCoords.length; i++) {
+      pointerIds.add(pointerProperties[i][0]);
+      final double x = pointerCoords[i][7];
+      final double y = pointerCoords[i][8];
+      pointerOffsets.add(new Offset(x, y));
+    }
+
+    if (!motionEvents.containsKey(id))
+      motionEvents[id] = <FakeMotionEvent> [];
+
+    motionEvents[id].add(new FakeMotionEvent(action, pointerIds, pointerOffsets));
+    return new Future<Null>.sync(() => null);
+  }
+
 }
 
 class FakePlatformView {
@@ -122,5 +156,34 @@ class FakePlatformView {
   @override
   String toString() {
     return 'FakePlatformView(id: $id, type: $type, size: $size)';
+  }
+}
+
+class FakeMotionEvent {
+  const FakeMotionEvent(this.action, this.pointerIds, this.pointers);
+
+  final int action;
+  final List<Offset> pointers;
+  final List<int> pointerIds;
+
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! FakeMotionEvent)
+      return false;
+    final FakeMotionEvent typedOther = other;
+    const ListEquality<Offset> offsetsEq = ListEquality<Offset>();
+    const ListEquality<int> pointersEq = ListEquality<int>();
+    return pointersEq.equals(pointerIds, typedOther.pointerIds) &&
+        action == typedOther.action &&
+        offsetsEq.equals(pointers, typedOther.pointers);
+  }
+
+  @override
+  int get hashCode => hashValues(action, pointers, pointerIds);
+
+  @override
+  String toString() {
+    return 'FakeMotionEvent(action: $action, pointerIds: $pointerIds, pointers: $pointers)';
   }
 }

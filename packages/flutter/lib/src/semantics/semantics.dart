@@ -3136,6 +3136,18 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isObscured, value);
   }
 
+  /// Whether the platform can scroll the semantics node when the user attempts
+  /// to move focus to an offscreen child.
+  ///
+  /// For example, a [ListView] widget has implicit scrolling so that users can
+  /// easily move to the next visible set of children. A [TabBar] widget does
+  /// not have implicit scrolling, so that users can navigate into the tab
+  /// body when reaching the end of the tab bar.
+  bool get hasImplicitScrolling => _hasFlag(SemanticsFlag.hasImplicitScrolling);
+  set hasImplicitScrolling(bool value) {
+    _setFlag(SemanticsFlag.hasImplicitScrolling, value);
+  }
+
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
   TextSelection get textSelection => _textSelection;

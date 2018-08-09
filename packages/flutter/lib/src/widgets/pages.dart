@@ -44,18 +44,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   }
 }
 
-/// Signature for the [PageRouteBuilder] function that builds the route's
-/// primary contents.
-///
-/// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
-
-/// Signature for the [PageRouteBuilder] function that builds the route's
-/// transitions.
-///
-/// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
-
 Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return child;
 }
