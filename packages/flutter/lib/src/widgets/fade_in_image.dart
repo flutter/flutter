@@ -393,7 +393,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   @override
   void didUpdateWidget(FadeInImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.image != oldWidget.image || widget.placeholder != widget.placeholder)
+    if (widget.image != oldWidget.image || widget.placeholder != oldWidget.placeholder)
       _resolveImage();
   }
 

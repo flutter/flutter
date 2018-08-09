@@ -482,6 +482,90 @@ void main() {
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 
+  testWidgets('accessible navigation behavior with action', (WidgetTester tester) async {
+      final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+      await tester.pumpWidget(new MaterialApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(accessibleNavigation: true),
+          child: Scaffold(
+            key: scaffoldKey,
+            body: new Builder(
+              builder: (BuildContext context) {
+                return new GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(new SnackBar(
+                      content: const Text('snack'),
+                      duration: const Duration(seconds: 1),
+                      action: new SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () {}
+                      ),
+                    ));
+                  },
+                  child: const Text('X')
+                );
+              },
+            )
+          )
+        )
+      ));
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      // Find action immediately
+      expect(find.text('ACTION'), findsOneWidget);
+      // Snackbar doesn't close
+      await tester.pump(const Duration(seconds: 10));
+      expect(find.text('ACTION'), findsOneWidget);
+      await tester.tap(find.text('ACTION'));
+      await tester.pump();
+      // Snackbar closes immediately
+      expect(find.text('ACTION'), findsNothing);
+  });
+
+  testWidgets('contributes dismiss semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(new MaterialApp(
+        home: new MediaQuery(
+            data: const MediaQueryData(accessibleNavigation: true),
+            child: Scaffold(
+                key: scaffoldKey,
+                body: new Builder(
+                  builder: (BuildContext context) {
+                    return new GestureDetector(
+                        onTap: () {
+                          Scaffold.of(context).showSnackBar(new SnackBar(
+                            content: const Text('snack'),
+                            duration: const Duration(seconds: 1),
+                            action: new SnackBarAction(
+                                label: 'ACTION',
+                                onPressed: () {}
+                            ),
+                          ));
+                        },
+                        child: const Text('X')
+                    );
+                  },
+                )
+            )
+        )
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemanticsData(find.text('snack')), matchesSemanticsData(
+      isLiveRegion: true,
+      hasDismissAction: true,
+      hasScrollDownAction: true,
+      hasScrollUpAction: true,
+      label: 'snack',
+      textDirection: TextDirection.ltr,
+    ));
+    handle.dispose();
+  });
+
   testWidgets('SnackBar default display duration test', (WidgetTester tester) async {
     const String helloSnackBar = 'Hello SnackBar';
     const Key tapTarget = Key('tap-target');
@@ -528,6 +612,54 @@ void main() {
     expect(find.text(helloSnackBar), findsOneWidget); // frame 0 of dismiss animation
     await tester.pump(const Duration(milliseconds: 750)); // 5.50s // last frame of animation, snackbar removed from build
     expect(find.text(helloSnackBar), findsNothing);
+  });
+
+  testWidgets('SnackBar handles updates to accessibleNavigation', (WidgetTester tester) async {
+    Future<void> boilerplate({bool accessibleNavigation}) {
+      return tester.pumpWidget(new MaterialApp(
+          home: new MediaQuery(
+              data: new MediaQueryData(accessibleNavigation: accessibleNavigation),
+              child: new Scaffold(
+                  body: new Builder(
+                      builder: (BuildContext context) {
+                        return new GestureDetector(
+                            onTap: () {
+                              Scaffold.of(context).showSnackBar(new SnackBar(
+                                  content: const Text('test'),
+                                  action: new SnackBarAction(label: 'foo', onPressed: () {}),
+                              ));
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: const Text('X'),
+                        );
+                      }
+                  )
+              )
+          )
+      ));
+    }
+
+    await boilerplate(accessibleNavigation: false);
+    expect(find.text('test'), findsNothing);
+    await tester.tap(find.text('X'));
+    await tester.pump(); // schedule animation
+    expect(find.text('test'), findsOneWidget);
+    await tester.pump(); // begin animation
+    await tester.pump(const Duration(milliseconds: 4750)); // 4.75s
+    expect(find.text('test'), findsOneWidget);
+
+    // Enabled accessible navigation
+    await boilerplate(accessibleNavigation: true);
+
+    await tester.pump(const Duration(milliseconds: 4000)); // 8.75s
+    await tester.pump();
+    expect(find.text('test'), findsOneWidget);
+
+    // disable accessible navigation
+    await boilerplate(accessibleNavigation: false);
+    await tester.pumpAndSettle(const Duration(milliseconds: 5750));
+
+    expect(find.text('test'), findsNothing);
   });
 
 }

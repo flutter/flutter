@@ -35,6 +35,12 @@ void main() {
     expect(localizations.dialogLabel, isNotNull);
     expect(localizations.alertDialogLabel, isNotNull);
     expect(localizations.searchFieldLabel, isNotNull);
+    expect(localizations.reorderItemUp, isNotNull);
+    expect(localizations.reorderItemDown, isNotNull);
+    expect(localizations.reorderItemLeft, isNotNull);
+    expect(localizations.reorderItemRight, isNotNull);
+    expect(localizations.reorderItemToEnd, isNotNull);
+    expect(localizations.reorderItemToStart, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

@@ -384,6 +384,9 @@ void _tests() {
               new TestSemantics(
                 children: <TestSemantics>[
                   new TestSemantics(
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.hasImplicitScrolling,
+                    ],
                     children: <TestSemantics>[
                       new TestSemantics(
                         label: 'Item 4',
