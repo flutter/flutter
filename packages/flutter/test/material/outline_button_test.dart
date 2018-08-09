@@ -51,7 +51,7 @@ void main() {
     const Color disabledBorderColor = const Color(0xFFFF00FF);
     const double borderWidth = 4.0;
 
-    Widget buildFrame(Key key, VoidCallback onPressed) {
+    Widget buildFrame({VoidCallback onPressed}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: new Theme(
@@ -59,7 +59,6 @@ void main() {
           child: new Container(
             alignment: Alignment.topLeft,
             child: OutlineButton(
-              key: key,
               shape: const RoundedRectangleBorder(), // default border radius is 0
               color: fillColor,
               highlightedBorderColor: highlightedBorderColor,
@@ -79,47 +78,47 @@ void main() {
     final Rect clipRect = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
     final Path clipPath = new Path()..addRect(clipRect);
 
-    // Pump a widget with a null onPressed to make it disabled.
-    const Key disabledKey = Key('disabled');
+    final Finder outlineButton = find.byType(OutlineButton);
+
+    // Pump a button with a null onPressed callback to make it disabled.
     await tester.pumpWidget(
-      buildFrame(disabledKey, null),
+      buildFrame(onPressed: null),
     );
 
-    final Finder disabledOutlineButton = find.byKey(disabledKey);
-    expect(tester.widget<OutlineButton>(disabledOutlineButton).enabled, false);
-
+    // Expect that the button is disabled and painted with the disabled border color.
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
     expect(
-      disabledOutlineButton,
+      outlineButton,
       paints
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
 
-    // Pump a new widget with no onPressed to make it enabled.
-    const Key enabledKey = Key('enabled');
+    // Pump a new button with a no-op onPressed callback to make it enabled.
     await tester.pumpWidget(
-      buildFrame(enabledKey, () { }),
+      buildFrame(onPressed: () { }),
     );
 
-    final Finder enabledOutlineButton = find.byKey(enabledKey);
-    expect(tester.widget<OutlineButton>(enabledOutlineButton).enabled, true);
+    // Wait for the border color to change from disabled to enabled.
+    await tester.pumpAndSettle();
 
-    await tester.pump();
+    // Expect that the button is disabled and painted with the enabled border color.
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     expect(
-      enabledOutlineButton,
+      outlineButton,
       paints
         // initially the interior of the button is transparent
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
 
-    final Offset center = tester.getCenter(enabledOutlineButton);
+    final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
     // Wait for the border's color to change to highlightedBorderColor and
     // the fillColor to become opaque.
     await tester.pump(const Duration(milliseconds: 200));
     expect(
-      enabledOutlineButton,
+      outlineButton,
       paints
         ..path(color: fillColor.withAlpha(0xFF))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
@@ -129,7 +128,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(
-      enabledOutlineButton,
+      outlineButton,
       paints
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
