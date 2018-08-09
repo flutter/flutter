@@ -59,6 +59,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   Timer _fadeoutTimer;
 
   @override
+  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
+
+  @override
   void initState() {
     super.initState();
     _fadeoutAnimationController = new AnimationController(

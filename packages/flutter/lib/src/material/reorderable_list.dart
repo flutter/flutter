@@ -284,18 +284,13 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
     );
     final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
-    // Work around to make the dragging work when animations are disabled (run at 20x speed)
-    Duration scrollAnimationDuration = _scrollAnimationDuration;
-    if (window.accessibilityFeatures.disableAnimations) {
-      scrollAnimationDuration *= 20;
-    }
 
     // If the context is off screen, then we request a scroll to make it visible.
     if (!onScreen) {
       _scrolling = true;
       _scrollController.position.animateTo(
         scrollOffset < bottomOffset ? bottomOffset : topOffset,
-        duration: scrollAnimationDuration,
+        duration: _scrollAnimationDuration,
         curve: Curves.easeInOut,
       ).then((Null none) {
         setState(() {
