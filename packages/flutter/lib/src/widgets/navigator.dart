@@ -1819,7 +1819,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   /// Return if `route` exist in the navigator history.
   bool isRouteExist(Route<dynamic> route) {
-    return _history.indexOf(route) >= 0;
+    return (_history.indexOf(route) >= 0);
   }
 
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
