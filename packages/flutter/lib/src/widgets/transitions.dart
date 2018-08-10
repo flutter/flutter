@@ -341,8 +341,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   const FadeTransition({
     Key key,
     @required this.opacity,
-    Widget child,
     this.alwaysIncludeSemantics = false,
+    Widget child,
   }) : super(key: key, child: child);
 
   /// The animation that controls the opacity of the child.
@@ -382,6 +382,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 

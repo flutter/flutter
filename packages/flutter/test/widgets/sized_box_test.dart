@@ -30,6 +30,10 @@ void main() {
     const SizedBox f = SizedBox.expand();
     expect(f.width, double.infinity);
     expect(f.height, double.infinity);
+
+    const SizedBox g = SizedBox.shrink();
+    expect(g.width, 0.0);
+    expect(g.height, 0.0);
   });
 
   testWidgets('SizedBox - no child', (WidgetTester tester) async {
@@ -95,6 +99,15 @@ void main() {
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox.shrink(
+          key: patient,
+        )
+      )
+    );
+    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -166,5 +179,15 @@ void main() {
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox.shrink(
+          key: patient,
+          child: new Container(),
+        )
+      )
+    );
+    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
   });
 }

@@ -11,7 +11,8 @@ const Color _kScrollbarColor = Color(0x99777777);
 const double _kScrollbarThickness = 2.5;
 const double _kScrollbarMainAxisMargin = 4.0;
 const double _kScrollbarCrossAxisMargin = 2.5;
-const double _kScrollbarMinLength = 4.0;
+const double _kScrollbarMinLength = 36.0;
+const double _kScrollbarMinOverscrollLength = 8.0;
 const Radius _kScrollbarRadius = Radius.circular(1.25);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 50);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
@@ -89,6 +90,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       crossAxisMargin: _kScrollbarCrossAxisMargin,
       radius: _kScrollbarRadius,
       minLength: _kScrollbarMinLength,
+      minOverscrollLength: _kScrollbarMinOverscrollLength,
     );
   }
 
