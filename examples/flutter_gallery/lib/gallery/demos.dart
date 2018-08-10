@@ -402,11 +402,11 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
     ),
     new GalleryDemo(
-      title: 'Dialogs',
+      title: 'Alerts',
       icon: GalleryIcons.dialogs,
       category: _kCupertinoComponents,
-      routeName: CupertinoDialogDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoDialogDemo(),
+      routeName: CupertinoAlertDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoAlertDemo(),
     ),
     new GalleryDemo(
       title: 'Navigation',
