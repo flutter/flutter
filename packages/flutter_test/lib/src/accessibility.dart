@@ -336,5 +336,5 @@ const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(
 /// partitioning of the colors into "light" and "dark" and then chooses the most
 /// frequently occurring color in each partition as a representative of the
 /// foreground and background colors. The contrast ratio is calculated from
-/// these colors according to https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef
+/// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
 const AccessibilityGuideline textContrastGuideline = _MinimumTextContrastGuideline();
