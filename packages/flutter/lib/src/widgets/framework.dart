@@ -4034,7 +4034,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
 }
 
 /// Used by [InheritedElement] to represent the aspects of its
-/// [InheritedWidget] that it depends on.
+/// [InheritedWidget] that will a dependent to be rebuilt.
 ///
 /// If [isGlobal] is true then a dependent widget should be rebuilt
 /// whenever the inherited widget it depends on changes.
@@ -4048,7 +4048,7 @@ class InheritedDependencies {
   /// Construct an InheritedDependencies object.
   const InheritedDependencies();
 
-  /// True then a dependent widget should be rebuilt whenever the inherited
+  /// If true then a dependent widget should be rebuilt whenever the inherited
   /// widget it depends on changes.
   ///
   /// This method returns true. Subclasses may return false because their
