@@ -31,8 +31,8 @@ void main() {
           fail('ToolExit expected, but nothing thrown');
         } on ToolExit catch(e) {
           expect(e.message, messageMatcher);
-        } catch(e) {
-          fail('ToolExit expected, got $e');
+        } catch(e, trace) {
+          fail('ToolExit expected, got $e\n$trace');
         }
       }
 
