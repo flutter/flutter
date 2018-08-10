@@ -218,7 +218,6 @@ class RawKeyboard {
   static final RawKeyboard instance = new RawKeyboard._();
 
   final List<ValueChanged<RawKeyEvent>> _listeners = <ValueChanged<RawKeyEvent>>[];
-  
   /// Calls the listener every time the user presses or releases a key.
   ///
   /// Listeners can be removed with [removeListener].
