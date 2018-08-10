@@ -1,4 +1,4 @@
-Signature: 47715821607d8bd183d779f34e455565
+Signature: 23488eb5053d0e9632b2f49ae29b8973
 
 UNUSED LICENSES:
 
@@ -1481,6 +1481,7 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.h
@@ -1879,11 +1880,15 @@ FILE: ../../../third_party/skia/docs/SkBlendMode_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkColor4f_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkColor_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkDynamicMemoryWStream_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkFILEStream_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkFILEWStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIPoint_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIRect_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkImageInfo_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkImage_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkMatrix_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkMemoryStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPaint_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPath_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPicture_Reference.bmh
@@ -1891,7 +1896,12 @@ FILE: ../../../third_party/skia/docs/SkPixmap_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPoint_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkRRect_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkRect_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkRegion_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkSurface_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkTextBlobBuilder_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkTextBlob_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkWStream_Reference.bmh
 FILE: ../../../third_party/skia/docs/illustrations.bmh
 FILE: ../../../third_party/skia/docs/markup.bmh
 FILE: ../../../third_party/skia/docs/overview.bmh
@@ -3452,7 +3462,7 @@ FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextContext.h
-FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.h
+FILE: ../../../third_party/skia/src/gpu/text/GrTextTarget.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBuffer.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCaps.cpp
