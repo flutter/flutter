@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
-import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'object.dart';
 import 'viewport_offset.dart';
-import 'package:flutter/foundation.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
