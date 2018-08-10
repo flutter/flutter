@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Clip;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -124,6 +122,13 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     canvas.save();
     canvas.transform(transform.storage);
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
   }

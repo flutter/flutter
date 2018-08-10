@@ -65,7 +65,7 @@ class WriteBuffer {
     _buffer.addAll(list);
   }
 
-  /// Write all the values from a [Int32List] into the buffer.
+  /// Write all the values from an [Int32List] into the buffer.
   void putInt32List(Int32List list) {
     _alignTo(4);
     _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));

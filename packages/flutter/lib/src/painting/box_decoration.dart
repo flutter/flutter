@@ -93,7 +93,7 @@ class BoxDecoration extends Decoration {
   @override
   bool debugAssertIsValid() {
     assert(shape != BoxShape.circle ||
-           borderRadius == null); // Can't have a border radius if you're a circle.
+          borderRadius == null); // Can't have a border radius if you're a circle.
     return super.debugAssertIsValid();
   }
 
