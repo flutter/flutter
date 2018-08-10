@@ -135,7 +135,10 @@ class CupertinoDialog extends StatelessWidget {
           child: new Container(
             width: _kCupertinoDialogWidth,
             decoration: _kCupertinoDialogBlurOverlayDecoration,
-            child: child,
+            child: new Container(
+              color: _kDialogColor,
+              child: child,
+            ),
           ),
         ),
       ),
