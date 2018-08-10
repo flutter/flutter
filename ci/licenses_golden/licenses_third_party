@@ -1,4 +1,4 @@
-Signature: 350887638dbf5cdb4d0e1879ddb0cf33
+Signature: ec72b49802f64feb7fa74573a404abc5
 
 UNUSED LICENSES:
 
@@ -6576,96 +6576,99 @@ FILE: ../../../third_party/freetype2/Jamfile
 FILE: ../../../third_party/freetype2/Jamrules
 FILE: ../../../third_party/freetype2/devel/ft2build.h
 FILE: ../../../third_party/freetype2/devel/ftoption.h
-FILE: ../../../third_party/freetype2/include/config/ftconfig.h
-FILE: ../../../third_party/freetype2/include/config/ftheader.h
-FILE: ../../../third_party/freetype2/include/config/ftmodule.h
-FILE: ../../../third_party/freetype2/include/config/ftoption.h
-FILE: ../../../third_party/freetype2/include/config/ftstdlib.h
 FILE: ../../../third_party/freetype2/include/freetype-fuchsia-config/ftmodule.h
 FILE: ../../../third_party/freetype2/include/freetype-fuchsia-config/ftoption.h
-FILE: ../../../third_party/freetype2/include/freetype.h
+FILE: ../../../third_party/freetype2/include/freetype/config/ftconfig.h
+FILE: ../../../third_party/freetype2/include/freetype/config/ftheader.h
+FILE: ../../../third_party/freetype2/include/freetype/config/ftmodule.h
+FILE: ../../../third_party/freetype2/include/freetype/config/ftoption.h
+FILE: ../../../third_party/freetype2/include/freetype/config/ftstdlib.h
+FILE: ../../../third_party/freetype2/include/freetype/freetype.h
+FILE: ../../../third_party/freetype2/include/freetype/ftadvanc.h
+FILE: ../../../third_party/freetype2/include/freetype/ftbbox.h
+FILE: ../../../third_party/freetype2/include/freetype/ftbdf.h
+FILE: ../../../third_party/freetype2/include/freetype/ftbitmap.h
+FILE: ../../../third_party/freetype2/include/freetype/ftbzip2.h
+FILE: ../../../third_party/freetype2/include/freetype/ftcache.h
+FILE: ../../../third_party/freetype2/include/freetype/ftchapters.h
+FILE: ../../../third_party/freetype2/include/freetype/ftcid.h
+FILE: ../../../third_party/freetype2/include/freetype/ftdriver.h
+FILE: ../../../third_party/freetype2/include/freetype/fterrdef.h
+FILE: ../../../third_party/freetype2/include/freetype/fterrors.h
+FILE: ../../../third_party/freetype2/include/freetype/ftfntfmt.h
+FILE: ../../../third_party/freetype2/include/freetype/ftgasp.h
+FILE: ../../../third_party/freetype2/include/freetype/ftglyph.h
+FILE: ../../../third_party/freetype2/include/freetype/ftgxval.h
+FILE: ../../../third_party/freetype2/include/freetype/ftgzip.h
+FILE: ../../../third_party/freetype2/include/freetype/ftimage.h
+FILE: ../../../third_party/freetype2/include/freetype/ftincrem.h
+FILE: ../../../third_party/freetype2/include/freetype/ftlcdfil.h
+FILE: ../../../third_party/freetype2/include/freetype/ftlist.h
+FILE: ../../../third_party/freetype2/include/freetype/ftlzw.h
+FILE: ../../../third_party/freetype2/include/freetype/ftmac.h
+FILE: ../../../third_party/freetype2/include/freetype/ftmm.h
+FILE: ../../../third_party/freetype2/include/freetype/ftmodapi.h
+FILE: ../../../third_party/freetype2/include/freetype/ftmoderr.h
+FILE: ../../../third_party/freetype2/include/freetype/ftotval.h
+FILE: ../../../third_party/freetype2/include/freetype/ftoutln.h
+FILE: ../../../third_party/freetype2/include/freetype/ftparams.h
+FILE: ../../../third_party/freetype2/include/freetype/ftpfr.h
+FILE: ../../../third_party/freetype2/include/freetype/ftrender.h
+FILE: ../../../third_party/freetype2/include/freetype/ftsizes.h
+FILE: ../../../third_party/freetype2/include/freetype/ftsnames.h
+FILE: ../../../third_party/freetype2/include/freetype/ftstroke.h
+FILE: ../../../third_party/freetype2/include/freetype/ftsynth.h
+FILE: ../../../third_party/freetype2/include/freetype/ftsystem.h
+FILE: ../../../third_party/freetype2/include/freetype/fttrigon.h
+FILE: ../../../third_party/freetype2/include/freetype/fttypes.h
+FILE: ../../../third_party/freetype2/include/freetype/ftwinfnt.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/autohint.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/cffotypes.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/cfftypes.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftcalc.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftdebug.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftdrv.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftgloadr.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftmemory.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftobjs.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftpic.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftpsprop.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftrfork.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftserv.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftstream.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/fttrace.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/ftvalid.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/internal.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/psaux.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/pshints.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svbdf.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svcfftl.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svcid.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svfntfmt.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svgldict.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svgxval.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svkern.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svmetric.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svmm.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svotval.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svpfr.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svpostnm.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svprop.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svpscmap.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svpsinfo.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svsfnt.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svttcmap.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svtteng.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svttglyf.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/services/svwinfnt.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/sfnt.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/t1types.h
+FILE: ../../../third_party/freetype2/include/freetype/internal/tttypes.h
+FILE: ../../../third_party/freetype2/include/freetype/t1tables.h
+FILE: ../../../third_party/freetype2/include/freetype/ttnameid.h
+FILE: ../../../third_party/freetype2/include/freetype/tttables.h
+FILE: ../../../third_party/freetype2/include/freetype/tttags.h
 FILE: ../../../third_party/freetype2/include/ft2build.h
-FILE: ../../../third_party/freetype2/include/ftadvanc.h
-FILE: ../../../third_party/freetype2/include/ftautoh.h
-FILE: ../../../third_party/freetype2/include/ftbbox.h
-FILE: ../../../third_party/freetype2/include/ftbdf.h
-FILE: ../../../third_party/freetype2/include/ftbitmap.h
-FILE: ../../../third_party/freetype2/include/ftbzip2.h
-FILE: ../../../third_party/freetype2/include/ftcache.h
-FILE: ../../../third_party/freetype2/include/ftcffdrv.h
-FILE: ../../../third_party/freetype2/include/ftchapters.h
-FILE: ../../../third_party/freetype2/include/ftcid.h
-FILE: ../../../third_party/freetype2/include/fterrdef.h
-FILE: ../../../third_party/freetype2/include/fterrors.h
-FILE: ../../../third_party/freetype2/include/ftfntfmt.h
-FILE: ../../../third_party/freetype2/include/ftgasp.h
-FILE: ../../../third_party/freetype2/include/ftglyph.h
-FILE: ../../../third_party/freetype2/include/ftgxval.h
-FILE: ../../../third_party/freetype2/include/ftgzip.h
-FILE: ../../../third_party/freetype2/include/ftimage.h
-FILE: ../../../third_party/freetype2/include/ftincrem.h
-FILE: ../../../third_party/freetype2/include/ftlcdfil.h
-FILE: ../../../third_party/freetype2/include/ftlist.h
-FILE: ../../../third_party/freetype2/include/ftlzw.h
-FILE: ../../../third_party/freetype2/include/ftmac.h
-FILE: ../../../third_party/freetype2/include/ftmm.h
-FILE: ../../../third_party/freetype2/include/ftmodapi.h
-FILE: ../../../third_party/freetype2/include/ftmoderr.h
-FILE: ../../../third_party/freetype2/include/ftotval.h
-FILE: ../../../third_party/freetype2/include/ftoutln.h
-FILE: ../../../third_party/freetype2/include/ftpfr.h
-FILE: ../../../third_party/freetype2/include/ftrender.h
-FILE: ../../../third_party/freetype2/include/ftsizes.h
-FILE: ../../../third_party/freetype2/include/ftsnames.h
-FILE: ../../../third_party/freetype2/include/ftstroke.h
-FILE: ../../../third_party/freetype2/include/ftsynth.h
-FILE: ../../../third_party/freetype2/include/ftsystem.h
-FILE: ../../../third_party/freetype2/include/fttrigon.h
-FILE: ../../../third_party/freetype2/include/ftttdrv.h
-FILE: ../../../third_party/freetype2/include/fttypes.h
-FILE: ../../../third_party/freetype2/include/ftwinfnt.h
-FILE: ../../../third_party/freetype2/include/internal/autohint.h
-FILE: ../../../third_party/freetype2/include/internal/ftcalc.h
-FILE: ../../../third_party/freetype2/include/internal/ftdebug.h
-FILE: ../../../third_party/freetype2/include/internal/ftdriver.h
-FILE: ../../../third_party/freetype2/include/internal/ftgloadr.h
-FILE: ../../../third_party/freetype2/include/internal/ftmemory.h
-FILE: ../../../third_party/freetype2/include/internal/ftobjs.h
-FILE: ../../../third_party/freetype2/include/internal/ftpic.h
-FILE: ../../../third_party/freetype2/include/internal/ftrfork.h
-FILE: ../../../third_party/freetype2/include/internal/ftserv.h
-FILE: ../../../third_party/freetype2/include/internal/ftstream.h
-FILE: ../../../third_party/freetype2/include/internal/fttrace.h
-FILE: ../../../third_party/freetype2/include/internal/ftvalid.h
-FILE: ../../../third_party/freetype2/include/internal/internal.h
-FILE: ../../../third_party/freetype2/include/internal/psaux.h
-FILE: ../../../third_party/freetype2/include/internal/pshints.h
-FILE: ../../../third_party/freetype2/include/internal/services/svbdf.h
-FILE: ../../../third_party/freetype2/include/internal/services/svcid.h
-FILE: ../../../third_party/freetype2/include/internal/services/svfntfmt.h
-FILE: ../../../third_party/freetype2/include/internal/services/svgldict.h
-FILE: ../../../third_party/freetype2/include/internal/services/svgxval.h
-FILE: ../../../third_party/freetype2/include/internal/services/svkern.h
-FILE: ../../../third_party/freetype2/include/internal/services/svmm.h
-FILE: ../../../third_party/freetype2/include/internal/services/svotval.h
-FILE: ../../../third_party/freetype2/include/internal/services/svpfr.h
-FILE: ../../../third_party/freetype2/include/internal/services/svpostnm.h
-FILE: ../../../third_party/freetype2/include/internal/services/svprop.h
-FILE: ../../../third_party/freetype2/include/internal/services/svpscmap.h
-FILE: ../../../third_party/freetype2/include/internal/services/svpsinfo.h
-FILE: ../../../third_party/freetype2/include/internal/services/svsfnt.h
-FILE: ../../../third_party/freetype2/include/internal/services/svttcmap.h
-FILE: ../../../third_party/freetype2/include/internal/services/svtteng.h
-FILE: ../../../third_party/freetype2/include/internal/services/svttglyf.h
-FILE: ../../../third_party/freetype2/include/internal/services/svwinfnt.h
-FILE: ../../../third_party/freetype2/include/internal/sfnt.h
-FILE: ../../../third_party/freetype2/include/internal/t1types.h
-FILE: ../../../third_party/freetype2/include/internal/tttypes.h
-FILE: ../../../third_party/freetype2/include/t1tables.h
-FILE: ../../../third_party/freetype2/include/ttnameid.h
-FILE: ../../../third_party/freetype2/include/tttables.h
-FILE: ../../../third_party/freetype2/include/tttags.h
-FILE: ../../../third_party/freetype2/include/ttunpat.h
 FILE: ../../../third_party/freetype2/modules.cfg
 FILE: ../../../third_party/freetype2/src/Jamfile
 FILE: ../../../third_party/freetype2/src/autofit/Jamfile
@@ -6701,14 +6704,14 @@ FILE: ../../../third_party/freetype2/src/autofit/afpic.h
 FILE: ../../../third_party/freetype2/src/autofit/afranges.c
 FILE: ../../../third_party/freetype2/src/autofit/afranges.h
 FILE: ../../../third_party/freetype2/src/autofit/afscript.h
+FILE: ../../../third_party/freetype2/src/autofit/afshaper.c
+FILE: ../../../third_party/freetype2/src/autofit/afshaper.h
 FILE: ../../../third_party/freetype2/src/autofit/afstyles.h
 FILE: ../../../third_party/freetype2/src/autofit/aftypes.h
 FILE: ../../../third_party/freetype2/src/autofit/afwarp.c
 FILE: ../../../third_party/freetype2/src/autofit/afwarp.h
 FILE: ../../../third_party/freetype2/src/autofit/afwrtsys.h
 FILE: ../../../third_party/freetype2/src/autofit/autofit.c
-FILE: ../../../third_party/freetype2/src/autofit/hbshim.c
-FILE: ../../../third_party/freetype2/src/autofit/hbshim.h
 FILE: ../../../third_party/freetype2/src/base/Jamfile
 FILE: ../../../third_party/freetype2/src/base/basepic.c
 FILE: ../../../third_party/freetype2/src/base/basepic.h
@@ -6739,6 +6742,7 @@ FILE: ../../../third_party/freetype2/src/base/ftoutln.c
 FILE: ../../../third_party/freetype2/src/base/ftpatent.c
 FILE: ../../../third_party/freetype2/src/base/ftpfr.c
 FILE: ../../../third_party/freetype2/src/base/ftpic.c
+FILE: ../../../third_party/freetype2/src/base/ftpsprop.c
 FILE: ../../../third_party/freetype2/src/base/ftrfork.c
 FILE: ../../../third_party/freetype2/src/base/ftsnames.c
 FILE: ../../../third_party/freetype2/src/base/ftstream.c
@@ -6748,6 +6752,7 @@ FILE: ../../../third_party/freetype2/src/base/ftsystem.c
 FILE: ../../../third_party/freetype2/src/base/fttrigon.c
 FILE: ../../../third_party/freetype2/src/base/fttype1.c
 FILE: ../../../third_party/freetype2/src/base/ftutil.c
+FILE: ../../../third_party/freetype2/src/base/ftver.rc
 FILE: ../../../third_party/freetype2/src/base/ftwinfnt.c
 FILE: ../../../third_party/freetype2/src/base/md5.c
 FILE: ../../../third_party/freetype2/src/base/md5.h
@@ -6773,27 +6778,6 @@ FILE: ../../../third_party/freetype2/src/cache/ftcmru.h
 FILE: ../../../third_party/freetype2/src/cache/ftcsbits.c
 FILE: ../../../third_party/freetype2/src/cache/ftcsbits.h
 FILE: ../../../third_party/freetype2/src/cff/Jamfile
-FILE: ../../../third_party/freetype2/src/cff/cf2arrst.c
-FILE: ../../../third_party/freetype2/src/cff/cf2arrst.h
-FILE: ../../../third_party/freetype2/src/cff/cf2blues.c
-FILE: ../../../third_party/freetype2/src/cff/cf2blues.h
-FILE: ../../../third_party/freetype2/src/cff/cf2error.c
-FILE: ../../../third_party/freetype2/src/cff/cf2error.h
-FILE: ../../../third_party/freetype2/src/cff/cf2fixed.h
-FILE: ../../../third_party/freetype2/src/cff/cf2font.c
-FILE: ../../../third_party/freetype2/src/cff/cf2font.h
-FILE: ../../../third_party/freetype2/src/cff/cf2ft.c
-FILE: ../../../third_party/freetype2/src/cff/cf2ft.h
-FILE: ../../../third_party/freetype2/src/cff/cf2glue.h
-FILE: ../../../third_party/freetype2/src/cff/cf2hints.c
-FILE: ../../../third_party/freetype2/src/cff/cf2hints.h
-FILE: ../../../third_party/freetype2/src/cff/cf2intrp.c
-FILE: ../../../third_party/freetype2/src/cff/cf2intrp.h
-FILE: ../../../third_party/freetype2/src/cff/cf2read.c
-FILE: ../../../third_party/freetype2/src/cff/cf2read.h
-FILE: ../../../third_party/freetype2/src/cff/cf2stack.c
-FILE: ../../../third_party/freetype2/src/cff/cf2stack.h
-FILE: ../../../third_party/freetype2/src/cff/cf2types.h
 FILE: ../../../third_party/freetype2/src/cff/cff.c
 FILE: ../../../third_party/freetype2/src/cff/cffcmap.c
 FILE: ../../../third_party/freetype2/src/cff/cffcmap.h
@@ -6811,7 +6795,6 @@ FILE: ../../../third_party/freetype2/src/cff/cffparse.h
 FILE: ../../../third_party/freetype2/src/cff/cffpic.c
 FILE: ../../../third_party/freetype2/src/cff/cffpic.h
 FILE: ../../../third_party/freetype2/src/cff/cfftoken.h
-FILE: ../../../third_party/freetype2/src/cff/cfftypes.h
 FILE: ../../../third_party/freetype2/src/cid/Jamfile
 FILE: ../../../third_party/freetype2/src/cid/ciderrs.h
 FILE: ../../../third_party/freetype2/src/cid/cidgload.c
@@ -6901,14 +6884,37 @@ FILE: ../../../third_party/freetype2/src/pfr/pfrtypes.h
 FILE: ../../../third_party/freetype2/src/psaux/Jamfile
 FILE: ../../../third_party/freetype2/src/psaux/afmparse.c
 FILE: ../../../third_party/freetype2/src/psaux/afmparse.h
+FILE: ../../../third_party/freetype2/src/psaux/cffdecode.c
+FILE: ../../../third_party/freetype2/src/psaux/cffdecode.h
+FILE: ../../../third_party/freetype2/src/psaux/psarrst.c
+FILE: ../../../third_party/freetype2/src/psaux/psarrst.h
 FILE: ../../../third_party/freetype2/src/psaux/psaux.c
 FILE: ../../../third_party/freetype2/src/psaux/psauxerr.h
 FILE: ../../../third_party/freetype2/src/psaux/psauxmod.c
 FILE: ../../../third_party/freetype2/src/psaux/psauxmod.h
+FILE: ../../../third_party/freetype2/src/psaux/psblues.c
+FILE: ../../../third_party/freetype2/src/psaux/psblues.h
 FILE: ../../../third_party/freetype2/src/psaux/psconv.c
 FILE: ../../../third_party/freetype2/src/psaux/psconv.h
+FILE: ../../../third_party/freetype2/src/psaux/pserror.c
+FILE: ../../../third_party/freetype2/src/psaux/pserror.h
+FILE: ../../../third_party/freetype2/src/psaux/psfixed.h
+FILE: ../../../third_party/freetype2/src/psaux/psfont.c
+FILE: ../../../third_party/freetype2/src/psaux/psfont.h
+FILE: ../../../third_party/freetype2/src/psaux/psft.c
+FILE: ../../../third_party/freetype2/src/psaux/psft.h
+FILE: ../../../third_party/freetype2/src/psaux/psglue.h
+FILE: ../../../third_party/freetype2/src/psaux/pshints.c
+FILE: ../../../third_party/freetype2/src/psaux/pshints.h
+FILE: ../../../third_party/freetype2/src/psaux/psintrp.c
+FILE: ../../../third_party/freetype2/src/psaux/psintrp.h
 FILE: ../../../third_party/freetype2/src/psaux/psobjs.c
 FILE: ../../../third_party/freetype2/src/psaux/psobjs.h
+FILE: ../../../third_party/freetype2/src/psaux/psread.c
+FILE: ../../../third_party/freetype2/src/psaux/psread.h
+FILE: ../../../third_party/freetype2/src/psaux/psstack.c
+FILE: ../../../third_party/freetype2/src/psaux/psstack.h
+FILE: ../../../third_party/freetype2/src/psaux/pstypes.h
 FILE: ../../../third_party/freetype2/src/psaux/t1cmap.c
 FILE: ../../../third_party/freetype2/src/psaux/t1cmap.h
 FILE: ../../../third_party/freetype2/src/psaux/t1decode.c
@@ -7183,9 +7189,39 @@ Legal Terms
 
   Our home page can be found at
 
-    http://www.freetype.org
+    https://www.freetype.org
 
 --- end of FTL.TXT ---
+====================================================================================================
+
+====================================================================================================
+LIBRARY: freetype2
+ORIGIN: ../../../third_party/freetype2/include/freetype/internal/fthash.h
+TYPE: LicenseType.mit
+FILE: ../../../third_party/freetype2/include/freetype/internal/fthash.h
+FILE: ../../../third_party/freetype2/src/base/fthash.c
+----------------------------------------------------------------------------------------------------
+Copyright 2000 Computing Research Labs, New Mexico State University
+Copyright 2001-2015
+  Francesco Zappa Nardelli
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+THE COMPUTING RESEARCH LAB OR NEW MEXICO STATE UNIVERSITY BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT
+OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
@@ -7392,9 +7428,9 @@ freely, subject to the following restrictions:
 
 ====================================================================================================
 LIBRARY: freetype2
-ORIGIN: ../../../third_party/freetype2/src/gzip/zconf.h + ../../../third_party/freetype2/src/gzip/zlib.h
+ORIGIN: ../../../third_party/freetype2/src/gzip/ftzconf.h + ../../../third_party/freetype2/src/gzip/zlib.h
 TYPE: LicenseType.zlib
-FILE: ../../../third_party/freetype2/src/gzip/zconf.h
+FILE: ../../../third_party/freetype2/src/gzip/ftzconf.h
 FILE: ../../../third_party/freetype2/src/gzip/zutil.c
 FILE: ../../../third_party/freetype2/src/gzip/zutil.h
 ----------------------------------------------------------------------------------------------------
@@ -17584,4 +17620,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 298
+Total license count: 299
