@@ -25,14 +25,25 @@ void main() {
         );
       });
 
+      Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+        try {
+          await future;
+          fail('ToolExit expected, but nothing thrown');
+        } on ToolExit catch(e) {
+          expect(e.message, messageMatcher);
+        } catch(e) {
+          fail('ToolExit expected, got $e');
+        }
+      }
+
       testInMemory('fails on invalid pubspec.yaml', () async {
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
-        await expectLater(
+        await expectToolExitLater(
           FlutterProject.fromDirectory(directory),
-          throwsA(const isInstanceOf<ToolExit>()),
+          contains('pubspec.yaml'),
         );
       });
 
@@ -41,9 +52,9 @@ void main() {
         directory.childDirectory('example').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
-        await expectLater(
+        await expectToolExitLater(
           FlutterProject.fromDirectory(directory),
-          throwsA(const isInstanceOf<ToolExit>()),
+          contains('pubspec.yaml'),
         );
       });
 
