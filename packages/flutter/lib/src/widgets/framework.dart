@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 
-import 'package:collection/collection.dart' show UnmodifiableSetView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -1572,323 +1571,6 @@ abstract class InheritedWidget extends ProxyWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
-/// An [InheritedWidget] that's intended to be used as the base class for data
-/// models which are scoped to a widget tree.
-///
-/// An inherited widget's dependents are unconditionally rebuilt when the
-/// inherited widget changes per [InheritedWidget.updateShouldNotify].
-/// Widgets that depend on an [InheritedModel] qualify their dependence
-/// with a value that indicates what "aspect" of the model they depend
-/// on. When the model is rebuilt, dependents will also be rebuilt, but
-/// only if there was a change in the model that corresponds to the aspect
-/// they provided.
-///
-/// An inherited model converts aspects into "dependencies" of type `T`
-/// with [getDependencyFor]. By default this method just returns its
-/// `aspect` argument. Models with complex dependencies can build
-/// specialized dependency objects by overriding this method.
-///
-/// The inherited model's [updateShouldNotifyDependent]
-/// method is tested for each dependent and its dependencies.
-///
-/// Widgets create a dependency on an [InheritedModel] with a static method:
-/// [InheritedModel.inheritFrom]. This method's `context` parameter
-/// defines the subtree that will be rebuilt when the model changes.
-/// Typically the `inheritFrom` method is called from a model-specific
-/// static `of` method. For example:
-///
-/// ```dart
-/// class MyModel extends InheritedModel<String> {
-///   // ...
-///   static MyModel of(BuildContext context, String dependency) {
-///     return InheritedModel.inheritFrom<MyModel>(context, aspect: dependency);
-///   }
-/// }
-/// ```
-///
-/// Calling `MyModel.of(context, 'foo')` means that `context` should only
-/// be rebuilt when the `foo` aspect of `MyModel` changes.
-///
-/// The [updateShouldNotifyDependent] method decides if a change in the model
-/// warrants rebuilding a dependent (BuildContext). It must compare the old
-/// and new [InheritedModel] widget configurations with a set of dependencies
-/// and decide if the model's changes correspond to any of the dependencies.
-///
-/// For example:
-///
-/// ```dart
-/// class ABModel extends InheritedModel<String> {
-///   ABModel({ this.a, this.b, Widget child }) : super(child: child);
-///
-///   final int a;
-///   final int b;
-///
-///   @override
-///   bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
-///     return (a != old.a && dependencies.contains('a'))
-///         || (b != old.b && dependencies.contains('b'))
-///   }
-///
-///   // ...
-/// }
-/// ```
-///
-/// In the previous example the dependency checked by
-/// [updateShouldNotifyDependent] is just the aspect string passed to
-/// `inheritFromWidgetOfExactType`. Sometimes it's useful to have the
-/// model create a dependency object that's based on the aspect but takes
-/// the current state of the model into account. The [getDependencyFor]
-/// method is called when a dependency is first created with
-/// `inheritFromWidgetOfExactType` and each time [update] process is
-/// completed.
-///
-/// In the following code example, `IntegerTree` represents a data model
-/// whose values are specified with paths, like '/a/b/c'. The IntegerModel
-/// has-a integer tree instance and is rebuilt when its descendants' view
-/// of the model should be updated. The [getDependencyFor] override
-/// converts the aspect, which is a path, to a `PathDependency` object. The
-/// path dependency saves the value of the path so that
-/// `updateShouldNotifyDependent` can compare it with the current value.
-///
-/// ```dart
-/// class IntegerTree {
-///   int valueOf(String path) => _lookup(path);
-///   // ...
-/// }
-///
-/// class PathDependency {
-///   PathDependency(this.path, this.value);
-///   final String path;
-///   final int value;
-/// }
-///
-/// class IntegerModel extends InheritedModel<PathDependency> {
-///   IntegerModel({ this.integerTree, Widget child }) : super(child: child);
-///
-///   final IntegerTree integerTree;
-///
-///   @override
-///   PathDependency getDependencyFor(dynamic aspect) {
-///     final String path = aspect;
-///     return new PathDependency(path, integerTree.valueOf(path));
-///   }
-///
-///   @override
-///   bool updateShouldNotifyDependent(IntegerModel old, Set<PathDependency> dependencies ) {
-///     for (PathDependency dependency in dependencies) {
-///       if (dependency.value != integerTree.valueOf(dependency.path))
-///         return true;
-///     }
-///     return false;
-///   }
-///
-///   // ...
-/// }
-/// ```
-///
-/// By default [InheritedWidget.updateShouldNotify] returns true. Subclasses
-/// can override it to quickly short circuit the update and skip calling
-/// [updateShouldNotifyDependent].
-abstract class InheritedModel<T> extends InheritedWidget {
-  const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
-
-  @override
-  InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
-
-  /// Returns a `T` that represents a dependency on this model.
-  ///
-  /// Returns [aspect] by default.
-  @protected
-  T getDependencyFor(dynamic aspect) => aspect;
-
-  @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
-
-  /// Return true if the changes between this model and [oldWidget] match any
-  /// of the [dependencies].
-  @protected
-  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
-
-  // Return the first ancestor of context whose widget is type T and for which
-  // vistor(widget) returns false. If visitor is null then this function is the
-  // same as: context.ancestorInheritedElementForWidgetOfExactType(T).
-  static InheritedElement _findModel<T extends InheritedModel<dynamic>>(
-    BuildContext context,
-    bool visitor(T widget)
-  ) {
-    final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
-    if (model == null)
-      return null;
-
-    assert(model.widget is T);
-    final T modelWidget = model.widget;
-    if (visitor == null || !visitor(modelWidget))
-      return model;
-
-    Element modelParent;
-    model.visitAncestorElements((Element ancestor) {
-      modelParent = ancestor;
-      return false;
-    });
-    if (modelParent == null)
-      return null;
-    return _findModel<T>(modelParent, visitor);
-  }
-
-  /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
-  /// of type T.
-  ///
-  /// When the given [aspect] of the model changes, the context will be
-  /// rebuilt. The [updateShouldNotifyDependent] method must determine if a
-  /// change in the model widget corresponds to an `aspect` value.
-  ///
-  /// By default, the dependency created by this method targets the first
-  /// [InheritedModel] ancestor of type T. If [visitor] is specified then
-  /// it's the first [InheritedModel] ancestor of type T for which
-  /// [vistor] returns false. The vistor parameter can be used to create
-  /// models that override some values and delegate the rest to an
-  /// ancestor model.
-  ///
-  /// In the following example the model's static `valueOf` method returns the
-  /// first non-null value of `path`. By doing so the caller will have created
-  /// a `context` dependency on the first model ancestor that has a non-null
-  /// value for the specified path.
-  ///
-  /// ```dart
-  /// class IntegerModel extends InheritedModel<String> {
-  ///   // ...
-  ///   int valueOf(String path) => _model.valueOf(path);
-  ///
-  ///   static int valueOf(BuildContext context, String path) {
-  ///     int value;
-  ///     InheritedModel.inheritFrom<IntegerModel>(context,
-  ///       aspect: path,
-  ///       visitor: (IntegerModel widget) => (value = widget.valueOf(path)) == null,
-  ///     );
-  ///     return value;
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// If [aspect] and [visitor] are null this method is the same as:
-  /// `context.inheritFromWidgetOfExactType(T)`.
-  static T inheritFrom<T extends InheritedModel<dynamic>>(
-    BuildContext context, {
-    dynamic aspect,
-    bool visitor(T widget),
-  }) {
-    final InheritedElement model = _findModel<T>(context, visitor);
-    if (model != null)
-      return context.inheritFromWidgetOfExactType(T, aspect: aspect, target: model);
-    return null;
-  }
-}
-
-// The dependency, produced by getDependencyFor(aspect), between an element and an
-// InheritedModel. Two dependencies are equal if the aspects they were based on
-// are equal.
-class _AspectDependency<T> {
-  _AspectDependency(this.aspect, this.dependency) : assert(aspect != null), assert(dependency != null);
-
-  final dynamic aspect;
-  final T dependency;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    final _AspectDependency<T> typedOther = other;
-    return aspect == typedOther.aspect;
-  }
-
-  @override
-  int get hashCode => aspect.hashCode;
-}
-
-/// An [Element] that uses a [InheritedModel] as its configuration.
-class InheritedModelElement<T> extends InheritedElement {
-  /// Creates an element that uses the given widget as its configuration.
-  InheritedModelElement(InheritedModel<T> widget) : super(widget);
-
-  @override
-  InheritedModel<T> get widget => super.widget;
-
-  _AspectDependency<T> _getAspectDependency(dynamic aspect) {
-    return new _AspectDependency<T>(aspect, widget.getDependencyFor(aspect));
-  }
-
-  // If `aspect` is ever null, then always rebuild element when this inherited
-  // widget changes, regardless of which aspects have changed.
-  void _addDependent(Element element, dynamic aspect) {
-    if (aspect == null) {
-      // ignore: prefer_const_constructors
-      _dependents[element] = new UnmodifiableSetView<T>.empty();
-    } else if (_dependents[element] == null) {
-      _dependents[element] = new HashSet<_AspectDependency<T>>.of(
-        <_AspectDependency<T>>[ _getAspectDependency(aspect) ]
-      );
-    } else if (_dependents[element].isNotEmpty) {
-      _dependents[element].add(_getAspectDependency(aspect));
-    } // otherwise _addDependent was already called with aspect == null
-  }
-
-  // The value of _dependents[dependent] is a Set<_AspectDependency>. Return a
-  // new set that just contains the dependencies.
-  Set<T> _getModelDependencies(Element dependent) {
-    if (_dependents[dependent].isEmpty) {
-      // ignore: prefer_const_constructors
-      return new UnmodifiableSetView<T>.empty();
-    }
-    return new HashSet<T>.of(
-      _dependents[dependent].map((dynamic aspectDependencyValue) {
-        final _AspectDependency<T> aspectDependency = aspectDependencyValue;
-        return aspectDependency.dependency;
-      })
-    );
-  }
-
-  /// Calls [Element.didChangeDependencies] if
-  /// [InheritedModel.updateShouldNotify] returns true and
-  /// [InheritedModel.updateShouldNotifyDependent] returns true for the
-  /// element's [InheritedModel] widget.
-  ///
-  /// This method must be called during the build phase. Usually this method is
-  /// called automatically when an inherited model is rebuilt, e.g. as a
-  /// result of calling [State.setState] above the inherited model.
-  @override
-  void notifyClients(InheritedModel<T> oldWidget) {
-    if (!widget.updateShouldNotify(oldWidget))
-      return;
-    assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
-    for (Element dependent in _dependents.keys) {
-      assert(() {
-        // check that it really is our descendant
-        Element ancestor = dependent._parent;
-        while (ancestor != this && ancestor != null)
-          ancestor = ancestor._parent;
-        return ancestor == this;
-      }());
-      // check that it really depends on us
-      assert(dependent._dependencies.contains(this));
-      final Set<T> dependencies = _getModelDependencies(dependent);
-      if (dependencies.isEmpty || widget.updateShouldNotifyDependent(oldWidget, dependencies))
-        dependent.didChangeDependencies();
-    }
-    // Recreate the set of depedencies for each dependent to give
-    // widget.getDependencyFor() an opportunity to sync with its model.
-    for (Element dependent in _dependents.keys) {
-      if (_dependents[dependent].isEmpty)
-        continue;
-      _dependents[dependent] = new HashSet<_AspectDependency<T>>.of(
-        _dependents[dependent].map((dynamic aspectDependencyValue) {
-          final _AspectDependency<T> aspectDependency = aspectDependencyValue;
-          return _getAspectDependency(aspectDependency.aspect);
-        })
-      );
-    }
-  }
-}
-
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
 /// which wrap [RenderObject]s, which provide the actual rendering of the
 /// application.
@@ -2231,7 +1913,7 @@ abstract class BuildContext {
   /// ancestor of this BuildContext's widget. The target is used instead of
   /// the first [targetType] widget ancestor. This parameter is used by
   /// [InheritedModel.inheritFrom]. It's typically not specified directly.
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic aspect, InheritedElement target });
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -3553,23 +3235,14 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic aspect, InheritedElement target }) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = target ?? (_inheritedWidgets == null ? null : _inheritedWidgets[targetType]);
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      // If we're ever called with aspect == null (the common case) then
-      // InheritedElement.notifyClients will unconditionally rebuild all dependents.
-      if (aspect == null) {
-        // ignore: prefer_const_constructors
-        ancestor._dependents[this] = new UnmodifiableSetView<dynamic>.empty();
-      } else {
-        assert(ancestor is InheritedModelElement);
-        final InheritedModelElement<dynamic> modelElement = ancestor;
-        modelElement._addDependent(this, aspect);
-      }
+      ancestor._dependents[this] = ancestor.updateDependencies(ancestor, aspect);
       return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
@@ -4181,7 +3854,7 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { dynamic aspect, InheritedElement target }) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target }) {
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw new FlutterError(
@@ -4360,6 +4033,30 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   }
 }
 
+/// Used by [InheritedElement] to represent the aspects of its
+/// [InheritedWidget] that it depends on.
+///
+/// If [isGlobal] is true then a dependent widget should be rebuilt
+/// whenever the inherited widget it depends on changes.
+///
+/// See also:
+///
+///  * [InheritedModel] and [InheritedModelElement], whose implementations
+///    extends this class to provide a way for a widget to depend
+///    specific aspects of an inherited widget ancestor.
+class InheritedDependencies {
+  /// Construct an InheritedDependencies object.
+  const InheritedDependencies();
+
+  /// True then a dependent widget should be rebuilt whenever the inherited
+  /// widget it depends on changes.
+  ///
+  /// This method returns true. Subclasses may return false because their
+  /// dependent widgets should be conditionally rebuilt, depending on
+  /// what aspect of the inherited widget changes.
+  bool get isGlobal => true;
+}
+
 /// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
@@ -4368,7 +4065,7 @@ class InheritedElement extends ProxyElement {
   @override
   InheritedWidget get widget => super.widget;
 
-  final Map<Element, Set<dynamic>> _dependents = <Element, Set<dynamic>>{};
+  final Map<Element, InheritedDependencies> _dependents = <Element, InheritedDependencies>{};
 
   @override
   void _updateInheritance() {
@@ -4388,6 +4085,34 @@ class InheritedElement extends ProxyElement {
       return true;
     }());
     super.debugDeactivated();
+  }
+
+  /// Returns the most recent [updateDependencies] value for [dependent].
+  ///
+  /// Each dependent element is mapped to a single [InheritedDependencies]
+  /// object.
+  @protected
+  InheritedDependencies getDependencies(Element dependent) => _dependents[dependent];
+
+  /// Called by [inheritFromWidgetOfExactType] when a new [dependent] is added.
+  ///
+  /// Each dependent element is mapped to a single [InheritedDependencies]
+  /// object. This method can lookup the existing dependencies with
+  /// [getDependencies].
+  ///
+  /// By default this method returns a constant [InheritedDependencies] object
+  /// for which [InheritedDependencies.isGlobal] is true.
+  @protected
+  InheritedDependencies updateDependencies(Element dependent, Object aspect) {
+    return const InheritedDependencies(); // isGlobal => true
+  }
+
+  /// Called by [notifyClients] for each dependent.
+  ///
+  /// Calls `dependent.didChangeDependencies()`.
+  @protected
+  void notifyDependent(covariant InheritedWidget oldWidget, Element dependent) {
+    dependent.didChangeDependencies();
   }
 
   /// Calls [Element.didChangeDependencies] of all dependent elements, if
@@ -4416,7 +4141,7 @@ class InheritedElement extends ProxyElement {
       }());
       // check that it really depends on us
       assert(dependent._dependencies.contains(this));
-      dependent.didChangeDependencies();
+      notifyDependent(oldWidget, dependent);
     }
   }
 }
