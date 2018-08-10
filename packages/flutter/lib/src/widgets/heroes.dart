@@ -516,7 +516,7 @@ class HeroController extends NavigatorObserver {
     _questsEnabled = true;
   }
 
-  // If we're transitioning between different page routes, start a hero transition5
+  // If we're transitioning between different page routes, start a hero transition
   // after the toRoute has been laid out with its animation's value at 1.0.
   void _maybeStartHeroTransition(Route<dynamic> fromRoute, Route<dynamic> toRoute, HeroFlightDirection flightType) {
     if (_questsEnabled && toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {

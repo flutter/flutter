@@ -220,6 +220,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
       actionsForegroundColor: actionsForegroundColor,
       largeTitle: null,
       large: false,
+      largeExpanded: false,
     );
 
     final Widget navBar = _wrapWithBackground(

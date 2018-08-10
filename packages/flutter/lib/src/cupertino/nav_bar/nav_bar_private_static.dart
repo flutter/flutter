@@ -360,8 +360,8 @@ class _NavigationBarStaticComponents {
     @required this.border,
     @required EdgeInsetsDirectional padding,
     @required Color actionsForegroundColor,
-    @required this.large,
-    this.largeExpanded,
+    @required bool large,
+    @required this.largeExpanded,
   }) : leading = createLeading(
          userLeading: leading,
          route: route,
@@ -600,7 +600,6 @@ class _NavigationBarStaticComponents {
     );
   }
 
-  final bool large;
   final bool largeExpanded;
 }
 

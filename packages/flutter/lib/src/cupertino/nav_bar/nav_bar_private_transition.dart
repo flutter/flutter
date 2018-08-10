@@ -301,10 +301,7 @@ class _NavigationBarComponentsTransition {
 
     // The middle component is non-null when the nav bar is a large title
     // nav bar but would be invisible when expanded, therefore don't show it here.
-    if (bottomComponents.large &&
-        !bottomComponents.hasUserMiddle &&
-        bottomComponents.largeExpanded
-    ) {
+    if (!bottomComponents.hasUserMiddle && bottomComponents.largeExpanded) {
       return null;
     }
 
@@ -358,6 +355,10 @@ class _NavigationBarComponentsTransition {
     final _RenderObjectFindingWidget bottomLargeTitle = bottomComponents.largeTitle;
     final _RenderObjectFindingWidget topBackLabel = topComponents.backLabel;
     final _RenderObjectFindingWidget topLeading = topComponents.leading;
+
+    if (bottomLargeTitle == null || !bottomComponents.largeExpanded) {
+      return null;
+    }
 
     if (bottomLargeTitle != null && topBackLabel != null) {
       return new PositionedTransition(
@@ -554,10 +555,7 @@ class _NavigationBarComponentsTransition {
 
     // The middle component is non-null when the nav bar is a large title
     // nav bar but would be invisible when expanded, therefore don't show it here.
-    if (topComponents.large &&
-        !topComponents.hasUserMiddle &&
-        topComponents.largeExpanded
-    ) {
+    if (!topComponents.hasUserMiddle && topComponents.largeExpanded) {
       return null;
     }
 
@@ -600,7 +598,7 @@ class _NavigationBarComponentsTransition {
   Widget get topLargeTitle {
     final _RenderObjectFindingWidget topLargeTitle = topComponents.largeTitle;
 
-    if (topLargeTitle == null) {
+    if (topLargeTitle == null || !topComponents.largeExpanded) {
       return null;
     }
 
