@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
-import 'dart:ui' as ui;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
