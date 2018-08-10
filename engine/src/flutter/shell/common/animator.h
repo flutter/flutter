@@ -75,6 +75,7 @@ class Animator final {
   bool paused_;
   bool regenerate_layer_tree_;
   bool frame_scheduled_;
+  int notify_idle_task_id_;
   bool dimension_change_pending_;
   SkISize last_layer_tree_size_;
 
