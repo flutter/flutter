@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -286,7 +287,9 @@ flutter:
 /// is in memory.
 void testInMemory(String description, Future<Null> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
-  final FileSystem testFileSystem = new MemoryFileSystem();
+  final FileSystem testFileSystem = new MemoryFileSystem(
+    style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+  );
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
   transfer(new Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
