@@ -31,7 +31,7 @@ final RegExp licenseNotAccepted = new RegExp(r'licenses? not accepted', caseSens
 final RegExp licenseAccepted = new RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
-  AndroidWorkflow() : super('Android toolchain - develop for Android devices');
+  AndroidWorkflow() : super('Android toolchain - develop for Android devices', ValidatorCategory.android);
 
   @override
   bool get appliesToHostPlatform => true;

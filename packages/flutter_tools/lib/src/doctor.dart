@@ -224,10 +224,21 @@ enum ValidationType {
   installed
 }
 
+/// Validator output is grouped by category.
+enum ValidatorCategory {
+  android,
+  ios,
+  flutter,
+  ide,
+  device,
+  unassigned
+}
+
 abstract class DoctorValidator {
-  const DoctorValidator(this.title);
+  const DoctorValidator(this.title, [this.category = ValidatorCategory.unassigned]);
 
   final String title;
+  final ValidatorCategory category;
 
   Future<ValidationResult> validate();
 }
@@ -271,7 +282,7 @@ class ValidationMessage {
 }
 
 class _FlutterValidator extends DoctorValidator {
-  _FlutterValidator() : super('Flutter');
+  _FlutterValidator() : super('Flutter', ValidatorCategory.flutter);
 
   @override
   Future<ValidationResult> validate() async {
@@ -320,7 +331,7 @@ bool _genSnapshotRuns(String genSnapshotPath) {
 }
 
 class NoIdeValidator extends DoctorValidator {
-  NoIdeValidator() : super('Flutter IDE Support');
+  NoIdeValidator() : super('Flutter IDE Support',ValidatorCategory.ide);
 
   @override
   Future<ValidationResult> validate() async {
@@ -333,7 +344,7 @@ class NoIdeValidator extends DoctorValidator {
 abstract class IntelliJValidator extends DoctorValidator {
   final String installPath;
 
-  IntelliJValidator(String title, this.installPath) : super(title);
+  IntelliJValidator(String title, this.installPath) : super(title, ValidatorCategory.ide);
 
   String get version;
   String get pluginsPath;
@@ -530,7 +541,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator() : super('Connected devices');
+  DeviceValidator() : super('Connected devices', ValidatorCategory.device);
 
   @override
   Future<ValidationResult> validate() async {
