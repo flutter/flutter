@@ -4025,7 +4025,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   }
 }
 
-/// An [Element] that uses a [InheritedWidget] as its configuration.
+/// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);

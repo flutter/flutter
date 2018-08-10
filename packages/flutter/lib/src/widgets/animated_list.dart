@@ -166,7 +166,7 @@ class AnimatedList extends StatefulWidget {
     if (nullOk || result != null)
       return result;
     throw new FlutterError(
-      'AnimatedList.of() called with a context that does not contain a AnimatedList.\n'
+      'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
       'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
       'This can happen when the context provided is from the same StatefulWidget that '
       'built the AnimatedList. Please see the AnimatedList documentation for examples '
