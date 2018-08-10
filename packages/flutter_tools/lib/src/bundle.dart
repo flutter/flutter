@@ -115,8 +115,7 @@ Future<void> build({
         extraGenSnapshotOptions: extraGenSnapshotOptions,
       );
       if (snapshotExitCode != 0) {
-        printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-        return;
+        throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
       }
     }
   }

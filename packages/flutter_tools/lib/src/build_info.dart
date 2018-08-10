@@ -74,6 +74,8 @@ class BuildInfo {
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
+  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -83,12 +85,12 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile;
+  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release;
+  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
@@ -106,24 +108,16 @@ class BuildInfo {
           targetPlatform: targetPlatform);
 }
 
-/// The type of build - `debug`, `profile`, or `release`.
+/// The type of build.
 enum BuildMode {
   debug,
   profile,
-  release
+  release,
+  dynamicProfile,
+  dynamicRelease
 }
 
 String getModeName(BuildMode mode) => getEnumName(mode);
-
-BuildMode getBuildModeForName(String mode) {
-  if (mode == 'debug')
-    return BuildMode.debug;
-  if (mode == 'profile')
-    return BuildMode.profile;
-  if (mode == 'release')
-    return BuildMode.release;
-  return null;
-}
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {
