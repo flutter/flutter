@@ -329,4 +329,12 @@ const AccessibilityGuideline androidTapTargetGuideline = _MinimumTapTargetGuidel
 const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(Size(44.0, 44.0));
 
 /// A guideline which requires text contrast to meet minimum values.
+///
+/// This guideline traverses the semantics tree looking for nodes with values or
+/// labels that corresponds to a Text or Editable text widget. Given the
+/// background pixels for the area around this widget, it performs a very naive
+/// partitioning of the colors into "light" and "dark" and then chooses the most
+/// frequently occurring color in each partition as a representative of the
+/// foreground and background colors. The contrast ratio is calculated from
+/// these colors according to https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef
 const AccessibilityGuideline textContrastGuideline = _MinimumTextContrastGuideline();
