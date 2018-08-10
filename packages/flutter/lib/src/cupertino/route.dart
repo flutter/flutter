@@ -744,6 +744,8 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   Animation<double> _animation;
 
+  Tween<Offset> _offsetTween;
+
   @override
   Animation<double> createAnimation() {
     assert(_animation == null);
@@ -751,6 +753,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
       parent: super.createAnimation(),
       curve: Curves.ease,
       reverseCurve: Curves.ease.flipped,
+    );
+    _offsetTween = new Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: const Offset(0.0, 0.0),
     );
     return _animation;
   }
@@ -762,16 +768,10 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (_animation.value == 1.0) {
-      context.findRenderObject().markNeedsSemanticsUpdate();
-    }
     return new Align(
       alignment: Alignment.bottomCenter,
       child: new FractionalTranslation(
-        translation: new Tween<Offset>(
-          begin: const Offset(0.0, 1.0),
-          end: const Offset(0.0, 0.0),
-        ).evaluate(_animation),
+        translation: _offsetTween.evaluate(_animation),
         child: child,
       ),
     );
