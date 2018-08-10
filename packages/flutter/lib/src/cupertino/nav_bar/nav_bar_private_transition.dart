@@ -63,10 +63,10 @@ class _NavigationBarTransition extends StatelessWidget {
          topNavBarBox: topNavBar.renderBox,
        );
 
-  _NavigationBarTransition.oneKnownBox({
-    @required this.animation,
-    @required _TransitionableNavigationBar destinationNavBar,
-  });
+  // _NavigationBarTransition.oneKnownBox({
+  //   @required this.animation,
+  //   @required _TransitionableNavigationBar destinationNavBar,
+  // });
 
   final Animation<double> animation;
   final _NavigationBarComponentsTransition componentsTransition;
@@ -77,7 +77,6 @@ class _NavigationBarTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('building navigation bar transition');
     final List<Widget> children = <Widget>[
       // Draw an empty navigation bar box with changing shape behind all the
       // moving components without any components inside it itself.
@@ -641,6 +640,22 @@ CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect begin, Rect end
   );
 };
 
+TransitionBuilder _navBarHeroLaunchPadBuilder = (
+  BuildContext context,
+  Widget child,
+) {
+  assert(child is _TransitionableNavigationBar);
+  // Tree reshaping is fine here because the Heroes' child is always a
+  // _TransitionableNavigationBar which has a GlobalKey.
+  return new Visibility(
+    maintainSize: true,
+    maintainAnimation: true,
+    maintainState: true,
+    visible: false,
+    child: child,
+  );
+};
+
 /// Navigation bars' hero flight shuttle builder.
 HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
   BuildContext flightContext,
@@ -649,14 +664,12 @@ HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
   BuildContext fromHeroContext,
   BuildContext toHeroContext,
 ) {
-  print('building shuttle');
   assert(animation != null);
   assert(flightDirection != null);
   assert(fromHeroContext != null);
   assert(toHeroContext != null);
   assert(fromHeroContext.widget is Hero);
   assert(toHeroContext.widget is Hero);
-  debugDumpApp();
 
   final Hero fromHeroWidget = fromHeroContext.widget;
   final Hero toHeroWidget = toHeroContext.widget;
@@ -676,7 +689,6 @@ HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
   assert(toNavBar.renderBox != null);
 
   final bool inMidTransitionAlready = !fromNavBar.mounted;
-
 
   switch (flightDirection) {
     case HeroFlightDirection.push:

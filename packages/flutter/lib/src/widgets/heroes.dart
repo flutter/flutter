@@ -93,6 +93,7 @@ class Hero extends StatefulWidget {
     @required this.tag,
     this.createRectTween,
     this.flightShuttleBuilder,
+    this.launchPadBuilder,
     @required this.child,
   }) : assert(tag != null),
        assert(child != null),
@@ -129,6 +130,8 @@ class Hero extends StatefulWidget {
 
   final HeroFlightShuttleBuilder flightShuttleBuilder;
 
+  final TransitionBuilder launchPadBuilder;
+
   // Returns a map of all of the heroes in context, indexed by hero tag.
   static Map<Object, _HeroState> _allHeroesFor(BuildContext context) {
     assert(context != null);
@@ -137,7 +140,6 @@ class Hero extends StatefulWidget {
       if (element.widget is Hero) {
         final StatefulElement hero = element;
         final Hero heroWidget = element.widget;
-        print('hero child is ${heroWidget.child}');
         final Object tag = heroWidget.tag;
         assert(tag != null);
         assert(() {
@@ -196,10 +198,14 @@ class _HeroState extends State<Hero> {
   @override
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
-      return new SizedBox(
-        width: _placeholderSize.width,
-        height: _placeholderSize.height
-      );
+      if (widget.launchPadBuilder == null) {
+        return new SizedBox(
+          width: _placeholderSize.width,
+          height: _placeholderSize.height
+        );
+      } else {
+        return widget.launchPadBuilder(context, widget.child);
+      }
     }
     return new KeyedSubtree(
       key: _key,
@@ -251,7 +257,6 @@ class _HeroFlightManifest {
 // Builds the in-flight hero widget.
 class _HeroFlight {
   _HeroFlight(this.onFlightEnded) {
-    print('created flight');
     _proxyAnimation = new ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
   }
 
@@ -275,7 +280,6 @@ class _HeroFlight {
 
   // The OverlayEntry WidgetBuilder callback for the hero's overlay.
   Widget _buildOverlay(BuildContext context) {
-    print('building flight overlay');
     assert(manifest != null);
     shuttle ??= manifest.shuttleBuilder(
       context,
@@ -378,7 +382,6 @@ class _HeroFlight {
       _globalBoundingBoxFor(manifest.toHero.context),
     );
 
-    print('creating overlay');
     overlayEntry = new OverlayEntry(builder: _buildOverlay);
     manifest.overlay.insert(overlayEntry);
   }
@@ -430,7 +433,6 @@ class _HeroFlight {
       assert(manifest.toHero != newManifest.toHero);
 
       heroRectTween = _doCreateRectTween(heroRectTween.evaluate(_proxyAnimation), _globalBoundingBoxFor(newManifest.toHero.context));
-      print('clearing existing shuttle');
       shuttle = null;
 
       if (newManifest.type == HeroFlightDirection.pop)
@@ -452,7 +454,6 @@ class _HeroFlight {
 
     _aborted = false;
     manifest = newManifest;
-    print('new manifest $manifest');
   }
 
   void abort() {
@@ -493,7 +494,6 @@ class HeroController extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    print('push');
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(previousRoute, route, HeroFlightDirection.push);
@@ -501,7 +501,6 @@ class HeroController extends NavigatorObserver {
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
-    print('pop');
     assert(navigator != null);
     assert(route != null);
     _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop);
@@ -548,7 +547,6 @@ class HeroController extends NavigatorObserver {
     Animation<double> animation,
     HeroFlightDirection flightType,
   ) {
-    print('start hero transition');
     // If the navigator or one of the routes subtrees was removed before this
     // end-of-frame callback was called, then don't actually start a transition.
     if (navigator == null || from.subtreeContext == null || to.subtreeContext == null) {
@@ -571,7 +569,6 @@ class HeroController extends NavigatorObserver {
         final HeroFlightShuttleBuilder fromShuttleBuilder = fromHeroes[tag].widget.flightShuttleBuilder;
         final HeroFlightShuttleBuilder toShuttleBuilder = toHeroes[tag].widget.flightShuttleBuilder;
 
-        print('created manifest');
         final _HeroFlightManifest manifest = new _HeroFlightManifest(
           type: flightType,
           overlay: navigator.overlay,

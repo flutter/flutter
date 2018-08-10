@@ -148,7 +148,6 @@ class _LargeTitleNavigationBarSliverDelegate
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
-    print('creating sliver components');
     final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
       route: ModalRoute.of(context),
       leading: leading,
@@ -234,11 +233,11 @@ class _LargeTitleNavigationBarSliverDelegate
       return navBar;
     }
 
-    print('creating new sliver hero and transitionable navigation bar');
     return new Hero(
       tag: _heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
+      launchPadBuilder: _navBarHeroLaunchPadBuilder,
       // This is all the way down here instead of being at the top level of
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.

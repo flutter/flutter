@@ -206,7 +206,6 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 
   @override
   Widget build(BuildContext context) {
-    print('creating components');
     final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
       route: ModalRoute.of(context),
       leading: leading,
@@ -236,10 +235,10 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
       return navBar;
     }
 
-    print('creating new hero and transitionable nav bar');
     return new Hero(
       tag: _heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
+      launchPadBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       child: new _TransitionableNavigationBar(
         components: components,
