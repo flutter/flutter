@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 
 import 'android/gradle.dart' as gradle;
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
@@ -28,34 +29,39 @@ import 'template.dart';
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this.manifest, this._exampleManifest);
+  FlutterProject(this.directory, this.manifest, this._exampleManifest)
+      : assert(directory != null),
+        assert(manifest != null),
+        assert(_exampleManifest != null);
 
-  /// Returns a future that completes with a FlutterProject view of the given directory.
+  /// Returns a future that completes with a [FlutterProject] view of the given directory
+  /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static Future<FlutterProject> fromDirectory(Directory directory) async {
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(
+    assert(directory != null);
+    final FlutterManifest manifest = await _readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
     );
-    final Directory exampleDirectory = _exampleDirectory(directory);
-    final FlutterManifest exampleManifest = await FlutterManifest.createFromPath(
-      exampleDirectory.childFile(bundle.defaultManifestPath).path,
+    final FlutterManifest exampleManifest = await _readManifest(
+      _exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
     );
     return new FlutterProject(directory, manifest, exampleManifest);
   }
 
-  /// Returns a future that completes with a FlutterProject view of the current directory.
+  /// Returns a future that completes with a [FlutterProject] view of the current directory.
+  /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static Future<FlutterProject> current() => fromDirectory(fs.currentDirectory);
 
-  /// Returns a future that completes with a FlutterProject view of the given directory.
+  /// Returns a future that completes with a [FlutterProject] view of the given directory.
+  /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static Future<FlutterProject> fromPath(String path) => fromDirectory(fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
 
-  /// The manifest of this project, or null, if `pubspec.yaml` is invalid.
+  /// The manifest of this project.
   final FlutterManifest manifest;
 
-  /// The manifest of the example sub-project of this project, or null, if
-  /// `example/pubspec.yaml` is invalid.
+  /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
 
   /// Asynchronously returns the organization names found in this project as
@@ -96,13 +102,26 @@ class FlutterProject {
     FlutterManifest.empty(),
   );
 
-  bool get isModule => manifest != null && manifest.isModule;
+  /// True, if this project is a Flutter module.
+  bool get isModule => manifest.isModule;
 
   /// True, if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
   /// The directory that will contain the example if an example exists.
   static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
+
+  /// Reads and validates the `pubspec.yaml` file at [path], asynchronously
+  /// returning a [FlutterManifest] representation of the contents.
+  ///
+  /// Completes with an empty [FlutterManifest], if the file does not exist.
+  /// Completes with a ToolExit on validation error.
+  static Future<FlutterManifest> _readManifest(String path) async {
+    final FlutterManifest manifest = await FlutterManifest.createFromPath(path);
+    if (manifest == null)
+      throwToolExit('Please correct the pubspec.yaml file at $path');
+    return manifest;
+  }
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
