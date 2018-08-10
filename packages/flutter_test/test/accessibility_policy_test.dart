@@ -53,6 +53,8 @@ void main() {
         new DefaultTextStyle(
           style: const TextStyle(fontSize: 14.0, color: Colors.white),
           child: new Container(
+            width: 200.0,
+            height: 200.0,
             color: Colors.black,
             child: const Text('this is a test'),
           ),
@@ -66,6 +68,6 @@ void main() {
 
 Widget _boilerplate(Widget child) {
   return new MaterialApp(
-    home: new Scaffold(body: new Container(child: child)),
+    home: new Scaffold(body: new Center(child: child)),
   );
 }

@@ -198,6 +198,11 @@ class _MinimumTextContrastPolicy extends AccessibilityPolicy {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     final RenderView renderView = tester.binding.renderView;
     final OffsetLayer layer = renderView.layer;
+    ui.Image image;
+    final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);
+      return image.toByteData();
+    });
 
     Future<Evaluation> evaluateNode(SemanticsNode node) async {
       final SemanticsData data = node.getSemanticsData();
@@ -245,24 +250,50 @@ class _MinimumTextContrastPolicy extends AccessibilityPolicy {
         paintBounds = paintBounds.shift(current.parent?.rect?.topLeft ?? Offset.zero);
         current = current.parent;
       }
-      final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
-        final ui.Image image = await layer.toImage(paintBounds);
-        return image.toByteData();
-      });
-      final _ContrastReport report = new _ContrastReport(byteData);
+      final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
+      final _ContrastReport report = new _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       final double targetContrastRatio = (isBold && fontSize > kBoldTextMinimumSize) ?
         kminimumRatioLargeText : kMinimumRatioNormalText;
       if (contrastRatio >= targetContrastRatio)
         return result + const Evaluation.pass();
       return result + new Evaluation.fail(
-        '${node.toString()}:\nExpected contrast ratio of at least $targetContrastRatio, '
-        'but found $contrastRatio. '
+        '${node.toString()}:\nExpected contrast ratio of at least '
+        '$targetContrastRatio but found $contrastRatio. '
         'The computed foreground color was: ${report.lightColor}, '
-        'The comptued background color was: ${report.darkColor}'
+        'The computed background color was: ${report.darkColor}'
       );
     }
     return evaluateNode(root);
+  }
+
+  List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {
+    final int newWidth = paintBounds.size.width.ceil();
+    final int newHeight = paintBounds.size.height.ceil();
+    final int leftX = paintBounds.topLeft.dx.ceil();
+    final int rightX = leftX + newWidth;
+    final int topY = paintBounds.topLeft.dy.ceil();
+    final int bottomY = topY + newHeight;
+    final List<int> buffer = <int>[];
+
+    // Data is stored in row major order.
+    for (int i = 0; i < data.lengthInBytes; i+=4) {
+      final int index = i ~/ 4;
+      final int dy = index % width;
+      final int dx = index ~/ width;
+      if (dx >= leftX && dx <= rightX && dy >= topY && dy <= bottomY) {
+        final int r = data.getUint8(i);
+        final int g = data.getUint8(i + 1);
+        final int b = data.getUint8(i + 2);
+        final int a = data.getUint8(i + 3);
+        final int color = (((a & 0xff) << 24) |
+          ((r & 0xff) << 16) |
+          ((g & 0xff) << 8)  |
+          ((b & 0xff) << 0)) & 0xFFFFFFFF;
+        buffer.add(color);
+      }
+    }
+    return buffer;
   }
 
   @override
@@ -270,20 +301,10 @@ class _MinimumTextContrastPolicy extends AccessibilityPolicy {
 }
 
 class _ContrastReport {
-  factory _ContrastReport(ByteData byteData) {
+  factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
-    for (int i = 0; i < byteData.lengthInBytes; i += 4) {
-      final int r = byteData.getUint8(i);
-      final int g = byteData.getUint8(i + 1);
-      final int b = byteData.getUint8(i + 2);
-      final int a = byteData.getUint8(i + 3);
-      final int color = (((a & 0xff) << 24) |
-        ((r & 0xff) << 16) |
-        ((g & 0xff) << 8)  |
-        ((b & 0xff) << 0)) & 0xFFFFFFFF;
+    for (int color in colors)
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
-    }
-    assert(colorHistogram.isNotEmpty);
     if (colorHistogram.length == 1) {
       final Color hslColor = new Color(colorHistogram.keys.first);
       return new _ContrastReport._(hslColor, hslColor);
