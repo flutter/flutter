@@ -68,6 +68,11 @@ std::string VulkanResultToString(VkResult result) {
       return "VK_ERROR_NOT_PERMITTED_EXT";
 #endif
 
+#if VK_HEADER_VERSION >= 72
+    case VK_ERROR_FRAGMENTATION_EXT:
+      return "VK_ERROR_FRAGMENTATION_EXT";
+#endif
+
 #if OS_FUCHSIA
 #if VK_KHR_external_memory
     case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR:
