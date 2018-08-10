@@ -204,8 +204,8 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         float density = mFlutterView.getContext().getResources().getDisplayMetrics().density;
 
         int id = (int) args.get(0);
-        int downTime = (int) args.get(1);
-        int eventTime = (int) args.get(2);
+        Number downTime = (Number) args.get(1);
+        Number eventTime = (Number) args.get(2);
         int action = (int) args.get(3);
         int pointerCount = (int) args.get(4);
         PointerProperties[] pointerProperties =
@@ -233,8 +233,8 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         }
 
         MotionEvent event = MotionEvent.obtain(
-                downTime,
-                eventTime,
+                downTime.intValue(),
+                eventTime.intValue(),
                 action,
                 pointerCount,
                 pointerProperties,
