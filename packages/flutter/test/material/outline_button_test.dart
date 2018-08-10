@@ -60,6 +60,7 @@ void main() {
             alignment: Alignment.topLeft,
             child: OutlineButton(
               shape: const RoundedRectangleBorder(), // default border radius is 0
+              clipBehavior: Clip.antiAlias,
               color: fillColor,
               highlightedBorderColor: highlightedBorderColor,
               disabledBorderColor: disabledBorderColor,
@@ -133,6 +134,29 @@ void main() {
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: borderColor, strokeWidth: borderWidth));
+  });
+
+  testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
+    final GlobalKey buttonKey = new GlobalKey();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new OutlineButton(
+                key: buttonKey,
+                onPressed: () { },
+                child: const Text('ABC'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byKey(buttonKey)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
   });
 
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {

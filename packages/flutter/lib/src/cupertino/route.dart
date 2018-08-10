@@ -14,6 +14,9 @@ const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 // Barrier color for a Cupertino modal barrier.
 const Color _kModalBarrierColor = Color(0x6604040F);
 
+// The duration of the transition used when a modal popup is shown.
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
+
 // Offset from offscreen to the right to fully on screen.
 final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(
   begin: const Offset(1.0, 0.0),
@@ -713,6 +716,102 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
     canvas.drawRect(rect, paint);
   }
+}
+
+class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+  _CupertinoModalPopupRoute({
+    this.builder,
+    this.barrierLabel,
+    RouteSettings settings,
+  }) : super(settings: settings);
+
+  final WidgetBuilder builder;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  Color get barrierColor => _kModalBarrierColor;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  bool get semanticsDismissible => false;
+
+  @override
+  Duration get transitionDuration => _kModalPopupTransitionDuration;
+
+  Animation<double> _animation;
+
+  Tween<Offset> _offsetTween;
+
+  @override
+  Animation<double> createAnimation() {
+    assert(_animation == null);
+    _animation = new CurvedAnimation(
+      parent: super.createAnimation(),
+      curve: Curves.ease,
+      reverseCurve: Curves.ease.flipped,
+    );
+    _offsetTween = new Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: const Offset(0.0, 0.0),
+    );
+    return _animation;
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return new Align(
+      alignment: Alignment.bottomCenter,
+      child: new FractionalTranslation(
+        translation: _offsetTween.evaluate(_animation),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Shows a modal iOS-style popup that slides up from the bottom of the screen.
+///
+/// Such a popup is an alternative to a menu or a dialog and prevents the user
+/// from interacting with the rest of the app.
+///
+/// The `context` argument is used to look up the [Navigator] for the popup.
+/// It is only used when the method is called. Its corresponding widget can be
+/// safely removed from the tree before the popup is closed.
+///
+/// The `builder` argument typically builds a [CupertinoActionSheet] widget.
+/// Content below the widget is dimmed with a [ModalBarrier]. The widget built
+/// by the `builder` does not share a context with the location that
+/// `showCupertinoModalPopup` is originally called from. Use a
+/// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
+/// update dynamically.
+///
+/// Returns a `Future` that resolves to the value that was passed to
+/// [Navigator.pop] when the popup was closed.
+///
+/// See also:
+///
+///  * [ActionSheet], which is the widget usually returned by the `builder`
+///    argument to [showCupertinoModalPopup].
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
+Future<T> showCupertinoModalPopup<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+}) {
+  return Navigator.of(context, rootNavigator: true).push(
+    new _CupertinoModalPopupRoute<T>(
+      builder: builder,
+      barrierLabel: 'Dismiss',
+    ),
+  );
 }
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
