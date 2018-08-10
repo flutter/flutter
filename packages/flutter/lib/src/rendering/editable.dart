@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
+import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'object.dart';
 import 'viewport_offset.dart';
+import 'package:flutter/foundation.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
@@ -161,7 +163,6 @@ class RenderEditable extends RenderBox {
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
-    
     _tap = new TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
@@ -215,12 +216,16 @@ class RenderEditable extends RenderBox {
   int _previousCursorLocation = -1;
   bool _resetCursor = false;
 
-  void _keyEvent(RawKeyEvent keyEvent){
-    if (!(keyEvent.data is RawKeyEventDataAndroid))
+  static const int _kShiftMask = 1;
+  static const int _kControlMask = 1 << 12;
+
+  void _handleKeyEvent(RawKeyEvent keyEvent){
+    if(defaultTargetPlatform != TargetPlatform.android)
       return;
 
     final RawKeyEventDataAndroid rawAndroidEvent = keyEvent.data;
     final int pressedKeyCode = rawAndroidEvent.keyCode;
+    final int pressedKeyMetaState = rawAndroidEvent.metaState;
 
     if (selection.isCollapsed) {
       _extentOffset = selection.extentOffset;
@@ -229,8 +234,9 @@ class RenderEditable extends RenderBox {
 
     // Update current key states
     final bool pressedDown = keyEvent is RawKeyDownEvent;
-    final bool shiftIsDown = RawKeyboard.shiftDown;
-    final bool ctrlIsDown = RawKeyboard.controlDown;
+    final bool shiftIsDown = pressedKeyMetaState & _kShiftMask > 0;
+    final bool ctrlIsDown = pressedKeyMetaState & _kControlMask > 0;
+
     if (pressedKeyCode == _kLeftArrowCode)
       _leftArrowDown = pressedDown;
     else if (pressedKeyCode == _kRightArrowCode)
@@ -271,12 +277,11 @@ class RenderEditable extends RenderBox {
       }
 
       if (_downArrowDown || _upArrowDown) {
-        double verticalOffset = _textPainter.preferredLineHeight;
-
-        // We want to search upwards, which means a negative offset given the
-        // origin of the text field is in the upper left corner.
-        if (_upArrowDown)
-          verticalOffset *= -1;
+        // The caret offset gives a location in the upper left hand corner of
+        // the caret so the middle of the line above is a half line above that
+        // point and the line below is 1.5 lines below that point.
+        final double plh = _textPainter.preferredLineHeight;
+        final double verticalOffset = _upArrowDown ? -0.5 * plh : 1.5 * plh;
 
         final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
         final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
@@ -306,12 +311,12 @@ class RenderEditable extends RenderBox {
       if (shiftIsDown) {
         if (_baseOffset < newOffset)
           onSelectionChanged(new TextSelection(
-              baseOffset: _baseOffset, extentOffset: newOffset),
-              this, SelectionChangedCause.keyboard);
+            baseOffset: _baseOffset, extentOffset: newOffset),
+            this, SelectionChangedCause.keyboard);
         else
           onSelectionChanged(new TextSelection(
-              baseOffset: newOffset , extentOffset: _baseOffset),
-              this, SelectionChangedCause.keyboard);
+            baseOffset: newOffset , extentOffset: _baseOffset),
+            this, SelectionChangedCause.keyboard);
       }
       // We want to put the cursor at the correct location depending on which
       // arrow is used while there is a selection.
@@ -323,8 +328,8 @@ class RenderEditable extends RenderBox {
             newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
         }
         onSelectionChanged(new TextSelection.fromPosition(
-            new TextPosition(offset: newOffset)),
-            this, SelectionChangedCause.keyboard);
+          new TextPosition(offset: newOffset)),
+          this, SelectionChangedCause.keyboard);
       }
       _extentOffset = newOffset;
     }
@@ -439,9 +444,9 @@ class RenderEditable extends RenderBox {
       return;
     _hasFocus = value;
     if (_hasFocus)
-      RawKeyboard.instance.addListener(_keyEvent);
+      RawKeyboard.instance.addListener(_handleKeyEvent);
     else
-      RawKeyboard.instance.removeListener(_keyEvent);
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
 
     markNeedsSemanticsUpdate();
   }
@@ -603,7 +608,7 @@ class RenderEditable extends RenderBox {
   void detach() {
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
-    RawKeyboard.instance.removeListener(_keyEvent);
+    RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
   }
 

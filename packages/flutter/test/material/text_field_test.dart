@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
+import 'dart:ui' as ui;
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -1772,23 +1773,21 @@ void main() {
     );
   }
 
-  void sendKeyEventWithCode(int code, [bool down = true]) {
+  void sendKeyEventWithCode(int code, bool down, bool shiftDown, bool ctrlDown) {
+
+    int metaState = shiftDown ? 1 : 0;
+    if (ctrlDown)
+      metaState |= 1 << 12;
+
     sendFakeKeyEvent(<String, dynamic>{
       'type': down ? 'keydown' : 'keyup',
       'keymap': 'android',
       'keyCode' : code,
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'metaState': metaState,
     });
   }
-
-
-  // Need to test
-  // -Control + arrow keys
-  // -Shift + arrow keys
-  // -Control + shift + arrow keys
-  // -Up and down arrows
 
   group('Keyboard Tests', (){
     List<RawKeyEvent> events;
@@ -1797,32 +1796,24 @@ void main() {
     setUp( () {
       events = <RawKeyEvent>[];
       controller = new TextEditingController();
-      sendKeyEventWithCode(59, false);
-      sendKeyEventWithCode(19, false);
-      sendKeyEventWithCode(20, false);
-      sendKeyEventWithCode(21, false);
-      sendKeyEventWithCode(113, false);
     });
 
     MaterialApp setupWidget() {
 
       final FocusNode focusNode = new FocusNode();
+      events = <RawKeyEvent>[];
+      controller = new TextEditingController();
 
       return new MaterialApp(
         home:  Material(
           child: new RawKeyboardListener(
             focusNode: focusNode,
             onKey: events.add,
-            child: DefaultTextStyle(
-              style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0), maxLines: 10,
-              child: Center(
-                child: TextField(
-                  controller: controller,
-                  maxLines: 10,
-                ),
-              ) ,
+            child: TextField(
+              controller: controller,
+              maxLines: 3,
             ),
-          ),
+          ) ,
         ),
       );
     }
@@ -1837,9 +1828,7 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59);  // SHIFT keydown
-      sendKeyEventWithCode(22);  // RIGHT_ARROW keydown
-
+      sendKeyEventWithCode(22, true, true, false);     // RIGHT_ARROW keydown, SHIFT_ON
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 
@@ -1851,12 +1840,8 @@ void main() {
       await tester.idle();
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
-
-      sendKeyEventWithCode(59);         // SHIFT keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(113);        // CONTROL keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(22);         // RIGHT_ARROW keydown
+      sendKeyEventWithCode(22, true, true, true);         // RIGHT_ARROW keydown SHIFT_ON, CONTROL_ON
 
       await tester.pumpAndSettle();
 
@@ -1872,15 +1857,14 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59);         // SHIFT keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(20);         // DOWN_ARROW keydown
+      sendKeyEventWithCode(20, true, true, false);         // DOWN_ARROW keydown
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
-      sendKeyEventWithCode(20, false);    // DOWN_ARROW keyup
+
+      sendKeyEventWithCode(20, false, true, false);          // DOWN_ARROW keyup
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19);           // UP_ARROW keydown
+      sendKeyEventWithCode(19, true, true, false);           // UP_ARROW keydown
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
@@ -1889,66 +1873,56 @@ void main() {
 
     testWidgets('Down and up test 2', (WidgetTester tester) async{
       await tester.pumpWidget(setupWidget());
-      const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
+      const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(59, false);        // SHIFT keyup
-      await tester.pumpAndSettle();
-
       for (int i = 0; i < 5; i += 1) {
-        sendKeyEventWithCode(22);             // RIGHT_ARROW keydown
+        sendKeyEventWithCode(22, true, false, false);             // RIGHT_ARROW keydown
         await tester.pumpAndSettle();
-        sendKeyEventWithCode(22, false);      // RIGHT_ARROW keyup
+        sendKeyEventWithCode(22, false, false, false);            // RIGHT_ARROW keyup
         await tester.pumpAndSettle();
       }
-      sendKeyEventWithCode(59);               // SHIFT keydown
+      sendKeyEventWithCode(20, true, true, false);               // DOWN_ARROW keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(20);               // DOWN_ARROW keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false);        // DOWN_ARROW keyup
-      await tester.pumpAndSettle();
-      // 'mom\nis ap'
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
-
-      sendKeyEventWithCode(20);               // DOWN_ARROW keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false);        // DOWN_ARROW keyup
-      await tester.pumpAndSettle();
-
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 26);
-
-      sendKeyEventWithCode(20);               // DOWN_ARROW keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(20, false);        // DOWN_ARROW keyup
-      await tester.pumpAndSettle();
-
-      sendKeyEventWithCode(19);               // UP_ARROW keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false);        // UP_ARROW keyup
+      sendKeyEventWithCode(20, false, true, false);              // DOWN_ARROW keyup
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
 
-      sendKeyEventWithCode(19);               // UP_ARROW keydown
+      sendKeyEventWithCode(20, true, true, false);                 // DOWN_ARROW keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false);        // UP_ARROW keyup
+      sendKeyEventWithCode(20, false, true, false);                // DOWN_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 32);
+
+      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
+
+      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
 
-      sendKeyEventWithCode(19);               // UP_ARROW keydown
+      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, false);        // UP_ARROW keyup
+      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
-
     });
   });
+
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
 
