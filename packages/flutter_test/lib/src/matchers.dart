@@ -17,9 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'widget_tester.dart' show WidgetTester;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -455,6 +457,11 @@ Matcher matchesSemanticsData({
     customActions: customActions,
     hintOverrides: hintOverrides,
   );
+}
+
+///
+AsyncMatcher meetsPolicy(AccessibilityPolicy policy) {
+  return new _MatchesSemanticsPolicy(policy);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -1606,5 +1613,25 @@ class _MatchesSemanticsData extends Matcher {
       bool verbose
       ) {
     return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchesSemanticsPolicy extends AsyncMatcher {
+  _MatchesSemanticsPolicy(this.policy);
+
+  final AccessibilityPolicy policy;
+
+  @override
+  Description describe(Description description) {
+    return description.add(policy.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    policy.beforeEvaluate();
+    final Evaluation result = await policy.evaluate(tester);
+    if (result.passed)
+      return null;
+    return result.reason;
   }
 }
