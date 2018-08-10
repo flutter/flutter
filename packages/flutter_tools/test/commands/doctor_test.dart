@@ -319,6 +319,9 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
       new PassingValidator('Providing validators is fun')
     ];
   }
+
+  @override
+  List<Workflow> get workflows => [];
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {

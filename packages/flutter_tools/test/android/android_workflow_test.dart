@@ -42,8 +42,8 @@ void main() {
     processManager.succeed = false;
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    expect(androidWorkflow.licensesAccepted, throwsToolExit());
+    final AndroidValidator androidValidator = new AndroidValidator();
+    expect(androidValidator.licensesAccepted, throwsToolExit());
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -55,8 +55,8 @@ void main() {
   testUsingContext('licensesAccepted handles garbage/no output', () async {
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidValidator androidValidator = new AndroidValidator();
+    final LicensesAccepted result = await androidValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.unknown));
     expect(processManager.commands.first, equals('/foo/bar/sdkmanager'));
     expect(processManager.commands.last, equals('--licenses'));
@@ -76,8 +76,8 @@ void main() {
        'All SDK package licenses accepted.'
     ]);
 
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidValidator androidValidator = new AndroidValidator();
+    final LicensesAccepted result = await androidValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.all));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -96,8 +96,8 @@ void main() {
       'Review licenses that have not been accepted (y/N)?',
     ]);
 
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidValidator androidValidator = new AndroidValidator();
+    final LicensesAccepted result = await androidValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.some));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -116,8 +116,8 @@ void main() {
       'Review licenses that have not been accepted (y/N)?',
     ]);
 
-    final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
+    final AndroidValidator androidValidator = new AndroidValidator();
+    final LicensesAccepted result = await androidValidator.licensesAccepted;
     expect(result, equals(LicensesAccepted.none));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -132,7 +132,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('26.0.0');
 
-    expect(await AndroidWorkflow.runLicenseManager(), isTrue);
+    expect(await AndroidValidator.runLicenseManager(), isTrue);
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -146,7 +146,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+    expect(AndroidValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -160,7 +160,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn(null);
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+    expect(AndroidValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -174,7 +174,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.succeed = false;
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit());
+    expect(AndroidValidator.runLicenseManager(), throwsToolExit());
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,

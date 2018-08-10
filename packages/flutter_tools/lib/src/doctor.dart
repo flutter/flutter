@@ -34,10 +34,12 @@ abstract class DoctorValidatorsProvider {
   static final DoctorValidatorsProvider defaultInstance = new _DefaultDoctorValidatorsProvider();
 
   List<DoctorValidator> get validators;
+  List<Workflow> get workflows;
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
+  List<Workflow> _workflows;
 
   @override
   List<DoctorValidator> get validators {
@@ -45,11 +47,13 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
 
-      if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(androidWorkflow);
+      if (androidWorkflow.appliesToHostPlatform) {
+        _validators.add(androidValidator);
+      }
 
-      if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(iosWorkflow);
+      if (iosWorkflow.appliesToHostPlatform) {
+        _validators.add(iosValidator);
+      }
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -65,6 +69,17 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     }
     return _validators;
   }
+
+  @override
+  List<Workflow> get workflows {
+    if (_workflows == null) {
+      _workflows = <Workflow>[];
+      _workflows.add(iosWorkflow);
+      _workflows.add(androidWorkflow);
+    }
+    return _workflows;
+  }
+
 }
 
 class ValidatorTask {
@@ -91,7 +106,7 @@ class Doctor {
   }
 
   List<Workflow> get workflows {
-    return new List<Workflow>.from(validators.where((DoctorValidator validator) => validator is Workflow));
+    return DoctorValidatorsProvider.instance.workflows;
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
@@ -134,7 +149,7 @@ class Doctor {
   /// Print information about the state of installed tooling.
   Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
-      return AndroidWorkflow.runLicenseManager();
+      return AndroidValidator.runLicenseManager();
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
