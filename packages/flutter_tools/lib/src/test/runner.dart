@@ -90,6 +90,7 @@ Future<int> runTests(
     previewDart2: previewDart2,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
+    projectRootDirectory: fs.currentDirectory.uri,
   );
 
   // Make the global packages path absolute.
