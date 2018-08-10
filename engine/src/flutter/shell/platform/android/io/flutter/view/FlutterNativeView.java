@@ -81,30 +81,28 @@ public class FlutterNativeView implements BinaryMessenger {
         } else if (args.entrypoint == null) {
           throw new AssertionError("An entrypoint must be specified");
         }
-      runFromBundleInternal(args.bundlePath, args.entrypoint,
-          args.libraryPath, null);
+      runFromBundleInternal(args.bundlePath, args.entrypoint, args.libraryPath, args.defaultPath);
     }
 
     /**
      * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`. Parameters
-     * `snapshotOverride` and `reuseRuntimeController` have no effect.
+     * Please use runFromBundle with `FlutterRunArguments`.
+     * Parameter `reuseRuntimeController` has no effect.
      */
     @Deprecated
-    public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint,
+    public void runFromBundle(String bundlePath, String defaultPath, String entrypoint,
             boolean reuseRuntimeController) {
-        runFromBundleInternal(bundlePath, entrypoint, null, null);
+        runFromBundleInternal(bundlePath, entrypoint, null, defaultPath);
     }
 
     private void runFromBundleInternal(String bundlePath, String entrypoint,
-        String libraryPath, String snapshotOverride) {
+        String libraryPath, String defaultPath) {
         assertAttached();
         if (applicationIsRunning)
             throw new AssertionError(
                     "This Flutter engine instance is already running an application");
         nativeRunBundleAndSnapshotFromLibrary(mNativePlatformView, bundlePath,
-            snapshotOverride, entrypoint, libraryPath,
-            mContext.getResources().getAssets());
+            defaultPath, entrypoint, libraryPath, mContext.getResources().getAssets());
 
         applicationIsRunning = true;
     }
@@ -238,7 +236,7 @@ public class FlutterNativeView implements BinaryMessenger {
 
     private static native void nativeRunBundleAndSnapshotFromLibrary(
             long nativePlatformViewAndroid, String bundlePath,
-            String snapshotOverride, String entrypoint, String libraryUrl,
+            String defaultPath, String entrypoint, String libraryUrl,
             AssetManager manager);
 
     private static native String nativeGetObservatoryUri();
