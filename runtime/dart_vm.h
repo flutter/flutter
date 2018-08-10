@@ -38,6 +38,8 @@ class DartVM : public fml::RefCountedThreadSafe<DartVM> {
 
   static bool IsRunningPrecompiledCode();
 
+  static bool IsKernelMapping(const fml::FileMapping* mapping);
+
   const Settings& GetSettings() const;
 
   const fml::Mapping& GetPlatformKernel() const;
@@ -47,6 +49,7 @@ class DartVM : public fml::RefCountedThreadSafe<DartVM> {
   IsolateNameServer* GetIsolateNameServer();
 
   fml::RefPtr<DartSnapshot> GetIsolateSnapshot() const;
+
   fml::RefPtr<DartSnapshot> GetSharedSnapshot() const;
 
   fml::WeakPtr<DartVM> GetWeakPtr();

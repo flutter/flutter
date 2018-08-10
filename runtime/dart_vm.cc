@@ -196,6 +196,26 @@ bool DartVM::IsRunningPrecompiledCode() {
   return Dart_IsPrecompiledRuntime();
 }
 
+bool DartVM::IsKernelMapping(const fml::FileMapping* mapping) {
+  if (mapping == nullptr) {
+    return false;
+  }
+
+  const uint8_t kKernelHeaderMagic[] = {0x90, 0xAB, 0xCD, 0xEF};
+  const size_t kKernelHeaderMagicSize = sizeof(kKernelHeaderMagic);
+
+  if (mapping->GetSize() < kKernelHeaderMagicSize) {
+    return false;
+  }
+
+  if (memcmp(kKernelHeaderMagic, mapping->GetMapping(),
+             kKernelHeaderMagicSize) != 0) {
+    return false;
+  }
+
+  return true;
+}
+
 static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
 // Disable Dart's built in profiler when building a debug build. This
 // works around a race condition that would sometimes stop a crash's
