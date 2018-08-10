@@ -9,6 +9,16 @@
 
 namespace shell {
 
+namespace {
+
+// Wait 51 milliseconds (which is 1 more milliseconds than 3 frames at 60hz)
+// before notifying the engine that we are idle.  See comments in |BeginFrame|
+// for further discussion on why this is necessary.
+constexpr fml::TimeDelta kNotifyIdleTaskWaitTime =
+    fml::TimeDelta::FromMilliseconds(51);
+
+}  // namespace
+
 Animator::Animator(Delegate& delegate,
                    blink::TaskRunners task_runners,
                    std::unique_ptr<VsyncWaiter> waiter)
@@ -23,6 +33,7 @@ Animator::Animator(Delegate& delegate,
       paused_(false),
       regenerate_layer_tree_(false),
       frame_scheduled_(false),
+      notify_idle_task_id_(0),
       dimension_change_pending_(false),
       weak_factory_(this) {}
 
@@ -64,6 +75,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
 
   frame_scheduled_ = false;
+  notify_idle_task_id_++;
   regenerate_layer_tree_ = false;
   pending_frame_semaphore_.Signal();
 
@@ -95,9 +107,28 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   }
 
   if (!frame_scheduled_) {
-    // We don't have another frame pending, so we're waiting on user input
-    // or I/O. Allow the Dart VM 100 ms.
-    delegate_.OnAnimatorNotifyIdle(*this, dart_frame_deadline_ + 100000);
+    // Under certain workloads (such as our parent view resizing us, which is
+    // communicated to us by repeat viewport metrics events), we won't
+    // actually have a frame scheduled yet, despite the fact that we *will* be
+    // producing a frame next vsync (it will be scheduled once we receive the
+    // viewport event).  Because of this, we hold off on calling
+    // |OnAnimatorNotifyIdle| for a little bit, as that could cause garbage
+    // collection to trigger at a highly undesirable time.
+    task_runners_.GetUITaskRunner()->PostDelayedTask(
+        [self = weak_factory_.GetWeakPtr(),
+         notify_idle_task_id = notify_idle_task_id_]() {
+          if (!self.get()) {
+            return;
+          }
+          // If our (this task's) task id is the same as the current one, then
+          // no further frames were produced, and it is safe (w.r.t. jank) to
+          // notify the engine we are idle.
+          if (notify_idle_task_id == self->notify_idle_task_id_) {
+            self->delegate_.OnAnimatorNotifyIdle(
+                *self.get(), Dart_TimelineGetMicros() + 100000);
+          }
+        },
+        kNotifyIdleTaskWaitTime);
   }
 }
 
