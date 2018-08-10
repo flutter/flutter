@@ -94,7 +94,7 @@ Future<Null> run(List<String> args) async {
     final Directory sdkRootDest =
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
-    await for (FileSystemEntity artifact in sdkRootSrc.list()) {
+    for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
       fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
     }
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
