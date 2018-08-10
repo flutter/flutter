@@ -63,6 +63,11 @@ class _NavigationBarTransition extends StatelessWidget {
          topNavBarBox: topNavBar.renderBox,
        );
 
+  _NavigationBarTransition.oneKnownBox({
+    @required this.animation,
+    @required _TransitionableNavigationBar destinationNavBar,
+  });
+
   final Animation<double> animation;
   final _NavigationBarComponentsTransition componentsTransition;
 
@@ -72,6 +77,7 @@ class _NavigationBarTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('building navigation bar transition');
     final List<Widget> children = <Widget>[
       // Draw an empty navigation bar box with changing shape behind all the
       // moving components without any components inside it itself.
@@ -454,7 +460,7 @@ class _NavigationBarComponentsTransition {
     // If it's the first page with a back chevron, shift in slightly from the
     // right.
     if (bottomComponents.backChevron == null) {
-      from = to.shift(new Offset(topBackChevron.renderBox.size.width, 0.0));
+      from = to.shift(new Offset(topBackChevron.renderBox.size.width * 2.0, 0.0));
     }
 
     final RelativeRectTween positionTween = new RelativeRectTween(
@@ -637,25 +643,40 @@ CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect begin, Rect end
 
 /// Navigation bars' hero flight shuttle builder.
 HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
+  BuildContext flightContext,
   Animation<double> animation,
   HeroFlightDirection flightDirection,
-  Hero fromWidget,
-  Hero toWidget,
+  BuildContext fromHeroContext,
+  BuildContext toHeroContext,
 ) {
+  print('building shuttle');
   assert(animation != null);
   assert(flightDirection != null);
-  assert(fromWidget != null);
-  assert(toWidget != null);
-  assert(fromWidget.child is _TransitionableNavigationBar);
-  assert(toWidget.child is _TransitionableNavigationBar);
-  final _TransitionableNavigationBar fromNavBar = fromWidget.child;
-  final _TransitionableNavigationBar toNavBar = toWidget.child;
+  assert(fromHeroContext != null);
+  assert(toHeroContext != null);
+  assert(fromHeroContext.widget is Hero);
+  assert(toHeroContext.widget is Hero);
+  debugDumpApp();
+
+  final Hero fromHeroWidget = fromHeroContext.widget;
+  final Hero toHeroWidget = toHeroContext.widget;
+
+  assert(fromHeroWidget.child is _TransitionableNavigationBar);
+  assert(toHeroWidget.child is _TransitionableNavigationBar);
+
+  final _TransitionableNavigationBar fromNavBar = fromHeroWidget.child;
+  final _TransitionableNavigationBar toNavBar = toHeroWidget.child;
+
   assert(fromNavBar.components != null);
   assert(toNavBar.components != null);
-  // These getters also make sure that the render boxes have been attached
-  // which should be the case when used in Heros.
-  assert(fromNavBar.renderBox != null);
+
+  // The destination render objects must have been attached which should be
+  // the case when used in Heroes. Otherwise, there's no way to construct
+  // a transition without knowing where it's going.
   assert(toNavBar.renderBox != null);
+
+  final bool inMidTransitionAlready = !fromNavBar.mounted;
+
 
   switch (flightDirection) {
     case HeroFlightDirection.push:

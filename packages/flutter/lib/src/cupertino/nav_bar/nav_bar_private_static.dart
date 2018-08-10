@@ -148,6 +148,7 @@ class _LargeTitleNavigationBarSliverDelegate
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
+    print('creating sliver components');
     final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
       route: ModalRoute.of(context),
       leading: leading,
@@ -233,6 +234,7 @@ class _LargeTitleNavigationBarSliverDelegate
       return navBar;
     }
 
+    print('creating new sliver hero and transitionable navigation bar');
     return new Hero(
       tag: _heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
@@ -623,6 +625,11 @@ class _RenderObjectFindingWidget extends StatelessWidget {
       'The renderBox getter should only be called after the widget is added to the tree',
     );
     return renderBox;
+  }
+
+  bool get mounted {
+    final GlobalKey globalKey = key;
+    return globalKey.currentContext?.findRenderObject()?.attached ?? false;
   }
 
   @override
