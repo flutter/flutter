@@ -36,6 +36,11 @@ VulkanApplication::VulkanApplication(
 #if OS_FUCHSIA
   if (ExtensionSupported(supported_extensions,
                          VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME)) {
+    // VK_KHR_get_physical_device_properties2 is a dependency of the memory
+    // capabilities extension, so the validation layers require that it be
+    // enabled.
+    enabled_extensions.emplace_back(
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
     enabled_extensions.emplace_back(
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
   }
