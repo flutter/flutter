@@ -218,13 +218,7 @@ class RawKeyboard {
   static final RawKeyboard instance = new RawKeyboard._();
 
   final List<ValueChanged<RawKeyEvent>> _listeners = <ValueChanged<RawKeyEvent>>[];
-
-  /// Whether the shift key is currently down.
-  static bool shiftDown = false;
-
-  /// Whether the control key is current down.
-  static bool controlDown = false;
-
+  
   /// Calls the listener every time the user presses or releases a key.
   ///
   /// Listeners can be removed with [removeListener].
@@ -239,20 +233,7 @@ class RawKeyboard {
     _listeners.remove(listener);
   }
 
-  static const int _kLeftShiftCode = 59;
-  static const int _kRightShiftCode = 60;
-  static const int _kLeftControlCode = 113;
-  static const int _kRightControlCode = 114;
-
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    if (message['keymap'] == 'android') {
-      final int keyCode = message['keyCode'];
-      final bool isDown = message['type'] == 'keydown';
-      if (keyCode == _kLeftShiftCode || keyCode == _kRightShiftCode) {
-        shiftDown = isDown;
-      } else if (keyCode == _kLeftControlCode || keyCode == _kRightControlCode)
-        controlDown = isDown;
-    }
     if (_listeners.isEmpty)
       return;
     final RawKeyEvent event = new RawKeyEvent.fromMessage(message);
