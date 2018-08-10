@@ -411,7 +411,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// giving them the `features` argument.
   ///
   /// This is called by [handleAccessibilityFeaturesChanged] when the
-  /// [Window.onAccessibilityFeaturesChanged] notification is recieved.
+  /// [Window.onAccessibilityFeaturesChanged] notification is received.
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
