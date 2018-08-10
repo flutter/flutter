@@ -856,19 +856,6 @@ bool Shell::OnServiceProtocolScreenshotSKP(
   return false;
 }
 
-static bool FileNameIsDill(const std::string& name) {
-  const std::string suffix = ".dill";
-
-  if (name.size() < suffix.size()) {
-    return false;
-  }
-
-  if (name.rfind(suffix, name.size()) == name.size() - suffix.size()) {
-    return true;
-  }
-  return false;
-}
-
 // Service protocol handler
 bool Shell::OnServiceProtocolRunInView(
     const blink::ServiceProtocol::Handler::ServiceProtocolMap& params,
@@ -900,10 +887,13 @@ bool Shell::OnServiceProtocolRunInView(
   auto main_script_file =
       fml::paths::AbsolutePath(params.at("mainScript").ToString());
 
+  auto main_script_file_mapping =
+      std::make_unique<fml::FileMapping>(main_script_file, false);
+
   auto isolate_configuration =
-      FileNameIsDill(main_script_file)
+      blink::DartVM::IsKernelMapping(main_script_file_mapping.get())
           ? IsolateConfiguration::CreateForSnapshot(
-                std::make_unique<fml::FileMapping>(main_script_file, false))
+                std::move(main_script_file_mapping))
           : IsolateConfiguration::CreateForSource(
                 main_script_file, params.at("packagesFile").ToString());
 
