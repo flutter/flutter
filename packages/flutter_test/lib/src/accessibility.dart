@@ -9,13 +9,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'finders.dart';
 import 'widget_tester.dart';
 
-/// The result of evaluating a semantics node by a [AccessibilityPolicy].
+/// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
   const Evaluation.pass() : passed = true, reason = null;
@@ -49,18 +48,11 @@ class Evaluation {
   }
 }
 
-/// An accessibility policy describes a restriction to conform to enhance
-/// usability.
-abstract class AccessibilityPolicy {
+/// An accessibility guideline describes a recommendation an application should
+/// meet to be considered accessible.
+abstract class AccessibilityGuideline {
   /// A const constructor allows subclasses to be const.
-  const AccessibilityPolicy();
-
-  /// Method which is called once before the policy is evaluated.
-  ///
-  /// Use this method to reset any internal state or initialize fields needed in
-  /// evaluate.
-  @mustCallSuper
-  void beforeEvaluate() {}
+  const AccessibilityGuideline();
 
   /// Evaluate whether the current state of the `tester` conforms to the rule.
   FutureOr<Evaluation> evaluate(WidgetTester tester);
@@ -69,54 +61,38 @@ abstract class AccessibilityPolicy {
   String get description;
 }
 
-/// A semantics policy which places restrictions on single semantics nodes.
-///
-/// If a policy only effects one node at a time, this class can be used as
-/// a base to get automatic tree traversal for free. The results for each
-/// node will be combined into a single result using [Evaluation.+].
-abstract class SingleNodeSemanticsPolicy extends AccessibilityPolicy {
-  /// A const constructor allows subclasses to be const.
-  const SingleNodeSemanticsPolicy();
-
-  @override
-  Evaluation evaluate(WidgetTester tester) {
-    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
-    final List<SemanticsNode> nodesToVisit = <SemanticsNode>[root];
-    Evaluation result;
-    while (nodesToVisit.isNotEmpty) {
-      final SemanticsNode current = nodesToVisit.removeAt(0);
-      final List<SemanticsData> children = <SemanticsData>[];
-      final SemanticsData currentData = current.getSemanticsData();
-      current.visitChildren((SemanticsNode child) {
-        nodesToVisit.add(child);
-        children.add(child.getSemanticsData());
-        return true;
-      });
-      result += evaluateData(currentData, current.id);
-    }
-    return result;
-  }
-
-  /// Override to provide specific logic for evaluating a single semantics node's
-  /// data.
-  Evaluation evaluateData(SemanticsData node, int id);
-}
-
-class _MinimumTapTargetPolicy extends SingleNodeSemanticsPolicy {
-  const _MinimumTapTargetPolicy(this.size);
+class _MinimumTapTargetGuideline extends AccessibilityGuideline {
+  const _MinimumTapTargetGuideline(this.size);
 
   final Size size;
 
   @override
-  Evaluation evaluateData(SemanticsData data, int id) {
-    if (data.hasAction(SemanticsAction.tap) || data.hasAction(SemanticsAction.longPress)) {
-      if (data.rect.width < size.width || data.rect.height < size.height) {
-        return new Evaluation.fail('Node{$id}: {$data.rect.size} < Size(48.0, 48.0)');
+  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+    final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    Evaluation traverse(SemanticsNode node) {
+      Evaluation result = const Evaluation.pass();
+      node.visitChildren((SemanticsNode child) {
+        result += traverse(child);
+        return true;
+      });
+      final SemanticsData data = node.getSemanticsData();
+      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+        return result;
+      Rect paintBounds = node.rect;
+      SemanticsNode current = node;
+      while (current != null) {
+        if (current.transform != null)
+          paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
+        current = current.parent;
       }
-      return const Evaluation.pass();
+      // shrink by device pixel ratio.
+      final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
+      if (candidateSize.width < size.width || candidateSize.height < size.height)
+        result += new Evaluation.fail(
+          '$node: expected tap target size of at least $size, but found $candidateSize');
+      return result;
     }
-    // Nodes with no tap actions are not evaluated by this rule.
-    return const Evaluation.pass();
+    return traverse(root);
   }
 
   @override
@@ -124,53 +100,8 @@ class _MinimumTapTargetPolicy extends SingleNodeSemanticsPolicy {
 }
 
 
-class _LabelledImagePolicy extends SingleNodeSemanticsPolicy {
-  const _LabelledImagePolicy();
-
-  @override
-  Evaluation evaluateData(SemanticsData data, int id) {
-    if (data.hasFlag(ui.SemanticsFlag.isImage) && (data.label == null || data.label.trim().isEmpty)) {
-      return new Evaluation.fail('Node{$id}: data.label == null|"" ');
-    }
-    // Nodes that are not images are not evaluated by this rule.
-    return const Evaluation.pass();
-  }
-
-  @override
-  String get description => 'Images should have labels';
-}
-
-class _NoOverlappingTapTargetPolicy extends SingleNodeSemanticsPolicy {
-  final Map<int, SemanticsData> _nodes = <int, SemanticsData>{};
-
-  @override
-  void beforeEvaluate() {
-    _nodes.clear();
-    super.beforeEvaluate();
-  }
-
-  @override
-  Evaluation evaluateData(SemanticsData data, int id) {
-    if (data.hasAction(SemanticsAction.tap) || data.hasAction(SemanticsAction.longPress)) {
-      Evaluation result = const Evaluation.pass();
-      for (int otherId in _nodes.keys) {
-        final SemanticsData other = _nodes[otherId];
-        if (other.rect.overlaps(data.rect)) {
-          result += new Evaluation.fail('Node{$id}: has overlapping touch area with Node{$otherId}');
-        }
-      }
-      _nodes[id] = data;
-      return result;
-    }
-    return const Evaluation.pass();
-  }
-
-  @override
-  String get description => 'Tap areas should not overlap';
-}
-
-class _MinimumTextContrastPolicy extends AccessibilityPolicy {
-  const _MinimumTextContrastPolicy();
+class _MinimumTextContrastGuideline extends AccessibilityGuideline {
+  const _MinimumTextContrastGuideline();
 
   /// The minimum text size considered large for contrast checking.
   ///
@@ -191,7 +122,7 @@ class _MinimumTextContrastPolicy extends AccessibilityPolicy {
   /// The minimum contrast ratio for large text.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  static const double kminimumRatioLargeText = 3.0;
+  static const double kMinimumRatioLargeText = 3.0;
 
   @override
   Future<Evaluation> evaluate(WidgetTester tester) async {
@@ -214,31 +145,37 @@ class _MinimumTextContrastPolicy extends AccessibilityPolicy {
       });
       for (SemanticsNode child in children)
         result += await evaluateNode(child);
-      if (data?.label?.trim()?.isEmpty == true || data.hasFlag(ui.SemanticsFlag.scopesRoute))
+      if (_shouldSkipNode(data))
         return result;
-      // TODO(jonahwilliams): handle icons somehow.
-      final List<Element> elements = find.text(data.label).evaluate().toList();
-      if (elements.isEmpty)
-        return result;
-      if (elements.length > 1)
-        return const Evaluation.fail('Multiple nodes with the same label');
 
-      final Element element = elements.single;
-      final Widget widget = element.widget;
-      final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
       // We need to look up the inherited text properties to determine the
       // contrast ratio based on text size/weight.
       double fontSize;
       bool isBold;
-      if (widget is Text) {
-        TextStyle effectiveTextStyle = widget.style;
-        if (widget.style == null || widget.style.inherit)
-          effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
-        fontSize = effectiveTextStyle.fontSize;
-        isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
+      final String text = (data.label?.isEmpty == true) ? data.value : data.label;
+      final List<Element> elements = find.text(text).evaluate().toList();
+      if (elements.length == 1) {
+        final Element element = elements.single;
+        final Widget widget = element.widget;
+        final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(element);
+        if (widget is Text) {
+          TextStyle effectiveTextStyle = widget.style;
+          if (widget.style == null || widget.style.inherit)
+            effectiveTextStyle = defaultTextStyle.style.merge(widget.style);
+          fontSize = effectiveTextStyle.fontSize;
+          isBold = effectiveTextStyle.fontWeight == FontWeight.bold;
+        } else if (widget is EditableText) {
+          isBold = widget.style.fontWeight == FontWeight.bold;
+          fontSize = widget.style.fontSize;
+        } else {
+          assert(false);
+        }
+      } else if (elements.length > 1) {
+        return const Evaluation.fail('Multiple nodes with the same label');
       } else {
-        // TODO(jonahwilliams): handle other widgets like editable text.
-        return result;
+        // If we can't find the text node, then look up the default text
+        fontSize = 12.0;
+        isBold = false;
       }
 
       // Transform local coordinate to screen coordinates.
@@ -254,17 +191,26 @@ class _MinimumTextContrastPolicy extends AccessibilityPolicy {
       final _ContrastReport report = new _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       final double targetContrastRatio = (isBold && fontSize > kBoldTextMinimumSize) ?
-        kminimumRatioLargeText : kMinimumRatioNormalText;
+        kMinimumRatioLargeText : kMinimumRatioNormalText;
       if (contrastRatio >= targetContrastRatio)
         return result + const Evaluation.pass();
       return result + new Evaluation.fail(
-        '${node.toString()}:\nExpected contrast ratio of at least '
-        '$targetContrastRatio but found $contrastRatio. '
+        '$node:\nExpected contrast ratio of at least '
+        '$targetContrastRatio but found $contrastRatio for a font size of $fontSize. '
         'The computed foreground color was: ${report.lightColor}, '
         'The computed background color was: ${report.darkColor}'
       );
     }
     return evaluateNode(root);
+  }
+
+  // Skip routes which might have labels, and nodes without any text.
+  bool _shouldSkipNode(SemanticsData data) {
+    if (data.hasFlag(ui.SemanticsFlag.scopesRoute))
+      return true;
+    if (data.label?.trim()?.isEmpty == true && data.value?.trim()?.isEmpty == true)
+      return true;
+    return false;
   }
 
   List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {
@@ -318,29 +264,27 @@ class _ContrastReport {
       return new _ContrastReport._(firstColor, lastColor);
     }
     // to determine the lighter and darker color, partition the colors
-    // by lightness and then choose a weighted average from each group.
+    // by lightness and then choose the mode from each group.
     final double averageLightness = colorHistogram.keys.fold(0.0, (double total, int color) {
       return total + new HSLColor.fromColor(new Color(color)).lightness;
     }) / colorHistogram.length;
-    double lightSum = 0.0;
-    double darkSum = 0.0;
-    int darkCount = 0;
+    int lightColor = 0;
+    int darkColor = 0;
     int lightCount = 0;
-    // compute average of light color and dark color.
+    int darkCount = 0;
+    // Find the most frequently occurring light and dark color.
     for (MapEntry<int, int> entry in colorHistogram.entries) {
       final HSLColor color = new HSLColor.fromColor(new Color(entry.key));
       final int count = entry.value;
-      if (color.lightness < averageLightness) {
-        darkSum += color.toColor().value * count;
-        darkCount += count;
-      } else {
-        lightSum += color.toColor().value * count;
-        lightCount += count;
+      if (color.lightness <= averageLightness && count > lightCount) {
+        darkColor = entry.key;
+        darkCount = count;
+      } else if (color.lightness > averageLightness && count > darkCount) {
+        lightColor = entry.key;
+        lightCount = count;
       }
     }
-    final Color lightColor = new Color(lightSum ~/ lightCount);
-    final Color darkColor = new Color(darkSum ~/ darkCount);
-    return new _ContrastReport._(lightColor, darkColor);
+    return new _ContrastReport._(new Color(lightColor), new Color(darkColor));
   }
 
   const _ContrastReport._(this.lightColor, this.darkColor);
@@ -378,19 +322,11 @@ class _ContrastReport {
   }
 }
 
-/// A policy which restricts all tapable semantic nodes a minimum size of
-/// 48 by 48.
-const AccessibilityPolicy minimumTapTargetPolicyAndroid = _MinimumTapTargetPolicy(Size(48.0, 48.0));
+/// A guideline which requires tapable semantic nodes a minimum size of 48 by 48.
+const AccessibilityGuideline androidTapTargetGuideline = _MinimumTapTargetGuideline(Size(48.0, 48.0));
 
-/// A policy which restricts all tapable semantic nodes a minimum size of
-/// 44 by 44.
-const AccessibilityPolicy minimumTapTargetPolicyIOS = _MinimumTapTargetPolicy(Size(44.0, 44.0));
+/// A guideline which requires tapable semantic nodes a minimum size of 44 by 44.
+const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(Size(44.0, 44.0));
 
-/// A policy which requires all image nodes to have a non-trivial label.
-const AccessibilityPolicy labelledImagePolicy = _LabelledImagePolicy();
-
-/// A policy which enforces text contrast.
-const AccessibilityPolicy minimumTextContrastPolicy = _MinimumTextContrastPolicy();
-
-/// A policy which requires that tap targets do not overlap.
-final AccessibilityPolicy noOverlappingTapTargetPolcy = new _NoOverlappingTapTargetPolicy();
+/// A guideline which requires text contrast to meet minimum values.
+const AccessibilityGuideline textContrastGuideline = _MinimumTextContrastGuideline();
