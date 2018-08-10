@@ -477,7 +477,6 @@ Matcher matchesSemanticsData({
 ///   * [androidTapTargetGuideline]
 ///   * [iOSTapTargetGuideline]
 ///   * [textContrastGuideline]
-///   * [labelledImageGuideline]
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return new _MatchesAccessibilityGuideline(guideline);
 }
