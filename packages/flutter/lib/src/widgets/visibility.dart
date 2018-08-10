@@ -103,16 +103,17 @@ class Visibility extends StatelessWidget {
   /// Whether to maintain the [State] objects of the [child] subtree when it is
   /// not [visible].
   ///
-  /// Keeping the state of the subtree is expensive. It should only be
-  /// maintained if it cannot be recreated on demand. One example of when the
-  /// state would be maintained is if the child subtree contains a [Navigator],
-  /// since that widget maintains elaborate state that cannot be recreated on
-  /// the fly.
+  /// Keeping the state of the subtree is potentially expensive (because it
+  /// means all the objects are still in memory; their resources are not
+  /// released). It should only be maintained if it cannot be recreated on
+  /// demand. One example of when the state would be maintained is if the child
+  /// subtree contains a [Navigator], since that widget maintains elaborate
+  /// state that cannot be recreated on the fly.
   ///
-  /// If this is true, an [Offstage] widget is used to hide the child instead of
-  /// replacing it with [replacement].
+  /// If this property is true, an [Offstage] widget is used to hide the child
+  /// instead of replacing it with [replacement].
   ///
-  /// If this is false, then [maintainAnimation] must also be false.
+  /// If this property is false, then [maintainAnimation] must also be false.
   ///
   /// Dynamically changing this value may cause the current state of the
   /// subtree to be lost (and a new instance of the subtree, with new [State]
@@ -133,9 +134,9 @@ class Visibility extends StatelessWidget {
   /// then any [AnimationController]s hosted inside the [child] subtree will be
   /// muted while the [visible] flag is false.
   ///
-  /// If this is true, no [TickerMode] widget is used.
+  /// If this property is true, no [TickerMode] widget is used.
   ///
-  /// If this is false, then [maintainSize] must also be false.
+  /// If this property is false, then [maintainSize] must also be false.
   ///
   /// Dynamically changing this value may cause the current state of the
   /// subtree to be lost (and a new instance of the subtree, with new [State]
@@ -154,10 +155,10 @@ class Visibility extends StatelessWidget {
   /// [child] subtree is not trivial then it is significantly cheaper to not
   /// even keep the state (see [maintainState]).
   ///
-  /// If this is true, [Opacity] is used instead of [Offstage].
+  /// If this property is true, [Opacity] is used instead of [Offstage].
   ///
-  /// If this is false, then [maintainSemantics] and [maintainInteractivity]
-  /// must also be false.
+  /// If this property is false, then [maintainSemantics] and
+  /// [maintainInteractivity] must also be false.
   ///
   /// Dynamically changing this value may cause the current state of the
   /// subtree to be lost (and a new instance of the subtree, with new [State]
