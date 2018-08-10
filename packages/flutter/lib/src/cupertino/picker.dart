@@ -72,8 +72,7 @@ class CupertinoPicker extends StatefulWidget {
   /// A child is lazily created when it starts becoming visible in the viewport.
   /// All of the children provided by the builder are cached and reused, so
   /// normally the builder is only called once for each index (except when
-  /// rebuilding - the cache is cleared). Therefore, the builder has to be
-  /// consistent and returns the same widget for the same index.
+  /// rebuilding - the cache is cleared).
   ///
   /// The [itemBuilder] argument must not be null. The [childCount] argument
   /// reflects the number of children that will be provided by the [itemBuilder].

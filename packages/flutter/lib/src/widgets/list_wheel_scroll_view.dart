@@ -46,6 +46,9 @@ abstract class ListWheelChildDelegate {
   /// Returns the true index for a child built at a given index. Defaults to
   /// the given index, however if the delegate is [ListWheelChildLoopingListDelegate],
   /// this value is the index of the true element that the delegate is looping to.
+  ///
+  /// Example: [ListWheelChildLoopingListDelegate] is built by looping a list of
+  /// length 8. Then, trueIndexOf(10) = 2 and trueIndexOf(-5) = 3.
   int trueIndexOf(int index) => index;
 
   /// Called to check whether this and the old delegate are actually 'different',
