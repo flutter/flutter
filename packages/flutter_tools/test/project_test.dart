@@ -312,12 +312,12 @@ void testInMemory(String description, Future<Null> testMethod()) {
 /// installation to an (in-memory) file system used for testing.
 void transfer(FileSystemEntity entity, FileSystem target) {
   if (entity is Directory) {
-    target.directory(entity.path).createSync(recursive: true);
+    target.directory(entity.absolute.path).createSync(recursive: true);
     for (FileSystemEntity child in entity.listSync()) {
       transfer(child, target);
     }
   } else if (entity is File) {
-    target.file(entity.path).writeAsBytesSync(entity.readAsBytesSync(), flush: true);
+    target.file(entity.absolute.path).writeAsBytesSync(entity.readAsBytesSync(), flush: true);
   } else {
     throw 'Unsupported FileSystemEntity ${entity.runtimeType}';
   }
