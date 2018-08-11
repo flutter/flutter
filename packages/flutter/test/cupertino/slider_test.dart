@@ -289,6 +289,10 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
             actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
           ),
         ]
