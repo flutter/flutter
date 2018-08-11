@@ -84,6 +84,15 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
   /// The behavior of the created [Ticker]s in the presence of time dilation.
   ///
   /// Defaults to [TimeDilationBehavior.normal].
+  ///
+  /// When [AccessibilityFeatures.disableAnimations] is enabled, the time
+  /// dilation is set to 0.05 (20x speed) to remove most animations. This enum
+  /// is used to allow certain Tickers to opt out of the time dilation, for the
+  /// purpose of preserving animation or simulation behavior for accessibility.
+  ///
+  /// For example, the Ticker which controls the physics simulation for a
+  /// scrollable list will have [TimeDilationBehavior.unscaled] so that when a
+  /// user attempts to scroll it does not jump to the end/beginning too quickly.
   @override
   TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
 

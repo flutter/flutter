@@ -44,11 +44,28 @@ abstract class TickerProvider {
 }
 
 /// Configures how a [Timer] behaves in the presence of time dilation.
+///
+/// When time dilation is applied, the ticker will receive timestamps which
+/// have been adjusted by some amount (either up or down). This will slow
+/// down or speed up anything that depends on the ticker, usually animations.
+///
+/// When [AccessibilityFeatures.disableAnimations] is enabled, the time dilation
+/// is set to 0.05 (20x speed) to remove most animations. This enum is used to
+/// allow certain Tickers to opt out of the time dilation, for the purpose of
+/// preserving animation or simulation behavior for accessibility.
+///
+/// For example, the Ticker which controls the physics simulation for a
+/// scrollable list will have [TimeDilationBehavior.unscaled] so that when a user
+/// attempts to scroll it does not jump to the end/beginning too quickly.
 enum TimeDilationBehavior {
-  /// The adjusted timestampts are accepted.
+  /// The default behavior for a ticker.
   normal,
 
-  /// The adjusted timestamps are unscaled by reversing the time dilation.
+  /// The Ticker will adjust the timestamps when time dilation is applied.
+  ///
+  /// When a ticker receives an adjusted timestamp and has this behavior, it
+  /// will look up the time dilation value and reverse the transformation to
+  /// receive the original timestamp.
   unscaled,
 }
 
@@ -85,6 +102,10 @@ class Ticker {
   /// The behavior of the [Ticker] in the presence of time dilation.
   ///
   /// Defaults to [TimeDilationBehavior.normal].
+  ///
+  /// See also:
+  ///
+  ///  * [TimeDilationBehavior], for an explanation of this configuration.
   TimeDilationBehavior timeDilationBehavior;
 
   /// Whether this ticker has been silenced.
@@ -245,7 +266,8 @@ class Ticker {
 
     _startTime ??= timeStamp;
     if (timeDilationBehavior == TimeDilationBehavior.unscaled && timeDilation != 1.0) {
-      final double scale = 1 / timeDilation;
+      assert(timeDilation > 0.0);
+      final double scale = 1.0 / timeDilation;
       final Duration delta = timeStamp - _startTime;
       final Duration tick = new Duration(microseconds: (delta.inMicroseconds / scale).round());
       _onTick(tick);

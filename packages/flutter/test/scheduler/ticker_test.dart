@@ -117,18 +117,26 @@ void main() {
 
   testWidgets('Ticker can be excluded from time dilation', (WidgetTester tester) async {
     timeDilation = 0.05; // Move 20 times as fast.
-    Duration lastDuration;
-    void handleTick(Duration duration) {
-      lastDuration = duration;
+    Duration lastDurationOne;
+    Duration lastDurationTwo;
+    void handleTickOne(Duration duration) {
+      lastDurationOne = duration;
+    }
+    void handleTickTwo(Duration duration) {
+      lastDurationTwo = duration;
     }
 
-    final Ticker ticker = new Ticker(handleTick, timeDilationBehavior: TimeDilationBehavior.unscaled);
-    ticker.start();
+    final Ticker tickerOne = new Ticker(handleTickOne, timeDilationBehavior: TimeDilationBehavior.unscaled);
+    final Ticker tickerTwo = new Ticker(handleTickTwo, timeDilationBehavior: TimeDilationBehavior.normal);
+    tickerOne.start();
+    tickerTwo.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
-    expect(lastDuration, const Duration(milliseconds: 10));
+    expect(lastDurationOne, const Duration(milliseconds: 10));
+    expect(lastDurationTwo, const Duration(milliseconds: 10 * 20));
 
-    ticker.dispose();
+    tickerOne.dispose();
+    tickerTwo.dispose();
   });
 
   testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
