@@ -265,7 +265,7 @@ class _FakeTicker implements Ticker {
   String get debugLabel => null;
 
   @override
-  TimeDilationBehavior timeDilationBehavior;
+  TimeDilationBehavior timeDilationBehavior = TimeDilationBehavior.normal;
 
   @override
   bool get isActive => null;
