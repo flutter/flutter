@@ -30,6 +30,7 @@ Future<int> runTests(
     bool ipv6 = false,
     bool machine = false,
     bool previewDart2 = false,
+    String precompiledDillPath,
     bool trackWidgetCreation = false,
     bool updateGoldens = false,
     TestWatcher watcher,
@@ -88,6 +89,7 @@ Future<int> runTests(
     startPaused: startPaused,
     serverType: serverType,
     previewDart2: previewDart2,
+    precompiledDillPath: precompiledDillPath,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
   );
