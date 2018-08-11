@@ -24,10 +24,16 @@ import 'package:flutter_tools/src/usage.dart';
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
+const String _kOptionSdkRoot = 'sdk-root';
+const String _kOptionTestFile = 'test-file';
+const String _kOptionDillFile = 'dill-file';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,
+  _kOptionSdkRoot,
+  _kOptionTestFile,
+  _kOptionDillFile,
 ];
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
@@ -38,20 +44,14 @@ void main(List<String> args) {
   });
 }
 
-List<String> _findTests(Directory directory) {
-  return directory
-      .listSync(recursive: true, followLinks: false)
-      .where((FileSystemEntity entity) =>
-          entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path))
-      .map((FileSystemEntity entity) => fs.path.absolute(entity.path))
-      .toList();
-}
-
 Future<Null> run(List<String> args) async {
   final ArgParser parser = new ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
+    ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
+    ..addOption(_kOptionTestFile, help: 'Test file to execute')
+    ..addOption(_kOptionDillFile, help: 'Precompiled dill file for test')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -72,22 +72,33 @@ Future<Null> run(List<String> args) async {
     Cache.flutterRoot = tempDirectory.path;
     final Directory testDirectory =
         fs.directory(argResults[_kOptionTestDirectory]);
-    final List<String> tests = _findTests(testDirectory);
-
-    final List<String> testArgs = <String>[];
-    testArgs.add('--');
-    testArgs.addAll(tests);
+    final File testFile = fs.file(argResults[_kOptionTestFile]);
+    final File dillFile = fs.file(argResults[_kOptionDillFile]);
 
     final String shellPath = argResults[_kOptionShell];
     if (!fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
+
+    final Directory sdkRootSrc = fs.directory(argResults[_kOptionSdkRoot]);
+    if (!fs.isDirectorySync(sdkRootSrc.path)) {
+      throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
+    }
+
     // Put the tester shell where runTests expects it.
     // TODO(tvolkert,garymm): Switch to a Fuchsia-specific Artifacts impl.
     final Link testerDestLink =
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(shellPath);
+    final Directory sdkRootDest =
+        fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+    sdkRootDest.createSync(recursive: true);
+    for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
+      fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
+    }
+    // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
+    fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
     PackageMap.globalPackagesPath =
         fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
@@ -98,10 +109,13 @@ Future<Null> run(List<String> args) async {
     }
 
     exitCode = await runTests(
-      tests,
+      <String>[testFile.path],
       workDir: testDirectory,
       watcher: collector,
+      ipv6: false,
       enableObservatory: collector != null,
+      previewDart2: true,
+      precompiledDillPath: dillFile.path,
     );
 
     if (collector != null) {
