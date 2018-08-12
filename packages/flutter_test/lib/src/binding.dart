@@ -695,7 +695,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _currentFakeAsync.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
-        addTime(const Duration(milliseconds: 100));
+        addTime(const Duration(milliseconds: 500));
         _currentFakeAsync.flushMicrotasks();
         handleBeginFrame(new Duration(
           milliseconds: _clock.now().millisecondsSinceEpoch,
@@ -710,7 +710,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
     assert(() {
