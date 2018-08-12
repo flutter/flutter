@@ -148,7 +148,7 @@ class CocoaPods {
     return true;
   }
 
-  /// Ensures the `ios` sub-project of the Flutter project at [appDirectory]
+  /// Ensures the iOS sub-project of the Flutter project at [appDirectory]
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
   void setupPodfile(IosProject iosProject) {
@@ -156,7 +156,7 @@ class CocoaPods {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }
-    if (!iosProject.directory.existsSync()) {
+    if (!iosProject.directory.childFile('Runner.xcodeproj').existsSync()) {
       return;
     }
     final File podfile = iosProject.podfile;
