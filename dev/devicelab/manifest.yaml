@@ -464,7 +464,7 @@ tasks:
     description: >
       Measures the speed of Dart analyzer.
     stage: devicelab
-    required_agent_capabilities: ["linux/android", "fast_linux"]
+    required_agent_capabilities: ["fast_linux"]
 
   flutter_gallery_ios32__start_up:
     description: >
