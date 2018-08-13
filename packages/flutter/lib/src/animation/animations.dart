@@ -369,7 +369,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// The curve direction is only reset when we hit the beginning or the end of
   /// the timeline to avoid discontinuities in the value of any variables this
-  /// a animation is used to animate.
+  /// animation is used to animate.
   AnimationStatus _curveDirection;
 
   void _updateCurveDirection(AnimationStatus status) {

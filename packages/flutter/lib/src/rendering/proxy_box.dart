@@ -717,15 +717,22 @@ class RenderOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
-  RenderOpacity({ double opacity = 1.0, RenderBox child })
-    : assert(opacity != null),
-      assert(opacity >= 0.0 && opacity <= 1.0),
-      _opacity = opacity,
-      _alpha = _getAlphaFromOpacity(opacity),
-      super(child);
+  RenderOpacity({
+    double opacity = 1.0,
+    bool alwaysIncludeSemantics = false,
+    RenderBox child,
+  }) : assert(opacity != null),
+       assert(opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
+       _opacity = opacity,
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       _alpha = _getAlphaFromOpacity(opacity),
+       super(child);
 
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+
+  int _alpha;
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -755,13 +762,26 @@ class RenderOpacity extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  int _alpha;
+  /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  bool _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool value) {
+    if (value == _alwaysIncludeSemantics)
+      return;
+    _alwaysIncludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0)
+      if (_alpha == 0) {
         return;
+      }
       if (_alpha == 255) {
         context.paintChild(child, offset);
         return;
@@ -773,7 +793,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && _alpha != 0)
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child);
   }
 
@@ -781,6 +801,7 @@ class RenderOpacity extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DoubleProperty('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -831,6 +852,8 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   }
 
   /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
   ///
   /// Defaults to false.
   bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
@@ -893,6 +916,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 

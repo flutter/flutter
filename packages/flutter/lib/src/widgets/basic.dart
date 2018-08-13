@@ -145,15 +145,15 @@ class Directionality extends InheritedWidget {
 ///
 /// ## Opacity Animation
 ///
-/// [Opacity] animations should be built using [AnimatedOpacity] rather than
-/// manually rebuilding the [Opacity] widget.
-///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
 /// an [AnimatedOpacity] instead.
 ///
 /// See also:
 ///
+///  * [Visibility], which can hide a child more efficiently (albeit less
+///    subtly, because it is either visible or hidden, rather than allowing
+///    fractional opacity values).
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
@@ -169,8 +169,10 @@ class Opacity extends SingleChildRenderObjectWidget {
   const Opacity({
     Key key,
     @required this.opacity,
+    this.alwaysIncludeSemantics = false,
     Widget child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
        super(key: key, child: child);
 
   /// The fraction to scale the child's alpha value.
@@ -185,18 +187,36 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// expensive.
   final double opacity;
 
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
   @override
-  RenderOpacity createRenderObject(BuildContext context) => new RenderOpacity(opacity: opacity);
+  RenderOpacity createRenderObject(BuildContext context) {
+    return new RenderOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderOpacity renderObject) {
-    renderObject.opacity = opacity;
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DoubleProperty('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -1710,6 +1730,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = double.infinity,
       super(key: key, child: child);
 
+  /// Creates a box that will become as small as its parent allows.
+  const SizedBox.shrink({ Key key, Widget child })
+    : width = 0.0,
+      height = 0.0,
+      super(key: key, child: child);
+
   /// Creates a box with the specified size.
   SizedBox.fromSize({ Key key, Widget child, Size size })
     : width = size?.width,
@@ -1740,17 +1766,27 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    final String type = (width == double.infinity && height == double.infinity) ?
-                  '$runtimeType.expand' : '$runtimeType';
+    String type;
+    if (width == double.infinity && height == double.infinity) {
+      type = '$runtimeType.expand';
+    } else if (width == 0.0 && height == 0.0) {
+      type = '$runtimeType.shrink';
+    } else {
+      type = '$runtimeType';
+    }
     return key == null ? '$type' : '$type-$key';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final DiagnosticLevel level = (width == double.infinity && height == double.infinity)
-        ? DiagnosticLevel.hidden
-        : DiagnosticLevel.info;
+    DiagnosticLevel level;
+    if ((width == double.infinity && height == double.infinity) ||
+        (width == 0.0 && height == 0.0)) {
+      level = DiagnosticLevel.hidden;
+    } else {
+      level = DiagnosticLevel.info;
+    }
     properties.add(new DoubleProperty('width', width, defaultValue: null, level: level));
     properties.add(new DoubleProperty('height', height, defaultValue: null, level: level));
   }
@@ -2237,9 +2273,9 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that lays the child out as if it was in the tree, but without painting anything,
-/// without making the child available for hit testing, and without taking any
-/// room in the parent.
+/// A widget that lays the child out as if it was in the tree, but without
+/// painting anything, without making the child available for hit testing, and
+/// without taking any room in the parent.
 ///
 /// Animations continue to run in offstage children, and therefore use battery
 /// and CPU time, regardless of whether the animations end up being visible.
@@ -2251,8 +2287,10 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [Visibility], which can hide a child more efficiently (albeit less
+///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage = true, Widget child })

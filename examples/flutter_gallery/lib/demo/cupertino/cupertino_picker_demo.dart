@@ -99,6 +99,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 child: new Text(index.toString()),
               );
             }),
+            looping: true,
           ),
         ),
         new Expanded(
@@ -123,6 +124,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 child: new Text(index.toString()),
               );
             }),
+            looping: true,
           ),
         ),
       ],
