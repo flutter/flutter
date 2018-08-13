@@ -18,7 +18,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 
 /// An iOS-styled picker.
 ///
-/// Displays the provided [children] widgets on a wheel for selection and
+/// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
 /// Can be used with [showModalBottomSheet] to display the picker modally at the
@@ -30,7 +30,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 ///    the iOS design specific chrome.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
 class CupertinoPicker extends StatefulWidget {
-  /// Creates a control used for selecting values.
+  /// Creates a picker from a concrete list of children.
   ///
   /// The [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
@@ -38,7 +38,12 @@ class CupertinoPicker extends StatefulWidget {
   /// The [backgroundColor] defaults to light gray. It can be set to null to
   /// disable the background painting entirely; this is mildly more efficient
   /// than using [Colors.transparent].
-  const CupertinoPicker({
+  ///
+  /// The [looping] argument decides whether the child list loops and can be
+  /// scrolled infinitely.  If set to true, scrolling past the end of the list
+  /// will loop the list back to the beginning.  If set to false, the list will
+  /// stop scrolling when you reach the end or the beginning.
+  CupertinoPicker({
     Key key,
     this.diameterRatio = _kDefaultDiameterRatio,
     this.backgroundColor = _kDefaultBackground,
@@ -48,12 +53,55 @@ class CupertinoPicker extends StatefulWidget {
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
-    @required this.children,
-  }) : assert(diameterRatio != null),
+    @required List<Widget> children,
+    bool looping = false,
+  }) : assert(children != null),
+       assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       childDelegate = looping
+                       ? new ListWheelChildLoopingListDelegate(children: children)
+                       : new ListWheelChildListDelegate(children: children),
+       super(key: key);
+
+  /// Creates a picker from an [IndexedWidgetBuilder] callback where the builder
+  /// is dynamically invoked during layout.
+  ///
+  /// A child is lazily created when it starts becoming visible in the viewport.
+  /// All of the children provided by the builder are cached and reused, so
+  /// normally the builder is only called once for each index (except when
+  /// rebuilding - the cache is cleared).
+  ///
+  /// The [itemBuilder] argument must not be null. The [childCount] argument
+  /// reflects the number of children that will be provided by the [itemBuilder].
+  /// {@macro flutter.widgets.wheelList.childCount}
+  ///
+  /// The [itemExtent] argument must be non-null and positive.
+  ///
+  /// The [backgroundColor] defaults to light gray. It can be set to null to
+  /// disable the background painting entirely; this is mildly more efficient
+  /// than using [Colors.transparent].
+  CupertinoPicker.builder({
+    Key key,
+    this.diameterRatio = _kDefaultDiameterRatio,
+    this.backgroundColor = _kDefaultBackground,
+    this.offAxisFraction = 0.0,
+    this.useMagnifier = false,
+    this.magnification = 1.0,
+    this.scrollController,
+    @required this.itemExtent,
+    @required this.onSelectedItemChanged,
+    @required IndexedWidgetBuilder itemBuilder,
+    int childCount,
+  }) : assert(itemBuilder != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(magnification > 0),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       childDelegate = new ListWheelChildBuilderDelegate(builder: itemBuilder, childCount: childCount),
        super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
@@ -102,8 +150,8 @@ class CupertinoPicker extends StatefulWidget {
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
   final ValueChanged<int> onSelectedItemChanged;
 
-  /// [Widget]s in the picker's scroll wheel.
-  final List<Widget> children;
+  /// A delegate that lazily instantiates children.
+  final ListWheelChildDelegate childDelegate;
 
   @override
   State<StatefulWidget> createState() => new _CupertinoPickerState();
@@ -196,7 +244,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     Widget result = new Stack(
       children: <Widget>[
         new Positioned.fill(
-          child: new ListWheelScrollView(
+          child: new ListWheelScrollView.useDelegate(
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
@@ -205,7 +253,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             magnification: widget.magnification,
             itemExtent: widget.itemExtent,
             onSelectedItemChanged: _handleSelectedItemChanged,
-            children: widget.children,
+            childDelegate: widget.childDelegate,
           ),
         ),
         _buildGradientScreen(),
