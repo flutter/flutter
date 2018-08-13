@@ -33,39 +33,38 @@ std::unique_ptr<VsyncWaiter> PlatformView::CreateVSyncWaiter() {
 
 void PlatformView::DispatchPlatformMessage(
     fml::RefPtr<blink::PlatformMessage> message) {
-  delegate_.OnPlatformViewDispatchPlatformMessage(*this, std::move(message));
+  delegate_.OnPlatformViewDispatchPlatformMessage(std::move(message));
 }
 
 void PlatformView::DispatchPointerDataPacket(
     std::unique_ptr<blink::PointerDataPacket> packet) {
-  delegate_.OnPlatformViewDispatchPointerDataPacket(*this, std::move(packet));
+  delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
 void PlatformView::DispatchSemanticsAction(int32_t id,
                                            blink::SemanticsAction action,
                                            std::vector<uint8_t> args) {
-  delegate_.OnPlatformViewDispatchSemanticsAction(*this, id, action,
-                                                  std::move(args));
+  delegate_.OnPlatformViewDispatchSemanticsAction(id, action, std::move(args));
 }
 
 void PlatformView::SetSemanticsEnabled(bool enabled) {
-  delegate_.OnPlatformViewSetSemanticsEnabled(*this, enabled);
+  delegate_.OnPlatformViewSetSemanticsEnabled(enabled);
 }
 
 void PlatformView::SetAccessibilityFeatures(int32_t flags) {
-  delegate_.OnPlatformViewSetAccessibilityFeatures(*this, flags);
+  delegate_.OnPlatformViewSetAccessibilityFeatures(flags);
 }
 
 void PlatformView::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
-  delegate_.OnPlatformViewSetViewportMetrics(*this, metrics);
+  delegate_.OnPlatformViewSetViewportMetrics(metrics);
 }
 
 void PlatformView::NotifyCreated() {
-  delegate_.OnPlatformViewCreated(*this, CreateRenderingSurface());
+  delegate_.OnPlatformViewCreated(CreateRenderingSurface());
 }
 
 void PlatformView::NotifyDestroyed() {
-  delegate_.OnPlatformViewDestroyed(*this);
+  delegate_.OnPlatformViewDestroyed();
 }
 
 sk_sp<GrContext> PlatformView::CreateResourceContext() const {
@@ -91,15 +90,15 @@ void PlatformView::HandlePlatformMessage(
 void PlatformView::OnPreEngineRestart() const {}
 
 void PlatformView::RegisterTexture(std::shared_ptr<flow::Texture> texture) {
-  delegate_.OnPlatformViewRegisterTexture(*this, std::move(texture));
+  delegate_.OnPlatformViewRegisterTexture(std::move(texture));
 }
 
 void PlatformView::UnregisterTexture(int64_t texture_id) {
-  delegate_.OnPlatformViewUnregisterTexture(*this, texture_id);
+  delegate_.OnPlatformViewUnregisterTexture(texture_id);
 }
 
 void PlatformView::MarkTextureFrameAvailable(int64_t texture_id) {
-  delegate_.OnPlatformViewMarkTextureFrameAvailable(*this, texture_id);
+  delegate_.OnPlatformViewMarkTextureFrameAvailable(texture_id);
 }
 
 std::unique_ptr<Surface> PlatformView::CreateRenderingSurface() {
@@ -115,7 +114,7 @@ void PlatformView::SetNextFrameCallback(fml::closure closure) {
     return;
   }
 
-  delegate_.OnPlatformViewSetNextFrameCallback(*this, std::move(closure));
+  delegate_.OnPlatformViewSetNextFrameCallback(std::move(closure));
 }
 
 }  // namespace shell

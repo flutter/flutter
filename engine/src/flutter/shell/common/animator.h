@@ -20,17 +20,14 @@ class Animator final {
  public:
   class Delegate {
    public:
-    virtual void OnAnimatorBeginFrame(const Animator& animator,
-                                      fml::TimePoint frame_time) = 0;
+    virtual void OnAnimatorBeginFrame(fml::TimePoint frame_time) = 0;
 
-    virtual void OnAnimatorNotifyIdle(const Animator& animator,
-                                      int64_t deadline) = 0;
+    virtual void OnAnimatorNotifyIdle(int64_t deadline) = 0;
 
     virtual void OnAnimatorDraw(
-        const Animator& animator,
         fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
 
-    virtual void OnAnimatorDrawLastLayerTree(const Animator& animator) = 0;
+    virtual void OnAnimatorDrawLastLayerTree() = 0;
   };
 
   Animator(Delegate& delegate,

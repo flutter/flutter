@@ -115,84 +115,68 @@ class Shell final : public PlatformView::Delegate,
              std::unique_ptr<IOManager> io_manager);
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewCreated(const PlatformView& view,
-                             std::unique_ptr<Surface> surface) override;
+  void OnPlatformViewCreated(std::unique_ptr<Surface> surface) override;
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewDestroyed(const PlatformView& view) override;
+  void OnPlatformViewDestroyed() override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(
-      const PlatformView& view,
       const blink::ViewportMetrics& metrics) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
-      const PlatformView& view,
       fml::RefPtr<blink::PlatformMessage> message) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchPointerDataPacket(
-      const PlatformView& view,
       std::unique_ptr<blink::PointerDataPacket> packet) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(
-      const PlatformView& view,
       int32_t id,
       blink::SemanticsAction action,
       std::vector<uint8_t> args) override;
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewSetSemanticsEnabled(const PlatformView& view,
-                                         bool enabled) override;
+  void OnPlatformViewSetSemanticsEnabled(bool enabled) override;
 
   // |shell:PlatformView::Delegate|
-  void OnPlatformViewSetAccessibilityFeatures(const PlatformView& view,
-                                              int32_t flags) override;
+  void OnPlatformViewSetAccessibilityFeatures(int32_t flags) override;
 
   // |shell::PlatformView::Delegate|
   void OnPlatformViewRegisterTexture(
-      const PlatformView& view,
       std::shared_ptr<flow::Texture> texture) override;
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewUnregisterTexture(const PlatformView& view,
-                                       int64_t texture_id) override;
+  void OnPlatformViewUnregisterTexture(int64_t texture_id) override;
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewMarkTextureFrameAvailable(const PlatformView& view,
-                                               int64_t texture_id) override;
+  void OnPlatformViewMarkTextureFrameAvailable(int64_t texture_id) override;
 
   // |shell::PlatformView::Delegate|
-  void OnPlatformViewSetNextFrameCallback(const PlatformView& view,
-                                          fml::closure closure) override;
+  void OnPlatformViewSetNextFrameCallback(fml::closure closure) override;
 
   // |shell::Animator::Delegate|
-  void OnAnimatorBeginFrame(const Animator& animator,
-                            fml::TimePoint frame_time) override;
+  void OnAnimatorBeginFrame(fml::TimePoint frame_time) override;
 
   // |shell::Animator::Delegate|
-  void OnAnimatorNotifyIdle(const Animator& animator,
-                            int64_t deadline) override;
+  void OnAnimatorNotifyIdle(int64_t deadline) override;
 
   // |shell::Animator::Delegate|
   void OnAnimatorDraw(
-      const Animator& animator,
       fml::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
   // |shell::Animator::Delegate|
-  void OnAnimatorDrawLastLayerTree(const Animator& animator) override;
+  void OnAnimatorDrawLastLayerTree() override;
 
   // |shell::Engine::Delegate|
   void OnEngineUpdateSemantics(
-      const Engine& engine,
       blink::SemanticsNodeUpdates update,
       blink::CustomAccessibilityActionUpdates actions) override;
 
   // |shell::Engine::Delegate|
   void OnEngineHandlePlatformMessage(
-      const Engine& engine,
       fml::RefPtr<blink::PlatformMessage> message) override;
 
   // |shell::Engine::Delegate|

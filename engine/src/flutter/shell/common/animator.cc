@@ -103,7 +103,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   {
     TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
                  FrameParity());
-    delegate_.OnAnimatorBeginFrame(*this, last_begin_frame_time_);
+    delegate_.OnAnimatorBeginFrame(last_begin_frame_time_);
   }
 
   if (!frame_scheduled_) {
@@ -124,8 +124,8 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
           // no further frames were produced, and it is safe (w.r.t. jank) to
           // notify the engine we are idle.
           if (notify_idle_task_id == self->notify_idle_task_id_) {
-            self->delegate_.OnAnimatorNotifyIdle(
-                *self.get(), Dart_TimelineGetMicros() + 100000);
+            self->delegate_.OnAnimatorNotifyIdle(Dart_TimelineGetMicros() +
+                                                 100000);
           }
         },
         kNotifyIdleTaskWaitTime);
@@ -148,7 +148,7 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   // Commit the pending continuation.
   producer_continuation_.Complete(std::move(layer_tree));
 
-  delegate_.OnAnimatorDraw(*this, layer_tree_pipeline_);
+  delegate_.OnAnimatorDraw(layer_tree_pipeline_);
 }
 
 bool Animator::CanReuseLastLayerTree() {
@@ -157,7 +157,7 @@ bool Animator::CanReuseLastLayerTree() {
 
 void Animator::DrawLastLayerTree() {
   pending_frame_semaphore_.Signal();
-  delegate_.OnAnimatorDrawLastLayerTree(*this);
+  delegate_.OnAnimatorDrawLastLayerTree();
 }
 
 void Animator::RequestFrame(bool regenerate_layer_tree) {
@@ -205,7 +205,7 @@ void Animator::AwaitVSync() {
         }
       });
 
-  delegate_.OnAnimatorNotifyIdle(*this, dart_frame_deadline_);
+  delegate_.OnAnimatorNotifyIdle(dart_frame_deadline_);
 }
 
 }  // namespace shell
