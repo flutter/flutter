@@ -15,7 +15,6 @@ const Color _kBackgroundColor = CupertinoColors.white;
 
 /// Default values for auto scrolling.
 ///
-///
 /// There are cases where scrolling lands on invalid entries and the picker has
 /// to automatically scrolls to a valid one.
 const Duration _kAutoScrollDuration = Duration(milliseconds: 400);
@@ -134,8 +133,9 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
-    // There are cases where scrolling lands on invalid entries. In such cases,
-    // the picker automatically scrolls to a valid one.
+    // There are cases where scrolling lands on invalid entries and the picker has
+    // to automatically scrolls to a valid one. Here we use a scroll end listener
+    // to detect such cases.
     return new NotificationListener<ScrollEndNotification>(
       onNotification: (ScrollEndNotification notification) {
         // Invalid case where both hour and minute values are 0.
