@@ -62,9 +62,13 @@ abstract class AccessibilityGuideline {
 }
 
 class _MinimumTapTargetGuideline extends AccessibilityGuideline {
-  const _MinimumTapTargetGuideline(this.size);
+  const _MinimumTapTargetGuideline(this.size, this.link);
 
+  // The minimum allowed size of a tapable node.
   final Size size;
+
+  // A link describing the tap target guidelines for a platform.
+  final String link;
 
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
@@ -89,7 +93,8 @@ class _MinimumTapTargetGuideline extends AccessibilityGuideline {
       final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
         result += new Evaluation.fail(
-          '$node: expected tap target size of at least $size, but found $candidateSize');
+          '$node: expected tap target size of at least $size, but found $candidateSize\n'
+          'See also: $link');
       return result;
     }
     return traverse(root);
@@ -198,7 +203,8 @@ class _MinimumTextContrastGuideline extends AccessibilityGuideline {
         '$node:\nExpected contrast ratio of at least '
         '$targetContrastRatio but found $contrastRatio for a font size of $fontSize. '
         'The computed foreground color was: ${report.lightColor}, '
-        'The computed background color was: ${report.darkColor}'
+        'The computed background color was: ${report.darkColor}\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
       );
     }
     return evaluateNode(root);
@@ -323,10 +329,24 @@ class _ContrastReport {
 }
 
 /// A guideline which requires tapable semantic nodes a minimum size of 48 by 48.
-const AccessibilityGuideline androidTapTargetGuideline = _MinimumTapTargetGuideline(Size(48.0, 48.0));
+///
+/// See also:
+///
+///  * [Android tap target guidelines](https://support.google.com/accessibility/android/answer/7101858?hl=en).
+const AccessibilityGuideline androidTapTargetGuideline = _MinimumTapTargetGuideline(
+  Size(48.0, 48.0),
+  'https://support.google.com/accessibility/android/answer/7101858?hl=en',
+);
 
 /// A guideline which requires tapable semantic nodes a minimum size of 44 by 44.
-const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(Size(44.0, 44.0));
+///
+/// See also:
+///
+///   * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/).
+const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(
+  Size(44.0, 44.0),
+  'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
+);
 
 /// A guideline which requires text contrast to meet minimum values.
 ///

@@ -470,13 +470,14 @@ Matcher matchesSemanticsData({
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
 /// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// handle.dispose();
 /// ```
 ///
 /// Supported accessibility guidelines:
 ///
-///   * [androidTapTargetGuideline]
-///   * [iOSTapTargetGuideline]
-///   * [textContrastGuideline]
+///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return new _MatchesAccessibilityGuideline(guideline);
 }
