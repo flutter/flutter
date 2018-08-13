@@ -15,9 +15,6 @@ class NonStopVSync implements TickerProvider {
   const NonStopVSync();
   @override
   Ticker createTicker(TickerCallback onTick) => new Ticker(onTick);
-
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
 }
 
 void main() {

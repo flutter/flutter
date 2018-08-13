@@ -45,9 +45,6 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   AnimationController _controller;
 
   @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
-
-  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(

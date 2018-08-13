@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show lerpDouble;
+import 'dart:ui' as ui show lerpDouble, window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
@@ -37,6 +37,31 @@ const Tolerance _kFlingTolerance = Tolerance(
   velocity: double.infinity,
   distance: 0.01,
 );
+
+/// Configures how an [AnimationController] behaves when animations are disabled.
+///
+/// When [AccessibilityFeatures.disableAnimations] is enabled, animations are
+/// speed up or modified to remove most of the visual component. This enum is
+/// used to allow certain AnimationControllers to opt out of this behavior, for
+/// the purpose of preserving some visual animation or simulation behavior for
+/// accessibility.
+///
+/// For example, the [AnimationController which controls the physics simulation
+/// for a scrollable list will have [AnimationBehavior.unscalable] so that when a
+/// user attempts to scroll it does not jump to the end/beginning too quickly.
+enum AnimationBehavior {
+  /// The [AnimationController] will reduce or remove the visual component by
+  /// adjusting simulation logic.
+  normal,
+
+  /// The [AnimationController] will preserve its behavior.
+  ///
+  /// This is the default for repeating animations in order to prevent them from
+  /// flashing rapidly on the screen. Instead, the components it question should
+  /// display a keyframe or other non-animating substitute when
+  /// [AccessibilityFeatures.disableAnimations] is enabled.
+  unscalable,
+}
 
 /// A controller for an animation.
 ///
@@ -120,6 +145,7 @@ class AnimationController extends Animation<double>
     this.debugLabel,
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
+    this.animationBehavior = AnimationBehavior.normal,
     @required TickerProvider vsync,
   }) : assert(lowerBound != null),
        assert(upperBound != null),
@@ -151,6 +177,7 @@ class AnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     @required TickerProvider vsync,
+    this.animationBehavior = AnimationBehavior.unscalable,
   }) : assert(value != null),
        assert(vsync != null),
        lowerBound = double.negativeInfinity,
@@ -169,6 +196,17 @@ class AnimationController extends Animation<double>
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying animation controller instances in debug output.
   final String debugLabel;
+
+  /// The behavior of the animation or simulation when animations are disabled.
+  ///
+  /// Defaults to [AnimationBehavior.normal] for the [new AnimationBehavior()]
+  /// constructor, and [AnimationBehavior.unscalable] for the
+  /// [new AnimationBehavior.unbounded()] constructor.
+  ///
+  /// See also:
+  ///
+  ///   * [AnimationBehavior], for a description of how this enum configures the controller.
+  final AnimationBehavior animationBehavior;
 
   /// Returns an [Animation<double>] for this animation controller, so that a
   /// pointer to this object can be passed around without allowing users of that
@@ -363,7 +401,18 @@ class AnimationController extends Animation<double>
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
-  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear }) {
+  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear, AnimationBehavior animationBehavior }) {
+    final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
+    double scale = 1.0;
+    if (ui.window.accessibilityFeatures.disableAnimations) {
+      switch (behavior) {
+        case AnimationBehavior.normal:
+          scale = 0.05;
+          break;
+        case AnimationBehavior.unscalable:
+          break;
+      }
+    }
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       assert(() {
@@ -398,7 +447,7 @@ class AnimationController extends Animation<double>
     }
     assert(simulationDuration > Duration.zero);
     assert(!isAnimating);
-    return _startSimulation(new _InterpolationSimulation(_value, target, simulationDuration, curve));
+    return _startSimulation(new _InterpolationSimulation(_value, target, simulationDuration, curve, scale));
   }
 
   /// Starts running this animation in the forward direction, and
@@ -441,11 +490,22 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture fling({ double velocity = 1.0 }) {
+  TickerFuture fling({ double velocity = 1.0, AnimationBehavior animationBehavior}) {
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
-    final Simulation simulation = new SpringSimulation(_kFlingSpringDescription, value, target, velocity)
+    double scale = 1.0;
+    final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
+    if (ui.window.accessibilityFeatures.disableAnimations) {
+      switch (behavior) {
+        case AnimationBehavior.normal:
+          scale = 200.0;
+          break;
+        case AnimationBehavior.unscalable:
+          break;
+      }
+    }
+    final Simulation simulation = new SpringSimulation(_kFlingSpringDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
   }
@@ -558,11 +618,11 @@ class AnimationController extends Animation<double>
 }
 
 class _InterpolationSimulation extends Simulation {
-  _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve)
+  _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve, double scale)
     : assert(_begin != null),
       assert(_end != null),
       assert(duration != null && duration.inMicroseconds > 0),
-      _durationInSeconds = duration.inMicroseconds / Duration.microsecondsPerSecond;
+      _durationInSeconds = (duration.inMicroseconds * scale) / Duration.microsecondsPerSecond;
 
   final double _durationInSeconds;
   final double _begin;

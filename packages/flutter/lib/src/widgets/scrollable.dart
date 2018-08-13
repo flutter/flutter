@@ -264,9 +264,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   ScrollBehavior _configuration;
   ScrollPhysics _physics;
 
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
-
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);

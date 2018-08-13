@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
 
-export 'package:flutter/scheduler.dart' show TickerProvider, TimeDilationBehavior;
+export 'package:flutter/scheduler.dart' show TickerProvider;
 
 /// Enables or disables tickers (and thus animation controllers) in the widget
 /// subtree.
@@ -81,21 +81,6 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
 
   Ticker _ticker;
 
-  /// The behavior of the created [Ticker]s in the presence of time dilation.
-  ///
-  /// Defaults to [TimeDilationBehavior.normal].
-  ///
-  /// When [AccessibilityFeatures.disableAnimations] is enabled, the time
-  /// dilation is set to 0.05 (20x speed) to remove most animations. This enum
-  /// is used to allow certain Tickers to opt out of the time dilation, for the
-  /// purpose of preserving animation or simulation behavior for accessibility.
-  ///
-  /// For example, the Ticker which controls the physics simulation for a
-  /// scrollable list will have [TimeDilationBehavior.unscaled] so that when a
-  /// user attempts to scroll it does not jump to the end/beginning too quickly.
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
-
   @override
   Ticker createTicker(TickerCallback onTick) {
     assert(() {
@@ -109,7 +94,7 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
     }());
-    _ticker = new Ticker(onTick, debugLabel: 'created by $this', timeDilationBehavior: timeDilationBehavior);
+    _ticker = new Ticker(onTick, debugLabel: 'created by $this');
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
@@ -180,12 +165,9 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
   Set<Ticker> _tickers;
 
   @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
-
-  @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= new Set<_WidgetTicker>();
-    final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this', timeDilationBehavior: timeDilationBehavior);
+    final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this');
     _tickers.add(result);
     return result;
   }
@@ -249,7 +231,7 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel, TimeDilationBehavior timeDilationBehavior = TimeDilationBehavior.normal}) : super(onTick, debugLabel: debugLabel, timeDilationBehavior: timeDilationBehavior);
+  _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel }) : super(onTick, debugLabel: debugLabel);
 
   final TickerProviderStateMixin _creator;
 

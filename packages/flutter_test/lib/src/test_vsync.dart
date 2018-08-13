@@ -14,7 +14,4 @@ class TestVSync implements TickerProvider {
 
   @override
   Ticker createTicker(TickerCallback onTick) => new Ticker(onTick);
-
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
 }

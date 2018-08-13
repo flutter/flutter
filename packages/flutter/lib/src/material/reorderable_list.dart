@@ -154,8 +154,6 @@ class _ReorderableListContent extends StatefulWidget {
 }
 
 class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
 
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.

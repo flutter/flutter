@@ -249,9 +249,6 @@ class _FakeTickerProvider implements TickerProvider {
   Ticker createTicker(TickerCallback onTick) {
     return new _FakeTicker();
   }
-
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
 }
 
 class _FakeTicker implements Ticker {
@@ -263,9 +260,6 @@ class _FakeTicker implements Ticker {
 
   @override
   String get debugLabel => null;
-
-  @override
-  TimeDilationBehavior timeDilationBehavior = TimeDilationBehavior.normal;
 
   @override
   bool get isActive => null;

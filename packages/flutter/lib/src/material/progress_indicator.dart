@@ -194,9 +194,6 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   AnimationController _controller;
 
   @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
-
-  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
@@ -372,9 +369,6 @@ final Animatable<double> _kRotationTween = new CurveTween(curve: const SawTooth(
 
 class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
   AnimationController _controller;
-
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
 
   @override
   void initState() {

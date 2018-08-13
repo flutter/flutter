@@ -16,14 +16,12 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   Animation<double> _animation;
 
   @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.unscaled;
-
-  @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
+      animationBehavior: AnimationBehavior.unscalable,
     )..forward();
 
     _animation = new CurvedAnimation(

@@ -204,9 +204,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   TestWidgetsFlutterBinding get binding => super.binding;
 
-  @override
-  TimeDilationBehavior get timeDilationBehavior => TimeDilationBehavior.normal;
-
   /// Renders the UI from the given [widget].
   ///
   /// Calls [runApp] with the given widget, then triggers a frame and flushes

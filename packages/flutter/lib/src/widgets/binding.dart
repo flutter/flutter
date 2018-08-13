@@ -20,15 +20,6 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
-// When [AccessibilityFeatures.disableAnimations] is enabled, time dilation is
-// used to give the appearance of disabled animations by running them at 20x
-// normal speed. This is partially to prevent every single animation controller
-// from having to be aware of the setting, and partially as a work around for
-// zero duration animations breaking most widgets and transitions.
-// See also [TimeDilationBehavior] enum for an explanation of how this is
-// configured.
-const double _kDisabledAnimationTimeDilation = 0.05;
-
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
@@ -387,10 +378,6 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    if (ui.window.accessibilityFeatures.disableAnimations)
-      timeDilation = _kDisabledAnimationTimeDilation;
-    else
-      timeDilation = 1.0;
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
