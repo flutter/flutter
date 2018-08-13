@@ -420,4 +420,45 @@ class CupertinoIcons {
   ///  * [plus_circled], which is the pre-iOS 7 version of this icon with a thicker cross.
   ///  * [add_circled], which is similar, but not filled in.
   static const IconData add_circled_solid = IconData(0xf48b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A gear with eigth cogs. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [gear_solid], which is similar, but filled in.
+  ///  * [gear_big], which is the pre-iOS 7 version of this icon and appears bigger because of fewer and bigger cogs.
+  ///  * [settings], which is another cogwheel with a different design.
+  static const IconData gear = IconData(0xf43c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A gear with eigth cogs. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [gear], which is similar, but not filled in.
+  ///  * [settings_solid], which is another cogwheel with a different design.
+  static const IconData gear_solid = IconData(0xf43d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A gear with six cogs.
+  ///
+  /// See also:
+  ///
+  ///  * [gear], which is the iOS 7 version of this icon and appears smaller because of more and larger cogs.
+  ///  * [settings_solid], which is another cogwheel with a different design.
+  static const IconData gear_big = IconData(0xf2f7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A cogwheel with many cogs and decoration in the middle. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [settings_solid], which is similar, but filled in.
+  ///  * [gear], which is another cogwheel with a different design.
+  static const IconData settings = IconData(0xf411, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A cogwheel with many cogs and decoration in the middle. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [settings], which is similar, but not filled in.
+  ///  * [gear_solid], which is another cogwheel with a different design.
+  static const IconData settings_solid = IconData(0xf412, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
