@@ -39,6 +39,23 @@ function _rmlock () {
   [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -f "$FLUTTER_UPGRADE_LOCK"
 }
 
+function retry_upgrade {
+  local total_tries="10"
+  local remaining_tries=$(($total_tries - 1))
+  while [[ "$remaining_tries" > 0 ]]; do
+    (cd "$FLUTTER_TOOLS_DIR" && "$PUB" upgrade "$VERBOSITY" --no-packages-dir) && break
+    echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
+    remaining_tries=$(($remaining_tries - 1))
+    sleep 5
+  done
+
+  if [[ "$remaining_tries" == 0 ]]; then
+    echo "Command 'pub upgrade' still failed after $total_tries tries, giving up."
+    return 1
+  fi
+  return 0
+}
+
 function upgrade_flutter () {
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
@@ -94,7 +111,7 @@ function upgrade_flutter () {
     echo Building flutter tool...
     if [[ "$CI" == "true" || "$BOT" == "true" || "$CONTINUOUS_INTEGRATION" == "true" || "$CHROME_HEADLESS" == "1" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
-      VERBOSITY="--verbosity=all"
+      VERBOSITY="--verbosity=normal"
     fi
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
 
@@ -102,12 +119,8 @@ function upgrade_flutter () {
       export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
     fi
 
-    while : ; do
-      cd "$FLUTTER_TOOLS_DIR"
-      "$PUB" upgrade "$VERBOSITY" --no-packages-dir && break
-      echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds..."
-      sleep 5
-    done
+    retry_upgrade
+
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo "$revision" > "$STAMP_PATH"
   fi

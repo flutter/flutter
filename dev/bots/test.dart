@@ -134,7 +134,7 @@ Future<Null> _checkForTrailingSpaces() async {
       'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
       workingDirectory: flutterRoot,
     );
-    if (changedFilesResult.stdout == null) {
+    if (changedFilesResult.stdout == null || changedFilesResult.stdout.trim().isEmpty) {
       print('No files found that need to be checked for trailing whitespace.');
       return;
     }
