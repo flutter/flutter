@@ -26,17 +26,6 @@ void main() {
         );
       });
 
-      Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
-        try {
-          await future;
-          fail('ToolExit expected, but nothing thrown');
-        } on ToolExit catch(e) {
-          expect(e.message, messageMatcher);
-        } catch(e, trace) {
-          fail('ToolExit expected, got $e\n$trace');
-        }
-      }
-
       testInMemory('fails on invalid pubspec.yaml', () async {
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -94,16 +83,54 @@ void main() {
           fs.currentDirectory.absolute.path,
         );
       });
+    });
 
+    group('materialize Android', () {
+      testInMemory('fails on non-module', () async {
+        final FlutterProject project = await someProject();
+        await expectLater(
+          project.android.materialize(),
+          throwsA(const isInstanceOf<AssertionError>()),
+        );
+      });
+      testInMemory('exits on already materialized module', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        expectToolExitLater(project.android.materialize(), contains('already materialized'));
+      });
+      testInMemory('creates android/app folder in place of .android/app', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
+        expect(
+          project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
+          isNot(contains("include ':app'")),
+        );
+        expectExists(project.directory.childDirectory('android').childDirectory('app'));
+        expect(
+          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
+          contains("include ':app'"),
+        );
+      });
+      testInMemory('retains .android/Flutter folder and references it', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
+        expect(
+          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
+          contains('../.android/include_flutter.groovy'),
+        );
+      });
+      testInMemory('can be redone after deletion', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        project.directory.childDirectory('android').deleteSync(recursive: true);
+        await project.android.materialize();
+        expectExists(project.directory.childDirectory('android').childDirectory('app'));
+      });
     });
 
     group('ensure ready for platform-specific tooling', () {
-      void expectExists(FileSystemEntity entity) {
-        expect(entity.existsSync(), isTrue);
-      }
-      void expectNotExists(FileSystemEntity entity) {
-        expect(entity.existsSync(), isFalse);
-      }
       testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = new FlutterProject(
           fs.directory('not_created'),
@@ -323,6 +350,24 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   } else {
     throw 'Unsupported FileSystemEntity ${entity.runtimeType}';
   }
+}
+
+Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+  try {
+    await future;
+    fail('ToolExit expected, but nothing thrown');
+  } on ToolExit catch(e) {
+    expect(e.message, messageMatcher);
+  } catch(e, trace) {
+    fail('ToolExit expected, got $e\n$trace');
+  }
+}
+
+void expectExists(FileSystemEntity entity) {
+  expect(entity.existsSync(), isTrue);
+}
+void expectNotExists(FileSystemEntity entity) {
+  expect(entity.existsSync(), isFalse);
 }
 
 void addIosWithBundleId(Directory directory, String id) {

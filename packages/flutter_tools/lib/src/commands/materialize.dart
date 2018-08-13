@@ -20,6 +20,9 @@ class MaterializeCommand extends FlutterCommand {
   final String description = 'Commands for materializing host apps for a Flutter Module';
 
   @override
+  bool get hidden => true;
+
+  @override
   Future<Null> runCommand() async { }
 }
 
