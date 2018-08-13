@@ -402,7 +402,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
                   onTap: close,
                   child: new Semantics(
-                    label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                    label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
                     child: new Container(
                       color: _color.evaluate(_controller),
                     ),
