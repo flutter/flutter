@@ -46,10 +46,11 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 /// The [children] will be displayed in the order of the keys in the [Map].
 /// The height of the segmented control is determined by the height of the
 /// tallest widget provided as a value in the [Map] of [children].
-/// The width of the segmented control is determined by the horizontal
-/// constraints on its parent. The available horizontal space is divided by
-/// the number of provided [children] to determine the width of each widget.
-/// The selection area for each of the widgets in the [Map] of
+/// The width of each child in the segmented control will be equal to the width
+/// of widest child, unless the combined width of the children is wider than
+/// the available horizontal space. In this case, the available horizontal space
+/// is divided by the number of provided [children] to determine the width of
+/// each widget. The selection area for each of the widgets in the [Map] of
 /// [children] will then be expanded to fill the calculated space, so each
 /// widget will appear to have the same dimensions.
 ///
@@ -62,7 +63,7 @@ const Duration _kFadeDuration = Duration(milliseconds: 165);
 /// See also:
 ///
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/segmented-controls/>
-class SegmentedControl<T> extends StatefulWidget {
+class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
   /// The [children], [onValueChanged], [unselectedColor], [selectedColor],
@@ -75,11 +76,11 @@ class SegmentedControl<T> extends StatefulWidget {
   /// in the [onValueChanged] callback when a new value from the [children] map
   /// is selected.
   ///
-  /// The [groupValue] must be one of the keys in the [children] map.
   /// The [groupValue] is the currently selected value for the segmented control.
   /// If no [groupValue] is provided, or the [groupValue] is null, no widget will
-  /// appear as selected.
-  SegmentedControl({
+  /// appear as selected. The [groupValue] must be either null or one of the keys
+  /// in the [children] map.
+  CupertinoSegmentedControl({
     Key key,
     @required this.children,
     @required this.onValueChanged,
@@ -91,7 +92,8 @@ class SegmentedControl<T> extends StatefulWidget {
   })  : assert(children != null),
         assert(children.length >= 2),
         assert(onValueChanged != null),
-        assert(groupValue == null || children.keys.any((T child) => child == groupValue)),
+        assert(groupValue == null || children.keys.any((T child) => child == groupValue),
+        'The groupValue must be either null or one of the keys in the children map.'),
         assert(unselectedColor != null),
         assert(selectedColor != null),
         assert(borderColor != null),
@@ -142,7 +144,7 @@ class SegmentedControl<T> extends StatefulWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new Container(
-  ///       child: new SegmentedControl<int>(
+  ///       child: new CupertinoSegmentedControl<int>(
   ///         children: children,
   ///         onValueChanged: (int newValue) {
   ///           setState(() {
@@ -189,15 +191,15 @@ class SegmentedControl<T> extends StatefulWidget {
   /// This attribute must not be null.
   ///
   /// If this attribute is unspecified, this color will default to
-  /// 'Color(0x33007AFF)', a light, partially-transparent blue color.
+  /// `Color(0x33007AFF)`, a light, partially-transparent blue color.
   final Color pressedColor;
 
   @override
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
 }
 
-class _SegmentedControlState<T> extends State<SegmentedControl<T>>
-    with TickerProviderStateMixin<SegmentedControl<T>> {
+class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
+    with TickerProviderStateMixin<CupertinoSegmentedControl<T>> {
   T _pressedKey;
 
   final List<AnimationController> _selectionControllers = <AnimationController>[];
@@ -306,7 +308,7 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
   }
 
   @override
-  void didUpdateWidget(SegmentedControl<T> oldWidget) {
+  void didUpdateWidget(CupertinoSegmentedControl<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.children.length != widget.children.length) {
@@ -346,7 +348,10 @@ class _SegmentedControlState<T> extends State<SegmentedControl<T>>
         color: getTextColor(index, currentKey),
       );
 
-      Widget child = widget.children[currentKey];
+      Widget child = new Center(
+        child: widget.children[currentKey],
+      );
+
       child = new GestureDetector(
         onTapDown: (TapDownDetails event) {
           _onTapDown(currentKey);
@@ -599,15 +604,11 @@ class _RenderSegmentedControl<T> extends RenderBox
   void performLayout() {
     double maxHeight = _kMinSegmentedControlHeight;
 
-    double childWidth;
-    if (constraints.maxWidth.isFinite) {
-      childWidth = constraints.maxWidth / childCount;
-    } else {
-      childWidth = constraints.minWidth / childCount;
-      for (RenderBox child in getChildrenAsList()) {
-        childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
-      }
+    double childWidth = constraints.minWidth / childCount;
+    for (RenderBox child in getChildrenAsList()) {
+      childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
     }
+    childWidth = math.min(childWidth, constraints.maxWidth / childCount);
 
     RenderBox child = firstChild;
     while (child != null) {

@@ -332,6 +332,176 @@ void main() {
     expect(scrollController.offset, 0.0);
     expect(find.widgetWithText(CupertinoDialogAction, 'One'), findsNothing);
   });
+
+  testWidgets('ScaleTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new Center(
+          child: new Builder(
+            builder: (BuildContext context) {
+              return new CupertinoButton(
+                onPressed: () {
+                  showCupertinoDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return new CupertinoAlertDialog(
+                        title: const Text('The title'),
+                        content: const Text('The content'),
+                        actions: <Widget>[
+                          const CupertinoDialogAction(
+                            child: Text('Cancel'),
+                          ),
+                          new CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    // Enter animation.
+    await tester.pump();
+    Transform transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.2, 0.01));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.182, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.108, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.044, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.015, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.003, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.000, 0.001));
+
+    await tester.tap(find.text('Delete'));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // No scaling on exit animation.
+    expect(find.byType(Transform), findsNothing);
+  });
+
+  testWidgets('FadeTransition animation for showCupertinoDialog()', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new Center(
+          child: new Builder(
+            builder: (BuildContext context) {
+              return new CupertinoButton(
+                onPressed: () {
+                  showCupertinoDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return new CupertinoAlertDialog(
+                        title: const Text('The title'),
+                        content: const Text('The content'),
+                        actions: <Widget>[
+                          const CupertinoDialogAction(
+                            child: Text('Cancel'),
+                          ),
+                          new CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('Go'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    // Enter animation.
+    await tester.pump();
+    FadeTransition transition = tester.firstWidget(find.byType(FadeTransition));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, closeTo(0.10, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, closeTo(0.156, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, closeTo(0.324, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, closeTo(0.606, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.firstWidget(find.byType(FadeTransition));
+    expect(transition.opacity.value, closeTo(1.0, 0.001));
+
+    await tester.tap(find.text('Delete'));
+
+    // Exit animation, look at reverse FadeTransition.
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    expect(transition.opacity.value, closeTo(0.358, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    expect(transition.opacity.value, closeTo(0.231, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    expect(transition.opacity.value, closeTo(0.128, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    expect(transition.opacity.value, closeTo(0.056, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    expect(transition.opacity.value, closeTo(0.013, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 25));
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
+    expect(transition.opacity.value, closeTo(0.0, 0.001));
+  });
 }
 
 Widget boilerplate(Widget child) {

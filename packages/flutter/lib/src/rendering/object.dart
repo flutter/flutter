@@ -4,7 +4,6 @@
 
 import 'dart:developer';
 import 'dart:ui' as ui show PictureRecorder;
-import 'dart:ui' show Clip;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';

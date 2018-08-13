@@ -37,7 +37,7 @@ class PlatformViewsRegistry {
 /// Callback signature for when a platform view was created.
 ///
 /// `id` is the platform view's unique identifier.
-typedef void OnPlatformViewCreated(int id);
+typedef void PlatformViewCreatedCallback(int id);
 
 /// Provides access to the platform views service.
 ///
@@ -62,7 +62,7 @@ class PlatformViewsService {
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
-    OnPlatformViewCreated onPlatformViewCreated,
+    PlatformViewCreatedCallback onPlatformViewCreated,
   }) {
     assert(id != null);
     assert(viewType != null);
@@ -78,6 +78,21 @@ class PlatformViewsService {
 ///
 /// A Dart version of Android's [MotionEvent.PointerProperties](https://developer.android.com/reference/android/view/MotionEvent.PointerProperties).
 class AndroidPointerProperties {
+  /// Value for `toolType` when the tool type is unknown.
+  static const int kToolTypeUnknown = 0;
+
+  /// Value for `toolType` when the tool type is a finger.
+  static const int kToolTypeFinger = 1;
+
+  /// Value for `toolType` when the tool type is a stylus.
+  static const int kToolTypeStylus = 2;
+
+  /// Value for `toolType` when the tool type is a mouse.
+  static const int kToolTypeMouse = 3;
+
+  /// Value for `toolType` when the tool type is an eraser.
+  static const int kToolTypeEraser = 4;
+
   /// Creates an AndroidPointerProperties.
   ///
   /// All parameters must not be null.
@@ -328,7 +343,7 @@ class AndroidViewController {
   AndroidViewController._(
     this.id,
     String viewType,
-    OnPlatformViewCreated onPlatformViewCreated,
+    PlatformViewCreatedCallback onPlatformViewCreated,
   ) : assert(id != null),
       assert(viewType != null),
       _viewType = viewType,
@@ -370,7 +385,7 @@ class AndroidViewController {
 
   final String _viewType;
 
-  final OnPlatformViewCreated _onPlatformViewCreated;
+  final PlatformViewCreatedCallback _onPlatformViewCreated;
 
   /// The texture entry id into which the Android view is rendered.
   int _textureId;

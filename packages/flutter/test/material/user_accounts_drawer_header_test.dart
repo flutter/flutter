@@ -374,6 +374,27 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await pumpTestWidget(tester);
+
+    expect(tester.getSemanticsData(find.text('B')), matchesSemanticsData(
+      label: 'B',
+      size: const Size(48.0, 48.0),
+    ));
+
+    expect(tester.getSemanticsData(find.text('C')), matchesSemanticsData(
+      label: 'C',
+      size: const Size(48.0, 48.0),
+    ));
+
+    expect(tester.getSemanticsData(find.text('D')), matchesSemanticsData(
+      label: 'D',
+      size: const Size(48.0, 48.0),
+    ));
+    handle.dispose();
+  });
+
   testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await pumpTestWidget(
