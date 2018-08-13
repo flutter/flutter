@@ -102,6 +102,31 @@ void main() {
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
+
+    testWidgets('grey text on white background fails with correct message', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(
+        new Container(
+          width: 200.0,
+          height: 200.0,
+          color: Colors.yellow,
+          child: const Text(
+            'this is a test',
+            style: TextStyle(fontSize: 14.0, color: Colors.yellowAccent),
+          ),
+        ),
+      ));
+      final Evaluation result = await textContrastGuideline.evaluate(tester);
+      expect(result.passed, false);
+      expect(result.reason,
+        'SemanticsNode#21(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), label: "this is a test",'
+        ' textDirection: ltr):\nExpected contrast ratio of at least '
+        '4.5 but found 1.17 for a font size of 14.0. '
+        'The computed foreground color was: Color(0xfffafafa), '
+        'The computed background color was: Color(0xffffeb3b)\n'
+        'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
+      handle.dispose();
+    });
   });
 
   group('tap target size guideline', () {
@@ -165,6 +190,26 @@ void main() {
         ),
       ));
       await expectLater(tester, doesNotMeetGuideline(androidTapTargetGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('Too small tap target fails with the correct message', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(_boilerplate(
+        new SizedBox(
+          width: 48.0,
+          height: 47.0,
+          child: new GestureDetector(
+            onTap: () {},
+          ),
+        ),
+      ));
+      final Evaluation result = await androidTapTargetGuideline.evaluate(tester);
+      expect(result.passed, false);
+      expect(result.reason,
+        'SemanticsNode#36(Rect.fromLTRB(376.0, 276.5, 424.0, 323.5), actions: [tap]): expected tap '
+        'target size of at least Size(48.0, 48.0), but found Size(48.0, 47.0)\n'
+        'See also: https://support.google.com/accessibility/android/answer/7101858?hl=en');
       handle.dispose();
     });
   });

@@ -61,13 +61,18 @@ abstract class AccessibilityGuideline {
   String get description;
 }
 
-class _MinimumTapTargetGuideline extends AccessibilityGuideline {
-  const _MinimumTapTargetGuideline(this.size, this.link);
+/// A guideline which enforces that all tapable semantics nodes have a minimum
+/// size.
+///
+/// Each platform defines its own guidelines for minimum tap areas.
+@visibleForTesting
+class MinimumTapTargetGuideline extends AccessibilityGuideline {
+  const MinimumTapTargetGuideline._(this.size, this.link);
 
-  // The minimum allowed size of a tapable node.
+  /// The minimum allowed size of a tapable node.
   final Size size;
 
-  // A link describing the tap target guidelines for a platform.
+  /// A link describing the tap target guidelines for a platform.
   final String link;
 
   @override
@@ -104,9 +109,14 @@ class _MinimumTapTargetGuideline extends AccessibilityGuideline {
   String get description => 'Tappable objects should be at least $size';
 }
 
-
-class _MinimumTextContrastGuideline extends AccessibilityGuideline {
-  const _MinimumTextContrastGuideline();
+/// A guideline which verifies that all nodes that contribute semantics via text
+/// meet minimum contrast levels.
+///
+/// The guidelines are defined by the Web Content Accessibility Guidelines,
+/// http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html.
+@visibleForTesting
+class MinimumTextContrastGuideline extends AccessibilityGuideline {
+  const MinimumTextContrastGuideline._();
 
   /// The minimum text size considered large for contrast checking.
   ///
@@ -201,7 +211,7 @@ class _MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result + const Evaluation.pass();
       return result + new Evaluation.fail(
         '$node:\nExpected contrast ratio of at least '
-        '$targetContrastRatio but found $contrastRatio for a font size of $fontSize. '
+        '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
         'The computed foreground color was: ${report.lightColor}, '
         'The computed background color was: ${report.darkColor}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
@@ -333,7 +343,7 @@ class _ContrastReport {
 /// See also:
 ///
 ///  * [Android tap target guidelines](https://support.google.com/accessibility/android/answer/7101858?hl=en).
-const AccessibilityGuideline androidTapTargetGuideline = _MinimumTapTargetGuideline(
+const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideline._(
   Size(48.0, 48.0),
   'https://support.google.com/accessibility/android/answer/7101858?hl=en',
 );
@@ -343,7 +353,7 @@ const AccessibilityGuideline androidTapTargetGuideline = _MinimumTapTargetGuidel
 /// See also:
 ///
 ///   * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/).
-const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(
+const AccessibilityGuideline iOSTapTargetGuideline = MinimumTapTargetGuideline._(
   Size(44.0, 44.0),
   'https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/',
 );
@@ -357,4 +367,4 @@ const AccessibilityGuideline iOSTapTargetGuideline = _MinimumTapTargetGuideline(
 /// frequently occurring color in each partition as a representative of the
 /// foreground and background colors. The contrast ratio is calculated from
 /// these colors according to the [WCAG](https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html#contrast-ratiodef)
-const AccessibilityGuideline textContrastGuideline = _MinimumTextContrastGuideline();
+const AccessibilityGuideline textContrastGuideline = MinimumTextContrastGuideline._();
