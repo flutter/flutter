@@ -385,8 +385,7 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 
 void Engine::UpdateSemantics(blink::SemanticsNodeUpdates update,
                              blink::CustomAccessibilityActionUpdates actions) {
-  delegate_.OnEngineUpdateSemantics(*this, std::move(update),
-                                    std::move(actions));
+  delegate_.OnEngineUpdateSemantics(std::move(update), std::move(actions));
 }
 
 void Engine::HandlePlatformMessage(
@@ -394,7 +393,7 @@ void Engine::HandlePlatformMessage(
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
   } else {
-    delegate_.OnEngineHandlePlatformMessage(*this, std::move(message));
+    delegate_.OnEngineHandlePlatformMessage(std::move(message));
   }
 }
 

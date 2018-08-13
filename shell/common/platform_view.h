@@ -29,48 +29,36 @@ class PlatformView {
  public:
   class Delegate {
    public:
-    virtual void OnPlatformViewCreated(const PlatformView& view,
-                                       std::unique_ptr<Surface> surface) = 0;
+    virtual void OnPlatformViewCreated(std::unique_ptr<Surface> surface) = 0;
 
-    virtual void OnPlatformViewDestroyed(const PlatformView& view) = 0;
+    virtual void OnPlatformViewDestroyed() = 0;
 
-    virtual void OnPlatformViewSetNextFrameCallback(const PlatformView& view,
-                                                    fml::closure closure) = 0;
+    virtual void OnPlatformViewSetNextFrameCallback(fml::closure closure) = 0;
 
     virtual void OnPlatformViewSetViewportMetrics(
-        const PlatformView& view,
         const blink::ViewportMetrics& metrics) = 0;
 
     virtual void OnPlatformViewDispatchPlatformMessage(
-        const PlatformView& view,
         fml::RefPtr<blink::PlatformMessage> message) = 0;
 
     virtual void OnPlatformViewDispatchPointerDataPacket(
-        const PlatformView& view,
         std::unique_ptr<blink::PointerDataPacket> packet) = 0;
 
     virtual void OnPlatformViewDispatchSemanticsAction(
-        const PlatformView& view,
         int32_t id,
         blink::SemanticsAction action,
         std::vector<uint8_t> args) = 0;
 
-    virtual void OnPlatformViewSetSemanticsEnabled(const PlatformView& view,
-                                                   bool enabled) = 0;
+    virtual void OnPlatformViewSetSemanticsEnabled(bool enabled) = 0;
 
-    virtual void OnPlatformViewSetAccessibilityFeatures(
-        const PlatformView& view,
-        int32_t flags) = 0;
+    virtual void OnPlatformViewSetAccessibilityFeatures(int32_t flags) = 0;
 
     virtual void OnPlatformViewRegisterTexture(
-        const PlatformView& view,
         std::shared_ptr<flow::Texture> texture) = 0;
 
-    virtual void OnPlatformViewUnregisterTexture(const PlatformView& view,
-                                                 int64_t texture_id) = 0;
+    virtual void OnPlatformViewUnregisterTexture(int64_t texture_id) = 0;
 
     virtual void OnPlatformViewMarkTextureFrameAvailable(
-        const PlatformView& view,
         int64_t texture_id) = 0;
   };
 
