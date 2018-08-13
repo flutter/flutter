@@ -31,13 +31,17 @@ abstract class ListWheelChildManager {
   int get childCount;
 
   /// Checks whether the delegate is able to provide a child widget at the given
-  /// index (this function is not about whether the child at the given index is
-  /// attached to the [RenderListWheelViewport] or not).
+  /// index.
+  ///
+  /// This function is not about whether the child at the given index is
+  /// attached to the [RenderListWheelViewport] or not.
   bool childExistsAt(int index);
 
   /// Creates a new child at the given index and updates it to the child list
   /// of [RenderListWheelViewport]. If no child corresponds to `index`, then do
   /// nothing.
+  ///
+  /// It is possible to create children with negative indices.
   void createChild(int index, {@required RenderBox after});
 
   /// Removes the child element corresponding with the given RenderBox.
@@ -562,7 +566,7 @@ class RenderListWheelViewport
     return childParentData.index;
   }
 
-  /// Returns the index of the child that should be at the given offset.
+  /// Returns the index of the child at the given offset.
   int scrollOffsetToIndex(double scrollOffset) => (scrollOffset / itemExtent).floor();
 
   /// Returns the scroll offset of the child with the given index.

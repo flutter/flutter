@@ -23,8 +23,8 @@ import 'scrollable.dart';
 
 /// A delegate that supplies children for [ListWheelScrollView].
 ///
-/// [ListWheelScrollView] lazily construct its children during layout to avoid
-/// creating more children than are visible through the [Viewport], and this
+/// [ListWheelScrollView] lazily constructs its children during layout to avoid
+/// creating more children than are visible through the [Viewport]. This
 /// delegate is responsible for providing children to [ListWheelScrollView]
 /// during that stage.
 ///
@@ -47,6 +47,7 @@ abstract class ListWheelChildDelegate {
   /// the given index, however if the delegate is [ListWheelChildLoopingListDelegate],
   /// this value is the index of the true element that the delegate is looping to.
   ///
+  ///
   /// Example: [ListWheelChildLoopingListDelegate] is built by looping a list of
   /// length 8. Then, trueIndexOf(10) = 2 and trueIndexOf(-5) = 3.
   int trueIndexOf(int index) => index;
@@ -59,7 +60,7 @@ abstract class ListWheelChildDelegate {
 /// A delegate that supplies children for [ListWheelScrollView] using an
 /// explicit list.
 ///
-/// [ListWheelScrollView] lazily construct its children to avoid creating more
+/// [ListWheelScrollView] lazily constructs its children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
 /// children using an explicit list, which is convenient but reduces the benefit
 /// of building children lazily.
@@ -102,7 +103,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
 /// A delegate that supplies infinite children for [ListWheelScrollView] by
 /// looping an explicit list.
 ///
-/// [ListWheelScrollView] lazily construct its children to avoid creating more
+/// [ListWheelScrollView] lazily constructs its children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
 /// children using an explicit list, which is convenient but reduces the benefit
 /// of building children lazily.
@@ -148,10 +149,10 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
 /// A delegate that supplies children for [ListWheelScrollView] using a builder
 /// callback.
 ///
-/// [ListWheelScrollView] lazily construct its children to avoid creating more
+/// [ListWheelScrollView] lazily constructs its children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
 /// children using an [IndexedWidgetBuilder] callback, so that the children do
-/// not even have to be built until they are displayed.
+/// not have to be built until they are displayed.
 class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   /// Constructs the delegate from a builder callback.
   ListWheelChildBuilderDelegate({
@@ -167,8 +168,8 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   /// provided, and children are available from 0 to [childCount] - 1.
   ///
   /// If null, then the lower and upper limit are not known. However the [builder]
-  /// must provide children for a contiguous segment and returning null at
-  /// some index means the segment is terminated there.
+  /// must provide children for a contiguous segment. If the builder returns null
+  /// at some index, the segment terminates there.
   /// {@endtemplate}
   final int childCount;
 
@@ -766,8 +767,8 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   // We inflate widgets at two different times:
   //  1. When we ourselves are told to rebuild (see performRebuild).
   //  2. When our render object needs a new child (see createChild).
-  // In both cases, we cache the results of calling into our delegate to get the widget,
-  // so that if we do case 2 later, we don't call the builder again.
+  // In both cases, we cache the results of calling into our delegate to get the
+  // widget, so that if we do case 2 later, we don't call the builder again.
   // Any time we do case 1, though, we reset the cache.
 
   /// A cache of widgets so that we don't have to rebuild every time.
@@ -816,8 +817,6 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
   /// Normally the builder is only called once for each index and the result
   /// will be cached. However when the element is rebuilt, the cache will be
   /// cleared.
-  ///
-  /// This function is often called when a new child needs to be created.
   Widget retrieveWidget(int index) {
     return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
   }
