@@ -717,15 +717,22 @@ class RenderOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
-  RenderOpacity({ double opacity = 1.0, RenderBox child })
-    : assert(opacity != null),
-      assert(opacity >= 0.0 && opacity <= 1.0),
-      _opacity = opacity,
-      _alpha = _getAlphaFromOpacity(opacity),
-      super(child);
+  RenderOpacity({
+    double opacity = 1.0,
+    bool alwaysIncludeSemantics = false,
+    RenderBox child,
+  }) : assert(opacity != null),
+       assert(opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
+       _opacity = opacity,
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       _alpha = _getAlphaFromOpacity(opacity),
+       super(child);
 
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+
+  int _alpha;
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -755,13 +762,26 @@ class RenderOpacity extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  int _alpha;
+  /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  bool _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool value) {
+    if (value == _alwaysIncludeSemantics)
+      return;
+    _alwaysIncludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0)
+      if (_alpha == 0) {
         return;
+      }
       if (_alpha == 255) {
         context.paintChild(child, offset);
         return;
@@ -773,7 +793,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && _alpha != 0)
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child);
   }
 
@@ -781,6 +801,7 @@ class RenderOpacity extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DoubleProperty('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -792,7 +813,14 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.
-  RenderAnimatedOpacity({ @required Animation<double> opacity, RenderBox child }) : super(child) {
+  RenderAnimatedOpacity({
+    @required Animation<double> opacity,
+    bool alwaysIncludeSemantics = false,
+    RenderBox child,
+  }) : assert(opacity != null),
+       assert(alwaysIncludeSemantics != null),
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       super(child) {
     this.opacity = opacity;
   }
 
@@ -821,6 +849,20 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     if (attached)
       _opacity.addListener(_updateOpacity);
     _updateOpacity();
+  }
+
+  /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  bool _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool value) {
+    if (value == _alwaysIncludeSemantics)
+      return;
+    _alwaysIncludeSemantics = value;
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -866,7 +908,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && _alpha != 0)
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child);
   }
 
@@ -874,6 +916,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -1097,8 +1140,9 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
-    CustomClipper<T> clipper
-  }) : _clipper = clipper, super(child);
+    CustomClipper<T> clipper,
+    this.clipBehavior = Clip.antiAlias,
+  }) : _clipper = clipper, assert(clipBehavior != null), super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1140,6 +1184,8 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
 
   T get _defaultClip;
   T _clip;
+
+  final Clip clipBehavior;
 
   @override
   void performLayout() {
@@ -1199,10 +1245,13 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipRect({
     RenderBox child,
-    CustomClipper<Rect> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Rect> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Rect get _defaultClip => Offset.zero & size;
@@ -1222,7 +1271,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRect(needsCompositing, offset, _clip, super.paint);
+      context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1251,11 +1300,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// right-angled corners.
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
-  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper) {
+    Clip clipBehavior = Clip.antiAlias,
+  }) : assert(clipBehavior != Clip.none), _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1293,7 +1345,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint);
+      context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1320,10 +1372,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipOval({
     RenderBox child,
-    CustomClipper<Rect> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Rect> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -1357,7 +1412,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint);
+      context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1392,10 +1447,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipPath({
     RenderBox child,
-    CustomClipper<Path> clipper
-  }) : super(child: child, clipper: clipper);
+    CustomClipper<Path> clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);
@@ -1415,7 +1473,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior);
     }
   }
 
@@ -1443,14 +1501,16 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
+    Clip clipBehavior = Clip.none,
     CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
+       assert(clipBehavior != null),
        _elevation = elevation,
        _color = color,
        _shadowColor = shadowColor,
-       super(child: child, clipper: clipper);
+       super(child: child, clipBehavior: clipBehavior, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
   ///
@@ -1520,17 +1580,20 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
+    Clip clipBehavior = Clip.none,
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
   }) : assert(shape != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius,
        super(
+         clipBehavior: clipBehavior,
          child: child,
          elevation: elevation,
          color: color,
@@ -1619,6 +1682,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetRRectAsPath,
+          clipBehavior: clipBehavior,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
@@ -1643,10 +1707,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           );
         }
         canvas.drawRRect(offsetRRect, new Paint()..color = color);
-        canvas.save();
-        canvas.clipRRect(offsetRRect);
-        super.paint(context, offset);
-        canvas.restore();
+        context.clipRRectAndPaint(offsetRRect, clipBehavior, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
@@ -1678,6 +1739,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
+    Clip clipBehavior = Clip.none,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
@@ -1691,6 +1753,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          color: color,
          shadowColor: shadowColor,
          clipper: clipper,
+         clipBehavior: clipBehavior
        );
 
   @override
@@ -1732,6 +1795,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
+          clipBehavior: clipBehavior,
           elevation: paintShadows ? elevation : 0.0,
           color: color,
           shadowColor: shadowColor,
@@ -1756,10 +1820,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           );
         }
         canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
-        canvas.save();
-        canvas.clipPath(offsetPath);
-        super.paint(context, offset);
-        canvas.restore();
+        context.clipPathAndPaint(offsetPath, clipBehavior, offsetBounds, () => super.paint(context, offset));
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }
     }
@@ -3188,6 +3249,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String increasedValue,
     String decreasedValue,
     String hint,
+    SemanticsHintOverrides hintOverrides,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -3233,6 +3295,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
+       _hintOverrides = hintOverrides,
        _textDirection = textDirection,
        _sortKey = sortKey,
        _onTap = onTap,
@@ -3526,6 +3589,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_hint == value)
       return;
     _hint = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.hintOverride] to the given value.
+  SemanticsHintOverrides get hintOverrides => _hintOverrides;
+  SemanticsHintOverrides _hintOverrides;
+  set hintOverrides(SemanticsHintOverrides value) {
+    if (_hintOverrides == value)
+      return;
+    _hintOverrides = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3970,6 +4043,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
+    if (hintOverrides != null && hintOverrides.isNotEmpty)
+      config.hintOverrides = hintOverrides;
     if (scopesRoute != null)
       config.scopesRoute = scopesRoute;
     if (namesRoute != null)

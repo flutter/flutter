@@ -349,6 +349,8 @@ void _defineTests() {
       ),
     ));
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+      ..remove(SemanticsAction.moveCursorForwardByWord)
+      ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
@@ -424,7 +426,9 @@ void _defineTests() {
     ));
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.hasToggledState)
+      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.isToggled);
     TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
@@ -468,7 +472,9 @@ void _defineTests() {
     ));
     flags = SemanticsFlag.values.values.toList();
     flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.hasCheckedState)
+      ..remove(SemanticsFlag.hasImplicitScrolling)
       ..remove(SemanticsFlag.isChecked);
 
     expectedSemantics = new TestSemantics.root(

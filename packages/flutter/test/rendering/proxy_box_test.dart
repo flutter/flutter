@@ -219,6 +219,7 @@ void main() {
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );
@@ -233,6 +234,7 @@ void main() {
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
       opacity: opacityAnimation,
       child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
     );

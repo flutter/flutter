@@ -39,5 +39,11 @@
   "popupMenuLabel": "Pop-up-Menü",
   "dialogLabel": "Dialogfeld",
   "alertDialogLabel": "Aufmerksam",
-  "searchFieldLabel": "Suchen"
+  "searchFieldLabel": "Suchen",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }

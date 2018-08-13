@@ -15,9 +15,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
-import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
 
@@ -26,25 +24,6 @@ final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
-}
-
-/// Writes default Xcode properties files in the Flutter project at [projectPath],
-/// if project is an iOS project and such files are out of date or do not
-/// already exist.
-Future<void> generateXcodeProperties({FlutterProject project}) async {
-  if ((await project.manifest).isModule ||
-      project.ios.directory.existsSync()) {
-    if (!Cache.instance.fileOlderThanToolsStamp(await project.generatedXcodePropertiesFile)) {
-      return;
-    }
-
-    await updateGeneratedXcodeProperties(
-      project: project,
-      buildInfo: BuildInfo.debug,
-      targetOverride: bundle.defaultMainPath,
-      previewDart2: true,
-    );
-  }
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -79,20 +58,19 @@ Future<void> updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  final FlutterManifest manifest = await project.manifest;
-  if (!manifest.isModule) {
+  if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
   }
 
-  final String buildName = buildInfo?.buildName ?? manifest.buildName;
+  final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+  final int buildNumber = buildInfo?.buildNumber ?? project.manifest.buildNumber;
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
@@ -119,7 +97,7 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File generatedXcodePropertiesFile = await project.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }

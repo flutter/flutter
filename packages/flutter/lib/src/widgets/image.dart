@@ -55,7 +55,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// Prefetches an image into the image cache.
 ///
 /// Returns a [Future] that will complete when the first image yielded by the
-/// [ImageProvider] is available.
+/// [ImageProvider] is available or failed to load.
 ///
 /// If the image is later used by an [Image] or [BoxDecoration] or [FadeInImage],
 /// it will probably be loaded faster. The consumer of the image does not need
@@ -65,17 +65,38 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
+/// The `onError` argument can be used to manually handle errors while precaching.
+///
 /// See also:
 ///
 ///   * [ImageCache], which holds images that may be reused.
-Future<Null> precacheImage(ImageProvider provider, BuildContext context, { Size size }) {
+Future<Null> precacheImage(
+  ImageProvider provider,
+  BuildContext context, {
+  Size size,
+  ImageErrorListener onError,
+}) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
   final Completer<Null> completer = new Completer<Null>();
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
   }
-  stream.addListener(listener);
+  void errorListener(dynamic exception, StackTrace stackTrace) {
+    completer.complete();
+    if (onError != null) {
+      onError(exception, stackTrace);
+    } else {
+      FlutterError.reportError(new FlutterErrorDetails(
+        context: 'image failed to precache',
+        library: 'image resource service',
+        exception: exception,
+        stack: stackTrace,
+        silent: true,
+      ));
+    }
+  }
+  stream.addListener(listener, onError: errorListener);
   completer.future.then((Null _) { stream.removeListener(listener); });
   return completer.future;
 }
@@ -435,8 +456,8 @@ class Image extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while an
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
   /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
@@ -612,7 +633,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    final RawImage image = RawImage(
+    final RawImage image = new RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,

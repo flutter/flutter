@@ -266,6 +266,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const LeaveBehindDemo(),
     ),
     new GalleryDemo(
+      title: 'Lists: reorderable',
+      subtitle: 'Reorderable lists',
+      icon: GalleryIcons.list_alt,
+      category: _kMaterialComponents,
+      routeName: ReorderableListDemo.routeName,
+      buildRoute: (BuildContext context) => const ReorderableListDemo(),
+    ),
+    new GalleryDemo(
       title: 'Menus',
       subtitle: 'Menu buttons and simple menus',
       icon: GalleryIcons.more_vert,
@@ -420,6 +428,13 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kCupertinoComponents,
       routeName: CupertinoRefreshControlDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Segmented Control',
+      icon: GalleryIcons.tabs,
+      category: _kCupertinoComponents,
+      routeName: CupertinoSegmentedControlDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoSegmentedControlDemo(),
     ),
     new GalleryDemo(
       title: 'Sliders',

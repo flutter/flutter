@@ -327,7 +327,7 @@ void main() {
       ),
     ];
 
-    final ExpansionPanelList _expansionList = ExpansionPanelList(
+    final ExpansionPanelList _expansionList = new ExpansionPanelList(
       children: _demoItems,
     );
 

@@ -33,8 +33,8 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'tool_tests': _runToolTests,
   'coverage': _runCoverage,
-  // 'docs': handled by travis_script.sh and docs.sh
-  // 'build_and_deploy_gallery': handled by travis_script.sh
+  // 'docs': handled by docs.sh
+  // 'build_and_deploy_gallery': handled by deploy_gallery.sh
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
@@ -128,18 +128,18 @@ Future<Null> _checkForTrailingSpaces() async {
         ? Platform.environment['TEST_COMMIT_RANGE']
         : await _getCommitRange();
     final List<String> fileTypes = <String>[
-      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '.yml',
+      '*.dart', '*.cxx', '*.cpp', '*.cc', '*.c', '*.C', '*.h', '*.java', '*.mm', '*.m', '*.yml',
     ];
     final EvalResult changedFilesResult = await _evalCommand(
       'git', <String>['diff', '-U0', '--no-color', '--name-only', commitRange, '--'] + fileTypes,
       workingDirectory: flutterRoot,
     );
-    if (changedFilesResult.stdout == null) {
-      print('No Results for whitespace check.');
+    if (changedFilesResult.stdout == null || changedFilesResult.stdout.trim().isEmpty) {
+      print('No files found that need to be checked for trailing whitespace.');
       return;
     }
     // Only include files that actually exist, so that we don't try and grep for
-    // nonexistent files (can occur when files are deleted or moved).
+    // nonexistent files, which can occur when files are deleted or moved.
     final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
       return new File(filename).existsSync();
     }).toList();
@@ -148,7 +148,7 @@ Future<Null> _checkForTrailingSpaces() async {
         <String>[
           '--line-number',
           '--extended-regexp',
-          r'[[:space:]]+$',
+          r'[[:blank:]]$',
         ] + changedFiles,
         workingDirectory: flutterRoot,
         failureMessage: '${red}Whitespace detected at the end of source code lines.$reset\nPlease remove:',
@@ -189,14 +189,27 @@ Future<Null> _analyzeRepo() async {
 
   await _checkForTrailingSpaces();
 
-  // Try an analysis against a big version of the gallery.
-  await _runCommand(dart,
-    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
-    workingDirectory: flutterRoot,
-  );
-  await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
-    options: <String>['--watch', '--benchmark'],
-  );
+  // Try analysis against a big version of the gallery; generate into a temporary directory.
+  final String outDir = Directory.systemTemp.createTempSync('mega_gallery').path;
+
+  try {
+    await _runCommand(dart,
+      <String>[
+        '--preview-dart-2',
+        path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
+        '--out',
+        outDir,
+      ],
+      workingDirectory: flutterRoot,
+    );
+    await _runFlutterAnalyze(outDir, options: <String>['--watch', '--benchmark']);
+  } finally {
+    try {
+      new Directory(outDir).deleteSync(recursive: true);
+    } catch (e) {
+      // ignore
+    }
+  }
 
   print('${bold}DONE: Analysis successful.$reset');
 }
