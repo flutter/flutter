@@ -808,10 +808,12 @@ void DartIsolate::DartIsolateShutdownCallback(
   }
 
   tonic::DartApiScope api_scope;
-  FML_LOG(ERROR) << "Isolate " << tonic::StdStringFromDart(Dart_DebugName())
-                 << " exited with an error";
   Dart_Handle sticky_error = Dart_GetStickyError();
-  FML_CHECK(tonic::LogIfError(sticky_error));
+  if (!Dart_IsFatalError(sticky_error)) {
+    FML_LOG(ERROR) << "Isolate " << tonic::StdStringFromDart(Dart_DebugName())
+                   << " exited with an error";
+    FML_CHECK(tonic::LogIfError(sticky_error));
+  }
 }
 
 // |Dart_IsolateCleanupCallback|
