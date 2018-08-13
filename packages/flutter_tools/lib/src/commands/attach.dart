@@ -53,6 +53,7 @@ class AttachCommand extends FlutterCommand {
           help: 'Handle machine structured JSON command input and provide output\n'
                 'and progress in machine friendly format.',
       );
+    usesTargetOption();
   }
 
   @override
@@ -118,6 +119,7 @@ class AttachCommand extends FlutterCommand {
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
+        target: targetFile,
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
         usesTerminalUI: daemon == null,
