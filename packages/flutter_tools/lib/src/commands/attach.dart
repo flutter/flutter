@@ -37,6 +37,7 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 class AttachCommand extends FlutterCommand {
   AttachCommand({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false);
+    usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     argParser
       ..addOption(
@@ -128,6 +129,7 @@ class AttachCommand extends FlutterCommand {
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
+        target: targetFile,
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
         usesTerminalUI: daemon == null,
