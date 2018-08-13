@@ -3237,6 +3237,13 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target }) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
+    assert(target == null || () {
+      // check that target is really an ancestor
+      Element ancestor = _parent;
+      while (ancestor != target && ancestor != null)
+        ancestor = ancestor._parent;
+      return ancestor == target;
+    }());
     final InheritedElement ancestor = target ?? (_inheritedWidgets == null ? null : _inheritedWidgets[targetType]);
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
