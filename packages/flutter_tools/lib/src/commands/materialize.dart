@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'package:meta/meta.dart';
+import '../base/common.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -31,9 +32,20 @@ abstract class MaterializeSubCommand extends FlutterCommand {
     requiresPubspecYaml();
   }
 
+  FlutterProject _project;
+
   @override
   @mustCallSuper
   Future<Null> runCommand() async {
+    await _project.ensureReadyForPlatformSpecificTooling();
+  }
+
+  @override
+  Future<Null> validateCommand() async {
+    await super.validateCommand();
+    _project = await FlutterProject.current();
+    if (!_project.isModule)
+      throw new ToolExit("Only projects created using 'flutter create -t module' can be materialized.");
   }
 }
 
@@ -47,9 +59,7 @@ class MaterializeAndroidCommand extends MaterializeSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-    final FlutterProject project = await FlutterProject.current();
-    await project.ensureReadyForPlatformSpecificTooling();
-    await project.android.materialize();
+    await _project.android.materialize();
   }
 }
 
@@ -63,8 +73,6 @@ class MaterializeIosCommand extends MaterializeSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-    final FlutterProject project = await FlutterProject.current();
-    await project.ensureReadyForPlatformSpecificTooling();
-    await project.ios.materialize();
+    await _project.ios.materialize();
   }
 }
