@@ -174,18 +174,20 @@ class InheritedModelElement<T> extends InheritedElement {
   InheritedModel<T> get widget => super.widget;
 
   @override
-  InheritedDependencies updateDependencies(Element dependent, Object aspect) {
+  void updateDependencies(Element dependent, Object aspect) {
     final _Dependencies<T> dependencies = getDependencies(dependent);
     if (dependencies != null && dependencies.isGlobal)
-      return dependencies;
+      return;
 
-    if (aspect == null)
-      return new _Dependencies<T>(isGlobal: true);
-
-    assert(aspect is T);
-    if (dependencies == null)
-      return new _Dependencies<T>()..add(aspect);
-    return dependencies..add(aspect);
+    if (aspect == null) {
+      setDependencies(dependent, new _Dependencies<T>(isGlobal: true));
+    } else {
+      assert(aspect is T);
+      setDependencies(dependent, dependencies == null
+        ? (new _Dependencies<T>()..add(aspect))
+        : dependencies..add(aspect)
+      );
+    }
   }
 
   @override
@@ -207,6 +209,7 @@ class _Dependencies<T> extends InheritedDependencies {
   bool contains(T dependency) => values.contains(dependency);
 
   void add(T dependency) {
+    assert(isGlobal);
     values.add(dependency);
   }
 }

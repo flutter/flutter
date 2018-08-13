@@ -3249,7 +3249,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      ancestor._dependents[this] = ancestor.updateDependencies(ancestor, aspect);
+      ancestor.updateDependencies(this, aspect);
       return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
@@ -4041,7 +4041,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
 }
 
 /// Used by [InheritedElement] to represent the aspects of its
-/// [InheritedWidget] that will a dependent to be rebuilt.
+/// [InheritedWidget] that will cause a dependent to be rebuilt.
 ///
 /// If [isGlobal] is true then a dependent widget should be rebuilt
 /// whenever the inherited widget it depends on changes.
@@ -4094,29 +4094,80 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
-  /// Returns the most recent [updateDependencies] value for [dependent].
+  /// Returns the [InheritedDependencies] value recorded for [dependent]
+  /// with [setDependencies].
   ///
   /// Each dependent element is mapped to a single [InheritedDependencies]
-  /// object.
+  /// object which represents how the element depends on this
+  /// [InheritedElement]. By default the inherited dependencies value has
+  /// [InheritedDependencies.isGlobal] true, which means that the dependent
+  /// element should be rebuilt whenever this inherited element changes.
+  ///
+  /// See also:
+  ///
+  ///  * [updateDependencies], which is called each time a dependency is
+  ///    created with [inheritFromWidgetOfExactType].
+  ///  * [setDependencies], which sets [InheritedDependencies] for a dependent
+  ///    element.
+  ///  * [notifyDependent], which can be overridden to use a dependent's
+  ///    [InheritedDependencies] value to decide if the dependent needs
+  ///    to be rebuilt.
   @protected
-  InheritedDependencies getDependencies(Element dependent) => _dependents[dependent];
+  InheritedDependencies getDependencies(Element dependent) {
+    return _dependents[dependent];
+  }
+
+  /// Sets the [InheritedDependencies] value for [dependent].
+  ///
+  /// Each dependent element is mapped to a single [InheritedDependencies]
+  /// object which represents how the element depends on this
+  /// [InheritedElement]. By default the inherited dependencies value has
+  /// [InheritedDependencies.isGlobal] true, which means that the dependent
+  /// element should be rebuilt whenever this inherited element changes.
+  ///
+  /// See also:
+  ///
+  ///  * [updateDependencies], which is called each time a dependency is
+  ///    created with [inheritFromWidgetOfExactType].
+  ///  * [getDependencies], which returns the current [InheritedDependencies]
+  ///    for a dependent element.
+  ///  * [notifyDependent], which can be overridden to use a dependent's
+  ///    [InheritedDependencies] value to decide if the dependent needs
+  ///    to be rebuilt.
+  @protected
+  void setDependencies(Element dependent, InheritedDependencies value) {
+    _dependents[dependent] = value;
+  }
 
   /// Called by [inheritFromWidgetOfExactType] when a new [dependent] is added.
   ///
   /// Each dependent element is mapped to a single [InheritedDependencies]
-  /// object. This method can lookup the existing dependencies with
-  /// [getDependencies].
+  /// object with [setDependencies]. This method can lookup the existing
+  /// dependencies with [getDependencies].
   ///
-  /// By default this method returns a constant [InheritedDependencies] object
-  /// for which [InheritedDependencies.isGlobal] is true.
+  /// By default this method sets the inherited dependencies for [dependent]
+  /// to a value for which [InheritedDependencies.isGlobal] is true.
+  ///
+  /// See also:
+  ///
+  ///  * [getDependencies], which returns the current [InheritedDependencies]
+  ///    for a dependent element.
+  ///  * [setDependencies], which sets [InheritedDependencies] for a dependent
+  ///    element.
+  ///  * [notifyDependent], which can be overridden to use a dependent's
+  ///    [InheritedDependencies] value to decide if the dependent needs
+  ///    to be rebuilt.
   @protected
-  InheritedDependencies updateDependencies(Element dependent, Object aspect) {
-    return const InheritedDependencies(); // isGlobal => true
+  void updateDependencies(Element dependent, Object aspect) {
+    setDependencies(dependent, const InheritedDependencies()); // isGlobal => true
   }
 
   /// Called by [notifyClients] for each dependent.
   ///
-  /// Calls `dependent.didChangeDependencies()`.
+  /// Calls `dependent.didChangeDependencies()` by default.
+  ///
+  /// Subclasses can override this method to selectively call
+  /// [didChangeDependencies] based on the value of [getDependencies].
   @protected
   void notifyDependent(covariant InheritedWidget oldWidget, Element dependent) {
     dependent.didChangeDependencies();
