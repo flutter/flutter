@@ -198,11 +198,6 @@ class RenderEditable extends RenderBox {
 
   Rect _lastCaretRect;
 
-  bool _rightArrowDown = false;
-  bool _leftArrowDown = false;
-  bool _upArrowDown = false;
-  bool _downArrowDown = false;
-
   static const int _kLeftArrowCode = 21;
   static const int _kRightArrowCode = 22;
   static const int _kUpArrowCode = 19;
@@ -218,7 +213,7 @@ class RenderEditable extends RenderBox {
   static const int _kControlMask = 1 << 12;
 
   void _handleKeyEvent(RawKeyEvent keyEvent){
-    if(defaultTargetPlatform != TargetPlatform.android)
+    if (defaultTargetPlatform != TargetPlatform.android)
       return;
 
     final RawKeyEventDataAndroid rawAndroidEvent = keyEvent.data;
@@ -235,15 +230,11 @@ class RenderEditable extends RenderBox {
     final bool shiftIsDown = pressedKeyMetaState & _kShiftMask > 0;
     final bool ctrlIsDown = pressedKeyMetaState & _kControlMask > 0;
 
-    if (pressedKeyCode == _kLeftArrowCode)
-      _leftArrowDown = pressedDown;
-    else if (pressedKeyCode == _kRightArrowCode)
-      _rightArrowDown = pressedDown;
-    else if (pressedKeyCode == _kUpArrowCode)
-      _upArrowDown = pressedDown;
-    else if (pressedKeyCode == _kDownArrowCode)
-      _downArrowDown = pressedDown;
-    final bool arrowDown = _leftArrowDown || _rightArrowDown || _upArrowDown || _downArrowDown;
+    final bool rightArrowDown = pressedKeyCode == _kRightArrowCode ? pressedDown : false;
+    final bool leftArrowDown = pressedKeyCode == _kLeftArrowCode ? pressedDown : false;
+    final bool upArrowDown = pressedKeyCode == _kUpArrowCode ? pressedDown : false;
+    final bool downArrowDown = pressedKeyCode == _kDownArrowCode ? pressedDown : false;
+    final bool arrowDown = leftArrowDown || rightArrowDown || upArrowDown || downArrowDown;
 
     // We will only move select or more the caret if an arrow is pressed
     if (arrowDown) {
@@ -252,10 +243,10 @@ class RenderEditable extends RenderBox {
       // If control is pressed, we will decide which way to look for a word
       // based on which arrow is pressed.
       if (pressedDown && ctrlIsDown) {
-        if (_leftArrowDown && _extentOffset > 2) {
+        if (leftArrowDown && _extentOffset > 2) {
           final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
           newOffset = textSelection.baseOffset + 1;
-        } else if (_rightArrowDown && _extentOffset < text.text.length - 2) {
+        } else if (rightArrowDown && _extentOffset < text.text.length - 2) {
           final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
           newOffset = textSelection.extentOffset - 1;
         }
@@ -263,23 +254,23 @@ class RenderEditable extends RenderBox {
 
       // Set the new offset to be +/- 1 depending on which arrow is pressed
       // If shift is down, we also want to update the previous cursor location
-      if (_rightArrowDown && _extentOffset < text.text.length) {
+      if (rightArrowDown && _extentOffset < text.text.length) {
         newOffset += 1;
         if (shiftIsDown)
           _previousCursorLocation += 1;
       }
-      if (_leftArrowDown && _extentOffset > 0) {
+      if (leftArrowDown && _extentOffset > 0) {
         newOffset -= 1;
         if (shiftIsDown)
           _previousCursorLocation -= 1;
       }
 
-      if (_downArrowDown || _upArrowDown) {
+      if (downArrowDown || upArrowDown) {
         // The caret offset gives a location in the upper left hand corner of
         // the caret so the middle of the line above is a half line above that
         // point and the line below is 1.5 lines below that point.
         final double plh = _textPainter.preferredLineHeight;
-        final double verticalOffset = _upArrowDown ? -0.5 * plh : 1.5 * plh;
+        final double verticalOffset = upArrowDown ? -0.5 * plh : 1.5 * plh;
 
         final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
         final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
@@ -290,9 +281,9 @@ class RenderEditable extends RenderBox {
         // cursor location. This allows us to restore to this position in the
         // case that the user wants to unhighlight some text.
         if (position.offset == _extentOffset){
-          if (_downArrowDown)
+          if (downArrowDown)
             newOffset = text.text.length;
-          else if (_upArrowDown)
+          else if (upArrowDown)
             newOffset = 0;
           _resetCursor = shiftIsDown;
         } else if (_resetCursor && shiftIsDown) {
@@ -320,9 +311,9 @@ class RenderEditable extends RenderBox {
       // arrow is used while there is a selection.
       else if (pressedDown){
         if (!selection.isCollapsed) {
-          if (_leftArrowDown)
+          if (leftArrowDown)
             newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
-          else if (_rightArrowDown)
+          else if (rightArrowDown)
             newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
         }
         onSelectionChanged(new TextSelection.fromPosition(
