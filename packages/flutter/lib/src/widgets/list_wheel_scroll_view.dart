@@ -875,7 +875,6 @@ class ListWheelElement extends RenderObjectElement implements ListWheelChildMana
 
   @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
-
     const String moveChildRenderObjectErrorMessage =
         'Currently we maintain the list in contiguous increasing order, so '
         'moving children around is not allowed.';
