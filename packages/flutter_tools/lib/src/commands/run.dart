@@ -124,11 +124,13 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.',
       )
-      ..addFlag('build-snapshot',
+      ..addOption('precompile',
         hide: !verboseHelp,
-        defaultsTo: false,
-        help: 'Build and use application-specific VM snapshot instead of\n'
-              'prebuilt one provided by the engine.',
+        help: 'Precompile functions specified in input file. This flag requires\n'
+              '--dynamic and takes a Dart compilation trace file produced by the\n'
+              'training run of the application. With this flag, instead of using\n'
+              'default Dart VM snapshot provided by the engine, the application\n'
+              'will use its own snapshot that includes additional functions.',
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,

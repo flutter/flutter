@@ -427,6 +427,7 @@ class CoreJITSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
+    @required String compilationTraceFilePath,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidCoreJitPlatform(platform)) {
@@ -437,7 +438,7 @@ class CoreJITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final List<String> inputPaths = <String>[mainPath];
+    final List<String> inputPaths = <String>[mainPath, compilationTraceFilePath];
     final Set<String> outputPaths = new Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
@@ -466,7 +467,7 @@ class CoreJITSnapshotter {
       '--isolate_snapshot_data=$isolateSnapshotData',
       '--vm_snapshot_instructions=$vmSnapshotInstructions',
       '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-      '--load_compilation_trace=trace.txt',
+      '--load_compilation_trace=$compilationTraceFilePath',
     ]);
 
     if (platform == TargetPlatform.android_arm) {

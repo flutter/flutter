@@ -37,11 +37,13 @@ class BuildBundleCommand extends BuildSubCommand {
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
       )
-      ..addFlag('build-snapshot',
+      ..addOption('precompile',
         hide: !verboseHelp,
-        defaultsTo: false,
-        help: 'Build and use application-specific VM snapshot instead of\n'
-            'prebuilt one provided by the engine.',
+        help: 'Precompile functions specified in input file. This flag requires\n'
+              '--dynamic and takes a Dart compilation trace file produced by the\n'
+              'training run of the application. With this flag, instead of using\n'
+              'default Dart VM snapshot provided by the engine, the application\n'
+              'will use its own snapshot that includes additional functions.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
@@ -106,7 +108,7 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      buildSnapshot: argResults['build-snapshot'],
+      compilationTraceFilePath: argResults['precompile'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],

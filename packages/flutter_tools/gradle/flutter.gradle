@@ -276,9 +276,9 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
-        Boolean buildSnapshotValue = false
-        if (project.hasProperty('build-snapshot')) {
-            buildSnapshotValue = project.property('build-snapshot').toBoolean()
+        String compilationTraceFilePathValue = null
+        if (project.hasProperty('precompile')) {
+            compilationTraceFilePathValue = project.property('precompile')
         }
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
@@ -322,7 +322,7 @@ class FlutterPlugin implements Plugin<Project> {
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
-                buildSnapshot buildSnapshotValue
+                compilationTraceFilePath compilationTraceFilePathValue
                 buildSharedLibrary buildSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -372,7 +372,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
-    Boolean buildSnapshot
+    String compilationTraceFilePath
     @Optional @Input
     Boolean buildSharedLibrary
     @Optional @Input
@@ -476,8 +476,8 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
             }
-            if (buildSnapshot) {
-                args "--build-snapshot"
+            if (compilationTraceFilePath != null) {
+                args "--precompile", compilationTraceFilePath
             }
             if (extraFrontEndOptions != null) {
                 args "--extra-front-end-options", "${extraFrontEndOptions}"
@@ -514,7 +514,7 @@ class FlutterTask extends BaseFlutterTask {
 
             include "flutter_assets/**" // the working dir and its files
 
-            if (buildMode != 'debug' || buildSnapshot) {
+            if (buildMode != 'debug' || compilationTraceFilePath) {
                 if (buildSharedLibrary) {
                     include "app.so"
                 } else {

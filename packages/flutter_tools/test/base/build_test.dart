@@ -813,6 +813,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -836,6 +837,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -880,6 +882,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -910,6 +913,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -933,6 +937,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -976,6 +981,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -1005,6 +1011,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -1028,6 +1035,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -1071,6 +1079,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
