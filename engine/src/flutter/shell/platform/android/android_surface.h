@@ -33,6 +33,8 @@ class AndroidSurface {
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
+  virtual bool ResourceContextClearCurrent() = 0;
+
   virtual bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) = 0;
 };
 

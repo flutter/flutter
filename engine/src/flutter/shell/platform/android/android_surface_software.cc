@@ -52,6 +52,10 @@ bool AndroidSurfaceSoftware::ResourceContextMakeCurrent() {
   return false;
 }
 
+bool AndroidSurfaceSoftware::ResourceContextClearCurrent() {
+  return false;
+}
+
 std::unique_ptr<Surface> AndroidSurfaceSoftware::CreateGPUSurface() {
   if (!IsValid()) {
     return nullptr;
