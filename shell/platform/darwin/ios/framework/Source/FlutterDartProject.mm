@@ -19,10 +19,26 @@ static const char* kScriptSnapshotFileName = "snapshot_blob.bin";
 static const char* kVMKernelSnapshotFileName = "platform.dill";
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 
-static blink::Settings DefaultSettingsForProcess() {
+static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   auto command_line = shell::CommandLineFromNSProcessInfo();
 
-  // Settings passed in explicitly via command line arguments take priority.
+  // Precedence:
+  // 1. Settings from the specified NSBundle.
+  // 2. Settings passed explicitly via command-line arguments.
+  // 3. Settings from the NSBundle with the default bundle ID.
+  // 4. Settings from the main NSBundle and default values.
+
+  NSBundle* mainBundle = [NSBundle mainBundle];
+  NSBundle* engineBundle = [NSBundle bundleForClass:[FlutterViewController class]];
+
+  bool hasExplicitBundle = bundle != nil;
+  if (bundle == nil) {
+    bundle = [NSBundle bundleWithIdentifier:[FlutterDartProject defaultBundleIdentifier]];
+  }
+  if (bundle == nil) {
+    bundle = mainBundle;
+  }
+
   auto settings = shell::SettingsFromCommandLine(command_line);
 
   settings.task_observer_add = [](intptr_t key, fml::closure callback) {
@@ -38,18 +54,24 @@ static blink::Settings DefaultSettingsForProcess() {
 
   // Flutter ships the ICU data file in the the bundle of the engine. Look for it there.
   if (settings.icu_data_path.size() == 0) {
-    NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
-    NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
+    NSString* icuDataPath = [engineBundle pathForResource:@"icudtl" ofType:@"dat"];
     if (icuDataPath.length > 0) {
       settings.icu_data_path = icuDataPath.UTF8String;
     }
   }
 
   if (blink::DartVM::IsRunningPrecompiledCode()) {
-    // The application bundle could be specified in the Info.plist.
+    if (hasExplicitBundle) {
+      NSString* executablePath = bundle.executablePath;
+      if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {
+        settings.application_library_path = executablePath.UTF8String;
+      }
+    }
+
+    // No application bundle specified.  Try a known location from the main bundle's Info.plist.
     if (settings.application_library_path.size() == 0) {
-      NSString* libraryName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
-      NSString* libraryPath = [[NSBundle mainBundle] pathForResource:libraryName ofType:nil];
+      NSString* libraryName = [mainBundle objectForInfoDictionaryKey:@"FLTLibraryPath"];
+      NSString* libraryPath = [mainBundle pathForResource:libraryName ofType:@""];
       if (libraryPath.length > 0) {
         settings.application_library_path =
             [NSBundle bundleWithPath:libraryPath].executablePath.UTF8String;
@@ -60,7 +82,7 @@ static blink::Settings DefaultSettingsForProcess() {
     // Frameworks directory.
     if (settings.application_library_path.size() == 0) {
       NSString* applicationFrameworkPath =
-          [[NSBundle mainBundle] pathForResource:@"Frameworks/App.framework" ofType:@""];
+          [mainBundle pathForResource:@"Frameworks/App.framework" ofType:@""];
       if (applicationFrameworkPath.length > 0) {
         settings.application_library_path =
             [NSBundle bundleWithPath:applicationFrameworkPath].executablePath.UTF8String;
@@ -70,11 +92,8 @@ static blink::Settings DefaultSettingsForProcess() {
 
   // Checks to see if the flutter assets directory is already present.
   if (settings.assets_path.size() == 0) {
-    // The kernel assets will not be present in the Flutter frameworks bundle since it is not user
-    // editable. Instead, look inside the main bundle.
-    NSBundle* bundle = [NSBundle mainBundle];
-    NSString* assets_directory_name = [FlutterDartProject flutterAssetsName:bundle];
-    NSString* assetsPath = [bundle pathForResource:assets_directory_name ofType:@""];
+    NSString* assetsName = [FlutterDartProject flutterAssetsName:bundle];
+    NSString* assetsPath = [mainBundle pathForResource:assetsName ofType:@""];
 
     if (assetsPath.length > 0) {
       settings.assets_path = assetsPath.UTF8String;
@@ -136,15 +155,7 @@ static blink::Settings DefaultSettingsForProcess() {
 
   if (self) {
     _precompiledDartBundle.reset([bundle retain]);
-
-    _settings = DefaultSettingsForProcess();
-
-    if (bundle != nil) {
-      NSString* executablePath = _precompiledDartBundle.get().executablePath;
-      if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {
-        _settings.application_library_path = executablePath.UTF8String;
-      }
-    }
+    _settings = DefaultSettingsForProcess(bundle);
   }
 
   return self;
@@ -218,11 +229,6 @@ static blink::Settings DefaultSettingsForProcess() {
   return flutterAssetsName;
 }
 
-+ (NSString*)pathForFlutterAssetsFromBundle:(NSBundle*)bundle {
-  NSString* flutterAssetsName = [FlutterDartProject flutterAssetsName:bundle];
-  return [bundle pathForResource:flutterAssetsName ofType:nil];
-}
-
 + (NSString*)lookupKeyForAsset:(NSString*)asset {
   NSString* flutterAssetsName = [FlutterDartProject flutterAssetsName:[NSBundle mainBundle]];
   return [NSString stringWithFormat:@"%@/%@", flutterAssetsName, asset];
@@ -230,6 +236,10 @@ static blink::Settings DefaultSettingsForProcess() {
 
 + (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
   return [self lookupKeyForAsset:[NSString stringWithFormat:@"packages/%@/%@", package, asset]];
+}
+
++ (NSString*)defaultBundleIdentifier {
+  return @"io.flutter.flutter.app";
 }
 
 @end
