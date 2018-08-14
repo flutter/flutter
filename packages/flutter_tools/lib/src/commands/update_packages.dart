@@ -27,8 +27,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-beta', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
-  'flutter_gallery_assets': '0.1.4', // See //examples/flutter_gallery/pubspec.yaml
+  'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -236,7 +235,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           retry: false, // errors here are usually fatal since we're not hitting the network
         );
       } finally {
-        temporaryDirectory.deleteSync(recursive: true);
+        //temporaryDirectory.deleteSync(recursive: true);
       }
 
       // The transitive dependency tree for the fake package does not contain
@@ -1074,6 +1073,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     if (!dependency.pointsToSdk)
       dependency.describeForFakePubspec(result, overrides);
   result.write(overrides.toString());
+  //print('XXXX: ${result.toString()}');
   return result.toString();
 }
 
