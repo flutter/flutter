@@ -375,38 +375,47 @@ abstract class Finder {
   }
 }
 
-class _FirstFinder extends Finder {
-  _FirstFinder(this.parent);
+/// Applies additional filtering against a [parent] [Finder].
+abstract class ChainedFinder extends Finder {
+  /// Create a Finder chained against the candidates of another [Finder].
+  ChainedFinder(this.parent) : assert(parent != null);
 
+  /// Another [Finder] that will run first.
   final Finder parent;
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) => parent.apply(candidates);
+
+  @override
+  Iterable<Element> get allCandidates => parent.allCandidates;
+}
+
+class _FirstFinder extends ChainedFinder {
+  _FirstFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but first)';
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).first;
+    yield super.apply(candidates).first;
   }
 }
 
-class _LastFinder extends Finder {
-  _LastFinder(this.parent);
-
-  final Finder parent;
+class _LastFinder extends ChainedFinder {
+  _LastFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but last)';
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).last;
+    yield super.apply(candidates).last;
   }
 }
 
-class _IndexFinder extends Finder {
-  _IndexFinder(this.parent, this.index);
-
-  final Finder parent;
+class _IndexFinder extends ChainedFinder {
+  _IndexFinder(Finder parent, this.index) : super(parent);
 
   final int index;
 
@@ -415,14 +424,13 @@ class _IndexFinder extends Finder {
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).elementAt(index);
+    yield super.apply(candidates).elementAt(index);
   }
 }
 
-class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.alignment);
+class _HitTestableFinder extends ChainedFinder {
+  _HitTestableFinder(Finder parent, this.alignment) : super(parent);
 
-  final Finder parent;
   final Alignment alignment;
 
   @override
@@ -430,7 +438,7 @@ class _HitTestableFinder extends Finder {
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    for (final Element candidate in parent.apply(candidates)) {
+    for (final Element candidate in super.apply(candidates)) {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
