@@ -164,11 +164,12 @@ class ImageStream extends Diagnosticable {
     if (_completer != null)
       return _completer.removeListener(listener);
     assert(_listeners != null);
-    _listeners.remove(
-      _listeners.firstWhere((_ImageListenerPair listenerPair) {
-        return listenerPair.listener == listener;
-      })
-    );
+    for (int i = 0; i < _listeners.length; ++i) {
+      if (_listeners[i].listener == listener) {
+        _listeners.removeAt(i);
+        continue;
+      }
+    }
   }
 
   /// Returns an object which can be used with `==` to determine if this
@@ -259,11 +260,12 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// Stop listening for new concrete [ImageInfo] objects and errors from
   /// its associated [ImageErrorListener].
   void removeListener(ImageListener listener) {
-    _listeners.remove(
-      _listeners.firstWhere((_ImageListenerPair listenerPair) {
-        return listenerPair.listener == listener;
-      })
-    );
+    for (int i = 0; i < _listeners.length; ++i) {
+      if (_listeners[i].listener == listener) {
+        _listeners.removeAt(i);
+        continue;
+      }
+    }
   }
 
   /// Calls all the registered listeners to notify them of a new image.
