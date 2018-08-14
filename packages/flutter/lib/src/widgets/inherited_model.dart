@@ -209,7 +209,7 @@ class _Dependencies<T> extends InheritedDependencies {
   bool contains(T dependency) => values.contains(dependency);
 
   void add(T dependency) {
-    assert(isGlobal);
+    assert(!isGlobal);
     values.add(dependency);
   }
 }

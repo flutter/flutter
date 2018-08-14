@@ -4072,7 +4072,7 @@ class InheritedElement extends ProxyElement {
   @override
   InheritedWidget get widget => super.widget;
 
-  final Map<Element, InheritedDependencies> _dependents = <Element, InheritedDependencies>{};
+  final Map<Element, InheritedDependencies> _dependents = new HashMap<Element, InheritedDependencies>();
 
   @override
   void _updateInheritance() {
