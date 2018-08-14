@@ -144,9 +144,9 @@ void main() {
         final FlutterProject project = await aPluginProject();
         await project.ensureReadyForPlatformSpecificTooling();
         expectNotExists(project.ios.directory.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
-        expectNotExists(androidPluginRegistrant(project.android.directory.childDirectory('app')));
+        expectNotExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
         expectNotExists(project.ios.directory.childDirectory('Flutter').childFile('Generated.xcconfig'));
-        expectNotExists(project.android.directory.childFile('local.properties'));
+        expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
@@ -161,19 +161,19 @@ void main() {
       testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(androidPluginRegistrant(project.android.directory.childDirectory('app')));
+        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
       });
       testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.android.directory.childFile('local.properties'));
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.android.directory.childFile('settings.gradle'));
-        expectExists(project.android.directory.childFile('local.properties'));
-        expectExists(androidPluginRegistrant(project.android.directory.childDirectory('Flutter')));
+        expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('Flutter')));
       });
       testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
@@ -195,7 +195,7 @@ void main() {
         expect(project.isModule, isTrue);
         expect(project.android.isModule, isTrue);
         expect(project.ios.isModule, isTrue);
-        expect(project.android.directory.basename, '.android');
+        expect(project.android.hostAppGradleRoot.basename, '.android');
         expect(project.ios.directory.basename, '.ios');
       });
       testInMemory('is known for non-module', () async {
@@ -203,7 +203,7 @@ void main() {
         expect(project.isModule, isFalse);
         expect(project.android.isModule, isFalse);
         expect(project.ios.isModule, isFalse);
-        expect(project.android.directory.basename, 'android');
+        expect(project.android.hostAppGradleRoot.basename, 'android');
         expect(project.ios.directory.basename, 'ios');
       });
     });

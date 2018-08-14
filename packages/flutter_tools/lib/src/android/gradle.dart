@@ -44,7 +44,7 @@ final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
-  final File plugin = project.directory.childFile(
+  final File plugin = project.hostAppGradleRoot.childFile(
       fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
   if (plugin.existsSync()) {
     final String packageLine = plugin.readAsLinesSync().skip(4).first;
@@ -53,7 +53,7 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
     }
     return FlutterPluginVersion.v1;
   }
-  final File appGradle = project.directory.childFile(
+  final File appGradle = project.hostAppGradleRoot.childFile(
       fs.path.join('app', 'build.gradle'));
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
@@ -99,7 +99,7 @@ Future<GradleProject> _readGradleProject() async {
   try {
     final RunResult runResult = await runCheckedAsync(
       <String>[gradle, 'app:properties'],
-      workingDirectory: flutterProject.android.directory.path,
+      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
     final String properties = runResult.stdout.trim();
@@ -166,7 +166,7 @@ Future<String> _ensureGradle(FlutterProject project) async {
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
-  final Directory android = project.android.directory;
+  final Directory android = project.android.hostAppGradleRoot;
   final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
   String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
@@ -284,7 +284,7 @@ Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   final Status status = logger.startProgress('Running \'gradlew build\'...', expectSlowOperation: true);
   final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
-    workingDirectory: project.android.directory.path,
+    workingDirectory: project.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
   );
@@ -361,7 +361,7 @@ Future<Null> _buildGradleProjectV2(
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
     command,
-    workingDirectory: flutterProject.android.directory.path,
+    workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     allowReentrantFlutter: true,
     environment: _gradleEnv,
     filter: logger.isVerbose ? null : ndkMessageFilter,

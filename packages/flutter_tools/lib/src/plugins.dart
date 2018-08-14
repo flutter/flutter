@@ -105,7 +105,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   return oldContents != newContents;
 }
 
-/// Returns the contents of the `.flutter-plugins` file in [directory], or
+/// Returns the contents of the `.flutter-plugins` file in [project], or
 /// null if that file does not exist.
 String _readFlutterPluginsList(FlutterProject project) {
   return project.flutterPluginsFile.existsSync()
@@ -295,8 +295,7 @@ Future<void> injectPlugins(FlutterProject project) async {
   }
 }
 
-/// Returns whether the Flutter project at the specified [directory]
-/// has any plugin dependencies.
+/// Returns whether the specified Flutter [project] has any plugin dependencies.
 bool hasPlugins(FlutterProject project) {
   return _readFlutterPluginsList(project) != null;
 }
