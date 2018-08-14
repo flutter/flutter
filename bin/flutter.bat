@@ -126,29 +126,38 @@ GOTO :after_subroutine
       GOTO not_on_bot
       :on_bot
         SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
-        SET VERBOSITY=--verbosity=all
+        SET VERBOSITY=--verbosity=normal
       :not_on_bot
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
       IF "%PUB_CACHE%" == "" (
         IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
       )
+
+      SET /A total_tries=10
+      SET /A remaining_tries=%total_tries%-1
       :retry_pub_upgrade
-      CALL "%pub%" upgrade "%VERBOSITY%" --no-packages-dir
-      IF "%ERRORLEVEL%" NEQ "0" (
-        ECHO Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
-        timeout /t 5 /nobreak
+        ECHO Running pub upgrade...
+        CALL "%pub%" upgrade "%VERBOSITY%" --no-packages-dir
+        IF "%ERRORLEVEL%" EQU "0" goto :upgrade_succeeded
+        ECHO Error Unable to 'pub upgrade' flutter tool. Retrying in five seconds... (%remaining_tries% tries left)
+        timeout /t 5 /nobreak 2>NUL
+        SET /A remaining_tries-=1
+        IF "%remaining_tries%" EQU "0" GOTO upgrade_retries_exhausted
         GOTO :retry_pub_upgrade
-      )
+      :upgrade_retries_exhausted
+        SET exit_code=%ERRORLEVEL%
+        ECHO Error: 'pub upgrade' still failing after %total_tries% tries, giving up.
+        GOTO final_exit
+      :upgrade_succeeded
     ENDLOCAL
 
     POPD
 
-    :retry_dart_snapshot
     CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to create dart snapshot for flutter tool. Retrying...
-      timeout /t 5 /nobreak
-      GOTO :retry_dart_snapshot
+      ECHO Error: Unable to create dart snapshot for flutter tool.
+      SET exit_code=%ERRORLEVEL%
+      GOTO :final_exit
     )
     >"%stamp_path%" ECHO %revision%
 
@@ -172,4 +181,5 @@ IF "%exit_code%" EQU "253" (
   SET exit_code=%ERRORLEVEL%
 )
 
+:final_exit
 EXIT /B %exit_code%

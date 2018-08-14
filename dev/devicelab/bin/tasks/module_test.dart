@@ -31,6 +31,17 @@ Future<Null> main() async {
         );
       });
 
+      section('Add plugins');
+
+      final File pubspec = new File(path.join(directory.path, 'hello', 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  battery:\n  package_info:\n',
+      );
+      await pubspec.writeAsString(content, flush: true);
+
+
       section('Build Flutter module library archive');
 
       await inDirectory(new Directory(path.join(directory.path, 'hello', '.android')), () async {

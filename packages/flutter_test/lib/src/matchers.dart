@@ -304,6 +304,8 @@ Matcher matchesSemanticsData({
   String label,
   String hint,
   String value,
+  String increasedValue,
+  String decreasedValue,
   TextDirection textDirection,
   Rect rect,
   Size size,
@@ -447,6 +449,8 @@ Matcher matchesSemanticsData({
     label: label,
     hint: hint,
     value: value,
+    increasedValue: increasedValue,
+    decreasedValue: decreasedValue,
     actions: actions,
     flags: flags,
     textDirection: textDirection,
@@ -1514,6 +1518,8 @@ class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
     this.label,
     this.value,
+    this.increasedValue,
+    this.decreasedValue,
     this.hint,
     this.flags,
     this.actions,
@@ -1527,6 +1533,8 @@ class _MatchesSemanticsData extends Matcher {
   final String label;
   final String value;
   final String hint;
+  final String increasedValue;
+  final String decreasedValue;
   final SemanticsHintOverrides hintOverrides;
   final List<SemanticsAction> actions;
   final List<CustomSemanticsAction> customActions;
@@ -1544,6 +1552,10 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with value: $value ');
     if (hint != null)
       description.add('with hint: $hint ');
+    if (increasedValue != null)
+      description.add('with increasedValue: $increasedValue');
+    if (decreasedValue != null)
+      description.add('with decreasedValue: $decreasedValue');
     if (actions != null)
       description.add('with actions:').addDescriptionOf(actions);
     if (flags != null)
@@ -1573,6 +1585,10 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'hint was: ${data.hint}');
     if (value != null && value != data.value)
       return failWithDescription(matchState, 'value was: ${data.value}');
+    if (increasedValue != null && increasedValue != data.increasedValue)
+      return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
+    if (decreasedValue != null && decreasedValue != data.decreasedValue)
+      return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
     if (rect != null && rect != data.rect)

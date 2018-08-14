@@ -285,8 +285,12 @@ class _Compiler {
   }
 
   Future<dynamic> shutdown() async {
-    await compiler.shutdown();
-    compiler = null;
+    // Check for null in case this instance is shut down before the
+    // lazily-created compiler has been created.
+    if (compiler != null) {
+      await compiler.shutdown();
+      compiler = null;
+    }
   }
 
   static Future<T> handleTimeout<T>(Future<T> value, String path) {
