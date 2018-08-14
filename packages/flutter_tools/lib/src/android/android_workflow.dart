@@ -91,7 +91,8 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
           'Install Android Studio from: https://developer.android.com/studio/index.html\n'
           'On first launch it will assist you in installing the Android SDK components.\n'
           '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location and add it to your PATH.'
+          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.\n'
+          'And you may want to add it to your PATH environment variable.\n'
         ));
       }
 
