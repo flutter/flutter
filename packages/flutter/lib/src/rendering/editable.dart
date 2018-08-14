@@ -428,6 +428,7 @@ class RenderEditable extends RenderBox {
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
   set hasFocus(bool value) {
+    debugPrint(value.toString() + " and " + this.hashCode.toString());
     assert(value != null);
     if (_hasFocus == value)
       return;

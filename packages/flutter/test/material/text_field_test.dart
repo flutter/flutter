@@ -2062,7 +2062,7 @@ void main() {
                     child: TextField(
                       controller: c2,
                       maxLines: 3,
-                    ),
+//                    ),
                   ) ,
                 ),
               ),
@@ -2070,10 +2070,10 @@ void main() {
           ],
         ),
     );
-    debugger(when:true);
+//    debugger(when:true);
     await tester.idle();
     await tester.tap(find.byType(TextField).first);
-    await tester.showKeyboard(find.byType(TextField).first);
+//    await tester.showKeyboard(find.byType(TextField).first);
 
     const String testValue = 'a big house';
     await tester.enterText(find.byType(TextField).first, testValue);
