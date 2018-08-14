@@ -12,6 +12,15 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
+REM Execute a copy of the script to prevent modifications to a running script,
+REM see https://github.com/flutter/flutter/issues/14578 for details.
+IF "%~n0" == "flutter-copy" GOTO run-flutter
+COPY "%~dpnx0" "%~dp0flutter-copy.bat" 1>NUL
+"%~dp0flutter-copy.bat" %*
+REM The call above REPLACES the flutter.bat process with the flutter-copy.bat process.
+
+:run-flutter
+
 SETLOCAL ENABLEDELAYEDEXPANSION
 
 FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi

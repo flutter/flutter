@@ -20,6 +20,7 @@
 .vscode/
 
 # Flutter repo-specific
+/bin/flutter-copy.bat
 /bin/cache/
 /bin/mingit/
 /dev/benchmarks/mega_gallery/
