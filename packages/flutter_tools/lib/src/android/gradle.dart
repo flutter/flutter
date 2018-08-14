@@ -200,12 +200,11 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
   }
 }
 
-/// Overwrite android/local.properties in the specified Flutter project, if needed.
+/// Overwrite local.properties in the specified Flutter project's Android
+/// sub-project, if needed.
 ///
-/// Throws, if `pubspec.yaml` or Android SDK cannot be located.
-///
-/// If [requireSdk] is `true` this will fail with a tool-exit if no Android Sdk
-/// is found.
+/// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
+/// this will fail with a [ToolExit].
 Future<void> updateLocalProperties({
   @required FlutterProject project,
   BuildInfo buildInfo,
@@ -215,7 +214,7 @@ Future<void> updateLocalProperties({
     throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
   }
 
-  final File localProperties = project.androidLocalPropertiesFile;
+  final File localProperties = project.android.localPropertiesFile;
   bool changed = false;
 
   SettingsFile settings;
@@ -361,11 +360,11 @@ Future<Null> _buildGradleProjectV2(
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
-      command,
-      workingDirectory: flutterProject.android.directory.path,
-      allowReentrantFlutter: true,
-      environment: _gradleEnv,
-      filter: logger.isVerbose ? null : ndkMessageFilter,
+    command,
+    workingDirectory: flutterProject.android.directory.path,
+    allowReentrantFlutter: true,
+    environment: _gradleEnv,
+    filter: logger.isVerbose ? null : ndkMessageFilter,
   );
   status.stop();
 

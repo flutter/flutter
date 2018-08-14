@@ -43,6 +43,9 @@ void main() {
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
+    expect(data.accessibleNavigation, false);
+    expect(data.invertColors, false);
+    expect(data.disableAnimations, false);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -54,6 +57,9 @@ void main() {
     expect(copied.padding, data.padding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
+    expect(copied.accessibleNavigation, data.accessibleNavigation);
+    expect(copied.invertColors, data.invertColors);
+    expect(copied.disableAnimations, data.disableAnimations);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -65,6 +71,9 @@ void main() {
       padding: const EdgeInsets.all(9.10938),
       viewInsets: const EdgeInsets.all(1.67262),
       alwaysUse24HourFormat: true,
+      accessibleNavigation: true,
+      invertColors: true,
+      disableAnimations: true,
     );
     expect(copied.size, const Size(3.14, 2.72));
     expect(copied.devicePixelRatio, 1.41);
@@ -72,6 +81,9 @@ void main() {
     expect(copied.padding, const EdgeInsets.all(9.10938));
     expect(copied.viewInsets, const EdgeInsets.all(1.67262));
     expect(copied.alwaysUse24HourFormat, true);
+    expect(copied.accessibleNavigation, true);
+    expect(copied.invertColors, true);
+    expect(copied.disableAnimations, true);
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -91,6 +103,9 @@ void main() {
          padding: padding,
          viewInsets: viewInsets,
          alwaysUse24HourFormat: true,
+         accessibleNavigation: true,
+         invertColors: true,
+         disableAnimations: true,
        ),
        child: new Builder(
          builder: (BuildContext context) {
@@ -118,6 +133,9 @@ void main() {
    expect(unpadded.padding, EdgeInsets.zero);
    expect(unpadded.viewInsets, viewInsets);
    expect(unpadded.alwaysUse24HourFormat, true);
+   expect(unpadded.accessibleNavigation, true);
+   expect(unpadded.invertColors, true);
+   expect(unpadded.disableAnimations, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -137,6 +155,9 @@ void main() {
           padding: padding,
           viewInsets: viewInsets,
           alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
         ),
         child: new Builder(
           builder: (BuildContext context) {
@@ -164,6 +185,9 @@ void main() {
     expect(unpadded.padding, padding);
     expect(unpadded.viewInsets, EdgeInsets.zero);
     expect(unpadded.alwaysUse24HourFormat, true);
+    expect(unpadded.accessibleNavigation, true);
+    expect(unpadded.invertColors, true);
+    expect(unpadded.disableAnimations, true);
   });
 
  testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {

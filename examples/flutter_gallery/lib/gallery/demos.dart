@@ -430,6 +430,13 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
     ),
     new GalleryDemo(
+      title: 'Segmented Control',
+      icon: GalleryIcons.tabs,
+      category: _kCupertinoComponents,
+      routeName: CupertinoSegmentedControlDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoSegmentedControlDemo(),
+    ),
+    new GalleryDemo(
       title: 'Sliders',
       icon: GalleryIcons.sliders,
       category: _kCupertinoComponents,

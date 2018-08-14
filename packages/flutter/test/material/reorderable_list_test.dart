@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -29,16 +30,19 @@ void main() {
       );
     }
 
-    Widget build({Widget header, Axis scrollDirection = Axis.vertical}) {
+    Widget build({Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr}) {
       return new MaterialApp(
-        home: new SizedBox(
-          height: itemHeight * 10,
-          width: itemHeight * 10,
-          child: new ReorderableListView(
-            header: header,
-            children: listItems.map(listItemToWidget).toList(),
-            scrollDirection: scrollDirection,
-            onReorder: onReorder,
+        home: new Directionality(
+          textDirection: textDirection,
+          child: new SizedBox(
+            height: itemHeight * 10,
+            width: itemHeight * 10,
+            child: new ReorderableListView(
+              header: header,
+              children: listItems.map(listItemToWidget).toList(),
+              scrollDirection: scrollDirection,
+              onReorder: onReorder,
+            ),
           ),
         ),
       );
@@ -169,7 +173,6 @@ void main() {
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
         expect(getContentElement().size.height, kDraggingListHeight);
-
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
@@ -220,6 +223,134 @@ void main() {
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
       });
+
+
+      group('Accessibility (a11y/Semantics)', () {
+        Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
+          final Semantics semantics = find.ancestor(
+            of: find.byKey(new Key(listItems[index])),
+            matching: find.byType(Semantics),
+          ).evaluate().first.widget;
+          return semantics.properties.customSemanticsActions;
+        }
+
+        const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
+        const CustomSemanticsAction moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+        const CustomSemanticsAction moveUp = CustomSemanticsAction(label: 'Move up');
+        const CustomSemanticsAction moveDown = CustomSemanticsAction(label: 'Move down');
+
+        testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
+          // The a11y actions for a vertical list are the same in LTR and RTL modes.
+          final SemanticsHandle handle = tester.ensureSemantics();
+          for (TextDirection direction in TextDirection.values) {
+            await tester.pumpWidget(build());
+
+            // The first item can be moved down or to the end.
+            final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+            expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions with $direction.');
+            expect(firstSemanticsActions.containsKey(moveToStart), false, reason: 'The first item cannot `Move to the start` with $direction.');
+            expect(firstSemanticsActions.containsKey(moveUp), false, reason: 'The first item cannot `Move up` with $direction.');
+            expect(firstSemanticsActions.containsKey(moveDown), true, reason: 'The first item should be able to `Move down` with $direction.');
+            expect(firstSemanticsActions.containsKey(moveToEnd), true, reason: 'The first item should be able to `Move to the end` with $direction.');
+
+            // Items in the middle can be moved to the start, end, up or down.
+            for (int i = 1; i < listItems.length - 1; i += 1) {
+              final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
+              expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions with $direction.');
+              expect(ithSemanticsActions.containsKey(moveToStart), true, reason: 'List item $i should be able to `Move to the start` with $direction.');
+              expect(ithSemanticsActions.containsKey(moveUp), true, reason: 'List item $i should be able to `Move up` with $direction.');
+              expect(ithSemanticsActions.containsKey(moveDown), true, reason: 'List item $i should be able to `Move down` with $direction.');
+              expect(ithSemanticsActions.containsKey(moveToEnd), true, reason: 'List item $i should be able to `Move to the end` with $direction.');
+            }
+
+            // The last item can be moved up or to the start.
+            final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+            expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions with $direction.');
+            expect(lastSemanticsActions.containsKey(moveToStart), true, reason: 'The last item should be able to `Move to the start` with $direction.');
+            expect(lastSemanticsActions.containsKey(moveUp), true, reason: 'The last item should be able to `Move up` with $direction.');
+            expect(lastSemanticsActions.containsKey(moveDown), false, reason: 'The last item cannot `Move down` with $direction.');
+            expect(lastSemanticsActions.containsKey(moveToEnd), false, reason: 'The last item cannot `Move to the end` with $direction.');
+          }
+          handle.dispose();
+        });
+
+        testWidgets('First item accessibility (a11y) actions work', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to end: move Item 1 to the end of the list.
+          await tester.pumpWidget(build());
+          Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+          firstSemanticsActions[moveToEnd]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+
+          // Test out move after: move Item 2 (the current first item) one space down.
+          await tester.pumpWidget(build());
+          firstSemanticsActions = getSemanticsActions(0);
+          firstSemanticsActions[moveDown]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
+
+          handle.dispose();
+        });
+
+        testWidgets('Middle item accessibility (a11y) actions work', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to end: move Item 2 to the end of the list.
+          await tester.pumpWidget(build());
+          Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
+          middleSemanticsActions[moveToEnd]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+          // Test out move after: move Item 3 (the current second item) one space down.
+          await tester.pumpWidget(build());
+          middleSemanticsActions = getSemanticsActions(1);
+          middleSemanticsActions[moveDown]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
+
+          // Test out move after: move Item 3 (the current third item) one space up.
+          await tester.pumpWidget(build());
+          middleSemanticsActions = getSemanticsActions(2);
+          middleSemanticsActions[moveUp]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+          // Test out move to start: move Item 4 (the current third item) to the start of the list.
+          await tester.pumpWidget(build());
+          middleSemanticsActions = getSemanticsActions(2);
+          middleSemanticsActions[moveToStart]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+
+          handle.dispose();
+        });
+
+        testWidgets('Last item accessibility (a11y) actions work', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to start: move Item 4 to the start of the list.
+          await tester.pumpWidget(build());
+          Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          lastSemanticsActions[moveToStart]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
+
+          // Test out move up: move Item 3 (the current last item) one space up.
+          await tester.pumpWidget(build());
+          lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          lastSemanticsActions[moveUp]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+
+          handle.dispose();
+        });
+      });
     });
 
     group('in horizontal mode', () {
@@ -268,7 +399,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Header Text'), findsOneWidget);
         expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
-
         await tester.pumpWidget(build(header: const Text('Header Text'), scrollDirection: Axis.horizontal));
         await longPressDrag(
           tester,
@@ -340,7 +470,6 @@ void main() {
         await tester.pump(kLongPressTimeout + kPressTimeout);
         await tester.pumpAndSettle();
         expect(getContentElement().size.width, kDraggingListWidth);
-
         // Move it
         await drag.moveTo(tester.getCenter(find.text('Last item')));
         await tester.pumpAndSettle();
@@ -394,6 +523,250 @@ void main() {
         expect(findState(const Key('C')).checked, false);
         expect(findState(const Key('A')).checked, true);
       });
+
+      group('Accessibility (a11y/Semantics)', () {
+        Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
+          final Semantics semantics = find.ancestor(
+            of: find.byKey(new Key(listItems[index])),
+            matching: find.byType(Semantics),
+          ).evaluate().first.widget;
+          return semantics.properties.customSemanticsActions;
+        }
+
+        const CustomSemanticsAction moveToStart = CustomSemanticsAction(label: 'Move to the start');
+        const CustomSemanticsAction moveToEnd = CustomSemanticsAction(label: 'Move to the end');
+        const CustomSemanticsAction moveLeft = CustomSemanticsAction(label: 'Move left');
+        const CustomSemanticsAction moveRight = CustomSemanticsAction(label: 'Move right');
+
+        testWidgets('Provides the correct accessibility actions in LTR mode', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+
+          // The first item can be moved right or to the end.
+          final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+          expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions.');
+          expect(firstSemanticsActions.containsKey(moveToStart), false, reason: 'The first item cannot `Move to the start`.');
+          expect(firstSemanticsActions.containsKey(moveLeft), false, reason: 'The first item cannot `Move left`.');
+          expect(firstSemanticsActions.containsKey(moveRight), true, reason: 'The first item should be able to `Move right`.');
+          expect(firstSemanticsActions.containsKey(moveToEnd), true, reason: 'The first item should be able to `Move to the end`.');
+
+          // Items in the middle can be moved to the start, end, left or right.
+          for (int i = 1; i < listItems.length - 1; i += 1) {
+            final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
+            expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions.');
+            expect(ithSemanticsActions.containsKey(moveToStart), true, reason: 'List item $i should be able to `Move to the start`.');
+            expect(ithSemanticsActions.containsKey(moveLeft), true, reason: 'List item $i should be able to `Move left`.');
+            expect(ithSemanticsActions.containsKey(moveRight), true, reason: 'List item $i should be able to `Move right`.');
+            expect(ithSemanticsActions.containsKey(moveToEnd), true, reason: 'List item $i should be able to `Move to the end`.');
+          }
+
+          // The last item can be moved left or to the start.
+          final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions.');
+          expect(lastSemanticsActions.containsKey(moveToStart), true, reason: 'The last item should be able to `Move to the start`.');
+          expect(lastSemanticsActions.containsKey(moveLeft), true, reason: 'The last item should be able to `Move left`.');
+          expect(lastSemanticsActions.containsKey(moveRight), false, reason: 'The last item cannot `Move right`.');
+          expect(lastSemanticsActions.containsKey(moveToEnd), false, reason: 'The last item cannot `Move to the end`.');
+          handle.dispose();
+        });
+
+        testWidgets('Provides the correct accessibility actions in Right-To-Left directionality', (WidgetTester tester) async {
+          // In RTL mode, the right is the start and the left is the end.
+          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+          final SemanticsHandle handle = tester.ensureSemantics();
+
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+
+          // The first item can be moved right or to the end.
+          final Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+          expect(firstSemanticsActions.length, 2, reason: 'The first list item should have 2 custom actions.');
+          expect(firstSemanticsActions.containsKey(moveToStart), false, reason: 'The first item cannot `Move to the start`.');
+          expect(firstSemanticsActions.containsKey(moveRight), false, reason: 'The first item cannot `Move right`.');
+          expect(firstSemanticsActions.containsKey(moveLeft), true, reason: 'The first item should be able to `Move left`.');
+          expect(firstSemanticsActions.containsKey(moveToEnd), true, reason: 'The first item should be able to `Move to the end`.');
+
+          // Items in the middle can be moved to the start, end, left or right.
+          for (int i = 1; i < listItems.length - 1; i += 1) {
+            final Map<CustomSemanticsAction, VoidCallback> ithSemanticsActions = getSemanticsActions(i);
+            expect(ithSemanticsActions.length, 4, reason: 'List item $i should have 4 custom actions.');
+            expect(ithSemanticsActions.containsKey(moveToStart), true, reason: 'List item $i should be able to `Move to the start`.');
+            expect(ithSemanticsActions.containsKey(moveRight), true, reason: 'List item $i should be able to `Move right`.');
+            expect(ithSemanticsActions.containsKey(moveLeft), true, reason: 'List item $i should be able to `Move left`.');
+            expect(ithSemanticsActions.containsKey(moveToEnd), true, reason: 'List item $i should be able to `Move to the end`.');
+          }
+
+          // The last item can be moved left or to the start.
+          final Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          expect(lastSemanticsActions.length, 2, reason: 'The last list item should have 2 custom actions.');
+          expect(lastSemanticsActions.containsKey(moveToStart), true, reason: 'The last item should be able to `Move to the start`.');
+          expect(lastSemanticsActions.containsKey(moveRight), true, reason: 'The last item should be able to `Move right`.');
+          expect(lastSemanticsActions.containsKey(moveLeft), false, reason: 'The last item cannot `Move left`.');
+          expect(lastSemanticsActions.containsKey(moveToEnd), false, reason: 'The last item cannot `Move to the end`.');
+          handle.dispose();
+        });
+
+        testWidgets('First item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to end: move Item 1 to the end of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+          firstSemanticsActions[moveToEnd]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+
+          // Test out move after: move Item 2 (the current first item) one space to the right.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          firstSemanticsActions = getSemanticsActions(0);
+          firstSemanticsActions[moveRight]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
+
+          handle.dispose();
+        });
+
+        testWidgets('First item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
+          // In RTL mode, the right is the start and the left is the end.
+          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to end: move Item 1 to the end of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          Map<CustomSemanticsAction, VoidCallback> firstSemanticsActions = getSemanticsActions(0);
+          firstSemanticsActions[moveToEnd]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 2', 'Item 3', 'Item 4', 'Item 1']));
+
+          // Test out move after: move Item 2 (the current first item) one space to the left.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          firstSemanticsActions = getSemanticsActions(0);
+          firstSemanticsActions[moveLeft]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 3', 'Item 2', 'Item 4', 'Item 1']));
+
+          handle.dispose();
+        });
+
+        testWidgets('Middle item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to end: move Item 2 to the end of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
+          middleSemanticsActions[moveToEnd]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+          // Test out move after: move Item 3 (the current second item) one space to the right.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          middleSemanticsActions = getSemanticsActions(1);
+          middleSemanticsActions[moveRight]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
+
+          // Test out move after: move Item 3 (the current third item) one space to the left.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          middleSemanticsActions = getSemanticsActions(2);
+          middleSemanticsActions[moveLeft]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+          // Test out move to start: move Item 4 (the current third item) to the start of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          middleSemanticsActions = getSemanticsActions(2);
+          middleSemanticsActions[moveToStart]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+
+          handle.dispose();
+        });
+
+        testWidgets('Middle item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
+          // In RTL mode, the right is the start and the left is the end.
+          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to end: move Item 2 to the end of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          Map<CustomSemanticsAction, VoidCallback> middleSemanticsActions = getSemanticsActions(1);
+          middleSemanticsActions[moveToEnd]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+          // Test out move after: move Item 3 (the current second item) one space to the left.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          middleSemanticsActions = getSemanticsActions(1);
+          middleSemanticsActions[moveLeft]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 4', 'Item 3', 'Item 2']));
+
+          // Test out move after: move Item 3 (the current third item) one space to the right.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          middleSemanticsActions = getSemanticsActions(2);
+          middleSemanticsActions[moveRight]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 1', 'Item 3', 'Item 4', 'Item 2']));
+
+          // Test out move to start: move Item 4 (the current third item) to the start of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          middleSemanticsActions = getSemanticsActions(2);
+          middleSemanticsActions[moveToStart]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+
+          handle.dispose();
+        });
+
+        testWidgets('Last item accessibility (a11y) actions work in LTR mode', (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to start: move Item 4 to the start of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          lastSemanticsActions[moveToStart]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
+
+          // Test out move before: move Item 3 (the current last item) one space to the left.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal));
+          lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          lastSemanticsActions[moveLeft]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+
+          handle.dispose();
+        });
+
+        testWidgets('Last item accessibility (a11y) actions work in Right-To-Left directionality', (WidgetTester tester) async {
+          // In RTL mode, the right is the start and the left is the end.
+          // The array representation is unchanged (LTR), but the direction of the motion actions is reversed.
+          final SemanticsHandle handle = tester.ensureSemantics();
+          expect(listItems, orderedEquals(originalListItems));
+
+          // Test out move to start: move Item 4 to the start of the list.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          Map<CustomSemanticsAction, VoidCallback> lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          lastSemanticsActions[moveToStart]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 2', 'Item 3']));
+
+          // Test out move before: move Item 3 (the current last item) one space to the right.
+          await tester.pumpWidget(build(scrollDirection: Axis.horizontal, textDirection: TextDirection.rtl));
+          lastSemanticsActions = getSemanticsActions(listItems.length - 1);
+          lastSemanticsActions[moveRight]();
+          await tester.pumpAndSettle();
+          expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
+
+          handle.dispose();
+        });
+      });
+
     });
 
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
