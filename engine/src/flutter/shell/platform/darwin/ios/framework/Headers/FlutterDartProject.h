@@ -43,6 +43,12 @@ FLUTTER_EXPORT
  */
 + (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
 
+/**
+ Returns the default identifier for the bundle where we expect to find the Flutter Dart
+ application.
+ */
++ (NSString*)defaultBundleIdentifier;
+
 @end
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_
