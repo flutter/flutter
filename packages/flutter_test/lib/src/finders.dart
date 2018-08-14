@@ -375,10 +375,17 @@ abstract class Finder {
   }
 }
 
-class _FirstFinder extends Finder {
-  _FirstFinder(this.parent);
+abstract class ChainedFinder extends Finder {
+  ChainedFinder(this.parent) : assert(parent != null);
 
   final Finder parent;
+
+  @override
+  Iterable<Element> get allCandidates => parent.allCandidates;
+}
+
+class _FirstFinder extends ChainedFinder {
+  _FirstFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but first)';
@@ -389,10 +396,8 @@ class _FirstFinder extends Finder {
   }
 }
 
-class _LastFinder extends Finder {
-  _LastFinder(this.parent);
-
-  final Finder parent;
+class _LastFinder extends ChainedFinder {
+  _LastFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but last)';
@@ -403,10 +408,8 @@ class _LastFinder extends Finder {
   }
 }
 
-class _IndexFinder extends Finder {
-  _IndexFinder(this.parent, this.index);
-
-  final Finder parent;
+class _IndexFinder extends ChainedFinder {
+  _IndexFinder(Finder parent, this.index) : super(parent);
 
   final int index;
 
@@ -419,10 +422,9 @@ class _IndexFinder extends Finder {
   }
 }
 
-class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.alignment);
+class _HitTestableFinder extends ChainedFinder {
+  _HitTestableFinder(Finder parent, this.alignment) : super(parent);
 
-  final Finder parent;
   final Alignment alignment;
 
   @override
