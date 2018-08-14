@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed

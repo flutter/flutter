@@ -7,7 +7,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
-import 'package:test/test.dart';
+
+import 'common.dart';
 
 void main() {
   const ProcessManager processManager = LocalProcessManager();
