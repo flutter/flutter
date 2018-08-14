@@ -5,9 +5,10 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:test/test.dart';
+
 import 'package:vm_service_client/vm_service_client.dart';
 
+import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
@@ -44,7 +45,7 @@ void main() {
       final VMIsolate isolate = await _flutter.breakAt(
           new Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
-      expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+      expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
       // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
     }, skip: !platform.isLinux);
   }, timeout: const Timeout.factor(3));

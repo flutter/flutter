@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'image_data.dart';
 

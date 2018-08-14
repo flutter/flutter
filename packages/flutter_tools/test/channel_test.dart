@@ -10,7 +10,6 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:process/process.dart';
 
 import 'src/common.dart';

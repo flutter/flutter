@@ -10,8 +10,12 @@ import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
+
+/// A matcher that compares the type of the actual value to the type argument T.
+Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
@@ -138,7 +142,7 @@ void main() {
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsA(const isInstanceOf<DriverError>()));
+            throwsA(isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
@@ -158,7 +162,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the tap command', () async {
@@ -177,7 +181,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.getText(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the getText command', () async {
@@ -200,7 +204,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.waitFor(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the waitFor command', () async {
