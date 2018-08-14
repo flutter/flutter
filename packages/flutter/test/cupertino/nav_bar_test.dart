@@ -318,11 +318,11 @@ void main() {
               new CupertinoSliverNavigationBar(
                 middle: new ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 200.0),
-                  child: new SegmentedControl<int>(
+                  child: new CupertinoSegmentedControl<int>(
                     key: segmentedControlsKey,
                     children: const <int, Widget>{
-                      0: const Center(child: const Text('Option A')),
-                      1: const Center(child: const Text('Option B')),
+                      0: const Text('Option A'),
+                      1: const Text('Option B'),
                     },
                     onValueChanged: (int selected) { },
                     groupValue: 0,
@@ -449,7 +449,7 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
     debugDumpApp();
 
     expect(find.byType(CupertinoButton), findsOneWidget);
@@ -465,23 +465,22 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.byType(CupertinoButton), findsNWidgets(2));
-    expect(find.text('Close'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, 'Close'), findsOneWidget);
 
     // Test popping goes back correctly.
     await tester.tap(find.text('Close'));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Page 2'), findsOneWidget);
 
     await tester.tap(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Home page'), findsOneWidget);
   });
