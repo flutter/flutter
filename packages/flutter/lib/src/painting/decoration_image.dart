@@ -357,6 +357,7 @@ void paintImage({
   Rect centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
+  bool invert = false,
 }) {
   assert(canvas != null);
   assert(image != null);

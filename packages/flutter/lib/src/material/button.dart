@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui'as ui show defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -267,7 +268,7 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.padding,
     this.materialTapTargetSize,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     @required this.onPressed,
     this.child
   }) : assert(clipBehavior != null), super(key: key);
