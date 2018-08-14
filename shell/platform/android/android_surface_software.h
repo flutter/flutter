@@ -27,6 +27,9 @@ class AndroidSurfaceSoftware final : public AndroidSurface,
   bool ResourceContextMakeCurrent() override;
 
   // |shell::AndroidSurface|
+  bool ResourceContextClearCurrent() override;
+
+  // |shell::AndroidSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
   // |shell::AndroidSurface|

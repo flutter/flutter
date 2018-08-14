@@ -65,6 +65,10 @@ bool AndroidSurfaceVulkan::ResourceContextMakeCurrent() {
   return false;
 }
 
+bool AndroidSurfaceVulkan::ResourceContextClearCurrent() {
+  return false;
+}
+
 // |shell::AndroidSurface|
 bool AndroidSurfaceVulkan::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> window) {

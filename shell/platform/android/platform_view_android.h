@@ -102,6 +102,9 @@ class PlatformViewAndroid final : public PlatformView {
   // |shell::PlatformView|
   sk_sp<GrContext> CreateResourceContext() const override;
 
+  // |shell::PlatformView|
+  void ReleaseResourceContext() const override;
+
   void InstallFirstFrameCallback();
 
   void FireFirstFrameCallback();

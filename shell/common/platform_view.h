@@ -88,6 +88,10 @@ class PlatformView {
   // non-platform task runner.
   virtual sk_sp<GrContext> CreateResourceContext() const;
 
+  // Unlike all other methods on the platform view, this one may be called on a
+  // non-platform task runner.
+  virtual void ReleaseResourceContext() const;
+
   fml::WeakPtr<PlatformView> GetWeakPtr() const;
 
   virtual void UpdateSemantics(blink::SemanticsNodeUpdates updates,

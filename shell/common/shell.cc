@@ -314,11 +314,15 @@ Shell::~Shell() {
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetIOTaskRunner(),
-      fml::MakeCopyable(
-          [io_manager = std::move(io_manager_), &io_latch]() mutable {
-            io_manager.reset();
-            io_latch.Signal();
-          }));
+      fml::MakeCopyable([io_manager = std::move(io_manager_),
+                         platform_view = platform_view_.get(),
+                         &io_latch]() mutable {
+        io_manager.reset();
+        if (platform_view) {
+          platform_view->ReleaseResourceContext();
+        }
+        io_latch.Signal();
+      }));
 
   io_latch.Wait();
 

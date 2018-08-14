@@ -73,6 +73,8 @@ sk_sp<GrContext> PlatformView::CreateResourceContext() const {
   return nullptr;
 }
 
+void PlatformView::ReleaseResourceContext() const {}
+
 fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }

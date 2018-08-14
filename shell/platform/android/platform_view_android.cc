@@ -385,6 +385,13 @@ sk_sp<GrContext> PlatformViewAndroid::CreateResourceContext() const {
   return resource_context;
 }
 
+// |shell::PlatformView|
+void PlatformViewAndroid::ReleaseResourceContext() const {
+  if (android_surface_) {
+    android_surface_->ResourceContextClearCurrent();
+  }
+}
+
 void PlatformViewAndroid::InstallFirstFrameCallback() {
   // On Platform Task Runner.
   SetNextFrameCallback(
