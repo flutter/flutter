@@ -4,4 +4,4 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 description: An empty package
 homepage: http://flutter.io
 environment:
-  sdk: '>=1.8.0 <2.0.0'
+  sdk: '>=1.8.0 <3.0.0'
