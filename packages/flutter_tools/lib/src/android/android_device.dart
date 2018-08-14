@@ -39,6 +39,7 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'samsungexynos7870': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
+  'samsungexynos9810': _HardwareType.physical,
 };
 
 class AndroidDevices extends PollingDeviceDiscovery {
@@ -374,14 +375,15 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
+      final FlutterProject project = await FlutterProject.current();
       await buildApk(
-          project: new FlutterProject(fs.currentDirectory),
+          project: project,
           target: mainPath,
           buildInfo: buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = await AndroidApk.fromAndroidProject(new FlutterProject(fs.currentDirectory).android);
+      package = await AndroidApk.fromAndroidProject(project.android);
     }
 
     printTrace("Stopping app '${package.name}' on $name.");

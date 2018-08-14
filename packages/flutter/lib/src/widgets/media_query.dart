@@ -43,6 +43,9 @@ class MediaQueryData {
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
+    this.accessibleNavigation = false,
+    this.invertColors = false,
+    this.disableAnimations = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -57,6 +60,9 @@ class MediaQueryData {
       textScaleFactor = window.textScaleFactor,
       padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.accessibilityFeatures.accessibleNavigation,
+      disableAnimations = window.accessibilityFeatures.disableAnimations,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -120,6 +126,33 @@ class MediaQueryData {
   ///   formatting.
   final bool alwaysUse24HourFormat;
 
+  /// Whether the user is using an accessibility service like TalkBack or
+  /// VoiceOver to interact with the application.
+  ///
+  /// When this setting is true, features such as timeouts should be disabled or
+  /// have minimum durations increased.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool accessibleNavigation;
+
+  /// Whether the device is inverting the colors of the platform.
+  ///
+  /// This flag is currently only updated on iOS devices.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool invertColors;
+
+  /// Whether the platform is requesting that animations be disabled or reduced
+  /// as much as possible.
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///
+  final bool disableAnimations;
+
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
@@ -134,6 +167,9 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
+    bool disableAnimations,
+    bool invertColors,
+    bool accessibleNavigation,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
@@ -142,6 +178,9 @@ class MediaQueryData {
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      invertColors: invertColors ?? this.invertColors,
+      disableAnimations: disableAnimations ?? this.disableAnimations,
+      accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
     );
   }
 
@@ -179,6 +218,9 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      disableAnimations: disableAnimations,
+      invertColors: invertColors,
+      accessibleNavigation: accessibleNavigation,
     );
   }
 
@@ -214,6 +256,9 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      disableAnimations: disableAnimations,
+      invertColors: invertColors,
+      accessibleNavigation: accessibleNavigation,
     );
   }
 
@@ -227,11 +272,26 @@ class MediaQueryData {
         && typedOther.textScaleFactor == textScaleFactor
         && typedOther.padding == padding
         && typedOther.viewInsets == viewInsets
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat;
+        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && typedOther.disableAnimations == disableAnimations
+        && typedOther.invertColors == invertColors
+        && typedOther.accessibleNavigation == accessibleNavigation;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets, alwaysUse24HourFormat);
+  int get hashCode {
+    return hashValues(
+      size,
+      devicePixelRatio,
+      textScaleFactor,
+      padding,
+      viewInsets,
+      alwaysUse24HourFormat,
+      disableAnimations,
+      invertColors,
+      accessibleNavigation,
+    );
+  }
 
   @override
   String toString() {
@@ -241,7 +301,10 @@ class MediaQueryData {
              'textScaleFactor: $textScaleFactor, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat'
+             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
+             'accessibleNavigation: $accessibleNavigation'
+             'disableAnimations: $disableAnimations'
+             'invertColors: $invertColors'
            ')';
   }
 }

@@ -90,7 +90,7 @@ class TestRecordingCanvas implements Canvas {
 }
 
 /// A [PaintingContext] for tests that use [TestRecordingCanvas].
-class TestRecordingPaintingContext implements PaintingContext {
+class TestRecordingPaintingContext extends ClipContext implements PaintingContext {
   /// Creates a [PaintingContext] for tests that use [TestRecordingCanvas].
   TestRecordingPaintingContext(this.canvas);
 
@@ -103,34 +103,32 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
-    canvas.save();
-    canvas.clipRect(clipRect.shift(offset));
-    painter(this, offset);
-    canvas.restore();
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+    clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
   }
 
   @override
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
-    canvas.save();
-    canvas.clipRRect(clipRRect.shift(offset));
-    painter(this, offset);
-    canvas.restore();
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+    assert(clipBehavior != null);
+    clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
-    canvas
-      ..save()
-      ..clipPath(clipPath.shift(offset));
-    painter(this, offset);
-    canvas.restore();
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+    clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     canvas.save();
     canvas.transform(transform.storage);
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
   }

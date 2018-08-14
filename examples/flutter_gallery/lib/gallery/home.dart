@@ -245,7 +245,7 @@ class _DemosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // When overriding ListView.padding, it's necessary to manually handle
+    // When overriding ListView.padding, it is necessary to manually handle
     // safe areas.
     final double windowBottomPadding = MediaQuery.of(context).padding.bottom;
     return new KeyedSubtree(
@@ -363,7 +363,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                 ? const Text('Flutter gallery')
                 : new Text(_category.name),
             ),
-            frontHeading: widget.testMode ? null: new Container(height: 24.0),
+            frontHeading: widget.testMode ? null : new Container(height: 24.0),
             frontLayer: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,

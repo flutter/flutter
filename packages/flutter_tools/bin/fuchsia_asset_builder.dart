@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -21,6 +22,7 @@ const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionAssetManifestOut = 'asset-manifest-out';
+const String _kOptionComponentName = 'component-name';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
@@ -28,8 +30,8 @@ const List<String> _kRequiredOptions = <String>[
 ];
 
 Future<Null> main(List<String> args) {
-  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
-    Usage: new DisabledUsage(),
+  return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
+    Usage: () => new DisabledUsage(),
   });
 }
 
@@ -46,7 +48,8 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionAsset,
         help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
-    ..addOption(_kOptionAssetManifestOut);
+    ..addOption(_kOptionAssetManifestOut)
+    ..addOption(_kOptionComponentName);
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
       .any((String option) => !argResults.options.contains(option))) {
@@ -76,10 +79,10 @@ Future<Null> run(List<String> args) async {
   await Future.wait(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
 }
 
-Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest) async {
+Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
 
   final libfs.File destFile = libfs.fs.file(fileDest);
   await destFile.create(recursive: true);
@@ -87,6 +90,9 @@ Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String 
 
   for (String path in assets.entries.keys) {
     outFile.write('data/$path=$outputBase/$path\n');
+    if (componentName != null && componentName.isNotEmpty) {
+      outFile.write('data/$componentName/$path=$outputBase/$path\n');
+    }
   }
   await outFile.flush();
   await outFile.close();

@@ -83,8 +83,17 @@ abstract class Device {
   /// Assumes the device doesn't have a secure unlock pattern.
   Future<Null> unlock();
 
+  /// Emulate a tap on the touch screen.
+  Future<Null> tap(int x, int y);
+
   /// Read memory statistics for a process.
   Future<Map<String, dynamic>> getMemoryStats(String packageName);
+
+  /// Stream the system log from the device.
+  ///
+  /// Flutter applications' `print` statements end up in this log
+  /// with some prefix.
+  Stream<String> get logcat;
 
   /// Stop a process.
   Future<Null> stop(String packageName);
@@ -237,6 +246,11 @@ class AndroidDevice implements Device {
     await shellExec('input', const <String>['keyevent', '82']);
   }
 
+  @override
+  Future<Null> tap(int x, int y) async {
+    await shellExec('input', <String>['tap', '$x', '$y']);
+  }
+
   /// Retrieves device's wakefulness state.
   ///
   /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
@@ -269,6 +283,63 @@ class AndroidDevice implements Device {
     return <String, dynamic>{
       'total_kb': int.parse(match.group(1)),
     };
+  }
+
+  @override
+  Stream<String> get logcat {
+    final Completer<void> stdoutDone = new Completer<void>();
+    final Completer<void> stderrDone = new Completer<void>();
+    final Completer<void> processDone = new Completer<void>();
+    final Completer<void> abort = new Completer<void>();
+    bool aborted = false;
+    StreamController<String> stream;
+    stream = new StreamController<String>(
+      onListen: () async {
+        await adb(<String>['logcat', '--clear']);
+        final Process process = await startProcess(adbPath, <String>['-s', deviceId, 'logcat']);
+        process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            print('adb logcat: $line');
+            stream.sink.add(line);
+          }, onDone: () { stdoutDone.complete(); });
+        process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            print('adb logcat stderr: $line');
+          }, onDone: () { stderrDone.complete(); });
+        process.exitCode.then((int exitCode) {
+          print('adb logcat process terminated with exit code $exitCode');
+          if (!aborted) {
+            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.'));
+            processDone.complete();
+          }
+        });
+        await Future.any<dynamic>(<Future<dynamic>>[
+          Future.wait<void>(<Future<void>>[
+            stdoutDone.future,
+            stderrDone.future,
+            processDone.future,
+          ]),
+          abort.future,
+        ]);
+        aborted = true;
+        print('terminating adb logcat');
+        process.kill();
+        print('closing logcat stream');
+        await stream.close();
+      },
+      onCancel: () {
+        if (!aborted) {
+          print('adb logcat aborted');
+          aborted = true;
+          abort.complete();
+        }
+      },
+    );
+    return stream.stream;
   }
 
   @override
@@ -372,7 +443,17 @@ class IosDevice implements Device {
   Future<Null> unlock() async {}
 
   @override
+  Future<Null> tap(int x, int y) async {
+    throw 'Not implemented';
+  }
+
+  @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw 'Not implemented';
+  }
+
+  @override
+  Stream<String> get logcat {
     throw 'Not implemented';
   }
 

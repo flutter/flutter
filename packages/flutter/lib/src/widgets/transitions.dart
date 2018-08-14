@@ -107,6 +107,19 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// [textDirection] is provided, then the offsets are applied in the reading
 /// direction, so in right-to-left text, positive x offsets move towards the
 /// left, and in left-to-right text, positive x offsets move towards the right.
+///
+/// Here's an illustration of the [SlideTransition] widget, with it's [position]
+/// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
+///
+/// See also:
+///
+///  * [AlignTransition], an animated version of an [Align] that animates its
+///    [Align.alignment] property.
+///  * [PositionedTransition], a widget that animates its child from a start
+///    position to an end position over the lifetime of the animation.
+///  * [RelativePositionedTransition], a widget that transitions its child's
+///    position based on the value of a rectangle relative to a bounding box.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
@@ -166,7 +179,20 @@ class SlideTransition extends AnimatedWidget {
   }
 }
 
-/// Animates the scale of transformed widget.
+/// Animates the scale of a transformed widget.
+///
+/// Here's an illustration of the [ScaleTransition] widget, with it's [alignment]
+/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
+///
+/// See also:
+///
+///  * [PositionedTransition], a widget that animates its child from a start
+///    position to an end position over the lifetime of the animation.
+///  * [RelativePositionedTransition], a widget that transitions its child's
+///    position based on the value of a rectangle relative to a bounding box.
+///  * [SizeTransition], a widget that animates its own size and clips and
+///    aligns its child.
 class ScaleTransition extends AnimatedWidget {
   /// Creates a scale transition.
   ///
@@ -211,6 +237,16 @@ class ScaleTransition extends AnimatedWidget {
 }
 
 /// Animates the rotation of a widget.
+///
+/// Here's an illustration of the [RotationTransition] widget, with it's [turns]
+/// animated by a [CurvedAnimation] set to [Curves.elasticOut]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/rotation_transition.mp4}
+/// See also:
+///
+///  * [ScaleTransition], a widget that animates the scale of a transformed
+///    widget.
+///  * [SizeTransition], a widget that animates its own size and clips and
+///    aligns its child.
 class RotationTransition extends AnimatedWidget {
   /// Creates a rotation transition.
   ///
@@ -244,16 +280,39 @@ class RotationTransition extends AnimatedWidget {
   }
 }
 
-/// Animates its own size and clips and aligns the child.
+/// Animates its own size and clips and aligns its child.
 ///
-/// For a widget that automatically animates between the sizes of two children,
-/// fading between them, see [AnimatedCrossFade].
+/// [SizeTransition] acts as a [ClipRect] that animates either its width or its
+/// height, depending upon the value of [axis]. The alignment of the child along
+/// the [axis] is specified by the [axisAlignment].
+///
+/// Like most widgets, [SizeTransition] will conform to the constraints it is
+/// given, so be sure to put it in a context where it can change size. For
+/// instance, if you place it into a [Container] with a fixed size, then the
+/// [SizeTransition] will not be able to change size, and will appear to do
+/// nothing.
+///
+/// Here's an illustration of the [SizeTransition] widget, with it's [sizeFactor]
+/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/size_transition.mp4}
+///
+/// See also:
+///
+///  * [AnimatedCrossFade], for a widget that automatically animates between
+///    the sizes of two children, fading between them.
+///  * [ScaleTransition], a widget that scales the size of the child instead of
+///    clipping it.
+///  * [PositionedTransition], a widget that animates its child from a start
+///    position to an end position over the lifetime of the animation.
+///  * [RelativePositionedTransition], a widget that transitions its child's
+///    position based on the value of a rectangle relative to a bounding box.
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [sizeFactor] argument must not be null. The [axis] argument defaults
-  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.0, which centers the
-  /// child along the main axis during the transition.
+  /// The [axis], [sizeFactor], and [axisAlignment] arguments must not be null.
+  /// The [axis] argument defaults to [Axis.vertical]. The [axisAlignment]
+  /// defaults to 0.0, which centers the child along the main axis during the
+  /// transition.
   const SizeTransition({
     Key key,
     this.axis = Axis.vertical,
@@ -261,17 +320,35 @@ class SizeTransition extends AnimatedWidget {
     this.axisAlignment = 0.0,
     this.child,
   }) : assert(axis != null),
+       assert(sizeFactor != null),
+       assert(axisAlignment != null),
        super(key: key, listenable: sizeFactor);
 
-  /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise [Axis.vertical].
+  /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise
+  /// [Axis.vertical].
   final Axis axis;
 
-  /// The animation that controls the (clipped) size of the child. If the current value
-  /// of sizeFactor is v then the width or height of the widget will be its intrinsic
-  /// width or height multiplied by v.
+  /// The animation that controls the (clipped) size of the child.
+  ///
+  /// The width or height (depending on the [axis] value) of this widget will be
+  /// its intrinsic width or height multiplied by [sizeFactor]'s value at the
+  /// current point in the animation.
+  ///
+  /// If the value of [sizeFactor] is less than one, the child will be clipped
+  /// in the appropriate axis.
   Animation<double> get sizeFactor => listenable;
 
-  /// How to align the child along the axis that sizeFactor is modifying.
+  /// Describes how to align the child along the axis that [sizeFactor] is
+  /// modifying.
+  ///
+  /// A value of -1.0 indicates the top when [axis] is [Axis.vertical], and the
+  /// start when [axis] is [Axis.horizontal]. The start is on the left when the
+  /// text direction in effect is [TextDirection.ltr] and on the right when it
+  /// is [TextDirection.rtl].
+  ///
+  /// A value of 1.0 indicates the bottom or end, depending upon the [axis].
+  ///
+  /// A value of 0.0 (the default) indicates the center for either [axis] value.
   final double axisAlignment;
 
   /// The widget below this widget in the tree.
@@ -301,6 +378,10 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// For a widget that automatically animates between the sizes of two children,
 /// fading between them, see [AnimatedCrossFade].
+///
+/// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
+/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -308,6 +389,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   const FadeTransition({
     Key key,
     @required this.opacity,
+    this.alwaysIncludeSemantics = false,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -319,23 +401,36 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   /// completely transparent.
   final Animation<double> opacity;
 
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
   @override
   RenderAnimatedOpacity createRenderObject(BuildContext context) {
     return new RenderAnimatedOpacity(
       opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
-      ..opacity = opacity;
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -360,13 +455,26 @@ class RelativeRectTween extends Tween<RelativeRect> {
 
 /// Animated version of [Positioned] which takes a specific
 /// [Animation<RelativeRect>] to transition the child's position from a start
-/// position to and end position over the lifetime of the animation.
+/// position to an end position over the lifetime of the animation.
 ///
 /// Only works if it's the child of a [Stack].
 ///
+/// Here's an illustration of the [PositionedTransition] widget, with it's [rect]
+/// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/positioned_transition.mp4}
+///
 /// See also:
 ///
-/// * [RelativePositionedTransition].
+///  * [RelativePositionedTransition], a widget that transitions its child's
+///    position based on the value of a rectangle relative to a bounding box.
+///  * [SlideTransition], a widget that animates the position of a widget
+///    relative to its normal position.
+///  * [AlignTransition], an animated version of an [Align] that animates its
+///    [Align.alignment] property.
+///  * [ScaleTransition], a widget that animates the scale of a transformed
+///    widget.
+///  * [SizeTransition], a widget that animates its own size and clips and
+///    aligns its child.
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
@@ -400,9 +508,22 @@ class PositionedTransition extends AnimatedWidget {
 ///
 /// Only works if it's the child of a [Stack].
 ///
+/// Here's an illustration of the [RelativePositionedTransition] widget, with it's [rect]
+/// animated by a [CurvedAnimation] set to [Curves.elasticInOut]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/relative_positioned_transition.mp4}
+///
 /// See also:
 ///
-/// * [PositionedTransition].
+///  * [PositionedTransition], a widget that animates its child from a start
+///    position to an end position over the lifetime of the animation.
+///  * [AlignTransition], an animated version of an [Align] that animates its
+///    [Align.alignment] property.
+///  * [ScaleTransition], a widget that animates the scale of a transformed
+///    widget.
+///  * [SizeTransition], a widget that animates its own size and clips and
+///    aligns its child.
+///  * [SlideTransition], a widget that animates the position of a widget
+///    relative to its normal position.
 class RelativePositionedTransition extends AnimatedWidget {
   /// Create an animated version of [Positioned].
   ///
@@ -445,6 +566,10 @@ class RelativePositionedTransition extends AnimatedWidget {
 
 /// Animated version of a [DecoratedBox] that animates the different properties
 /// of its [Decoration].
+///
+/// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
+/// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/decorated_box_transition.mp4}
 ///
 /// See also:
 ///
@@ -492,6 +617,21 @@ class DecoratedBoxTransition extends AnimatedWidget {
 }
 
 /// Animated version of an [Align] that animates its [Align.alignment] property.
+///
+/// Here's an illustration of the [DecoratedBoxTransition] widget, with it's
+/// [decoration] animated by a [CurvedAnimation] set to [Curves.decelerate]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/align_transition.mp4}
+///
+/// See also:
+///
+///  * [PositionedTransition], a widget that animates its child from a start
+///    position to an end position over the lifetime of the animation.
+///  * [RelativePositionedTransition], a widget that transitions its child's
+///    position based on the value of a rectangle relative to a bounding box.
+///  * [SizeTransition], a widget that animates its own size and clips and
+///    aligns its child.
+///  * [SlideTransition], a widget that animates the position of a widget
+///    relative to its normal position.
 class AlignTransition extends AnimatedWidget {
   /// Creates an animated [Align] whose [AlignmentGeometry] animation updates
   /// the widget.

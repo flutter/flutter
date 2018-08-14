@@ -71,7 +71,7 @@ class DecorationImage {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
   /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an

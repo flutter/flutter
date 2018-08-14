@@ -270,6 +270,72 @@ void main() {
     await checkCursorToggle();
   });
 
+  testWidgets('cursor has expected defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const TextField(
+          ),
+        )
+    );
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.cursorWidth, 2.0);
+    expect(textField.cursorRadius, null);
+  });
+
+  testWidgets('cursor has expected radius value', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const TextField(
+            cursorRadius: Radius.circular(3.0),
+          ),
+        )
+    );
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.cursorWidth, 2.0);
+    expect(textField.cursorRadius, const Radius.circular(3.0));
+  });
+
+  testWidgets('cursor layout has correct width', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const RepaintBoundary(
+            child: TextField(
+              cursorWidth: 15.0,
+            ),
+          ),
+        )
+    );
+    await tester.enterText(find.byType(TextField), ' ');
+    await skipPastScrollingAnimation(tester);
+
+    await expectLater(
+      find.byType(TextField),
+      matchesGoldenFile('text_field_test.0.0.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        overlay(
+          child: const RepaintBoundary(
+            child: TextField(
+              cursorWidth: 15.0,
+              cursorRadius: Radius.circular(3.0),
+            ),
+          ),
+        )
+    );
+    await tester.enterText(find.byType(TextField), ' ');
+    await skipPastScrollingAnimation(tester);
+
+    await expectLater(
+      find.byType(TextField),
+      matchesGoldenFile('text_field_test.1.0.png'),
+    );
+  }, skip: !Platform.isLinux);
+
   testWidgets('obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
@@ -1228,7 +1294,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(399));
+    expect(topLeft.dx, equals(398.5));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1237,7 +1303,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(399));
+    expect(topLeft.dx, equals(398.5));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -1260,7 +1326,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.dx, equals(399));
+    expect(topLeft.dx, equals(398.5));
 
     await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
@@ -1269,7 +1335,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.dx, equals(399));
+    expect(topLeft.dx, equals(398.5));
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {
@@ -2182,6 +2248,70 @@ void main() {
       ),
     );
     expect(focusNode.hasFocus, isFalse);
+  });
+
+  testWidgets('TextField semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final TextEditingController controller = new TextEditingController();
+    final Key key = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'label',
+            hintText: 'hint',
+            helperText: 'helper',
+            counterText: 'counter',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'label\nhelper\ncounter',
+          id: 1,
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'hint\nhelper\ncounter',
+          id: 1,
+          textDirection: TextDirection.ltr,
+          textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.setSelection,
+            SemanticsAction.paste,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    controller.text = 'hello';
+    await tester.pump();
+    semantics.dispose();
   });
 
 }

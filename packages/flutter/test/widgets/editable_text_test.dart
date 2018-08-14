@@ -79,7 +79,7 @@ void main() {
     expect(editableText.maxLines, equals(1));
     expect(editableText.obscureText, isFalse);
     expect(editableText.autocorrect, isTrue);
-    expect(editableText.cursorWidth, 1.0);
+    expect(editableText.cursorWidth, 2.0);
   });
 
   testWidgets('cursor has expected width and radius',

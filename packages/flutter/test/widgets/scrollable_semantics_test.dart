@@ -342,6 +342,9 @@ void main() {
         new TestSemantics.rootChild(
           children: <TestSemantics>[
             new TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasImplicitScrolling,
+              ],
               actions: <SemanticsAction>[SemanticsAction.scrollUp],
               children: <TestSemantics>[
                 new TestSemantics(

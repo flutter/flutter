@@ -241,6 +241,12 @@ class _RenderCheckbox extends RenderToggleable {
     super.value = newValue;
   }
 
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isChecked = value == true;
+  }
+
   // The square outer bounds of the checkbox at t, with the specified origin.
   // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
   // At t == 0.5, .. is _kEdgeSize - _kStrokeWidth

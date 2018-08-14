@@ -38,5 +38,11 @@
   "popupMenuLabel": "د پاپ اپ مینو",
   "dialogLabel": "خبرې اترې",
   "alertDialogLabel": "خبرتیا",
-  "searchFieldLabel": "لټون"
+  "searchFieldLabel": "لټون",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }

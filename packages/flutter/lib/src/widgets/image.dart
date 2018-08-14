@@ -55,7 +55,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// Prefetches an image into the image cache.
 ///
 /// Returns a [Future] that will complete when the first image yielded by the
-/// [ImageProvider] is available.
+/// [ImageProvider] is available or failed to load.
 ///
 /// If the image is later used by an [Image] or [BoxDecoration] or [FadeInImage],
 /// it will probably be loaded faster. The consumer of the image does not need
@@ -65,17 +65,38 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
+/// The `onError` argument can be used to manually handle errors while precaching.
+///
 /// See also:
 ///
 ///   * [ImageCache], which holds images that may be reused.
-Future<Null> precacheImage(ImageProvider provider, BuildContext context, { Size size }) {
+Future<Null> precacheImage(
+  ImageProvider provider,
+  BuildContext context, {
+  Size size,
+  ImageErrorListener onError,
+}) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
   final Completer<Null> completer = new Completer<Null>();
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
   }
-  stream.addListener(listener);
+  void errorListener(dynamic exception, StackTrace stackTrace) {
+    completer.complete();
+    if (onError != null) {
+      onError(exception, stackTrace);
+    } else {
+      FlutterError.reportError(new FlutterErrorDetails(
+        context: 'image failed to precache',
+        library: 'image resource service',
+        exception: exception,
+        stack: stackTrace,
+        silent: true,
+      ));
+    }
+  }
+  stream.addListener(listener, onError: errorListener);
   completer.future.then((Null _) { stream.removeListener(listener); });
   return completer.future;
 }
@@ -120,9 +141,13 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  ///
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   const Image({
     Key key,
     @required this.image,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -152,9 +177,13 @@ class Image extends StatefulWidget {
   ///
   /// An optional [headers] argument can be used to send custom HTTP headers
   /// with the image request.
+  ///
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.network(String src, {
     Key key,
     double scale = 1.0,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -183,9 +212,13 @@ class Image extends StatefulWidget {
   ///
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
+  ///
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.file(File file, {
     Key key,
     double scale = 1.0,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -217,6 +250,8 @@ class Image extends StatefulWidget {
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
   /// asset specified will be used.
+  ///
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   // ///
@@ -319,6 +354,8 @@ class Image extends StatefulWidget {
   Image.asset(String name, {
     Key key,
     AssetBundle bundle,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     double scale,
     this.width,
     this.height,
@@ -347,9 +384,13 @@ class Image extends StatefulWidget {
   /// widget should be placed in a context that sets tight layout constraints.
   /// Otherwise, the image dimensions will change as the image is loaded, which
   /// will result in ugly layout changes.
+  ///
+  /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   Image.memory(Uint8List bytes, {
     Key key,
     double scale = 1.0,
+    this.semanticLabel,
+    this.excludeFromSemantics = false,
     this.width,
     this.height,
     this.color,
@@ -415,8 +456,8 @@ class Image extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while an
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
   /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
@@ -472,6 +513,18 @@ class Image extends StatefulWidget {
   /// (false), when the image provider changes.
   final bool gaplessPlayback;
 
+  /// A Semantic description of the image.
+  ///
+  /// Used to provide a description of the image to TalkBack on Andoid, and
+  /// VoiceOver on iOS.
+  final String semanticLabel;
+
+  /// Whether to exclude this image from semantics.
+  ///
+  /// Useful for images which do not contribute meaningful information to an
+  /// application.
+  final bool excludeFromSemantics;
+
   @override
   _ImageState createState() => new _ImageState();
 
@@ -488,6 +541,8 @@ class Image extends StatefulWidget {
     properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(new StringProperty('semanticLabel', semanticLabel, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
   }
 }
 
@@ -578,7 +633,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    return new RawImage(
+    final RawImage image = new RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -590,6 +645,14 @@ class _ImageState extends State<Image> {
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
+    );
+    if (widget.excludeFromSemantics)
+      return image;
+    return new Semantics(
+      container: widget.semanticLabel != null,
+      image: true,
+      label: widget.semanticLabel == null ? '' : widget.semanticLabel,
+      child: image,
     );
   }
 

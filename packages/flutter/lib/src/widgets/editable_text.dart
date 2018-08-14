@@ -209,7 +209,7 @@ class EditableText extends StatefulWidget {
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
-    this.cursorWidth = 1.0,
+    this.cursorWidth = 2.0,
     this.cursorRadius,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
@@ -374,7 +374,7 @@ class EditableText extends StatefulWidget {
 
   /// How thick the cursor will be.
   ///
-  /// Defaults to 1.0
+  /// Defaults to 2.0
   final double cursorWidth;
 
   /// How rounded the corners of the cursor should be.
@@ -398,6 +398,12 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
+
+  /// Setting this property to true makes the cursor stop blinking and stay visible on the screen continually.
+  /// This property is most useful for testing purposes.
+  ///
+  /// Defaults to false, resulting in a typical blinking cursor.
+  static bool debugDeterministicCursor = false;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -881,7 +887,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: widget.cursorColor,
-              showCursor: _showCursor,
+              showCursor: EditableText.debugDeterministicCursor ? ValueNotifier<bool>(true) : _showCursor,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               selectionColor: widget.selectionColor,
