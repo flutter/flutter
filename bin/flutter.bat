@@ -12,8 +12,8 @@ REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
 
-REM Execute a copy of the script to prevent modifications to a running script,
-REM see https://github.com/flutter/flutter/issues/14578 for details.
+REM Execute a copy of the script to prevent modifications to a running script
+REM (as might happen during "flutter upgrade" or "flutter channel").
 IF "%~n0" == "flutter-copy" GOTO run-flutter
 COPY "%~dpnx0" "%~dp0flutter-copy.bat" 1>NUL
 "%~dp0flutter-copy.bat" %*
