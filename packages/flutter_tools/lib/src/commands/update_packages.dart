@@ -235,7 +235,7 @@ class UpdatePackagesCommand extends FlutterCommand {
           retry: false, // errors here are usually fatal since we're not hitting the network
         );
       } finally {
-        //temporaryDirectory.deleteSync(recursive: true);
+        temporaryDirectory.deleteSync(recursive: true);
       }
 
       // The transitive dependency tree for the fake package does not contain
