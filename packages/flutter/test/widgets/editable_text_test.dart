@@ -292,7 +292,7 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
-  testWidgets('Correct keyboard is requested when maxLines = null', (WidgetTester tester) async {
+  testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
@@ -321,7 +321,7 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
-  testWidgets('Correct keyboard is requested when set explicitly and maxLines = null', (WidgetTester tester) async {
+  testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
