@@ -59,7 +59,7 @@ const Object _heroTag = const Object();
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
-class CupertinoNavigationBar extends StatelessWidget implements ObstructingPreferredSizeWidget {
+class CupertinoNavigationBar extends StatefulWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
@@ -205,34 +205,47 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   }
 
   @override
+  _CupertinoNavigationBarState createState() {
+    return new _CupertinoNavigationBarState();
+  }
+}
+
+class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
+  _NavigationBarStaticComponentsKeys keys;
+
+  @override
+  void initState() {
+    super.initState();
+    keys = new _NavigationBarStaticComponentsKeys();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
+      keys: keys,
       route: ModalRoute.of(context),
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      automaticallyImplyTitle: automaticallyImplyMiddle,
-      previousPageTitle: previousPageTitle,
-      middle: middle,
-      trailing: trailing,
-      backgroundColor: backgroundColor,
-      border: border,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
-      largeTitle: null,
+      userLeading: widget.leading,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
+      automaticallyImplyTitle: widget.automaticallyImplyMiddle,
+      previousPageTitle: widget.previousPageTitle,
+      userMiddle: widget.middle,
+      userTrailing: widget.trailing,
+      padding: widget.padding,
+      actionsForegroundColor: widget.actionsForegroundColor,
+      userLargeTitle: null,
       large: false,
-      largeExpanded: false,
     );
 
     final Widget navBar = _wrapWithBackground(
-      border: border,
-      backgroundColor: backgroundColor,
+      border: widget.border,
+      backgroundColor: widget.backgroundColor,
       child: new _PersistentNavigationBar(
         components: components,
-        padding: padding,
+        padding: widget.padding,
       ),
     );
 
-    if (!transitionBetweenRoutes) {
+    if (!widget.transitionBetweenRoutes) {
       return navBar;
     }
 
@@ -242,7 +255,12 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
       launchPadBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       child: new _TransitionableNavigationBar(
-        components: components,
+        componentsKeys: keys,
+        backgroundColor: widget.backgroundColor,
+        actionsForegroundColor: widget.actionsForegroundColor,
+        border: widget.border,
+        hasUserMiddle: widget.middle != null,
+        largeExpanded: false,
         child: navBar,
       ),
     );
@@ -287,7 +305,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
 ///    pages.
-class CupertinoSliverNavigationBar extends StatelessWidget {
+class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///
   /// The [largeTitle] argument is required and must not be null.
@@ -385,24 +403,40 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   bool get opaque => backgroundColor.alpha == 0xFF;
 
   @override
+  _CupertinoSliverNavigationBarState createState() {
+    return new _CupertinoSliverNavigationBarState();
+  }
+}
+
+class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
+  _NavigationBarStaticComponentsKeys keys;
+
+  @override
+  void initState() {
+    super.initState();
+    keys = new _NavigationBarStaticComponentsKeys();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _LargeTitleNavigationBarSliverDelegate(
-        leading: leading,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        automaticallyImplyTitle: automaticallyImplyTitle,
-        previousPageTitle: previousPageTitle,
-        middle: middle,
-        trailing: trailing,
-        largeTitle: largeTitle,
-        backgroundColor: backgroundColor,
-        border: border,
-        padding: padding,
-        actionsForegroundColor: actionsForegroundColor,
-        transitionBetweenRoutes: transitionBetweenRoutes,
+        keys: keys,
+        userLeading: widget.leading,
+        automaticallyImplyLeading: widget.automaticallyImplyLeading,
+        automaticallyImplyTitle: widget.automaticallyImplyTitle,
+        previousPageTitle: widget.previousPageTitle,
+        userMiddle: widget.middle,
+        userTrailing: widget.trailing,
+        userLargeTitle: widget.largeTitle,
+        backgroundColor: widget.backgroundColor,
+        border: widget.border,
+        padding: widget.padding,
+        actionsForegroundColor: widget.actionsForegroundColor,
+        transitionBetweenRoutes: widget.transitionBetweenRoutes,
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-        alwaysShowMiddle: middle != null,
+        alwaysShowMiddle: widget.middle != null,
       ),
     );
   }

@@ -105,13 +105,14 @@ Widget _wrapWithBackground({
 class _LargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _LargeTitleNavigationBarSliverDelegate({
-    @required this.leading,
+    @required this.keys,
+    @required this.userLeading,
     @required this.automaticallyImplyLeading,
     @required this.automaticallyImplyTitle,
     @required this.previousPageTitle,
-    @required this.middle,
-    @required this.trailing,
-    @required this.largeTitle,
+    @required this.userMiddle,
+    @required this.userTrailing,
+    @required this.userLargeTitle,
     @required this.backgroundColor,
     @required this.border,
     @required this.padding,
@@ -123,13 +124,14 @@ class _LargeTitleNavigationBarSliverDelegate
        assert(alwaysShowMiddle != null),
        assert(transitionBetweenRoutes != null);
 
-  final Widget leading;
+  final _NavigationBarStaticComponentsKeys keys;
+  final Widget userLeading;
   final bool automaticallyImplyLeading;
   final bool automaticallyImplyTitle;
   final String previousPageTitle;
-  final Widget middle;
-  final Widget trailing;
-  final Widget largeTitle;
+  final Widget userMiddle;
+  final Widget userTrailing;
+  final Widget userLargeTitle;
   final Color backgroundColor;
   final Border border;
   final EdgeInsetsDirectional padding;
@@ -149,20 +151,18 @@ class _LargeTitleNavigationBarSliverDelegate
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
     final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
+      keys: keys,
       route: ModalRoute.of(context),
-      leading: leading,
+      userLeading: userLeading,
       automaticallyImplyLeading: automaticallyImplyLeading,
       automaticallyImplyTitle: automaticallyImplyTitle,
       previousPageTitle: previousPageTitle,
-      middle: middle,
-      trailing: trailing,
-      largeTitle: largeTitle,
+      userMiddle: userMiddle,
+      userTrailing: userTrailing,
+      userLargeTitle: userLargeTitle,
       padding: padding,
-      backgroundColor: backgroundColor,
-      border: border,
       actionsForegroundColor: actionsForegroundColor,
       large: true,
-      largeExpanded: showLargeTitle,
     );
 
     final _PersistentNavigationBar persistentNavigationBar =
@@ -242,7 +242,12 @@ class _LargeTitleNavigationBarSliverDelegate
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.
       child: new _TransitionableNavigationBar(
-        components: components,
+        componentsKeys: keys,
+        backgroundColor: backgroundColor,
+        actionsForegroundColor: actionsForegroundColor,
+        border: border,
+        hasUserMiddle: userMiddle != null,
+        largeExpanded: showLargeTitle,
         child: navBar,
       ),
     );
@@ -250,13 +255,13 @@ class _LargeTitleNavigationBarSliverDelegate
 
   @override
   bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return leading != oldDelegate.leading
+    return userLeading != oldDelegate.userLeading
         || automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading
         || automaticallyImplyTitle != oldDelegate.automaticallyImplyTitle
         || previousPageTitle != oldDelegate.previousPageTitle
-        || middle != oldDelegate.middle
-        || trailing != oldDelegate.trailing
-        || largeTitle != oldDelegate.largeTitle
+        || userMiddle != oldDelegate.userMiddle
+        || userTrailing != oldDelegate.userTrailing
+        || userLargeTitle != oldDelegate.userLargeTitle
         || backgroundColor != oldDelegate.backgroundColor
         || border != oldDelegate.border
         || padding != oldDelegate.padding
@@ -346,55 +351,78 @@ class _PersistentNavigationBar extends StatelessWidget {
 }
 
 @immutable
+class _NavigationBarStaticComponentsKeys {
+  _NavigationBarStaticComponentsKeys()
+      : navBarBoxKey = new GlobalKey(),
+        leadingKey = new GlobalKey(),
+        backChevronKey = new GlobalKey(),
+        backLabelKey = new GlobalKey(),
+        middleKey = new GlobalKey(),
+        trailingKey = new GlobalKey(),
+        largeTitleKey = new GlobalKey();
+
+  final GlobalKey navBarBoxKey;
+  final GlobalKey leadingKey;
+  final GlobalKey backChevronKey;
+  final GlobalKey backLabelKey;
+  final GlobalKey middleKey;
+  final GlobalKey trailingKey;
+  final GlobalKey largeTitleKey;
+}
+
+@immutable
 class _NavigationBarStaticComponents {
   _NavigationBarStaticComponents({
+    @required _NavigationBarStaticComponentsKeys keys,
     @required ModalRoute<dynamic> route,
-    @required Widget leading,
+    @required Widget userLeading,
     @required bool automaticallyImplyLeading,
     @required bool automaticallyImplyTitle,
     @required String previousPageTitle,
-    @required Widget middle,
-    @required Widget trailing,
-    @required Widget largeTitle,
-    @required this.backgroundColor,
-    @required this.border,
+    @required Widget userMiddle,
+    @required Widget userTrailing,
+    @required Widget userLargeTitle,
     @required EdgeInsetsDirectional padding,
     @required Color actionsForegroundColor,
     @required bool large,
-    @required this.largeExpanded,
   }) : leading = createLeading(
-         userLeading: leading,
+         leadingKey: keys.leadingKey,
+         userLeading: userLeading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
          padding: padding,
          actionsForegroundColor: actionsForegroundColor,
-        ),
+       ),
        backChevron = createBackChevron(
-         userLeading: leading,
+         backChevronKey: keys.backChevronKey,
+         userLeading: userLeading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
        ),
        backLabel = createBackLabel(
-         userLeading: leading,
+         backLabelKey: keys.backLabelKey,
+         userLeading: userLeading,
          route: route,
          previousPageTitle: previousPageTitle,
          automaticallyImplyLeading: automaticallyImplyLeading,
        ),
-       hasUserMiddle = middle != null,
        middle = createMiddle(
-         userMiddle: middle,
-         userLargeTitle: largeTitle,
+         middleKey: keys.middleKey,
+         userMiddle: userMiddle,
+         userLargeTitle: userLargeTitle,
          route: route,
          automaticallyImplyTitle: automaticallyImplyTitle,
          large: large,
        ),
        trailing = createTrailing(
-         userTrailing: trailing,
+         trailingKey: keys.trailingKey,
+         userTrailing: userTrailing,
          padding: padding,
          actionsForegroundColor: actionsForegroundColor,
        ),
        largeTitle = createLargeTitle(
-         userLargeTitle: largeTitle,
+         largeTitleKey: keys.largeTitleKey,
+         userLargeTitle: userLargeTitle,
          route: route,
          automaticImplyTitle: automaticallyImplyTitle,
          large: large,
@@ -415,12 +443,11 @@ class _NavigationBarStaticComponents {
     return null;
   }
 
-  final Color backgroundColor;
-  final Border border;
   final TextStyle actionsStyle;
 
-  final _RenderObjectFindingWidget leading;
-  static _RenderObjectFindingWidget createLeading({
+  final KeyedSubtree leading;
+  static KeyedSubtree createLeading({
+    @required GlobalKey leadingKey,
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
@@ -448,7 +475,8 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new _RenderObjectFindingWidget(
+    return new KeyedSubtree(
+      key: leadingKey,
       child: new Padding(
         padding: new EdgeInsetsDirectional.only(
           start: padding?.start ?? _kNavBarEdgePadding,
@@ -467,8 +495,9 @@ class _NavigationBarStaticComponents {
     );
   }
 
-  final _RenderObjectFindingWidget backChevron;
-  static _RenderObjectFindingWidget createBackChevron({
+  final KeyedSubtree backChevron;
+  static KeyedSubtree createBackChevron({
+    @required GlobalKey backChevronKey,
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
@@ -482,15 +511,14 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new _RenderObjectFindingWidget(
-      child: const _BackChevron(),
-    );
+    return new KeyedSubtree(key: backChevronKey, child: new _BackChevron());
   }
 
   /// This widget is not decorated with a font since the font style could
   /// animate during transitions.
-  final _RenderObjectFindingWidget backLabel;
-  static _RenderObjectFindingWidget createBackLabel({
+  final KeyedSubtree backLabel;
+  static KeyedSubtree createBackLabel({
+    @required GlobalKey backLabelKey,
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
@@ -505,7 +533,8 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new _RenderObjectFindingWidget(
+    return new KeyedSubtree(
+      key: backLabelKey,
       child: new _BackLabel(
         specifiedPreviousTitle: previousPageTitle,
         route: route,
@@ -513,11 +542,11 @@ class _NavigationBarStaticComponents {
     );
   }
 
-  final bool hasUserMiddle;
   /// This widget is not decorated with a font since the font style could
   /// animate during transitions.
-  final _RenderObjectFindingWidget middle;
-  static _RenderObjectFindingWidget createMiddle({
+  final KeyedSubtree middle;
+  static KeyedSubtree createMiddle({
+    @required GlobalKey middleKey,
     @required Widget userMiddle,
     @required Widget userLargeTitle,
     @required bool large,
@@ -539,13 +568,15 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new _RenderObjectFindingWidget(
+    return new KeyedSubtree(
+      key: middleKey,
       child: middleContent,
     );
   }
 
-  final _RenderObjectFindingWidget trailing;
-  static _RenderObjectFindingWidget createTrailing({
+  final KeyedSubtree trailing;
+  static KeyedSubtree createTrailing({
+    @required GlobalKey trailingKey,
     @required Widget userTrailing,
     @required EdgeInsetsDirectional padding,
     @required Color actionsForegroundColor,
@@ -554,7 +585,8 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new _RenderObjectFindingWidget(
+    return new KeyedSubtree(
+      key: trailingKey,
       child: new Padding(
         padding: new EdgeInsetsDirectional.only(
           end: padding?.end ?? _kNavBarEdgePadding,
@@ -575,8 +607,9 @@ class _NavigationBarStaticComponents {
 
   /// This widget is not decorated with a font since the font style could
   /// animate during transitions.
-  final _RenderObjectFindingWidget largeTitle;
-  static _RenderObjectFindingWidget createLargeTitle({
+  final KeyedSubtree largeTitle;
+  static KeyedSubtree createLargeTitle({
+    @required GlobalKey largeTitleKey,
     @required Widget userLargeTitle,
     @required bool large,
     @required bool automaticImplyTitle,
@@ -595,74 +628,75 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new _RenderObjectFindingWidget(
+    return new KeyedSubtree(
+      key: largeTitleKey,
       child: largeTitleContent,
     );
   }
 
-  final bool largeExpanded;
+
 }
 
-/// The [_NavigationBarStaticComponents]'s widgets are all instances of this class.
-///
-/// This allows Hero transitions with references to instances of this widget
-/// class to be able to get this widget's [RenderBox] and build transitions
-/// based on the [RenderBox]'s existing layout.
-class _RenderObjectFindingWidget extends StatelessWidget {
-  _RenderObjectFindingWidget({ @required this.child }) :
-    assert(child != null),
-    super(key: new GlobalKey());
+// /// The [_NavigationBarStaticComponents]'s widgets are all instances of this class.
+// ///
+// /// This allows Hero transitions with references to instances of this widget
+// /// class to be able to get this widget's [RenderBox] and build transitions
+// /// based on the [RenderBox]'s existing layout.
+// class _RenderObjectFindingWidget extends StatelessWidget {
+//   _RenderObjectFindingWidget({ @required this.child }) :
+//     assert(child != null),
+//     super(key: new GlobalKey());
 
-  final Widget child;
+//   final Widget child;
 
-  RenderBox get renderBox {
-    final GlobalKey globalKey = key;
-    final RenderBox renderBox = globalKey.currentContext?.findRenderObject();
-    assert(
-      renderBox != null && renderBox.attached,
-      'The renderBox getter should only be called after the widget is added to the tree',
-    );
-    return renderBox;
-  }
+//   RenderBox get renderBox {
+//     final GlobalKey globalKey = key;
+//     final RenderBox renderBox = globalKey.currentContext?.findRenderObject();
+//     assert(
+//       renderBox != null && renderBox.attached,
+//       'The renderBox getter should only be called after the widget is added to the tree',
+//     );
+//     return renderBox;
+//   }
 
-  bool get mounted {
-    final GlobalKey globalKey = key;
-    return globalKey.currentContext?.findRenderObject()?.attached ?? false;
-  }
+//   bool get mounted {
+//     final GlobalKey globalKey = key;
+//     return globalKey.currentContext?.findRenderObject()?.attached ?? false;
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    assert(() {
-      // This instance is already a _TransitionableNavigationBars, don't
-      // check that it's inside another _TransitionableNavigationBars.
-      bool inTransitionableNavBar = runtimeType == _TransitionableNavigationBar;
-      context.visitAncestorElements((Element ancestor) {
-        if (ancestor is StatelessElement) {
-          assert(
-            ancestor.widget.runtimeType != _NavigationBarTransition,
-            '_RenderObjectFindingWidget should never appear inside '
-            '_NavigationBarTransition. Keyed _RenderObjectFindingWidgets should '
-            'only serve as anchor points in _TransitionableNavigationBars rather '
-            'than appearing inside Hero flights themselves.',
-          );
-          if (ancestor.widget.runtimeType == _TransitionableNavigationBar) {
-            inTransitionableNavBar = true;
-          }
-        }
-        return true;
-      });
-      assert(
-        inTransitionableNavBar,
-        '_RenderObjectFindingWidget should only be used inside _TransitionableNavigationBars',
-      );
-      return true;
-    }());
-    return child;
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     assert(() {
+//       // This instance is already a _TransitionableNavigationBars, don't
+//       // check that it's inside another _TransitionableNavigationBars.
+//       bool inTransitionableNavBar = runtimeType == _TransitionableNavigationBar;
+//       context.visitAncestorElements((Element ancestor) {
+//         if (ancestor is StatelessElement) {
+//           assert(
+//             ancestor.widget.runtimeType != _NavigationBarTransition,
+//             '_RenderObjectFindingWidget should never appear inside '
+//             '_NavigationBarTransition. Keyed _RenderObjectFindingWidgets should '
+//             'only serve as anchor points in _TransitionableNavigationBars rather '
+//             'than appearing inside Hero flights themselves.',
+//           );
+//           if (ancestor.widget.runtimeType == _TransitionableNavigationBar) {
+//             inTransitionableNavBar = true;
+//           }
+//         }
+//         return true;
+//       });
+//       assert(
+//         inTransitionableNavBar,
+//         '_RenderObjectFindingWidget should only be used inside _TransitionableNavigationBars',
+//       );
+//       return true;
+//     }());
+//     return child;
+//   }
+// }
 
 class _BackChevron extends StatelessWidget {
-  const _BackChevron();
+  const _BackChevron({ Key key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -704,9 +738,11 @@ class _BackChevron extends StatelessWidget {
 /// is true.
 class _BackLabel extends StatelessWidget {
   const _BackLabel({
+    Key key,
     @required this.specifiedPreviousTitle,
     @required this.route,
-  }) : assert(route != null);
+  }) : assert(route != null),
+       super(key: key);
 
   final String specifiedPreviousTitle;
   final ModalRoute<dynamic> route;
