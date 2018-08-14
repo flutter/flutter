@@ -331,6 +331,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _position.animateTo(newValue, curve: Curves.fastOutSlowIn);
     else
       _position.value = newValue;
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
@@ -503,8 +504,12 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
+      config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
+      config.value = '${(value * 100).round()}%';
+      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
     }
   }
 
