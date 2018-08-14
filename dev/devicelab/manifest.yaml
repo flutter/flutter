@@ -458,6 +458,7 @@ tasks:
     description: >
       Measures memory usage after Android app suspend and resume.
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   analyzer_benchmark:
