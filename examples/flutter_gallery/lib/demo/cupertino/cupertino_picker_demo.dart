@@ -66,9 +66,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           _selectedColorIndex = index;
         });
       },
-      children: new List<Widget>.generate(coolColorNames.length, (int index) {
-        return new Center(child:
-        new Text(coolColorNames[index]),
+      children: new List<CupertinoPickerItem>.generate(coolColorNames.length, (int index) {
+        return new CupertinoPickerItem(
+          value: coolColorNames[index],
         );
       }),
     );
@@ -92,11 +92,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 _selectedHour = index;
               });
             },
-            children: new List<Widget>.generate(24, (int index) {
-              return new Container(
+            children: new List<CupertinoPickerItem>.generate(24, (int index) {
+              return new CupertinoPickerItem(
                 alignment: Alignment.centerRight,
                 padding: const EdgeInsets.only(right: 32.0),
-                child: new Text(index.toString()),
+                value: index.toString(),
               );
             }),
           ),
@@ -116,11 +116,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 _selectedMinute = index;
               });
             },
-            children: new List<Widget>.generate(60, (int index) {
-              return new Container(
+            children: new List<CupertinoPickerItem>.generate(60, (int index) {
+              return new CupertinoPickerItem(
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 32.0),
-                child: new Text(index.toString()),
+                value: index.toString(),
               );
             }),
           ),

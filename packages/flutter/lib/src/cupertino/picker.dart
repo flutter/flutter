@@ -16,11 +16,6 @@ const double _kDefaultDiameterRatio = 1.1;
 /// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
 
-// Two magic numbers used to determine the currently selected semantics node
-// from only the picker's scrollable offset.
-const double _kMagicMinOffset = 68.0;
-const double _kMagicMaxOffset = 80.0;
-
 /// An iOS-styled picker.
 ///
 /// Displays the provided [children] widgets on a wheel for selection and
@@ -107,8 +102,8 @@ class CupertinoPicker extends StatefulWidget {
   /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
   final ValueChanged<int> onSelectedItemChanged;
 
-  /// [Widget]s in the picker's scroll wheel.
-  final List<Widget> children;
+  /// [CupertinoPickerItem]s in the picker's scroll wheel.
+  final List<CupertinoPickerItem> children;
 
   @override
   State<StatefulWidget> createState() => new _CupertinoPickerState();
@@ -210,7 +205,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         new Positioned.fill(
           child: new _CupertinoPickerSemantics(
             controller: _controller,
-            childCount: widget.children.length,
+            items: widget.children,
             child: new ListWheelScrollView(
               controller: _controller,
               physics: const FixedExtentScrollPhysics(),
@@ -220,7 +215,18 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
               magnification: widget.magnification,
               itemExtent: widget.itemExtent,
               onSelectedItemChanged: _handleSelectedItemChanged,
-              children: widget.children,
+              children: widget.children.map<Widget>((CupertinoPickerItem item) {
+                Widget result = new Container(
+                  width: item.width,
+                  height: item.height,
+                  alignment: item.alignment,
+                  padding: item.padding,
+                  child: new Text(item.value),
+                );
+                if (item.center)
+                  result = new Center(child: result);
+                return result;
+              }).toList(),
             ),
           ),
         ),
@@ -243,21 +249,21 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   const _CupertinoPickerSemantics({
     @required this.controller,
-    @required this.childCount,
+    @required this.items,
     @required Widget child}) : super(child: child);
 
   // The currently selected index.
   final FixedExtentScrollController controller;
 
   // The total number of children, or null if unbounded.
-  final int childCount;
+  final List<CupertinoPickerItem> items;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return new _RenderCupertinoPickerSemantics(
       controller,
       Directionality.of(context),
-      childCount,
+      items,
     );
   }
 
@@ -265,7 +271,7 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
     renderObject
       ..textDirection = Directionality.of(context)
-      ..childCount = childCount
+      ..items = items
       ..controller = controller;
   }
 }
@@ -274,7 +280,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   _RenderCupertinoPickerSemantics(
     this._controller,
     this._textDirection,
-    this._childCount,
+    this._items,
   );
 
   FixedExtentScrollController get controller => _controller;
@@ -282,7 +288,10 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   set controller(FixedExtentScrollController value) {
     if (value != _controller)
       return;
+    _controller.removeListener(_handleScrollEvent);
     _controller = value;
+    if (_controller.initialItem != null)
+      _selectedItem = _controller.initialItem;
     _controller.addListener(_handleScrollEvent);
   }
 
@@ -295,18 +304,20 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  int get childCount => _childCount;
-  int _childCount;
-  set childCount(int value) {
-    if (value == _childCount)
+  List<CupertinoPickerItem> get items => _items;
+  List<CupertinoPickerItem> _items;
+  set items(List<CupertinoPickerItem> value) {
+    if (value == items)
       return;
-    _childCount = value;
+    _items = value;
     markNeedsSemanticsUpdate();
   }
 
   int _selectedItem = 0;
 
   void _handleScrollEvent() {
+    if (controller.selectedItem == _selectedItem)
+      return;
     _selectedItem = controller.selectedItem;
     markNeedsSemanticsUpdate();
   }
@@ -320,7 +331,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   }
 
   void _handleIncrease() {
-    if (_childCount != null && _controller.selectedItem - 1 == _childCount)
+    if (_items != null && _controller.selectedItem - 1 == _items.length)
       return;
     _controller.jumpToItem(
       _controller.selectedItem + 1,
@@ -331,36 +342,52 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
-    if (_childCount != null && _selectedItem < _childCount - 1)
+    if (_items != null && _selectedItem < _items.length - 1) {
       config.onIncrease = _handleIncrease;
-    if (_selectedItem > 0)
+      config.increasedValue = _items[_selectedItem + 1].value;
+    }
+    if (_selectedItem > 0) {
       config.onDecrease = _handleDecrease;
+      config.decreasedValue = _items[_selectedItem - 1].value;
+    }
+    config.value = _items[_selectedItem].value;
     config.textDirection = textDirection;
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    if (children.isEmpty)
-      return super.assembleSemanticsNode(node, config, children);
-    final SemanticsNode scrollable = children.first;
-    final List<SemanticsNode> labels = <SemanticsNode>[];
-    scrollable.visitChildren((SemanticsNode child) {
-      labels.add(child);
-      return true;
-    });
-    int middle = 0;
-    for (int i = 0; i < labels.length; i++) {
-      final SemanticsNode label = labels[i];
-      final double offset = label.transform.getTranslation()[1];
-      if (offset > _kMagicMinOffset && offset < _kMagicMaxOffset) {
-        middle = i;
-      }
-    }
-    config.value = labels[middle].label;
-    if (middle + 1 < labels.length)
-      config.increasedValue = labels[middle + 1].label;
-    if (middle - 1 >= 0)
-      config.decreasedValue = labels[middle - 1].label;
-    super.assembleSemanticsNode(node, config, const <SemanticsNode>[]);
-  }
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {}
+}
+
+/// The [CupertinoPickerItem] is a value that can be picked from a [CupertinoPicker].
+class CupertinoPickerItem {
+  /// Create a new [CupertinoPickerItem] from a non-null, non-empty [value].
+  const CupertinoPickerItem({
+    @required this.value,
+    this.center = false,
+    this.height,
+    this.alignment,
+    this.width,
+    this.padding,
+  }) : assert(value != null),
+       assert(value != '');
+
+  /// Whether to center the picker item within its container.
+  ///
+  /// Defaults to false.
+  final bool center;
+
+  /// Padding
+  final EdgeInsets padding;
+
+  /// Alignment
+  final Alignment alignment;
+
+  /// Width
+  final double width;
+
+  /// Height
+  final double height;
+
+  /// The value that can be picked.
+  final String value;
 }

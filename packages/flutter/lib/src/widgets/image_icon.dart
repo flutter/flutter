@@ -61,7 +61,7 @@ class ImageIcon extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
+  ///  * [Semantics.value], which is set to [semanticLabel] in the underlying
   ///    [Semantics] widget.
   final String semanticLabel;
 

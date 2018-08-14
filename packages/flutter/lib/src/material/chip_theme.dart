@@ -292,7 +292,7 @@ class ChipThemeData extends Diagnosticable {
   /// The chip is selected when [selected] is true.
   final Color secondarySelectedColor;
 
-  /// The padding around the [label] widget.
+  /// The padding around the [value] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
   /// label, and zero on top and bottom.

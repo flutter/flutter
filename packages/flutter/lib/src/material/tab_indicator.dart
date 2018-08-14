@@ -13,7 +13,7 @@ import 'colors.dart';
 /// The [borderSide] defines the line's color and weight.
 ///
 /// The [TabBar.indicatorSize] property can be used to define the indicator's
-/// bounds in terms of its (centered) widget with [TabIndicatorSize.label],
+/// bounds in terms of its (centered) widget with [TabIndicatorSize.value],
 /// or the entire tab with [TabIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
   /// Create an underline style selected tab indicator.
@@ -31,7 +31,7 @@ class UnderlineTabIndicator extends Decoration {
   ///
   /// The [TabBar.indicatorSize] property can be used to define the
   /// tab indicator's bounds in terms of its (centered) tab widget with
-  /// [TabIndicatorSize.label], or the entire tab with [TabIndicatorSize.tab].
+  /// [TabIndicatorSize.value], or the entire tab with [TabIndicatorSize.tab].
   final EdgeInsetsGeometry insets;
 
   @override

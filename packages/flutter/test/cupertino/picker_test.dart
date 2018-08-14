@@ -24,11 +24,11 @@ void main() {
                 scrollController: controller,
                 itemExtent: 50.0,
                 onSelectedItemChanged: (_) {},
-                children: new List<Widget>.generate(3, (int index) {
-                  return new Container(
+                children: new List<CupertinoPickerItem>.generate(3, (int index) {
+                  return new CupertinoPickerItem(
                     height: 50.0,
                     width: 300.0,
-                    child: new Text(index.toString()),
+                    value: index.toString(),
                   );
                 }),
               ),
@@ -74,13 +74,11 @@ void main() {
             child: new CupertinoPicker(
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: new List<Widget>.generate(100, (int index) {
-                return new Center(
-                  child: new Container(
-                    width: 400.0,
-                    height: 100.0,
-                    child: new Text(index.toString()),
-                  ),
+              children: new List<CupertinoPickerItem>.generate(100, (int index) {
+                return new CupertinoPickerItem(
+                  width: 400.0,
+                  height: 100.0,
+                  value: index.toString(),
                 );
               }),
             ),
@@ -129,13 +127,11 @@ void main() {
             child: new CupertinoPicker(
               itemExtent: 100.0,
               onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: new List<Widget>.generate(100, (int index) {
-                return new Center(
-                  child: new Container(
-                    width: 400.0,
-                    height: 100.0,
-                    child: new Text(index.toString()),
-                  ),
+              children: new List<CupertinoPickerItem>.generate(100, (int index) {
+                return new CupertinoPickerItem(
+                  width: 400.0,
+                  height: 100.0,
+                  value: index.toString(),
                 );
               }),
             ),
@@ -163,13 +159,11 @@ void main() {
             scrollController: controller,
             itemExtent: 100.0,
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: new List<Widget>.generate(100, (int index) {
-              return new Center(
-                child: new Container(
-                  width: 400.0,
-                  height: 100.0,
-                  child: new Text(index.toString()),
-                ),
+            children: new List<CupertinoPickerItem>.generate(100, (int index) {
+              return new CupertinoPickerItem(
+                width: 400.0,
+                height: 100.0,
+                value: index.toString(),
               );
             }),
           ),
@@ -220,13 +214,11 @@ void main() {
             scrollController: controller,
             itemExtent: 100.0,
             onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: new List<Widget>.generate(100, (int index) {
-              return new Center(
-                child: new Container(
-                  width: 400.0,
-                  height: 100.0,
-                  child: new Text(index.toString()),
-                ),
+            children: new List<CupertinoPickerItem>.generate(100, (int index) {
+              return new CupertinoPickerItem(
+                width: 400.0,
+                height: 100.0,
+                value: index.toString(),
               );
             }),
           ),
