@@ -90,7 +90,7 @@ Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String 
 
   for (String path in assets.entries.keys) {
     outFile.write('data/$path=$outputBase/$path\n');
-    if (componentName.isNotEmpty) {
+    if (componentName != null && componentName.isNotEmpty) {
       outFile.write('data/$componentName/$path=$outputBase/$path\n');
     }
   }
