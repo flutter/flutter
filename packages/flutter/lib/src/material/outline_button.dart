@@ -98,7 +98,7 @@ class OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     this.shape,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
