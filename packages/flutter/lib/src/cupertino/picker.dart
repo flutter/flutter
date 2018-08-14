@@ -16,6 +16,11 @@ const double _kDefaultDiameterRatio = 1.1;
 /// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
 
+// Two magic numbers used to determine the currently selected semantics node
+// from only the picker's scrollable offset.
+const double _kMagicMinOffset = 68.0;
+const double _kMagicMaxOffset = 80.0;
+
 /// An iOS-styled picker.
 ///
 /// Displays the provided [children] widgets on a wheel for selection and
@@ -111,6 +116,13 @@ class CupertinoPicker extends StatefulWidget {
 
 class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
+  ScrollController _controller;
+
+  @override
+  void initState() {
+    _controller = widget.scrollController ?? new FixedExtentScrollController();
+    super.initState();
+  }
 
   void _handleSelectedItemChanged(int index) {
     // Only the haptic engine hardware on iOS devices would produce the
@@ -196,16 +208,20 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     Widget result = new Stack(
       children: <Widget>[
         new Positioned.fill(
-          child: new ListWheelScrollView(
-            controller: widget.scrollController,
-            physics: const FixedExtentScrollPhysics(),
-            diameterRatio: widget.diameterRatio,
-            offAxisFraction: widget.offAxisFraction,
-            useMagnifier: widget.useMagnifier,
-            magnification: widget.magnification,
-            itemExtent: widget.itemExtent,
-            onSelectedItemChanged: _handleSelectedItemChanged,
-            children: widget.children,
+          child: new _CupertinoPickerSemantics(
+            controller: _controller,
+            childCount: widget.children.length,
+            child: new ListWheelScrollView(
+              controller: _controller,
+              physics: const FixedExtentScrollPhysics(),
+              diameterRatio: widget.diameterRatio,
+              offAxisFraction: widget.offAxisFraction,
+              useMagnifier: widget.useMagnifier,
+              magnification: widget.magnification,
+              itemExtent: widget.itemExtent,
+              onSelectedItemChanged: _handleSelectedItemChanged,
+              children: widget.children,
+            ),
           ),
         ),
         _buildGradientScreen(),
@@ -221,5 +237,130 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       );
     }
     return result;
+  }
+}
+
+class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
+  const _CupertinoPickerSemantics({
+    @required this.controller,
+    @required this.childCount,
+    @required Widget child}) : super(child: child);
+
+  // The currently selected index.
+  final FixedExtentScrollController controller;
+
+  // The total number of children, or null if unbounded.
+  final int childCount;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return new _RenderCupertinoPickerSemantics(
+      controller,
+      Directionality.of(context),
+      childCount,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context)
+      ..childCount = childCount
+      ..controller = controller;
+  }
+}
+
+class _RenderCupertinoPickerSemantics extends RenderProxyBox {
+  _RenderCupertinoPickerSemantics(
+    this._controller,
+    this._textDirection,
+    this._childCount,
+  );
+
+  FixedExtentScrollController get controller => _controller;
+  FixedExtentScrollController _controller;
+  set controller(FixedExtentScrollController value) {
+    if (value != _controller)
+      return;
+    _controller = value;
+    _controller.addListener(_handleScrollEvent);
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  int get childCount => _childCount;
+  int _childCount;
+  set childCount(int value) {
+    if (value == _childCount)
+      return;
+    _childCount = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  int _selectedItem = 0;
+
+  void _handleScrollEvent() {
+    _selectedItem = controller.selectedItem;
+    markNeedsSemanticsUpdate();
+  }
+
+  void _handleDecrease() {
+    if (_controller.selectedItem == 0)
+      return;
+    _controller.jumpToItem(
+      _controller.selectedItem - 1,
+    );
+  }
+
+  void _handleIncrease() {
+    if (_childCount != null && _controller.selectedItem - 1 == _childCount)
+      return;
+    _controller.jumpToItem(
+      _controller.selectedItem + 1,
+    );
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    if (_childCount != null && _selectedItem < _childCount - 1)
+      config.onIncrease = _handleIncrease;
+    if (_selectedItem > 0)
+      config.onDecrease = _handleDecrease;
+    config.textDirection = textDirection;
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty)
+      return super.assembleSemanticsNode(node, config, children);
+    final SemanticsNode scrollable = children.first;
+    final List<SemanticsNode> labels = <SemanticsNode>[];
+    scrollable.visitChildren((SemanticsNode child) {
+      labels.add(child);
+      return true;
+    });
+    int middle = 0;
+    for (int i = 0; i < labels.length; i++) {
+      final SemanticsNode label = labels[i];
+      final double offset = label.transform.getTranslation()[1];
+      if (offset > _kMagicMinOffset && offset < _kMagicMaxOffset) {
+        middle = i;
+      }
+    }
+    config.value = labels[middle].label;
+    if (middle + 1 < labels.length)
+      config.increasedValue = labels[middle + 1].label;
+    if (middle - 1 >= 0)
+      config.decreasedValue = labels[middle - 1].label;
+    super.assembleSemanticsNode(node, config, const <SemanticsNode>[]);
   }
 }
