@@ -408,6 +408,11 @@ class _FirstFinder extends ChainedFinder {
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     yield parentCandidates.first;
   }
+
+  @override
+  Iterable<Element> get allCandidates {
+    return parent.allCandidates;
+  }
 }
 
 class _LastFinder extends ChainedFinder {
@@ -419,6 +424,11 @@ class _LastFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     yield parentCandidates.last;
+  }
+
+  @override
+  Iterable<Element> get allCandidates {
+    return parent.allCandidates;
   }
 }
 
@@ -433,6 +443,11 @@ class _IndexFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     yield parentCandidates.elementAt(index);
+  }
+
+  @override
+  Iterable<Element> get allCandidates {
+    return parent.allCandidates;
   }
 }
 
@@ -459,6 +474,11 @@ class _HitTestableFinder extends ChainedFinder {
         }
       }
     }
+  }
+
+  @override
+  Iterable<Element> get allCandidates {
+    return parent.allCandidates;
   }
 }
 

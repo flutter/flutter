@@ -71,34 +71,53 @@ Finder inHero(WidgetTester tester, Finder finder) {
   final RenderStack theaterStack = theater.child;
   return find.descendant(
     of: find.byElementPredicate(
-      (Element element) => element.renderObject == theaterStack.lastChild,
+      (Element element) {
+        return element is RenderObjectElement &&
+            element.renderObject == theaterStack.lastChild;
+      }
     ),
     matching: finder,
   );
 }
 
 void main() {
-  testWidgets('Middle moves between middle and back label', (
+  testWidgets('Bottom middle moves between middle and back label', (
+      WidgetTester tester) async {
+    // await startTransitionBetween(tester, fromTitle: 'Page 1');
+
+    // // Be mid-transition.
+    // await tester.pump(const Duration(milliseconds: 50));
+
+    // // There's 2 of them. One from the top route's back label and one from the
+    // // bottom route's middle widget.
+    // expect(inHero(tester, find.text('Page 1')), findsNWidgets(2));
+
+    // // Since they have the same text, they should be more or less at the same
+    // // place with minor differences due to different
+    // expect(
+    //   tester.getTopLeft(inHero(tester, find.text('Page 1')).first),
+    //   const Offset(289.1547948519389, 13.5),
+    // );
+    // expect(
+    //   tester.getTopLeft(inHero(tester, find.text('Page 1')).last),
+    //   const Offset(331.0724935531616, 13.5),
+    // );
+  });
+
+  testWidgets('Bottom middle and top back label transitions their font', (
       WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 50));
 
-    // There's 2 of them. One from the top route's back label and one from the
-    // bottom route's middle widget.
-    expect(inHero(tester, find.text('Page 1')), findsNWidgets(2));
-    debugDumpApp();
+    RenderParagraph text = tester.renderObject(inHero(tester, find.text('Page 1')).first);
 
-    // Since they have the same text, they should be more or less at the same
-    // place.
-    expect(
-      tester.getTopLeft(inHero(tester, find.text('Page 1')).first),
-      const Offset(235.13582849502563, 13.5),
-    );
-    expect(
-      tester.getTopLeft(inHero(tester, find.text('Page 1')).last),
-      const Offset(235.13582849502563, 13.5),
-    );
+    print('all');
+    find.text('Page 1').evaluate().forEach((Element element) {print(element.findRenderObject());});
+    print(inHero(tester, find.text('Page 1')));
+    print(inHero(tester, find.text('Page 1')).first.evaluate().first.renderObject);
+    print(inHero(tester, find.text('Page 1')).evaluate().first.renderObject);
+    // debugDumpApp();
   });
 }
