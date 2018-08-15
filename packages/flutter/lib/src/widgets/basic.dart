@@ -5165,6 +5165,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     String onLongPressHint,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
+    int indexInParent,
     VoidCallback onTap,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
@@ -5212,6 +5213,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       hint: hint,
       textDirection: textDirection,
       sortKey: sortKey,
+      indexInParent: indexInParent,
       onTap: onTap,
       onLongPress: onLongPress,
       onScrollLeft: onScrollLeft,
@@ -5321,6 +5323,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
+      indexInParent: properties.indexInParent,
       onTap: properties.onTap,
       onLongPress: properties.onLongPress,
       onScrollLeft: properties.onScrollLeft,
@@ -5383,6 +5386,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
+      ..indexInParent = properties.indexInParent
       ..onTap = properties.onTap
       ..onLongPress = properties.onLongPress
       ..onScrollLeft = properties.onScrollLeft

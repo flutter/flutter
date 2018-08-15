@@ -1545,7 +1545,7 @@ class _MatchesSemanticsData extends Matcher {
 
   @override
   Description describe(Description description) {
-    description.add('has semantics');
+    description.add('has semantics ');
     if (label != null)
       description.add('with label: $label ');
     if (value != null)
@@ -1553,23 +1553,23 @@ class _MatchesSemanticsData extends Matcher {
     if (hint != null)
       description.add('with hint: $hint ');
     if (increasedValue != null)
-      description.add('with increasedValue: $increasedValue');
+      description.add('with increasedValue: $increasedValue ');
     if (decreasedValue != null)
-      description.add('with decreasedValue: $decreasedValue');
+      description.add('with decreasedValue: $decreasedValue ');
     if (actions != null)
-      description.add('with actions:').addDescriptionOf(actions);
+      description.add('with actions:').addDescriptionOf(actions).add(' ');
     if (flags != null)
-      description.add('with flags:').addDescriptionOf(flags);
+      description.add('with flags:').addDescriptionOf(flags).add(' ');
     if (textDirection != null)
       description.add('with textDirection: $textDirection ');
     if (rect != null)
-      description.add('with rect: $rect');
+      description.add('with rect: $rect ');
     if (size != null)
-      description.add('with size: $size');
+      description.add('with size: $size ');
     if (customActions != null)
       description.add('with custom actions: $customActions');
     if (hintOverrides != null)
-      description.add('with custom hints: $hintOverrides');
+      description.add('with custom hints: $hintOverrides ');
     return description;
   }
 

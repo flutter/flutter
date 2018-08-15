@@ -191,6 +191,7 @@ class SemanticsData extends Diagnosticable {
     @required this.scrollPosition,
     @required this.scrollExtentMax,
     @required this.scrollExtentMin,
+    this.indexInParent,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -304,6 +305,9 @@ class SemanticsData extends Diagnosticable {
   ///   * [CustomSemanticsAction], for an explanation of custom actions.
   final List<int> customSemanticsActionIds;
 
+  /// The index of the corresponding semantics node with respect to its parent.
+  final int indexInParent;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -346,6 +350,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(new DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(new DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(new IntProperty('indexInParent', indexInParent, defaultValue: null));
   }
 
   @override
@@ -368,6 +373,7 @@ class SemanticsData extends Diagnosticable {
         && typedOther.scrollExtentMax == scrollExtentMax
         && typedOther.scrollExtentMin == scrollExtentMin
         && typedOther.transform == transform
+        && typedOther.indexInParent == indexInParent
         && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
   }
 
@@ -389,6 +395,7 @@ class SemanticsData extends Diagnosticable {
       scrollExtentMax,
       scrollExtentMin,
       transform,
+      indexInParent,
       ui.hashList(customSemanticsActionIds),
     );
   }
@@ -521,6 +528,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.hintOverrides,
     this.textDirection,
     this.sortKey,
+    this.indexInParent,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -738,6 +746,9 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
   final String hint;
+
+  /// Describes the index of a semantics node with respect to its parent.
+  final int indexInParent;
 
   /// Provides hint values which override the default hints on supported
   /// platforms.
@@ -1495,6 +1506,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   double get scrollExtentMin => _scrollExtentMin;
   double _scrollExtentMin;
 
+  /// The index of this semantics node with respect to its parent.
+  int get indexInParent => _indexInParent;
+  int _indexInParent;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
@@ -1533,6 +1548,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
+    _indexInParent = config.indexInParent;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -1565,6 +1581,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
     double scrollExtentMin = _scrollExtentMin;
+    int indexInParent = _indexInParent;
     final Set<int> customSemanticsActionIds = new Set<int>();
     for (CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -1595,6 +1612,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         scrollPosition ??= node._scrollPosition;
         scrollExtentMax ??= node._scrollExtentMax;
         scrollExtentMin ??= node._scrollExtentMin;
+        indexInParent ??= node._indexInParent;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1657,6 +1675,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
+      indexInParent: indexInParent,
       customSemanticsActionIds: customSemanticsActionIds.toList()..sort(),
     );
   }
@@ -1851,6 +1870,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(new DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(new DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
+    properties.add(new IntProperty('relativeIndex', indexInParent, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2426,6 +2446,9 @@ class SemanticsConfiguration {
   /// Paint order as established by [visitChildrenForSemantics] is used to
   /// determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
+
+  /// The relative index of a semantics node with respect to its parent.
+  int indexInParent;
 
   // SEMANTIC ANNOTATIONS
   // These will end up on [SemanticNode]s generated from
@@ -3296,6 +3319,7 @@ class SemanticsConfiguration {
     _scrollExtentMax ??= other._scrollExtentMax;
     _scrollExtentMin ??= other._scrollExtentMin;
     _hintOverrides ??= other._hintOverrides;
+    indexInParent ??= other.indexInParent;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3345,7 +3369,8 @@ class SemanticsConfiguration {
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions)
-      .._customSemanticsActions.addAll(_customSemanticsActions);
+      .._customSemanticsActions.addAll(_customSemanticsActions)
+      ..indexInParent = indexInParent;
   }
 }
 
