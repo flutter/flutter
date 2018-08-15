@@ -74,9 +74,9 @@ void main() {
     );
 
     // Get the text back. By correctly chaining the descendant finder's
-    // candidates, it should find 1 instead of 2 (which would have been `last`
-    // if the _LastFinder wasn't correctly chained after the descendant's
-    // candidates).
+    // candidates, it should find 1 instead of 2. If the _LastFinder wasn't
+    // correctly chained after the descendant's candidates, the last element
+    // with a Text widget would have been 2.
     final Text text = find.descendant(
       of: find.byKey(key1),
       matching: find.byType(Text),
