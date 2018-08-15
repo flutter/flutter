@@ -11,9 +11,6 @@ class BasicProject extends TestProject {
   @override
   final String pubspec = '''
   name: test
-  environment:
-    sdk: ">=2.0.0-dev.68.0 <3.0.0"
-
   dependencies:
     flutter:
       sdk: flutter
