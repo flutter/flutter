@@ -17,9 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'widget_tester.dart' show WidgetTester;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -459,6 +461,37 @@ Matcher matchesSemanticsData({
     customActions: customActions,
     hintOverrides: hintOverrides,
   );
+}
+
+/// Asserts that the currently rendered widget meets the provided accessibility
+/// `guideline`.
+///
+/// This matcher requires the result to be awaited and for semantics to be
+/// enabled first.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// handle.dispose();
+/// ```
+///
+/// Supported accessibility guidelines:
+///
+///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
+  return new _MatchesAccessibilityGuideline(guideline);
+}
+
+/// The inverse matcher of [meetsGuideline].
+///
+/// This is needed because the [isNot] matcher does not compose with an
+/// [AsyncMatcher].
+AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
+  return new _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -1658,5 +1691,43 @@ class _MatchesSemanticsData extends Matcher {
       bool verbose
       ) {
     return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchesAccessibilityGuideline extends AsyncMatcher {
+  _MatchesAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add(guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return null;
+    return result.reason;
+  }
+}
+
+class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
+  _DoesNotMatchAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add('Does not ' + guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return 'Failed';
+    return null;
   }
 }
