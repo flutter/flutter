@@ -114,7 +114,7 @@ void main() {
 class SpyStringValueNotifier extends ValueNotifier<String> {
   SpyStringValueNotifier(String initialValue) : super(initialValue);
 
-  // Override for test visibility only.
+  /// Override for test visibility only.
   @override
   bool get hasListeners => super.hasListeners;
 }
