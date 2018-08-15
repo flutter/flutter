@@ -383,8 +383,16 @@ abstract class ChainedFinder extends Finder {
   /// Another [Finder] that will run first.
   final Finder parent;
 
+  /// Return another [Iterable] when given an [Iterable] of candidates from a
+  /// parent [Finder].
+  ///
+  /// This is the method to implement when subclassing [ChainedFinder].
+  Iterable<Element> filter(Iterable<Element> parentCandidates);
+
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) => parent.apply(candidates);
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return filter(parent.apply(candidates));
+  }
 
   @override
   Iterable<Element> get allCandidates => parent.allCandidates;
@@ -397,8 +405,8 @@ class _FirstFinder extends ChainedFinder {
   String get description => '${parent.description} (ignoring all but first)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield super.apply(candidates).first;
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.first;
   }
 }
 
@@ -409,8 +417,8 @@ class _LastFinder extends ChainedFinder {
   String get description => '${parent.description} (ignoring all but last)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield super.apply(candidates).last;
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.last;
   }
 }
 
@@ -423,8 +431,8 @@ class _IndexFinder extends ChainedFinder {
   String get description => '${parent.description} (ignoring all but index $index)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield super.apply(candidates).elementAt(index);
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.elementAt(index);
   }
 }
 
@@ -437,8 +445,8 @@ class _HitTestableFinder extends ChainedFinder {
   String get description => '${parent.description} (considering only hit-testable ones)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    for (final Element candidate in super.apply(candidates)) {
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    for (final Element candidate in parentCandidates) {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
