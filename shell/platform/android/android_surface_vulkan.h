@@ -36,6 +36,9 @@ class AndroidSurfaceVulkan : public AndroidSurface {
   bool ResourceContextMakeCurrent() override;
 
   // |shell::AndroidSurface|
+  bool ResourceContextClearCurrent() override;
+
+  // |shell::AndroidSurface|
   bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
  private:

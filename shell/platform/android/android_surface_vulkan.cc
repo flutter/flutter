@@ -65,7 +65,9 @@ bool AndroidSurfaceVulkan::ResourceContextMakeCurrent() {
   return false;
 }
 
+// |shell::AndroidSurface|
 bool AndroidSurfaceVulkan::ResourceContextClearCurrent() {
+  FML_DLOG(ERROR) << "The vulkan backend does not support resource contexts.";
   return false;
 }
 
