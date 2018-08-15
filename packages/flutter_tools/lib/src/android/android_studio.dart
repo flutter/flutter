@@ -25,17 +25,19 @@ AndroidStudio get androidStudio => context[AndroidStudio];
 // $HOME/Applications/Android Studio.app/Contents/
 
 final RegExp _dotHomeStudioVersionMatcher =
-    RegExp(r'^\.AndroidStudio([^\d]*)([\d.]+)');
+    RegExp(r'^\.(AndroidStudio[^\d]*)([\d.]+)');
 
 String get javaPath => androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
-  AndroidStudio(this.directory, {Version version, this.configured})
+  AndroidStudio(this.directory,
+      {Version version, this.configured, this.studioAppName = 'AndroidStudio'})
       : this.version = version ?? Version.unknown {
     _init();
   }
 
   final String directory;
+  final String studioAppName;
   final Version version;
   final String configured;
 
@@ -65,7 +67,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return null;
     }
     final Version version = Version.parse(versionMatch[2]);
-    if (version == null) {
+    final String studioAppName = versionMatch[1];
+    if (studioAppName == null || version == null) {
       return null;
     }
     String installPath;
@@ -77,7 +80,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       // ignored, installPath will be null, which is handled below
     }
     if (installPath != null && fs.isDirectorySync(installPath)) {
-      return AndroidStudio(installPath, version: version);
+      return AndroidStudio(
+          installPath,
+          version: version,
+          studioAppName: studioAppName,
+      );
     }
     return null;
   }
@@ -98,7 +105,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             'AndroidStudio$major.$minor');
       } else {
         _pluginsPath = fs.path.join(homeDirPath,
-            '.AndroidStudio$major.$minor',
+            '.$studioAppName$major.$minor',
             'config',
             'plugins');
       }
