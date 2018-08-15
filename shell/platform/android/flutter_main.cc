@@ -67,7 +67,7 @@ void FlutterMain::Init(JNIEnv* env,
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
     auto platform_kernel_path =
-        fml::paths::JoinPaths({settings.assets_path, "platform.dill"});
+        fml::paths::JoinPaths({settings.assets_path, "platform_strong.dill"});
     auto application_kernel_path =
         fml::paths::JoinPaths({settings.assets_path, "kernel_blob.bin"});
 
