@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-// ignore: implementation_imports
-import 'package:test/src/executable.dart' as test;
+import 'package:meta/meta.dart';
+import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -21,20 +21,21 @@ import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
 Future<int> runTests(
-    List<String> testFiles, {
-    Directory workDir,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    bool enableObservatory = false,
-    bool startPaused = false,
-    bool ipv6 = false,
-    bool machine = false,
-    bool previewDart2 = false,
-    String precompiledDillPath,
-    bool trackWidgetCreation = false,
-    bool updateGoldens = false,
-    TestWatcher watcher,
-    }) async {
+  List<String> testFiles, {
+  Directory workDir,
+  List<String> names = const <String>[],
+  List<String> plainNames = const <String>[],
+  bool enableObservatory = false,
+  bool startPaused = false,
+  bool ipv6 = false,
+  bool machine = false,
+  bool previewDart2 = false,
+  String precompiledDillPath,
+  bool trackWidgetCreation = false,
+  bool updateGoldens = false,
+  TestWatcher watcher,
+  @required int concurrency,
+}) async {
   if (trackWidgetCreation && !previewDart2) {
     throw new UsageException(
       '--track-widget-creation is valid only when --preview-dart-2 is specified.',
@@ -54,13 +55,7 @@ Future<int> runTests(
     testArgs.addAll(<String>['-r', 'compact']);
   }
 
-  if (enableObservatory) { // (In particular, for collecting code coverage.)
-    // Turn on concurrency, but just barely. This is a trade-off between running
-    // too many tests such that they all time out, and too few tests such that
-    // the tests overall take too much time. The current number is empirically
-    // based on what our infrastructure can handle, which isn't ideal...
-    testArgs.add('--concurrency=2');
-  }
+  testArgs.add('--concurrency=$concurrency');
 
   for (String name in names) {
     testArgs..add('--name')..add(name);
