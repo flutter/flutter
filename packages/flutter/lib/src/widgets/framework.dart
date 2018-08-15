@@ -4043,7 +4043,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
 /// Used by [InheritedElement] to represent the aspects of its
 /// [InheritedWidget] that will cause a dependent to be rebuilt.
 ///
-/// If [isGlobal] is true then a dependent widget should be rebuilt
+/// If [isUniversal] is true then a dependent widget should be rebuilt
 /// whenever the inherited widget it depends on changes.
 ///
 /// See also:
@@ -4061,7 +4061,7 @@ class InheritedDependencies {
   /// This method returns true. Subclasses may return false because their
   /// dependent widgets should be conditionally rebuilt, depending on
   /// what aspect of the inherited widget changes.
-  bool get isGlobal => true;
+  bool get isUniversal => true;
 }
 
 /// An [Element] that uses an [InheritedWidget] as its configuration.
@@ -4100,7 +4100,7 @@ class InheritedElement extends ProxyElement {
   /// Each dependent element is mapped to a single [InheritedDependencies]
   /// object which represents how the element depends on this
   /// [InheritedElement]. By default the inherited dependencies value has
-  /// [InheritedDependencies.isGlobal] true, which means that the dependent
+  /// [InheritedDependencies.isUniversal] true, which means that the dependent
   /// element should be rebuilt whenever this inherited element changes.
   ///
   /// See also:
@@ -4122,7 +4122,7 @@ class InheritedElement extends ProxyElement {
   /// Each dependent element is mapped to a single [InheritedDependencies]
   /// object which represents how the element depends on this
   /// [InheritedElement]. By default the inherited dependencies value has
-  /// [InheritedDependencies.isGlobal] true, which means that the dependent
+  /// [InheritedDependencies.isUniversal] true, which means that the dependent
   /// element should be rebuilt whenever this inherited element changes.
   ///
   /// See also:
@@ -4146,7 +4146,7 @@ class InheritedElement extends ProxyElement {
   /// dependencies with [getDependencies].
   ///
   /// By default this method sets the inherited dependencies for [dependent]
-  /// to a value for which [InheritedDependencies.isGlobal] is true.
+  /// to a value for which [InheritedDependencies.isUniversal] is true.
   ///
   /// See also:
   ///
@@ -4159,7 +4159,7 @@ class InheritedElement extends ProxyElement {
   ///    to be rebuilt.
   @protected
   void updateDependencies(Element dependent, Object aspect) {
-    setDependencies(dependent, const InheritedDependencies()); // isGlobal => true
+    setDependencies(dependent, const InheritedDependencies()); // isUniversal => true
   }
 
   /// Called by [notifyClients] for each dependent.

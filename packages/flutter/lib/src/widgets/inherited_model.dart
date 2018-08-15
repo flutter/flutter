@@ -30,14 +30,15 @@ import 'framework.dart';
 /// ```dart
 /// class MyModel extends InheritedModel<String> {
 ///   // ...
-///   static MyModel of(BuildContext context, String dependency) {
-///     return InheritedModel.inheritFrom<MyModel>(context, aspect: dependency);
+///   static MyModel of(BuildContext context, String aspect) {
+///     return InheritedModel.inheritFrom<MyModel>(context, aspect: aspect);
 ///   }
 /// }
 /// ```
 ///
 /// Calling `MyModel.of(context, 'foo')` means that `context` should only
-/// be rebuilt when the `foo` aspect of `MyModel` changes.
+/// be rebuilt when the `foo` aspect of `MyModel` changes. If the aspect
+/// is null, then the the model supports all aspects.
 ///
 /// When the inherited model is rebuilt the [updateShouldNotify] and
 /// [updateShouldNotifyDependent] methods are used to decide what
@@ -58,7 +59,7 @@ import 'framework.dart';
 ///
 ///   @override
 ///   bool updateShouldNotify(ABCModel old) {
-///     return a != old.a || b != old.b;
+///     return return super.updateShouldNotify(old) || a != old.a || b != old.b;
 ///   }
 ///
 ///   @override
@@ -78,33 +79,54 @@ import 'framework.dart';
 /// If a widget depends on the model but doesn't specify an aspect,
 /// then changes in the model will cause the widget to be rebuilt
 /// unconditionally.
+///
+/// The `super.updateShouldNotify()` call, which is required, will return
+/// true if the model's [aspects] have changed. By default the model's
+/// [aspects] are null, which means the model supports all aspects.
 abstract class InheritedModel<T> extends InheritedWidget {
-  const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
+  /// Creates an inherited widget that supports partial dependencies called "aspects".
+  ///
+  /// If [aspects] is null (the default) then this model is "universal",
+  /// i.e. it supports all aspects.
+  const InheritedModel({ Key key, Widget child, this.aspects }) : super(key: key, child: child);
 
   @override
   InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
 
+  /// The features of this model that widgets can depend on with [inheritFrom].
+  ///
+  /// This property is null by default, which means that the model supports
+  /// all aspects.
+  final Set<T> aspects;
+
+  @mustCallSuper
+  @override
+  bool updateShouldNotify(covariant InheritedModel<T> oldWidget) {
+    return _notEqual<T>(aspects, oldWidget.aspects);
+  }
+
   /// Return true if the changes between this model and [oldWidget] match any
   /// of the [dependencies].
   @protected
-  bool updateShouldNotifyDependent(
-    covariant InheritedModel<T> oldWidget, Set<T> dependencies);
+  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
 
-  // Return the first ancestor of context whose widget is type T and for which
-  // visitor(widget) returns false. If visitor is null then this function is the
-  // same as: context.ancestorInheritedElementForWidgetOfExactType(T).
-  static InheritedElement _findModel<T extends InheritedModel<Object>>(
+  // The [result] will be a list of all of context's type T ancestors concluding
+  // with the one that supports the specified model [aspect].
+  static void _findModels<T extends InheritedModel<Object>>(
     BuildContext context,
-    bool visitor(T widget)
+    Object aspect,
+    List<InheritedElement> result,
   ) {
     final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
     if (model == null)
-      return null;
+      return;
+
+    result.add(model);
 
     assert(model.widget is T);
     final T modelWidget = model.widget;
-    if (visitor == null || !visitor(modelWidget))
-      return model;
+    if (aspect == null || modelWidget.aspects == null || modelWidget.aspects.contains(aspect))
+      return;
 
     Element modelParent;
     model.visitAncestorElements((Element ancestor) {
@@ -112,8 +134,8 @@ abstract class InheritedModel<T> extends InheritedWidget {
       return false;
     });
     if (modelParent == null)
-      return null;
-    return _findModel<T>(modelParent, visitor);
+      return;
+    _findModels<T>(modelParent, aspect, result);
   }
 
   /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
@@ -123,44 +145,32 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// rebuilt. The [updateShouldNotifyDependent] method must determine if a
   /// change in the model widget corresponds to an `aspect` value.
   ///
-  /// By default, the dependency created by this method targets the first
-  /// [InheritedModel] ancestor of type T. If [visitor] is specified then
-  /// it's the first [InheritedModel] ancestor of type T for which
-  /// [vistor] returns false. The vistor parameter can be used to create
-  /// models that override some values and delegate the rest to an
-  /// ancestor model.
+  /// The dependency created by this method targets the first
+  /// [InheritedModel] ancestor of type T whose [InheritedModel.aspects] set
+  /// is either null (the default) or contains [aspect]. If [aspect] is
+  /// null then it's the first ancestor of type T.
   ///
-  /// In the following example the model's static `valueOf` method returns the
-  /// first non-null value of `path`. By doing so the caller will have created
-  /// a `context` dependency on the first model ancestor that has a non-null
-  /// value for the specified path.
-  ///
-  /// ```dart
-  /// class IntegerModel extends InheritedModel<String> {
-  ///   // ...
-  ///   int valueOf(String path) => _model.valueOf(path);
-  ///
-  ///   static int valueOf(BuildContext context, String path) {
-  ///     int value;
-  ///     InheritedModel.inheritFrom<IntegerModel>(context,
-  ///       aspect: path,
-  ///       visitor: (IntegerModel widget) => (value = widget.valueOf(path)) == null,
-  ///     );
-  ///     return value;
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// If [aspect] and [visitor] are null this method is the same as:
+  /// If [aspect] is null this method is the same as
   /// `context.inheritFromWidgetOfExactType(T)`.
-  static T inheritFrom<T extends InheritedModel<Object>>(
-    BuildContext context, {
-    Object aspect,
-    bool visitor(T widget),
-  }) {
-    final InheritedElement model = _findModel<T>(context, visitor);
-    if (model != null)
-      return context.inheritFromWidgetOfExactType(T, aspect: aspect, target: model);
+  static T inheritFrom<T extends InheritedModel<Object>>(BuildContext context, { Object aspect }) {
+    if (aspect == null)
+      return context.inheritFromWidgetOfExactType(T);
+
+    // Create a dependency on all of the type T ancestor models up until
+    // a model is found whose aspects are null or contain the given aspect.
+    // Rebuilding one of the intermediate models only causes its dependents
+    // to be rebuilt if its aspsects property changes (see _shouldNotify).
+    final List<InheritedElement> models = <InheritedElement>[];
+    _findModels<T>(context, aspect, models);
+    if (models.isEmpty)
+      return null;
+    final InheritedElement lastModel = models.last;
+    for (InheritedElement model in models) {
+      final T value = context.inheritFromWidgetOfExactType(T, aspect: aspect, target: model);
+      if (model == lastModel)
+        return value;
+    }
+    assert(false, 'Unreachable');
     return null;
   }
 }
@@ -176,11 +186,11 @@ class InheritedModelElement<T> extends InheritedElement {
   @override
   void updateDependencies(Element dependent, Object aspect) {
     final _Dependencies<T> dependencies = getDependencies(dependent);
-    if (dependencies != null && dependencies.isGlobal)
+    if (dependencies != null && dependencies.isUniversal)
       return;
 
     if (aspect == null) {
-      setDependencies(dependent, new _Dependencies<T>(isGlobal: true));
+      setDependencies(dependent, new _Dependencies<T>(isUniversal: true));
     } else {
       assert(aspect is T);
       setDependencies(dependent, dependencies == null
@@ -190,26 +200,48 @@ class InheritedModelElement<T> extends InheritedElement {
     }
   }
 
+  bool _shouldNotify(InheritedModel<T> oldWidget, Element dependent, Set<T> aspects) {
+    // If the aspects the model supports have changed, then rebuild.
+    if (_notEqual<T>(widget.aspects, oldWidget.aspects))
+      return true;
+
+    // The aspects argument specifies the model aspects that the dependent element depends on.
+    if (widget.aspects == null || widget.aspects.any((T aspect) => aspects.contains(aspect)))
+      return widget.updateShouldNotifyDependent(oldWidget, aspects);
+
+    return false;
+  }
+
   @override
-  void notifyDependent(InheritedWidget oldWidget, Element dependent) {
+  void notifyDependent(InheritedModel<T> oldWidget, Element dependent) {
     final _Dependencies<T> dependencies = getDependencies(dependent);
-    if (dependencies.isGlobal || widget.updateShouldNotifyDependent(oldWidget, dependencies.values))
+    if (dependencies.isUniversal || _shouldNotify(oldWidget, dependent, dependencies.aspects))
       dependent.didChangeDependencies();
   }
 }
 
 class _Dependencies<T> extends InheritedDependencies {
-  _Dependencies({ this.isGlobal = false });
+  _Dependencies({ this.isUniversal = false });
 
   @override
-  final bool isGlobal;
+  final bool isUniversal;
 
-  final Set<T> values = new HashSet<T>();
-
-  bool contains(T dependency) => values.contains(dependency);
+  final Set<T> aspects = new HashSet<T>();
 
   void add(T dependency) {
-    assert(!isGlobal);
-    values.add(dependency);
+    assert(!isUniversal);
+    aspects.add(dependency);
   }
+}
+
+bool _notEqual<T>(Set<T> a, Set<T> b) {
+  if (identical(a, b))
+    return false;
+  if (a?.length != b?.length)
+    return true;
+  for(T elementA in a) {
+    if (!b.contains(elementA))
+      return true;
+  }
+  return false;
 }
