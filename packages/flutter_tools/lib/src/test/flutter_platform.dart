@@ -814,7 +814,7 @@ class _FlutterPlatform extends PlatformPlugin {
     return processManager.start(command, environment: environment);
   }
 
-  Future<void> _pipeStandardStreamsToConsole(
+  void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
     void reportObservatoryUri(Uri uri),
