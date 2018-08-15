@@ -141,7 +141,7 @@ abstract class FlutterCommand extends Command<Null> {
         valueHelp: 'x.y.z');
   }
 
-  void addBuildModeFlags({bool defaultToRelease = true}) {
+  void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -153,6 +153,11 @@ abstract class FlutterCommand extends Command<Null> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    argParser.addFlag('dynamic',
+      hide: !verboseHelp,
+      negatable: false,
+      help: 'Enable dynamic code. This flag is intended for use with\n'
+            '--release or --profile; --debug always has this enabled.');
   }
 
   set defaultBuildMode(BuildMode value) {
@@ -166,9 +171,9 @@ abstract class FlutterCommand extends Command<Null> {
     if (argResults['debug'])
       return BuildMode.debug;
     if (argResults['profile'])
-      return BuildMode.profile;
+      return argResults['dynamic'] ? BuildMode.dynamicProfile : BuildMode.profile;
     if (argResults['release'])
-      return BuildMode.release;
+      return argResults['dynamic'] ? BuildMode.dynamicRelease : BuildMode.release;
     return _defaultBuildMode;
   }
 
