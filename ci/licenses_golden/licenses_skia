@@ -1,4 +1,4 @@
-Signature: fff514269f842d892d79cdd8bc6789cd
+Signature: 0fc48b43b5bd25fb3531c07e4466e00c
 
 UNUSED LICENSES:
 
@@ -1917,8 +1917,6 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
-FILE: ../../../third_party/skia/experimental/pathkit/docker/emsdk-base/Dockerfile
-FILE: ../../../third_party/skia/experimental/pathkit/docker/karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/experimental/pathkit/helper.js
 FILE: ../../../third_party/skia/experimental/pathkit/helper_externs.js
 FILE: ../../../third_party/skia/experimental/pathkit/karma-docker.conf.js
@@ -2205,6 +2203,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_push.jso
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_2.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_test.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_coverage_results.expected/alternate_bucket.json
@@ -2232,6 +2231,9 @@ FILE: ../../../third_party/skia/infra/bots/tools/luci-go/win64/isolate.exe.sha1
 FILE: ../../../third_party/skia/infra/branch-config/cq.cfg
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
+FILE: ../../../third_party/skia/infra/pathkit/docker/emsdk-base/Dockerfile
+FILE: ../../../third_party/skia/infra/pathkit/docker/gold-karma-chrome-tests/Dockerfile
+FILE: ../../../third_party/skia/infra/pathkit/docker/karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
 FILE: ../../../third_party/skia/infra/project-config/project.cfg
 FILE: ../../../third_party/skia/infra/project-config/refs.cfg
@@ -4930,6 +4932,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h + 
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h
 FILE: ../../../third_party/skia/include/utils/SkTraceEventPhase.h
+FILE: ../../../third_party/skia/infra/pathkit/gold/pathkit_aggregator.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
 
