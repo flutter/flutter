@@ -30,7 +30,7 @@ const String _kVMSnapshotInstr = 'vm_snapshot_instr';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 const String _kDylibKey = 'libapp.so';
-const String _kPlatformKernelKey = 'platform.dill';
+const String _kPlatformKernelKey = 'platform_strong.dill';
 
 Future<void> build({
   TargetPlatform platform,
