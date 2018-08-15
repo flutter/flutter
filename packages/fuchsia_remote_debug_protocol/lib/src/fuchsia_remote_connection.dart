@@ -261,7 +261,7 @@ class FuchsiaRemoteConnection {
               .getMainIsolatesByPattern(pattern)
               .timeout(timeout);
           if (result.isNotEmpty) {
-            if (!completer.isComplete) {
+            if (!completer.isCompleted) {
               completer.complete(result);
             } else {
               _log.warning('Found more than one Dart VM containing Isolates '
