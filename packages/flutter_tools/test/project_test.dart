@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -10,9 +11,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:test/test.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+
 import 'src/common.dart';
 import 'src/context.dart';
 
@@ -22,7 +23,7 @@ void main() {
       testInMemory('fails on null directory', () async {
         await expectLater(
           FlutterProject.fromDirectory(null),
-          throwsA(const isInstanceOf<AssertionError>()),
+          throwsA(isInstanceOf<AssertionError>()),
         );
       });
 

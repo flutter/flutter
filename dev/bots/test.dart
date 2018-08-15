@@ -160,6 +160,7 @@ Future<Null> _checkForTrailingSpaces() async {
 }
 
 Future<Null> _analyzeRepo() async {
+  await _verifyNoTestPackageImports(flutterRoot);
   await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImportsInFlutter(flutterRoot);
   await _verifyNoBadImportsInFlutterTools(flutterRoot);
@@ -526,6 +527,81 @@ Future<Null> _runFlutterAnalyze(String workingDirectory, {
   return _runCommand(flutter, <String>['analyze']..addAll(options),
     workingDirectory: workingDirectory,
   );
+}
+
+Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
+  // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
+  final List<String> shims = <String>[];
+  final List<String> errors = new Directory(workingDirectory)
+    .listSync(recursive: true)
+    .where((FileSystemEntity entity) {
+      return entity is File && entity.path.endsWith('.dart');
+    })
+    .map<String>((FileSystemEntity entity) {
+      final File file = entity;
+      final String data = file.readAsStringSync();
+      final String name = path.relative(file.path, from: workingDirectory);
+      if (name.startsWith('bin/cache') ||
+          name == 'dev/bots/test.dart')
+        return null;
+      if (data.contains("import 'package:test/test.dart'")) {
+        if (data.contains("// Defines a 'package:test' shim.")) {
+          shims.add('  $name');
+          if (!data.contains('https://github.com/dart-lang/matcher/issues/98'))
+            return '  $name: Shims must link to the isInstanceOf issue.';
+          if (data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;") &&
+              data.contains("export 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
+            return null;
+          return '  $name: Shim seems to be missing the expected import/export lines.';
+        }
+        final int count = 'package:test'.allMatches(data).length;
+        if (file.path.contains('/test_driver/') ||
+            name.startsWith('dev/missing_dependency_tests/') ||
+            name.startsWith('dev/automated_tests/') ||
+            name.startsWith('packages/flutter/test/engine/') ||
+            name.startsWith('examples/layers/test/smoketests/raw/') ||
+            name.startsWith('examples/layers/test/smoketests/rendering/') ||
+            name.startsWith('examples/flutter_gallery/test/calculator')) {
+          // We only exempt driver tests, some of our special trivial tests.
+          // Driver tests aren't typically expected to use TypeMatcher and company.
+          // The trivial tests don't typically do anything at all and it would be
+          // a pain to have to give them a shim.
+          if (!data.contains("import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;"))
+            return '  $name: test does not hide TypeMatcher and isInstanceOf from package:test; consider using a shim instead.';
+          assert(count > 0);
+          if (count == 1)
+            return null;
+          return '  $name: uses \'package:test\' $count times.';
+        }
+        if (name.startsWith('packages/flutter_test/')) {
+          // flutter_test has deep ties to package:test
+          return null;
+        }
+        if (data.contains("import 'package:test/test.dart' as test_package;") ||
+            data.contains("import 'package:test/test.dart' as test_package show ")) {
+          if (count == 1)
+            return null;
+        }
+        return '  $name: uses \'package:test\' directly.';
+      }
+    })
+    .where((String line) => line != null)
+    .toList()
+    ..sort();
+
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    final String s1 = errors.length == 1 ? 's' : '';
+    final String s2 = errors.length == 1 ? '' : 's';
+    print('${bold}The following file$s2 depend$s1 on \'package:test\' directly:$reset');
+    print(errors.join('\n'));
+    print('Rather than depending on \'package:test\' directly, use one of the shims:');
+    print(shims.join('\n'));
+    print('This insulates us from breaking changes in \'package:test\'.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    exit(1);
+  }
 }
 
 Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {

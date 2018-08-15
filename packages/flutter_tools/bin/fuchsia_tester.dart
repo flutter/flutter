@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
@@ -27,6 +29,7 @@ const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionTestFile = 'test-file';
 const String _kOptionDillFile = 'dill-file';
+const String _kOptionIcudtl = 'icudtl';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -34,6 +37,7 @@ const List<String> _kRequiredOptions = <String>[
   _kOptionSdkRoot,
   _kOptionTestFile,
   _kOptionDillFile,
+  _kOptionIcudtl
 ];
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
@@ -52,6 +56,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionTestFile, help: 'Test file to execute')
     ..addOption(_kOptionDillFile, help: 'Precompiled dill file for test')
+    ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -91,6 +96,8 @@ Future<Null> run(List<String> args) async {
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(shellPath);
+    final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
+    icudtlLink.createSync(argResults[_kOptionIcudtl]);
     final Directory sdkRootDest =
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
@@ -116,6 +123,7 @@ Future<Null> run(List<String> args) async {
       enableObservatory: collector != null,
       previewDart2: true,
       precompiledDillPath: dillFile.path,
+      concurrency: math.max(1, platform.numberOfProcessors - 2),
     );
 
     if (collector != null) {

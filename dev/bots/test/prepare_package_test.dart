@@ -8,11 +8,11 @@ import 'dart:io' hide Platform;
 import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show FakePlatform;
 
 import '../prepare_package.dart';
+import 'common.dart';
 import 'fake_process_manager.dart';
 
 void main() {
@@ -25,7 +25,7 @@ void main() {
         expectAsync1((List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
-        throwsA(const isInstanceOf<ProcessRunnerException>()));
+        throwsA(isInstanceOf<ProcessRunnerException>()));
     try {
       await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
     } on ProcessRunnerException catch (e) {
@@ -62,7 +62,7 @@ void main() {
             expectAsync1((List<String> commandLine) async {
               return processRunner.runProcess(commandLine);
             })(<String>['echo', 'test']),
-            throwsA(const isInstanceOf<ProcessRunnerException>()));
+            throwsA(isInstanceOf<ProcessRunnerException>()));
       });
     });
     group('ArchiveCreator for $platformName', () {
@@ -204,7 +204,7 @@ void main() {
         };
         processManager.fakeResults = calls;
         expect(expectAsync0(creator.initializeRepo),
-            throwsA(const isInstanceOf<ProcessRunnerException>()));
+            throwsA(isInstanceOf<ProcessRunnerException>()));
       });
     });
 

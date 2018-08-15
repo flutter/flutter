@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +15,12 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+
+export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+
+/// A matcher that compares the type of the actual value to the type argument T.
+// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
+Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Gets the path to the root of the Flutter repository.
 ///
@@ -76,7 +83,7 @@ Matcher throwsToolExit({int exitCode, String message}) {
 }
 
 /// Matcher for [ToolExit]s.
-const Matcher isToolExit = isInstanceOf<ToolExit>();
+final Matcher isToolExit = isInstanceOf<ToolExit>();
 
 /// Matcher for functions that throw [ProcessExit].
 Matcher throwsProcessExit([dynamic exitCode]) {
@@ -86,7 +93,7 @@ Matcher throwsProcessExit([dynamic exitCode]) {
 }
 
 /// Matcher for [ProcessExit]s.
-const Matcher isProcessExit = isInstanceOf<ProcessExit>();
+final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.

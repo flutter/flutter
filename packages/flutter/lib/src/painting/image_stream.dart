@@ -151,8 +151,6 @@ class ImageStream extends Diagnosticable {
   /// Many `listener`s can have the same `onError` and one `listener` can also
   /// have multiple `onError` by invoking [addListener] multiple times with
   /// a different `onError` each time.
-  ///
-  /// Repeated `onError` will only be called once when an error occurs.
   void addListener(ImageListener listener, { ImageErrorListener onError }) {
     if (_completer != null)
       return _completer.addListener(listener, onError: onError);
@@ -166,9 +164,12 @@ class ImageStream extends Diagnosticable {
     if (_completer != null)
       return _completer.removeListener(listener);
     assert(_listeners != null);
-    _listeners.removeWhere((_ImageListenerPair listenerPair) {
-      return listenerPair.listener == listener;
-    });
+    for (int i = 0; i < _listeners.length; ++i) {
+      if (_listeners[i].listener == listener) {
+        _listeners.removeAt(i);
+        continue;
+      }
+    }
   }
 
   /// Returns an object which can be used with `==` to determine if this
@@ -242,26 +243,29 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     }
     if (_currentError != null && onError != null) {
       try {
-          onError(_currentError.exception, _currentError.stack);
-        } catch (exception, stack) {
-          FlutterError.reportError(
-            new FlutterErrorDetails(
-              exception: exception,
-              library: 'image resource service',
-              context: 'by a synchronously-called image error listener',
-              stack: stack,
-            ),
-          );
-        }
+        onError(_currentError.exception, _currentError.stack);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          new FlutterErrorDetails(
+            exception: exception,
+            library: 'image resource service',
+            context: 'by a synchronously-called image error listener',
+            stack: stack,
+          ),
+        );
+      }
     }
   }
 
   /// Stop listening for new concrete [ImageInfo] objects and errors from
   /// its associated [ImageErrorListener].
   void removeListener(ImageListener listener) {
-    _listeners.removeWhere((_ImageListenerPair listenerPair) {
-      return listenerPair.listener == listener;
-    });
+    for (int i = 0; i < _listeners.length; ++i) {
+      if (_listeners[i].listener == listener) {
+        _listeners.removeAt(i);
+        continue;
+      }
+    }
   }
 
   /// Calls all the registered listeners to notify them of a new image.
@@ -289,9 +293,6 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// Calls all the registered error listeners to notify them of an error that
   /// occurred while resolving the image.
   ///
-  /// If the same error listener is attached with multiple listeners, that
-  /// error listener will only be notified once.
-  ///
   /// If no error listeners are attached, a [FlutterError] will be reported
   /// instead.
   @protected
@@ -311,7 +312,6 @@ abstract class ImageStreamCompleter extends Diagnosticable {
       silent: silent,
     );
 
-    // Many listeners can have the same error listener. De-duplicate.
     final List<ImageErrorListener> localErrorListeners =
         _listeners.map<ImageErrorListener>(
           (_ImageListenerPair listenerPair) => listenerPair.errorListener
