@@ -820,11 +820,8 @@ class _FlutterPlatform extends PlatformPlugin {
     void reportObservatoryUri(Uri uri),
   }) {
     const String observatoryString = 'Observatory listening on ';
-    final List<Future<void>> futures = <Future<void>>[];
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
-      final Completer<void> completer = new Completer<void>();
-      futures.add(completer.future);
       stream.transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
@@ -851,13 +848,9 @@ class _FlutterPlatform extends PlatformPlugin {
           onError: (dynamic error) {
             printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
           },
-          onDone: () {
-            completer.complete();
-          },
           cancelOnError: true,
         );
     }
-    return Future.wait(futures).then<void>((List<void> results) => null);
   }
 
   String _getErrorMessage(String what, String testPath, String shellPath) {
