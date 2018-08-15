@@ -462,7 +462,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       color: color,
       containedInkWell: true,
       // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
-      borderRadius: BorderRadius.zero,
+      border: null, // a null border generates a rectangle border clip
       onRemoved: handleRemoved,
     );
 

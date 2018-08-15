@@ -40,13 +40,13 @@ class InkHighlight extends InteractiveInkFeature {
     @required RenderBox referenceBox,
     @required Color color,
     BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
+    ShapeBorder border,
     RectCallback rectCallback,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
        _shape = shape,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
+       _border = border,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
@@ -62,7 +62,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   final BoxShape _shape;
-  final BorderRadius _borderRadius;
+  final ShapeBorder _border;
   final RectCallback _rectCallback;
 
   Animation<int> _alpha;
@@ -97,23 +97,20 @@ class InkHighlight extends InteractiveInkFeature {
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
     assert(_shape != null);
+    Path highlightPath = new Path();
     switch (_shape) {
       case BoxShape.circle:
-        canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
+        highlightPath.addOval(Rect.fromCircle(center: rect.center, radius: Material.defaultSplashRadius));
         break;
       case BoxShape.rectangle:
-        if (_borderRadius != BorderRadius.zero) {
-          final RRect clipRRect = new RRect.fromRectAndCorners(
-            rect,
-            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
-          );
-          canvas.drawRRect(clipRRect, paint);
-        } else {
-          canvas.drawRect(rect, paint);
-        }
+        highlightPath.addRect(rect);
         break;
     }
+    if (_border != null) {
+      final Path clipPath = _border.getOuterPath(rect);
+      highlightPath = Path.combine(PathOperation.intersect, highlightPath, clipPath);
+    }
+    canvas.drawPath(highlightPath, paint);
   }
 
   @override

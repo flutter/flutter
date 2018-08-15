@@ -18,7 +18,7 @@ class TestInkSplash extends InkSplash {
     Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
-    BorderRadius borderRadius,
+    ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
   }) : super(
@@ -28,7 +28,7 @@ class TestInkSplash extends InkSplash {
     color: color,
     containedInkWell: containedInkWell,
     rectCallback: rectCallback,
-    borderRadius: borderRadius,
+    border: border,
     radius: radius,
     onRemoved: onRemoved,
   );
@@ -57,7 +57,7 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
     Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
-    BorderRadius borderRadius,
+    ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
   }) {
@@ -68,7 +68,7 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
       color: color,
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
-      borderRadius: borderRadius,
+      border: border,
       radius: radius,
       onRemoved: onRemoved,
     );

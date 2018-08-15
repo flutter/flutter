@@ -21,7 +21,7 @@ void main() {
             width: 200.0,
             height: 60.0,
             child: new InkWell(
-              borderRadius: borderRadius,
+              border: new RoundedRectangleBorder(borderRadius: borderRadius),
               highlightColor: highlightColor,
               splashColor: splashColor,
               onTap: () { },
@@ -63,7 +63,7 @@ void main() {
             width: 100.0,
             height: 100.0,
             child: new InkWell(
-              borderRadius: borderRadius,
+              border: new RoundedRectangleBorder(borderRadius: borderRadius),
               highlightColor: highlightColor,
               splashColor: splashColor,
               onTap: () { },

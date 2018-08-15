@@ -47,7 +47,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     @required Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
-    BorderRadius borderRadius,
+    ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
   }) {
@@ -58,7 +58,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       color: color,
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
-      borderRadius: borderRadius,
+      border: border,
       radius: radius,
       onRemoved: onRemoved,
     );
@@ -114,19 +114,17 @@ class InkRipple extends InteractiveInkFeature {
     @required Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
-    BorderRadius borderRadius,
+    ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(position != null),
        _position = position,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
+       _border = border,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
   {
-    assert(_borderRadius != null);
-
     // Immediately begin fading-in the initial splash.
     _fadeInController = new AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
@@ -171,7 +169,7 @@ class InkRipple extends InteractiveInkFeature {
   }
 
   final Offset _position;
-  final BorderRadius _borderRadius;
+  final ShapeBorder _border;
   final double _targetRadius;
   final RectCallback _clipCallback;
 
@@ -220,26 +218,6 @@ class InkRipple extends InteractiveInkFeature {
     super.dispose();
   }
 
-  RRect _clipRRectFromRect(Rect rect) {
-    return new RRect.fromRectAndCorners(
-      rect,
-      topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-      bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
-    );
-  }
-
-  void _clipCanvasWithRect(Canvas canvas, Rect rect, {Offset offset}) {
-    Rect clipRect = rect;
-    if (offset != null) {
-      clipRect = clipRect.shift(offset);
-    }
-    if (_borderRadius != BorderRadius.zero) {
-      canvas.clipRRect(_clipRRectFromRect(clipRect));
-    } else {
-      canvas.clipRect(clipRect);
-    }
-  }
-
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
@@ -251,22 +229,25 @@ class InkRipple extends InteractiveInkFeature {
       Curves.ease.transform(_radiusController.value),
     );
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    canvas.save();
     if (originOffset == null) {
-      canvas.save();
       canvas.transform(transform.storage);
-      if (_clipCallback != null) {
-        _clipCanvasWithRect(canvas, _clipCallback());
-      }
-      canvas.drawCircle(center, _radius.value, paint);
-      canvas.restore();
     } else {
-      if (_clipCallback != null) {
-        canvas.save();
-        _clipCanvasWithRect(canvas, _clipCallback(), offset: originOffset);
-      }
-      canvas.drawCircle(center + originOffset, _radius.value, paint);
-      if (_clipCallback != null)
-        canvas.restore();
+      canvas.translate(originOffset.dx, originOffset.dy);
     }
+    Path path = new Path();
+    path.addOval(Rect.fromCircle(center: center, radius: _radius.value));
+    if (_clipCallback != null) {
+      final Rect rect = _clipCallback();
+      Path clipPath;
+      if (_border != null) {
+        clipPath = _border.getOuterPath(rect);
+      } else {
+        clipPath = new Path()..addRect(rect);
+      }
+      path = Path.combine(PathOperation.intersect, path, clipPath);
+    }
+    canvas.drawPath(path, paint);
+    canvas.restore();
   }
 }
