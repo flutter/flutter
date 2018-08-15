@@ -168,12 +168,15 @@ abstract class FlutterCommand extends Command<Null> {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+    final bool dynamicFlag = argParser.options.containsKey('dynamic')
+        ? argResults['dynamic']
+        : false;
     if (argResults['debug'])
       return BuildMode.debug;
     if (argResults['profile'])
-      return argResults['dynamic'] ? BuildMode.dynamicProfile : BuildMode.profile;
+      return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
     if (argResults['release'])
-      return argResults['dynamic'] ? BuildMode.dynamicRelease : BuildMode.release;
+      return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
     return _defaultBuildMode;
   }
 
