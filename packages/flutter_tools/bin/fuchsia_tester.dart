@@ -27,6 +27,7 @@ const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionTestFile = 'test-file';
 const String _kOptionDillFile = 'dill-file';
+const String _kOptionIcudtl = 'icudtl';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -34,6 +35,7 @@ const List<String> _kRequiredOptions = <String>[
   _kOptionSdkRoot,
   _kOptionTestFile,
   _kOptionDillFile,
+  _kOptionIcudtl
 ];
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
@@ -52,6 +54,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionTestFile, help: 'Test file to execute')
     ..addOption(_kOptionDillFile, help: 'Precompiled dill file for test')
+    ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -91,6 +94,8 @@ Future<Null> run(List<String> args) async {
         fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(shellPath);
+    final Link icudtlLink = testerDestLink.parent.childLink('icudtl.dat');
+    icudtlLink.createSync(argResults[_kOptionIcudtl]);
     final Directory sdkRootDest =
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
