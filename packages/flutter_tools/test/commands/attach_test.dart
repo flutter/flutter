@@ -5,9 +5,12 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_hot.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -49,6 +52,49 @@ void main() {
       verify(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).called(1);
 
       mockLogReader.dispose();
+    });
+
+    testUsingContext('selects specified target', () async {
+      const int devicePort = 499;
+      const int hostPort = 42;
+      final MockDeviceLogReader mockLogReader = new MockDeviceLogReader();
+      final MockPortForwarder portForwarder = new MockPortForwarder();
+      final MockAndroidDevice device = new MockAndroidDevice();
+      final MockHotRunnerFactory mockHotRunnerFactory = new MockHotRunnerFactory();
+      when(device.portForwarder).thenReturn(portForwarder);
+      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
+      when(mockHotRunnerFactory.build(any,
+          target: anyNamed('target'),
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          usesTerminalUI: anyNamed('usesTerminalUI'))).thenReturn(new MockHotRunner());
+
+      testDeviceManager.addDevice(device);
+      when(device.getLogReader()).thenAnswer((_) {
+        // Now that the reader is used, start writing messages to it.
+        Timer.run(() {
+          mockLogReader.addLine('Foo');
+          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
+        });
+
+        return mockLogReader;
+      });
+      Directory temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      File foo_bart = fs.file(temp.childFile('abc'));
+      foo_bart.createSync();
+
+      final AttachCommand command = new AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await createTestCommandRunner(command).run(<String>['attach', '-t', foo_bart.path, '-v']);
+
+      verify(mockHotRunnerFactory.build(any,
+          target: foo_bart.path,
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          usesTerminalUI: anyNamed('usesTerminalUI'))).called(1);
+
+      temp.deleteSync(recursive: true);
     });
 
     testUsingContext('forwards to given port', () async {
@@ -104,3 +150,7 @@ void main() {
 }
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
+
+class MockHotRunner extends Mock implements HotRunner {}
+
+class MockHotRunnerFactory extends Mock implements HotRunnerFactory {}
