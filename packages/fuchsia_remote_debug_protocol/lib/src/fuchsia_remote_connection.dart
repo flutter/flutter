@@ -257,11 +257,23 @@ class FuchsiaRemoteConnection {
           _log.fine('New VM found on port: ${event.servicePort}. Searching '
               'for Isolate: $pattern');
           final DartVm vmService = await _getDartVm(event.uri.port);
-          final List<IsolateRef> result =
-              await vmService.getMainIsolatesByPattern(pattern);
+          final List<IsolateRef> result = await vmService
+              .getMainIsolatesByPattern(pattern)
+              .timeout(timeout);
           if (result.isNotEmpty) {
-            completer.complete(result);
+            if (!completer.isComplete) {
+              completer.complete(result);
+            } else {
+              _log.warning('Found more than one Dart VM containing Isolates '
+                  'that match the pattern "$pattern".');
+            }
           }
+        }
+      },
+      onDone: () {
+        if (!completer.isCompleted) {
+          _log.warning('Terminating isolate search for "$pattern"'
+              ' before timeout reached.');
         }
       },
     );
@@ -288,11 +300,12 @@ class FuchsiaRemoteConnection {
     final List<Future<List<IsolateRef>>> isolates =
         <Future<List<IsolateRef>>>[];
     for (PortForwarder fp in _dartVmPortMap.values) {
-      final DartVm vmService = await _getDartVm(fp.port);
+      final DartVm vmService = await _getDartVm(fp.port).timeout(timeout);
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    final List<IsolateRef> result =
-        await Future.wait(isolates).then((List<List<IsolateRef>> listOfLists) {
+    final List<IsolateRef> result = await Future.wait(isolates)
+        .timeout(timeout)
+        .then((List<List<IsolateRef>> listOfLists) {
       final List<List<IsolateRef>> mutableListOfLists =
           new List<List<IsolateRef>>.from(listOfLists)
             ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
