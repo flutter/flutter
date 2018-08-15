@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  ValueNotifier<String> valueListenable;
+  SpyStringValueNotifier valueListenable;
   Widget textBuilderUnderTest;
 
   Widget builderForValueListenable(
@@ -27,7 +27,7 @@ void main() {
   }
 
   setUp(() {
-    valueListenable = new ValueNotifier<String>(null);
+    valueListenable = new SpyStringValueNotifier(null);
     textBuilderUnderTest = builderForValueListenable(valueListenable);
   });
 
@@ -38,7 +38,7 @@ void main() {
   });
 
   testWidgets('Widget builds with initial value', (WidgetTester tester) async {
-    valueListenable = new ValueNotifier<String>('Bachman');
+    valueListenable = new SpyStringValueNotifier('Bachman');
 
     await tester.pumpWidget(builderForValueListenable(valueListenable));
 
@@ -66,11 +66,34 @@ void main() {
     expect(find.text('Gilfoyle'), findsOneWidget);
 
     final ValueListenable<String> differentListenable =
-        new ValueNotifier<String>('Hendricks');
+        new SpyStringValueNotifier('Hendricks');
 
     await tester.pumpWidget(builderForValueListenable(differentListenable));
 
     expect(find.text('Gilfoyle'), findsNothing);
+    expect(find.text('Hendricks'), findsOneWidget);
+  });
+
+  testWidgets('Stops listening to old listenable after chainging listenable', (WidgetTester tester) async {
+    await tester.pumpWidget(textBuilderUnderTest);
+
+    valueListenable.value = 'Gilfoyle';
+    await tester.pump();
+    expect(find.text('Gilfoyle'), findsOneWidget);
+
+    final ValueListenable<String> differentListenable =
+       new SpyStringValueNotifier('Hendricks');
+
+    await tester.pumpWidget(builderForValueListenable(differentListenable));
+
+    expect(find.text('Gilfoyle'), findsNothing);
+    expect(find.text('Hendricks'), findsOneWidget);
+
+    // Change value of the (now) disconnected listenable.
+    valueListenable.value = 'Big Head';
+
+    expect(find.text('Gilfoyle'), findsNothing);
+    expect(find.text('Big Head'), findsNothing);
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
@@ -86,4 +109,12 @@ void main() {
     expect(find.text('Gilfoyle'), findsNothing);
     expect(valueListenable.hasListeners, false);
   });
+}
+
+class SpyStringValueNotifier extends ValueNotifier<String> {
+  SpyStringValueNotifier(String initialValue) : super(initialValue);
+
+  // Override for test visibility only.
+  @override
+  bool get hasListeners => super.hasListeners;
 }
