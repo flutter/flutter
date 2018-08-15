@@ -466,6 +466,15 @@ abstract class FlutterCommand extends Command<Null> {
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
+
+    final bool dynamicFlag = argParser.options.containsKey('dynamic')
+        ? argResults['dynamic'] : false;
+    final String compilationTraceFilePath = argParser.options.containsKey('precompile')
+        ? argResults['precompile'] : null;
+    if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
+      throw new ToolExit('Error: --precompile is not allowed when --debug is specified.');
+    if (compilationTraceFilePath != null && !dynamicFlag)
+      throw new ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
   }
 
   ApplicationPackageStore applicationPackages;

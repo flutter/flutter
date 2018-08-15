@@ -126,11 +126,12 @@ class RunCommand extends RunCommandBase {
       )
       ..addOption('precompile',
         hide: !verboseHelp,
-        help: 'Precompile functions specified in input file. This flag requires\n'
-              '--dynamic and takes a Dart compilation trace file produced by the\n'
-              'training run of the application. With this flag, instead of using\n'
-              'default Dart VM snapshot provided by the engine, the application\n'
-              'will use its own snapshot that includes additional functions.',
+        help: 'Precompile functions specified in input file. This flag is only\n'
+              'allowed when using --dynamic. It takes a Dart compilation trace\n'
+              'file produced by the training run of the application. With this\n'
+              'flag, instead of using default Dart VM snapshot provided by the\n'
+              'engine, the application will use its own snapshot that includes\n'
+              'additional functions.'
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
