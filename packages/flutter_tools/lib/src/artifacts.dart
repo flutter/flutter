@@ -8,7 +8,6 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
-import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/sdk.dart';
 import 'globals.dart';
@@ -219,7 +218,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
-        final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
         return fs.path.join(engineDir, platformName + suffix);
     }
     assert(false, 'Invalid platform $platform.');
