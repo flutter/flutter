@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -81,15 +80,15 @@ void main() {
 
         return mockLogReader;
       });
-      Directory temp = fs.systemTempDirectory.createTempSync('flutter_tools');
-      File foo_bart = fs.file(temp.childFile('abc'));
-      foo_bart.createSync();
+      final Directory temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      final File foo = fs.file(temp.childFile('foo'));
+      foo.createSync();
 
       final AttachCommand command = new AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
-      await createTestCommandRunner(command).run(<String>['attach', '-t', foo_bart.path, '-v']);
+      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
 
       verify(mockHotRunnerFactory.build(any,
-          target: foo_bart.path,
+          target: foo.path,
           debuggingOptions: anyNamed('debuggingOptions'),
           packagesFilePath: anyNamed('packagesFilePath'),
           usesTerminalUI: anyNamed('usesTerminalUI'))).called(1);
