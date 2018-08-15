@@ -27,8 +27,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-beta', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
-  'flutter_gallery_assets': '0.1.4', // See //examples/flutter_gallery/pubspec.yaml
+  'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
