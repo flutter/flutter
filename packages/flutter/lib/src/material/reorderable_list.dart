@@ -402,33 +402,35 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
       // We build the draggable inside of a layout builder so that we can
       // constrain the size of the feedback dragging widget.
-      Widget child = new LongPressDraggable<Key>(
-        maxSimultaneousDrags: 1,
-        axis: widget.scrollDirection,
-        data: toWrap.key,
-        ignoringFeedbackSemantics: false,
-        feedback: new Container(
-          alignment: Alignment.topLeft,
-          // These constraints will limit the cross axis of the drawn widget.
-          constraints: constraints,
-          child: new Material(
-            elevation: 6.0,
-            child: toWrapWithSemantics,
+      Widget child = new MergeSemantics(
+        child: new LongPressDraggable<Key>(
+            maxSimultaneousDrags: 1,
+            axis: widget.scrollDirection,
+            data: toWrap.key,
+            ignoringFeedbackSemantics: false,
+            feedback: new Container(
+              alignment: Alignment.topLeft,
+              // These constraints will limit the cross axis of the drawn widget.
+              constraints: constraints,
+              child: new Material(
+                elevation: 6.0,
+                child: toWrapWithSemantics,
+              ),
+            ),
+            child: _dragging == toWrap.key ? const SizedBox() : toWrapWithSemantics,
+            childWhenDragging: const SizedBox(),
+            dragAnchor: DragAnchor.child,
+            onDragStarted: onDragStarted,
+            // When the drag ends inside a DragTarget widget, the drag
+            // succeeds, and we reorder the widget into position appropriately.
+            onDragCompleted: onDragEnded,
+            // When the drag does not end inside a DragTarget widget, the
+            // drag fails, but we still reorder the widget to the last position it
+            // had been dragged to.
+            onDraggableCanceled: (Velocity velocity, Offset offset) {
+              onDragEnded();
+            },
           ),
-        ),
-        child: _dragging == toWrap.key ? const SizedBox() : toWrapWithSemantics,
-        childWhenDragging: const SizedBox(),
-        dragAnchor: DragAnchor.child,
-        onDragStarted: onDragStarted,
-        // When the drag ends inside a DragTarget widget, the drag
-        // succeeds, and we reorder the widget into position appropriately.
-        onDragCompleted: onDragEnded,
-        // When the drag does not end inside a DragTarget widget, the
-        // drag fails, but we still reorder the widget to the last position it
-        // had been dragged to.
-        onDraggableCanceled: (Velocity velocity, Offset offset) {
-          onDragEnded();
-        },
       );
 
       // The target for dropping at the end of the list doesn't need to be
