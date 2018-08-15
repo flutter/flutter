@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui'as ui show defaultClipBehavior; // ignore: deprecated_member_use
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -172,7 +174,7 @@ class Material extends StatefulWidget {
     this.textStyle,
     this.borderRadius,
     this.shape,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use
     this.animationDuration = kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
@@ -598,7 +600,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
