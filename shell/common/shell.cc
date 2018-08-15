@@ -28,7 +28,6 @@
 #include "flutter/shell/common/vsync_waiter.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
-#include "third_party/tonic/common/log.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -176,9 +175,6 @@ static void PerformInitializationTasks(const blink::Settings& settings) {
           settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
       fml::SetLogSettings(log_settings);
     }
-
-    tonic::SetLogHandler(
-        [](const char* message) { FML_LOG(ERROR) << message; });
 
     if (settings.trace_skia) {
       InitSkiaEventTracer(settings.trace_skia);

@@ -1,4 +1,4 @@
-Signature: 09731565df309a8750981693eccc220b
+Signature: ec72b49802f64feb7fa74573a404abc5
 
 UNUSED LICENSES:
 
@@ -16752,10 +16752,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: tonic
-ORIGIN: ../../../third_party/tonic/common/log.cc + ../../../third_party/tonic/LICENSE
+ORIGIN: ../../../third_party/tonic/common/macros.h + ../../../third_party/tonic/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/tonic/common/log.cc
-FILE: ../../../third_party/tonic/common/log.h
 FILE: ../../../third_party/tonic/common/macros.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Fuchsia Authors. All rights reserved.
