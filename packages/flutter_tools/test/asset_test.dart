@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:test/test.dart';
+
 import 'src/common.dart';
 import 'src/context.dart';
 

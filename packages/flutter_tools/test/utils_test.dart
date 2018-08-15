@@ -6,7 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 void main() {
   group('SettingsFile', () {

@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
