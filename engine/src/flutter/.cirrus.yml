@@ -32,7 +32,7 @@ task:
 
 format_and_dart_test_task:
   container:
-    image: gcr.io/flutter-cirrus/build-engine-image:0.2
+    image: gcr.io/flutter-cirrus/build-engine-image:latest
 
   env:
     CIRRUS_WORKING_DIR: "/tmp/github_repo"
