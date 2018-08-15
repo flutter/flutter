@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
 import 'common.dart';
 
