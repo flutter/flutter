@@ -101,51 +101,6 @@ bool _isInAccessibilityMode(BuildContext context) {
   return data != null && data.textScaleFactor > _kMaxRegularTextScaleFactor;
 }
 
-/// An iOS-style dialog.
-///
-/// This dialog widget does not have any opinion about the contents of the
-/// dialog. Rather than using this widget directly, consider using
-/// [CupertinoAlertDialog], which implement a specific kind of dialog.
-///
-/// Push with `Navigator.of(..., rootNavigator: true)` when using with
-/// [CupertinoTabScaffold] to ensure that the dialog appears above the tabs.
-///
-/// See also:
-///
-///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
-///    actions.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-class CupertinoDialog extends StatelessWidget {
-  /// Creates an iOS-style dialog.
-  const CupertinoDialog({
-    Key key,
-    this.child,
-  }) : super(key: key);
-
-  /// The widget below this widget in the tree.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return new Center(
-      child: new ClipRRect(
-        borderRadius: BorderRadius.circular(_kDialogCornerRadius),
-        child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-          child: new Container(
-            width: _kCupertinoDialogWidth,
-            decoration: _kCupertinoDialogBlurOverlayDecoration,
-            child: new Container(
-              color: _kDialogColor,
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// An iOS-style alert dialog.
 ///
 /// An alert dialog informs the user about situations that require
@@ -166,7 +121,8 @@ class CupertinoDialog extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [CupertinoDialog], which is a generic iOS-style dialog.
+///  * [CupertinoPopupSurface], which is a generic iOS-style popup surface that
+///    holds arbitrary content to create custom popups.
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
@@ -277,26 +233,97 @@ class CupertinoAlertDialog extends StatelessWidget {
               width: isInAccessibilityMode
                   ? _kAccessibilityCupertinoDialogWidth
                   : _kCupertinoDialogWidth,
-              // The following clip is critical. The BackdropFilter needs to have
-              // rounded corners, but Skia cannot internally create a blurred rounded
-              // rect. Therefore, we have no choice but to clip, ourselves.
-              // TODO(mattcarroll): Skia bug filed: https://bugs.chromium.org/p/skia/issues/detail?id=8238
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(_kDialogCornerRadius),
-                child: new BackdropFilter(
-                  filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-                  child: new Container(
-                    decoration: _kCupertinoDialogBlurOverlayDecoration,
-                    child: new _CupertinoDialogRenderWidget(
-                      contentSection: _buildContent(),
-                      actionsSection: _buildActions(),
-                    ),
-                  ),
+              child: new CupertinoPopupSurface(
+                paintForeground: false,
+                child: new _CupertinoDialogRenderWidget(
+                  contentSection: _buildContent(),
+                  actionsSection: _buildActions(),
                 ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// An iOS-style dialog.
+///
+/// This dialog widget does not have any opinion about the contents of the
+/// dialog. Rather than using this widget directly, consider using
+/// [CupertinoAlertDialog], which implement a specific kind of dialog.
+///
+/// Push with `Navigator.of(..., rootNavigator: true)` when using with
+/// [CupertinoTabScaffold] to ensure that the dialog appears above the tabs.
+///
+/// See also:
+///
+///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
+///    actions.
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+@Deprecated('Use CupertinoAlertDialog for alert dialogs. Use CupertinoPopupSurface for custom popups.')
+class CupertinoDialog extends StatelessWidget {
+  /// Creates an iOS-style dialog.
+  const CupertinoDialog({
+    Key key,
+    this.child,
+  }) : super(key: key);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Center(
+      child: new CupertinoPopupSurface(
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Rectangular surface that looks like an iOS popup surface, e.g., alert dialog
+/// and action sheet.
+///
+/// A [CupertinoPopupSurface] can be configured to paint or not paint its white
+/// foreground color. Typical usage should paint the foreground. The foreground
+/// can be disabled for the purpose of rendering divider gaps for more complicated
+/// layout, e.g., [CupertinoAlertDialog].
+///
+/// See also:
+///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
+///    actions.
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+class CupertinoPopupSurface extends StatelessWidget {
+  /// Creates an iOS-style rectangular popup surface.
+  const CupertinoPopupSurface({
+    Key key,
+    this.paintForeground = true,
+    this.child,
+  }) : super(key: key);
+
+  /// Whether or not to paint a translucent white foreground on top of this
+  /// surface's blurred background.
+  final bool paintForeground;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new ClipRRect(
+      borderRadius: BorderRadius.circular(_kDialogCornerRadius),
+      child: new BackdropFilter(
+        filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+        child: new Container(
+          width: _kCupertinoDialogWidth,
+          decoration: _kCupertinoDialogBlurOverlayDecoration,
+          child: new Container(
+            color: paintForeground ? _kDialogColor : null,
+            child: child,
+          ),
+        ),
       ),
     );
   }
