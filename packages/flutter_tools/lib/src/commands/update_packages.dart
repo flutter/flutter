@@ -1073,7 +1073,6 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
     if (!dependency.pointsToSdk)
       dependency.describeForFakePubspec(result, overrides);
   result.write(overrides.toString());
-  //print('XXXX: ${result.toString()}');
   return result.toString();
 }
 
