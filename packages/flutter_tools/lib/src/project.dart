@@ -264,18 +264,17 @@ class AndroidProject {
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
-      _deleteIfExistsSync(_ephemeralDirectory);
-      _overwriteFromTemplate(fs.path.join('module', 'android'), _ephemeralDirectory);
-      gradle.injectGradleWrapper(_ephemeralDirectory);
+      _regenerateLibrary();
       // Add ephemeral host app, if a materialized host app does not already exist.
       if (!_materializedDirectory.existsSync()) {
-        _overwriteFromTemplate(fs.path.join('module', 'android_host_common'), _ephemeralDirectory);
-        _overwriteFromTemplate(fs.path.join('module', 'android_host_ephemeral'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
       }
     }
-    if (!hostAppGradleRoot.existsSync())
+    if (!hostAppGradleRoot.existsSync()) {
       return;
-    await gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    }
+    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
   }
 
   bool _shouldRegenerateFromTemplate() {
@@ -286,20 +285,25 @@ class AndroidProject {
     assert(isModule);
     if (_materializedDirectory.existsSync())
       throwToolExit('Android host app already materialized. To redo materialization, delete the android/ folder.');
-    // Reset contents of .android/
-    _deleteIfExistsSync(_ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android'), _ephemeralDirectory);
-    gradle.injectGradleWrapper(_ephemeralDirectory);
-    // Write contents of android/
-    _overwriteFromTemplate(fs.path.join('module', 'android_host_common'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android_host_materialized'), _materializedDirectory);
+    _regenerateLibrary();
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _materializedDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_materialized'), _materializedDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _materializedDirectory);
     gradle.injectGradleWrapper(_materializedDirectory);
-    await gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    gradle.writeAndroidSdkPath(_materializedDirectory.childFile('local.properties'));
+    await injectPlugins(parent);
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
 
   Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
+
+  void _regenerateLibrary() {
+    _deleteIfExistsSync(_ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _ephemeralDirectory);
+    gradle.injectGradleWrapper(_ephemeralDirectory);
+  }
 
   void _deleteIfExistsSync(Directory directory) {
     if (directory.existsSync())

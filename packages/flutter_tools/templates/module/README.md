@@ -1,6 +1,14 @@
 # Templates for Flutter Module
 
+## common
+
+Written to root of Flutter module.
+
+Adds Dart project files including `pubspec.yaml`.
+
 ## android
+
+#### library
 
 Written to the `.android/` hidden folder.
 
@@ -13,16 +21,15 @@ a `.aar` archive.
 Android host apps can set up a dependency to this project to consume
 Flutter views.
 
-## ios
+#### gradle
 
-Written to the `.ios/` hidden folder.
+Written to `.android/` or `android/`.
 
-Contents wraps Flutter/Dart code as a CocoaPods pod.
+Mixin for adding Gradle boilerplate to Android projects. The `build.gradle`
+file is a template file so that it is created, not copied, on instantiation.
+That way, its timestamp reflects template instantiation time.
 
-iOS host apps can set up a dependency to this project to consume
-Flutter views.
-
-## android_host_common
+#### host_app_common
 
 Written to either `.android/` or `android/`.
 
@@ -34,7 +41,7 @@ an `.apk` archive.
 
 Used with either `android_host_ephemeral` or `android_host_materialized`.
 
-## android_host_ephemeral
+#### host_app_ephemeral
 
 Written to `.android/` on top of `android_host_common`.
 
@@ -42,10 +49,19 @@ Combined contents define an *ephemeral* (hidden, auto-generated,
 under Flutter tooling control) Android host app with a dependency on the
 `.android/Flutter` library.
 
-## android_host_materialized
+#### host_app_materialized
 
 Written to `android/` on top of `android_host_common`.
 
 Combined contents define a *materialized* (visible, one-time generated,
 under app author control) Android host app with a dependency on the
 `.android/Flutter` library.
+
+## ios
+
+Written to the `.ios/` hidden folder.
+
+Contents wraps Flutter/Dart code as a CocoaPods pod.
+
+iOS host apps can set up a dependency to this project to consume
+Flutter views.

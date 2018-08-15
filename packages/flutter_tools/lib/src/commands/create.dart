@@ -286,8 +286,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
       );
     }
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
     final String organization = templateContext['organization'];
@@ -320,8 +319,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
       await project.ensureReadyForPlatformSpecificTooling();
     }
 
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     return generatedCount;
   }

@@ -107,6 +107,7 @@ void main() {
           isNot(contains("include ':app'")),
         );
         expectExists(project.directory.childDirectory('android').childDirectory('app'));
+        expectExists(project.directory.childDirectory('android').childDirectory('app').childFile('local.properties'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
           contains("include ':app'"),
@@ -366,6 +367,7 @@ Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
 void expectExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isTrue);
 }
+
 void expectNotExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isFalse);
 }

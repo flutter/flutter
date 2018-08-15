@@ -40,7 +40,12 @@ Future<Null> main() async {
         '\ndependencies:\n  battery:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
-
+      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
+        );
+      });
 
       section('Build Flutter module library archive');
 

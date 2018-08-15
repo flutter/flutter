@@ -23,7 +23,7 @@ import '../project.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const String gradleVersion = '4.1';
+const String gradleVersion = '4.4';
 final RegExp _assembleTaskPattern = new RegExp(r'assemble([^:]+): task ');
 
 GradleProject _cachedGradleProject;
@@ -93,7 +93,7 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final FlutterProject flutterProject = await FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
-  await updateLocalProperties(project: flutterProject);
+  updateLocalProperties(project: flutterProject);
   final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
   GradleProject project;
   try {
@@ -205,13 +205,13 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 ///
 /// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
 /// this will fail with a [ToolExit].
-Future<void> updateLocalProperties({
+void updateLocalProperties({
   @required FlutterProject project,
   BuildInfo buildInfo,
   bool requireAndroidSdk = true,
-}) async {
-  if (requireAndroidSdk && androidSdk == null) {
-    throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
+}) {
+  if (requireAndroidSdk) {
+    _exitIfNoAndroidSdk();
   }
 
   final File localProperties = project.android.localPropertiesFile;
@@ -250,6 +250,23 @@ Future<void> updateLocalProperties({
     settings.writeContents(localProperties);
 }
 
+/// Overwrites the specified properties file with the Android SDK path.
+///
+/// Throws ToolExit if the Android SDK is not known.
+void writeAndroidSdkPath(File properties) {
+  _exitIfNoAndroidSdk();
+  new SettingsFile()
+   ..values['sdk.dir'] = escapePath(androidSdk.directory)
+   ..writeContents(properties);
+}
+
+/// Throws a ToolExit, if the path to the Android SDK is not known.
+void _exitIfNoAndroidSdk() {
+  if (androidSdk == null) {
+    throwToolExit('Unable to locate Android SDK. Please run `flutter doctor` for more details.');
+  }
+}
+
 Future<Null> buildGradleProject({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
@@ -263,7 +280,7 @@ Future<Null> buildGradleProject({
   // and can be overwritten with flutter build command.
   // The default Gradle script reads the version name and number
   // from the local.properties file.
-  await updateLocalProperties(project: project, buildInfo: buildInfo);
+  updateLocalProperties(project: project, buildInfo: buildInfo);
 
   final String gradle = await _ensureGradle(project);
 
