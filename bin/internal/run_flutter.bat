@@ -7,7 +7,7 @@ REM found in the LICENSE file.
 REM ---------------------------------- NOTE ----------------------------------
 REM
 REM Please keep the logic in this file consistent with the logic in the
-REM `flutter` script in the same directory to ensure that Flutter continues to
+REM `../flutter` script for Linux to ensure that Flutter continues to
 REM work across all platforms!
 REM
 REM --------------------------------------------------------------------------
