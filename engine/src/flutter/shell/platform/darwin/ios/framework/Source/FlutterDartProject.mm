@@ -16,7 +16,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
 static const char* kScriptSnapshotFileName = "snapshot_blob.bin";
-static const char* kVMKernelSnapshotFileName = "platform.dill";
+static const char* kVMKernelSnapshotFileName = "platform_strong.dill";
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 
 static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
