@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show defaultClipBehavior; // ignore: deprecated_member_use
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -63,7 +65,7 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation = 0.0,
     this.padding,
     this.shape,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use
     this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     this.child,
@@ -98,7 +100,7 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.shape,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use
     this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     @required Widget icon,
