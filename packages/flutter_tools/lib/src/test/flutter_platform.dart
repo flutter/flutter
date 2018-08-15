@@ -696,11 +696,11 @@ class _FlutterPlatform extends PlatformPlugin {
       tempBundleDirectory.deleteSync(recursive: true);
     });
 
-    // copy 'vm_platform_strong.dill' into 'platform.dill'
+    // copy 'vm_platform_strong.dill' into 'platform_strong.dill'
     final File vmPlatformStrongDill = fs.file(
       artifacts.getArtifactPath(Artifact.platformKernelDill),
     );
-    printTrace('Copying platform.dill file from ${vmPlatformStrongDill.path}');
+    printTrace('Copying platform_strong.dill file from ${vmPlatformStrongDill.path}');
     final File platformDill = vmPlatformStrongDill.copySync(
       tempBundleDirectory
           .childFile('platform_strong.dill')
