@@ -257,6 +257,7 @@ fml::RefPtr<DartVM> DartVM::ForProcess(Settings settings) {
 }
 
 static std::once_flag gVMInitialization;
+static std::mutex gVMMutex;
 static fml::RefPtr<DartVM> gVM;
 
 fml::RefPtr<DartVM> DartVM::ForProcess(
@@ -264,6 +265,7 @@ fml::RefPtr<DartVM> DartVM::ForProcess(
     fml::RefPtr<DartSnapshot> vm_snapshot,
     fml::RefPtr<DartSnapshot> isolate_snapshot,
     fml::RefPtr<DartSnapshot> shared_snapshot) {
+  std::lock_guard<std::mutex> lock(gVMMutex);
   std::call_once(gVMInitialization, [settings,          //
                                      vm_snapshot,       //
                                      isolate_snapshot,  //
@@ -296,6 +298,7 @@ fml::RefPtr<DartVM> DartVM::ForProcess(
 }
 
 fml::RefPtr<DartVM> DartVM::ForProcessIfInitialized() {
+  std::lock_guard<std::mutex> lock(gVMMutex);
   return gVM;
 }
 
