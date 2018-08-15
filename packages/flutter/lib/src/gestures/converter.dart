@@ -319,6 +319,48 @@ class PointerEventConverter {
             );
           }
           break;
+        case ui.PointerChange.scroll:
+          final _PointerState state = _ensureStateForPointer(datum, position);
+          if (state.lastPosition != position) {
+            // Not all sources of pointer packets respect the invariant that
+            // they hover the pointer to the scroll location before sending the
+            // scroll event. We restore the invariant here for our clients.
+            final Offset offset = position - state.lastPosition;
+            state.lastPosition = position;
+            yield new PointerHoverEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              delta: offset,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
+              synthesized: true,
+            );
+            state.lastPosition = position;
+          }
+          final Offset scrollDelta =
+              new Offset(datum.scrollDeltaX, datum.scrollDeltaY) /
+                  devicePixelRatio;
+          yield new PointerScrollEvent(
+            timeStamp: timeStamp,
+            pointer: state.pointer,
+            kind: kind,
+            device: datum.device,
+            position: position,
+            scrollDelta: scrollDelta
+          );
+          break;
         case ui.PointerChange.remove:
           assert(_pointers.containsKey(datum.device));
           final _PointerState state = _pointers[datum.device];

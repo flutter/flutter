@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -477,27 +478,45 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
 
+  // SCROLL WHEEL
+
+  void _handlePointerScroll(PointerScrollEvent event) {
+    final double delta = widget.axis == Axis.horizontal
+        ? event.scrollDelta.dx
+        : event.scrollDelta.dy;
+    final ScrollPosition position = widget.controller?.position;
+    if (position != null) {
+      final double targetScrollPixels = math.min(
+          math.max(position.pixels + delta, position.minScrollExtent),
+          position.maxScrollExtent);
+      position.jumpTo(targetScrollPixels);
+    }
+  }
+
   // DESCRIPTION
 
   @override
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    Widget result = new RawGestureDetector(
-      key: _gestureDetectorKey,
-      gestures: _gestureRecognizers,
-      behavior: HitTestBehavior.opaque,
-      excludeFromSemantics: widget.excludeFromSemantics,
-      child: new Semantics(
-        explicitChildNodes: !widget.excludeFromSemantics,
-        child: new IgnorePointer(
-          key: _ignorePointerKey,
-          ignoring: _shouldIgnorePointer,
-          ignoringSemantics: false,
-          child: new _ScrollableScope(
-            scrollable: this,
-            position: position,
-            child: widget.viewportBuilder(context, position),
+    Widget result = new Listener(
+      onPointerScroll: _handlePointerScroll,
+      child: new RawGestureDetector(
+        key: _gestureDetectorKey,
+        gestures: _gestureRecognizers,
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: widget.excludeFromSemantics,
+        child: new Semantics(
+          explicitChildNodes: !widget.excludeFromSemantics,
+          child: new IgnorePointer(
+            key: _ignorePointerKey,
+            ignoring: _shouldIgnorePointer,
+            ignoringSemantics: false,
+            child: new _ScrollableScope(
+              scrollable: this,
+              position: position,
+              child: widget.viewportBuilder(context, position),
+            ),
           ),
         ),
       ),
