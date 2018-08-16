@@ -40,12 +40,14 @@ class InkHighlight extends InteractiveInkFeature {
     @required RenderBox referenceBox,
     @required Color color,
     BoxShape shape = BoxShape.rectangle,
+    BorderRadius borderRadius,
     ShapeBorder border,
     RectCallback rectCallback,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
        _shape = shape,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
        _border = border,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
@@ -62,6 +64,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   final BoxShape _shape;
+  final BorderRadius _borderRadius;
   final ShapeBorder _border;
   final RectCallback _rectCallback;
 
@@ -106,8 +109,18 @@ class InkHighlight extends InteractiveInkFeature {
         highlightPath.addRect(rect);
         break;
     }
+    Path clipPath;
     if (_border != null) {
-      final Path clipPath = _border.getOuterPath(rect);
+      clipPath = _border.getOuterPath(rect);
+    } if (_borderRadius != BorderRadius.zero) {
+      final RRect clipRRect = new RRect.fromRectAndCorners(
+        rect,
+        topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+        bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+      );
+      clipPath = new Path()..addRRect(clipRRect);
+    }
+    if (clipPath != null) {
       highlightPath = Path.combine(PathOperation.intersect, highlightPath, clipPath);
     }
     canvas.drawPath(highlightPath, paint);

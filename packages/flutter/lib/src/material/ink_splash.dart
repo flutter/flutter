@@ -53,6 +53,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
     @required Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
+    BorderRadius borderRadius,
     ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
@@ -64,6 +65,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
       color: color,
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
+      borderRadius: borderRadius,
       border: border,
       radius: radius,
       onRemoved: onRemoved,
@@ -118,15 +120,18 @@ class InkSplash extends InteractiveInkFeature {
     Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
+    BorderRadius borderRadius,
     ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
   }) : _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
        _border = border,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
+    assert(_borderRadius != null);
     _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
@@ -146,6 +151,7 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   final Offset _position;
+  final BorderRadius _borderRadius;
   final ShapeBorder _border;
   final double _targetRadius;
   final RectCallback _clipCallback;
@@ -204,6 +210,12 @@ class InkSplash extends InteractiveInkFeature {
       Path clipPath;
       if (_border != null) {
         clipPath = _border.getOuterPath(rect);
+      } else if (_borderRadius != BorderRadius.zero) {
+        clipPath = new Path()..addRRect(new RRect.fromRectAndCorners(
+          rect,
+          topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+          bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+        ));
       } else {
         clipPath = new Path()..addRect(rect);
       }

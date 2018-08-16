@@ -47,6 +47,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     @required Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
+    BorderRadius borderRadius,
     ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
@@ -58,6 +59,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       color: color,
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
+      borderRadius: borderRadius,
       border: border,
       radius: radius,
       onRemoved: onRemoved,
@@ -114,17 +116,21 @@ class InkRipple extends InteractiveInkFeature {
     @required Color color,
     bool containedInkWell = false,
     RectCallback rectCallback,
+    BorderRadius borderRadius,
     ShapeBorder border,
     double radius,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(position != null),
        _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
        _border = border,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
   {
+    assert(_borderRadius != null);
+
     // Immediately begin fading-in the initial splash.
     _fadeInController = new AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
@@ -169,6 +175,7 @@ class InkRipple extends InteractiveInkFeature {
   }
 
   final Offset _position;
+  final BorderRadius _borderRadius;
   final ShapeBorder _border;
   final double _targetRadius;
   final RectCallback _clipCallback;
@@ -242,6 +249,12 @@ class InkRipple extends InteractiveInkFeature {
       Path clipPath;
       if (_border != null) {
         clipPath = _border.getOuterPath(rect);
+      } else if (_borderRadius != BorderRadius.zero) {
+        clipPath = new Path()..addRRect(new RRect.fromRectAndCorners(
+          rect,
+          topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+          bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+        ));
       } else {
         clipPath = new Path()..addRect(rect);
       }

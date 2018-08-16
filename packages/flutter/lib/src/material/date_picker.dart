@@ -185,7 +185,7 @@ class _DateHeaderButton extends StatelessWidget {
       type: MaterialType.button,
       color: color,
       child: new InkWell(
-        border: new RoundedRectangleBorder(borderRadius: kMaterialEdges[MaterialType.button]),
+        borderRadius: kMaterialEdges[MaterialType.button],
         highlightColor: theme.highlightColor,
         splashColor: theme.splashColor,
         onTap: onTap,
