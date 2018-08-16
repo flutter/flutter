@@ -11,7 +11,7 @@ import 'picker.dart';
 const double _kItemExtent = 32.0;
 /// Consider setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
-const double _kPickerWidth = 420.0;
+const double _kPickerWidth = 360.0;
 
 
 /// A countdown timer picker in iOS style.
@@ -89,6 +89,39 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
       initialItem: _selectedSecond ~/ widget.secondInterval);
   }
 
+  Widget _fixedColumn(Widget child, Alignment align) {
+    return new IgnorePointer(
+      child: Align(
+        alignment: align,
+        child: Container(
+          width: _kPickerWidth / 6,
+          child: new Container(
+            alignment: -align,
+            // A little space between words to look better.
+            padding: const EdgeInsets.symmetric(horizontal: 2.0),
+            decoration:BoxDecoration(border: Border.all()),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _extendableColumn(Widget child, Alignment align, EdgeInsets padding) {
+    return new IgnorePointer(
+      child: Padding(
+        padding: padding,
+        child: new Container(
+          decoration: BoxDecoration(border: Border.all()),
+          alignment: align,
+          // A little space between words to look better.
+          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Widget _buildHourPicker(BuildContext context) {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
@@ -120,37 +153,17 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
               });
             },
             children: new List<Widget>.generate(24, (int index) {
-              return new Padding(
-                padding: textDirectionFactor == 1
-                         ? const EdgeInsets.only(right: _kPickerWidth / 6)
-                         : const EdgeInsets.only(left: _kPickerWidth / 6),
-                child: new Container(
-                  // decoration:BoxDecoration(border: Border.all()),
-                  alignment: Alignment(1.0 * textDirectionFactor, 0.0),
-                  // A little space to look better.
-                  padding: EdgeInsets.symmetric(horizontal: 2.0),
-                  child: new Text(index.toString()),
-                ),
+              return _extendableColumn(
+                Text(index.toString()),
+                Alignment(1.0 * textDirectionFactor, 0.0),
+                textDirectionFactor == 1 ? const EdgeInsets.only(right: _kPickerWidth / 6)
+                                         : const EdgeInsets.only(left: _kPickerWidth / 6),
               );
             }),
           ),
-          Positioned(
-            left: textDirectionFactor == 1 ? null : 0.0,
-            right: textDirectionFactor == 1 ? 0.0 : null,
-            top: 0.0,
-            bottom: 0.0,
-            width: _kPickerWidth / 6,
-            child: new Container(
-              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
-              // A little space to look better.
-              padding: EdgeInsets.symmetric(horizontal: 2.0),
-              // decoration:BoxDecoration(border: Border.all()),
-              child: Text(
-                'hours',
-                textScaleFactor: 0.9,
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+          _fixedColumn(
+            const Text('hours', textScaleFactor: 0.9, style: TextStyle(fontWeight: FontWeight.w600)),
+            Alignment(1.0 * textDirectionFactor, 0.0),
           ),
         ],
       ),
@@ -187,37 +200,15 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
             },
             children: new List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
               int minutes = index * widget.minuteInterval;
-              return new Padding(
-                padding: textDirectionFactor == 1
-                         ? EdgeInsets.only(right: _kPickerWidth / 6)
-                         : EdgeInsets.only(left: _kPickerWidth / 6),
-                child: new Container(
-                  // decoration:BoxDecoration(border: Border.all()),
-                  alignment: Alignment(1.0 * textDirectionFactor, 0.0),
-                  // A little space to look better.
-                  padding: EdgeInsets.symmetric(horizontal: 2.0),
-                  child: new Text(minutes.toString()),
-                ),
+              return _fixedColumn(
+                new Text(minutes.toString()),
+                Alignment(-1.0 * textDirectionFactor, 0.0),
               );
             }),
           ),
-          Positioned(
-            left: textDirectionFactor == 1 ? null : 0.0,
-            right: textDirectionFactor == 1 ? 0.0 : null,
-            top: 0.0,
-            bottom: 0.0,
-            width: _kPickerWidth / 6,
-            child: new Container(
-              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
-              // A little space to look better.
-              padding: EdgeInsets.symmetric(horizontal: 2.0),
-              // decoration:BoxDecoration(border: Border.all()),
-              child: Text(
-                'min',
-                textScaleFactor: 0.9,
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+          _fixedColumn(
+            const Text('min', textScaleFactor: 0.9, style: TextStyle(fontWeight: FontWeight.w600)),
+            Alignment(1.0 * textDirectionFactor, 0.0),
           ),
         ],
       ),
@@ -254,37 +245,39 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
             },
             children: new List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
               int seconds = index * widget.secondInterval;
-              return new Align(
-                alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
-                child: new Container(
-                  width: _kPickerWidth / 6 * 0.95,
-                    // decoration:BoxDecoration(border: Border.all()),
-                    alignment: Alignment(1.0 * textDirectionFactor, 0.0),
-                    // A little space to look better.
-                    padding: EdgeInsets.symmetric(horizontal: 2.0),
-                    child: new Text(seconds.toString()),
-                ),
+              return _fixedColumn(
+                new Text(seconds.toString()),
+                Alignment(-1.0 * textDirectionFactor, 0.0),
               );
             }),
           ),
-          Positioned(
-            left: textDirectionFactor == 1 ? null : 0.0,
-            right: textDirectionFactor == 1 ? 0.0 : null,
-            top: 0.0,
-            bottom: 0.0,
-            width: _kPickerWidth / 6,
-            child: new Container(
-              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
-              // A little space to look better.
-              padding: EdgeInsets.symmetric(horizontal: 2.0),
-              // decoration:BoxDecoration(border: Border.all()),
-              child: Text(
-                'sec',
-                textScaleFactor: 0.9,
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
+
+          _extendableColumn(
+            const Text(
+              'sec',
+              textScaleFactor: 0.9,
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
+            Alignment(-1.0 * textDirectionFactor, 0.0),
+            textDirectionFactor == 1 ? const EdgeInsets.only(left: _kPickerWidth / 6)
+                                     : const EdgeInsets.only(right: _kPickerWidth / 6),
           ),
+//          Padding(
+//            padding: textDirectionFactor == 1
+//                ? EdgeInsets.only(left: _kPickerWidth / 6)
+//                : EdgeInsets.only(right: _kPickerWidth / 6),
+//            child: new Container(
+//              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
+//              // A little space to look better.
+//              padding: EdgeInsets.symmetric(horizontal: 2.0),
+//              decoration:BoxDecoration(border: Border.all()),
+//              child: Text(
+//                'sec',
+//                textScaleFactor: 0.9,
+//                style: TextStyle(fontWeight: FontWeight.w600),
+//              ),
+//            ),
+//          ),
         ],
       ),
     );
@@ -292,7 +285,6 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
-    print(_kPickerWidth / 3);
     return new MediaQuery(
       data: const MediaQueryData(
         // The iOS picker's text scaling is fixed, so we will also fix it in
