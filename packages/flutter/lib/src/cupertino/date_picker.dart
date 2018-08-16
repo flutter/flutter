@@ -8,11 +8,10 @@ import 'colors.dart';
 import 'picker.dart';
 
 /// Default aesthetic values obtained by comparing with iOS pickers.
-const bool _kUseMagnifier = true;
-const double _kMagnification = 1.1;
 const double _kItemExtent = 32.0;
 /// Consider setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
+const double _kPickerWidth = 420.0;
 
 
 /// A countdown timer picker in iOS style.
@@ -94,26 +93,67 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    return new CupertinoPicker(
-      scrollController: hourController,
-      offAxisFraction: -0.15 * textDirectionFactor,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      itemExtent: _kItemExtent,
-      backgroundColor: _kBackgroundColor,
-      onSelectedItemChanged: (int index) {
-        setState(() {
-          _selectedHour = index;
-          widget.onTimerDurationChanged(
-            new Duration(hours: _selectedHour, minutes: _selectedMinute));
-        });
+    print(Directionality.of(context));
+
+    return new Semantics(
+      onScrollUp: () {
+        hourController.jumpToItem(hourController.selectedItem + 1);
       },
-      children: new List<Widget>.generate(24, (int index) {
-        return new Container(
-          alignment: Alignment.center,
-          child: new Text(index.toString().padLeft(2, '  ')),
-        );
-      }),
+      onScrollDown: () {
+        hourController.jumpToItem(hourController.selectedItem - 1);
+      },
+      child: new Stack(
+        children: <Widget>[
+          CupertinoPicker(
+            scrollController: hourController,
+            offAxisFraction: -0.5 * textDirectionFactor,
+            itemExtent: _kItemExtent,
+            backgroundColor: _kBackgroundColor,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _selectedHour = index;
+                widget.onTimerDurationChanged(
+                    new Duration(
+                        hours: _selectedHour,
+                        minutes: _selectedMinute,
+                        seconds: _selectedSecond));
+              });
+            },
+            children: new List<Widget>.generate(24, (int index) {
+              return new Padding(
+                padding: textDirectionFactor == 1
+                         ? const EdgeInsets.only(right: _kPickerWidth / 6)
+                         : const EdgeInsets.only(left: _kPickerWidth / 6),
+                child: new Container(
+                  // decoration:BoxDecoration(border: Border.all()),
+                  alignment: Alignment(1.0 * textDirectionFactor, 0.0),
+                  // A little space to look better.
+                  padding: EdgeInsets.symmetric(horizontal: 2.0),
+                  child: new Text(index.toString()),
+                ),
+              );
+            }),
+          ),
+          Positioned(
+            left: textDirectionFactor == 1 ? null : 0.0,
+            right: textDirectionFactor == 1 ? 0.0 : null,
+            top: 0.0,
+            bottom: 0.0,
+            width: _kPickerWidth / 6,
+            child: new Container(
+              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
+              // A little space to look better.
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              // decoration:BoxDecoration(border: Border.all()),
+              child: Text(
+                'hours',
+                textScaleFactor: 0.9,
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -121,64 +161,138 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    return new CupertinoPicker(
-      scrollController: minuteController,
-      offAxisFraction: 0.0 * textDirectionFactor,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      itemExtent: _kItemExtent,
-      backgroundColor: _kBackgroundColor,
-      onSelectedItemChanged: (int index) {
-        setState(() {
-          _selectedMinute = index * widget.minuteInterval;
-          widget.onTimerDurationChanged(
-              new Duration(hours: _selectedHour, minutes: _selectedMinute));
-        });
+    return new Semantics(
+      onScrollUp: () {
+        minuteController.jumpToItem(minuteController.selectedItem + 1);
       },
-      children: new List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
-        final int toMinutes = index * widget.minuteInterval;
-        return new Container(
-          alignment: Alignment.center,
-//          alignment: new Alignment(-1.0 * textDirectionFactor, 0.0),
-          child: new Text(toMinutes.toString().padLeft(2, '  ')),
-        );
-      }),
-      looping: true,
+      onScrollDown: () {
+        minuteController.jumpToItem(minuteController.selectedItem - 1);
+      },
+      child: new Stack(
+        children: <Widget>[
+          new CupertinoPicker(
+            scrollController: minuteController,
+            offAxisFraction: 0.0 * textDirectionFactor,
+            itemExtent: _kItemExtent,
+            backgroundColor: _kBackgroundColor,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _selectedMinute = index;
+                widget.onTimerDurationChanged(
+                    new Duration(
+                        hours: _selectedHour,
+                        minutes: _selectedMinute,
+                        seconds: _selectedSecond));
+              });
+            },
+            children: new List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
+              int minutes = index * widget.minuteInterval;
+              return new Padding(
+                padding: textDirectionFactor == 1
+                         ? EdgeInsets.only(right: _kPickerWidth / 6)
+                         : EdgeInsets.only(left: _kPickerWidth / 6),
+                child: new Container(
+                  // decoration:BoxDecoration(border: Border.all()),
+                  alignment: Alignment(1.0 * textDirectionFactor, 0.0),
+                  // A little space to look better.
+                  padding: EdgeInsets.symmetric(horizontal: 2.0),
+                  child: new Text(minutes.toString()),
+                ),
+              );
+            }),
+          ),
+          Positioned(
+            left: textDirectionFactor == 1 ? null : 0.0,
+            right: textDirectionFactor == 1 ? 0.0 : null,
+            top: 0.0,
+            bottom: 0.0,
+            width: _kPickerWidth / 6,
+            child: new Container(
+              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
+              // A little space to look better.
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              // decoration:BoxDecoration(border: Border.all()),
+              child: Text(
+                'min',
+                textScaleFactor: 0.9,
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildSecondPicker(BuildContext context) {
     final int textDirectionFactor =
-      Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+    Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    return new CupertinoPicker(
-      scrollController: secondController,
-      offAxisFraction: 0.3 * textDirectionFactor,
-      useMagnifier: _kUseMagnifier,
-      magnification: _kMagnification,
-      itemExtent: _kItemExtent,
-      backgroundColor: _kBackgroundColor,
-      onSelectedItemChanged: (int index) {
-        setState(() {
-          _selectedMinute = index * widget.secondInterval;
-          widget.onTimerDurationChanged(
-              new Duration(hours: _selectedHour, minutes: _selectedMinute));
-        });
+    return new Semantics(
+      onScrollUp: () {
+        secondController.jumpToItem(secondController.selectedItem + 1);
       },
-      children: new List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
-        final int toSeconds = index * widget.secondInterval;
-        return new Container(
-          alignment: Alignment.center,
-//          alignment: new Alignment(-1.0 * textDirectionFactor, 0.0),
-          child: new Text(toSeconds.toString().padLeft(2, '  ')),
-        );
-      }),
-      looping: true,
+      onScrollDown: () {
+        secondController.jumpToItem(secondController.selectedItem - 1);
+      },
+      child: new Stack(
+        children: <Widget>[
+          new CupertinoPicker(
+            scrollController: secondController,
+            offAxisFraction: 0.5 * textDirectionFactor,
+            itemExtent: _kItemExtent,
+            backgroundColor: _kBackgroundColor,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _selectedSecond = index;
+                widget.onTimerDurationChanged(
+                    new Duration(
+                        hours: _selectedHour,
+                        minutes: _selectedMinute,
+                        seconds: _selectedSecond));
+              });
+            },
+            children: new List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
+              int seconds = index * widget.secondInterval;
+              return new Align(
+                alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
+                child: new Container(
+                  width: _kPickerWidth / 6 * 0.95,
+                    // decoration:BoxDecoration(border: Border.all()),
+                    alignment: Alignment(1.0 * textDirectionFactor, 0.0),
+                    // A little space to look better.
+                    padding: EdgeInsets.symmetric(horizontal: 2.0),
+                    child: new Text(seconds.toString()),
+                ),
+              );
+            }),
+          ),
+          Positioned(
+            left: textDirectionFactor == 1 ? null : 0.0,
+            right: textDirectionFactor == 1 ? 0.0 : null,
+            top: 0.0,
+            bottom: 0.0,
+            width: _kPickerWidth / 6,
+            child: new Container(
+              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
+              // A little space to look better.
+              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              // decoration:BoxDecoration(border: Border.all()),
+              child: Text(
+                'sec',
+                textScaleFactor: 0.9,
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    print(_kPickerWidth / 3);
     return new MediaQuery(
       data: const MediaQueryData(
         // The iOS picker's text scaling is fixed, so we will also fix it in
@@ -187,21 +301,12 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
       ),
       child: new Row(
         children: <Widget>[
-          new Expanded(
-            child: new MergeSemantics(
-              child: _buildHourPicker(context),
-            ),
+          new Expanded(child: _buildHourPicker(context)),
+          new Container(
+            width: _kPickerWidth / 3,
+            child: _buildMinutePicker(context),
           ),
-          new Expanded(
-            child: new MergeSemantics(
-              child: _buildMinutePicker(context),
-            ),
-          ),
-          new Expanded(
-            child: new MergeSemantics(
-              child: _buildSecondPicker(context),
-            ),
-          ),
+          new Expanded(child: _buildSecondPicker(context)),
         ],
       ),
     );
