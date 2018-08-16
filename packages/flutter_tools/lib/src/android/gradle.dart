@@ -250,14 +250,15 @@ void updateLocalProperties({
     settings.writeContents(localProperties);
 }
 
-/// Overwrites the specified properties file with the Android SDK path.
+/// Writes standard Android local properties to the specified [properties] file.
 ///
-/// Throws ToolExit if the Android SDK is not known.
-void writeAndroidSdkPath(File properties) {
-  _exitIfNoAndroidSdk();
-  new SettingsFile()
-   ..values['sdk.dir'] = escapePath(androidSdk.directory)
-   ..writeContents(properties);
+/// Writes the path to the Android SDK, if known.
+void writeLocalProperties(File properties) {
+  final SettingsFile settings = new SettingsFile();
+  if (androidSdk != null) {
+    settings.values['sdk.dir'] = escapePath(androidSdk.directory);
+  }
+  settings.writeContents(properties);
 }
 
 /// Throws a ToolExit, if the path to the Android SDK is not known.

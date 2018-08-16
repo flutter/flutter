@@ -290,7 +290,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_materialized'), _materializedDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _materializedDirectory);
     gradle.injectGradleWrapper(_materializedDirectory);
-    gradle.writeAndroidSdkPath(_materializedDirectory.childFile('local.properties'));
+    gradle.writeLocalProperties(_materializedDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
 
