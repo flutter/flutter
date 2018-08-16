@@ -83,25 +83,25 @@ Finder inHero(WidgetTester tester, Finder finder) {
 void main() {
   testWidgets('Bottom middle moves between middle and back label', (
       WidgetTester tester) async {
-    // await startTransitionBetween(tester, fromTitle: 'Page 1');
+     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
-    // // Be mid-transition.
-    // await tester.pump(const Duration(milliseconds: 50));
+     // Be mid-transition.
+     await tester.pump(const Duration(milliseconds: 50));
 
-    // // There's 2 of them. One from the top route's back label and one from the
-    // // bottom route's middle widget.
-    // expect(inHero(tester, find.text('Page 1')), findsNWidgets(2));
+     // There's 2 of them. One from the top route's back label and one from the
+     // bottom route's middle widget.
+     expect(inHero(tester, find.text('Page 1')), findsNWidgets(2));
 
-    // // Since they have the same text, they should be more or less at the same
-    // // place with minor differences due to different
-    // expect(
-    //   tester.getTopLeft(inHero(tester, find.text('Page 1')).first),
-    //   const Offset(289.1547948519389, 13.5),
-    // );
-    // expect(
-    //   tester.getTopLeft(inHero(tester, find.text('Page 1')).last),
-    //   const Offset(331.0724935531616, 13.5),
-    // );
+     // Since they have the same text, they should be more or less at the same
+     // place.
+     expect(
+       tester.getTopLeft(inHero(tester, find.text('Page 1')).first),
+       const Offset(331.0724935531616, 13.5),
+     );
+     expect(
+       tester.getTopLeft(inHero(tester, find.text('Page 1')).last),
+       const Offset(331.0724935531616, 13.5),
+     );
   });
 
   testWidgets('Bottom middle and top back label transitions their font', (
@@ -111,13 +111,70 @@ void main() {
     // Be mid-transition.
     await tester.pump(const Duration(milliseconds: 50));
 
-    RenderParagraph text = tester.renderObject(inHero(tester, find.text('Page 1')).first);
+    // The transition's stack is ordered. The bottom middle is inserted first.
+    RenderParagraph bottomMiddle = tester.renderObject(inHero(tester, find.text('Page 1')).first);
+    expect(bottomMiddle.text.style.color, const Color(0xFF00070F));
+    expect(bottomMiddle.text.style.fontWeight, FontWeight.w600);
+    expect(bottomMiddle.text.style.fontFamily, '.SF UI Text');
+    expect(bottomMiddle.text.style.letterSpacing, -0.08952957153320312);
 
-    print('all');
-    find.text('Page 1').evaluate().forEach((Element element) {print(element.findRenderObject());});
-    print(inHero(tester, find.text('Page 1')));
-    print(inHero(tester, find.text('Page 1')).first.evaluate().first.renderObject);
-    print(inHero(tester, find.text('Page 1')).evaluate().first.renderObject);
-    // debugDumpApp();
+    expect(
+      tester.renderObject<RenderAnimatedOpacity>(
+        find.ancestor(
+          of: inHero(tester, find.text('Page 1')).first,
+          matching: find.byType(FadeTransition),
+        )
+      ).opacity.value,
+      0.8609542846679688,
+    );
+
+    // The top back label is styled exactly the same way. But the opacity tweens
+    // are flipped.
+    RenderParagraph topBackLabel = tester.renderObject(inHero(tester, find.text('Page 1')).last);
+    expect(topBackLabel.text.style.color, const Color(0xFF00070F));
+    expect(topBackLabel.text.style.fontWeight, FontWeight.w600);
+    expect(topBackLabel.text.style.fontFamily, '.SF UI Text');
+    expect(topBackLabel.text.style.letterSpacing, -0.08952957153320312);
+
+    expect(
+      tester.renderObject<RenderAnimatedOpacity>(
+        find.ancestor(
+          of: inHero(tester, find.text('Page 1')).last,
+          matching: find.byType(FadeTransition),
+        )
+      ).opacity.value,
+      0.0,
+    );
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(bottomMiddle.text.style.color, const Color(0xFF0073F0));
+    expect(bottomMiddle.text.style.fontWeight, FontWeight.w400);
+    expect(bottomMiddle.text.style.fontFamily, '.SF UI Text');
+    expect(bottomMiddle.text.style.letterSpacing, -0.231169798374176);
+
+    expect(
+      tester.renderObject<RenderAnimatedOpacity>(
+          find.ancestor(
+            of: inHero(tester, find.text('Page 1')).first,
+            matching: find.byType(FadeTransition),
+          )
+      ).opacity.value,
+      0.0,
+    );
+
+    expect(topBackLabel.text.style.color, const Color(0xFF0073F0));
+    expect(topBackLabel.text.style.fontWeight, FontWeight.w400);
+    expect(topBackLabel.text.style.fontFamily, '.SF UI Text');
+    expect(topBackLabel.text.style.letterSpacing, -0.231169798374176);
+
+    expect(
+      tester.renderObject<RenderAnimatedOpacity>(
+          find.ancestor(
+            of: inHero(tester, find.text('Page 1')).last,
+            matching: find.byType(FadeTransition),
+          )
+      ).opacity.value,
+      0.8733493089675903,
+    );
   });
 }
