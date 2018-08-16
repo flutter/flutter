@@ -393,25 +393,23 @@ void main() {
           ));
 
           // Get the switch tile's semantics:
-          // final RenderMergeSemantics semantics = find.descendant(
-          //   of: find.byKey(const Key('Switch tile')),
-          //   matching: find.byType(MergeSemantics),
-          // ).evaluate().first.renderObject;
-          // final Map<CustomSemanticsAction, VoidCallback> semanticsActions = semantics..customSemanticsActions;
-
           final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
-          print(semanticsData);
-          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
           
-          // Check for properties of a SwitchTile semantics.
-          expect(semanticsData.hasFlag(SemanticsFlag.hasToggledState), true);
-          expect(semanticsData.hasFlag(SemanticsFlag.isToggled), true);
-          // Check for properties of the ReorderableListView semantics.
-          expect(semanticsData.customSemanticsActionIds, hasLength(4), reason: 'List item with its own semantics should have the 4 reorderable custom actions plus its own.');
-          // expect(semanticsActions.containsKey(moveToStart), true, reason: 'Should be able to `Move to the start`.');
-          // expect(semanticsActions.containsKey(moveUp), true, reason: 'Should be able to `Move up`.');
-          // expect(semanticsActions.containsKey(moveDown), true, reason: 'Should be able to `Move down`.');
-          // expect(semanticsActions.containsKey(moveToEnd), true, reason: 'Should be able to `Move to the end`.');
+          // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
+          expect(semanticsData, matchesSemanticsData(
+            hasToggledState: true,
+            isToggled: true,
+            isEnabled: true,
+            hasEnabledState: true,
+            label: 'Switch tile',
+            hasTapAction: true,
+            customActions: const <CustomSemanticsAction>[
+              CustomSemanticsAction(label: 'Move up'),
+              CustomSemanticsAction(label: 'Move down'),
+              CustomSemanticsAction(label: 'Move to the end'),
+              CustomSemanticsAction(label: 'Move to the start'),
+            ],
+          ));
           handle.dispose();
         });
       });
