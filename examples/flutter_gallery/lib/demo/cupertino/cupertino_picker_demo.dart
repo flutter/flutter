@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
@@ -20,7 +19,7 @@ class CupertinoPickerDemo extends StatefulWidget {
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedColorIndex = 0;
 
-  Duration timer = new Duration(minutes: 1);
+  Duration timer = new Duration();
 
   Widget _buildMenu(List<Widget> children) {
     return new Container(
@@ -101,12 +100,13 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           builder: (BuildContext context) {
             return _buildBottomPicker(
               CupertinoCountdownTimerPicker(
+                initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() {
                     timer = newTimer;
                   });
                 },
-              ),
+              )
             );
           },
         );
@@ -115,7 +115,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           <Widget>[
             const Text('Countdown Timer'),
             new Text(
-              "${timer.inHours}:${(timer.inMinutes % 60).toString().padLeft(2,'0')}",
+              "${timer.inHours}:"
+              "${(timer.inMinutes % 60).toString().padLeft(2,'0')}:"
+              "${(timer.inSeconds % 60).toString().padLeft(2,'0')}",
               style: const TextStyle(color: CupertinoColors.inactiveGray),
             ),
           ]
