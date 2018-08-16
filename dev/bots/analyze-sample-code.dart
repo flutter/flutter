@@ -221,7 +221,7 @@ dependencies:
     );
     final List<String> errors = <String>[];
     errors.addAll(await process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
-    errors.addAll(null);
+    errors.add(null);
     errors.addAll(await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
     // top is stderr
     if (errors.isNotEmpty && (errors.first.contains(' issues found. (ran in ') || errors.first.contains(' issue found. (ran in '))) {
