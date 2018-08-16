@@ -329,7 +329,7 @@ class _DevFSHttpWriter {
 }
 
 class DevFS {
-  /// Create a [DevFS] named [fsName] for the local files in [directory].
+  /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(VMService serviceProtocol,
         this.fsName,
         this.rootDirectory, {

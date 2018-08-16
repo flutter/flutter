@@ -40,7 +40,12 @@ Future<Null> main() async {
         '\ndependencies:\n  battery:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
-
+      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
+        );
+      });
 
       section('Build Flutter module library archive');
 
@@ -76,7 +81,7 @@ Future<Null> main() async {
         );
       });
 
-      final bool apkBuilt = exists(new File(path.join(
+      final bool ephemeralHostApkBuilt = exists(new File(path.join(
         directory.path,
         'hello',
         'build',
@@ -87,8 +92,47 @@ Future<Null> main() async {
         'app-release.apk',
       )));
 
-      if (!apkBuilt) {
+      if (!ephemeralHostApkBuilt) {
         return new TaskResult.failure('Failed to build ephemeral host .apk');
+      }
+
+      section('Clean build');
+
+      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+        await flutter('clean');
+      });
+
+      section('Materialize host app');
+
+      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+        await flutter(
+          'materialize',
+          options: <String>['android'],
+        );
+      });
+
+      section('Build materialized host app');
+
+      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+        await flutter(
+          'build',
+          options: <String>['apk'],
+        );
+      });
+
+      final bool materializedHostApkBuilt = exists(new File(path.join(
+        directory.path,
+        'hello',
+        'build',
+        'host',
+        'outputs',
+        'apk',
+        'release',
+        'app-release.apk',
+      )));
+
+      if (!materializedHostApkBuilt) {
+        return new TaskResult.failure('Failed to build materialized host .apk');
       }
 
       section('Add to Android app');

@@ -186,6 +186,10 @@ class IosProject {
     }
   }
 
+  Future<void> materialize() async {
+    throwToolExit('flutter materialize has not yet been implemented for iOS');
+  }
+
   bool _shouldRegenerateFromTemplate() {
     return Cache.instance.fileOlderThanToolsStamp(directory.childFile('podhelper.rb'));
   }
@@ -212,62 +216,112 @@ class AndroidProject {
   /// The parent of this project.
   final FlutterProject parent;
 
-  /// The directory of this project.
-  Directory get directory => parent.directory.childDirectory(isModule ? '.android' : 'android');
+  /// The Gradle root directory of the Android host app. This is the directory
+  /// containing the `app/` subdirectory and the `settings.gradle` file that
+  /// includes it in the overall Gradle project.
+  Directory get hostAppGradleRoot {
+    if (!isModule || _materializedDirectory.existsSync())
+      return _materializedDirectory;
+    return _ephemeralDirectory;
+  }
+
+  /// The Gradle root directory of the Android wrapping of Flutter and plugins.
+  /// This is the same as [hostAppGradleRoot] except when the project is
+  /// a Flutter module with a materialized host app.
+  Directory get _flutterLibGradleRoot => isModule ? _ephemeralDirectory : _materializedDirectory;
+
+  Directory get _ephemeralDirectory => parent.directory.childDirectory('.android');
+  Directory get _materializedDirectory => parent.directory.childDirectory('android');
 
   /// True, if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
-  File get gradleManifestFile {
+  File get appManifestFile {
     return isUsingGradle()
-        ? fs.file(fs.path.join(directory.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
-        : directory.childFile('AndroidManifest.xml');
+        ? fs.file(fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
+        : hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
 
   Directory get gradleAppOutV1Directory {
-    return fs.directory(fs.path.join(directory.path, 'app', 'build', 'outputs', 'apk'));
+    return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
   }
 
   bool isUsingGradle() {
-    return directory.childFile('build.gradle').existsSync();
+    return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
 
   Future<String> applicationId() {
-    final File gradleFile = directory.childDirectory('app').childFile('build.gradle');
+    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _applicationIdPattern).then((Match match) => match?.group(1));
   }
 
   Future<String> group() {
-    final File gradleFile = directory.childFile('build.gradle');
+    final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
     return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
-      final Template template = new Template.fromName(fs.path.join('module', 'android'));
-      template.render(
-        directory,
-        <String, dynamic>{
-          'androidIdentifier': parent.manifest.androidPackage,
-        },
-        printStatusWhenWriting: false,
-      );
-      gradle.injectGradleWrapper(directory);
+      _regenerateLibrary();
+      // Add ephemeral host app, if a materialized host app does not already exist.
+      if (!_materializedDirectory.existsSync()) {
+        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
+      }
     }
-    if (!directory.existsSync())
+    if (!hostAppGradleRoot.existsSync()) {
       return;
-    await gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    }
+    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
   }
 
   bool _shouldRegenerateFromTemplate() {
-    return Cache.instance.fileOlderThanToolsStamp(directory.childFile('build.gradle'));
+    return Cache.instance.fileOlderThanToolsStamp(_ephemeralDirectory.childFile('build.gradle'));
   }
 
-  File get localPropertiesFile => directory.childFile('local.properties');
+  Future<void> materialize() async {
+    assert(isModule);
+    if (_materializedDirectory.existsSync())
+      throwToolExit('Android host app already materialized. To redo materialization, delete the android/ folder.');
+    _regenerateLibrary();
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _materializedDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_materialized'), _materializedDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _materializedDirectory);
+    gradle.injectGradleWrapper(_materializedDirectory);
+    gradle.writeLocalProperties(_materializedDirectory.childFile('local.properties'));
+    await injectPlugins(parent);
+  }
 
-  Directory get pluginRegistrantHost => directory.childDirectory(isModule ? 'Flutter' : 'app');
+  File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
+
+  Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
+
+  void _regenerateLibrary() {
+    _deleteIfExistsSync(_ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'library'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _ephemeralDirectory);
+    gradle.injectGradleWrapper(_ephemeralDirectory);
+  }
+
+  void _deleteIfExistsSync(Directory directory) {
+    if (directory.existsSync())
+      directory.deleteSync(recursive: true);
+  }
+
+  void _overwriteFromTemplate(String path, Directory target) {
+    final Template template = new Template.fromName(path);
+    template.render(
+      target,
+      <String, dynamic>{
+        'projectName': parent.manifest.appName,
+        'androidIdentifier': parent.manifest.androidPackage,
+      },
+      printStatusWhenWriting: false,
+      overwriteExisting: true,
+    );
+  }
 }
 
 /// Asynchronously returns the first line-based match for [regExp] in [file].
