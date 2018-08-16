@@ -1870,6 +1870,17 @@ abstract class BuildContext {
   /// render object is usually short.
   Size get size;
 
+  /// Registers this build context with [ancestor] such that when that when
+  /// [ancestor]'s widget changes this build context is rebuilt.
+  ///
+  /// This method is rarely called directly. Most applications should use
+  /// [inheritFromWidgetOfExactType], which calls this method after finding
+  /// the appropriate [InheritedElement] ancestor.
+  ///
+  /// All of the qualifications about when [inheritFromWidgetOfExactType] can
+  /// be called, apply to this method as well.
+  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
+
   /// Obtains the nearest widget of the given type, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
@@ -1879,9 +1890,9 @@ abstract class BuildContext {
   /// This is typically called implicitly from `of()` static methods, e.g.
   /// [Theme.of].
   ///
-  /// This should not be called from widget constructors or from
+  /// This method should not be called from widget constructors or from
   /// [State.initState] methods, because those methods would not get called
-  /// again if the inherited value were to change. To ensure that the widget
+  /// again if the inherited value was to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
   /// from [State.didChangeDependencies].
@@ -1892,9 +1903,9 @@ abstract class BuildContext {
   /// It is safe to use this method from [State.deactivate], which is called
   /// whenever the widget is removed from the tree.
   ///
-  /// It is also possible to call this from interaction event handlers (e.g.
-  /// gesture callbacks) or timers, to obtain a value once, if that value is not
-  /// going to be cached and reused later.
+  /// It is also possible to call this method from interaction event handlers
+  /// (e.g. gesture callbacks) or timers, to obtain a value once, if that value
+  /// is not going to be cached and reused later.
   ///
   /// Calling this method is O(1) with a small constant factor, but will lead to
   /// the widget being rebuilt more often.
@@ -1905,15 +1916,11 @@ abstract class BuildContext {
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
   ///
-  /// The [aspect] parameter is only used when [targetType] is a subclass
-  /// of [InheritedModel]. It specifies what "aspect" of the inherited model
+  /// The [aspect] parameter is only used when [targetType] is an
+  /// [InheritedWidget] subclasses that supports partial updates, like
+  /// [InheritedModel]. It specifies what "aspect" of the inherited
   /// widget this context depends on.
-  ///
-  /// If the [target] parameter is specified its [widget] must be a [targetType]
-  /// ancestor of this BuildContext's widget. The target is used instead of
-  /// the first [targetType] widget ancestor. This parameter is used by
-  /// [InheritedModel.inheritFrom]. It's typically not specified directly.
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target });
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -3235,22 +3242,29 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target }) {
-    assert(_debugCheckStateIsActiveForAncestorLookup());
-    assert(target == null || () {
-      // check that target is really an ancestor
-      Element ancestor = _parent;
-      while (ancestor != target && ancestor != null)
-        ancestor = ancestor._parent;
-      return ancestor == target;
+  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
+    assert(ancestor != null);
+    assert(() {
+      // check that ancestor really is an ancestor
+      Element element = _parent;
+      while (ancestor != element && element != null)
+        element = element._parent;
+      return ancestor == element;
     }());
-    final InheritedElement ancestor = target ?? (_inheritedWidgets == null ? null : _inheritedWidgets[targetType]);
+
+    _dependencies ??= new HashSet<InheritedElement>();
+    _dependencies.add(ancestor);
+    ancestor.updateDependencies(this, aspect);
+    return ancestor.widget;
+  }
+
+  @override
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
+    assert(_debugCheckStateIsActiveForAncestorLookup());
+    final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
-      _dependencies ??= new HashSet<InheritedElement>();
-      _dependencies.add(ancestor);
-      ancestor.updateDependencies(this, aspect);
-      return ancestor.widget;
+      return inheritFromElement(ancestor, aspect: aspect);
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -3861,11 +3875,13 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect, InheritedElement target }) {
+  InheritedWidget inheritFromElement(Element ancestor, { Object aspect }) {
+    assert(ancestor != null);
     assert(() {
+      final Type targetType = ancestor.widget.runtimeType;
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw new FlutterError(
-          'inheritFromWidgetOfExactType($targetType) was called before ${_state.runtimeType}.initState() completed.\n'
+          'inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called before ${_state.runtimeType}.initState() completed.\n'
           'When an inherited widget changes, for example if the value of Theme.of() changes, '
           'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
           'the inherited widget is in a constructor or an initState() method, '
@@ -3878,7 +3894,7 @@ class StatefulElement extends ComponentElement {
       }
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         throw new FlutterError(
-          'inheritFromWidgetOfExactType($targetType) called after dispose(): $this\n'
+          'inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called after dispose(): $this\n'
           'This error happens if you call inheritFromWidgetOfExactType() on the '
           'BuildContext for a widget that no longer appears in the widget tree '
           '(e.g., whose parent widget no longer includes the widget in its '
@@ -3898,7 +3914,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.inheritFromWidgetOfExactType(targetType, aspect: aspect, target: target);
+    return super.inheritFromElement(ancestor, aspect: aspect);
   }
 
   @override

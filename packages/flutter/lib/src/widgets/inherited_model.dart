@@ -166,7 +166,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
       return null;
     final InheritedElement lastModel = models.last;
     for (InheritedElement model in models) {
-      final T value = context.inheritFromWidgetOfExactType(T, aspect: aspect, target: model);
+      final T value = context.inheritFromElement(model, aspect: aspect);
       if (model == lastModel)
         return value;
     }
