@@ -189,6 +189,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           onTap: widget.onPressed,
+          customBorder: widget.shape,
           child: IconTheme.merge(
             data: new IconThemeData(color: widget.textStyle?.color),
             child: new Container(

@@ -457,7 +457,7 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(box, paints..circle(x: 200.0)..circle(x: 600.0));
+    expect(box, paints..circle(x: 200.0)..translate(x: 400.0)..circle(x: 200.0));
 
     // Now we flip the directionality and verify that the circles switch positions.
     await tester.pumpWidget(
@@ -478,12 +478,23 @@ void main() {
       ),
     );
 
-    expect(box, paints..circle(x: 600.0)..circle(x: 200.0));
+    expect(box, paints..translate()..save()..translate(x: 400.0)..circle(x: 200.0)..restore()..circle(x: 200.0));
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(box, paints..circle(x: 600.0)..circle(x: 200.0)..circle(x: 600.0));
+    expect(
+        box,
+        paints
+          ..translate(x: 0.0, y: 0.0)
+          ..save()
+          ..translate(x: 400.0)
+          ..circle(x: 200.0)
+          ..restore()
+          ..circle(x: 200.0)
+          ..translate(x: 400.0)
+          ..circle(x: 200.0)
+    );
   });
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
