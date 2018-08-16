@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 
 import 'box.dart';
@@ -463,13 +464,16 @@ class RenderParagraph extends RenderBox {
     final List<SemanticsNode> newChildren = <SemanticsNode>[];
     StringBuffer buffer;
     double order = 0.0;
+    int start = 0;
+    int end = 0;
+    double lastOffset = 0.0;
     // traverse all spans and collect them into adjacent compatible nodes.
     text.visitTextSpan((TextSpan span) {
       if (span.recognizer != null) {
         if (buffer != null) {
           final SemanticsNode child = new SemanticsNode();
           final SemanticsConfiguration childConfig = new SemanticsConfiguration();
-          child.rect = node.rect;
+          child.rect = _getRectForSpan(start, end, lastOffset);
           childConfig
             ..label = buffer.toString()
             ..textDirection = textDirection
@@ -477,7 +481,10 @@ class RenderParagraph extends RenderBox {
           buffer = null;
           child.updateWith(config: childConfig);
           newChildren.add(child);
+          start = end;
+          lastOffset = child.rect.height;
         }
+        end += span.text.length;
         final SemanticsNode child = new SemanticsNode();
         final SemanticsConfiguration childConfig = new SemanticsConfiguration();
         childConfig.textDirection = textDirection;
@@ -490,26 +497,50 @@ class RenderParagraph extends RenderBox {
           final TapGestureRecognizer recognizer = span.recognizer;
           childConfig.onTap = recognizer.onTap;
         }
-        child.rect = node.rect;
+        child.rect = _getRectForSpan(start, end, lastOffset);
         child.updateWith(config: childConfig);
         newChildren.add(child);
+        start = end;
+        lastOffset = child.rect.height;
       } else {
         buffer ??= new StringBuffer();
         buffer.write(span.text);
+        end += span.text.length;
       }
       return true;
     });
     if (buffer != null && buffer.isNotEmpty) {
       final SemanticsNode child = new SemanticsNode();
       final SemanticsConfiguration childConfig = new SemanticsConfiguration();
-      child.rect = node.rect;
+      child.rect = _getRectForSpan(start, end, lastOffset);
       childConfig
+        ..sortKey = new OrdinalSortKey(order++)
         ..label = buffer.toString()
         ..textDirection = textDirection;
       child.updateWith(config: childConfig);
       newChildren.add(child);
     }
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
+  }
+
+  Rect _getRectForSpan(int start, int end, double lastOffset) {
+    print('from $start to $end');
+    final TextSelection current = new TextSelection(baseOffset: start, extentOffset: end);
+    final List<ui.TextBox> currentBoxes = getBoxesForSelection(current);
+    final double top = currentBoxes.first.top;
+    double left = currentBoxes.first.left;
+    double right = currentBoxes.first.right;
+    double bottom = currentBoxes.first.bottom;
+    for (TextBox box in currentBoxes.skip(1)) {
+      if (box.left < left)
+        left = box.left;
+      if (box.right > right)
+        right = box.right;
+      if (box.bottom > bottom)
+        bottom = box.bottom;
+    }
+    print('height: ${bottom - top}');
+    return new Rect.fromLTWH(left, top, right - left, bottom - top);
   }
 
 
