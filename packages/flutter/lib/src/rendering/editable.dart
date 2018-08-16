@@ -467,9 +467,15 @@ class RenderEditable extends RenderBox {
     final TextRange nextWord = _getNextWord(currentWord.end);
     if (nextWord == null)
       return;
-    final int baseOffset = !extentSelection ? nextWord.start : _selection.baseOffset;
+    final int baseOffset = extentSelection ? _selection.baseOffset : nextWord.start;
     onSelectionChanged(
-      new TextSelection(baseOffset: baseOffset, extentOffset: nextWord.start), this, SelectionChangedCause.keyboard);
+      new TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: nextWord.start,
+      ),
+      this,
+      SelectionChangedCause.keyboard,
+    );
   }
 
   void _handleMoveCursorBackwardByWord(bool extentSelection) {
@@ -479,9 +485,15 @@ class RenderEditable extends RenderBox {
     final TextRange previousWord = _getPreviousWord(currentWord.start - 1);
     if (previousWord == null)
       return;
-    final int baseOffset = !extentSelection ? previousWord.start : _selection.baseOffset;
+    final int baseOffset = extentSelection ?  _selection.baseOffset : previousWord.start;
     onSelectionChanged(
-      new TextSelection(baseOffset: baseOffset, extentOffset: previousWord.start), this, SelectionChangedCause.keyboard);
+      new TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: previousWord.start,
+      ),
+      this,
+      SelectionChangedCause.keyboard,
+    );
   }
 
   TextRange _getNextWord(int offset) {
@@ -504,10 +516,14 @@ class RenderEditable extends RenderBox {
         return range;
       offset = range.start - 1;
     }
+    return null;
   }
 
   // Check if the given text range only contains white space or separator
   // characters.
+  //
+  // newline characters from ascii and separators from the
+  // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
   // TODO(jonahwilliams): replace when we expose this ICU information.
   bool _onlyWhitespace(TextRange range) {
     for (int i = range.start; i < range.end; i++) {
