@@ -2015,6 +2015,79 @@ void main() {
 
   });
 
+
+  testWidgets('Changing focus test', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+    final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+    final TextEditingController c1 = new TextEditingController();
+    final TextEditingController c2 = new TextEditingController();
+    final Key key1 = new UniqueKey();
+    final Key key2 = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: events.add,
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  controller: c1,
+                  maxLines: 3,
+                ),
+                TextField(
+                  key: key2,
+                  controller: c2,
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+
+    const String testValue = 'a big house';
+    await tester.enterText(find.byType(TextField).first, testValue);
+
+    await tester.pumpAndSettle();
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+    }
+
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+    expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
+
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).last);
+
+    await tester.enterText(find.byType(TextField).last, testValue);
+
+    await tester.pumpAndSettle();
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+    }
+
+
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
+    expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
+
+  });
+
   testWidgets('Simultaneous focus test', (WidgetTester tester) async{
 
     final FocusNode focusNode = new FocusNode();
