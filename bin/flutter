@@ -7,8 +7,8 @@
 # ---------------------------------- NOTE ---------------------------------- #
 #
 # Please keep the logic in this file consistent with the logic in the
-# `internal/run_flutter.bat` script for Windows to ensure that Flutter
-# continues to work across all platforms!
+# `flutter.bat` script in the same directory to ensure that Flutter continues
+# to work across all platforms!
 #
 # -------------------------------------------------------------------------- #
 
