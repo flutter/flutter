@@ -185,18 +185,17 @@ class InheritedModelElement<T> extends InheritedElement {
 
   @override
   void updateDependencies(Element dependent, Object aspect) {
-    final _Dependencies<T> dependencies = getDependencies(dependent);
-    if (dependencies != null && dependencies.isUniversal)
+    final Set<T> dependencies = getDependencies(dependent);
+    if (dependencies != null && dependencies.isEmpty)
       return;
 
     if (aspect == null) {
-      setDependencies(dependent, new _Dependencies<T>(isUniversal: true));
+      setDependencies(dependent, new HashSet<T>());
     } else {
       assert(aspect is T);
       setDependencies(dependent, dependencies == null
-        ? (new _Dependencies<T>()..add(aspect))
-        : dependencies..add(aspect)
-      );
+        ? (new HashSet<T>()..add(aspect))
+        : dependencies..add(aspect));
     }
   }
 
@@ -214,23 +213,11 @@ class InheritedModelElement<T> extends InheritedElement {
 
   @override
   void notifyDependent(InheritedModel<T> oldWidget, Element dependent) {
-    final _Dependencies<T> dependencies = getDependencies(dependent);
-    if (dependencies.isUniversal || _shouldNotify(oldWidget, dependent, dependencies.aspects))
+    final Set<T> dependencies = getDependencies(dependent);
+    if (dependencies == null)
+      return;
+    if (dependencies.isEmpty || _shouldNotify(oldWidget, dependent, dependencies))
       dependent.didChangeDependencies();
-  }
-}
-
-class _Dependencies<T> extends InheritedDependencies {
-  _Dependencies({ this.isUniversal = false });
-
-  @override
-  final bool isUniversal;
-
-  final Set<T> aspects = new HashSet<T>();
-
-  void add(T dependency) {
-    assert(!isUniversal);
-    aspects.add(dependency);
   }
 }
 
