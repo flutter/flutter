@@ -44,7 +44,6 @@ class GenSnapshot {
   Future<int> run({
     @required SnapshotType snapshotType,
     @required String packagesPath,
-    @required String depfilePath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
@@ -121,7 +120,6 @@ class ScriptSnapshotter {
     final int exitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packagesPath,
-      depfilePath: depfilePath,
       additionalArgs: args,
     );
 
@@ -260,7 +258,7 @@ class AOTSnapshotter {
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
-      depfilePaths: <String>[depfilePath],
+      depfilePaths: <String>[],
     );
     if (await fingerprinter.doesFingerprintMatch()) {
       printTrace('Skipping AOT snapshot build. Fingerprint match.');
@@ -271,7 +269,6 @@ class AOTSnapshotter {
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packageMap.packagesPath,
-      depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
     );
@@ -283,7 +280,7 @@ class AOTSnapshotter {
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
-    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshotPath\n');
+    await outputDir.childFile('gen_snapshot.d').writeAsString('gen_snapshot.d: $genSnapshotPath\n');
 
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
@@ -498,7 +495,7 @@ class CoreJITSnapshotter {
         'entryPoint': mainPath,
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
-      depfilePaths: <String>[depfilePath],
+      depfilePaths: <String>[],
     );
     if (await fingerprinter.doesFingerprintMatch()) {
       printTrace('Skipping Core JIT snapshot build. Fingerprint match.');
@@ -509,7 +506,6 @@ class CoreJITSnapshotter {
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packagesPath,
-      depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {
@@ -520,7 +516,7 @@ class CoreJITSnapshotter {
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
-    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshotPath\n');
+    await outputDir.childFile('gen_snapshot.d').writeAsString('gen_snapshot.d: $genSnapshotPath\n');
 
     // Compute and record build fingerprint.
     await fingerprinter.writeFingerprint();

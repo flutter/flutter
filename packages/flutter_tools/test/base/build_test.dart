@@ -164,7 +164,6 @@ void main() {
       expect(genSnapshot.snapshotType.platform, isNull);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, 'output.snapshot.d');
       expect(genSnapshot.additionalArgs, <String>[
         '--snapshot_kind=script',
         '--script_snapshot=output.snapshot',
