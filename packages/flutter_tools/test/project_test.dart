@@ -91,7 +91,7 @@ void main() {
         final FlutterProject project = await someProject();
         await expectLater(
           project.android.materialize(),
-          throwsA(const isInstanceOf<AssertionError>()),
+          throwsA(isInstanceOf<AssertionError>()),
         );
       });
       testInMemory('exits on already materialized module', () async {
