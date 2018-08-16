@@ -1,4 +1,4 @@
-Signature: 0fc48b43b5bd25fb3531c07e4466e00c
+Signature: 3178d63b9ab0cda35aed0196bb420d02
 
 UNUSED LICENSES:
 
@@ -1273,6 +1273,7 @@ LIBRARY: vulkanmemoryallocator
 ORIGIN: ../../../third_party/skia/bench/CompositingImagesBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
+FILE: ../../../third_party/skia/bench/CubicMapBench.cpp
 FILE: ../../../third_party/skia/bench/GrCCGeometryBench.cpp
 FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
 FILE: ../../../third_party/skia/bench/JSONBench.cpp
