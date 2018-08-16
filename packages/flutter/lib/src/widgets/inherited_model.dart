@@ -159,7 +159,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // Create a dependency on all of the type T ancestor models up until
     // a model is found whose aspects are null or contain the given aspect.
     // Rebuilding one of the intermediate models only causes its dependents
-    // to be rebuilt if its aspsects property changes (see _shouldNotify).
+    // to be rebuilt if its aspects property changes (see _shouldNotify).
     final List<InheritedElement> models = <InheritedElement>[];
     _findModels<T>(context, aspect, models);
     if (models.isEmpty)
