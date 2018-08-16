@@ -42,6 +42,8 @@ class FlutterPlugin implements Plugin<Project> {
     private File debugFlutterJar
     private File profileFlutterJar
     private File releaseFlutterJar
+    private File dynamicProfileFlutterJar
+    private File dynamicReleaseFlutterJar
 
     private Properties readPropertiesIfExist(File propertiesFile) {
         Properties result = new Properties()
@@ -70,9 +72,21 @@ class FlutterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        // Add a 'profile' build type
+        // Add custom build types
         project.android.buildTypes {
             profile {
+                initWith debug
+                if (it.hasProperty('matchingFallbacks')) {
+                    matchingFallbacks = ['debug', 'release']
+                }
+            }
+            dynamicProfile {
+                initWith debug
+                if (it.hasProperty('matchingFallbacks')) {
+                    matchingFallbacks = ['debug', 'release']
+                }
+            }
+            dynamicRelease {
                 initWith debug
                 if (it.hasProperty('matchingFallbacks')) {
                     matchingFallbacks = ['debug', 'release']
@@ -123,6 +137,8 @@ class FlutterPlugin implements Plugin<Project> {
             debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
             profileFlutterJar = baseEnginePath.resolve("android-${targetArch}-profile").resolve("flutter.jar").toFile()
             releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()
+            dynamicProfileFlutterJar = baseEnginePath.resolve("android-${targetArch}-dynamic-profile").resolve("flutter.jar").toFile()
+            dynamicReleaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-dynamic-release").resolve("flutter.jar").toFile()
             if (!debugFlutterJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -217,6 +233,10 @@ class FlutterPlugin implements Plugin<Project> {
                     [flutterX86Jar, debugFlutterJar]
                 } else if (buildMode == "profile") {
                     profileFlutterJar
+                } else if (buildMode == "dynamicProfile") {
+                    dynamicProfileFlutterJar
+                } else if (buildMode == "dynamicRelease") {
+                    dynamicReleaseFlutterJar
                 } else {
                     releaseFlutterJar
                 }
@@ -229,11 +249,15 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      *
-     * @return "debug", "profile", or "release" (fall-back).
+     * @return "debug", "profile", "dynamicProfile", "dynamicRelease", or "release" (fall-back).
      */
     private static String buildModeFor(buildType) {
         if (buildType.name == "profile") {
             return "profile"
+        } else if (buildType.name == "dynamicProfile") {
+            return "dynamicProfile"
+        } else if (buildType.name == "dynamicRelease") {
+            return "dynamicRelease"
         } else if (buildType.debuggable) {
             return "debug"
         }
@@ -409,7 +433,7 @@ abstract class BaseFlutterTask extends DefaultTask {
 
         intermediateDir.mkdirs()
 
-        if (buildMode != "debug") {
+        if (buildMode == "profile" || buildMode == "release") {
             project.exec {
                 executable flutterExecutable.absolutePath
                 workingDir sourceDir
@@ -488,7 +512,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (targetPlatform != null) {
                 args "--target-platform", "${targetPlatform}"
             }
-            if (buildMode != "debug") {
+            if (buildMode == "release" || buildMode == "profile") {
                 args "--precompiled"
             } else {
                 args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
@@ -497,7 +521,18 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
             }
             args "--asset-dir", "${intermediateDir}/flutter_assets"
-            args "--${buildMode}"
+            if (buildMode == "debug") {
+                args "--debug"
+            }
+            if (buildMode == "profile" || buildMode == "dynamicProfile") {
+                args "--profile"
+            }
+            if (buildMode == "release" || buildMode == "dynamicRelease") {
+                args "--release"
+            }
+            if (buildMode == "dynamicProfile" || buildMode == "dynamicRelease") {
+                args "--dynamic"
+            }
         }
     }
 }
