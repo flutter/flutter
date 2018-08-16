@@ -47,7 +47,7 @@ Future<void> build({
   bool precompiledSnapshot = false,
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,
-  bool buildSnapshot = false,
+  String compilationTraceFilePath,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],
   List<String> fileSystemRoots,
@@ -84,7 +84,7 @@ Future<void> build({
     ensureDirectoryExists(applicationKernelFilePath);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-      incrementalCompilerByteStorePath: buildSnapshot ? null :
+      incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
           fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
@@ -94,7 +94,7 @@ Future<void> build({
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       packagesPath: packagesPath,
-      linkPlatformKernelIn: buildSnapshot,
+      linkPlatformKernelIn: compilationTraceFilePath != null,
     );
     if (compilerOutput?.outputFilename == null) {
       throwToolExit('Compiler failed on $mainPath');
@@ -104,7 +104,7 @@ Future<void> build({
     await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
-    if (buildSnapshot) {
+    if (compilationTraceFilePath != null) {
       final CoreJITSnapshotter snapshotter = new CoreJITSnapshotter();
       final int snapshotExitCode = await snapshotter.build(
         platform: platform,
@@ -112,6 +112,7 @@ Future<void> build({
         mainPath: applicationKernelFilePath,
         outputPath: getBuildDirectory(),
         packagesPath: packagesPath,
+        compilationTraceFilePath: compilationTraceFilePath,
         extraGenSnapshotOptions: extraGenSnapshotOptions,
       );
       if (snapshotExitCode != 0) {
@@ -135,7 +136,7 @@ Future<void> build({
     snapshotFile: snapshotFile,
     privateKeyPath: privateKeyPath,
     assetDirPath: assetDirPath,
-    buildSnapshot: buildSnapshot,
+    compilationTraceFilePath: compilationTraceFilePath,
   );
 }
 
@@ -171,14 +172,14 @@ Future<void> assemble({
   File dylibFile,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
-  bool buildSnapshot,
+  String compilationTraceFilePath,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
 
   final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
-    if (buildSnapshot) {
+    if (compilationTraceFilePath != null) {
       final String vmSnapshotData = fs.path.join(getBuildDirectory(), _kVMSnapshotData);
       final String vmSnapshotInstr = fs.path.join(getBuildDirectory(), _kVMSnapshotInstr);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
