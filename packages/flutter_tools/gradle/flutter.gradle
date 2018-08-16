@@ -410,8 +410,7 @@ abstract class BaseFlutterTask extends DefaultTask {
 
     @OutputFiles
     FileCollection getDependenciesFiles() {
-        // For AOT and Core JIT builds, include the gen_snapshot depfile.
-        FileCollection depfiles = project.files("${intermediateDir}/snapshot.d")
+        FileCollection depfiles = project.files()
         if (previewDart2) {
             // For Dart 2, also include the kernel compiler depfile, since
             // kernel compile is the first stage of AOT build in this mode,
