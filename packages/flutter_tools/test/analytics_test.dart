@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:mockito/mockito.dart';
+import 'package:quiver/time.dart';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -12,9 +15,6 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';

@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -74,7 +73,7 @@ void main() {
       final AttachCommand command = new AttachCommand();
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(const isInstanceOf<ToolExit>()),
+        throwsA(isInstanceOf<ToolExit>()),
       );
       expect(testLogger.statusText, contains('No connected devices'));
     });
@@ -94,7 +93,7 @@ void main() {
       testDeviceManager.addDevice(aDeviceWithId('yy2'));
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(const isInstanceOf<ToolExit>()),
+        throwsA(isInstanceOf<ToolExit>()),
       );
       expect(testLogger.statusText, contains('More than one device'));
       expect(testLogger.statusText, contains('xx1'));

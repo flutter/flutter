@@ -8,7 +8,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
-import 'package:test/test.dart';
+
 import 'src/common.dart';
 import 'src/context.dart';
 

@@ -4,7 +4,7 @@
 
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('rect accessors', () {

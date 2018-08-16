@@ -292,6 +292,65 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
+  testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.newline'));
+  });
+
+  testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            keyboardType: TextInputType.text,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.done'));
+  });
+
   testWidgets(
       'Correct keyboard is requested when set explicitly and maxLines > 1',
       (WidgetTester tester) async {

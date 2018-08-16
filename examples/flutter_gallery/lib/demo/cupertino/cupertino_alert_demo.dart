@@ -5,14 +5,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CupertinoDialogDemo extends StatefulWidget {
-  static const String routeName = '/cupertino/dialog';
+class CupertinoAlertDemo extends StatefulWidget {
+  static const String routeName = '/cupertino/alert';
 
   @override
-  _CupertinoDialogDemoState createState() => new _CupertinoDialogDemoState();
+  _CupertinoAlertDemoState createState() => new _CupertinoAlertDemoState();
 }
 
-class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
+class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   void showDemoDialog<T>({BuildContext context, Widget child}) {
@@ -32,12 +32,27 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
     });
   }
 
+  void showDemoActionSheet<T>({BuildContext context, Widget child}) {
+    showCupertinoModalPopup<T>(
+      context: context,
+      builder: (BuildContext context) => child,
+    ).then<void>((T value) {
+      if (value != null) {
+        _scaffoldKey.currentState.showSnackBar(
+          new SnackBar(
+            content: new Text('You selected: $value'),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: const Text('Cupertino Dialogs'),
+        title: const Text('Cupertino Alerts'),
       ),
       body: new ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
@@ -126,6 +141,48 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               showDemoDialog<String>(
                 context: context,
                 child: const CupertinoDessertDialog(),
+              );
+            },
+          ),
+          const Padding(padding: EdgeInsets.all(8.0)),
+          new CupertinoButton(
+            child: const Text('Action Sheet'),
+            color: CupertinoColors.activeBlue,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+            onPressed: () {
+              showDemoActionSheet<String>(
+                context: context,
+                child: new CupertinoActionSheet(
+                  title: const Text('Favorite Dessert'),
+                  message: const Text('Please select the best dessert from the options below.'),
+                  actions: <Widget>[
+                    new CupertinoActionSheetAction(
+                      child: const Text('Profiteroles'),
+                      onPressed: () {
+                        Navigator.pop(context, 'Profiteroles');
+                      },
+                    ),
+                    new CupertinoActionSheetAction(
+                      child: const Text('Cannolis'),
+                      onPressed: () {
+                        Navigator.pop(context, 'Cannolis');
+                      },
+                    ),
+                    new CupertinoActionSheetAction(
+                      child: const Text('Trifle'),
+                      onPressed: () {
+                        Navigator.pop(context, 'Trifle');
+                      },
+                    ),
+                  ],
+                  cancelButton: new CupertinoActionSheetAction(
+                    child: const Text('Cancel'),
+                    isDefaultAction: true,
+                    onPressed: () {
+                      Navigator.pop(context, 'Cancel');
+                    },
+                  )
+                ),
               );
             },
           ),

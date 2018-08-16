@@ -285,8 +285,12 @@ class _Compiler {
   }
 
   Future<dynamic> shutdown() async {
-    await compiler.shutdown();
-    compiler = null;
+    // Check for null in case this instance is shut down before the
+    // lazily-created compiler has been created.
+    if (compiler != null) {
+      await compiler.shutdown();
+      compiler = null;
+    }
   }
 
   static Future<T> handleTimeout<T>(Future<T> value, String path) {
@@ -692,14 +696,14 @@ class _FlutterPlatform extends PlatformPlugin {
       tempBundleDirectory.deleteSync(recursive: true);
     });
 
-    // copy 'vm_platform_strong.dill' into 'platform.dill'
+    // copy 'vm_platform_strong.dill' into 'platform_strong.dill'
     final File vmPlatformStrongDill = fs.file(
       artifacts.getArtifactPath(Artifact.platformKernelDill),
     );
-    printTrace('Copying platform.dill file from ${vmPlatformStrongDill.path}');
+    printTrace('Copying platform_strong.dill file from ${vmPlatformStrongDill.path}');
     final File platformDill = vmPlatformStrongDill.copySync(
       tempBundleDirectory
-          .childFile('platform.dill')
+          .childFile('platform_strong.dill')
           .path,
     );
     if (!platformDill.existsSync()) {
