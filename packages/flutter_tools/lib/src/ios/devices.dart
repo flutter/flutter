@@ -376,7 +376,9 @@ class IOSDevice extends Device {
   bool get supportsScreenshot => iMobileDevice.isInstalled;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) => iMobileDevice.takeScreenshot(outputFile);
+  Future<Null> takeScreenshot(File outputFile) async {
+    await iMobileDevice.takeScreenshot(outputFile);
+  }
 }
 
 /// Decodes an encoded syslog string to a UTF-8 representation.
