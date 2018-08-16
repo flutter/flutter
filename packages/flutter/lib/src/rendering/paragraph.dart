@@ -78,6 +78,7 @@ class RenderParagraph extends RenderBox {
       case RenderComparison.paint:
         _textPainter.text = value;
         markNeedsPaint();
+        markNeedsSemanticsUpdate();
         break;
       case RenderComparison.layout:
         _textPainter.text = value;
@@ -440,10 +441,77 @@ class RenderParagraph extends RenderBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config
-      ..label = text.toPlainText()
-      ..textDirection = textDirection;
+    bool hasRecognizers = false;
+    text.visitTextSpan((TextSpan span) {
+      if (span.recognizer != null) {
+        hasRecognizers = true;
+        return false;
+      }
+      return true;
+    });
+    if (hasRecognizers) {
+      config.explicitChildNodes = true;
+      config.isSemanticBoundary = true;
+    } else {
+      config.label = text.toPlainText();
+      config.textDirection = textDirection;
+    }
   }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    StringBuffer buffer;
+    double order = 0.0;
+    // traverse all spans and collect them into adjacent compatible nodes.
+    text.visitTextSpan((TextSpan span) {
+      if (span.recognizer != null) {
+        if (buffer != null) {
+          final SemanticsNode child = new SemanticsNode();
+          final SemanticsConfiguration childConfig = new SemanticsConfiguration();
+          child.rect = node.rect;
+          childConfig
+            ..label = buffer.toString()
+            ..textDirection = textDirection
+            ..sortKey = new OrdinalSortKey(order++);
+          buffer = null;
+          child.updateWith(config: childConfig);
+          newChildren.add(child);
+        }
+        final SemanticsNode child = new SemanticsNode();
+        final SemanticsConfiguration childConfig = new SemanticsConfiguration();
+        childConfig.textDirection = textDirection;
+        childConfig.label = span.text;
+        childConfig.sortKey = new OrdinalSortKey(order++);
+        if (span.recognizer is LongPressGestureRecognizer) {
+          final LongPressGestureRecognizer recognizer = span.recognizer;
+          childConfig.onLongPress = recognizer.onLongPress;
+        } else if (span.recognizer is TapGestureRecognizer) {
+          final TapGestureRecognizer recognizer = span.recognizer;
+          childConfig.onTap = recognizer.onTap;
+        }
+        child.rect = node.rect;
+        child.updateWith(config: childConfig);
+        newChildren.add(child);
+      } else {
+        buffer ??= new StringBuffer();
+        buffer.write(span.text);
+      }
+      return true;
+    });
+    if (buffer != null && buffer.isNotEmpty) {
+      final SemanticsNode child = new SemanticsNode();
+      final SemanticsConfiguration childConfig = new SemanticsConfiguration();
+      child.rect = node.rect;
+      childConfig
+        ..label = buffer.toString()
+        ..textDirection = textDirection;
+      child.updateWith(config: childConfig);
+      newChildren.add(child);
+    }
+    node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
+  }
+
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {

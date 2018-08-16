@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -133,6 +134,48 @@ void main() {
         child: Text('\$\$', semanticsLabel: 'Double dollars')),
     );
 
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
+  testWidgets('recognizers split semantic node', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Text.rich(
+        new TextSpan(
+          children: <TextSpan>[
+            const TextSpan(text: 'hello '),
+            new TextSpan(text: 'world', recognizer: new TapGestureRecognizer()..onTap = () {}),
+            const TextSpan(text: ' this is a '),
+            const TextSpan(text: 'cat-astrophe'),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          children: <TestSemantics>[
+            new TestSemantics(
+              label: 'hello ',
+              textDirection: TextDirection.ltr,
+            ),
+            new TestSemantics(
+              label: 'world',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            new TestSemantics(
+              label: ' this is a cat-astrophe',
+              textDirection: TextDirection.ltr,
+            )
+          ],
+        ),
+      ],
+    );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
   });
