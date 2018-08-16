@@ -27,17 +27,6 @@ void main() {
         );
       });
 
-      Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
-        try {
-          await future;
-          fail('ToolExit expected, but nothing thrown');
-        } on ToolExit catch(e) {
-          expect(e.message, messageMatcher);
-        } catch(e, trace) {
-          fail('ToolExit expected, got $e\n$trace');
-        }
-      }
-
       testInMemory('fails on invalid pubspec.yaml', () async {
         final Directory directory = fs.directory('myproject');
         directory.childFile('pubspec.yaml')
@@ -95,16 +84,55 @@ void main() {
           fs.currentDirectory.absolute.path,
         );
       });
+    });
 
+    group('materialize Android', () {
+      testInMemory('fails on non-module', () async {
+        final FlutterProject project = await someProject();
+        await expectLater(
+          project.android.materialize(),
+          throwsA(const isInstanceOf<AssertionError>()),
+        );
+      });
+      testInMemory('exits on already materialized module', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        expectToolExitLater(project.android.materialize(), contains('already materialized'));
+      });
+      testInMemory('creates android/app folder in place of .android/app', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
+        expect(
+          project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
+          isNot(contains("include ':app'")),
+        );
+        expectExists(project.directory.childDirectory('android').childDirectory('app'));
+        expectExists(project.directory.childDirectory('android').childFile('local.properties'));
+        expect(
+          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
+          contains("include ':app'"),
+        );
+      });
+      testInMemory('retains .android/Flutter folder and references it', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
+        expect(
+          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
+          contains('../.android/include_flutter.groovy'),
+        );
+      });
+      testInMemory('can be redone after deletion', () async {
+        final FlutterProject project = await aModuleProject();
+        await project.android.materialize();
+        project.directory.childDirectory('android').deleteSync(recursive: true);
+        await project.android.materialize();
+        expectExists(project.directory.childDirectory('android').childDirectory('app'));
+      });
     });
 
     group('ensure ready for platform-specific tooling', () {
-      void expectExists(FileSystemEntity entity) {
-        expect(entity.existsSync(), isTrue);
-      }
-      void expectNotExists(FileSystemEntity entity) {
-        expect(entity.existsSync(), isFalse);
-      }
       testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = new FlutterProject(
           fs.directory('not_created'),
@@ -118,9 +146,9 @@ void main() {
         final FlutterProject project = await aPluginProject();
         await project.ensureReadyForPlatformSpecificTooling();
         expectNotExists(project.ios.directory.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
-        expectNotExists(androidPluginRegistrant(project.android.directory.childDirectory('app')));
+        expectNotExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
         expectNotExists(project.ios.directory.childDirectory('Flutter').childFile('Generated.xcconfig'));
-        expectNotExists(project.android.directory.childFile('local.properties'));
+        expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
@@ -135,19 +163,19 @@ void main() {
       testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(androidPluginRegistrant(project.android.directory.childDirectory('app')));
+        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
       });
       testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.android.directory.childFile('local.properties'));
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.android.directory.childFile('settings.gradle'));
-        expectExists(project.android.directory.childFile('local.properties'));
-        expectExists(androidPluginRegistrant(project.android.directory.childDirectory('Flutter')));
+        expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
+        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('Flutter')));
       });
       testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
@@ -169,7 +197,7 @@ void main() {
         expect(project.isModule, isTrue);
         expect(project.android.isModule, isTrue);
         expect(project.ios.isModule, isTrue);
-        expect(project.android.directory.basename, '.android');
+        expect(project.android.hostAppGradleRoot.basename, '.android');
         expect(project.ios.directory.basename, '.ios');
       });
       testInMemory('is known for non-module', () async {
@@ -177,7 +205,7 @@ void main() {
         expect(project.isModule, isFalse);
         expect(project.android.isModule, isFalse);
         expect(project.ios.isModule, isFalse);
-        expect(project.android.directory.basename, 'android');
+        expect(project.android.hostAppGradleRoot.basename, 'android');
         expect(project.ios.directory.basename, 'ios');
       });
     });
@@ -324,6 +352,25 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   } else {
     throw 'Unsupported FileSystemEntity ${entity.runtimeType}';
   }
+}
+
+Future<Null> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+  try {
+    await future;
+    fail('ToolExit expected, but nothing thrown');
+  } on ToolExit catch(e) {
+    expect(e.message, messageMatcher);
+  } catch(e, trace) {
+    fail('ToolExit expected, got $e\n$trace');
+  }
+}
+
+void expectExists(FileSystemEntity entity) {
+  expect(entity.existsSync(), isTrue);
+}
+
+void expectNotExists(FileSystemEntity entity) {
+  expect(entity.existsSync(), isFalse);
 }
 
 void addIosWithBundleId(Directory directory, String id) {
