@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   group('$ReorderableListView', () {
@@ -348,6 +353,65 @@ void main() {
           await tester.pumpAndSettle();
           expect(listItems, orderedEquals(<String>['Item 4', 'Item 1', 'Item 3', 'Item 2']));
 
+          handle.dispose();
+        });
+
+        testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          final Widget reorderableListView = new ReorderableListView(
+            children: <Widget>[
+              const SizedBox(
+                key: Key('List tile 1'),
+                height: itemHeight,
+                child: Text('List tile 1'),
+              ),
+              new SizedBox(
+                key: const Key('Switch tile'),
+                height: itemHeight,
+                child: new Material(
+                  child: new SwitchListTile(
+                    title: const Text('Switch tile'),
+                    value: true,
+                    onChanged: (bool newValue) {},
+                  ),
+                ),
+              ),
+              const SizedBox(
+                key: Key('List tile 2'),
+                height: itemHeight,
+                child: Text('List tile 2'),
+              ),
+            ],
+            scrollDirection: Axis.vertical,
+            onReorder: (int oldIndex, int newIndex) {},
+          );
+          await tester.pumpWidget(new MaterialApp(
+            home: new SizedBox(
+              height: itemHeight * 10,
+              child: reorderableListView,
+            ),
+          ));
+
+          // Get the switch tile's semantics:
+          // final RenderMergeSemantics semantics = find.descendant(
+          //   of: find.byKey(const Key('Switch tile')),
+          //   matching: find.byType(MergeSemantics),
+          // ).evaluate().first.renderObject;
+          // final Map<CustomSemanticsAction, VoidCallback> semanticsActions = semantics..customSemanticsActions;
+
+          final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
+          print(semanticsData);
+          debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
+          
+          // Check for properties of a SwitchTile semantics.
+          expect(semanticsData.hasFlag(SemanticsFlag.hasToggledState), true);
+          expect(semanticsData.hasFlag(SemanticsFlag.isToggled), true);
+          // Check for properties of the ReorderableListView semantics.
+          expect(semanticsData.customSemanticsActionIds, hasLength(4), reason: 'List item with its own semantics should have the 4 reorderable custom actions plus its own.');
+          // expect(semanticsActions.containsKey(moveToStart), true, reason: 'Should be able to `Move to the start`.');
+          // expect(semanticsActions.containsKey(moveUp), true, reason: 'Should be able to `Move up`.');
+          // expect(semanticsActions.containsKey(moveDown), true, reason: 'Should be able to `Move down`.');
+          // expect(semanticsActions.containsKey(moveToEnd), true, reason: 'Should be able to `Move to the end`.');
           handle.dispose();
         });
       });
