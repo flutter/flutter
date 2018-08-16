@@ -221,19 +221,26 @@ dependencies:
     );
     final List<String> errors = <String>[];
     errors.addAll(await process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
+    errors.addAll(null);
     errors.addAll(await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
-    if (errors.isNotEmpty && (errors.first.contains(' issues found. (ran in ') || errors.last.contains(' issue found. (ran in '))) {
+    // top is stderr
+    if (errors.isNotEmpty && (errors.first.contains(' issues found. (ran in ') || errors.first.contains(' issue found. (ran in '))) {
       errors.removeAt(0); // the "23 issues found" message goes onto stderr, which is concatenated first
-      if (errors.isNotEmpty && errors.last == '')
-        errors.removeLast();
+      if (errors.isNotEmpty && errors.last.isEmpty)
+        errors.removeLast(); // if there's an "issues found" message, we put a blank line on stdout before it
     }
+    // null separates stderr from stdout
+    if (errors.first != null)
+      throw 'cannot analyze dartdocs; unexpected error output: $errors';
+    errors.removeAt(0);
+    // rest is stdout
     if (errors.isNotEmpty && errors.first == 'Building flutter tool...')
       errors.removeAt(0);
     if (errors.isNotEmpty && errors.first.startsWith('Running "flutter packages get" in '))
       errors.removeAt(0);
     int errorCount = 0;
     final String kBullet = Platform.isWindows ? ' - ' : ' • ';
-    final RegExp errorPattern = new RegExp('^ +([a-z]+)$kBullet(.+)$kBullet(.+):([0-9]+):([0-9]+)$kBullet([-a-z_]+)\$');
+    final RegExp errorPattern = new RegExp('^ +([a-z]+)$kBullet(.+)$kBullet(.+):([0-9]+):([0-9]+)$kBullet([-a-z_]+)\$', caseSensitive: false);
     for (String error in errors) {
       final Match parts = errorPattern.matchAsPrefix(error);
       if (parts != null) {
