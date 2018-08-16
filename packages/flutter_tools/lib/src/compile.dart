@@ -101,6 +101,7 @@ class KernelCompiler {
         properties: <String, String>{
           'entryPoint': mainPath,
           'trackWidgetCreation': trackWidgetCreation.toString(),
+          'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),

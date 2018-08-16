@@ -166,4 +166,17 @@ baz=qux
       expect(duration, greaterThanOrEqualTo(new Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
     });
   });
+
+  group('Misc', () {
+    test('snakeCase', () async {
+      expect(snakeCase('abc'), equals('abc'));
+      expect(snakeCase('abC'), equals('ab_c'));
+      expect(snakeCase('aBc'), equals('a_bc'));
+      expect(snakeCase('aBC'), equals('a_b_c'));
+      expect(snakeCase('Abc'), equals('abc'));
+      expect(snakeCase('AbC'), equals('ab_c'));
+      expect(snakeCase('ABc'), equals('a_bc'));
+      expect(snakeCase('ABC'), equals('a_b_c'));
+    });
+  });
 }
