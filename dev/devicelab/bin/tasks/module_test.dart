@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
@@ -22,9 +23,9 @@ Future<Null> main() async {
 
     section('Create Flutter module project');
 
-    final Directory directory = await Directory.systemTemp.createTemp('module');
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
     try {
-      await inDirectory(directory, () async {
+      await inDirectory(tempDir, () async {
         await flutter(
           'create',
           options: <String>['--org', 'io.flutter.devicelab', '-t', 'module', 'hello'],
@@ -33,14 +34,14 @@ Future<Null> main() async {
 
       section('Add plugins');
 
-      final File pubspec = new File(path.join(directory.path, 'hello', 'pubspec.yaml'));
+      final File pubspec = new File(path.join(tempDir.path, 'hello', 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  battery:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
-      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'packages',
           options: <String>['get'],
@@ -49,7 +50,7 @@ Future<Null> main() async {
 
       section('Build Flutter module library archive');
 
-      await inDirectory(new Directory(path.join(directory.path, 'hello', '.android')), () async {
+      await inDirectory(new Directory(path.join(tempDir.path, 'hello', '.android')), () async {
         await exec(
           './gradlew',
           <String>['flutter:assembleDebug'],
@@ -58,7 +59,7 @@ Future<Null> main() async {
       });
 
       final bool aarBuilt = exists(new File(path.join(
-        directory.path,
+        tempDir.path,
         'hello',
         '.android',
         'Flutter',
@@ -74,7 +75,7 @@ Future<Null> main() async {
 
       section('Build ephemeral host app');
 
-      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'build',
           options: <String>['apk'],
@@ -82,7 +83,7 @@ Future<Null> main() async {
       });
 
       final bool ephemeralHostApkBuilt = exists(new File(path.join(
-        directory.path,
+        tempDir.path,
         'hello',
         'build',
         'host',
@@ -98,13 +99,13 @@ Future<Null> main() async {
 
       section('Clean build');
 
-      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter('clean');
       });
 
       section('Materialize host app');
 
-      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'materialize',
           options: <String>['android'],
@@ -113,7 +114,7 @@ Future<Null> main() async {
 
       section('Build materialized host app');
 
-      await inDirectory(new Directory(path.join(directory.path, 'hello')), () async {
+      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'build',
           options: <String>['apk'],
@@ -121,7 +122,7 @@ Future<Null> main() async {
       });
 
       final bool materializedHostApkBuilt = exists(new File(path.join(
-        directory.path,
+        tempDir.path,
         'hello',
         'build',
         'host',
@@ -137,18 +138,18 @@ Future<Null> main() async {
 
       section('Add to Android app');
 
-      final Directory hostApp = new Directory(path.join(directory.path, 'hello_host_app'));
+      final Directory hostApp = new Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
         new Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
         hostApp,
       );
       copy(
-        new File(path.join(directory.path, 'hello', '.android', 'gradlew')),
+        new File(path.join(tempDir.path, 'hello', '.android', 'gradlew')),
         hostApp,
       );
       copy(
-        new File(path.join(directory.path, 'hello', '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        new File(path.join(tempDir.path, 'hello', '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
         new Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
@@ -177,7 +178,7 @@ Future<Null> main() async {
     } catch (e) {
       return new TaskResult.failure(e.toString());
     } finally {
-      rmTree(directory);
+      rmTree(tempDir);
     }
   });
 }

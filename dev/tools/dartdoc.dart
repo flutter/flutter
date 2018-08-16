@@ -244,7 +244,7 @@ void createIndexAndCleanup() {
 void removeOldFlutterDocsDir() {
   try {
     new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
-  } catch (e) {
+  } on FileSystemException {
     // If the directory does not exist, that's OK.
   }
 }

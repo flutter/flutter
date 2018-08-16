@@ -24,7 +24,7 @@ const String frameworkChannel = 'omega';
 
 void main() {
   group('create', () {
-    Directory temp;
+    Directory tempDir;
     Directory projectDir;
     FlutterVersion mockFlutterVersion;
     LoggingProcessManager loggingProcessManager;
@@ -35,18 +35,13 @@ void main() {
 
     setUp(() {
       loggingProcessManager = new LoggingProcessManager();
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
-      projectDir = temp.childDirectory('flutter_project');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+      projectDir = tempDir.childDirectory('flutter_project');
       mockFlutterVersion = new MockFlutterVersion();
     });
 
     tearDown(() {
-      try {
-        temp.deleteSync(recursive: true);
-      } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
-      }
+      tryToDelete(tempDir);
     });
 
     // Verify that we create a project that is well-formed.

@@ -191,7 +191,7 @@ Future<Null> _analyzeRepo() async {
   await _checkForTrailingSpaces();
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
-  final String outDir = Directory.systemTemp.createTempSync('mega_gallery').path;
+  final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
 
   try {
     await _runCommand(dart,
@@ -199,17 +199,13 @@ Future<Null> _analyzeRepo() async {
         '--preview-dart-2',
         path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
         '--out',
-        outDir,
+        outDir.path,
       ],
       workingDirectory: flutterRoot,
     );
-    await _runFlutterAnalyze(outDir, options: <String>['--watch', '--benchmark']);
+    await _runFlutterAnalyze(outDir.path, options: <String>['--watch', '--benchmark']);
   } finally {
-    try {
-      new Directory(outDir).deleteSync(recursive: true);
-    } catch (e) {
-      // ignore
-    }
+    outDir.deleteSync(recursive: true);
   }
 
   print('${bold}DONE: Analysis successful.$reset');

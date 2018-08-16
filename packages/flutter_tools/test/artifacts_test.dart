@@ -18,12 +18,12 @@ void main() {
     CachedArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_cached.');
       artifacts = new CachedArtifacts();
     });
 
     tearDown(() {
-      tempDir.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('getArtifactPath', () {
@@ -69,7 +69,7 @@ void main() {
     LocalEngineArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_local.');
       artifacts = new LocalEngineArtifacts(tempDir.path,
         fs.path.join(tempDir.path, 'out', 'android_debug_unopt'),
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt'),
@@ -77,7 +77,7 @@ void main() {
     });
 
     tearDown(() {
-      tempDir.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('getArtifactPath', () {
