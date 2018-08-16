@@ -11,7 +11,7 @@ import 'picker.dart';
 const double _kItemExtent = 32.0;
 /// Consider setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
-const double _kPickerWidth = 360.0;
+const double _kPickerWidth = 330.0;
 
 
 /// A countdown timer picker in iOS style.
@@ -99,7 +99,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
             alignment: -align,
             // A little space between words to look better.
             padding: const EdgeInsets.symmetric(horizontal: 2.0),
-            decoration:BoxDecoration(border: Border.all()),
+            // decoration: BoxDecoration(border: Border.all()),
             child: child,
           ),
         ),
@@ -112,7 +112,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
       child: Padding(
         padding: padding,
         child: new Container(
-          decoration: BoxDecoration(border: Border.all()),
+          // decoration: BoxDecoration(border: Border.all()),
           alignment: align,
           // A little space between words to look better.
           padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -162,7 +162,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
             }),
           ),
           _fixedColumn(
-            const Text('hours', textScaleFactor: 0.9, style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('hours', textScaleFactor: 0.8, style: TextStyle(fontWeight: FontWeight.w600)),
             Alignment(1.0 * textDirectionFactor, 0.0),
           ),
         ],
@@ -207,7 +207,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
             }),
           ),
           _fixedColumn(
-            const Text('min', textScaleFactor: 0.9, style: TextStyle(fontWeight: FontWeight.w600)),
+            const Text('min', textScaleFactor: 0.8, style: TextStyle(fontWeight: FontWeight.w600)),
             Alignment(1.0 * textDirectionFactor, 0.0),
           ),
         ],
@@ -253,31 +253,11 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
           ),
 
           _extendableColumn(
-            const Text(
-              'sec',
-              textScaleFactor: 0.9,
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+            const Text('sec', textScaleFactor: 0.8, style: TextStyle(fontWeight: FontWeight.w600)),
             Alignment(-1.0 * textDirectionFactor, 0.0),
             textDirectionFactor == 1 ? const EdgeInsets.only(left: _kPickerWidth / 6)
                                      : const EdgeInsets.only(right: _kPickerWidth / 6),
           ),
-//          Padding(
-//            padding: textDirectionFactor == 1
-//                ? EdgeInsets.only(left: _kPickerWidth / 6)
-//                : EdgeInsets.only(right: _kPickerWidth / 6),
-//            child: new Container(
-//              alignment: Alignment(-1.0 * textDirectionFactor, 0.0),
-//              // A little space to look better.
-//              padding: EdgeInsets.symmetric(horizontal: 2.0),
-//              decoration:BoxDecoration(border: Border.all()),
-//              child: Text(
-//                'sec',
-//                textScaleFactor: 0.9,
-//                style: TextStyle(fontWeight: FontWeight.w600),
-//              ),
-//            ),
-//          ),
         ],
       ),
     );
