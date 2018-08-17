@@ -14,7 +14,7 @@ const double _kPickerWidth = 330.0;
 const Color _kBackgroundColor = CupertinoColors.white;
 
 
-/// The iOS date picker always has its width fixed to [_kPickerWidth].
+/// The iOS date picker has its width fixed to [_kPickerWidth] in all modes.
 /// If the maximum width given to the picker is greater than [_kPickerWidth],
 /// the leftmost and rightmost column will be extended equally so that the
 /// widths matched, and the picker is in the center.
