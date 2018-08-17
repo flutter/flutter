@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1807,6 +1808,17 @@ class _NavigationBarComponentsTransition {
     final KeyedSubtree bottomMiddle = bottomComponents.middleKey.currentWidget;
     final KeyedSubtree bottomLargeTitle = bottomComponents.largeTitleKey.currentWidget;
     final KeyedSubtree topBackLabel = topComponents.backLabelKey.currentWidget;
+    RenderAnimatedOpacity opacity = topComponents.backLabelKey.currentContext.ancestorRenderObjectOfType(
+      const TypeMatcher<RenderAnimatedOpacity>()
+    );
+
+    Animation<double> midClickOpacity;
+    if (opacity.opacity.value < 1.0) {
+      midClickOpacity = new Tween<double>(
+        begin: 0.0,
+        end: opacity.opacity.value,
+      ).animate(animation);
+    }
 
     if (topBackLabel == null) {
       return null;
@@ -1829,7 +1841,7 @@ class _NavigationBarComponentsTransition {
           toNavBarBox: topNavBarBox,
         ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeInFrom(0.4),
+          opacity: midClickOpacity ?? fadeInFrom(0.4),
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kLargeTitleTextStyle,
@@ -1854,7 +1866,7 @@ class _NavigationBarComponentsTransition {
           toNavBarBox: topNavBarBox,
         ).animate(animation),
         child: new FadeTransition(
-          opacity: fadeInFrom(0.3),
+          opacity: midClickOpacity ?? fadeInFrom(0.3),
           child: new DefaultTextStyleTransition(
             style: TextStyleTween(
               begin: _kMiddleTitleTextStyle,
