@@ -13,24 +13,21 @@ import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
-BasicProject _project = new BasicProject();
-FlutterTestDriver _flutter;
-
 void main() {
   group('expression evaluation', () {
+    Directory tempDir;
+    final BasicProject _project = new BasicProject();
+    FlutterTestDriver _flutter;
+
     setUp(() async {
-      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
       await _project.setUpIn(tempDir);
       _flutter = new FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
-      try {
-        await _flutter.stop();
-        _project.cleanup();
-      } catch (e) {
-        // Don't fail tests if we failed to clean up temp folder.
-      }
+      await _flutter.stop();
+      tryToDelete(tempDir);
     });
 
     Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {

@@ -459,15 +459,14 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('devfs${_tempDirs.length}');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.isNotEmpty) {
-    _tempDirs.removeLast().deleteSync(recursive: true);
-  }
+  while (_tempDirs.isNotEmpty)
+    tryToDelete(_tempDirs.removeLast());
 }
 
 Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {

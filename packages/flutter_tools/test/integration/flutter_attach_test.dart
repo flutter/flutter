@@ -11,26 +11,22 @@ import '../src/context.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
-FlutterTestDriver _flutterRun, _flutterAttach;
-BasicProject _project = new BasicProject();
-
 void main() {
+  FlutterTestDriver _flutterRun, _flutterAttach;
+  final BasicProject _project = new BasicProject();
+  Directory tempDir;
 
   setUp(() async {
-    final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_attach_test.');
     await _project.setUpIn(tempDir);
     _flutterRun = new FlutterTestDriver(tempDir);
     _flutterAttach = new FlutterTestDriver(tempDir);
   });
 
   tearDown(() async {
-    try {
-      await _flutterRun.stop();
-      await _flutterAttach.stop();
-      _project.cleanup();
-    } catch (e) {
-      // Don't fail tests if we failed to clean up temp folder.
-    }
+    await _flutterRun.stop();
+    await _flutterAttach.stop();
+    tryToDelete(tempDir);
   });
 
   group('attached process', () {

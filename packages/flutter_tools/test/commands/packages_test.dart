@@ -35,18 +35,18 @@ class AlwaysFalseBotDetector implements BotDetector {
 void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
-    Directory temp;
+    Directory tempDir;
 
     setUp(() {
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     Future<String> createProjectWithPlugin(String plugin) async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
@@ -168,7 +168,7 @@ void main() {
     }
 
     testUsingContext('get fetches packages', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -178,7 +178,7 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get --offline fetches packages', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get', args: <String>['--offline']);
@@ -188,7 +188,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'upgrade');
@@ -210,7 +210,7 @@ void main() {
     }, timeout: allowForRemotePubInvocation, skip: true);
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
-        temp,
+        tempDir,
         arguments: <String>['-t', 'plugin', '--no-pub'],
       );
       final String exampleProjectPath = fs.path.join(projectPath, 'example');

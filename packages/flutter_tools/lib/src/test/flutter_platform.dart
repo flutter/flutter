@@ -203,7 +203,7 @@ class _Compiler {
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
     final Directory outputDillDirectory = fs.systemTempDirectory
-        .createTempSync('output_dill');
+        .createTempSync('flutter_test_compiler.');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
     bool suppressOutput = false;
@@ -656,15 +656,15 @@ class _FlutterPlatform extends PlatformPlugin {
   String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
       String testPath, HttpServer server) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory temporaryDirectory = fs.systemTempDirectory
-        .createTempSync('dart_test_listener');
+    final Directory tempDir = fs.systemTempDirectory
+        .createTempSync('flutter_test_listener.');
     finalizers.add(() async {
       printTrace('test $ourTestCount: deleting temporary directory');
-      temporaryDirectory.deleteSync(recursive: true);
+      tempDir.deleteSync(recursive: true);
     });
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
+    final File listenerFile = fs.file('${tempDir.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: fs.path.toUri(fs.path.absolute(testPath)),
@@ -683,7 +683,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
     // bundlePath needs to point to a folder with `platform.dill` file.
     final Directory tempBundleDirectory = fs.systemTempDirectory
-        .createTempSync('flutter_bundle_directory');
+        .createTempSync('flutter_test_bundle.');
     finalizers.add(() async {
       printTrace(
           'test $ourTestCount: deleting temporary bundle directory');
@@ -757,7 +757,7 @@ class _FlutterPlatform extends PlatformPlugin {
     sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
     sb.writeln('</fontconfig>');
 
-    final Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_fonts');
+    final Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
     _cachedFontConfig = fs.file('${fontsDir.path}/fonts.conf');
     _cachedFontConfig.createSync();
     _cachedFontConfig.writeAsStringSync(sb.toString());

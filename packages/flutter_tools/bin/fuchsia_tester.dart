@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/usage.dart';
 
-// Note: this was largely inspired by lib/src/commands/test.dart.
+// This was largely inspired by lib/src/commands/test.dart.
 
 const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
@@ -71,10 +71,10 @@ Future<Null> run(List<String> args) async {
       .any((String option) => !argResults.options.contains(option))) {
     throwToolExit('Missing option! All options must be specified.');
   }
-  final Directory tempDirectory =
-      fs.systemTempDirectory.createTempSync('fuchsia_tester');
+  final Directory tempDir =
+      fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
   try {
-    Cache.flutterRoot = tempDirectory.path;
+    Cache.flutterRoot = tempDir.path;
     final Directory testDirectory =
         fs.directory(argResults[_kOptionTestDirectory]);
     final File testFile = fs.file(argResults[_kOptionTestFile]);
@@ -130,13 +130,13 @@ Future<Null> run(List<String> args) async {
       // collector expects currentDirectory to be the root of the dart
       // package (i.e. contains lib/ and test/ sub-dirs).
       fs.currentDirectory = testDirectory.parent;
-      if (!await
-          collector.collectCoverageData(argResults[_kOptionCoveragePath]))
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath]))
         throwToolExit('Failed to collect coverage data');
     }
   } finally {
-    tempDirectory.deleteSync(recursive: true);
+    tempDir.deleteSync(recursive: true);
   }
-  // Not sure why this is needed, but main() doesn't seem to exit on its own.
+  // TODO(ianh): There's apparently some sort of lost async task keeping the
+  // process open. Remove the next line once that's been resolved.
   exit(exitCode);
 }
