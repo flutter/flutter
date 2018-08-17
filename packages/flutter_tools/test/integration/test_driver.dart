@@ -54,27 +54,51 @@ class FlutterTestDriver {
     return msg;
   }
 
-  Future<void> run({bool withDebugger = false, bool pauseOnExceptions = false}) async {
-    await _setupProcess(<String>[
+  Future<void> run({
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    Duration stepTimeout,
+  }) async {
+    await _setupProcess(
+      <String>[
         'run',
         '--machine',
         '-d',
         'flutter-tester',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
+      ],
+      withDebugger: withDebugger,
+      pauseOnExceptions: pauseOnExceptions,
+      stepTimeout: stepTimeout,
+    );
   }
 
-  Future<void> attach(int port, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
-    await _setupProcess(<String>[
+  Future<void> attach(
+    int port, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    Duration stepTimeout,
+  }) async {
+    await _setupProcess(
+      <String>[
         'attach',
         '--machine',
         '-d',
         'flutter-tester',
         '--debug-port',
         '$port',
-    ], withDebugger: withDebugger, pauseOnExceptions: pauseOnExceptions);
+      ],
+      withDebugger: withDebugger,
+      pauseOnExceptions: pauseOnExceptions,
+      stepTimeout: stepTimeout,
+    );
   }
 
-  Future<void> _setupProcess(List<String> args, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
+  Future<void> _setupProcess(
+    List<String> args, {
+    bool withDebugger = false,
+    bool pauseOnExceptions = false,
+    Duration stepTimeout,
+  }) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
     _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
 
@@ -101,17 +125,17 @@ class FlutterTestDriver {
     // Stash the PID so that we can terminate the VM more reliably than using
     // _proc.kill() (because _proc is a shell, because `flutter` is a shell
     // script).
-    final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected');
+    final Map<String, dynamic> connected = await _waitFor(event: 'daemon.connected', timeout: stepTimeout);
     _procPid = connected['params']['pid'];
 
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
     final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started',
-        timeout: appStartTimeout);
+        timeout: stepTimeout ?? appStartTimeout);
 
     if (withDebugger) {
       final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort',
-          timeout: appStartTimeout);
+          timeout: stepTimeout ?? appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
       _vmServicePort = debugPort['params']['port'];
@@ -139,16 +163,20 @@ class FlutterTestDriver {
     _currentRunningAppId = (await started)['params']['appId'];
   }
 
-  Future<void> hotRestart({bool pause = false}) => _restart(fullRestart: true, pause: pause);
-  Future<void> hotReload() => _restart(fullRestart: false);
+  Future<void> hotRestart({bool pause = false, Duration timeout}) {
+    return _restart(fullRestart: true, pause: pause, timeout: timeout);
+  }
 
-  Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
+  Future<void> hotReload({Duration timeout}) => _restart(fullRestart: false, timeout: timeout);
+
+  Future<void> _restart({bool fullRestart = false, bool pause = false, Duration timeout}) async {
     if (_currentRunningAppId == null)
       throw new Exception('App has not started yet');
 
     final dynamic hotReloadResp = await _sendRequest(
-        'app.restart',
-        <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause}
+      'app.restart',
+      <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
+      timeout: timeout,
     );
 
     if (hotReloadResp == null || hotReloadResp['code'] != 0)
@@ -276,12 +304,13 @@ class FlutterTestDriver {
       }
     });
 
-    return _timeoutWithMessages(() => response.future,
-            timeout: timeout,
-            message: event != null
-                ? 'Did not receive expected $event event.'
-                : 'Did not receive response to request "$id".')
-        .whenComplete(() => sub.cancel());
+    return _timeoutWithMessages(
+      () => response.future,
+      timeout: timeout,
+      message: event != null
+          ? 'Did not receive expected $event event.'
+          : 'Did not receive response to request "$id".',
+    ).whenComplete(() => sub.cancel());
   }
 
   Future<T> _timeoutWithMessages<T>(Future<T> Function() f, {Duration timeout, String message}) {
@@ -316,7 +345,7 @@ class FlutterTestDriver {
   }
 
   int id = 1;
-  Future<dynamic> _sendRequest(String method, dynamic params) async {
+  Future<dynamic> _sendRequest(String method, dynamic params, { Duration timeout }) async {
     final int requestId = id++;
     final Map<String, dynamic> req = <String, dynamic>{
       'id': requestId,
@@ -328,7 +357,8 @@ class FlutterTestDriver {
 
     // Set up the response future before we send the request to avoid any
     // races.
-    final Future<Map<String, dynamic>> responseFuture = _waitFor(id: requestId);
+    final Future<Map<String, dynamic>> responseFuture =
+        _waitFor(id: requestId, timeout: timeout);
     _proc.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> resp = await responseFuture;
 
