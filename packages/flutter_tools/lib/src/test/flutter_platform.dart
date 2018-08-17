@@ -460,12 +460,14 @@ class _FlutterPlatform extends PlatformPlugin {
         }
       });
 
-      final Completer<Null> timeout = new Completer<Null>();
+      final Completer<void> timeout = new Completer<void>();
+      final Completer<void> gotProcessObservatoryUri = new Completer<void>();
+      if (!enableObservatory)
+        gotProcessObservatoryUri.complete();
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
       Uri processObservatoryUri;
-
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) {
@@ -480,10 +482,9 @@ class _FlutterPlatform extends PlatformPlugin {
           } else {
             printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
           }
-          if (watcher != null) {
-            watcher.onStartedProcess(new ProcessEvent(ourTestCount, process, detectedUri));
-          }
           processObservatoryUri = detectedUri;
+          gotProcessObservatoryUri.complete();
+          watcher?.handleStartedProcess(new ProcessEvent(ourTestCount, process, processObservatoryUri));
         },
         startTimeoutTimer: () {
           new Future<_InitialResult>.delayed(_kTestStartupTimeout).then((_) => timeout.complete());
@@ -498,9 +499,13 @@ class _FlutterPlatform extends PlatformPlugin {
       printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
       final _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
         process.exitCode.then<_InitialResult>((int exitCode) => _InitialResult.crashed),
-        timeout.future.then<_InitialResult>((Null _) => _InitialResult.timedOut),
+        timeout.future.then<_InitialResult>((void value) => _InitialResult.timedOut),
         new Future<_InitialResult>.delayed(_kTestProcessTimeout, () => _InitialResult.timedOut),
-        webSocket.future.then<_InitialResult>((WebSocket webSocket) => _InitialResult.connected),
+        gotProcessObservatoryUri.future.then<_InitialResult>((void value) {
+          return webSocket.future.then<_InitialResult>(
+            (WebSocket webSocket) => _InitialResult.connected,
+          );
+        }),
       ]);
 
       switch (initialResult) {
@@ -514,6 +519,7 @@ class _FlutterPlatform extends PlatformPlugin {
           controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
+          await watcher?.handleTestCrashed(new ProcessEvent(ourTestCount, process));
           break;
         case _InitialResult.timedOut:
           // Could happen either if the process takes a long time starting
@@ -526,12 +532,13 @@ class _FlutterPlatform extends PlatformPlugin {
           controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
+          await watcher?.handleTestTimedOut(new ProcessEvent(ourTestCount, process));
           break;
         case _InitialResult.connected:
           printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
           final WebSocket testSocket = await webSocket.future;
 
-          final Completer<Null> harnessDone = new Completer<Null>();
+          final Completer<void> harnessDone = new Completer<void>();
           final StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
             (dynamic event) { testSocket.add(json.encode(event)); },
             onDone: harnessDone.complete,
@@ -548,7 +555,7 @@ class _FlutterPlatform extends PlatformPlugin {
             cancelOnError: true,
           );
 
-          final Completer<Null> testDone = new Completer<Null>();
+          final Completer<void> testDone = new Completer<void>();
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
               assert(encodedEvent is String); // we shouldn't ever get binary messages
@@ -571,11 +578,11 @@ class _FlutterPlatform extends PlatformPlugin {
           printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
           final _TestResult testResult = await Future.any(<Future<_TestResult>>[
             process.exitCode.then<_TestResult>((int exitCode) { return _TestResult.crashed; }),
-            harnessDone.future.then<_TestResult>((Null _) { return _TestResult.harnessBailed; }),
-            testDone.future.then<_TestResult>((Null _) { return _TestResult.testBailed; }),
+            harnessDone.future.then<_TestResult>((void value) { return _TestResult.harnessBailed; }),
+            testDone.future.then<_TestResult>((void value) { return _TestResult.testBailed; }),
           ]);
 
-          await Future.wait(<Future<Null>>[
+          await Future.wait(<Future<void>>[
             harnessToTest.cancel(),
             testToHarness.cancel(),
           ]);
@@ -593,30 +600,17 @@ class _FlutterPlatform extends PlatformPlugin {
               await controller.sink.done;
               break;
             case _TestResult.harnessBailed:
-              printTrace('test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
-              break;
             case _TestResult.testBailed:
-              printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
+              if (testResult == _TestResult.harnessBailed) {
+                printTrace('test $ourTestCount: process with pid ${process.pid} no longer needed by test harness');
+              } else {
+                assert(testResult == _TestResult.testBailed);
+                printTrace('test $ourTestCount: process with pid ${process.pid} no longer needs test harness');
+              }
+              await watcher?.handleFinishedTest(new ProcessEvent(ourTestCount, process, processObservatoryUri));
               break;
           }
           break;
-      }
-
-      if (watcher != null) {
-        switch (initialResult) {
-          case _InitialResult.crashed:
-            await watcher.onTestCrashed(new ProcessEvent(ourTestCount, process));
-            break;
-          case _InitialResult.timedOut:
-            await watcher.onTestTimedOut(new ProcessEvent(ourTestCount, process));
-            break;
-          case _InitialResult.connected:
-            if (subprocessActive) {
-              await watcher.onFinishedTest(
-                  new ProcessEvent(ourTestCount, process, processObservatoryUri));
-            }
-            break;
-        }
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
@@ -830,7 +824,6 @@ class _FlutterPlatform extends PlatformPlugin {
     void reportObservatoryUri(Uri uri),
   }) {
     const String observatoryString = 'Observatory listening on ';
-
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream.transform(utf8.decoder)
@@ -891,18 +884,18 @@ class _FlutterPlatform extends PlatformPlugin {
 class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   _FlutterPlatformStreamSinkWrapper(this._parent, this._shellProcessClosed);
   final StreamSink<S> _parent;
-  final Future<Null> _shellProcessClosed;
+  final Future<void> _shellProcessClosed;
 
   @override
-  Future<Null> get done => _done.future;
-  final Completer<Null> _done = new Completer<Null>();
+  Future<void> get done => _done.future;
+  final Completer<void> _done = new Completer<void>();
 
   @override
   Future<dynamic> close() {
    Future.wait<dynamic>(<Future<dynamic>>[
       _parent.close(),
       _shellProcessClosed,
-    ]).then<Null>(
+    ]).then<void>(
       (List<dynamic> value) {
         _done.complete();
       },
