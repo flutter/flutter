@@ -101,7 +101,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
             return _buildBottomPicker(
               Localizations.override(
                 context: context,
-                delegates: [DefaultCupertinoLocalizations.delegate],
+                delegates: const <LocalizationsDelegate<CupertinoLocalizations>>[DefaultCupertinoLocalizations.delegate],
                 child: CupertinoCountdownTimerPicker(
                   initialTimerDuration: timer,
                   onTimerDurationChanged: (Duration newTimer) {
