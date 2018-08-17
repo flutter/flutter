@@ -15,10 +15,12 @@ const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
 const double pythonCost = 3001.0; // six average SWE days, in dollars
 const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
+const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2003.0; // same as ignoring analyzer warning
 
 final RegExp todoPattern = new RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = new RegExp(r'// *ignore:');
+final RegExp ignoreForFilePattern = new RegExp(r'// *ignore_for_file:');
 final RegExp asDynamicPattern = new RegExp(r'as dynamic');
 
 Future<double> findCostsForFile(File file) async {
@@ -35,6 +37,8 @@ Future<double> findCostsForFile(File file) async {
       total += todoCost;
     if (line.contains(ignorePattern))
       total += ignoreCost;
+    if (line.contains(ignoreForFilePattern))
+      total += ignoreForFileCost;
     if (line.contains(asDynamicPattern))
       total += asDynamicCost;
     if (isTest && line.contains('skip:'))
