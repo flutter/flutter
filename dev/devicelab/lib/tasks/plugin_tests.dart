@@ -33,23 +33,24 @@ class PluginTest {
 
   Future<TaskResult> call() async {
     section('Create Flutter project');
-    final Directory tmp = await Directory.systemTemp.createTemp('plugin');
-    final FlutterProject project = await FlutterProject.create(tmp, options);
-    if (buildTarget == 'ios') {
-      await prepareProvisioningCertificates(project.rootPath);
-    }
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     try {
-      section('Add plugin');
-      await project.addPlugin('path_provider');
-
-      section('Build');
-      await project.build(buildTarget);
-
+      final FlutterProject project = await FlutterProject.create(tempDir, options);
+      try {
+        if (buildTarget == 'ios')
+          await prepareProvisioningCertificates(project.rootPath);
+        section('Add plugin');
+        await project.addPlugin('path_provider');
+        section('Build');
+        await project.build(buildTarget);
+      } finally {
+        await project.delete();
+      }
       return new TaskResult.success(null);
     } catch (e) {
       return new TaskResult.failure(e.toString());
     } finally {
-      await project.delete();
+      rmTree(tempDir);
     }
   }
 }
@@ -97,9 +98,9 @@ class FlutterProject {
         <String>['--stop'],
         canFail: true,
       );
-      // TODO(mravn): Investigating if flakiness is timing dependent.
+      // TODO(ianh): Investigating if flakiness is timing dependent.
       await new Future<Null>.delayed(const Duration(seconds: 10));
     }
-    await parent.delete(recursive: true);
+    rmTree(parent);
   }
 }

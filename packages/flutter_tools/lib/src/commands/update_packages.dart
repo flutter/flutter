@@ -215,13 +215,13 @@ class UpdatePackagesCommand extends FlutterCommand {
       // pub tool will attempt to bring these dependencies up to the most recent
       // possible versions while honoring all their constraints.
       final PubDependencyTree tree = new PubDependencyTree(); // object to collect results
-      final Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('flutter_update_packages_');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_update_packages.');
       try {
-        final File fakePackage = _pubspecFor(temporaryDirectory);
+        final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(context: PubContext.updatePackages, directory: temporaryDirectory.path, upgrade: true, checkLastModified: false);
+        await pubGet(context: PubContext.updatePackages, directory: tempDir.path, upgrade: true, checkLastModified: false);
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive
@@ -230,12 +230,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         await pub(
           <String>['deps', '--style=compact'],
           context: PubContext.updatePackages,
-          directory: temporaryDirectory.path,
+          directory: tempDir.path,
           filter: tree.fill,
           retry: false, // errors here are usually fatal since we're not hitting the network
         );
       } finally {
-        temporaryDirectory.deleteSync(recursive: true);
+        tempDir.deleteSync(recursive: true);
       }
 
       // The transitive dependency tree for the fake package does not contain

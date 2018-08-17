@@ -39,7 +39,6 @@ void main() {
 
   testUsingContext('licensesAccepted throws if cannot run sdkmanager', () async {
     processManager.succeed = false;
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
     expect(androidWorkflow.licensesAccepted, throwsToolExit());
@@ -52,7 +51,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted handles garbage/no output', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
     final LicensesAccepted result = await androidWorkflow.licensesAccepted;
@@ -68,7 +66,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted works for all licenses accepted', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
        '[=======================================] 100% Computing updates...             ',
@@ -87,7 +84,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted works for some licenses accepted', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
       '[=======================================] 100% Computing updates...             ',
@@ -107,7 +103,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted works for no licenses accepted', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
       '[=======================================] 100% Computing updates...             ',
@@ -127,7 +122,6 @@ void main() {
   });
 
   testUsingContext('runLicenseManager succeeds for version >= 26', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('26.0.0');
 
@@ -141,7 +135,6 @@ void main() {
   });
 
   testUsingContext('runLicenseManager errors for version < 26', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
@@ -155,7 +148,6 @@ void main() {
   });
 
   testUsingContext('runLicenseManager errors correctly for null version', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn(null);
 
@@ -169,7 +161,6 @@ void main() {
   });
 
   testUsingContext('runLicenseManager errors when sdkmanager is not found', () async {
-    MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.succeed = false;
 

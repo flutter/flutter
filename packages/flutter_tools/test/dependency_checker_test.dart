@@ -93,16 +93,18 @@ void main() {
     /// Tests that the flutter tool doesn't crash and displays a warning when its own location
     /// changed since it was last referenced to in a package's .packages file.
     testUsingContext('moved flutter sdk', () async {
-      final Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_dependency_checker_test.');
+
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
       const LocalFileSystem localFileSystem = LocalFileSystem();
       final Directory sourcePath = localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
-      copyDirectorySync(sourcePath, destinationPath);
-      fs.currentDirectory = destinationPath;
+      copyDirectorySync(sourcePath, tempDir);
+      fs.currentDirectory = tempDir;
 
       // Doesn't matter what commands we run. Arbitrarily list devices here.
       await createTestCommandRunner(new DevicesCommand()).run(<String>['devices']);
       expect(testLogger.errorText, contains('.packages'));
+      tryToDelete(tempDir);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });

@@ -1902,6 +1902,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
           ],
@@ -1927,6 +1928,8 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
           ],
@@ -1952,6 +1955,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
           ],
@@ -2011,6 +2015,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
           ],
@@ -2036,6 +2041,8 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
             SemanticsAction.cut,
@@ -2085,6 +2092,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
           ],
@@ -2129,6 +2137,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
             SemanticsAction.paste,
             SemanticsAction.cut,
@@ -2197,6 +2206,7 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.tap,
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.paste,
             ],

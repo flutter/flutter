@@ -164,7 +164,6 @@ void main() {
       expect(genSnapshot.snapshotType.platform, isNull);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, 'output.snapshot.d');
       expect(genSnapshot.additionalArgs, <String>[
         '--snapshot_kind=script',
         '--script_snapshot=output.snapshot',
@@ -813,6 +812,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -836,6 +836,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -880,6 +881,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -910,6 +912,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -933,6 +936,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -976,6 +980,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -1005,6 +1010,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -1028,6 +1034,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -1071,6 +1078,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
