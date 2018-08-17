@@ -119,8 +119,25 @@ class Doctor {
 
     bool allGood = true;
 
+    Set<ValidatorCategory> finishedGroups = new Set();
     for (DoctorValidator validator in validators) {
-      final ValidationResult result = await validator.validate();
+      final ValidatorCategory currentCategory = validator.category;
+      ValidationResult result;
+
+      if (currentCategory.isGrouped) {
+        if (finishedGroups.contains(currentCategory)) {
+          continue;
+        }
+        List<ValidationResult> results = [];
+        for (DoctorValidator subValidator in validators.where(
+                (DoctorValidator v) => v.category == currentCategory)) {
+          results.add(await subValidator.validate());
+        }
+        result = _mergeValidationResults(results);
+      } else {
+        result = await validator.validate();
+      }
+      
       buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
         buffer.write('not installed.');
@@ -136,6 +153,7 @@ class Doctor {
 
       if (result.type != ValidationType.installed)
         allGood = false;
+
     }
 
     if (!allGood) {
@@ -181,7 +199,7 @@ class Doctor {
             rethrow;
           }
         }
-       result = _mergeValidationResults(results);
+        result = _mergeValidationResults(results);
       } else {
         try {
           result = await validatorTask.result;
@@ -358,13 +376,13 @@ class _FlutterValidator extends DoctorValidator {
 
     messages.add(new ValidationMessage('Flutter version ${version.frameworkVersion} at ${Cache.flutterRoot}'));
     messages.add(new ValidationMessage(
-      'Framework revision ${version.frameworkRevisionShort} '
-      '(${version.frameworkAge}), ${version.frameworkDate}'
+        'Framework revision ${version.frameworkRevisionShort} '
+            '(${version.frameworkAge}), ${version.frameworkDate}'
     ));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Dart version ${version.dartSdkVersion}'));
     final String genSnapshotPath =
-      artifacts.getArtifactPath(Artifact.genSnapshot);
+    artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
@@ -381,7 +399,7 @@ class _FlutterValidator extends DoctorValidator {
     }
 
     return new ValidationResult(valid, messages,
-      statusInfo: 'Channel ${version.channel}, v${version.frameworkVersion}, on ${os.name}, locale ${platform.localeName}'
+        statusInfo: 'Channel ${version.channel}, v${version.frameworkVersion}, on ${os.name}, locale ${platform.localeName}'
     );
   }
 }
@@ -442,17 +460,17 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
-        'For information about installing plugins, see\n'
-        'https://flutter.io/intellij-setup/#installing-the-plugins'
+          'For information about installing plugins, see\n'
+              'https://flutter.io/intellij-setup/#installing-the-plugins'
       ));
     }
 
     _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return new ValidationResult(
-      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
-      messages,
-      statusInfo: 'version $version'
+        _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
+        messages,
+        statusInfo: 'version $version'
     );
   }
 
@@ -471,7 +489,7 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     if (installedVersion < minVersion) {
       messages.add(new ValidationMessage.error(
-        'This install is older than the minimum recommended version of $minVersion.'
+          'This install is older than the minimum recommended version of $minVersion.'
       ));
     }
   }
@@ -493,7 +511,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
       final IntelliJValidatorOnLinuxAndWindows validator =
-        new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
+      new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
@@ -556,10 +574,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     try {
       final Iterable<FileSystemEntity> installDirs = installPaths
-              .map((String installPath) => fs.directory(installPath))
-              .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-              .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
-              .where((FileSystemEntity mappedDir) => mappedDir is Directory);
+          .map((String installPath) => fs.directory(installPath))
+          .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+          .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
+          .where((FileSystemEntity mappedDir) => mappedDir is Directory);
       for (FileSystemEntity dir in installDirs) {
         if (dir is Directory) {
           checkForIntelliJ(dir);
@@ -574,10 +592,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
     } on FileSystemException catch (e) {
       validators.add(new ValidatorWithResult(
-          'Cannot determine if IntelliJ is installed',
-          new ValidationResult(ValidationType.missing, <ValidationMessage>[
-             new ValidationMessage.error(e.message),
-          ]),
+        'Cannot determine if IntelliJ is installed',
+        new ValidationResult(ValidationType.missing, <ValidationMessage>[
+          new ValidationMessage.error(e.message),
+        ]),
       ));
     }
     return validators;
