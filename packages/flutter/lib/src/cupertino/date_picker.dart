@@ -113,7 +113,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
   }
 
   // Builds a column with fixed width of PickerWidth / 6. The align parameter 
-  // is how this column is aligned inside its parent.
+  // describes how this column is aligned inside its parent.
   Widget _fixedColumn(Widget child, Alignment align) {
     return new IgnorePointer(
       child: Align(
@@ -131,8 +131,9 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     );
   }
 
-  // Builds an extendable column. The padding parameter is how this column is
-  // padded inside its parent, and align is how this column's child is aligned.
+  // Builds an extendable column. The padding parameter describes how this 
+  // column is padded inside its parent, and the align parameter describes how
+  // this column's child is aligned.
   Widget _extendableColumn(Widget child, Alignment align, EdgeInsets padding) {
     return new IgnorePointer(
       child: Padding(
