@@ -18,10 +18,6 @@ abstract class CupertinoLocalizations {
   /// The given number in local numerical alphabet.
   String number(int num);
 
-  /// The date order of the current locale. Can be any permutation of 'DMY'.
-  /// This will affect how the cupertino date picker orders its children.
-  String get dateOrder;
-
   /// Name of the month corresponding to the given integer.
   String month(int month);
 
@@ -35,6 +31,10 @@ abstract class CupertinoLocalizations {
   /// - US English: Wed Sep 27
   /// - Russian: ср сент. 27
   String formatMediumDate(DateTime date);
+
+  /// The date order of the current locale. Can be any permutation of 'DMY'.
+  /// This will affect how the cupertino date picker orders its children.
+  String get dateOrder;
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.
   String get anteMeridiemAbbreviation;
@@ -134,9 +134,6 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String number(int num) => num.toString();
 
   @override
-  String get dateOrder => 'MDY';
-
-  @override
   String month(int month) => _months[month - 1];
 
   @override
@@ -145,6 +142,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
         '${_shortMonths[date.month - DateTime.january]} '
         '${date.day}';
   }
+
+  @override
+  String get dateOrder => 'MDY';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
