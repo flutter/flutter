@@ -96,7 +96,6 @@ Future<Null> main(List<String> arguments) async {
     exit(code);
 
   createFooter('dev/docs/lib/footer.html');
-
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
     dartdocBaseArgs.add('-c');
@@ -208,7 +207,7 @@ void createFooter(String footerPath) {
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
   final Match gitBranchMatch = gitBranchRegexp.firstMatch(
       gitResult.stdout.trim().split('\n').first);
-  final String gitBranchOut = gitBranchMatch == null ? '' : '• </span class="no-break">${gitBranchMatch.group(1)}</span>';
+  final String gitBranchOut = gitBranchMatch == null ? '' : '• </span class="no-break">${gitBranchMatch.group(1).split('...').first}</span>';
 
   gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
