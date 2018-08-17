@@ -157,7 +157,7 @@ void main() {
         tester.renderObject(find.byKey(buttonKey)),
         paintsExactlyCountTimes(#clipPath, 0)
     );
-  }, skip: true);
+  });
 
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
