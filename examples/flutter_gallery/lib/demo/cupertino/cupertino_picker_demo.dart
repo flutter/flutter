@@ -99,14 +99,18 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           context: context,
           builder: (BuildContext context) {
             return _buildBottomPicker(
-              CupertinoCountdownTimerPicker(
-                initialTimerDuration: timer,
-                onTimerDurationChanged: (Duration newTimer) {
-                  setState(() {
-                    timer = newTimer;
-                  });
-                },
-              )
+              Localizations.override(
+                context: context,
+                delegates: [DefaultCupertinoLocalizations.delegate],
+                child: CupertinoCountdownTimerPicker(
+                  initialTimerDuration: timer,
+                  onTimerDurationChanged: (Duration newTimer) {
+                    setState(() {
+                      timer = newTimer;
+                    });
+                  },
+                ),
+              ),
             );
           },
         );
