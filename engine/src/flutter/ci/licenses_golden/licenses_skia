@@ -1,4 +1,4 @@
-Signature: 2e9a1f69e8319a9b8ff6ebb6d4fbc20e
+Signature: abb465841eff11cdfb568a7cdaaa370e
 
 UNUSED LICENSES:
 
@@ -803,7 +803,6 @@ FILE: ../../../third_party/skia/gm/imagemakewithfilter.cpp
 FILE: ../../../third_party/skia/gm/imagemasksubset.cpp
 FILE: ../../../third_party/skia/gm/lattice.cpp
 FILE: ../../../third_party/skia/gm/lightingshader2.cpp
-FILE: ../../../third_party/skia/gm/occludedrrectblur.cpp
 FILE: ../../../third_party/skia/gm/overdrawcolorfilter.cpp
 FILE: ../../../third_party/skia/gm/pathmaskcache.cpp
 FILE: ../../../third_party/skia/gm/readpixels.cpp
@@ -1552,6 +1551,7 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
+FILE: ../../../third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
 FILE: ../../../third_party/skia/src/pdf/SkClusterator.cpp
 FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.cpp
@@ -2332,6 +2332,7 @@ FILE: ../../../third_party/skia/site/favicon.ico
 FILE: ../../../third_party/skia/site/user/METADATA
 FILE: ../../../third_party/skia/site/user/api/METADATA
 FILE: ../../../third_party/skia/site/user/api/catalog.htm
+FILE: ../../../third_party/skia/site/user/modules/PathKit_effects.png
 FILE: ../../../third_party/skia/site/user/sample/architecture.png
 FILE: ../../../third_party/skia/site/user/sample/detail_correct.png
 FILE: ../../../third_party/skia/site/user/sample/detail_wrong.png
