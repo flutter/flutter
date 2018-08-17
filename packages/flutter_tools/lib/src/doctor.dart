@@ -310,7 +310,7 @@ class ValidatorCategory {
   static const ValidatorCategory androidToolchain = ValidatorCategory('androidToolchain', false);
   static const ValidatorCategory androidStudio = ValidatorCategory('androidStudio', false);
   static const ValidatorCategory ios = ValidatorCategory('ios', false);
-  static const ValidatorCategory flutter = ValidatorCategory('flutter', true);
+  static const ValidatorCategory flutter = ValidatorCategory('flutter', false);
   static const ValidatorCategory ide = ValidatorCategory('ide', false);
   static const ValidatorCategory device = ValidatorCategory('device', false);
   static const ValidatorCategory other = ValidatorCategory('other', false);
