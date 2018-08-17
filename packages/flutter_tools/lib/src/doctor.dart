@@ -119,7 +119,7 @@ class Doctor {
 
     bool allGood = true;
 
-    Set<ValidatorCategory> finishedGroups = new Set();
+    final Set<ValidatorCategory> finishedGroups = new Set<ValidatorCategory>();
     for (DoctorValidator validator in validators) {
       final ValidatorCategory currentCategory = validator.category;
       ValidationResult result;
@@ -128,7 +128,7 @@ class Doctor {
         if (finishedGroups.contains(currentCategory)) {
           continue;
         }
-        List<ValidationResult> results = [];
+        final List<ValidationResult> results = <ValidationResult>[];
         for (DoctorValidator subValidator in validators.where(
                 (DoctorValidator v) => v.category == currentCategory)) {
           results.add(await subValidator.validate());
@@ -137,7 +137,7 @@ class Doctor {
       } else {
         result = await validator.validate();
       }
-      
+
       buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
         buffer.write('not installed.');
@@ -175,9 +175,9 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    List<ValidatorTask> taskList = startValidatorTasks();
+    final List<ValidatorTask> taskList = startValidatorTasks();
 
-    Set<ValidatorCategory> finishedGroups = new Set();
+    final Set<ValidatorCategory> finishedGroups = new Set<ValidatorCategory>();
     for (ValidatorTask validatorTask in taskList) {
       final DoctorValidator validator = validatorTask.validator;
       final ValidatorCategory currentCategory = validator.category;
@@ -189,7 +189,7 @@ class Doctor {
           continue;
         }
 
-        final List<ValidationResult> results = [];
+        final List<ValidationResult> results = <ValidationResult>[];
         for (ValidatorTask subValidator in taskList.where(
                 (ValidatorTask t) => t.validator.category == currentCategory)) {
           try {
@@ -252,7 +252,7 @@ class Doctor {
 
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
     ValidationType mergedType = results[0].type;
-    final List<ValidationMessage> mergedMessages = [];
+    final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
 
     for (ValidationResult result in results) {
       if (mergedType == ValidationType.installed &&
@@ -307,21 +307,20 @@ class ValidatorCategory {
   final bool isGrouped;
   const ValidatorCategory(this.name, this.isGrouped);
 
-  static const ValidatorCategory androidToolchain = ValidatorCategory("androidToolchain", false);
-  static const ValidatorCategory androidStudio = ValidatorCategory("androidStudio", false);
-  static const ValidatorCategory ios = ValidatorCategory("ios", false);
-  static const ValidatorCategory flutter = ValidatorCategory("flutter", false);
-  static const ValidatorCategory ide = ValidatorCategory("flutter", false);
-  static const ValidatorCategory device = ValidatorCategory("flutter", false);
-  static const ValidatorCategory unassigned = ValidatorCategory("unassigned", false);
+  static const ValidatorCategory androidToolchain = ValidatorCategory('androidToolchain', false);
+  static const ValidatorCategory androidStudio = ValidatorCategory('androidStudio', false);
+  static const ValidatorCategory ios = ValidatorCategory('ios', false);
+  static const ValidatorCategory flutter = ValidatorCategory('flutter', true);
+  static const ValidatorCategory ide = ValidatorCategory('ide', false);
+  static const ValidatorCategory device = ValidatorCategory('device', false);
+  static const ValidatorCategory other = ValidatorCategory('other', false);
 }
 
 abstract class DoctorValidator {
-  const DoctorValidator(this.title, [this.category = ValidatorCategory.unassigned, this.hasChildren = false]);
+  const DoctorValidator(this.title, [this.category = ValidatorCategory.other]);
 
   final String title;
   final ValidatorCategory category;
-  final bool hasChildren;
 
   Future<ValidationResult> validate();
 }
