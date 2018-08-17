@@ -96,6 +96,7 @@ Future<Null> main(List<String> arguments) async {
     exit(code);
 
   createFooter('dev/docs/lib/footer.html');
+
   final List<String> dartdocBaseArgs = <String>['global', 'run'];
   if (args['checked']) {
     dartdocBaseArgs.add('-c');
