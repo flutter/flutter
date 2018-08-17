@@ -1,4 +1,4 @@
-Signature: abb465841eff11cdfb568a7cdaaa370e
+Signature: 7b57fc8eda48131a84e63774ad4992ab
 
 UNUSED LICENSES:
 
@@ -1354,7 +1354,9 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieTextLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGColorFilter.h
@@ -1957,8 +1959,9 @@ FILE: ../../../third_party/skia/experimental/docs/jsonbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/svgBackend.js
 FILE: ../../../third_party/skia/experimental/docs/svgbaseddoc.htm
 FILE: ../../../third_party/skia/experimental/docs/utilities.js
+FILE: ../../../third_party/skia/experimental/pathkit/chaining.js
+FILE: ../../../third_party/skia/experimental/pathkit/externs.js
 FILE: ../../../third_party/skia/experimental/pathkit/helper.js
-FILE: ../../../third_party/skia/experimental/pathkit/helper_externs.js
 FILE: ../../../third_party/skia/experimental/pathkit/karma-docker.conf.js
 FILE: ../../../third_party/skia/experimental/pathkit/karma.conf.js
 FILE: ../../../third_party/skia/experimental/pathkit/package.json
@@ -2353,11 +2356,13 @@ FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_kernels.bin.
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_kernels.pre.cl
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_kernels.src.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/cl/intel/gen8/u64/hs_kernels.src.xxd
-FILE: ../../../third_party/skia/src/compute/hs/images/hs_32_mkeys.svg
-FILE: ../../../third_party/skia/src/compute/hs/images/hs_32_msecs.svg
-FILE: ../../../third_party/skia/src/compute/hs/images/hs_64_mkeys.svg
-FILE: ../../../third_party/skia/src/compute/hs/images/hs_64_msecs.svg
 FILE: ../../../third_party/skia/src/compute/hs/images/hs_flip_merge.svg
+FILE: ../../../third_party/skia/src/compute/hs/images/hs_intel_gen8_mkeys.svg
+FILE: ../../../third_party/skia/src/compute/hs/images/hs_intel_gen8_msecs.svg
+FILE: ../../../third_party/skia/src/compute/hs/images/hs_nvidia_sm35_u32_mkeys.svg
+FILE: ../../../third_party/skia/src/compute/hs/images/hs_nvidia_sm35_u32_msecs.svg
+FILE: ../../../third_party/skia/src/compute/hs/images/hs_nvidia_sm35_u64_mkeys.svg
+FILE: ../../../third_party/skia/src/compute/hs/images/hs_nvidia_sm35_u64_msecs.svg
 FILE: ../../../third_party/skia/src/compute/hs/images/hs_sorted_slab.svg
 FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u32/hs_bc_0.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u32/hs_bc_0.spv.xxd
