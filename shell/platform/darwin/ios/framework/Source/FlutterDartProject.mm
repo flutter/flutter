@@ -73,8 +73,10 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
       NSString* libraryName = [mainBundle objectForInfoDictionaryKey:@"FLTLibraryPath"];
       NSString* libraryPath = [mainBundle pathForResource:libraryName ofType:@""];
       if (libraryPath.length > 0) {
-        settings.application_library_path =
-            [NSBundle bundleWithPath:libraryPath].executablePath.UTF8String;
+        NSString* executablePath = [NSBundle bundleWithPath:libraryPath].executablePath;
+        if (executablePath.length > 0) {
+          settings.application_library_path = executablePath.UTF8String;
+        }
       }
     }
 
@@ -84,8 +86,11 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
       NSString* applicationFrameworkPath =
           [mainBundle pathForResource:@"Frameworks/App.framework" ofType:@""];
       if (applicationFrameworkPath.length > 0) {
-        settings.application_library_path =
-            [NSBundle bundleWithPath:applicationFrameworkPath].executablePath.UTF8String;
+        NSString* executablePath =
+            [NSBundle bundleWithPath:applicationFrameworkPath].executablePath;
+        if (executablePath.length > 0) {
+          settings.application_library_path = executablePath.UTF8String;
+        }
       }
     }
   }
