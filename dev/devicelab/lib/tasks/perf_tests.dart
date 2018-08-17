@@ -89,8 +89,6 @@ TaskFunction createBasicMaterialCompileTest() {
 
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = Duration(minutes: 5);
-
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
 
   final String testDirectory;
@@ -110,7 +108,7 @@ class StartupTest {
         '--trace-startup',
         '-d',
         deviceId,
-      ]).timeout(_startupTimeout);
+      ]);
       final Map<String, dynamic> data = json.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
 
       if (!reportMetrics)
