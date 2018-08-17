@@ -14,7 +14,7 @@ class EventPrinter extends TestWatcher {
   final StringSink _out;
 
   @override
-  void onStartedProcess(ProcessEvent event) {
+  void handleStartedProcess(ProcessEvent event) {
     _sendEvent('test.startedProcess',
         <String, dynamic>{'observatoryUri': event.observatoryUri.toString()});
   }

@@ -22,7 +22,7 @@ class CoverageCollector extends TestWatcher {
   Map<String, dynamic> _globalHitmap;
 
   @override
-  Future<void> onFinishedTest(ProcessEvent event) async {
+  Future<void> handleFinishedTest(ProcessEvent event) async {
     printTrace('test ${event.childIndex}: collecting coverage');
     await collectCoverage(event.process, event.observatoryUri);
   }
