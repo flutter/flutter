@@ -35,9 +35,10 @@ void main() {
 
   group('attached process', () {
     testUsingContext('can hot reload', () async {
-      await _flutterRun.run(withDebugger: true);
-      await _flutterAttach.attach(_flutterRun.vmServicePort);
-      await _flutterAttach.hotReload();
+      const Duration stepTimeout = Duration(seconds: 30);
+      await _flutterRun.run(withDebugger: true, stepTimeout: stepTimeout);
+      await _flutterAttach.attach(_flutterRun.vmServicePort, stepTimeout: stepTimeout);
+      await _flutterAttach.hotReload(timeout: stepTimeout);
     });
     // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
   }, timeout: const Timeout.factor(3), skip: platform.isWindows);
