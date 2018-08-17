@@ -157,18 +157,41 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (ValidatorTask validatorTask in startValidatorTasks()) {
+    List<ValidatorTask> taskList = startValidatorTasks();
+
+    Set<ValidatorCategory> finishedGroups = new Set();
+    for (ValidatorTask validatorTask in taskList) {
       final DoctorValidator validator = validatorTask.validator;
+      final ValidatorCategory currentCategory = validator.category;
       final Status status = new Status.withSpinner();
-      try {
-        await validatorTask.result;
-      } catch (exception) {
-        status.cancel();
-        rethrow;
+      ValidationResult result;
+
+      if (currentCategory.isGrouped) {
+        if(finishedGroups.contains(currentCategory)) {
+          continue;
+        }
+
+        final List<ValidationResult> results = [];
+        for (ValidatorTask subValidator in taskList.where(
+                (ValidatorTask t) => t.validator.category == currentCategory)) {
+          try {
+            results.add(await subValidator.result);
+          } catch (exception) {
+            status.cancel();
+            rethrow;
+          }
+        }
+       result = _mergeValidationResults(results);
+      } else {
+        try {
+          result = await validatorTask.result;
+        } catch (exception) {
+          status.cancel();
+          rethrow;
+        }
       }
       status.stop();
 
-      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -209,6 +232,22 @@ class Doctor {
     return doctorResult;
   }
 
+  ValidationResult _mergeValidationResults(List<ValidationResult> results) {
+    ValidationType mergedType = results[0].type;
+    final List<ValidationMessage> mergedMessages = [];
+
+    for (ValidationResult result in results) {
+      if (mergedType == ValidationType.installed &&
+          result.type != ValidationType.installed) {
+        mergedType = ValidationType.partial;
+      }
+      mergedMessages.addAll(result.messages);
+    }
+
+    return new ValidationResult(mergedType, mergedMessages,
+        statusInfo: results[0].statusInfo);
+  }
+
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
   bool get canLaunchAnything {
@@ -216,7 +255,10 @@ class Doctor {
       return true;
     return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
   }
+
+
 }
+
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
 abstract class Workflow {
@@ -240,20 +282,28 @@ enum ValidationType {
 }
 
 /// Validator output is grouped by category.
-enum ValidatorCategory {
-  android,
-  ios,
-  flutter,
-  ide,
-  device,
-  unassigned
+class ValidatorCategory {
+  final String name;
+  // Whether we should bundle results for validators sharing this cateogry,
+  // or let each stand alone.
+  final bool isGrouped;
+  const ValidatorCategory(this.name, this.isGrouped);
+
+  static const ValidatorCategory androidToolchain = ValidatorCategory("androidToolchain", false);
+  static const ValidatorCategory androidStudio = ValidatorCategory("androidStudio", false);
+  static const ValidatorCategory ios = ValidatorCategory("ios", false);
+  static const ValidatorCategory flutter = ValidatorCategory("flutter", false);
+  static const ValidatorCategory ide = ValidatorCategory("flutter", false);
+  static const ValidatorCategory device = ValidatorCategory("flutter", false);
+  static const ValidatorCategory unassigned = ValidatorCategory("unassigned", false);
 }
 
 abstract class DoctorValidator {
-  const DoctorValidator(this.title, [this.category = ValidatorCategory.unassigned]);
+  const DoctorValidator(this.title, [this.category = ValidatorCategory.unassigned, this.hasChildren = false]);
 
   final String title;
   final ValidatorCategory category;
+  final bool hasChildren;
 
   Future<ValidationResult> validate();
 }
