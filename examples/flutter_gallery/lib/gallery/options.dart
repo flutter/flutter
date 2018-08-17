@@ -115,11 +115,12 @@ class _OptionsItem extends StatelessWidget {
 }
 
 class _BooleanItem extends StatelessWidget {
-  const _BooleanItem(this.title, this.value, this.onChanged, {this.switchKey});
+  const _BooleanItem(this.title, this.value, this.onChanged, { this.switchKey });
 
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
+  // [switchKey] is used for accessing the switch from driver tests.
   final Key switchKey;
 
   @override
