@@ -48,7 +48,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
-    ShapeBorder border,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   }) {
@@ -60,7 +60,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
-      border: border,
+      customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
     );
@@ -117,14 +117,14 @@ class InkRipple extends InteractiveInkFeature {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
-    ShapeBorder border,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(position != null),
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
-       _border = border,
+       _customBorder = customBorder,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
@@ -176,7 +176,7 @@ class InkRipple extends InteractiveInkFeature {
 
   final Offset _position;
   final BorderRadius _borderRadius;
-  final ShapeBorder _border;
+  final ShapeBorder _customBorder;
   final double _targetRadius;
   final RectCallback _clipCallback;
 
@@ -244,8 +244,8 @@ class InkRipple extends InteractiveInkFeature {
     }
     if (_clipCallback != null) {
       final Rect rect = _clipCallback();
-      if (_border != null) {
-        canvas.clipPath(_border.getOuterPath(rect));
+      if (_customBorder != null) {
+        canvas.clipPath(_customBorder.getOuterPath(rect));
       } else if (_borderRadius != BorderRadius.zero) {
         canvas.clipRRect(new RRect.fromRectAndCorners(
           rect,
