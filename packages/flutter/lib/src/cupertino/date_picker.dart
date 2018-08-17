@@ -41,7 +41,6 @@ Widget _buildColumn(
       child: new Container(
         width: childWidth,
         alignment: childAlign,
-        decoration: BoxDecoration(border: Border.all()),
         padding: childPadding,
         child: child,
       ),
@@ -189,7 +188,6 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-    assert(localizations != null, "No cupertino localization is found.");
 
     return new Semantics(
       child: new Stack(
@@ -288,6 +286,8 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
+    assert(CupertinoLocalizations.of(context) != null, 'No cupertino localization is found.');
+
     return new MediaQuery(
       data: const MediaQueryData(
         // The iOS picker's text scaling is fixed, so we will also fix it in
