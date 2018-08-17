@@ -100,30 +100,28 @@ class InkHighlight extends InteractiveInkFeature {
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
     assert(_shape != null);
-    Path highlightPath = new Path();
+    canvas.save();
+    if (_border != null) {
+      canvas.clipPath(_border.getOuterPath(rect));
+    }
     switch (_shape) {
       case BoxShape.circle:
-        highlightPath.addOval(Rect.fromCircle(center: rect.center, radius: Material.defaultSplashRadius));
+        canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
         break;
       case BoxShape.rectangle:
-        highlightPath.addRect(rect);
+        if (_borderRadius != BorderRadius.zero) {
+          final RRect clipRRect = new RRect.fromRectAndCorners(
+            rect,
+            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+          );
+          canvas.drawRRect(clipRRect, paint);
+        } else {
+          canvas.drawRect(rect, paint);
+        }
         break;
     }
-    Path clipPath;
-    if (_border != null) {
-      clipPath = _border.getOuterPath(rect);
-    } if (_borderRadius != BorderRadius.zero) {
-      final RRect clipRRect = new RRect.fromRectAndCorners(
-        rect,
-        topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-        bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
-      );
-      clipPath = new Path()..addRRect(clipRRect);
-    }
-    if (clipPath != null) {
-      highlightPath = Path.combine(PathOperation.intersect, highlightPath, clipPath);
-    }
-    canvas.drawPath(highlightPath, paint);
+    canvas.restore();
   }
 
   @override

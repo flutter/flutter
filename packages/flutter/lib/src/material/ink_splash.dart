@@ -203,25 +203,21 @@ class InkSplash extends InteractiveInkFeature {
     } else {
       canvas.translate(originOffset.dx, originOffset.dy);
     }
-    Path path = new Path();
-    path.addOval(Rect.fromCircle(center: center, radius: _radius.value));
     if (_clipCallback != null) {
       final Rect rect = _clipCallback();
-      Path clipPath;
       if (_border != null) {
-        clipPath = _border.getOuterPath(rect);
+        canvas.clipPath(_border.getOuterPath(rect));
       } else if (_borderRadius != BorderRadius.zero) {
-        clipPath = new Path()..addRRect(new RRect.fromRectAndCorners(
+        canvas.clipRRect(new RRect.fromRectAndCorners(
           rect,
           topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
           bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
         ));
       } else {
-        clipPath = new Path()..addRect(rect);
+        canvas.clipRect(rect);
       }
-      path = Path.combine(PathOperation.intersect, path, clipPath);
     }
-    canvas.drawPath(path, paint);
+    canvas.drawCircle(center, _radius.value, paint);
     canvas.restore();
   }
 }
