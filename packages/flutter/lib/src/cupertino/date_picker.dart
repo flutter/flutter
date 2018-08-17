@@ -131,7 +131,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     );
   }
 
-  // Builds an extendable column. The padding parameter describes how this 
+  // Builds an extendable column. The padding parameter describes how this
   // column is padded inside its parent, and the align parameter describes how
   // this column's child is aligned.
   Widget _extendableColumn(Widget child, Alignment align, EdgeInsets padding) {
