@@ -20,11 +20,11 @@ void main() {
 
   setUp(() {
     FlutterCommandRunner.initFlutterRoot();
-    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
   tearDown(() {
-    tempDir?.deleteSync(recursive: true);
+    tryToDelete(tempDir);
     return server?.dispose();
   });
 

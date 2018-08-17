@@ -19,19 +19,14 @@ void main() {
   Directory oldCurrentDir;
 
   setUp(() async {
-    tempDir = await fs.systemTempDirectory.createTemp('flutter_tester_device');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tester_device_test.');
     oldCurrentDir = fs.currentDirectory;
     fs.currentDirectory = tempDir;
   });
 
   tearDown(() {
     fs.currentDirectory = oldCurrentDir;
-    try {
-      tempDir?.deleteSync(recursive: true);
-      tempDir = null;
-    } catch (e) {
-      // Ignored.
-    }
+    tryToDelete(tempDir);
   });
 
   group('FlutterTesterDevice', () {

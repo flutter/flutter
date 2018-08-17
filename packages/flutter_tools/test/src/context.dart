@@ -48,13 +48,16 @@ void testUsingContext(String description, dynamic testMethod(), {
   // leak a sticky $HOME/.flutter_settings behind!
   Directory configDir;
   tearDown(() {
-    configDir?.deleteSync(recursive: true);
-    configDir = null;
+    if (configDir != null) {
+      tryToDelete(configDir);
+      configDir = null;
+    }
   });
   Config buildConfig(FileSystem fs) {
-    configDir = fs.systemTempDirectory.createTempSync('config-dir');
+    configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     final File settingsFile = fs.file(
-        fs.path.join(configDir.path, '.flutter_settings'));
+      fs.path.join(configDir.path, '.flutter_settings')
+    );
     return new Config(settingsFile);
   }
 

@@ -534,6 +534,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onPaste,
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
+    this.onMoveCursorForwardByWord,
+    this.onMoveCursorBackwardByWord,
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
@@ -903,6 +905,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  final MoveCursorHandler onMoveCursorForwardByWord;
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  final MoveCursorHandler onMoveCursorBackwardByWord;
 
   /// The handler for [SemanticsAction.setSelection].
   ///
@@ -2723,6 +2743,44 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler _onMoveCursorForwardByWord;
+  set onMoveCursorForwardByWord(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler _onMoveCursorBackwardByWord;
+  set onMoveCursorBackwardByWord(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);

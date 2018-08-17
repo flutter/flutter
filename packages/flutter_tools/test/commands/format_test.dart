@@ -12,19 +12,19 @@ import '../src/context.dart';
 
 void main() {
   group('format', () {
-    Directory temp;
+    Directory tempDir;
 
     setUp(() {
       Cache.disableLocking();
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('a file', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
 
       final File srcFile = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
       final String original = srcFile.readAsStringSync();
@@ -39,7 +39,7 @@ void main() {
     });
 
     testUsingContext('dry-run', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
 
       final File srcFile = fs.file(
           fs.path.join(projectPath, 'lib', 'main.dart'));
@@ -56,7 +56,7 @@ void main() {
     });
 
     testUsingContext('dry-run with set-exit-if-changed', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
 
       final File srcFile = fs.file(
           fs.path.join(projectPath, 'lib', 'main.dart'));

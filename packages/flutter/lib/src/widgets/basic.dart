@@ -5335,6 +5335,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
+      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
@@ -5397,6 +5399,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
+      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
       ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus

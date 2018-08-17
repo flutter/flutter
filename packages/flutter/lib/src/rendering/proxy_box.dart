@@ -3266,6 +3266,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onPaste,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    MoveCursorHandler onMoveCursorForwardByWord,
+    MoveCursorHandler onMoveCursorBackwardByWord,
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
@@ -3311,6 +3313,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onPaste = onPaste,
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
+       _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
+       _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
@@ -3899,6 +3903,42 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler _onMoveCursorForwardByWord;
+  set onMoveCursorForwardByWord(MoveCursorHandler handler) {
+    if (_onMoveCursorForwardByWord == handler)
+      return;
+    final bool hadValue = _onMoveCursorForwardByWord != null;
+    _onMoveCursorForwardByWord = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler _onMoveCursorBackwardByWord;
+  set onMoveCursorBackwardByWord(MoveCursorHandler handler) {
+    if (_onMoveCursorBackwardByWord == handler)
+      return;
+    final bool hadValue = _onMoveCursorBackwardByWord != null;
+    _onMoveCursorBackwardByWord = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.setSelection].
   ///
   /// This handler is invoked when the user either wants to change the currently
@@ -4086,6 +4126,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
     if (onMoveCursorBackwardByCharacter != null)
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
+    if (onMoveCursorForwardByWord != null)
+      config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
+    if (onMoveCursorBackwardByWord != null)
+      config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
     if (onDidGainAccessibilityFocus != null)
@@ -4164,6 +4208,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
     if (onMoveCursorBackwardByCharacter != null)
       onMoveCursorBackwardByCharacter(extendSelection);
+  }
+
+  void _performMoveCursorForwardByWord(bool extendSelection) {
+    if (onMoveCursorForwardByWord != null)
+      onMoveCursorForwardByWord(extendSelection);
+  }
+
+  void _performMoveCursorBackwardByWord(bool extendSelection) {
+    if (onMoveCursorBackwardByWord != null)
+      onMoveCursorBackwardByWord(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {

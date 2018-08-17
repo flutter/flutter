@@ -100,13 +100,13 @@ const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
 Future<Null> main(List<String> arguments) async {
-  final Directory temp = Directory.systemTemp.createTempSync('analyze_sample_code_');
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
   int exitCode = 1;
   bool keepMain = false;
   final List<String> buffer = <String>[];
   try {
-    final File mainDart = new File(path.join(temp.path, 'main.dart'));
-    final File pubSpec = new File(path.join(temp.path, 'pubspec.yaml'));
+    final File mainDart = new File(path.join(tempDir.path, 'main.dart'));
+    final File pubSpec = new File(path.join(tempDir.path, 'pubspec.yaml'));
     Directory flutterPackage;
     if (arguments.length == 1) {
       // Used for testing.
@@ -217,7 +217,7 @@ dependencies:
     final Process process = await Process.start(
       _flutter,
       <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
-      workingDirectory: temp.path,
+      workingDirectory: tempDir.path,
     );
     final List<String> errors = <String>[];
     errors.addAll(await process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
@@ -289,7 +289,7 @@ dependencies:
       print('No errors!');
   } finally {
     if (keepMain) {
-      print('Kept ${temp.path} because it had errors (see above).');
+      print('Kept ${tempDir.path} because it had errors (see above).');
       print('-------8<-------');
       int number = 1;
       for (String line in buffer) {
@@ -299,10 +299,9 @@ dependencies:
       print('-------8<-------');
     } else {
       try {
-        temp.deleteSync(recursive: true);
+        tempDir.deleteSync(recursive: true);
       } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
+        print('Failed to delete ${tempDir.path}: $e');
       }
     }
   }
