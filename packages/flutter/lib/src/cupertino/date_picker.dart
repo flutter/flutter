@@ -165,7 +165,6 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
                   ? const EdgeInsets.only(right: _kPickerWidth / 6)
                   : const EdgeInsets.only(left: _kPickerWidth / 6),
                 new Text(localizations.number(index)),
-//                new Text(index.toString()),
                 _kPickerWidth / 6,
                 Alignment(1.0 * textDirectionFactor, 0.0),
                 const EdgeInsets.symmetric(horizontal: 2.0),
@@ -175,7 +174,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
           _buildColumn(
             Alignment(1.0 * textDirectionFactor, 0.0),
             null,
-            textLabel('hours'), // Needs l10n when possible.
+            textLabel(localizations.hourLabel),
             _kPickerWidth / 6,
             Alignment(-1.0 * textDirectionFactor, 0.0),
             const EdgeInsets.symmetric(horizontal: 2.0),
@@ -188,6 +187,9 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
   Widget buildMinutePicker(BuildContext context) {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    assert(localizations != null, "No cupertino localization is found.");
 
     return new Semantics(
       child: new Stack(
@@ -212,7 +214,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
               return _buildColumn(
                 Alignment(-1.0 * textDirectionFactor, 0.0),
                 null,
-                new Text(minutes.toString()), // Needs l10n when possible.
+                new Text(localizations.number(minutes)),
                 _kPickerWidth / 6,
                 Alignment(1.0 * textDirectionFactor, 0.0),
                 const EdgeInsets.symmetric(horizontal: 2.0),
@@ -222,7 +224,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
           _buildColumn(
             Alignment(1.0 * textDirectionFactor, 0.0),
             null,
-            textLabel('min'), // Needs l10n when possible.
+            textLabel(localizations.minuteLabel),
             _kPickerWidth / 6,
             Alignment(-1.0 * textDirectionFactor, 0.0),
             const EdgeInsets.symmetric(horizontal: 2.0),
@@ -234,7 +236,9 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
 
   Widget buildSecondPicker(BuildContext context) {
     final int textDirectionFactor =
-    Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+      Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     return new Semantics(
       child: new Stack(
@@ -259,7 +263,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
               return _buildColumn(
                 Alignment(-1.0 * textDirectionFactor, 0.0),
                 null,
-                new Text(seconds.toString()), // Needs l10n when possible.
+                new Text(localizations.number(seconds)),
                 _kPickerWidth / 6,
                 Alignment(1.0 * textDirectionFactor, 0.0),
                 const EdgeInsets.symmetric(horizontal: 2.0),
@@ -272,7 +276,7 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
             textDirectionFactor == 1
               ? const EdgeInsets.only(left: _kPickerWidth / 6)
               : const EdgeInsets.only(right: _kPickerWidth / 6),
-            textLabel('sec'), // Needs l10n when possible.
+            textLabel(localizations.secondLabel),
             _kPickerWidth / 6,
             Alignment(-1.0 * textDirectionFactor, 0.0),
             const EdgeInsets.symmetric(horizontal: 2.0),
