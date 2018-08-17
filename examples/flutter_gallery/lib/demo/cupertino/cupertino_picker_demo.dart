@@ -102,13 +102,16 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               Localizations.override(
                 context: context,
                 delegates: const <LocalizationsDelegate<CupertinoLocalizations>>[DefaultCupertinoLocalizations.delegate],
-                child: CupertinoCountdownTimerPicker(
-                  initialTimerDuration: timer,
-                  onTimerDurationChanged: (Duration newTimer) {
-                    setState(() {
-                      timer = newTimer;
-                    });
-                  },
+                child: Directionality(
+                  textDirection: Directionality.of(context),
+                  child: CupertinoCountdownTimerPicker(
+                    initialTimerDuration: timer,
+                    onTimerDurationChanged: (Duration newTimer) {
+                      setState(() {
+                        timer = newTimer;
+                      });
+                    },
+                  ),
                 ),
               ),
             );
