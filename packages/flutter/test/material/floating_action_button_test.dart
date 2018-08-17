@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -407,5 +408,34 @@ void main() {
     expect(longFAB, findsOneWidget);
     expect(shortFAB, findsNothing);
     expect(helloWorld, findsOneWidget);
+  });
+
+  // This test prevents https://github.com/flutter/flutter/issues/20483
+  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Center(
+            child: new RepaintBoundary(
+              key: key,
+              child: new FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.press(find.byKey(key));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('floating_action_button_test.clip.1.png'),
+      skip: !Platform.isLinux,
+    );
   });
 }
