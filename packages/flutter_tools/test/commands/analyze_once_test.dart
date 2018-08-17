@@ -28,18 +28,13 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
       projectPath = fs.path.join(tempDir.path, 'flutter_project');
       libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
     });
 
     tearDownAll(() {
-      try {
-        tempDir?.deleteSync(recursive: true);
-      } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
-      }
+      tryToDelete(tempDir);
     });
 
     // Create a project to be analyzed
@@ -134,7 +129,7 @@ void main() {
     }, timeout: allowForSlowAnalyzeTests);
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
 
       try {
         final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
@@ -163,7 +158,7 @@ void bar() {
           toolExit: true,
         );
       } finally {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
       }
     });
 
@@ -171,7 +166,7 @@ void bar() {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync();
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
@@ -180,7 +175,7 @@ StringBuffer bar = StringBuffer('baz');
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
       }
     });
   });

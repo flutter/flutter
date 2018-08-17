@@ -136,7 +136,7 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
         final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
         final ProcessResult result = processManager.runSync(<String>[

@@ -22,6 +22,17 @@ export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'pa
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
 Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
+void tryToDelete(Directory directory) {
+  // This should not be necessary, but it turns out that
+  // on Windows it's common for deletions to fail due to
+  // bogus (we think) "access denied" errors.
+  try {
+    directory.deleteSync(recursive: true);
+  } on FileSystemException catch (error) {
+    print('Failed to delete ${directory.path}: $error');
+  }
+}
+
 /// Gets the path to the root of the Flutter repository.
 ///
 /// This will first look for a `FLUTTER_ROOT` environment variable. If the
