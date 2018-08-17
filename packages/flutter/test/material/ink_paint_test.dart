@@ -103,13 +103,14 @@ void main() {
           if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
             return true;
           throw '''
-          Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
-          Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+            Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
+            Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
         }
       );
     }
 
-    // Initially the ripple's center is where the tap occurred,
+    // Initially the ripple's center is where the tap occurred. Note that
+    // ripplePattern always add a translation of tapDownOffset.
     expect(box, ripplePattern(Offset.zero, 30.0, 0));
 
     // The ripple fades in for 75ms. During that time its alpha is eased from
