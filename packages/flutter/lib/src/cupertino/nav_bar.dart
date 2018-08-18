@@ -115,6 +115,12 @@ Widget _wrapWithBackground({
   );
 }
 
+bool _isTransitionable(BuildContext context) {
+  final ModalRoute route = ModalRoute.of(context);
+
+  return route is PageRoute && !route.fullscreenDialog;
+}
+
 /// An iOS-styled navigation bar.
 ///
 /// The navigation bar is a toolbar that minimally consists of a widget, normally
@@ -336,7 +342,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       ),
     );
 
-    if (!widget.transitionBetweenRoutes) {
+    if (!widget.transitionBetweenRoutes || !_isTransitionable(context)) {
       return navBar;
     }
 
@@ -662,7 +668,7 @@ class _LargeTitleNavigationBarSliverDelegate
       ),
     );
 
-    if (!transitionBetweenRoutes) {
+    if (!transitionBetweenRoutes || !_isTransitionable(context)) {
       return navBar;
     }
 
