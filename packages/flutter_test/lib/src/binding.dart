@@ -1029,9 +1029,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   int get microtaskCount {
-    // Unsupported until we have a wrapper around the real async API
-    // https://github.com/flutter/flutter/issues/4637
-    assert(false);
+    // The Dart SDK doesn't report this number.
+    assert(false, 'microtaskCount cannot be reported when running in real time');
     return -1;
   }
 

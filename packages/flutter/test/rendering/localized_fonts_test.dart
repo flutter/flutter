@@ -52,7 +52,6 @@ void main() {
       await expectLater(
         find.byType(RichText),
         matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
-        skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,
@@ -105,7 +104,6 @@ void main() {
       await expectLater(
         find.byType(Row),
         matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
-        skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,
@@ -150,7 +148,6 @@ void main() {
       await expectLater(
         find.byType(Row),
         matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
-        skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,
