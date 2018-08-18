@@ -206,6 +206,8 @@ class _Compiler {
         .createTempSync('flutter_test_compiler.');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
+    printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
+
     bool suppressOutput = false;
     void reportCompilerMessage(String message) {
       if (suppressOutput)
@@ -230,6 +232,7 @@ class _Compiler {
       );
     }
 
+    printTrace('Listening to compiler controller...');
     compilerController.stream.listen((_CompilationRequest request) async {
       final bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
@@ -240,6 +243,7 @@ class _Compiler {
         while (compilationQueue.isNotEmpty) {
           final _CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
+          final Stopwatch compilerTime = new Stopwatch()..start();
           compiler ??= createCompiler();
           suppressOutput = false;
           final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
@@ -256,7 +260,7 @@ class _Compiler {
           // a weird state.
           if (outputPath == null || compilerOutput.errorCount > 0) {
             request.result.complete(null);
-            await shutdown();
+            await _shutdown();
           } else {
             final File kernelReadyToRun =
                 await fs.file(outputPath).copy('${request.path}.dill');
@@ -264,11 +268,13 @@ class _Compiler {
             compiler.accept();
             compiler.reset();
           }
+          printTrace('Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
           // Only remove now when we finished processing the element
           compilationQueue.removeAt(0);
         }
       }
     }, onDone: () {
+      printTrace('Deleting ${outputDillDirectory.path}...');
       outputDillDirectory.deleteSync(recursive: true);
     });
   }
@@ -284,13 +290,18 @@ class _Compiler {
     return handleTimeout<String>(completer.future, mainDart);
   }
 
-  Future<dynamic> shutdown() async {
+  Future<void> _shutdown() async {
     // Check for null in case this instance is shut down before the
     // lazily-created compiler has been created.
     if (compiler != null) {
       await compiler.shutdown();
       compiler = null;
     }
+  }
+
+  Future<void> dispose() async {
+    await _shutdown();
+    await compilerController.close();
   }
 
   static Future<T> handleTimeout<T>(Future<T> value, String path) {
@@ -330,6 +341,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool trackWidgetCreation;
   final bool updateGoldens;
 
+  Directory fontsDirectory;
   _Compiler compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
@@ -740,8 +752,13 @@ class _FlutterPlatform extends PlatformPlugin {
   @override
   Future<dynamic> close() async {
     if (compiler != null) {
-      await compiler.shutdown();
+      await compiler.dispose();
       compiler = null;
+    }
+    if (fontsDirectory != null) {
+      printTrace('Deleting ${fontsDirectory.path}...');
+      fontsDirectory.deleteSync(recursive: true);
+      fontsDirectory = null;
     }
   }
 
@@ -757,8 +774,12 @@ class _FlutterPlatform extends PlatformPlugin {
     sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
     sb.writeln('</fontconfig>');
 
-    final Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
-    _cachedFontConfig = fs.file('${fontsDir.path}/fonts.conf');
+    if (fontsDirectory == null) {
+      fontsDirectory = fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
+      printTrace('Using this directory for fonts configuration: ${fontsDirectory.path}');
+    }
+
+    _cachedFontConfig = fs.file('${fontsDirectory.path}/fonts.conf');
     _cachedFontConfig.createSync();
     _cachedFontConfig.writeAsStringSync(sb.toString());
     return _cachedFontConfig;
