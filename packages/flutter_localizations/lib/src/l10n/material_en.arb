@@ -235,5 +235,15 @@
   "reorderItemRight": "Move right",
   "@reorderItemRight": {
     "description": "The audio announcement to move an item in a Reorderable List right in the list when it is oriented horizontally."
+  },
+
+  "expandedIconTapHint": "Collapse",
+  "@expandedIconTapHint": {
+    "description": "The verb infinitive which describes what happens when an expanded ExpandIcon is activated."
+  },
+
+  "collapsedIconTapHint": "Expand",
+  "@collapsedIconTapHint": {
+    "description": "The verb infinitive which describes what happens when a collapsed ExpandIcon is activated."
   }
 }
