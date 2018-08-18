@@ -72,7 +72,7 @@ class VirtualDisplayController {
     }
 
     public void resize(final int width, final int height, final Runnable onNewSizeFrameAvailable) {
-        final PlatformView view = mPresentation.detachView();
+        final SingleViewPresentation.PresentationState presentationState = mPresentation.detachState();
         // We detach the surface to prevent it being destroyed when releasing the vd.
         //
         // setSurface is only available starting API 20. We could support API 19 by re-creating a new
@@ -118,18 +118,21 @@ class VirtualDisplayController {
             public void onViewDetachedFromWindow(View v) {}
         });
 
-        mPresentation = new SingleViewPresentation(mContext, mVirtualDisplay.getDisplay(), view);
+        mPresentation = new SingleViewPresentation(mContext, mVirtualDisplay.getDisplay(), presentationState);
         mPresentation.show();
     }
 
     public void dispose() {
-        mPresentation.detachView().dispose();
+        PlatformView view = mPresentation.getView();
+        mPresentation.detachState();
+        view.dispose();
         mVirtualDisplay.release();
     }
 
     public View getView() {
         if (mPresentation == null)
             return null;
-        return mPresentation.getView();
+        PlatformView platformView = mPresentation.getView();
+        return platformView.getView();
     }
 }
