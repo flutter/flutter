@@ -4120,6 +4120,184 @@ const Map<String, dynamic> dateSymbols = <String, dynamic>{
       r'''{1} {0}'''
     ],
   },
+  'km': <String, dynamic>{
+    'NAME': r'''km''',
+    'ERAS': <dynamic>[r'''BC''', r'''AD'''],
+    'ERANAMES': <dynamic>[r'''មុនគ្រិស្តសករាជ''', r'''ក្រោយគ្រិស្តសករាជ'''],
+    'NARROWMONTHS': <dynamic>[
+      r'''J''',
+      r'''F''',
+      r'''M''',
+      r'''A''',
+      r'''M''',
+      r'''J''',
+      r'''J''',
+      r'''A''',
+      r'''S''',
+      r'''O''',
+      r'''N''',
+      r'''D'''
+    ],
+    'STANDALONENARROWMONTHS': <dynamic>[
+      r'''J''',
+      r'''F''',
+      r'''M''',
+      r'''A''',
+      r'''M''',
+      r'''J''',
+      r'''J''',
+      r'''A''',
+      r'''S''',
+      r'''O''',
+      r'''N''',
+      r'''D'''
+    ],
+    'MONTHS': <dynamic>[
+      r'''ខែមករា''',
+      r'''ខែកុម្ភះ''',
+      r'''ខែមីនា''',
+      r'''ខែមេសា''',
+      r'''ខែឧសភា''',
+      r'''ខែមិថុនា''',
+      r'''ខែកក្កដា''',
+      r'''ខែសីហា''',
+      r'''ខែកញ្ញា''',
+      r'''ខែតុលា''',
+      r'''ខែវិច្ឆិកា''',
+      r'''ខែធ្នូ'''
+    ],
+    'STANDALONEMONTHS': <dynamic>[
+      r'''ខែមករា''',
+      r'''ខែកុម្ភះ''',
+      r'''ខែមីនា''',
+      r'''ខែមេសា''',
+      r'''ខែឧសភា''',
+      r'''ខែមិថុនា''',
+      r'''ខែកក្កដា''',
+      r'''ខែសីហា''',
+      r'''ខែកញ្ញា''',
+      r'''ខែតុលា''',
+      r'''ខែវិច្ឆិកា''',
+      r'''ខែធ្នូ'''
+    ],
+    'SHORTMONTHS': <dynamic>[
+      r'''មករា''',
+      r'''កុម្ភះ''',
+      r'''មីនា''',
+      r'''មេសា''',
+      r'''ឧសភា''',
+      r'''មិថុនា''',
+      r'''កក្កដា''',
+      r'''សីហា''',
+      r'''កញ្ញា''',
+      r'''តុលា''',
+      r'''វិច្ឆិកា''',
+      r'''ធ្នូ'''
+    ],
+    'STANDALONESHORTMONTHS': <dynamic>[
+      r'''មករា''',
+      r'''កុម្ភះ''',
+      r'''មីនា''',
+      r'''មេសា''',
+      r'''ឧសភា''',
+      r'''មិថុនា''',
+      r'''កក្កដា''',
+      r'''សីហា''',
+      r'''កញ្ញា''',
+      r'''តុលា''',
+      r'''វិច្ឆិកា''',
+      r'''ធ្នូ'''
+    ],
+    'WEEKDAYS': <dynamic>[
+      r'''ថ្ងៃអាទិត្យ''',
+      r'''ថ្ងៃចន្ទ''',
+      r'''ថ្ងៃអង្គារ''',
+      r'''ថ្ងៃពុធ''',
+      r'''ថ្ងៃព្រហស្បតិ៍''',
+      r'''ថ្ងៃសុក្រ''',
+      r'''ថ្ងៃសៅរ៍'''
+    ],
+    'STANDALONEWEEKDAYS': <dynamic>[
+      r'''ថ្ងៃអាទិត្យ''',
+      r'''ថ្ងៃចន្ទ''',
+      r'''ថ្ងៃអង្គារ''',
+      r'''ថ្ងៃពុធ''',
+      r'''ថ្ងៃព្រហស្បតិ៍''',
+      r'''ថ្ងៃសុក្រ''',
+      r'''ថ្ងៃសៅរ៍'''
+    ],
+    'SHORTWEEKDAYS': <dynamic>[
+      r'''អាទិត្យ''',
+      r'''ចន្ទ''',
+      r'''អង្គារ''',
+      r'''ពុធ''',
+      r'''ព្រហស្បតិ៍''',
+      r'''សុក្រ''',
+      r'''សៅរ៍'''
+    ],
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
+      r'''អាទិត្យ''',
+      r'''ចន្ទ''',
+      r'''អង្គារ''',
+      r'''ពុធ''',
+      r'''ព្រហស្បតិ៍''',
+      r'''សុក្រ''',
+      r'''សៅរ៍'''
+    ],
+    'NARROWWEEKDAYS': <dynamic>[
+      r'''S''',
+      r'''M''',
+      r'''T''',
+      r'''W''',
+      r'''T''',
+      r'''F''',
+      r'''S'''
+    ],
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
+      r'''S''',
+      r'''M''',
+      r'''T''',
+      r'''W''',
+      r'''T''',
+      r'''F''',
+      r'''S'''
+    ],
+    'SHORTQUARTERS': <dynamic>[
+      r'''Q1''',
+      r'''Q2''',
+      r'''Q3''',
+      r'''Q4'''
+    ],
+    'QUARTERS': <dynamic>[
+      r'''1st quarter''',
+      r'''2nd quarter''',
+      r'''3rd quarter''',
+      r'''4th quarter'''
+    ],
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
+      r'''EEEE, MMMM d, y''',
+      r'''MMMM d, y''',
+      r'''MMM d, y''',
+      r'''M/d/yy'''
+    ],
+    'TIMEFORMATS': <dynamic>[
+      r'''h:mm:ss a zzzz''',
+      r'''h:mm:ss a z''',
+      r'''h:mm:ss a''',
+      r'''h:mm a'''
+    ],
+    'AVAILABLEFORMATS': null,
+    'FIRSTDAYOFWEEK': 6,
+    'WEEKENDRANGE': <dynamic>[5, 6],
+    'FIRSTWEEKCUTOFFDAY': 5,
+    'DATETIMEFORMATS': <dynamic>[
+      r"""{1} 'at' {0}""",
+      r"""{1} 'at' {0}""",
+      r'''{1}, {0}''',
+      r'''{1}, {0}'''
+    ],
+  },
   'ko': <String, dynamic>{
     'NAME': r'''ko''',
     'ERAS': <dynamic>[r'''BC''', r'''AD'''],

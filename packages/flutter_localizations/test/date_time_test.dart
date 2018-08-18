@@ -105,6 +105,7 @@ void main() {
 
         expect(await formatTimeOfDay(tester, const Locale('ja', ''), const TimeOfDay(hour: 9, minute: 32)), '9:32');
         expect(await formatTimeOfDay(tester, const Locale('ja', ''), const TimeOfDay(hour: 20, minute: 32)), '20:32');
+        expect(await formatTimeOfDay(tester, const Locale('km', ''), const TimeOfDay(hour: 23, minute: 32)), '23:32');
       });
 
       testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {

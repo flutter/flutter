@@ -5733,6 +5733,183 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ライセンスを表示';
 }
 
+/// The translations for Khmer (`km`).
+class MaterialLocalizationKm extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for English.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationKm({
+    String localeName = 'km',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'អំពី $applicationName';
+
+  @override
+  String get alertDialogLabel => r'ជូនដំណឹង';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'ត្រលប់ក្រោយ';
+
+  @override
+  String get cancelButtonLabel => r'បោះបង់';
+
+  @override
+  String get closeButtonLabel => r'បិទ';
+
+  @override
+  String get closeButtonTooltip => r'បិទ';
+
+  @override
+  String get continueButtonLabel => r'បន្ត';
+
+  @override
+  String get copyButtonLabel => r'ចម្លង';
+
+  @override
+  String get cutButtonLabel => r'កាត់';
+
+  @override
+  String get deleteButtonTooltip => r'លុប';
+
+  @override
+  String get dialogLabel => r'ប្រអប់';
+
+  @override
+  String get drawerLabel => r'ម៉ឺនុយរុករក';
+
+  @override
+  String get hideAccountsLabel => r'លាក់គណនី';
+
+  @override
+  String get licensesPageTitle => r'អាជ្ញាប័ណ្ណ';
+
+  @override
+  String get modalBarrierDismissLabel => r'បោះបង់';
+
+  @override
+  String get nextMonthTooltip => r'ខែក្រោយ';
+
+  @override
+  String get nextPageTooltip => r'ទំ​ព​រ័​បន្ទាប់';
+
+  @override
+  String get okButtonLabel => r'យល់ព្រម';
+
+  @override
+  String get openAppDrawerTooltip => r'បើកម៉ឺនុយរុករក';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow of $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow of about $rowCount';
+
+  @override
+  String get pasteButtonLabel => r'PASTE';
+
+  @override
+  String get popupMenuLabel => r'ម៉ឺនុយលេចឡើង';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'ខែមុន';
+
+  @override
+  String get previousPageTooltip => r'ទំព័រ​មុន';
+
+  @override
+  String get reorderItemDown => r'ទៅ​ក្រោម';
+
+  @override
+  String get reorderItemLeft => r'ផ្លាស់ទី​ទៅ​ឆ្វេង';
+
+  @override
+  String get reorderItemRight => r'ផ្លាស់ទីទៅស្តាំ';
+
+  @override
+  String get reorderItemToEnd => r'ផ្លាស់ទីទៅទីបញ្ចប់';
+
+  @override
+  String get reorderItemToStart => r'ផ្លាស់ទីទៅចំណុចចាប់ផ្តើម';
+
+  @override
+  String get reorderItemUp => r'ផ្លាស់ទីឡើងលើ';
+
+  @override
+  String get rowsPerPageTitle => r'ជួរដេកក្នុងមួយទំព័រ:';
+
+  @override
+  String get scriptCategory => r'English-like';
+
+  @override
+  String get searchFieldLabel => r'ស្វែងរក';
+
+  @override
+  String get selectAllButtonLabel => r'ជ្រើស​យក​ទាំងអស់';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => r'បានជ្រើស 1 ធាតុ';
+
+  @override
+  String get selectedRowCountTitleOther => r'បានជ្រើស $selectedRowCount ធាតុ';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'គ្មានធាតុត្រូវបានជ្រើស';
+
+  @override
+  String get showAccountsLabel => r'បង្ហាញគណនី';
+
+  @override
+  String get showMenuTooltip => r'បង្ហាញម៉ឺនុយ';
+
+  @override
+  String get signedInLabel => r'Signed in';
+
+  @override
+  String get tabLabelRaw => r'Tab $tabIndex of $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Select hours';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Select minutes';
+
+  @override
+  String get viewLicensesButtonLabel => r'VIEW LICENSES';
+}
+
 /// The translations for Korean (`ko`).
 class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Korean.
@@ -10115,6 +10292,7 @@ final Set<String> kSupportedLanguages = new HashSet<String>.from(const <String>[
   'id', // Indonesian
   'it', // Italian
   'ja', // Japanese
+  'km', // Khmer
   'ko', // Korean
   'lt', // Lithuanian
   'lv', // Latvian
@@ -10172,6 +10350,7 @@ final Set<String> kSupportedLanguages = new HashSet<String>.from(const <String>[
 ///  * `id` - Indonesian
 ///  * `it` - Italian
 ///  * `ja` - Japanese
+///  * `km` - Khmer
 ///  * `ko` - Korean
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian
@@ -10324,6 +10503,8 @@ GlobalMaterialLocalizations getTranslation(
       return new MaterialLocalizationIt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
       return new MaterialLocalizationJa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'km':
+      return new MaterialLocalizationKm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
       return new MaterialLocalizationKo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'lt':
