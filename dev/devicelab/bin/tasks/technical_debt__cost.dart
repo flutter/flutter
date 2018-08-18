@@ -43,51 +43,24 @@ Future<double> findCostsForFile(File file) async {
   return total;
 }
 
-Future<double> findCostsForRepo() async {
-  final Process git = await startProcess(
-    'git',
-    <String>['ls-files', '--full-name', flutterDirectory.path],
-    workingDirectory: flutterDirectory.path,
-  );
-  double total = 0.0;
-  await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
-    total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
-  final int gitExitCode = await git.exitCode;
-  if (gitExitCode != 0)
-    throw new Exception('git exit with unexpected error code $gitExitCode');
-  return total;
-}
-
-Future<int> countDependencies() async {
-  final Process subprocess = await startProcess(
-    'flutter',
-    <String>['update-packages', '--transitive-closure'],
-    workingDirectory: flutterDirectory.path,
-  );
-  final List<String> lines = await subprocess.stdout.transform(utf8.decoder).transform(const LineSplitter()).toList();
-  final int subprocessExitCode = await subprocess.exitCode;
-  if (subprocessExitCode != 0)
-    throw new Exception('flutter exit with unexpected error code $subprocessExitCode');
-  final int count = lines.where((String line) => line.contains('->')).length;
-  if (count < 2) // we'll always have flutter and flutter_test, at least...
-    throw new Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
-  return count;
-}
-
-const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
-const String _kNumberOfDependenciesKey = 'dependencies_count';
+const String _kBenchmarkKey = 'technical_debt_in_dollars';
 
 Future<Null> main() async {
   await task(() async {
+    final Process git = await startProcess(
+      'git',
+      <String>['ls-files', '--full-name', flutterDirectory.path],
+      workingDirectory: flutterDirectory.path,
+    );
+    double total = 0.0;
+    await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
+      total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
+    final int gitExitCode = await git.exitCode;
+    if (gitExitCode != 0)
+      throw new Exception('git exit with unexpected error code $gitExitCode');
     return new TaskResult.success(
-      <String, dynamic>{
-        _kCostBenchmarkKey: await findCostsForRepo(),
-        _kNumberOfDependenciesKey: await countDependencies(),
-      },
-      benchmarkScoreKeys: <String>[
-        _kCostBenchmarkKey,
-        _kNumberOfDependenciesKey,
-      ],
+      <String, dynamic>{_kBenchmarkKey: total},
+      benchmarkScoreKeys: <String>[_kBenchmarkKey],
     );
   });
 }
