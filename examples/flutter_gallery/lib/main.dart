@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'gallery/app.dart';
 
 void main() {
-  // Temporary debugging hook for https://github.com/flutter/flutter/issues/17956
+  // Temporary debugging hook for https://github.com/flutter/flutter/issues/17888
   debugInstrumentationEnabled = true;
 
   // Overriding https://github.com/flutter/flutter/issues/13736 for better

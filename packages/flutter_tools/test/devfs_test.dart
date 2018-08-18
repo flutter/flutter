@@ -196,8 +196,8 @@ void main() {
         }
         fileFilter.addAll(fs.directory(pkgUri)
             .listSync(recursive: true)
-            .where((FileSystemEntity file) => file is File)
-            .map((FileSystemEntity file) => canonicalizePath(file.path))
+            .whereType<File>()
+            .map<String>((File file) => canonicalizePath(file.path))
             .toList());
       }
       final int bytes = await devFS.update(fileFilter: fileFilter);

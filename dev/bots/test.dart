@@ -610,8 +610,8 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
     .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
     .toList()..sort();
   final List<String> directories = new Directory(srcPath).listSync()
-    .where((FileSystemEntity entity) => entity is Directory)
-    .map<String>((FileSystemEntity entity) => path.basename(entity.path))
+    .whereType<Directory>()
+    .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
   if (!_matches(packages, directories)) {
     errors.add(
