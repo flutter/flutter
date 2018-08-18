@@ -2059,9 +2059,8 @@ abstract class RenderBox extends RenderObject {
   ///   // ... handle the event ...
   /// }
   /// ```
-  // TODO(ianh): Fix the type of the argument here once https://github.com/dart-lang/sdk/issues/25232 is fixed
   @override
-  void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
   }
 

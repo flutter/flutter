@@ -53,7 +53,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 /// This class can be used as a mixin for situations where the proxying behavior
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
-// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
+// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/31543 is fixed
 @optionalTypeArgs
 abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
   // This class is intended to be used as a mixin, and should not be
@@ -3243,7 +3243,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool hidden,
     bool image,
     bool liveRegion,
-    bool isSwitch,
     String label,
     String value,
     String increasedValue,

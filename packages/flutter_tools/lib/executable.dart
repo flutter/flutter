@@ -73,7 +73,7 @@ Future<Null> main(List<String> args) async {
     new PrecacheCommand(),
     new RunCommand(verboseHelp: verboseHelp),
     new ScreenshotCommand(),
-    new ShellCompletionCommand(verboseHelp: verboseHelp),
+    new ShellCompletionCommand(),
     new StopCommand(),
     new TestCommand(verboseHelp: verboseHelp),
     new TraceCommand(),

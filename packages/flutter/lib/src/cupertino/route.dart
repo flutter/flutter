@@ -95,7 +95,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
-    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
+    // ignore: prefer_asserts_in_initializer_lists, https://github.com/dart-lang/sdk/issues/31223
     assert(opaque); // PageRoute makes it return true.
   }
 
