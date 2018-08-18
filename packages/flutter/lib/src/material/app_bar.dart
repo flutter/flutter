@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'back_button.dart';
 import 'constants.dart';
+import 'debug.dart';
 import 'flexible_space_bar.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -332,6 +333,7 @@ class _AppBarState extends State<AppBar> {
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData themeData = Theme.of(context);
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);

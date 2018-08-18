@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material_localizations.dart';
@@ -389,6 +390,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
