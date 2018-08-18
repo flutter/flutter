@@ -59,6 +59,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       new FixedExtentScrollController(initialItem: _selectedColorIndex);
     return new CupertinoPicker(
       scrollController: scrollController,
+      useMagnifier: true,
+      magnification: 1.1,
       itemExtent: _kPickerItemHeight,
       backgroundColor: CupertinoColors.white,
       onSelectedItemChanged: (int index) {
