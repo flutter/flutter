@@ -12,9 +12,20 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new Scaffold(
+    Widget boilerplate(Widget child) {
+      return new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: child,
+        ),
+      );
+    }
+    await tester.pumpWidget(boilerplate(new Scaffold(
         appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey),
       ),
@@ -30,9 +41,7 @@ void main() {
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
+    await tester.pumpWidget(boilerplate(new MediaQuery(
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: new Scaffold(
           appBar: new AppBar(title: const Text('Title')),
@@ -44,17 +53,14 @@ void main() {
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 444.0)));
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
-        child: new Scaffold(
-          appBar: new AppBar(title: const Text('Title')),
-          body: new Container(key: bodyKey),
-          resizeToAvoidBottomPadding: false,
-        ),
+    await tester.pumpWidget(boilerplate(new MediaQuery(
+      data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+      child: new Scaffold(
+        appBar: new AppBar(title: const Text('Title')),
+        body: new Container(key: bodyKey),
+        resizeToAvoidBottomPadding: false,
       ),
-    ));
+    )));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
@@ -62,24 +68,34 @@ void main() {
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(
-          viewInsets: EdgeInsets.only(bottom: 700.0),
+
+    Widget boilerplate(Widget child) {
+      return new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: child,
         ),
-        child: new Scaffold(
-          body: new Container(key: bodyKey),
-        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(new MediaQuery(
+      data: const MediaQueryData(
+        viewInsets: EdgeInsets.only(bottom: 700.0),
       ),
+      child: new Scaffold(
+        body: new Container(key: bodyKey),
+      ))
     ));
 
     final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
+    await tester.pumpWidget(boilerplate(new MediaQuery(
         data: const MediaQueryData(
           viewInsets: EdgeInsets.only(bottom: 500.0),
         ),
@@ -91,9 +107,7 @@ void main() {
 
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
+    await tester.pumpWidget(boilerplate(new MediaQuery(
         data: const MediaQueryData(
           viewInsets: EdgeInsets.only(bottom: 580.0),
         ),
@@ -597,64 +611,71 @@ void main() {
     final Key insideDrawer = new UniqueKey();
     final Key insideBottomNavigationBar = new UniqueKey();
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.rtl,
-        child: new MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.only(
-              left: 20.0,
-              top: 30.0,
-              right: 50.0,
-              bottom: 60.0,
+      new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                left: 20.0,
+                top: 30.0,
+                right: 50.0,
+                bottom: 60.0,
+              ),
+              viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
-            viewInsets: EdgeInsets.only(bottom: 200.0),
-          ),
-          child: new Scaffold(
-            appBar: new PreferredSize(
-              preferredSize: const Size(11.0, 13.0),
-              child: new Container(
-                key: appBar,
-                child: new SafeArea(
-                  child: new Placeholder(key: insideAppBar),
+            child: new Scaffold(
+              appBar: new PreferredSize(
+                preferredSize: const Size(11.0, 13.0),
+                child: new Container(
+                  key: appBar,
+                  child: new SafeArea(
+                    child: new Placeholder(key: insideAppBar),
+                  ),
                 ),
               ),
-            ),
-            body: new Container(
-              key: body,
-              child: new SafeArea(
-                child: new Placeholder(key: insideBody),
-              ),
-            ),
-            floatingActionButton: new SizedBox(
-              key: floatingActionButton,
-              width: 77.0,
-              height: 77.0,
-              child: new SafeArea(
-                child: new Placeholder(key: insideFloatingActionButton),
-              ),
-            ),
-            persistentFooterButtons: <Widget>[
-              new SizedBox(
-                key: persistentFooterButton,
-                width: 100.0,
-                height: 90.0,
+              body: new Container(
+                key: body,
                 child: new SafeArea(
-                  child: new Placeholder(key: insidePersistentFooterButton),
+                  child: new Placeholder(key: insideBody),
                 ),
               ),
-            ],
-            drawer: new Container(
-              key: drawer,
-              width: 204.0,
-              child: new SafeArea(
-                child: new Placeholder(key: insideDrawer),
+              floatingActionButton: new SizedBox(
+                key: floatingActionButton,
+                width: 77.0,
+                height: 77.0,
+                child: new SafeArea(
+                  child: new Placeholder(key: insideFloatingActionButton),
+                ),
               ),
-            ),
-            bottomNavigationBar: new SizedBox(
-              key: bottomNavigationBar,
-              height: 85.0,
-              child: new SafeArea(
-                child: new Placeholder(key: insideBottomNavigationBar),
+              persistentFooterButtons: <Widget>[
+                new SizedBox(
+                  key: persistentFooterButton,
+                  width: 100.0,
+                  height: 90.0,
+                  child: new SafeArea(
+                    child: new Placeholder(key: insidePersistentFooterButton),
+                  ),
+                ),
+              ],
+              drawer: new Container(
+                key: drawer,
+                width: 204.0,
+                child: new SafeArea(
+                  child: new Placeholder(key: insideDrawer),
+                ),
+              ),
+              bottomNavigationBar: new SizedBox(
+                key: bottomNavigationBar,
+                height: 85.0,
+                child: new SafeArea(
+                  child: new Placeholder(key: insideBottomNavigationBar),
+                ),
               ),
             ),
           ),
@@ -692,57 +713,64 @@ void main() {
     final Key insidePersistentFooterButton = new UniqueKey();
     final Key insideDrawer = new UniqueKey();
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.rtl,
-        child: new MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.only(
-              left: 20.0,
-              top: 30.0,
-              right: 50.0,
-              bottom: 60.0,
+      new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                left: 20.0,
+                top: 30.0,
+                right: 50.0,
+                bottom: 60.0,
+              ),
+              viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
-            viewInsets: EdgeInsets.only(bottom: 200.0),
-          ),
-          child: new Scaffold(
-            appBar: new PreferredSize(
-              preferredSize: const Size(11.0, 13.0),
-              child: new Container(
-                key: appBar,
-                child: new SafeArea(
-                  child: new Placeholder(key: insideAppBar),
+            child: new Scaffold(
+              appBar: new PreferredSize(
+                preferredSize: const Size(11.0, 13.0),
+                child: new Container(
+                  key: appBar,
+                  child: new SafeArea(
+                    child: new Placeholder(key: insideAppBar),
+                  ),
                 ),
               ),
-            ),
-            body: new Container(
-              key: body,
-              child: new SafeArea(
-                child: new Placeholder(key: insideBody),
-              ),
-            ),
-            floatingActionButton: new SizedBox(
-              key: floatingActionButton,
-              width: 77.0,
-              height: 77.0,
-              child: new SafeArea(
-                child: new Placeholder(key: insideFloatingActionButton),
-              ),
-            ),
-            persistentFooterButtons: <Widget>[
-              new SizedBox(
-                key: persistentFooterButton,
-                width: 100.0,
-                height: 90.0,
+              body: new Container(
+                key: body,
                 child: new SafeArea(
-                  child: new Placeholder(key: insidePersistentFooterButton),
+                  child: new Placeholder(key: insideBody),
                 ),
               ),
-            ],
-            drawer: new Container(
-              key: drawer,
-              width: 204.0,
-              child: new SafeArea(
-                child: new Placeholder(key: insideDrawer),
+              floatingActionButton: new SizedBox(
+                key: floatingActionButton,
+                width: 77.0,
+                height: 77.0,
+                child: new SafeArea(
+                  child: new Placeholder(key: insideFloatingActionButton),
+                ),
+              ),
+              persistentFooterButtons: <Widget>[
+                new SizedBox(
+                  key: persistentFooterButton,
+                  width: 100.0,
+                  height: 90.0,
+                  child: new SafeArea(
+                    child: new Placeholder(key: insidePersistentFooterButton),
+                  ),
+                ),
+              ],
+              drawer: new Container(
+                key: drawer,
+                width: 204.0,
+                child: new SafeArea(
+                  child: new Placeholder(key: insideDrawer),
+                ),
               ),
             ),
           ),

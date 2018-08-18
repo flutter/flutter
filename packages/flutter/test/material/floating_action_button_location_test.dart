@@ -243,16 +243,23 @@ Widget buildFrame({
   EdgeInsets viewInsets = const EdgeInsets.only(bottom: 200.0),
   Widget bab,
 }) {
-  return new Directionality(
-    textDirection: textDirection,
-    child: new MediaQuery(
-      data: new MediaQueryData(viewInsets: viewInsets),
-      child: new Scaffold(
-        appBar: new AppBar(title: const Text('FabLocation Test')),
-        floatingActionButtonLocation: location,
-        floatingActionButton: fab,
-        bottomNavigationBar: bab,
-        body: listener,
+  return new Localizations(
+    locale: const Locale('en', 'us'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultWidgetsLocalizations.delegate,
+      DefaultMaterialLocalizations.delegate,
+    ],
+    child: new Directionality(
+      textDirection: textDirection,
+      child: new MediaQuery(
+        data: new MediaQueryData(viewInsets: viewInsets),
+        child: new Scaffold(
+          appBar: new AppBar(title: const Text('FabLocation Test')),
+          floatingActionButtonLocation: location,
+          floatingActionButton: fab,
+          bottomNavigationBar: bab,
+          body: listener,
+        ),
       ),
     ),
   );

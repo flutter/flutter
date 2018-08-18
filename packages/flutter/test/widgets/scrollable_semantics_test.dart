@@ -105,27 +105,34 @@ void main() {
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-      data: const MediaQueryData(),
-        child: new Scrollable(
-        controller: scrollController,
-        viewportBuilder: (BuildContext context, ViewportOffset offset) {
-          return new Viewport(
-            offset: offset,
-            slivers: <Widget>[
-              const SliverAppBar(
-                pinned: true,
-                expandedHeight: kExpandedAppBarHeight,
-                flexibleSpace: FlexibleSpaceBar(
-                  title: Text('App Bar'),
-                ),
-              ),
-              new SliverList(
-                delegate: new SliverChildListDelegate(containers),
-              )
-            ],
-          );
-        }),
+      child: new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new MediaQuery(
+          data: const MediaQueryData(),
+            child: new Scrollable(
+            controller: scrollController,
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return new Viewport(
+                offset: offset,
+                slivers: <Widget>[
+                  const SliverAppBar(
+                    pinned: true,
+                    expandedHeight: kExpandedAppBarHeight,
+                    flexibleSpace: FlexibleSpaceBar(
+                      title: Text('App Bar'),
+                    ),
+                  ),
+                  new SliverList(
+                    delegate: new SliverChildListDelegate(containers),
+                  )
+                ],
+              );
+            }),
+          ),
       ),
     ));
 
@@ -169,22 +176,29 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(),
-        child: new Scrollable(
-          controller: scrollController,
-          viewportBuilder: (BuildContext context, ViewportOffset offset) {
-            return new Viewport(
-              offset: offset,
-              slivers: <Widget>[
-                const SliverAppBar(
-                  pinned: true,
-                  expandedHeight: kExpandedAppBarHeight,
-                  flexibleSpace: FlexibleSpaceBar(
-                    title: Text('App Bar'),
+        child:  new Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: new Scrollable(
+            controller: scrollController,
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return new Viewport(
+                offset: offset,
+                slivers: <Widget>[
+                  const SliverAppBar(
+                    pinned: true,
+                    expandedHeight: kExpandedAppBarHeight,
+                    flexibleSpace: FlexibleSpaceBar(
+                      title: Text('App Bar'),
+                    ),
                   ),
-                ),
-              ]..addAll(slivers),
-            );
-          },
+                ]..addAll(slivers),
+              );
+            },
+          ),
         ),
       ),
     ));

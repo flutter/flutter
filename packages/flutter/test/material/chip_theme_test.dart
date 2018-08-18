@@ -64,25 +64,28 @@ void main() {
     bool value;
 
     Widget buildChip(ChipThemeData data) {
-      return new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
-                data: theme,
-                child: new RawChip(
-                  showCheckmark: true,
-                  onDeleted: () {},
-                  tapEnabled: true,
-                  avatar: const Placeholder(),
-                  deleteIcon: const Placeholder(),
-                  isEnabled: true,
-                  selected: value,
-                  label: new Text('$value'),
-                  onSelected: (bool newValue) {},
-                  onPressed: null,
+      return new MaterialApp(
+        locale: const Locale('en', 'us'),
+        home: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: new MediaQueryData.fromWindow(window),
+            child: new Material(
+              child: new Center(
+                child: new Theme(
+                  data: theme,
+                  child: new RawChip(
+                    showCheckmark: true,
+                    onDeleted: () {},
+                    tapEnabled: true,
+                    avatar: const Placeholder(),
+                    deleteIcon: const Placeholder(),
+                    isEnabled: true,
+                    selected: value,
+                    label: new Text('$value'),
+                    onSelected: (bool newValue) {},
+                    onPressed: null,
+                  ),
                 ),
               ),
             ),
@@ -111,27 +114,29 @@ void main() {
     );
     const bool value = false;
     Widget buildChip(ChipThemeData data) {
-      return new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
-                data: theme,
-                child: new ChipTheme(
-                  data: customTheme,
-                  child: new RawChip(
-                    showCheckmark: true,
-                    onDeleted: () {},
-                    tapEnabled: true,
-                    avatar: const Placeholder(),
-                    deleteIcon: const Placeholder(),
-                    isEnabled: true,
-                    selected: value,
-                    label: const Text('$value'),
-                    onSelected: (bool newValue) {},
-                    onPressed: null,
+      return new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: new MediaQueryData.fromWindow(window),
+            child: new Material(
+              child: new Center(
+                child: new Theme(
+                  data: theme,
+                  child: new ChipTheme(
+                    data: customTheme,
+                    child: new RawChip(
+                      showCheckmark: true,
+                      onDeleted: () {},
+                      tapEnabled: true,
+                      avatar: const Placeholder(),
+                      deleteIcon: const Placeholder(),
+                      isEnabled: true,
+                      selected: value,
+                      label: const Text('$value'),
+                      onSelected: (bool newValue) {},
+                      onPressed: null,
+                    ),
                   ),
                 ),
               ),

@@ -318,19 +318,26 @@ void main() {
   testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(),
-        child: new NestedScrollView(
-          physics: const _CustomPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              const SliverAppBar(
-                floating: true,
-                title: Text('AA'),
-              ),
-            ];
-          },
-          body: new Container(),
+      child: Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new MediaQuery(
+          data: const MediaQueryData(),
+          child: new NestedScrollView(
+            physics: const _CustomPhysics(),
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                const SliverAppBar(
+                  floating: true,
+                  title: Text('AA'),
+                ),
+              ];
+            },
+            body: new Container(),
+          ),
         ),
       ),
     ));

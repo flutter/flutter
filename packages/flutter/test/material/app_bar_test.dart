@@ -845,13 +845,20 @@ void main() {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: topPadding100,
-          child: new Scaffold(
-            primary: false,
-            appBar: new AppBar(),
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: topPadding100,
+            child: new Scaffold(
+              primary: false,
+              appBar: new AppBar(),
+            ),
           ),
         ),
       ),
@@ -860,13 +867,20 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight);
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: topPadding100,
-          child: new Scaffold(
-            primary: true,
-            appBar: new AppBar(title: const Text('title'))
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: topPadding100,
+            child: new Scaffold(
+              primary: true,
+              appBar: new AppBar(title: const Text('title'))
+            ),
           ),
         ),
       ),
@@ -876,16 +890,23 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: topPadding100,
-          child: new Scaffold(
-            primary: false,
-            appBar: new AppBar(
-              bottom: new PreferredSize(
-                preferredSize: const Size.fromHeight(200.0),
-                child: new Container(),
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: topPadding100,
+            child: new Scaffold(
+              primary: false,
+              appBar: new AppBar(
+                bottom: new PreferredSize(
+                  preferredSize: const Size.fromHeight(200.0),
+                  child: new Container(),
+                ),
               ),
             ),
           ),
@@ -896,16 +917,23 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 200.0);
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: topPadding100,
-          child: new Scaffold(
-            primary: true,
-            appBar: new AppBar(
-              bottom: new PreferredSize(
-                preferredSize: const Size.fromHeight(200.0),
-                child: new Container(),
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: topPadding100,
+            child: new Scaffold(
+              primary: true,
+              appBar: new AppBar(
+                bottom: new PreferredSize(
+                  preferredSize: const Size.fromHeight(200.0),
+                  child: new Container(),
+                ),
               ),
             ),
           ),
@@ -916,13 +944,20 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: topPadding100,
-          child: new AppBar(
-            primary: false,
-            title: const Text('title'),
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: topPadding100,
+            child: new AppBar(
+              primary: false,
+              title: const Text('title'),
+            ),
           ),
         ),
       ),
@@ -1095,16 +1130,23 @@ void main() {
     final Key trailingKey = new UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
         textDirection: TextDirection.rtl,
         child: new MediaQuery(
           data: topPadding100,
           child: new Scaffold(
-            primary: false,
-            appBar: new AppBar(
-              leading: new Placeholder(key: leadingKey),
-              title: new Placeholder(key: titleKey),
-              actions: <Widget>[ new Placeholder(key: trailingKey) ],
+              primary: false,
+              appBar: new AppBar(
+                leading: new Placeholder(key: leadingKey),
+                title: new Placeholder(key: titleKey),
+                actions: <Widget>[ new Placeholder(key: trailingKey) ],
+              ),
             ),
           ),
         ),
@@ -1124,19 +1166,26 @@ void main() {
     final Key trailingKey = new UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
         textDirection: TextDirection.rtl,
         child: new MediaQuery(
           data: topPadding100,
           child: new CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              new SliverAppBar(
-                leading: new Placeholder(key: leadingKey),
-                title: new Placeholder(key: titleKey),
-                actions: <Widget>[ new Placeholder(key: trailingKey) ],
-              ),
-            ],
+              primary: true,
+              slivers: <Widget>[
+                new SliverAppBar(
+                  leading: new Placeholder(key: leadingKey),
+                  title: new Placeholder(key: titleKey),
+                  actions: <Widget>[ new Placeholder(key: trailingKey) ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1155,19 +1204,26 @@ void main() {
     final Key trailingKey = new UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new Directionality(
         textDirection: TextDirection.rtl,
         child: new MediaQuery(
           data: topPadding100,
           child: new CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              new SliverAppBar(
-                leading: new Placeholder(key: leadingKey),
-                title: new Placeholder(key: titleKey),
-                actions: <Widget>[ new Placeholder(key: trailingKey) ],
-              ),
-            ],
+              primary: true,
+              slivers: <Widget>[
+                new SliverAppBar(
+                  leading: new Placeholder(key: leadingKey),
+                  title: new Placeholder(key: titleKey),
+                  actions: <Widget>[ new Placeholder(key: trailingKey) ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

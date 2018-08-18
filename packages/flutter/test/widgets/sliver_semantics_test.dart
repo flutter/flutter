@@ -37,22 +37,29 @@ void _tests() {
     await tester.pumpWidget(
       new Semantics(
         textDirection: TextDirection.ltr,
-        child: new Directionality(
-          textDirection: TextDirection.ltr,
-          child: new MediaQuery(
-            data: const MediaQueryData(),
-            child: new CustomScrollView(
-              controller: scrollController,
-              slivers: <Widget>[
-                const SliverAppBar(
-                  pinned: true,
-                  expandedHeight: appBarExpandedHeight,
-                  title: Text('Semantics Test with Slivers'),
-                ),
-                new SliverList(
-                  delegate: new SliverChildListDelegate(listChildren),
-                ),
-              ],
+        child: new Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new MediaQuery(
+              data: const MediaQueryData(),
+              child: new CustomScrollView(
+                controller: scrollController,
+                slivers: <Widget>[
+                  const SliverAppBar(
+                    pinned: true,
+                    expandedHeight: appBarExpandedHeight,
+                    title: Text('Semantics Test with Slivers'),
+                  ),
+                  new SliverList(
+                    delegate: new SliverChildListDelegate(listChildren),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -289,14 +296,21 @@ void _tests() {
     await tester.pumpWidget(
       new Semantics(
         textDirection: TextDirection.ltr,
-        child: new Directionality(
-          textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new SizedBox(
-              height: containerHeight,
-              child: new CustomScrollView(
-                controller: scrollController,
-                slivers: slivers,
+        child: new Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Center(
+              child: new SizedBox(
+                height: containerHeight,
+                child: new CustomScrollView(
+                  controller: scrollController,
+                  slivers: slivers,
+                ),
               ),
             ),
           ),
@@ -366,10 +380,17 @@ void _tests() {
     await tester.pumpWidget(
       new Semantics(
         textDirection: TextDirection.ltr,
-        child: new Directionality(
-          textDirection: TextDirection.ltr,
-          child: new CustomScrollView(
-            slivers: slivers,
+        child: new Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new CustomScrollView(
+              slivers: slivers,
+            ),
           ),
         ),
       ),
@@ -437,22 +458,29 @@ void _tests() {
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
     await tester.pumpWidget(new Semantics(
       textDirection: TextDirection.ltr,
-      child: new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(),
-          child: new CustomScrollView(
-            slivers: <Widget>[
-              const SliverAppBar(
-                pinned: true,
-                expandedHeight: 100.0,
-                title: Text('AppBar'),
-              ),
-              new SliverList(
-                delegate: new SliverChildListDelegate(listChildren),
-              ),
-            ],
-            controller: controller,
+      child: new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 100.0,
+                  title: Text('AppBar'),
+                ),
+                new SliverList(
+                  delegate: new SliverChildListDelegate(listChildren),
+                ),
+              ],
+              controller: controller,
+            ),
           ),
         ),
       ),
@@ -542,19 +570,26 @@ void _tests() {
     });
     await tester.pumpWidget(new Semantics(
       textDirection: TextDirection.ltr,
-      child: new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(),
-          child: new CustomScrollView(
-            controller: controller,
-            slivers: <Widget>[
-              const SliverAppBar(
-                pinned: true,
-                expandedHeight: 100.0,
-                title: Text('AppBar'),
-              ),
-            ]..addAll(slivers),
+      child: new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new CustomScrollView(
+              controller: controller,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 100.0,
+                  title: Text('AppBar'),
+                ),
+              ]..addAll(slivers),
+            ),
           ),
         ),
       ),
@@ -642,23 +677,30 @@ void _tests() {
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
     await tester.pumpWidget(new Semantics(
       textDirection: TextDirection.ltr,
-      child: new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(),
-          child: new CustomScrollView(
-            reverse: true, // This is the important setting for this test.
-            slivers: <Widget>[
-              const SliverAppBar(
-                pinned: true,
-                expandedHeight: 100.0,
-                title: Text('AppBar'),
-              ),
-              new SliverList(
-                delegate: new SliverChildListDelegate(listChildren),
-              ),
-            ],
-            controller: controller,
+      child: new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new CustomScrollView(
+              reverse: true, // This is the important setting for this test.
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 100.0,
+                  title: Text('AppBar'),
+                ),
+                new SliverList(
+                  delegate: new SliverChildListDelegate(listChildren),
+                ),
+              ],
+              controller: controller,
+            ),
           ),
         ),
       ),
@@ -748,20 +790,27 @@ void _tests() {
     });
     await tester.pumpWidget(new Semantics(
       textDirection: TextDirection.ltr,
-      child: new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(),
-          child: new CustomScrollView(
-            reverse: true, // This is the important setting for this test.
-            controller: controller,
-            slivers: <Widget>[
-              const SliverAppBar(
-                pinned: true,
-                expandedHeight: 100.0,
-                title: Text('AppBar'),
-              ),
-            ]..addAll(slivers),
+      child: new Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new CustomScrollView(
+              reverse: true, // This is the important setting for this test.
+              controller: controller,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 100.0,
+                  title: Text('AppBar'),
+                ),
+              ]..addAll(slivers),
+            ),
           ),
         ),
       ),
@@ -856,39 +905,46 @@ void _tests() {
       textDirection: TextDirection.ltr,
       child: new Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(),
-          child: new Scrollable(
-            controller: controller,
-            viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return new Viewport(
-                offset: offset,
-                center: forwardAppBarKey,
-                slivers: <Widget>[
-                  new SliverList(
-                    delegate: new SliverChildListDelegate(backwardChildren),
-                  ),
-                  const SliverAppBar(
-                    pinned: true,
-                    expandedHeight: 100.0,
-                    flexibleSpace: FlexibleSpaceBar(
-                      title: Text('Backward app bar', textDirection: TextDirection.ltr),
+        child: new Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new Scrollable(
+              controller: controller,
+              viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                return new Viewport(
+                  offset: offset,
+                  center: forwardAppBarKey,
+                  slivers: <Widget>[
+                    new SliverList(
+                      delegate: new SliverChildListDelegate(backwardChildren),
                     ),
-                  ),
-                  new SliverAppBar(
-                    pinned: true,
-                    key: forwardAppBarKey,
-                    expandedHeight: 100.0,
-                    flexibleSpace: const FlexibleSpaceBar(
-                      title: Text('Forward app bar', textDirection: TextDirection.ltr),
+                    const SliverAppBar(
+                      pinned: true,
+                      expandedHeight: 100.0,
+                      flexibleSpace: FlexibleSpaceBar(
+                        title: Text('Backward app bar', textDirection: TextDirection.ltr),
+                      ),
                     ),
-                  ),
-                  new SliverList(
-                    delegate: new SliverChildListDelegate(forwardChildren),
-                  ),
-                ],
-              );
-            },
+                    new SliverAppBar(
+                      pinned: true,
+                      key: forwardAppBarKey,
+                      expandedHeight: 100.0,
+                      flexibleSpace: const FlexibleSpaceBar(
+                        title: Text('Forward app bar', textDirection: TextDirection.ltr),
+                      ),
+                    ),
+                    new SliverList(
+                      delegate: new SliverChildListDelegate(forwardChildren),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

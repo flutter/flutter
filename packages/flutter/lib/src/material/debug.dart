@@ -94,11 +94,13 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
       );
       message.writeln(
           'Localizations are used to generate many different messages, labels,'
-            'and abbreviations which are used by the material library.'
+            'and abbreviations which are used by the material library. '
       );
       message.writeln(
-          'To introduce a MaterialLocalizations, make sure you are using a'
-              'MaterialApp at the root of your application.'
+          'To introduce a MaterialLocalizations, either use a'
+              ' MaterialApp at the root of your application to include them '
+              'automatically, or add a Localization widget with a '
+              'MaterialLocalizations delegate.'
       );
       message.writeln(
           'The specific widget that could not find a MaterialLocalizations ancestor was:'
