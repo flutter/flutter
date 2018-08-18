@@ -5733,9 +5733,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ライセンスを表示';
 }
 
-/// The translations for Khmer (`km`).
+/// The translations for Khmer Central Khmer (`km`).
 class MaterialLocalizationKm extends GlobalMaterialLocalizations {
-  /// Create an instance of the translation bundle for English.
+  /// Create an instance of the translation bundle for Khmer Central Khmer.
   ///
   /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
   const MaterialLocalizationKm({
@@ -5760,13 +5760,13 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get aboutListTileTitleRaw => r'អំពី $applicationName';
 
   @override
-  String get alertDialogLabel => r'ជូនដំណឹង';
+  String get alertDialogLabel => r'ការជូនដំណឹង';
 
   @override
   String get anteMeridiemAbbreviation => r'AM';
 
   @override
-  String get backButtonTooltip => r'ត្រលប់ក្រោយ';
+  String get backButtonTooltip => r'ថយក្រោយ';
 
   @override
   String get cancelButtonLabel => r'បោះបង់';
@@ -5787,7 +5787,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get cutButtonLabel => r'កាត់';
 
   @override
-  String get deleteButtonTooltip => r'លុប';
+  String get deleteButtonTooltip => r'យកចេញ';
 
   @override
   String get dialogLabel => r'ប្រអប់';
@@ -5802,13 +5802,13 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get licensesPageTitle => r'អាជ្ញាប័ណ្ណ';
 
   @override
-  String get modalBarrierDismissLabel => r'បោះបង់';
+  String get modalBarrierDismissLabel => r'បិទ';
 
   @override
   String get nextMonthTooltip => r'ខែក្រោយ';
 
   @override
-  String get nextPageTooltip => r'ទំ​ព​រ័​បន្ទាប់';
+  String get nextPageTooltip => r'ទំព័របន្ទាប់';
 
   @override
   String get okButtonLabel => r'យល់ព្រម';
@@ -5817,13 +5817,13 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get openAppDrawerTooltip => r'បើកម៉ឺនុយរុករក';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow of $rowCount';
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow ពី $rowCount';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow of about $rowCount';
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ពីប្រហែល $rowCount';
 
   @override
-  String get pasteButtonLabel => r'PASTE';
+  String get pasteButtonLabel => r'ដាក់';
 
   @override
   String get popupMenuLabel => r'ម៉ឺនុយលេចឡើង';
@@ -5832,40 +5832,40 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get postMeridiemAbbreviation => r'PM';
 
   @override
-  String get previousMonthTooltip => r'ខែមុន';
+  String get previousMonthTooltip => r'កាលពីខែមុន';
 
   @override
-  String get previousPageTooltip => r'ទំព័រ​មុន';
+  String get previousPageTooltip => r'ទំព័រមុន';
 
   @override
-  String get reorderItemDown => r'ទៅ​ក្រោម';
+  String get reorderItemDown => r'TBD';
 
   @override
-  String get reorderItemLeft => r'ផ្លាស់ទី​ទៅ​ឆ្វេង';
+  String get reorderItemLeft => r'TBD';
 
   @override
-  String get reorderItemRight => r'ផ្លាស់ទីទៅស្តាំ';
+  String get reorderItemRight => r'TBD';
 
   @override
-  String get reorderItemToEnd => r'ផ្លាស់ទីទៅទីបញ្ចប់';
+  String get reorderItemToEnd => r'TBD';
 
   @override
-  String get reorderItemToStart => r'ផ្លាស់ទីទៅចំណុចចាប់ផ្តើម';
+  String get reorderItemToStart => r'TBD';
 
   @override
-  String get reorderItemUp => r'ផ្លាស់ទីឡើងលើ';
+  String get reorderItemUp => r'TBD';
 
   @override
-  String get rowsPerPageTitle => r'ជួរដេកក្នុងមួយទំព័រ:';
+  String get rowsPerPageTitle => r'ជួរមុខ:';
 
   @override
-  String get scriptCategory => r'English-like';
+  String get scriptCategory => r'tall';
 
   @override
   String get searchFieldLabel => r'ស្វែងរក';
 
   @override
-  String get selectAllButtonLabel => r'ជ្រើស​យក​ទាំងអស់';
+  String get selectAllButtonLabel => r'ជ្រើសទាំងអស់';
 
   @override
   String get selectedRowCountTitleFew => null;
@@ -5883,7 +5883,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleTwo => null;
 
   @override
-  String get selectedRowCountTitleZero => r'គ្មានធាតុត្រូវបានជ្រើស';
+  String get selectedRowCountTitleZero => null;
 
   @override
   String get showAccountsLabel => r'បង្ហាញគណនី';
@@ -5892,22 +5892,22 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get showMenuTooltip => r'បង្ហាញម៉ឺនុយ';
 
   @override
-  String get signedInLabel => r'Signed in';
+  String get signedInLabel => r'ចូល';
 
   @override
-  String get tabLabelRaw => r'Tab $tabIndex of $tabCount';
+  String get tabLabelRaw => r'ថេប $tabIndex ពី $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
-  String get timePickerHourModeAnnouncement => r'Select hours';
+  String get timePickerHourModeAnnouncement => r'ជ្រើសរើសមួយម៉ោង';
 
   @override
-  String get timePickerMinuteModeAnnouncement => r'Select minutes';
+  String get timePickerMinuteModeAnnouncement => r'ជ្រើសនាទី';
 
   @override
-  String get viewLicensesButtonLabel => r'VIEW LICENSES';
+  String get viewLicensesButtonLabel => r'មើលអាជ្ញាប័ណ្ណ';
 }
 
 /// The translations for Korean (`ko`).
@@ -10292,7 +10292,7 @@ final Set<String> kSupportedLanguages = new HashSet<String>.from(const <String>[
   'id', // Indonesian
   'it', // Italian
   'ja', // Japanese
-  'km', // Khmer
+  'km', // Khmer Central Khmer
   'ko', // Korean
   'lt', // Lithuanian
   'lv', // Latvian
@@ -10350,7 +10350,7 @@ final Set<String> kSupportedLanguages = new HashSet<String>.from(const <String>[
 ///  * `id` - Indonesian
 ///  * `it` - Italian
 ///  * `ja` - Japanese
-///  * `km` - Khmer
+///  * `km` - Khmer Central Khmer
 ///  * `ko` - Korean
 ///  * `lt` - Lithuanian
 ///  * `lv` - Latvian

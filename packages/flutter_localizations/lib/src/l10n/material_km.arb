@@ -1,6 +1,6 @@
 {
   "scriptCategory": "tall",
-  "timeOfDayFormat": "ah:mm",
+  "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "បើកម៉ឺនុយរុករក",
   "backButtonTooltip": "ថយក្រោយ",
   "closeButtonTooltip": "បិទ",
@@ -12,7 +12,7 @@
   "showMenuTooltip": "បង្ហាញម៉ឺនុយ",
   "aboutListTileTitle": "អំពី $applicationName",
   "licensesPageTitle": "អាជ្ញាប័ណ្ណ",
-  "pageRowsInfoTitle": "$firstRow-$lastRow จาก $rowCount",
+  "pageRowsInfoTitle": "$firstRow-$lastRow ពី $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow ពីប្រហែល $rowCount",
   "rowsPerPageTitle": "ជួរមុខ:",
   "tabLabel": "ថេប $tabIndex ពី $tabCount",

@@ -109,7 +109,7 @@ void main() {
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('km', ''));
-    expect(localizations.selectedRowCountTitle(0), 'គ្មានធាតុត្រូវបានជ្រើស');
+    expect(localizations.selectedRowCountTitle(0), 'បានជ្រើស 0 ធាតុ');
     expect(localizations.selectedRowCountTitle(1), 'បានជ្រើស 1 ធាតុ');
     expect(localizations.selectedRowCountTitle(2), 'បានជ្រើស 2 ធាតុ');
     expect(localizations.selectedRowCountTitle(3), 'បានជ្រើស 3 ធាតុ');
