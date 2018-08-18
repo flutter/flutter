@@ -3243,7 +3243,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool hidden,
     bool image,
     bool liveRegion,
-    bool isSwitch,
     String label,
     String value,
     String increasedValue,
