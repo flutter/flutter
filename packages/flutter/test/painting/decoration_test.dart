@@ -347,4 +347,163 @@ void main() {
     expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.75), isInstanceOf<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
     expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isInstanceOf<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
   });
+
+  test('paintImage BoxFit.none scale test', () {
+    for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
+      final TestCanvas canvas = new TestCanvas(<Invocation>[]);
+
+      final outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      final image = TestImage();
+
+      paintImage(
+        canvas: canvas,
+        rect: outputRect,
+        image: image,
+        scale: scale,
+        alignment: Alignment.bottomRight,
+        fit: BoxFit.none,
+        repeat: ImageRepeat.noRepeat,
+        flipHorizontally: false,
+      );
+
+      final imageSize = Size(100.0, 100.0);
+
+      final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      // Image should be scaled down (divided by scale)
+      // and be positioned in the bottom right of the outputRect
+      final expectedTileSize = imageSize / scale;
+      final expectedTileRect = Rect.fromPoints(
+        outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
+        outputRect.bottomRight,
+      );
+      expect(call.positionalArguments[2], expectedTileRect);
+
+      expect(call.positionalArguments[3], isInstanceOf<Paint>());
+    }
+  });
+
+  test('paintImage BoxFit.scaleDown scale test', () {
+    for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
+      final TestCanvas canvas = new TestCanvas(<Invocation>[]);
+
+      // container size > scaled image size
+      final outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      final image = TestImage();
+
+      paintImage(
+        canvas: canvas,
+        rect: outputRect,
+        image: image,
+        scale: scale,
+        alignment: Alignment.bottomRight,
+        fit: BoxFit.scaleDown,
+        repeat: ImageRepeat.noRepeat,
+        flipHorizontally: false,
+      );
+
+      final imageSize = Size(100.0, 100.0);
+
+      final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+
+      // sourceRect should contain all pixels of the source image
+      expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+      // Image should be scaled down (divided by scale)
+      // and be positioned in the bottom right of the outputRect
+      final expectedTileSize = imageSize / scale;
+      final expectedTileRect = Rect.fromPoints(
+        outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
+        outputRect.bottomRight,
+      );
+      expect(call.positionalArguments[2], expectedTileRect);
+
+      expect(call.positionalArguments[3], isInstanceOf<Paint>());
+    }
+  });
+
+  test('paintImage BoxFit.scaleDown test', () {
+    final TestCanvas canvas = new TestCanvas(<Invocation>[]);
+
+    // container height (20 px) < scaled image height (50 px)
+    final outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
+    final image = TestImage();
+
+    paintImage(
+      canvas: canvas,
+      rect: outputRect,
+      image: image,
+      scale: 2.0,
+      alignment: Alignment.bottomRight,
+      fit: BoxFit.scaleDown,
+      repeat: ImageRepeat.noRepeat,
+      flipHorizontally: false,
+    );
+
+    final imageSize = Size(100.0, 100.0);
+
+    final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+
+    expect(call.isMethod, isTrue);
+    expect(call.positionalArguments, hasLength(4));
+
+    expect(call.positionalArguments[0], isInstanceOf<TestImage>());
+
+    // sourceRect should contain all pixels of the source image
+    expect(call.positionalArguments[1], Offset.zero & imageSize);
+
+    // Image should be scaled down to fit in hejght
+    // and be positioned in the bottom right of the outputRect
+    final expectedTileSize = Size(20.0, 20.0);
+    final expectedTileRect = Rect.fromPoints(
+      outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
+      outputRect.bottomRight,
+    );
+    expect(call.positionalArguments[2], expectedTileRect);
+
+    expect(call.positionalArguments[3], isInstanceOf<Paint>());
+  });
+
+  test('paintImage boxFit, scale and alignment test', () {
+    final boxFits = [BoxFit.contain, BoxFit.cover, BoxFit.fitWidth, BoxFit.fitWidth, BoxFit.fitHeight, BoxFit.none, BoxFit.scaleDown,];
+
+    for(BoxFit boxFit in boxFits) {
+      final TestCanvas canvas = new TestCanvas(<Invocation>[]);
+
+      final outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      final image = TestImage();
+
+      paintImage(
+        canvas: canvas,
+        rect: outputRect,
+        image: image,
+        scale: 3.0,
+        alignment: Alignment.center,
+        fit: boxFit,
+        repeat: ImageRepeat.noRepeat,
+        flipHorizontally: false,
+      );
+
+      final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+
+      expect(call.isMethod, isTrue);
+      expect(call.positionalArguments, hasLength(4));
+
+      // Image should be positioned in the center of the container
+      expect(call.positionalArguments[2].center, outputRect.center);
+    }
+  });
 }
