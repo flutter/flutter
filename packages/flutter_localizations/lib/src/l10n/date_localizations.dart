@@ -7,13 +7,12 @@
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
 // ignore_for_file: public_member_api_docs
-
- const Map<String, dynamic> dateSymbols =  <String, dynamic>{
-  'ar':  <String, dynamic>{
+ const Map<String, dynamic> dateSymbols = <String, dynamic>{
+  'ar': <String, dynamic>{
     'NAME': r'''ar''',
-    'ERAS':  <dynamic>[r'''ق.م''', r'''م'''],
-    'ERANAMES':  <dynamic>[r'''قبل الميلاد''', r'''ميلادي'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''ق.م''', r'''م'''],
+    'ERANAMES': <dynamic>[r'''قبل الميلاد''', r'''ميلادي'''],
+    'NARROWMONTHS': <dynamic>[
       r'''ي''',
       r'''ف''',
       r'''م''',
@@ -27,7 +26,7 @@
       r'''ب''',
       r'''د'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''ي''',
       r'''ف''',
       r'''م''',
@@ -41,7 +40,7 @@
       r'''ب''',
       r'''د'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''يناير''',
       r'''فبراير''',
       r'''مارس''',
@@ -55,7 +54,7 @@
       r'''نوفمبر''',
       r'''ديسمبر'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''يناير''',
       r'''فبراير''',
       r'''مارس''',
@@ -69,7 +68,7 @@
       r'''نوفمبر''',
       r'''ديسمبر'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''يناير''',
       r'''فبراير''',
       r'''مارس''',
@@ -83,7 +82,7 @@
       r'''نوفمبر''',
       r'''ديسمبر'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''يناير''',
       r'''فبراير''',
       r'''مارس''',
@@ -97,7 +96,7 @@
       r'''نوفمبر''',
       r'''ديسمبر'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''الأحد''',
       r'''الاثنين''',
       r'''الثلاثاء''',
@@ -106,7 +105,7 @@
       r'''الجمعة''',
       r'''السبت'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''الأحد''',
       r'''الاثنين''',
       r'''الثلاثاء''',
@@ -115,7 +114,7 @@
       r'''الجمعة''',
       r'''السبت'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''الأحد''',
       r'''الاثنين''',
       r'''الثلاثاء''',
@@ -124,7 +123,7 @@
       r'''الجمعة''',
       r'''السبت'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''الأحد''',
       r'''الاثنين''',
       r'''الثلاثاء''',
@@ -133,7 +132,7 @@
       r'''الجمعة''',
       r'''السبت'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''ح''',
       r'''ن''',
       r'''ث''',
@@ -142,7 +141,7 @@
       r'''ج''',
       r'''س'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''ح''',
       r'''ن''',
       r'''ث''',
@@ -151,26 +150,26 @@
       r'''ج''',
       r'''س'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''الربع الأول''',
       r'''الربع الثاني''',
       r'''الربع الثالث''',
       r'''الربع الرابع'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''الربع الأول''',
       r'''الربع الثاني''',
       r'''الربع الثالث''',
       r'''الربع الرابع'''
     ],
-    'AMPMS':  <dynamic>[r'''ص''', r'''م'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''ص''', r'''م'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE، d MMMM y''',
       r'''d MMMM y''',
       r'''dd‏/MM‏/y''',
       r'''d‏/M‏/y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -178,9 +177,9 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 5,
-    'WEEKENDRANGE':  <dynamic>[4, 5],
+    'WEEKENDRANGE': <dynamic>[4, 5],
     'FIRSTWEEKCUTOFFDAY': 4,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
@@ -188,11 +187,11 @@
     ],
     'ZERODIGIT': r'''٠''',
   },
-  'bg':  <String, dynamic>{
+  'bg': <String, dynamic>{
     'NAME': r'''bg''',
-    'ERAS':  <dynamic>[r'''пр.Хр.''', r'''сл.Хр.'''],
-    'ERANAMES':  <dynamic>[r'''преди Христа''', r'''след Христа'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''пр.Хр.''', r'''сл.Хр.'''],
+    'ERANAMES': <dynamic>[r'''преди Христа''', r'''след Христа'''],
+    'NARROWMONTHS': <dynamic>[
       r'''я''',
       r'''ф''',
       r'''м''',
@@ -206,7 +205,7 @@
       r'''н''',
       r'''д'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''я''',
       r'''ф''',
       r'''м''',
@@ -220,7 +219,7 @@
       r'''н''',
       r'''д'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''януари''',
       r'''февруари''',
       r'''март''',
@@ -234,7 +233,7 @@
       r'''ноември''',
       r'''декември'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''януари''',
       r'''февруари''',
       r'''март''',
@@ -248,7 +247,7 @@
       r'''ноември''',
       r'''декември'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''яну''',
       r'''фев''',
       r'''март''',
@@ -262,7 +261,7 @@
       r'''ное''',
       r'''дек'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''яну''',
       r'''фев''',
       r'''март''',
@@ -276,7 +275,7 @@
       r'''ное''',
       r'''дек'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''неделя''',
       r'''понеделник''',
       r'''вторник''',
@@ -285,7 +284,7 @@
       r'''петък''',
       r'''събота'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''неделя''',
       r'''понеделник''',
       r'''вторник''',
@@ -294,7 +293,7 @@
       r'''петък''',
       r'''събота'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''нд''',
       r'''пн''',
       r'''вт''',
@@ -303,7 +302,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''нд''',
       r'''пн''',
       r'''вт''',
@@ -312,7 +311,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''н''',
       r'''п''',
       r'''в''',
@@ -321,7 +320,7 @@
       r'''п''',
       r'''с'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''н''',
       r'''п''',
       r'''в''',
@@ -330,26 +329,26 @@
       r'''п''',
       r'''с'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1. трим.''',
       r'''2. трим.''',
       r'''3. трим.''',
       r'''4. трим.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. тримесечие''',
       r'''2. тримесечие''',
       r'''3. тримесечие''',
       r'''4. тримесечие'''
     ],
-    'AMPMS':  <dynamic>[r'''пр.об.''', r'''сл.об.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''пр.об.''', r'''сл.об.'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, d MMMM y 'г'.""",
       r"""d MMMM y 'г'.""",
       r"""d.MM.y 'г'.""",
       r"""d.MM.yy 'г'."""
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r"""H:mm:ss 'ч'. zzzz""",
       r"""H:mm:ss 'ч'. z""",
       r"""H:mm:ss 'ч'.""",
@@ -357,20 +356,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'bs':  <String, dynamic>{
+  'bs': <String, dynamic>{
     'NAME': r'''bs''',
-    'ERAS':  <dynamic>[r'''p. n. e.''', r'''n. e.'''],
-    'ERANAMES':  <dynamic>[r'''prije nove ere''', r'''nove ere'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''p. n. e.''', r'''n. e.'''],
+    'ERANAMES': <dynamic>[r'''prije nove ere''', r'''nove ere'''],
+    'NARROWMONTHS': <dynamic>[
       r'''j''',
       r'''f''',
       r'''m''',
@@ -384,7 +383,7 @@
       r'''n''',
       r'''d'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''j''',
       r'''f''',
       r'''m''',
@@ -398,7 +397,7 @@
       r'''n''',
       r'''d'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''mart''',
@@ -412,7 +411,7 @@
       r'''novembar''',
       r'''decembar'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''mart''',
@@ -426,7 +425,7 @@
       r'''novembar''',
       r'''decembar'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''feb''',
       r'''mar''',
@@ -440,7 +439,7 @@
       r'''nov''',
       r'''dec'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''feb''',
       r'''mar''',
@@ -454,7 +453,7 @@
       r'''nov''',
       r'''dec'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''nedjelja''',
       r'''ponedjeljak''',
       r'''utorak''',
@@ -463,7 +462,7 @@
       r'''petak''',
       r'''subota'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''nedjelja''',
       r'''ponedjeljak''',
       r'''utorak''',
@@ -472,7 +471,7 @@
       r'''petak''',
       r'''subota'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''ned''',
       r'''pon''',
       r'''uto''',
@@ -481,7 +480,7 @@
       r'''pet''',
       r'''sub'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''ned''',
       r'''pon''',
       r'''uto''',
@@ -490,7 +489,7 @@
       r'''pet''',
       r'''sub'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''N''',
       r'''P''',
       r'''U''',
@@ -499,7 +498,7 @@
       r'''P''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''u''',
@@ -508,26 +507,26 @@
       r'''p''',
       r'''s'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''KV1''',
       r'''KV2''',
       r'''KV3''',
       r'''KV4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''Prvi kvartal''',
       r'''Drugi kvartal''',
       r'''Treći kvartal''',
       r'''Četvrti kvartal'''
     ],
-    'AMPMS':  <dynamic>[r'''prijepodne''', r'''popodne'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''prijepodne''', r'''popodne'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d. MMMM y.''',
       r'''d. MMMM y.''',
       r'''d. MMM y.''',
       r'''d.M.yy.'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -535,20 +534,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'u' {0}""",
       r"""{1} 'u' {0}""",
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'ca':  <String, dynamic>{
+  'ca': <String, dynamic>{
     'NAME': r'''ca''',
-    'ERAS':  <dynamic>[r'''aC''', r'''dC'''],
-    'ERANAMES':  <dynamic>[r'''abans de Crist''', r'''després de Crist'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''aC''', r'''dC'''],
+    'ERANAMES': <dynamic>[r'''abans de Crist''', r'''després de Crist'''],
+    'NARROWMONTHS': <dynamic>[
       r'''GN''',
       r'''FB''',
       r'''MÇ''',
@@ -562,7 +561,7 @@
       r'''NV''',
       r'''DS'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''GN''',
       r'''FB''',
       r'''MÇ''',
@@ -576,7 +575,7 @@
       r'''NV''',
       r'''DS'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''de gener''',
       r'''de febrer''',
       r'''de març''',
@@ -590,7 +589,7 @@
       r'''de novembre''',
       r'''de desembre'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''gener''',
       r'''febrer''',
       r'''març''',
@@ -604,7 +603,7 @@
       r'''novembre''',
       r'''desembre'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''de gen.''',
       r'''de febr.''',
       r'''de març''',
@@ -618,7 +617,7 @@
       r'''de nov.''',
       r'''de des.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''gen.''',
       r'''febr.''',
       r'''març''',
@@ -632,7 +631,7 @@
       r'''nov.''',
       r'''des.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''diumenge''',
       r'''dilluns''',
       r'''dimarts''',
@@ -641,7 +640,7 @@
       r'''divendres''',
       r'''dissabte'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''diumenge''',
       r'''dilluns''',
       r'''dimarts''',
@@ -650,7 +649,7 @@
       r'''divendres''',
       r'''dissabte'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''dg.''',
       r'''dl.''',
       r'''dt.''',
@@ -659,7 +658,7 @@
       r'''dv.''',
       r'''ds.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''dg.''',
       r'''dl.''',
       r'''dt.''',
@@ -668,7 +667,7 @@
       r'''dv.''',
       r'''ds.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''dg''',
       r'''dl''',
       r'''dt''',
@@ -677,7 +676,7 @@
       r'''dv''',
       r'''ds'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''dg''',
       r'''dl''',
       r'''dt''',
@@ -686,26 +685,26 @@
       r'''dv''',
       r'''ds'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1T''',
       r'''2T''',
       r'''3T''',
       r'''4T'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1r trimestre''',
       r'''2n trimestre''',
       r'''3r trimestre''',
       r'''4t trimestre'''
     ],
-    'AMPMS':  <dynamic>[r'''a. m.''', r'''p. m.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''a. m.''', r'''p. m.'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, d MMMM 'de' y""",
       r"""d MMMM 'de' y""",
       r'''d MMM y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -713,23 +712,23 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'a' 'les' {0}""",
       r"""{1} 'a' 'les' {0}""",
       r'''{1}, {0}''',
       r'''{1} {0}'''
     ],
   },
-  'cs':  <String, dynamic>{
+  'cs': <String, dynamic>{
     'NAME': r'''cs''',
-    'ERAS':  <dynamic>[r'''př. n. l.''', r'''n. l.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''př. n. l.''', r'''n. l.'''],
+    'ERANAMES': <dynamic>[
       r'''před naším letopočtem''',
       r'''našeho letopočtu'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -743,7 +742,7 @@
       r'''11''',
       r'''12'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -757,7 +756,7 @@
       r'''11''',
       r'''12'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''ledna''',
       r'''února''',
       r'''března''',
@@ -771,7 +770,7 @@
       r'''listopadu''',
       r'''prosince'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''leden''',
       r'''únor''',
       r'''březen''',
@@ -785,7 +784,7 @@
       r'''listopad''',
       r'''prosinec'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''led''',
       r'''úno''',
       r'''bře''',
@@ -799,7 +798,7 @@
       r'''lis''',
       r'''pro'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''led''',
       r'''úno''',
       r'''bře''',
@@ -813,7 +812,7 @@
       r'''lis''',
       r'''pro'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''neděle''',
       r'''pondělí''',
       r'''úterý''',
@@ -822,7 +821,7 @@
       r'''pátek''',
       r'''sobota'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''neděle''',
       r'''pondělí''',
       r'''úterý''',
@@ -831,7 +830,7 @@
       r'''pátek''',
       r'''sobota'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''ne''',
       r'''po''',
       r'''út''',
@@ -840,7 +839,7 @@
       r'''pá''',
       r'''so'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''ne''',
       r'''po''',
       r'''út''',
@@ -849,7 +848,7 @@
       r'''pá''',
       r'''so'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''N''',
       r'''P''',
       r'''Ú''',
@@ -858,7 +857,7 @@
       r'''P''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''N''',
       r'''P''',
       r'''Ú''',
@@ -867,26 +866,26 @@
       r'''P''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. čtvrtletí''',
       r'''2. čtvrtletí''',
       r'''3. čtvrtletí''',
       r'''4. čtvrtletí'''
     ],
-    'AMPMS':  <dynamic>[r'''dop.''', r'''odp.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''dop.''', r'''odp.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d. MMMM y''',
       r'''d. MMMM y''',
       r'''d. M. y''',
       r'''dd.MM.yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -894,20 +893,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'da':  <String, dynamic>{
+  'da': <String, dynamic>{
     'NAME': r'''da''',
-    'ERAS':  <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
-    'ERANAMES':  <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
+    'ERANAMES': <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -921,7 +920,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -935,7 +934,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''marts''',
@@ -949,7 +948,7 @@
       r'''november''',
       r'''december'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''marts''',
@@ -963,7 +962,7 @@
       r'''november''',
       r'''december'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mar.''',
@@ -977,7 +976,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mar.''',
@@ -991,7 +990,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''søndag''',
       r'''mandag''',
       r'''tirsdag''',
@@ -1000,7 +999,7 @@
       r'''fredag''',
       r'''lørdag'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''søndag''',
       r'''mandag''',
       r'''tirsdag''',
@@ -1009,7 +1008,7 @@
       r'''fredag''',
       r'''lørdag'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''søn.''',
       r'''man.''',
       r'''tir.''',
@@ -1018,7 +1017,7 @@
       r'''fre.''',
       r'''lør.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''søn''',
       r'''man''',
       r'''tir''',
@@ -1027,7 +1026,7 @@
       r'''fre''',
       r'''lør'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -1036,7 +1035,7 @@
       r'''F''',
       r'''L'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -1045,26 +1044,26 @@
       r'''F''',
       r'''L'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1. kvt.''',
       r'''2. kvt.''',
       r'''3. kvt.''',
       r'''4. kvt.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. kvartal''',
       r'''2. kvartal''',
       r'''3. kvartal''',
       r'''4. kvartal'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE 'den' d. MMMM y""",
       r'''d. MMMM y''',
       r'''d. MMM y''',
       r'''dd/MM/y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH.mm.ss zzzz''',
       r'''HH.mm.ss z''',
       r'''HH.mm.ss''',
@@ -1072,20 +1071,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'kl'. {0}""",
       r"""{1} 'kl'. {0}""",
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'de':  <String, dynamic>{
+  'de': <String, dynamic>{
     'NAME': r'''de''',
-    'ERAS':  <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
-    'ERANAMES':  <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
+    'ERANAMES': <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -1099,7 +1098,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -1113,7 +1112,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Januar''',
       r'''Februar''',
       r'''März''',
@@ -1127,7 +1126,7 @@
       r'''November''',
       r'''Dezember'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Januar''',
       r'''Februar''',
       r'''März''',
@@ -1141,7 +1140,7 @@
       r'''November''',
       r'''Dezember'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Jan.''',
       r'''Feb.''',
       r'''März''',
@@ -1155,7 +1154,7 @@
       r'''Nov.''',
       r'''Dez.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mär''',
@@ -1169,7 +1168,7 @@
       r'''Nov''',
       r'''Dez'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Sonntag''',
       r'''Montag''',
       r'''Dienstag''',
@@ -1178,7 +1177,7 @@
       r'''Freitag''',
       r'''Samstag'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Sonntag''',
       r'''Montag''',
       r'''Dienstag''',
@@ -1187,7 +1186,7 @@
       r'''Freitag''',
       r'''Samstag'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''So.''',
       r'''Mo.''',
       r'''Di.''',
@@ -1196,7 +1195,7 @@
       r'''Fr.''',
       r'''Sa.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''So''',
       r'''Mo''',
       r'''Di''',
@@ -1205,7 +1204,7 @@
       r'''Fr''',
       r'''Sa'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''D''',
@@ -1214,7 +1213,7 @@
       r'''F''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''D''',
@@ -1223,26 +1222,26 @@
       r'''F''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. Quartal''',
       r'''2. Quartal''',
       r'''3. Quartal''',
       r'''4. Quartal'''
     ],
-    'AMPMS':  <dynamic>[r'''vorm.''', r'''nachm.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''vorm.''', r'''nachm.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d. MMMM y''',
       r'''d. MMMM y''',
       r'''dd.MM.y''',
       r'''dd.MM.yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -1250,20 +1249,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'um' {0}""",
       r"""{1} 'um' {0}""",
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'el':  <String, dynamic>{
+  'el': <String, dynamic>{
     'NAME': r'''el''',
-    'ERAS':  <dynamic>[r'''π.Χ.''', r'''μ.Χ.'''],
-    'ERANAMES':  <dynamic>[r'''προ Χριστού''', r'''μετά Χριστόν'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''π.Χ.''', r'''μ.Χ.'''],
+    'ERANAMES': <dynamic>[r'''προ Χριστού''', r'''μετά Χριστόν'''],
+    'NARROWMONTHS': <dynamic>[
       r'''Ι''',
       r'''Φ''',
       r'''Μ''',
@@ -1277,7 +1276,7 @@
       r'''Ν''',
       r'''Δ'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''Ι''',
       r'''Φ''',
       r'''Μ''',
@@ -1291,7 +1290,7 @@
       r'''Ν''',
       r'''Δ'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Ιανουαρίου''',
       r'''Φεβρουαρίου''',
       r'''Μαρτίου''',
@@ -1305,7 +1304,7 @@
       r'''Νοεμβρίου''',
       r'''Δεκεμβρίου'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Ιανουάριος''',
       r'''Φεβρουάριος''',
       r'''Μάρτιος''',
@@ -1319,7 +1318,7 @@
       r'''Νοέμβριος''',
       r'''Δεκέμβριος'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Ιαν''',
       r'''Φεβ''',
       r'''Μαρ''',
@@ -1333,7 +1332,7 @@
       r'''Νοε''',
       r'''Δεκ'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Ιαν''',
       r'''Φεβ''',
       r'''Μάρ''',
@@ -1347,7 +1346,7 @@
       r'''Νοέ''',
       r'''Δεκ'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Κυριακή''',
       r'''Δευτέρα''',
       r'''Τρίτη''',
@@ -1356,7 +1355,7 @@
       r'''Παρασκευή''',
       r'''Σάββατο'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Κυριακή''',
       r'''Δευτέρα''',
       r'''Τρίτη''',
@@ -1365,7 +1364,7 @@
       r'''Παρασκευή''',
       r'''Σάββατο'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Κυρ''',
       r'''Δευ''',
       r'''Τρί''',
@@ -1374,7 +1373,7 @@
       r'''Παρ''',
       r'''Σάβ'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Κυρ''',
       r'''Δευ''',
       r'''Τρί''',
@@ -1383,7 +1382,7 @@
       r'''Παρ''',
       r'''Σάβ'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''Κ''',
       r'''Δ''',
       r'''Τ''',
@@ -1392,7 +1391,7 @@
       r'''Π''',
       r'''Σ'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''Κ''',
       r'''Δ''',
       r'''Τ''',
@@ -1401,26 +1400,26 @@
       r'''Π''',
       r'''Σ'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Τ1''',
       r'''Τ2''',
       r'''Τ3''',
       r'''Τ4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1ο τρίμηνο''',
       r'''2ο τρίμηνο''',
       r'''3ο τρίμηνο''',
       r'''4ο τρίμηνο'''
     ],
-    'AMPMS':  <dynamic>[r'''π.μ.''', r'''μ.μ.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''π.μ.''', r'''μ.μ.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -1428,20 +1427,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} - {0}''',
       r'''{1} - {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'en':  <String, dynamic>{
+  'en': <String, dynamic>{
     'NAME': r'''en''',
-    'ERAS':  <dynamic>[r'''BC''', r'''AD'''],
-    'ERANAMES':  <dynamic>[r'''Before Christ''', r'''Anno Domini'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''BC''', r'''AD'''],
+    'ERANAMES': <dynamic>[r'''Before Christ''', r'''Anno Domini'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -1455,7 +1454,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -1469,7 +1468,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''January''',
       r'''February''',
       r'''March''',
@@ -1483,7 +1482,7 @@
       r'''November''',
       r'''December'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''January''',
       r'''February''',
       r'''March''',
@@ -1497,7 +1496,7 @@
       r'''November''',
       r'''December'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mar''',
@@ -1511,7 +1510,7 @@
       r'''Nov''',
       r'''Dec'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mar''',
@@ -1525,7 +1524,7 @@
       r'''Nov''',
       r'''Dec'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Sunday''',
       r'''Monday''',
       r'''Tuesday''',
@@ -1534,7 +1533,7 @@
       r'''Friday''',
       r'''Saturday'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Sunday''',
       r'''Monday''',
       r'''Tuesday''',
@@ -1543,7 +1542,7 @@
       r'''Friday''',
       r'''Saturday'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Sun''',
       r'''Mon''',
       r'''Tue''',
@@ -1552,7 +1551,7 @@
       r'''Fri''',
       r'''Sat'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Sun''',
       r'''Mon''',
       r'''Tue''',
@@ -1561,7 +1560,7 @@
       r'''Fri''',
       r'''Sat'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -1570,7 +1569,7 @@
       r'''F''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -1579,26 +1578,26 @@
       r'''F''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1st quarter''',
       r'''2nd quarter''',
       r'''3rd quarter''',
       r'''4th quarter'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, MMMM d, y''',
       r'''MMMM d, y''',
       r'''MMM d, y''',
       r'''M/d/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -1606,23 +1605,23 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'at' {0}""",
       r"""{1} 'at' {0}""",
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'es':  <String, dynamic>{
+  'es': <String, dynamic>{
     'NAME': r'''es''',
-    'ERAS':  <dynamic>[r'''a. C.''', r'''d. C.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''a. C.''', r'''d. C.'''],
+    'ERANAMES': <dynamic>[
       r'''antes de Cristo''',
       r'''después de Cristo'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''E''',
       r'''F''',
       r'''M''',
@@ -1636,7 +1635,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''E''',
       r'''F''',
       r'''M''',
@@ -1650,7 +1649,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''enero''',
       r'''febrero''',
       r'''marzo''',
@@ -1664,7 +1663,7 @@
       r'''noviembre''',
       r'''diciembre'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''enero''',
       r'''febrero''',
       r'''marzo''',
@@ -1678,7 +1677,7 @@
       r'''noviembre''',
       r'''diciembre'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''ene.''',
       r'''feb.''',
       r'''mar.''',
@@ -1692,7 +1691,7 @@
       r'''nov.''',
       r'''dic.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''ene.''',
       r'''feb.''',
       r'''mar.''',
@@ -1706,7 +1705,7 @@
       r'''nov.''',
       r'''dic.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''domingo''',
       r'''lunes''',
       r'''martes''',
@@ -1715,7 +1714,7 @@
       r'''viernes''',
       r'''sábado'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''domingo''',
       r'''lunes''',
       r'''martes''',
@@ -1724,7 +1723,7 @@
       r'''viernes''',
       r'''sábado'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''dom.''',
       r'''lun.''',
       r'''mar.''',
@@ -1733,7 +1732,7 @@
       r'''vie.''',
       r'''sáb.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''dom.''',
       r'''lun.''',
       r'''mar.''',
@@ -1742,7 +1741,7 @@
       r'''vie.''',
       r'''sáb.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -1751,7 +1750,7 @@
       r'''V''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -1760,26 +1759,26 @@
       r'''V''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''T1''',
       r'''T2''',
       r'''T3''',
       r'''T4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1.er trimestre''',
       r'''2.º trimestre''',
       r'''3.er trimestre''',
       r'''4.º trimestre'''
     ],
-    'AMPMS':  <dynamic>[r'''a. m.''', r'''p. m.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''a. m.''', r'''p. m.'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, d 'de' MMMM 'de' y""",
       r"""d 'de' MMMM 'de' y""",
       r'''d MMM y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss (zzzz)''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -1787,20 +1786,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'et':  <String, dynamic>{
+  'et': <String, dynamic>{
     'NAME': r'''et''',
-    'ERAS':  <dynamic>[r'''eKr''', r'''pKr'''],
-    'ERANAMES':  <dynamic>[r'''enne Kristust''', r'''pärast Kristust'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''eKr''', r'''pKr'''],
+    'ERANAMES': <dynamic>[r'''enne Kristust''', r'''pärast Kristust'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''V''',
       r'''M''',
@@ -1814,7 +1813,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''V''',
       r'''M''',
@@ -1828,7 +1827,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''jaanuar''',
       r'''veebruar''',
       r'''märts''',
@@ -1842,7 +1841,7 @@
       r'''november''',
       r'''detsember'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''jaanuar''',
       r'''veebruar''',
       r'''märts''',
@@ -1856,7 +1855,7 @@
       r'''november''',
       r'''detsember'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jaan''',
       r'''veebr''',
       r'''märts''',
@@ -1870,7 +1869,7 @@
       r'''nov''',
       r'''dets'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jaan''',
       r'''veebr''',
       r'''märts''',
@@ -1884,7 +1883,7 @@
       r'''nov''',
       r'''dets'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''pühapäev''',
       r'''esmaspäev''',
       r'''teisipäev''',
@@ -1893,7 +1892,7 @@
       r'''reede''',
       r'''laupäev'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''pühapäev''',
       r'''esmaspäev''',
       r'''teisipäev''',
@@ -1902,7 +1901,7 @@
       r'''reede''',
       r'''laupäev'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''P''',
       r'''E''',
       r'''T''',
@@ -1911,7 +1910,7 @@
       r'''R''',
       r'''L'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''P''',
       r'''E''',
       r'''T''',
@@ -1920,7 +1919,7 @@
       r'''R''',
       r'''L'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''P''',
       r'''E''',
       r'''T''',
@@ -1929,7 +1928,7 @@
       r'''R''',
       r'''L'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''P''',
       r'''E''',
       r'''T''',
@@ -1938,26 +1937,26 @@
       r'''R''',
       r'''L'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''K1''',
       r'''K2''',
       r'''K3''',
       r'''K4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. kvartal''',
       r'''2. kvartal''',
       r'''3. kvartal''',
       r'''4. kvartal'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d. MMMM y''',
       r'''d. MMMM y''',
       r'''d. MMM y''',
       r'''dd.MM.yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -1965,20 +1964,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'fa':  <String, dynamic>{
+  'fa': <String, dynamic>{
     'NAME': r'''fa''',
-    'ERAS':  <dynamic>[r'''ق.م.''', r'''م.'''],
-    'ERANAMES':  <dynamic>[r'''قبل از میلاد''', r'''میلادی'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''ق.م.''', r'''م.'''],
+    'ERANAMES': <dynamic>[r'''قبل از میلاد''', r'''میلادی'''],
+    'NARROWMONTHS': <dynamic>[
       r'''ژ''',
       r'''ف''',
       r'''م''',
@@ -1992,7 +1991,7 @@
       r'''ن''',
       r'''د'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''ژ''',
       r'''ف''',
       r'''م''',
@@ -2006,7 +2005,7 @@
       r'''ن''',
       r'''د'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''ژانویهٔ''',
       r'''فوریهٔ''',
       r'''مارس''',
@@ -2020,7 +2019,7 @@
       r'''نوامبر''',
       r'''دسامبر'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''ژانویه''',
       r'''فوریه''',
       r'''مارس''',
@@ -2034,7 +2033,7 @@
       r'''نوامبر''',
       r'''دسامبر'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''ژانویهٔ''',
       r'''فوریهٔ''',
       r'''مارس''',
@@ -2048,7 +2047,7 @@
       r'''نوامبر''',
       r'''دسامبر'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''ژانویه''',
       r'''فوریه''',
       r'''مارس''',
@@ -2062,7 +2061,7 @@
       r'''نوامبر''',
       r'''دسامبر'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''یکشنبه''',
       r'''دوشنبه''',
       r'''سه‌شنبه''',
@@ -2071,7 +2070,7 @@
       r'''جمعه''',
       r'''شنبه'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''یکشنبه''',
       r'''دوشنبه''',
       r'''سه‌شنبه''',
@@ -2080,7 +2079,7 @@
       r'''جمعه''',
       r'''شنبه'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''یکشنبه''',
       r'''دوشنبه''',
       r'''سه‌شنبه''',
@@ -2089,7 +2088,7 @@
       r'''جمعه''',
       r'''شنبه'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''یکشنبه''',
       r'''دوشنبه''',
       r'''سه‌شنبه''',
@@ -2098,7 +2097,7 @@
       r'''جمعه''',
       r'''شنبه'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''ی''',
       r'''د''',
       r'''س''',
@@ -2107,7 +2106,7 @@
       r'''ج''',
       r'''ش'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''ی''',
       r'''د''',
       r'''س''',
@@ -2116,26 +2115,26 @@
       r'''ج''',
       r'''ش'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''س‌م۱''',
       r'''س‌م۲''',
       r'''س‌م۳''',
       r'''س‌م۴'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''سه‌ماههٔ اول''',
       r'''سه‌ماههٔ دوم''',
       r'''سه‌ماههٔ سوم''',
       r'''سه‌ماههٔ چهارم'''
     ],
-    'AMPMS':  <dynamic>[r'''قبل‌ازظهر''', r'''بعدازظهر'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''قبل‌ازظهر''', r'''بعدازظهر'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''y/M/d'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss (zzzz)''',
       r'''H:mm:ss (z)''',
       r'''H:mm:ss''',
@@ -2143,9 +2142,9 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 5,
-    'WEEKENDRANGE':  <dynamic>[4, 4],
+    'WEEKENDRANGE': <dynamic>[4, 4],
     'FIRSTWEEKCUTOFFDAY': 4,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1}، ساعت {0}''',
       r'''{1}، ساعت {0}''',
       r'''{1}،‏ {0}''',
@@ -2153,14 +2152,14 @@
     ],
     'ZERODIGIT': r'''۰''',
   },
-  'fi':  <String, dynamic>{
+  'fi': <String, dynamic>{
     'NAME': r'''fi''',
-    'ERAS':  <dynamic>[r'''eKr.''', r'''jKr.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''eKr.''', r'''jKr.'''],
+    'ERANAMES': <dynamic>[
       r'''ennen Kristuksen syntymää''',
       r'''jälkeen Kristuksen syntymän'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''T''',
       r'''H''',
       r'''M''',
@@ -2174,7 +2173,7 @@
       r'''M''',
       r'''J'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''T''',
       r'''H''',
       r'''M''',
@@ -2188,7 +2187,7 @@
       r'''M''',
       r'''J'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''tammikuuta''',
       r'''helmikuuta''',
       r'''maaliskuuta''',
@@ -2202,7 +2201,7 @@
       r'''marraskuuta''',
       r'''joulukuuta'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''tammikuu''',
       r'''helmikuu''',
       r'''maaliskuu''',
@@ -2216,7 +2215,7 @@
       r'''marraskuu''',
       r'''joulukuu'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''tammik.''',
       r'''helmik.''',
       r'''maalisk.''',
@@ -2230,7 +2229,7 @@
       r'''marrask.''',
       r'''jouluk.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''tammi''',
       r'''helmi''',
       r'''maalis''',
@@ -2244,7 +2243,7 @@
       r'''marras''',
       r'''joulu'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''sunnuntaina''',
       r'''maanantaina''',
       r'''tiistaina''',
@@ -2253,7 +2252,7 @@
       r'''perjantaina''',
       r'''lauantaina'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''sunnuntai''',
       r'''maanantai''',
       r'''tiistai''',
@@ -2262,7 +2261,7 @@
       r'''perjantai''',
       r'''lauantai'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''su''',
       r'''ma''',
       r'''ti''',
@@ -2271,7 +2270,7 @@
       r'''pe''',
       r'''la'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''su''',
       r'''ma''',
       r'''ti''',
@@ -2280,7 +2279,7 @@
       r'''pe''',
       r'''la'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -2289,7 +2288,7 @@
       r'''P''',
       r'''L'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -2298,26 +2297,26 @@
       r'''P''',
       r'''L'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1. nelj.''',
       r'''2. nelj.''',
       r'''3. nelj.''',
       r'''4. nelj.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. neljännes''',
       r'''2. neljännes''',
       r'''3. neljännes''',
       r'''4. neljännes'''
     ],
-    'AMPMS':  <dynamic>[r'''ap.''', r'''ip.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''ap.''', r'''ip.'''],
+    'DATEFORMATS': <dynamic>[
       r'''cccc d. MMMM y''',
       r'''d. MMMM y''',
       r'''d.M.y''',
       r'''d.M.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H.mm.ss zzzz''',
       r'''H.mm.ss z''',
       r'''H.mm.ss''',
@@ -2325,20 +2324,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'klo' {0}""",
       r"""{1} 'klo' {0}""",
       r"""{1} 'klo' {0}""",
       r'''{1} {0}'''
     ],
   },
-  'fil':  <String, dynamic>{
+  'fil': <String, dynamic>{
     'NAME': r'''fil''',
-    'ERAS':  <dynamic>[r'''BC''', r'''AD'''],
-    'ERANAMES':  <dynamic>[r'''Before Christ''', r'''Anno Domini'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''BC''', r'''AD'''],
+    'ERANAMES': <dynamic>[r'''Before Christ''', r'''Anno Domini'''],
+    'NARROWMONTHS': <dynamic>[
       r'''Ene''',
       r'''Peb''',
       r'''Mar''',
@@ -2352,7 +2351,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''E''',
       r'''P''',
       r'''M''',
@@ -2366,7 +2365,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Enero''',
       r'''Pebrero''',
       r'''Marso''',
@@ -2380,7 +2379,7 @@
       r'''Nobyembre''',
       r'''Disyembre'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Enero''',
       r'''Pebrero''',
       r'''Marso''',
@@ -2394,7 +2393,7 @@
       r'''Nobyembre''',
       r'''Disyembre'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Ene''',
       r'''Peb''',
       r'''Mar''',
@@ -2408,7 +2407,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Ene''',
       r'''Peb''',
       r'''Mar''',
@@ -2422,7 +2421,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Linggo''',
       r'''Lunes''',
       r'''Martes''',
@@ -2431,7 +2430,7 @@
       r'''Biyernes''',
       r'''Sabado'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Linggo''',
       r'''Lunes''',
       r'''Martes''',
@@ -2440,7 +2439,7 @@
       r'''Biyernes''',
       r'''Sabado'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -2449,7 +2448,7 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -2458,7 +2457,7 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -2467,7 +2466,7 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -2476,26 +2475,26 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''ika-1 quarter''',
       r'''ika-2 quarter''',
       r'''ika-3 quarter''',
       r'''ika-4 na quarter'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, MMMM d, y''',
       r'''MMMM d, y''',
       r'''MMM d, y''',
       r'''M/d/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -2503,23 +2502,23 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'nang' {0}""",
       r"""{1} 'nang' {0}""",
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'fr':  <String, dynamic>{
+  'fr': <String, dynamic>{
     'NAME': r'''fr''',
-    'ERAS':  <dynamic>[r'''av. J.-C.''', r'''ap. J.-C.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''av. J.-C.''', r'''ap. J.-C.'''],
+    'ERANAMES': <dynamic>[
       r'''avant Jésus-Christ''',
       r'''après Jésus-Christ'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -2533,7 +2532,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -2547,7 +2546,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''janvier''',
       r'''février''',
       r'''mars''',
@@ -2561,7 +2560,7 @@
       r'''novembre''',
       r'''décembre'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''janvier''',
       r'''février''',
       r'''mars''',
@@ -2575,7 +2574,7 @@
       r'''novembre''',
       r'''décembre'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''janv.''',
       r'''févr.''',
       r'''mars''',
@@ -2589,7 +2588,7 @@
       r'''nov.''',
       r'''déc.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''janv.''',
       r'''févr.''',
       r'''mars''',
@@ -2603,7 +2602,7 @@
       r'''nov.''',
       r'''déc.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''dimanche''',
       r'''lundi''',
       r'''mardi''',
@@ -2612,7 +2611,7 @@
       r'''vendredi''',
       r'''samedi'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''dimanche''',
       r'''lundi''',
       r'''mardi''',
@@ -2621,7 +2620,7 @@
       r'''vendredi''',
       r'''samedi'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''dim.''',
       r'''lun.''',
       r'''mar.''',
@@ -2630,7 +2629,7 @@
       r'''ven.''',
       r'''sam.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''dim.''',
       r'''lun.''',
       r'''mar.''',
@@ -2639,7 +2638,7 @@
       r'''ven.''',
       r'''sam.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -2648,7 +2647,7 @@
       r'''V''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -2657,26 +2656,26 @@
       r'''V''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''T1''',
       r'''T2''',
       r'''T3''',
       r'''T4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1er trimestre''',
       r'''2e trimestre''',
       r'''3e trimestre''',
       r'''4e trimestre'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''dd/MM/y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -2684,20 +2683,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'à' {0}""",
       r"""{1} 'à' {0}""",
       r"""{1} 'à' {0}""",
       r'''{1} {0}'''
     ],
   },
-  'gsw':  <String, dynamic>{
+  'gsw': <String, dynamic>{
     'NAME': r'''gsw''',
-    'ERAS':  <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
-    'ERANAMES':  <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
+    'ERANAMES': <dynamic>[r'''v. Chr.''', r'''n. Chr.'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -2711,7 +2710,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -2725,7 +2724,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Januar''',
       r'''Februar''',
       r'''März''',
@@ -2739,7 +2738,7 @@
       r'''Novämber''',
       r'''Dezämber'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Januar''',
       r'''Februar''',
       r'''März''',
@@ -2753,7 +2752,7 @@
       r'''Novämber''',
       r'''Dezämber'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mär''',
@@ -2767,7 +2766,7 @@
       r'''Nov''',
       r'''Dez'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mär''',
@@ -2781,7 +2780,7 @@
       r'''Nov''',
       r'''Dez'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Sunntig''',
       r'''Määntig''',
       r'''Ziischtig''',
@@ -2790,7 +2789,7 @@
       r'''Friitig''',
       r'''Samschtig'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Sunntig''',
       r'''Määntig''',
       r'''Ziischtig''',
@@ -2799,7 +2798,7 @@
       r'''Friitig''',
       r'''Samschtig'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Su.''',
       r'''Mä.''',
       r'''Zi.''',
@@ -2808,7 +2807,7 @@
       r'''Fr.''',
       r'''Sa.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Su.''',
       r'''Mä.''',
       r'''Zi.''',
@@ -2817,7 +2816,7 @@
       r'''Fr.''',
       r'''Sa.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''D''',
@@ -2826,7 +2825,7 @@
       r'''F''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''D''',
@@ -2835,26 +2834,26 @@
       r'''F''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. Quartal''',
       r'''2. Quartal''',
       r'''3. Quartal''',
       r'''4. Quartal'''
     ],
-    'AMPMS':  <dynamic>[r'''am Vormittag''', r'''am Namittag'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''am Vormittag''', r'''am Namittag'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d. MMMM y''',
       r'''d. MMMM y''',
       r'''dd.MM.y''',
       r'''dd.MM.yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -2862,20 +2861,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'he':  <String, dynamic>{
+  'he': <String, dynamic>{
     'NAME': r'''he''',
-    'ERAS':  <dynamic>[r'''לפנה״ס''', r'''לספירה'''],
-    'ERANAMES':  <dynamic>[r'''לפני הספירה''', r'''לספירה'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''לפנה״ס''', r'''לספירה'''],
+    'ERANAMES': <dynamic>[r'''לפני הספירה''', r'''לספירה'''],
+    'NARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -2889,7 +2888,7 @@
       r'''11''',
       r'''12'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -2903,7 +2902,7 @@
       r'''11''',
       r'''12'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''ינואר''',
       r'''פברואר''',
       r'''מרץ''',
@@ -2917,7 +2916,7 @@
       r'''נובמבר''',
       r'''דצמבר'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''ינואר''',
       r'''פברואר''',
       r'''מרץ''',
@@ -2931,7 +2930,7 @@
       r'''נובמבר''',
       r'''דצמבר'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''ינו׳''',
       r'''פבר׳''',
       r'''מרץ''',
@@ -2945,7 +2944,7 @@
       r'''נוב׳''',
       r'''דצמ׳'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''ינו׳''',
       r'''פבר׳''',
       r'''מרץ''',
@@ -2959,7 +2958,7 @@
       r'''נוב׳''',
       r'''דצמ׳'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''יום ראשון''',
       r'''יום שני''',
       r'''יום שלישי''',
@@ -2968,7 +2967,7 @@
       r'''יום שישי''',
       r'''יום שבת'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''יום ראשון''',
       r'''יום שני''',
       r'''יום שלישי''',
@@ -2977,7 +2976,7 @@
       r'''יום שישי''',
       r'''יום שבת'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''יום א׳''',
       r'''יום ב׳''',
       r'''יום ג׳''',
@@ -2986,7 +2985,7 @@
       r'''יום ו׳''',
       r'''שבת'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''יום א׳''',
       r'''יום ב׳''',
       r'''יום ג׳''',
@@ -2995,7 +2994,7 @@
       r'''יום ו׳''',
       r'''שבת'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''א׳''',
       r'''ב׳''',
       r'''ג׳''',
@@ -3004,7 +3003,7 @@
       r'''ו׳''',
       r'''ש׳'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''א׳''',
       r'''ב׳''',
       r'''ג׳''',
@@ -3013,26 +3012,26 @@
       r'''ו׳''',
       r'''ש׳'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''רבעון 1''',
       r'''רבעון 2''',
       r'''רבעון 3''',
       r'''רבעון 4'''
     ],
-    'AMPMS':  <dynamic>[r'''לפנה״צ''', r'''אחה״צ'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''לפנה״צ''', r'''אחה״צ'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d בMMMM y''',
       r'''d בMMMM y''',
       r'''d בMMM y''',
       r'''d.M.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -3040,20 +3039,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[4, 5],
+    'WEEKENDRANGE': <dynamic>[4, 5],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} בשעה {0}''',
       r'''{1} בשעה {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'hi':  <String, dynamic>{
+  'hi': <String, dynamic>{
     'NAME': r'''hi''',
-    'ERAS':  <dynamic>[r'''ईसा-पूर्व''', r'''ईस्वी'''],
-    'ERANAMES':  <dynamic>[r'''ईसा-पूर्व''', r'''ईसवी सन'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''ईसा-पूर्व''', r'''ईस्वी'''],
+    'ERANAMES': <dynamic>[r'''ईसा-पूर्व''', r'''ईसवी सन'''],
+    'NARROWMONTHS': <dynamic>[
       r'''ज''',
       r'''फ़''',
       r'''मा''',
@@ -3067,7 +3066,7 @@
       r'''न''',
       r'''दि'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''ज''',
       r'''फ़''',
       r'''मा''',
@@ -3081,7 +3080,7 @@
       r'''न''',
       r'''दि'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''जनवरी''',
       r'''फ़रवरी''',
       r'''मार्च''',
@@ -3095,7 +3094,7 @@
       r'''नवंबर''',
       r'''दिसंबर'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''जनवरी''',
       r'''फ़रवरी''',
       r'''मार्च''',
@@ -3109,7 +3108,7 @@
       r'''नवंबर''',
       r'''दिसंबर'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''जन॰''',
       r'''फ़र॰''',
       r'''मार्च''',
@@ -3123,7 +3122,7 @@
       r'''नव॰''',
       r'''दिस॰'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''जन॰''',
       r'''फ़र॰''',
       r'''मार्च''',
@@ -3137,7 +3136,7 @@
       r'''नव॰''',
       r'''दिस॰'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''रविवार''',
       r'''सोमवार''',
       r'''मंगलवार''',
@@ -3146,7 +3145,7 @@
       r'''शुक्रवार''',
       r'''शनिवार'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''रविवार''',
       r'''सोमवार''',
       r'''मंगलवार''',
@@ -3155,7 +3154,7 @@
       r'''शुक्रवार''',
       r'''शनिवार'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''रवि''',
       r'''सोम''',
       r'''मंगल''',
@@ -3164,7 +3163,7 @@
       r'''शुक्र''',
       r'''शनि'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''रवि''',
       r'''सोम''',
       r'''मंगल''',
@@ -3173,7 +3172,7 @@
       r'''शुक्र''',
       r'''शनि'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''र''',
       r'''सो''',
       r'''मं''',
@@ -3182,7 +3181,7 @@
       r'''शु''',
       r'''श'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''र''',
       r'''सो''',
       r'''मं''',
@@ -3191,26 +3190,26 @@
       r'''शु''',
       r'''श'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''ति1''',
       r'''ति2''',
       r'''ति3''',
       r'''ति4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''पहली तिमाही''',
       r'''दूसरी तिमाही''',
       r'''तीसरी तिमाही''',
       r'''चौथी तिमाही'''
     ],
-    'AMPMS':  <dynamic>[r'''am''', r'''pm'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''am''', r'''pm'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -3218,20 +3217,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[6, 6],
+    'WEEKENDRANGE': <dynamic>[6, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} को {0}''',
       r'''{1} को {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'hr':  <String, dynamic>{
+  'hr': <String, dynamic>{
     'NAME': r'''hr''',
-    'ERAS':  <dynamic>[r'''pr. Kr.''', r'''po. Kr.'''],
-    'ERANAMES':  <dynamic>[r'''prije Krista''', r'''poslije Krista'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''pr. Kr.''', r'''po. Kr.'''],
+    'ERANAMES': <dynamic>[r'''prije Krista''', r'''poslije Krista'''],
+    'NARROWMONTHS': <dynamic>[
       r'''1.''',
       r'''2.''',
       r'''3.''',
@@ -3245,7 +3244,7 @@
       r'''11.''',
       r'''12.'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1.''',
       r'''2.''',
       r'''3.''',
@@ -3259,7 +3258,7 @@
       r'''11.''',
       r'''12.'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''siječnja''',
       r'''veljače''',
       r'''ožujka''',
@@ -3273,7 +3272,7 @@
       r'''studenoga''',
       r'''prosinca'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''siječanj''',
       r'''veljača''',
       r'''ožujak''',
@@ -3287,7 +3286,7 @@
       r'''studeni''',
       r'''prosinac'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''sij''',
       r'''velj''',
       r'''ožu''',
@@ -3301,7 +3300,7 @@
       r'''stu''',
       r'''pro'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''sij''',
       r'''velj''',
       r'''ožu''',
@@ -3315,7 +3314,7 @@
       r'''stu''',
       r'''pro'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''nedjelja''',
       r'''ponedjeljak''',
       r'''utorak''',
@@ -3324,7 +3323,7 @@
       r'''petak''',
       r'''subota'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''nedjelja''',
       r'''ponedjeljak''',
       r'''utorak''',
@@ -3333,7 +3332,7 @@
       r'''petak''',
       r'''subota'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''ned''',
       r'''pon''',
       r'''uto''',
@@ -3342,7 +3341,7 @@
       r'''pet''',
       r'''sub'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''ned''',
       r'''pon''',
       r'''uto''',
@@ -3351,7 +3350,7 @@
       r'''pet''',
       r'''sub'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''N''',
       r'''P''',
       r'''U''',
@@ -3360,7 +3359,7 @@
       r'''P''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''u''',
@@ -3369,26 +3368,26 @@
       r'''p''',
       r'''s'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1kv''',
       r'''2kv''',
       r'''3kv''',
       r'''4kv'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. kvartal''',
       r'''2. kvartal''',
       r'''3. kvartal''',
       r'''4. kvartal'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d. MMMM y.''',
       r'''d. MMMM y.''',
       r'''d. MMM y.''',
       r'''dd. MM. y.'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss (zzzz)''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -3396,23 +3395,23 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'u' {0}""",
       r"""{1} 'u' {0}""",
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'hu':  <String, dynamic>{
+  'hu': <String, dynamic>{
     'NAME': r'''hu''',
-    'ERAS':  <dynamic>[r'''i. e.''', r'''i. sz.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''i. e.''', r'''i. sz.'''],
+    'ERANAMES': <dynamic>[
       r'''Krisztus előtt''',
       r'''időszámításunk szerint'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -3426,7 +3425,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -3440,7 +3439,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''január''',
       r'''február''',
       r'''március''',
@@ -3454,7 +3453,7 @@
       r'''november''',
       r'''december'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''január''',
       r'''február''',
       r'''március''',
@@ -3468,7 +3467,7 @@
       r'''november''',
       r'''december'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''febr.''',
       r'''márc.''',
@@ -3482,7 +3481,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''febr.''',
       r'''márc.''',
@@ -3496,7 +3495,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''vasárnap''',
       r'''hétfő''',
       r'''kedd''',
@@ -3505,7 +3504,7 @@
       r'''péntek''',
       r'''szombat'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''vasárnap''',
       r'''hétfő''',
       r'''kedd''',
@@ -3514,7 +3513,7 @@
       r'''péntek''',
       r'''szombat'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''V''',
       r'''H''',
       r'''K''',
@@ -3523,7 +3522,7 @@
       r'''P''',
       r'''Szo'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''V''',
       r'''H''',
       r'''K''',
@@ -3532,7 +3531,7 @@
       r'''P''',
       r'''Szo'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''V''',
       r'''H''',
       r'''K''',
@@ -3541,7 +3540,7 @@
       r'''P''',
       r'''Sz'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''V''',
       r'''H''',
       r'''K''',
@@ -3550,26 +3549,26 @@
       r'''P''',
       r'''Sz'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''I. n.év''',
       r'''II. n.év''',
       r'''III. n.év''',
       r'''IV. n.év'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''I. negyedév''',
       r'''II. negyedév''',
       r'''III. negyedév''',
       r'''IV. negyedév'''
     ],
-    'AMPMS':  <dynamic>[r'''de.''', r'''du.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''de.''', r'''du.'''],
+    'DATEFORMATS': <dynamic>[
       r'''y. MMMM d., EEEE''',
       r'''y. MMMM d.''',
       r'''y. MMM d.''',
       r'''y. MM. dd.'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -3577,20 +3576,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'id':  <String, dynamic>{
+  'id': <String, dynamic>{
     'NAME': r'''id''',
-    'ERAS':  <dynamic>[r'''SM''', r'''M'''],
-    'ERANAMES':  <dynamic>[r'''Sebelum Masehi''', r'''Masehi'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''SM''', r'''M'''],
+    'ERANAMES': <dynamic>[r'''Sebelum Masehi''', r'''Masehi'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -3604,7 +3603,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -3618,7 +3617,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Januari''',
       r'''Februari''',
       r'''Maret''',
@@ -3632,7 +3631,7 @@
       r'''November''',
       r'''Desember'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Januari''',
       r'''Februari''',
       r'''Maret''',
@@ -3646,7 +3645,7 @@
       r'''November''',
       r'''Desember'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mar''',
@@ -3660,7 +3659,7 @@
       r'''Nov''',
       r'''Des'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mar''',
@@ -3674,7 +3673,7 @@
       r'''Nov''',
       r'''Des'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Minggu''',
       r'''Senin''',
       r'''Selasa''',
@@ -3683,7 +3682,7 @@
       r'''Jumat''',
       r'''Sabtu'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Minggu''',
       r'''Senin''',
       r'''Selasa''',
@@ -3692,7 +3691,7 @@
       r'''Jumat''',
       r'''Sabtu'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Min''',
       r'''Sen''',
       r'''Sel''',
@@ -3701,7 +3700,7 @@
       r'''Jum''',
       r'''Sab'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Min''',
       r'''Sen''',
       r'''Sel''',
@@ -3710,7 +3709,7 @@
       r'''Jum''',
       r'''Sab'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''M''',
       r'''S''',
       r'''S''',
@@ -3719,7 +3718,7 @@
       r'''J''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''M''',
       r'''S''',
       r'''S''',
@@ -3728,26 +3727,26 @@
       r'''J''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''K1''',
       r'''K2''',
       r'''K3''',
       r'''K4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''Kuartal ke-1''',
       r'''Kuartal ke-2''',
       r'''Kuartal ke-3''',
       r'''Kuartal ke-4'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, dd MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''dd/MM/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH.mm.ss zzzz''',
       r'''HH.mm.ss z''',
       r'''HH.mm.ss''',
@@ -3755,20 +3754,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'it':  <String, dynamic>{
+  'it': <String, dynamic>{
     'NAME': r'''it''',
-    'ERAS':  <dynamic>[r'''a.C.''', r'''d.C.'''],
-    'ERANAMES':  <dynamic>[r'''avanti Cristo''', r'''dopo Cristo'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''a.C.''', r'''d.C.'''],
+    'ERANAMES': <dynamic>[r'''avanti Cristo''', r'''dopo Cristo'''],
+    'NARROWMONTHS': <dynamic>[
       r'''G''',
       r'''F''',
       r'''M''',
@@ -3782,7 +3781,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''G''',
       r'''F''',
       r'''M''',
@@ -3796,7 +3795,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''gennaio''',
       r'''febbraio''',
       r'''marzo''',
@@ -3810,7 +3809,7 @@
       r'''novembre''',
       r'''dicembre'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''gennaio''',
       r'''febbraio''',
       r'''marzo''',
@@ -3824,7 +3823,7 @@
       r'''novembre''',
       r'''dicembre'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''gen''',
       r'''feb''',
       r'''mar''',
@@ -3838,7 +3837,7 @@
       r'''nov''',
       r'''dic'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''gen''',
       r'''feb''',
       r'''mar''',
@@ -3852,7 +3851,7 @@
       r'''nov''',
       r'''dic'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''domenica''',
       r'''lunedì''',
       r'''martedì''',
@@ -3861,7 +3860,7 @@
       r'''venerdì''',
       r'''sabato'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''domenica''',
       r'''lunedì''',
       r'''martedì''',
@@ -3870,7 +3869,7 @@
       r'''venerdì''',
       r'''sabato'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''dom''',
       r'''lun''',
       r'''mar''',
@@ -3879,7 +3878,7 @@
       r'''ven''',
       r'''sab'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''dom''',
       r'''lun''',
       r'''mar''',
@@ -3888,7 +3887,7 @@
       r'''ven''',
       r'''sab'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -3897,7 +3896,7 @@
       r'''V''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -3906,26 +3905,26 @@
       r'''V''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''T1''',
       r'''T2''',
       r'''T3''',
       r'''T4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1º trimestre''',
       r'''2º trimestre''',
       r'''3º trimestre''',
       r'''4º trimestre'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''dd/MM/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -3933,20 +3932,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'ja':  <String, dynamic>{
+  'ja': <String, dynamic>{
     'NAME': r'''ja''',
-    'ERAS':  <dynamic>[r'''紀元前''', r'''西暦'''],
-    'ERANAMES':  <dynamic>[r'''紀元前''', r'''西暦'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''紀元前''', r'''西暦'''],
+    'ERANAMES': <dynamic>[r'''紀元前''', r'''西暦'''],
+    'NARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -3960,7 +3959,7 @@
       r'''11''',
       r'''12'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -3974,7 +3973,7 @@
       r'''11''',
       r'''12'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''1月''',
       r'''2月''',
       r'''3月''',
@@ -3988,7 +3987,7 @@
       r'''11月''',
       r'''12月'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''1月''',
       r'''2月''',
       r'''3月''',
@@ -4002,7 +4001,7 @@
       r'''11月''',
       r'''12月'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''1月''',
       r'''2月''',
       r'''3月''',
@@ -4016,7 +4015,7 @@
       r'''11月''',
       r'''12月'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''1月''',
       r'''2月''',
       r'''3月''',
@@ -4030,7 +4029,7 @@
       r'''11月''',
       r'''12月'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''日曜日''',
       r'''月曜日''',
       r'''火曜日''',
@@ -4039,7 +4038,7 @@
       r'''金曜日''',
       r'''土曜日'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''日曜日''',
       r'''月曜日''',
       r'''火曜日''',
@@ -4048,7 +4047,7 @@
       r'''金曜日''',
       r'''土曜日'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''日''',
       r'''月''',
       r'''火''',
@@ -4057,7 +4056,7 @@
       r'''金''',
       r'''土'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''日''',
       r'''月''',
       r'''火''',
@@ -4066,7 +4065,7 @@
       r'''金''',
       r'''土'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''日''',
       r'''月''',
       r'''火''',
@@ -4075,7 +4074,7 @@
       r'''金''',
       r'''土'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''日''',
       r'''月''',
       r'''火''',
@@ -4084,26 +4083,26 @@
       r'''金''',
       r'''土'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''第1四半期''',
       r'''第2四半期''',
       r'''第3四半期''',
       r'''第4四半期'''
     ],
-    'AMPMS':  <dynamic>[r'''午前''', r'''午後'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''午前''', r'''午後'''],
+    'DATEFORMATS': <dynamic>[
       r'''y年M月d日EEEE''',
       r'''y年M月d日''',
       r'''y/MM/dd''',
       r'''y/MM/dd'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H時mm分ss秒 zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -4111,20 +4110,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'km':  <String, dynamic>{
+  'km': <String, dynamic>{
     'NAME': r'''km''',
-    'ERAS':  <dynamic>[r'''មុន គ.ស.''', r'''គ.ស.'''],
-    'ERANAMES':  <dynamic>[r'''មុន​គ្រិស្តសករាជ''', r'''គ្រិស្តសករាជ'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''មុន គ.ស.''', r'''គ.ស.'''],
+    'ERANAMES': <dynamic>[r'''មុន​គ្រិស្តសករាជ''', r'''គ្រិស្តសករាជ'''],
+    'NARROWMONTHS': <dynamic>[
       r'''ម''',
       r'''ក''',
       r'''ម''',
@@ -4138,7 +4137,7 @@
       r'''វ''',
       r'''ធ'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''ម''',
       r'''ក''',
       r'''ម''',
@@ -4152,7 +4151,7 @@
       r'''វ''',
       r'''ធ'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''មករា''',
       r'''កុម្ភៈ''',
       r'''មីនា''',
@@ -4166,7 +4165,7 @@
       r'''វិច្ឆិកា''',
       r'''ធ្នូ'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''មករា''',
       r'''កុម្ភៈ''',
       r'''មីនា''',
@@ -4180,7 +4179,7 @@
       r'''វិច្ឆិកា''',
       r'''ធ្នូ'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''មករា''',
       r'''កុម្ភៈ''',
       r'''មីនា''',
@@ -4194,7 +4193,7 @@
       r'''វិច្ឆិកា''',
       r'''ធ្នូ'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''មករា''',
       r'''កុម្ភៈ''',
       r'''មីនា''',
@@ -4208,7 +4207,7 @@
       r'''វិច្ឆិកា''',
       r'''ធ្នូ'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''អាទិត្យ''',
       r'''ច័ន្ទ''',
       r'''អង្គារ''',
@@ -4217,7 +4216,7 @@
       r'''សុក្រ''',
       r'''សៅរ៍'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''អាទិត្យ''',
       r'''ច័ន្ទ''',
       r'''អង្គារ''',
@@ -4226,7 +4225,7 @@
       r'''សុក្រ''',
       r'''សៅរ៍'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''អាទិត្យ''',
       r'''ច័ន្ទ''',
       r'''អង្គារ''',
@@ -4235,7 +4234,7 @@
       r'''សុក្រ''',
       r'''សៅរ៍'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''អាទិត្យ''',
       r'''ច័ន្ទ''',
       r'''អង្គារ''',
@@ -4244,7 +4243,7 @@
       r'''សុក្រ''',
       r'''សៅរ៍'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''អ''',
       r'''ច''',
       r'''អ''',
@@ -4253,7 +4252,7 @@
       r'''ស''',
       r'''ស'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''អ''',
       r'''ច''',
       r'''អ''',
@@ -4262,26 +4261,26 @@
       r'''ស''',
       r'''ស'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''ត្រីមាសទី 1''',
       r'''ត្រីមាសទី 2''',
       r'''ត្រីមាសទី 3''',
       r'''ត្រីមាសទី 4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''ត្រីមាសទី 1''',
       r'''ត្រីមាសទី 2''',
       r'''ត្រីមាសទី 3''',
       r'''ត្រីមាសទី 4'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -4289,20 +4288,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} នៅ​ម៉ោង {0}''',
       r'''{1} នៅ​ម៉ោង {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'ko':  <String, dynamic>{
+  'ko': <String, dynamic>{
     'NAME': r'''ko''',
-    'ERAS':  <dynamic>[r'''BC''', r'''AD'''],
-    'ERANAMES':  <dynamic>[r'''기원전''', r'''서기'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''BC''', r'''AD'''],
+    'ERANAMES': <dynamic>[r'''기원전''', r'''서기'''],
+    'NARROWMONTHS': <dynamic>[
       r'''1월''',
       r'''2월''',
       r'''3월''',
@@ -4316,7 +4315,7 @@
       r'''11월''',
       r'''12월'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1월''',
       r'''2월''',
       r'''3월''',
@@ -4330,7 +4329,7 @@
       r'''11월''',
       r'''12월'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''1월''',
       r'''2월''',
       r'''3월''',
@@ -4344,7 +4343,7 @@
       r'''11월''',
       r'''12월'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''1월''',
       r'''2월''',
       r'''3월''',
@@ -4358,7 +4357,7 @@
       r'''11월''',
       r'''12월'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''1월''',
       r'''2월''',
       r'''3월''',
@@ -4372,7 +4371,7 @@
       r'''11월''',
       r'''12월'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''1월''',
       r'''2월''',
       r'''3월''',
@@ -4386,7 +4385,7 @@
       r'''11월''',
       r'''12월'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''일요일''',
       r'''월요일''',
       r'''화요일''',
@@ -4395,7 +4394,7 @@
       r'''금요일''',
       r'''토요일'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''일요일''',
       r'''월요일''',
       r'''화요일''',
@@ -4404,7 +4403,7 @@
       r'''금요일''',
       r'''토요일'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''일''',
       r'''월''',
       r'''화''',
@@ -4413,7 +4412,7 @@
       r'''금''',
       r'''토'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''일''',
       r'''월''',
       r'''화''',
@@ -4422,7 +4421,7 @@
       r'''금''',
       r'''토'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''일''',
       r'''월''',
       r'''화''',
@@ -4431,7 +4430,7 @@
       r'''금''',
       r'''토'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''일''',
       r'''월''',
       r'''화''',
@@ -4440,26 +4439,26 @@
       r'''금''',
       r'''토'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1분기''',
       r'''2분기''',
       r'''3분기''',
       r'''4분기'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''제 1/4분기''',
       r'''제 2/4분기''',
       r'''제 3/4분기''',
       r'''제 4/4분기'''
     ],
-    'AMPMS':  <dynamic>[r'''오전''', r'''오후'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''오전''', r'''오후'''],
+    'DATEFORMATS': <dynamic>[
       r'''y년 M월 d일 EEEE''',
       r'''y년 M월 d일''',
       r'''y. M. d.''',
       r'''yy. M. d.'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''a h시 m분 s초 zzzz''',
       r'''a h시 m분 s초 z''',
       r'''a h:mm:ss''',
@@ -4467,20 +4466,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'lt':  <String, dynamic>{
+  'lt': <String, dynamic>{
     'NAME': r'''lt''',
-    'ERAS':  <dynamic>[r'''pr. Kr.''', r'''po Kr.'''],
-    'ERANAMES':  <dynamic>[r'''prieš Kristų''', r'''po Kristaus'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''pr. Kr.''', r'''po Kr.'''],
+    'ERANAMES': <dynamic>[r'''prieš Kristų''', r'''po Kristaus'''],
+    'NARROWMONTHS': <dynamic>[
       r'''S''',
       r'''V''',
       r'''K''',
@@ -4494,7 +4493,7 @@
       r'''L''',
       r'''G'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''S''',
       r'''V''',
       r'''K''',
@@ -4508,7 +4507,7 @@
       r'''L''',
       r'''G'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''sausio''',
       r'''vasario''',
       r'''kovo''',
@@ -4522,7 +4521,7 @@
       r'''lapkričio''',
       r'''gruodžio'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''sausis''',
       r'''vasaris''',
       r'''kovas''',
@@ -4536,7 +4535,7 @@
       r'''lapkritis''',
       r'''gruodis'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''saus.''',
       r'''vas.''',
       r'''kov.''',
@@ -4550,7 +4549,7 @@
       r'''lapkr.''',
       r'''gruod.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''saus.''',
       r'''vas.''',
       r'''kov.''',
@@ -4564,7 +4563,7 @@
       r'''lapkr.''',
       r'''gruod.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''sekmadienis''',
       r'''pirmadienis''',
       r'''antradienis''',
@@ -4573,7 +4572,7 @@
       r'''penktadienis''',
       r'''šeštadienis'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''sekmadienis''',
       r'''pirmadienis''',
       r'''antradienis''',
@@ -4582,7 +4581,7 @@
       r'''penktadienis''',
       r'''šeštadienis'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''sk''',
       r'''pr''',
       r'''an''',
@@ -4591,7 +4590,7 @@
       r'''pn''',
       r'''št'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''sk''',
       r'''pr''',
       r'''an''',
@@ -4600,7 +4599,7 @@
       r'''pn''',
       r'''št'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''P''',
       r'''A''',
@@ -4609,7 +4608,7 @@
       r'''P''',
       r'''Š'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''P''',
       r'''A''',
@@ -4618,26 +4617,26 @@
       r'''P''',
       r'''Š'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''I k.''',
       r'''II k.''',
       r'''III k.''',
       r'''IV k.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''I ketvirtis''',
       r'''II ketvirtis''',
       r'''III ketvirtis''',
       r'''IV ketvirtis'''
     ],
-    'AMPMS':  <dynamic>[r'''priešpiet''', r'''popiet'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''priešpiet''', r'''popiet'''],
+    'DATEFORMATS': <dynamic>[
       r"""y 'm'. MMMM d 'd'., EEEE""",
       r"""y 'm'. MMMM d 'd'.""",
       r'''y-MM-dd''',
       r'''y-MM-dd'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -4645,20 +4644,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'lv':  <String, dynamic>{
+  'lv': <String, dynamic>{
     'NAME': r'''lv''',
-    'ERAS':  <dynamic>[r'''p.m.ē.''', r'''m.ē.'''],
-    'ERANAMES':  <dynamic>[r'''pirms mūsu ēras''', r'''mūsu ērā'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''p.m.ē.''', r'''m.ē.'''],
+    'ERANAMES': <dynamic>[r'''pirms mūsu ēras''', r'''mūsu ērā'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -4672,7 +4671,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -4686,7 +4685,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''janvāris''',
       r'''februāris''',
       r'''marts''',
@@ -4700,7 +4699,7 @@
       r'''novembris''',
       r'''decembris'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''janvāris''',
       r'''februāris''',
       r'''marts''',
@@ -4714,7 +4713,7 @@
       r'''novembris''',
       r'''decembris'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''janv.''',
       r'''febr.''',
       r'''marts''',
@@ -4728,7 +4727,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''janv.''',
       r'''febr.''',
       r'''marts''',
@@ -4742,7 +4741,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''svētdiena''',
       r'''pirmdiena''',
       r'''otrdiena''',
@@ -4751,7 +4750,7 @@
       r'''piektdiena''',
       r'''sestdiena'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Svētdiena''',
       r'''Pirmdiena''',
       r'''Otrdiena''',
@@ -4760,7 +4759,7 @@
       r'''Piektdiena''',
       r'''Sestdiena'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''svētd.''',
       r'''pirmd.''',
       r'''otrd.''',
@@ -4769,7 +4768,7 @@
       r'''piektd.''',
       r'''sestd.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Svētd.''',
       r'''Pirmd.''',
       r'''Otrd.''',
@@ -4778,7 +4777,7 @@
       r'''Piektd.''',
       r'''Sestd.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''P''',
       r'''O''',
@@ -4787,7 +4786,7 @@
       r'''P''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''P''',
       r'''O''',
@@ -4796,26 +4795,26 @@
       r'''P''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1. cet.''',
       r'''2. cet.''',
       r'''3. cet.''',
       r'''4. cet.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. ceturksnis''',
       r'''2. ceturksnis''',
       r'''3. ceturksnis''',
       r'''4. ceturksnis'''
     ],
-    'AMPMS':  <dynamic>[r'''priekšpusdienā''', r'''pēcpusdienā'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''priekšpusdienā''', r'''pēcpusdienā'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, y. 'gada' d. MMMM""",
       r"""y. 'gada' d. MMMM""",
       r"""y. 'gada' d. MMM""",
       r'''dd.MM.yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -4823,20 +4822,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'ms':  <String, dynamic>{
+  'ms': <String, dynamic>{
     'NAME': r'''ms''',
-    'ERAS':  <dynamic>[r'''S.M.''', r'''TM'''],
-    'ERANAMES':  <dynamic>[r'''S.M.''', r'''TM'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''S.M.''', r'''TM'''],
+    'ERANAMES': <dynamic>[r'''S.M.''', r'''TM'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -4850,7 +4849,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -4864,7 +4863,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Januari''',
       r'''Februari''',
       r'''Mac''',
@@ -4878,7 +4877,7 @@
       r'''November''',
       r'''Disember'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Januari''',
       r'''Februari''',
       r'''Mac''',
@@ -4892,7 +4891,7 @@
       r'''November''',
       r'''Disember'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mac''',
@@ -4906,7 +4905,7 @@
       r'''Nov''',
       r'''Dis'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Jan''',
       r'''Feb''',
       r'''Mac''',
@@ -4920,7 +4919,7 @@
       r'''Nov''',
       r'''Dis'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Ahad''',
       r'''Isnin''',
       r'''Selasa''',
@@ -4929,7 +4928,7 @@
       r'''Jumaat''',
       r'''Sabtu'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Ahad''',
       r'''Isnin''',
       r'''Selasa''',
@@ -4938,7 +4937,7 @@
       r'''Jumaat''',
       r'''Sabtu'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Ahd''',
       r'''Isn''',
       r'''Sel''',
@@ -4947,7 +4946,7 @@
       r'''Jum''',
       r'''Sab'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Ahd''',
       r'''Isn''',
       r'''Sel''',
@@ -4956,7 +4955,7 @@
       r'''Jum''',
       r'''Sab'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''A''',
       r'''I''',
       r'''S''',
@@ -4965,7 +4964,7 @@
       r'''J''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''A''',
       r'''I''',
       r'''S''',
@@ -4974,26 +4973,26 @@
       r'''J''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''S1''',
       r'''S2''',
       r'''S3''',
       r'''S4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''Suku pertama''',
       r'''Suku Ke-2''',
       r'''Suku Ke-3''',
       r'''Suku Ke-4'''
     ],
-    'AMPMS':  <dynamic>[r'''PG''', r'''PTG'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''PG''', r'''PTG'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''d/MM/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -5001,20 +5000,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'nb':  <String, dynamic>{
+  'nb': <String, dynamic>{
     'NAME': r'''nb''',
-    'ERAS':  <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
-    'ERANAMES':  <dynamic>[r'''før Kristus''', r'''etter Kristus'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
+    'ERANAMES': <dynamic>[r'''før Kristus''', r'''etter Kristus'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -5028,7 +5027,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -5042,7 +5041,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''mars''',
@@ -5056,7 +5055,7 @@
       r'''november''',
       r'''desember'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''mars''',
@@ -5070,7 +5069,7 @@
       r'''november''',
       r'''desember'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mar.''',
@@ -5084,7 +5083,7 @@
       r'''nov.''',
       r'''des.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''feb''',
       r'''mar''',
@@ -5098,7 +5097,7 @@
       r'''nov''',
       r'''des'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''søndag''',
       r'''mandag''',
       r'''tirsdag''',
@@ -5107,7 +5106,7 @@
       r'''fredag''',
       r'''lørdag'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''søndag''',
       r'''mandag''',
       r'''tirsdag''',
@@ -5116,7 +5115,7 @@
       r'''fredag''',
       r'''lørdag'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''søn.''',
       r'''man.''',
       r'''tir.''',
@@ -5125,7 +5124,7 @@
       r'''fre.''',
       r'''lør.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''søn.''',
       r'''man.''',
       r'''tir.''',
@@ -5134,7 +5133,7 @@
       r'''fre.''',
       r'''lør.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -5143,7 +5142,7 @@
       r'''F''',
       r'''L'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -5152,26 +5151,26 @@
       r'''F''',
       r'''L'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''K1''',
       r'''K2''',
       r'''K3''',
       r'''K4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. kvartal''',
       r'''2. kvartal''',
       r'''3. kvartal''',
       r'''4. kvartal'''
     ],
-    'AMPMS':  <dynamic>[r'''a.m.''', r'''p.m.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''a.m.''', r'''p.m.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d. MMMM y''',
       r'''d. MMMM y''',
       r'''d. MMM y''',
       r'''dd.MM.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -5179,20 +5178,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r"""{1} 'kl'. {0}""",
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'nl':  <String, dynamic>{
+  'nl': <String, dynamic>{
     'NAME': r'''nl''',
-    'ERAS':  <dynamic>[r'''v.Chr.''', r'''n.Chr.'''],
-    'ERANAMES':  <dynamic>[r'''voor Christus''', r'''na Christus'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''v.Chr.''', r'''n.Chr.'''],
+    'ERANAMES': <dynamic>[r'''voor Christus''', r'''na Christus'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -5206,7 +5205,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -5220,7 +5219,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januari''',
       r'''februari''',
       r'''maart''',
@@ -5234,7 +5233,7 @@
       r'''november''',
       r'''december'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''januari''',
       r'''februari''',
       r'''maart''',
@@ -5248,7 +5247,7 @@
       r'''november''',
       r'''december'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mrt.''',
@@ -5262,7 +5261,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mrt.''',
@@ -5276,7 +5275,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''zondag''',
       r'''maandag''',
       r'''dinsdag''',
@@ -5285,7 +5284,7 @@
       r'''vrijdag''',
       r'''zaterdag'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''zondag''',
       r'''maandag''',
       r'''dinsdag''',
@@ -5294,7 +5293,7 @@
       r'''vrijdag''',
       r'''zaterdag'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''zo''',
       r'''ma''',
       r'''di''',
@@ -5303,7 +5302,7 @@
       r'''vr''',
       r'''za'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''zo''',
       r'''ma''',
       r'''di''',
@@ -5312,7 +5311,7 @@
       r'''vr''',
       r'''za'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''Z''',
       r'''M''',
       r'''D''',
@@ -5321,7 +5320,7 @@
       r'''V''',
       r'''Z'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''Z''',
       r'''M''',
       r'''D''',
@@ -5330,26 +5329,26 @@
       r'''V''',
       r'''Z'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''K1''',
       r'''K2''',
       r'''K3''',
       r'''K4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1e kwartaal''',
       r'''2e kwartaal''',
       r'''3e kwartaal''',
       r'''4e kwartaal'''
     ],
-    'AMPMS':  <dynamic>[r'''a.m.''', r'''p.m.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''a.m.''', r'''p.m.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''dd-MM-yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -5357,20 +5356,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'om' {0}""",
       r"""{1} 'om' {0}""",
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'pl':  <String, dynamic>{
+  'pl': <String, dynamic>{
     'NAME': r'''pl''',
-    'ERAS':  <dynamic>[r'''p.n.e.''', r'''n.e.'''],
-    'ERANAMES':  <dynamic>[r'''przed naszą erą''', r'''naszej ery'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''p.n.e.''', r'''n.e.'''],
+    'ERANAMES': <dynamic>[r'''przed naszą erą''', r'''naszej ery'''],
+    'NARROWMONTHS': <dynamic>[
       r'''s''',
       r'''l''',
       r'''m''',
@@ -5384,7 +5383,7 @@
       r'''l''',
       r'''g'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''S''',
       r'''L''',
       r'''M''',
@@ -5398,7 +5397,7 @@
       r'''L''',
       r'''G'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''stycznia''',
       r'''lutego''',
       r'''marca''',
@@ -5412,7 +5411,7 @@
       r'''listopada''',
       r'''grudnia'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''styczeń''',
       r'''luty''',
       r'''marzec''',
@@ -5426,7 +5425,7 @@
       r'''listopad''',
       r'''grudzień'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''sty''',
       r'''lut''',
       r'''mar''',
@@ -5440,7 +5439,7 @@
       r'''lis''',
       r'''gru'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''sty''',
       r'''lut''',
       r'''mar''',
@@ -5454,7 +5453,7 @@
       r'''lis''',
       r'''gru'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''niedziela''',
       r'''poniedziałek''',
       r'''wtorek''',
@@ -5463,7 +5462,7 @@
       r'''piątek''',
       r'''sobota'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''niedziela''',
       r'''poniedziałek''',
       r'''wtorek''',
@@ -5472,7 +5471,7 @@
       r'''piątek''',
       r'''sobota'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''niedz.''',
       r'''pon.''',
       r'''wt.''',
@@ -5481,7 +5480,7 @@
       r'''pt.''',
       r'''sob.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''niedz.''',
       r'''pon.''',
       r'''wt.''',
@@ -5490,7 +5489,7 @@
       r'''pt.''',
       r'''sob.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''w''',
@@ -5499,7 +5498,7 @@
       r'''p''',
       r'''s'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''N''',
       r'''P''',
       r'''W''',
@@ -5508,26 +5507,26 @@
       r'''P''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''I kw.''',
       r'''II kw.''',
       r'''III kw.''',
       r'''IV kw.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''I kwartał''',
       r'''II kwartał''',
       r'''III kwartał''',
       r'''IV kwartał'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''dd.MM.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -5535,23 +5534,23 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'ps':  <String, dynamic>{
+  'ps': <String, dynamic>{
     'NAME': r'''ps''',
-    'ERAS':  <dynamic>[r'''له میلاد وړاندې''', r'''م.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''له میلاد وړاندې''', r'''م.'''],
+    'ERANAMES': <dynamic>[
       r'''له میلاد څخه وړاندې''',
       r'''له میلاد څخه وروسته'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''ج''',
       r'''ف''',
       r'''م''',
@@ -5565,7 +5564,7 @@
       r'''ن''',
       r'''د'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -5579,7 +5578,7 @@
       r'''11''',
       r'''12'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''جنوري''',
       r'''فبروري''',
       r'''مارچ''',
@@ -5593,7 +5592,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''جنوري''',
       r'''فېبروري''',
       r'''مارچ''',
@@ -5607,7 +5606,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''جنوري''',
       r'''فبروري''',
       r'''مارچ''',
@@ -5621,7 +5620,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''جنوري''',
       r'''فبروري''',
       r'''مارچ''',
@@ -5635,7 +5634,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''يونۍ''',
       r'''دونۍ''',
       r'''درېنۍ''',
@@ -5644,7 +5643,7 @@
       r'''جمعه''',
       r'''اونۍ'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''يونۍ''',
       r'''دونۍ''',
       r'''درېنۍ''',
@@ -5653,7 +5652,7 @@
       r'''جمعه''',
       r'''اونۍ'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''يونۍ''',
       r'''دونۍ''',
       r'''درېنۍ''',
@@ -5662,7 +5661,7 @@
       r'''جمعه''',
       r'''اونۍ'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''يونۍ''',
       r'''دونۍ''',
       r'''درېنۍ''',
@@ -5671,7 +5670,7 @@
       r'''جمعه''',
       r'''اونۍ'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -5680,7 +5679,7 @@
       r'''F''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -5689,26 +5688,26 @@
       r'''F''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''لومړۍ ربعه''',
       r'''۲مه ربعه''',
       r'''۳مه ربعه''',
       r'''۴مه ربعه'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''لومړۍ ربعه''',
       r'''۲مه ربعه''',
       r'''۳مه ربعه''',
       r'''۴مه ربعه'''
     ],
-    'AMPMS':  <dynamic>[r'''غ.م.''', r'''غ.و.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''غ.م.''', r'''غ.و.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE د y د MMMM d''',
       r'''د y د MMMM d''',
       r'''y MMM d''',
       r'''y/M/d'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss (zzzz)''',
       r'''H:mm:ss (z)''',
       r'''H:mm:ss''',
@@ -5716,9 +5715,9 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 5,
-    'WEEKENDRANGE':  <dynamic>[3, 4],
+    'WEEKENDRANGE': <dynamic>[3, 4],
     'FIRSTWEEKCUTOFFDAY': 4,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
@@ -5726,14 +5725,14 @@
     ],
     'ZERODIGIT': r'''۰''',
   },
-  'pt':  <String, dynamic>{
+  'pt': <String, dynamic>{
     'NAME': r'''pt''',
-    'ERAS':  <dynamic>[r'''a.C.''', r'''d.C.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''a.C.''', r'''d.C.'''],
+    'ERANAMES': <dynamic>[
       r'''antes de Cristo''',
       r'''depois de Cristo'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -5747,7 +5746,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -5761,7 +5760,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''janeiro''',
       r'''fevereiro''',
       r'''março''',
@@ -5775,7 +5774,7 @@
       r'''novembro''',
       r'''dezembro'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''janeiro''',
       r'''fevereiro''',
       r'''março''',
@@ -5789,7 +5788,7 @@
       r'''novembro''',
       r'''dezembro'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''fev''',
       r'''mar''',
@@ -5803,7 +5802,7 @@
       r'''nov''',
       r'''dez'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''fev''',
       r'''mar''',
@@ -5817,7 +5816,7 @@
       r'''nov''',
       r'''dez'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''domingo''',
       r'''segunda-feira''',
       r'''terça-feira''',
@@ -5826,7 +5825,7 @@
       r'''sexta-feira''',
       r'''sábado'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''domingo''',
       r'''segunda-feira''',
       r'''terça-feira''',
@@ -5835,7 +5834,7 @@
       r'''sexta-feira''',
       r'''sábado'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''dom''',
       r'''seg''',
       r'''ter''',
@@ -5844,7 +5843,7 @@
       r'''sex''',
       r'''sáb'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''dom''',
       r'''seg''',
       r'''ter''',
@@ -5853,7 +5852,7 @@
       r'''sex''',
       r'''sáb'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''S''',
       r'''T''',
@@ -5862,7 +5861,7 @@
       r'''S''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''S''',
       r'''T''',
@@ -5871,26 +5870,26 @@
       r'''S''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''T1''',
       r'''T2''',
       r'''T3''',
       r'''T4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1º trimestre''',
       r'''2º trimestre''',
       r'''3º trimestre''',
       r'''4º trimestre'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, d 'de' MMMM 'de' y""",
       r"""d 'de' MMMM 'de' y""",
       r"""d 'de' MMM 'de' y""",
       r'''dd/MM/y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -5898,20 +5897,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'ro':  <String, dynamic>{
+  'ro': <String, dynamic>{
     'NAME': r'''ro''',
-    'ERAS':  <dynamic>[r'''î.Hr.''', r'''d.Hr.'''],
-    'ERANAMES':  <dynamic>[r'''înainte de Hristos''', r'''după Hristos'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''î.Hr.''', r'''d.Hr.'''],
+    'ERANAMES': <dynamic>[r'''înainte de Hristos''', r'''după Hristos'''],
+    'NARROWMONTHS': <dynamic>[
       r'''I''',
       r'''F''',
       r'''M''',
@@ -5925,7 +5924,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''I''',
       r'''F''',
       r'''M''',
@@ -5939,7 +5938,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''ianuarie''',
       r'''februarie''',
       r'''martie''',
@@ -5953,7 +5952,7 @@
       r'''noiembrie''',
       r'''decembrie'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''ianuarie''',
       r'''februarie''',
       r'''martie''',
@@ -5967,7 +5966,7 @@
       r'''noiembrie''',
       r'''decembrie'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''ian.''',
       r'''feb.''',
       r'''mar.''',
@@ -5981,7 +5980,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''ian.''',
       r'''feb.''',
       r'''mar.''',
@@ -5995,7 +5994,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''duminică''',
       r'''luni''',
       r'''marți''',
@@ -6004,7 +6003,7 @@
       r'''vineri''',
       r'''sâmbătă'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''duminică''',
       r'''luni''',
       r'''marți''',
@@ -6013,7 +6012,7 @@
       r'''vineri''',
       r'''sâmbătă'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''dum.''',
       r'''lun.''',
       r'''mar.''',
@@ -6022,7 +6021,7 @@
       r'''vin.''',
       r'''sâm.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''dum.''',
       r'''lun.''',
       r'''mar.''',
@@ -6031,7 +6030,7 @@
       r'''vin.''',
       r'''sâm.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -6040,7 +6039,7 @@
       r'''V''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''D''',
       r'''L''',
       r'''M''',
@@ -6049,26 +6048,26 @@
       r'''V''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''trim. I''',
       r'''trim. II''',
       r'''trim. III''',
       r'''trim. IV'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''trimestrul I''',
       r'''trimestrul al II-lea''',
       r'''trimestrul al III-lea''',
       r'''trimestrul al IV-lea'''
     ],
-    'AMPMS':  <dynamic>[r'''a.m.''', r'''p.m.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''a.m.''', r'''p.m.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''dd.MM.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -6076,23 +6075,23 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'ru':  <String, dynamic>{
+  'ru': <String, dynamic>{
     'NAME': r'''ru''',
-    'ERAS':  <dynamic>[r'''до н. э.''', r'''н. э.'''],
-    'ERANAMES':  <dynamic>[
+    'ERAS': <dynamic>[r'''до н. э.''', r'''н. э.'''],
+    'ERANAMES': <dynamic>[
       r'''до Рождества Христова''',
       r'''от Рождества Христова'''
     ],
-    'NARROWMONTHS':  <dynamic>[
+    'NARROWMONTHS': <dynamic>[
       r'''Я''',
       r'''Ф''',
       r'''М''',
@@ -6106,7 +6105,7 @@
       r'''Н''',
       r'''Д'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''Я''',
       r'''Ф''',
       r'''М''',
@@ -6120,7 +6119,7 @@
       r'''Н''',
       r'''Д'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''января''',
       r'''февраля''',
       r'''марта''',
@@ -6134,7 +6133,7 @@
       r'''ноября''',
       r'''декабря'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''январь''',
       r'''февраль''',
       r'''март''',
@@ -6148,7 +6147,7 @@
       r'''ноябрь''',
       r'''декабрь'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''янв.''',
       r'''февр.''',
       r'''мар.''',
@@ -6162,7 +6161,7 @@
       r'''нояб.''',
       r'''дек.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''янв.''',
       r'''февр.''',
       r'''март''',
@@ -6176,7 +6175,7 @@
       r'''нояб.''',
       r'''дек.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''воскресенье''',
       r'''понедельник''',
       r'''вторник''',
@@ -6185,7 +6184,7 @@
       r'''пятница''',
       r'''суббота'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''воскресенье''',
       r'''понедельник''',
       r'''вторник''',
@@ -6194,7 +6193,7 @@
       r'''пятница''',
       r'''суббота'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''вс''',
       r'''пн''',
       r'''вт''',
@@ -6203,7 +6202,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''вс''',
       r'''пн''',
       r'''вт''',
@@ -6212,7 +6211,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''вс''',
       r'''пн''',
       r'''вт''',
@@ -6221,7 +6220,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''В''',
       r'''П''',
       r'''В''',
@@ -6230,26 +6229,26 @@
       r'''П''',
       r'''С'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1-й кв.''',
       r'''2-й кв.''',
       r'''3-й кв.''',
       r'''4-й кв.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1-й квартал''',
       r'''2-й квартал''',
       r'''3-й квартал''',
       r'''4-й квартал'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, d MMMM y 'г'.""",
       r"""d MMMM y 'г'.""",
       r"""d MMM y 'г'.""",
       r'''dd.MM.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -6257,20 +6256,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'sk':  <String, dynamic>{
+  'sk': <String, dynamic>{
     'NAME': r'''sk''',
-    'ERAS':  <dynamic>[r'''pred Kr.''', r'''po Kr.'''],
-    'ERANAMES':  <dynamic>[r'''pred Kristom''', r'''po Kristovi'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''pred Kr.''', r'''po Kr.'''],
+    'ERANAMES': <dynamic>[r'''pred Kristom''', r'''po Kristovi'''],
+    'NARROWMONTHS': <dynamic>[
       r'''j''',
       r'''f''',
       r'''m''',
@@ -6284,7 +6283,7 @@
       r'''n''',
       r'''d'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''j''',
       r'''f''',
       r'''m''',
@@ -6298,7 +6297,7 @@
       r'''n''',
       r'''d'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januára''',
       r'''februára''',
       r'''marca''',
@@ -6312,7 +6311,7 @@
       r'''novembra''',
       r'''decembra'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''január''',
       r'''február''',
       r'''marec''',
@@ -6326,7 +6325,7 @@
       r'''november''',
       r'''december'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''feb''',
       r'''mar''',
@@ -6340,7 +6339,7 @@
       r'''nov''',
       r'''dec'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan''',
       r'''feb''',
       r'''mar''',
@@ -6354,7 +6353,7 @@
       r'''nov''',
       r'''dec'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''nedeľa''',
       r'''pondelok''',
       r'''utorok''',
@@ -6363,7 +6362,7 @@
       r'''piatok''',
       r'''sobota'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''nedeľa''',
       r'''pondelok''',
       r'''utorok''',
@@ -6372,7 +6371,7 @@
       r'''piatok''',
       r'''sobota'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''ne''',
       r'''po''',
       r'''ut''',
@@ -6381,7 +6380,7 @@
       r'''pi''',
       r'''so'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''ne''',
       r'''po''',
       r'''ut''',
@@ -6390,7 +6389,7 @@
       r'''pi''',
       r'''so'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''u''',
@@ -6399,7 +6398,7 @@
       r'''p''',
       r'''s'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''u''',
@@ -6408,26 +6407,26 @@
       r'''p''',
       r'''s'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. štvrťrok''',
       r'''2. štvrťrok''',
       r'''3. štvrťrok''',
       r'''4. štvrťrok'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d. MMMM y''',
       r'''d. MMMM y''',
       r'''d. M. y''',
       r'''d. M. y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H:mm:ss zzzz''',
       r'''H:mm:ss z''',
       r'''H:mm:ss''',
@@ -6435,20 +6434,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1}, {0}''',
       r'''{1} {0}'''
     ],
   },
-  'sl':  <String, dynamic>{
+  'sl': <String, dynamic>{
     'NAME': r'''sl''',
-    'ERAS':  <dynamic>[r'''pr. Kr.''', r'''po Kr.'''],
-    'ERANAMES':  <dynamic>[r'''pred Kristusom''', r'''po Kristusu'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''pr. Kr.''', r'''po Kr.'''],
+    'ERANAMES': <dynamic>[r'''pred Kristusom''', r'''po Kristusu'''],
+    'NARROWMONTHS': <dynamic>[
       r'''j''',
       r'''f''',
       r'''m''',
@@ -6462,7 +6461,7 @@
       r'''n''',
       r'''d'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''j''',
       r'''f''',
       r'''m''',
@@ -6476,7 +6475,7 @@
       r'''n''',
       r'''d'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''marec''',
@@ -6490,7 +6489,7 @@
       r'''november''',
       r'''december'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''januar''',
       r'''februar''',
       r'''marec''',
@@ -6504,7 +6503,7 @@
       r'''november''',
       r'''december'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mar.''',
@@ -6518,7 +6517,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mar.''',
@@ -6532,7 +6531,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''nedelja''',
       r'''ponedeljek''',
       r'''torek''',
@@ -6541,7 +6540,7 @@
       r'''petek''',
       r'''sobota'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''nedelja''',
       r'''ponedeljek''',
       r'''torek''',
@@ -6550,7 +6549,7 @@
       r'''petek''',
       r'''sobota'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''ned.''',
       r'''pon.''',
       r'''tor.''',
@@ -6559,7 +6558,7 @@
       r'''pet.''',
       r'''sob.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''ned.''',
       r'''pon.''',
       r'''tor.''',
@@ -6568,7 +6567,7 @@
       r'''pet.''',
       r'''sob.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''t''',
@@ -6577,7 +6576,7 @@
       r'''p''',
       r'''s'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''n''',
       r'''p''',
       r'''t''',
@@ -6586,26 +6585,26 @@
       r'''p''',
       r'''s'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1. čet.''',
       r'''2. čet.''',
       r'''3. čet.''',
       r'''4. čet.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. četrtletje''',
       r'''2. četrtletje''',
       r'''3. četrtletje''',
       r'''4. četrtletje'''
     ],
-    'AMPMS':  <dynamic>[r'''dop.''', r'''pop.'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''dop.''', r'''pop.'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, dd. MMMM y''',
       r'''dd. MMMM y''',
       r'''d. MMM y''',
       r'''d. MM. yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -6613,20 +6612,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'sr':  <String, dynamic>{
+  'sr': <String, dynamic>{
     'NAME': r'''sr''',
-    'ERAS':  <dynamic>[r'''п. н. е.''', r'''н. е.'''],
-    'ERANAMES':  <dynamic>[r'''пре нове ере''', r'''нове ере'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''п. н. е.''', r'''н. е.'''],
+    'ERANAMES': <dynamic>[r'''пре нове ере''', r'''нове ере'''],
+    'NARROWMONTHS': <dynamic>[
       r'''ј''',
       r'''ф''',
       r'''м''',
@@ -6640,7 +6639,7 @@
       r'''н''',
       r'''д'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''ј''',
       r'''ф''',
       r'''м''',
@@ -6654,7 +6653,7 @@
       r'''н''',
       r'''д'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''јануар''',
       r'''фебруар''',
       r'''март''',
@@ -6668,7 +6667,7 @@
       r'''новембар''',
       r'''децембар'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''јануар''',
       r'''фебруар''',
       r'''март''',
@@ -6682,7 +6681,7 @@
       r'''новембар''',
       r'''децембар'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''јан''',
       r'''феб''',
       r'''мар''',
@@ -6696,7 +6695,7 @@
       r'''нов''',
       r'''дец'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''јан''',
       r'''феб''',
       r'''мар''',
@@ -6710,7 +6709,7 @@
       r'''нов''',
       r'''дец'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''недеља''',
       r'''понедељак''',
       r'''уторак''',
@@ -6719,7 +6718,7 @@
       r'''петак''',
       r'''субота'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''недеља''',
       r'''понедељак''',
       r'''уторак''',
@@ -6728,7 +6727,7 @@
       r'''петак''',
       r'''субота'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''нед''',
       r'''пон''',
       r'''уто''',
@@ -6737,7 +6736,7 @@
       r'''пет''',
       r'''суб'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''нед''',
       r'''пон''',
       r'''уто''',
@@ -6746,7 +6745,7 @@
       r'''пет''',
       r'''суб'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''н''',
       r'''п''',
       r'''у''',
@@ -6755,7 +6754,7 @@
       r'''п''',
       r'''с'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''н''',
       r'''п''',
       r'''у''',
@@ -6764,26 +6763,26 @@
       r'''п''',
       r'''с'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''К1''',
       r'''К2''',
       r'''К3''',
       r'''К4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''први квартал''',
       r'''други квартал''',
       r'''трећи квартал''',
       r'''четврти квартал'''
     ],
-    'AMPMS':  <dynamic>[r'''пре подне''', r'''по подне'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''пре подне''', r'''по подне'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, dd. MMMM y.''',
       r'''dd. MMMM y.''',
       r'''dd.MM.y.''',
       r'''d.M.yy.'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -6791,20 +6790,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'sv':  <String, dynamic>{
+  'sv': <String, dynamic>{
     'NAME': r'''sv''',
-    'ERAS':  <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
-    'ERANAMES':  <dynamic>[r'''före Kristus''', r'''efter Kristus'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''f.Kr.''', r'''e.Kr.'''],
+    'ERANAMES': <dynamic>[r'''före Kristus''', r'''efter Kristus'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -6818,7 +6817,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -6832,7 +6831,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''januari''',
       r'''februari''',
       r'''mars''',
@@ -6846,7 +6845,7 @@
       r'''november''',
       r'''december'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''januari''',
       r'''februari''',
       r'''mars''',
@@ -6860,7 +6859,7 @@
       r'''november''',
       r'''december'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mars''',
@@ -6874,7 +6873,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''jan.''',
       r'''feb.''',
       r'''mars''',
@@ -6888,7 +6887,7 @@
       r'''nov.''',
       r'''dec.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''söndag''',
       r'''måndag''',
       r'''tisdag''',
@@ -6897,7 +6896,7 @@
       r'''fredag''',
       r'''lördag'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''söndag''',
       r'''måndag''',
       r'''tisdag''',
@@ -6906,7 +6905,7 @@
       r'''fredag''',
       r'''lördag'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''sön''',
       r'''mån''',
       r'''tis''',
@@ -6915,7 +6914,7 @@
       r'''fre''',
       r'''lör'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''sön''',
       r'''mån''',
       r'''tis''',
@@ -6924,7 +6923,7 @@
       r'''fre''',
       r'''lör'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -6933,7 +6932,7 @@
       r'''F''',
       r'''L'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -6942,26 +6941,26 @@
       r'''F''',
       r'''L'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''K1''',
       r'''K2''',
       r'''K3''',
       r'''K4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1:a kvartalet''',
       r'''2:a kvartalet''',
       r'''3:e kvartalet''',
       r'''4:e kvartalet'''
     ],
-    'AMPMS':  <dynamic>[r'''fm''', r'''em'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''fm''', r'''em'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE d MMMM y''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''y-MM-dd'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r"""'kl'. HH:mm:ss zzzz""",
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -6969,20 +6968,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 3,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'th':  <String, dynamic>{
+  'th': <String, dynamic>{
     'NAME': r'''th''',
-    'ERAS':  <dynamic>[r'''ปีก่อน ค.ศ.''', r'''ค.ศ.'''],
-    'ERANAMES':  <dynamic>[r'''ปีก่อนคริสต์ศักราช''', r'''คริสต์ศักราช'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''ปีก่อน ค.ศ.''', r'''ค.ศ.'''],
+    'ERANAMES': <dynamic>[r'''ปีก่อนคริสต์ศักราช''', r'''คริสต์ศักราช'''],
+    'NARROWMONTHS': <dynamic>[
       r'''ม.ค.''',
       r'''ก.พ.''',
       r'''มี.ค.''',
@@ -6996,7 +6995,7 @@
       r'''พ.ย.''',
       r'''ธ.ค.'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''ม.ค.''',
       r'''ก.พ.''',
       r'''มี.ค.''',
@@ -7010,7 +7009,7 @@
       r'''พ.ย.''',
       r'''ธ.ค.'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''มกราคม''',
       r'''กุมภาพันธ์''',
       r'''มีนาคม''',
@@ -7024,7 +7023,7 @@
       r'''พฤศจิกายน''',
       r'''ธันวาคม'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''มกราคม''',
       r'''กุมภาพันธ์''',
       r'''มีนาคม''',
@@ -7038,7 +7037,7 @@
       r'''พฤศจิกายน''',
       r'''ธันวาคม'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''ม.ค.''',
       r'''ก.พ.''',
       r'''มี.ค.''',
@@ -7052,7 +7051,7 @@
       r'''พ.ย.''',
       r'''ธ.ค.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''ม.ค.''',
       r'''ก.พ.''',
       r'''มี.ค.''',
@@ -7066,7 +7065,7 @@
       r'''พ.ย.''',
       r'''ธ.ค.'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''วันอาทิตย์''',
       r'''วันจันทร์''',
       r'''วันอังคาร''',
@@ -7075,7 +7074,7 @@
       r'''วันศุกร์''',
       r'''วันเสาร์'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''วันอาทิตย์''',
       r'''วันจันทร์''',
       r'''วันอังคาร''',
@@ -7084,7 +7083,7 @@
       r'''วันศุกร์''',
       r'''วันเสาร์'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''อา.''',
       r'''จ.''',
       r'''อ.''',
@@ -7093,7 +7092,7 @@
       r'''ศ.''',
       r'''ส.'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''อา.''',
       r'''จ.''',
       r'''อ.''',
@@ -7102,7 +7101,7 @@
       r'''ศ.''',
       r'''ส.'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''อา''',
       r'''จ''',
       r'''อ''',
@@ -7111,7 +7110,7 @@
       r'''ศ''',
       r'''ส'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''อา''',
       r'''จ''',
       r'''อ''',
@@ -7120,26 +7119,26 @@
       r'''ศ''',
       r'''ส'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''ไตรมาส 1''',
       r'''ไตรมาส 2''',
       r'''ไตรมาส 3''',
       r'''ไตรมาส 4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''ไตรมาส 1''',
       r'''ไตรมาส 2''',
       r'''ไตรมาส 3''',
       r'''ไตรมาส 4'''
     ],
-    'AMPMS':  <dynamic>[r'''ก่อนเที่ยง''', r'''หลังเที่ยง'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''ก่อนเที่ยง''', r'''หลังเที่ยง'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEEที่ d MMMM G y''',
       r'''d MMMM G y''',
       r'''d MMM y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''H นาฬิกา mm นาที ss วินาที zzzz''',
       r'''H นาฬิกา mm นาที ss วินาที z''',
       r'''HH:mm:ss''',
@@ -7147,20 +7146,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'tl':  <String, dynamic>{
+  'tl': <String, dynamic>{
     'NAME': r'''tl''',
-    'ERAS':  <dynamic>[r'''BC''', r'''AD'''],
-    'ERANAMES':  <dynamic>[r'''Before Christ''', r'''Anno Domini'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''BC''', r'''AD'''],
+    'ERANAMES': <dynamic>[r'''Before Christ''', r'''Anno Domini'''],
+    'NARROWMONTHS': <dynamic>[
       r'''Ene''',
       r'''Peb''',
       r'''Mar''',
@@ -7174,7 +7173,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''E''',
       r'''P''',
       r'''M''',
@@ -7188,7 +7187,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Enero''',
       r'''Pebrero''',
       r'''Marso''',
@@ -7202,7 +7201,7 @@
       r'''Nobyembre''',
       r'''Disyembre'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Enero''',
       r'''Pebrero''',
       r'''Marso''',
@@ -7216,7 +7215,7 @@
       r'''Nobyembre''',
       r'''Disyembre'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Ene''',
       r'''Peb''',
       r'''Mar''',
@@ -7230,7 +7229,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Ene''',
       r'''Peb''',
       r'''Mar''',
@@ -7244,7 +7243,7 @@
       r'''Nob''',
       r'''Dis'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Linggo''',
       r'''Lunes''',
       r'''Martes''',
@@ -7253,7 +7252,7 @@
       r'''Biyernes''',
       r'''Sabado'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Linggo''',
       r'''Lunes''',
       r'''Martes''',
@@ -7262,7 +7261,7 @@
       r'''Biyernes''',
       r'''Sabado'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -7271,7 +7270,7 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -7280,7 +7279,7 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -7289,7 +7288,7 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''Lin''',
       r'''Lun''',
       r'''Mar''',
@@ -7298,26 +7297,26 @@
       r'''Biy''',
       r'''Sab'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''ika-1 quarter''',
       r'''ika-2 quarter''',
       r'''ika-3 quarter''',
       r'''ika-4 na quarter'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, MMMM d, y''',
       r'''MMMM d, y''',
       r'''MMM d, y''',
       r'''M/d/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -7325,20 +7324,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'nang' {0}""",
       r"""{1} 'nang' {0}""",
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'tr':  <String, dynamic>{
+  'tr': <String, dynamic>{
     'NAME': r'''tr''',
-    'ERAS':  <dynamic>[r'''MÖ''', r'''MS'''],
-    'ERANAMES':  <dynamic>[r'''Milattan Önce''', r'''Milattan Sonra'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''MÖ''', r'''MS'''],
+    'ERANAMES': <dynamic>[r'''Milattan Önce''', r'''Milattan Sonra'''],
+    'NARROWMONTHS': <dynamic>[
       r'''O''',
       r'''Ş''',
       r'''M''',
@@ -7352,7 +7351,7 @@
       r'''K''',
       r'''A'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''O''',
       r'''Ş''',
       r'''M''',
@@ -7366,7 +7365,7 @@
       r'''K''',
       r'''A'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''Ocak''',
       r'''Şubat''',
       r'''Mart''',
@@ -7380,7 +7379,7 @@
       r'''Kasım''',
       r'''Aralık'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Ocak''',
       r'''Şubat''',
       r'''Mart''',
@@ -7394,7 +7393,7 @@
       r'''Kasım''',
       r'''Aralık'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''Oca''',
       r'''Şub''',
       r'''Mar''',
@@ -7408,7 +7407,7 @@
       r'''Kas''',
       r'''Ara'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Oca''',
       r'''Şub''',
       r'''Mar''',
@@ -7422,7 +7421,7 @@
       r'''Kas''',
       r'''Ara'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Pazar''',
       r'''Pazartesi''',
       r'''Salı''',
@@ -7431,7 +7430,7 @@
       r'''Cuma''',
       r'''Cumartesi'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Pazar''',
       r'''Pazartesi''',
       r'''Salı''',
@@ -7440,7 +7439,7 @@
       r'''Cuma''',
       r'''Cumartesi'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''Paz''',
       r'''Pzt''',
       r'''Sal''',
@@ -7449,7 +7448,7 @@
       r'''Cum''',
       r'''Cmt'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''Paz''',
       r'''Pzt''',
       r'''Sal''',
@@ -7458,7 +7457,7 @@
       r'''Cum''',
       r'''Cmt'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''P''',
       r'''P''',
       r'''S''',
@@ -7467,7 +7466,7 @@
       r'''C''',
       r'''C'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''P''',
       r'''P''',
       r'''S''',
@@ -7476,26 +7475,26 @@
       r'''C''',
       r'''C'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Ç1''',
       r'''Ç2''',
       r'''Ç3''',
       r'''Ç4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1. çeyrek''',
       r'''2. çeyrek''',
       r'''3. çeyrek''',
       r'''4. çeyrek'''
     ],
-    'AMPMS':  <dynamic>[r'''ÖÖ''', r'''ÖS'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''ÖÖ''', r'''ÖS'''],
+    'DATEFORMATS': <dynamic>[
       r'''d MMMM y EEEE''',
       r'''d MMMM y''',
       r'''d MMM y''',
       r'''d.MM.y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -7503,20 +7502,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'uk':  <String, dynamic>{
+  'uk': <String, dynamic>{
     'NAME': r'''uk''',
-    'ERAS':  <dynamic>[r'''до н. е.''', r'''н. е.'''],
-    'ERANAMES':  <dynamic>[r'''до нашої ери''', r'''нашої ери'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''до н. е.''', r'''н. е.'''],
+    'ERANAMES': <dynamic>[r'''до нашої ери''', r'''нашої ери'''],
+    'NARROWMONTHS': <dynamic>[
       r'''с''',
       r'''л''',
       r'''б''',
@@ -7530,7 +7529,7 @@
       r'''л''',
       r'''г'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''С''',
       r'''Л''',
       r'''Б''',
@@ -7544,7 +7543,7 @@
       r'''Л''',
       r'''Г'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''січня''',
       r'''лютого''',
       r'''березня''',
@@ -7558,7 +7557,7 @@
       r'''листопада''',
       r'''грудня'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''січень''',
       r'''лютий''',
       r'''березень''',
@@ -7572,7 +7571,7 @@
       r'''листопад''',
       r'''грудень'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''січ.''',
       r'''лют.''',
       r'''бер.''',
@@ -7586,7 +7585,7 @@
       r'''лист.''',
       r'''груд.'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''січ''',
       r'''лют''',
       r'''бер''',
@@ -7600,7 +7599,7 @@
       r'''лис''',
       r'''гру'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''неділя''',
       r'''понеділок''',
       r'''вівторок''',
@@ -7609,7 +7608,7 @@
       r'''пʼятниця''',
       r'''субота'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''неділя''',
       r'''понеділок''',
       r'''вівторок''',
@@ -7618,7 +7617,7 @@
       r'''пʼятниця''',
       r'''субота'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''нд''',
       r'''пн''',
       r'''вт''',
@@ -7627,7 +7626,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''нд''',
       r'''пн''',
       r'''вт''',
@@ -7636,7 +7635,7 @@
       r'''пт''',
       r'''сб'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''Н''',
       r'''П''',
       r'''В''',
@@ -7645,7 +7644,7 @@
       r'''П''',
       r'''С'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''Н''',
       r'''П''',
       r'''В''',
@@ -7654,26 +7653,26 @@
       r'''П''',
       r'''С'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1-й кв.''',
       r'''2-й кв.''',
       r'''3-й кв.''',
       r'''4-й кв.'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''1-й квартал''',
       r'''2-й квартал''',
       r'''3-й квартал''',
       r'''4-й квартал'''
     ],
-    'AMPMS':  <dynamic>[r'''дп''', r'''пп'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''дп''', r'''пп'''],
+    'DATEFORMATS': <dynamic>[
       r"""EEEE, d MMMM y 'р'.""",
       r"""d MMMM y 'р'.""",
       r"""d MMM y 'р'.""",
       r'''dd.MM.yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -7681,20 +7680,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r"""{1} 'о' {0}""",
       r"""{1} 'о' {0}""",
       r'''{1}, {0}''',
       r'''{1}, {0}'''
     ],
   },
-  'ur':  <String, dynamic>{
+  'ur': <String, dynamic>{
     'NAME': r'''ur''',
-    'ERAS':  <dynamic>[r'''قبل مسیح''', r'''عیسوی'''],
-    'ERANAMES':  <dynamic>[r'''قبل مسیح''', r'''عیسوی'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''قبل مسیح''', r'''عیسوی'''],
+    'ERANAMES': <dynamic>[r'''قبل مسیح''', r'''عیسوی'''],
+    'NARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -7708,7 +7707,7 @@
       r'''N''',
       r'''D'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''J''',
       r'''F''',
       r'''M''',
@@ -7722,7 +7721,7 @@
       r'''N''',
       r'''D'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''جنوری''',
       r'''فروری''',
       r'''مارچ''',
@@ -7736,7 +7735,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''جنوری''',
       r'''فروری''',
       r'''مارچ''',
@@ -7750,7 +7749,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''جنوری''',
       r'''فروری''',
       r'''مارچ''',
@@ -7764,7 +7763,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''جنوری''',
       r'''فروری''',
       r'''مارچ''',
@@ -7778,7 +7777,7 @@
       r'''نومبر''',
       r'''دسمبر'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''اتوار''',
       r'''پیر''',
       r'''منگل''',
@@ -7787,7 +7786,7 @@
       r'''جمعہ''',
       r'''ہفتہ'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''اتوار''',
       r'''پیر''',
       r'''منگل''',
@@ -7796,7 +7795,7 @@
       r'''جمعہ''',
       r'''ہفتہ'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''اتوار''',
       r'''پیر''',
       r'''منگل''',
@@ -7805,7 +7804,7 @@
       r'''جمعہ''',
       r'''ہفتہ'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''اتوار''',
       r'''پیر''',
       r'''منگل''',
@@ -7814,7 +7813,7 @@
       r'''جمعہ''',
       r'''ہفتہ'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -7823,7 +7822,7 @@
       r'''F''',
       r'''S'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''S''',
       r'''M''',
       r'''T''',
@@ -7832,26 +7831,26 @@
       r'''F''',
       r'''S'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''پہلی سہ ماہی''',
       r'''دوسری سہ ماہی''',
       r'''تیسری سہ ماہی''',
       r'''چوتهی سہ ماہی'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''پہلی سہ ماہی''',
       r'''دوسری سہ ماہی''',
       r'''تیسری سہ ماہی''',
       r'''چوتهی سہ ماہی'''
     ],
-    'AMPMS':  <dynamic>[r'''AM''', r'''PM'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''AM''', r'''PM'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE، d MMMM، y''',
       r'''d MMMM، y''',
       r'''d MMM، y''',
       r'''d/M/yy'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''h:mm:ss a zzzz''',
       r'''h:mm:ss a z''',
       r'''h:mm:ss a''',
@@ -7859,20 +7858,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-  'vi':  <String, dynamic>{
+  'vi': <String, dynamic>{
     'NAME': r'''vi''',
-    'ERAS':  <dynamic>[r'''Trước CN''', r'''sau CN'''],
-    'ERANAMES':  <dynamic>[r'''Trước CN''', r'''sau CN'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''Trước CN''', r'''sau CN'''],
+    'ERANAMES': <dynamic>[r'''Trước CN''', r'''sau CN'''],
+    'NARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -7886,7 +7885,7 @@
       r'''11''',
       r'''12'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -7900,7 +7899,7 @@
       r'''11''',
       r'''12'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''tháng 1''',
       r'''tháng 2''',
       r'''tháng 3''',
@@ -7914,7 +7913,7 @@
       r'''tháng 11''',
       r'''tháng 12'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''Tháng 1''',
       r'''Tháng 2''',
       r'''Tháng 3''',
@@ -7928,7 +7927,7 @@
       r'''Tháng 11''',
       r'''Tháng 12'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''thg 1''',
       r'''thg 2''',
       r'''thg 3''',
@@ -7942,7 +7941,7 @@
       r'''thg 11''',
       r'''thg 12'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''Thg 1''',
       r'''Thg 2''',
       r'''Thg 3''',
@@ -7956,7 +7955,7 @@
       r'''Thg 11''',
       r'''Thg 12'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''Chủ Nhật''',
       r'''Thứ Hai''',
       r'''Thứ Ba''',
@@ -7965,7 +7964,7 @@
       r'''Thứ Sáu''',
       r'''Thứ Bảy'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''Chủ Nhật''',
       r'''Thứ Hai''',
       r'''Thứ Ba''',
@@ -7974,7 +7973,7 @@
       r'''Thứ Sáu''',
       r'''Thứ Bảy'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''CN''',
       r'''Th 2''',
       r'''Th 3''',
@@ -7983,7 +7982,7 @@
       r'''Th 6''',
       r'''Th 7'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''CN''',
       r'''Th 2''',
       r'''Th 3''',
@@ -7992,7 +7991,7 @@
       r'''Th 6''',
       r'''Th 7'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''CN''',
       r'''T2''',
       r'''T3''',
@@ -8001,7 +8000,7 @@
       r'''T6''',
       r'''T7'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''CN''',
       r'''T2''',
       r'''T3''',
@@ -8010,26 +8009,26 @@
       r'''T6''',
       r'''T7'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''Q1''',
       r'''Q2''',
       r'''Q3''',
       r'''Q4'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''Quý 1''',
       r'''Quý 2''',
       r'''Quý 3''',
       r'''Quý 4'''
     ],
-    'AMPMS':  <dynamic>[r'''SA''', r'''CH'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''SA''', r'''CH'''],
+    'DATEFORMATS': <dynamic>[
       r'''EEEE, d MMMM, y''',
       r'''d MMMM, y''',
       r'''d MMM, y''',
       r'''dd/MM/y'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''HH:mm:ss zzzz''',
       r'''HH:mm:ss z''',
       r'''HH:mm:ss''',
@@ -8037,20 +8036,20 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 0,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 6,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{0} {1}''',
       r'''{0} {1}''',
       r'''{0}, {1}''',
       r'''{0}, {1}'''
     ],
   },
-  'zh':  <String, dynamic>{
+  'zh': <String, dynamic>{
     'NAME': r'''zh''',
-    'ERAS':  <dynamic>[r'''公元前''', r'''公元'''],
-    'ERANAMES':  <dynamic>[r'''公元前''', r'''公元'''],
-    'NARROWMONTHS':  <dynamic>[
+    'ERAS': <dynamic>[r'''公元前''', r'''公元'''],
+    'ERANAMES': <dynamic>[r'''公元前''', r'''公元'''],
+    'NARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -8064,7 +8063,7 @@
       r'''11''',
       r'''12'''
     ],
-    'STANDALONENARROWMONTHS':  <dynamic>[
+    'STANDALONENARROWMONTHS': <dynamic>[
       r'''1''',
       r'''2''',
       r'''3''',
@@ -8078,7 +8077,7 @@
       r'''11''',
       r'''12'''
     ],
-    'MONTHS':  <dynamic>[
+    'MONTHS': <dynamic>[
       r'''一月''',
       r'''二月''',
       r'''三月''',
@@ -8092,7 +8091,7 @@
       r'''十一月''',
       r'''十二月'''
     ],
-    'STANDALONEMONTHS':  <dynamic>[
+    'STANDALONEMONTHS': <dynamic>[
       r'''一月''',
       r'''二月''',
       r'''三月''',
@@ -8106,7 +8105,7 @@
       r'''十一月''',
       r'''十二月'''
     ],
-    'SHORTMONTHS':  <dynamic>[
+    'SHORTMONTHS': <dynamic>[
       r'''1月''',
       r'''2月''',
       r'''3月''',
@@ -8120,7 +8119,7 @@
       r'''11月''',
       r'''12月'''
     ],
-    'STANDALONESHORTMONTHS':  <dynamic>[
+    'STANDALONESHORTMONTHS': <dynamic>[
       r'''1月''',
       r'''2月''',
       r'''3月''',
@@ -8134,7 +8133,7 @@
       r'''11月''',
       r'''12月'''
     ],
-    'WEEKDAYS':  <dynamic>[
+    'WEEKDAYS': <dynamic>[
       r'''星期日''',
       r'''星期一''',
       r'''星期二''',
@@ -8143,7 +8142,7 @@
       r'''星期五''',
       r'''星期六'''
     ],
-    'STANDALONEWEEKDAYS':  <dynamic>[
+    'STANDALONEWEEKDAYS': <dynamic>[
       r'''星期日''',
       r'''星期一''',
       r'''星期二''',
@@ -8152,7 +8151,7 @@
       r'''星期五''',
       r'''星期六'''
     ],
-    'SHORTWEEKDAYS':  <dynamic>[
+    'SHORTWEEKDAYS': <dynamic>[
       r'''周日''',
       r'''周一''',
       r'''周二''',
@@ -8161,7 +8160,7 @@
       r'''周五''',
       r'''周六'''
     ],
-    'STANDALONESHORTWEEKDAYS':  <dynamic>[
+    'STANDALONESHORTWEEKDAYS': <dynamic>[
       r'''周日''',
       r'''周一''',
       r'''周二''',
@@ -8170,7 +8169,7 @@
       r'''周五''',
       r'''周六'''
     ],
-    'NARROWWEEKDAYS':  <dynamic>[
+    'NARROWWEEKDAYS': <dynamic>[
       r'''日''',
       r'''一''',
       r'''二''',
@@ -8179,7 +8178,7 @@
       r'''五''',
       r'''六'''
     ],
-    'STANDALONENARROWWEEKDAYS':  <dynamic>[
+    'STANDALONENARROWWEEKDAYS': <dynamic>[
       r'''日''',
       r'''一''',
       r'''二''',
@@ -8188,26 +8187,26 @@
       r'''五''',
       r'''六'''
     ],
-    'SHORTQUARTERS':  <dynamic>[
+    'SHORTQUARTERS': <dynamic>[
       r'''1季度''',
       r'''2季度''',
       r'''3季度''',
       r'''4季度'''
     ],
-    'QUARTERS':  <dynamic>[
+    'QUARTERS': <dynamic>[
       r'''第一季度''',
       r'''第二季度''',
       r'''第三季度''',
       r'''第四季度'''
     ],
-    'AMPMS':  <dynamic>[r'''上午''', r'''下午'''],
-    'DATEFORMATS':  <dynamic>[
+    'AMPMS': <dynamic>[r'''上午''', r'''下午'''],
+    'DATEFORMATS': <dynamic>[
       r'''y年M月d日EEEE''',
       r'''y年M月d日''',
       r'''y年M月d日''',
       r'''y/M/d'''
     ],
-    'TIMEFORMATS':  <dynamic>[
+    'TIMEFORMATS': <dynamic>[
       r'''zzzz ah:mm:ss''',
       r'''z ah:mm:ss''',
       r'''ah:mm:ss''',
@@ -8215,19 +8214,18 @@
     ],
     'AVAILABLEFORMATS': null,
     'FIRSTDAYOFWEEK': 6,
-    'WEEKENDRANGE':  <dynamic>[5, 6],
+    'WEEKENDRANGE': <dynamic>[5, 6],
     'FIRSTWEEKCUTOFFDAY': 5,
-    'DATETIMEFORMATS':  <dynamic>[
+    'DATETIMEFORMATS': <dynamic>[
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}''',
       r'''{1} {0}'''
     ],
   },
-};
- Map<String, Map<String, String>> datePatterns =
-     <String, Map<String, String>>{
-  'ar':  <String, String>{
+}; Map<String, Map<String, String>> datePatterns =
+    <String, Map<String, String>>{
+  'ar': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8273,7 +8271,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'bg':  <String, String>{
+  'bg': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8319,7 +8317,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'bs':  <String, String>{
+  'bs': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8365,7 +8363,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ca':  <String, String>{
+  'ca': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8411,7 +8409,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'cs':  <String, String>{
+  'cs': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8457,7 +8455,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'da':  <String, String>{
+  'da': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8503,7 +8501,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'de':  <String, String>{
+  'de': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8549,7 +8547,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'el':  <String, String>{
+  'el': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8595,7 +8593,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'en':  <String, String>{
+  'en': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8641,7 +8639,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'es':  <String, String>{
+  'es': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8687,7 +8685,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'et':  <String, String>{
+  'et': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8733,7 +8731,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'fa':  <String, String>{
+  'fa': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8779,7 +8777,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'fi':  <String, String>{
+  'fi': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8825,7 +8823,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'fil':  <String, String>{
+  'fil': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -8871,7 +8869,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'fr':  <String, String>{
+  'fr': <String, String>{
     'd': r'''d''',
     'E': r'''EEE''',
     'EEEE': r'''EEEE''',
@@ -8917,7 +8915,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'gsw':  <String, String>{
+  'gsw': <String, String>{
     'd': r'''d''',
     'E': r'''EEE''',
     'EEEE': r'''EEEE''',
@@ -8963,7 +8961,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'he':  <String, String>{
+  'he': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9009,7 +9007,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'hi':  <String, String>{
+  'hi': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9055,7 +9053,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'hr':  <String, String>{
+  'hr': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9101,7 +9099,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'hu':  <String, String>{
+  'hu': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9147,7 +9145,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'id':  <String, String>{
+  'id': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9193,7 +9191,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'it':  <String, String>{
+  'it': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9239,7 +9237,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ja':  <String, String>{
+  'ja': <String, String>{
     'd': r'''d日''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9285,7 +9283,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'km':  <String, String>{
+  'km': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9331,7 +9329,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ko':  <String, String>{
+  'ko': <String, String>{
     'd': r'''d일''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9377,7 +9375,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'lt':  <String, String>{
+  'lt': <String, String>{
     'd': r'''dd''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9423,7 +9421,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'lv':  <String, String>{
+  'lv': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9469,7 +9467,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ms':  <String, String>{
+  'ms': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9515,7 +9513,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'nb':  <String, String>{
+  'nb': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9561,7 +9559,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'nl':  <String, String>{
+  'nl': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9607,7 +9605,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'pl':  <String, String>{
+  'pl': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9653,7 +9651,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ps':  <String, String>{
+  'ps': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9699,7 +9697,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'pt':  <String, String>{
+  'pt': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9745,7 +9743,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ro':  <String, String>{
+  'ro': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9791,7 +9789,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ru':  <String, String>{
+  'ru': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9837,7 +9835,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'sk':  <String, String>{
+  'sk': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9883,7 +9881,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'sl':  <String, String>{
+  'sl': <String, String>{
     'd': r'''d.''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -9929,7 +9927,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'sr':  <String, String>{
+  'sr': <String, String>{
     'd': r'''d''',
     'E': r'''EEE''',
     'EEEE': r'''EEEE''',
@@ -9975,7 +9973,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'sv':  <String, String>{
+  'sv': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10021,7 +10019,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'th':  <String, String>{
+  'th': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10067,7 +10065,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'tl':  <String, String>{
+  'tl': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10113,7 +10111,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'tr':  <String, String>{
+  'tr': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10159,7 +10157,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'uk':  <String, String>{
+  'uk': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10205,7 +10203,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'ur':  <String, String>{
+  'ur': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10251,7 +10249,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'vi':  <String, String>{
+  'vi': <String, String>{
     'd': r'''d''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',
@@ -10297,7 +10295,7 @@
     'zzzz': r'''zzzz''',
     'ZZZZ': r'''ZZZZ''',
   },
-  'zh':  <String, String>{
+  'zh': <String, String>{
     'd': r'''d日''',
     'E': r'''ccc''',
     'EEEE': r'''cccc''',

@@ -5859,7 +5859,7 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get rowsPerPageTitle => r'ជួរមុខ:';
 
   @override
-  String get scriptCategory => r'tall';
+  String get scriptCategory => r'dense';
 
   @override
   String get searchFieldLabel => r'ស្វែងរក';
