@@ -9,7 +9,7 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
@@ -17,9 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'widget_tester.dart' show WidgetTester;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -191,8 +193,8 @@ final Matcher isFlutterError = isInstanceOf<FlutterError>();
 final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
-// TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
-Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
+Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -304,8 +306,11 @@ Matcher matchesSemanticsData({
   String label,
   String hint,
   String value,
+  String increasedValue,
+  String decreasedValue,
   TextDirection textDirection,
   Rect rect,
+  Size size,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -325,6 +330,7 @@ Matcher matchesSemanticsData({
   bool isLiveRegion = false,
   bool hasToggledState = false,
   bool isToggled = false,
+  bool hasImplicitScrolling = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -388,6 +394,8 @@ Matcher matchesSemanticsData({
     flags.add(SemanticsFlag.hasToggledState);
   if (isToggled)
     flags.add(SemanticsFlag.isToggled);
+  if (hasImplicitScrolling)
+    flags.add(SemanticsFlag.hasImplicitScrolling);
 
   final List<SemanticsAction> actions = <SemanticsAction>[];
   if (hasTapAction)
@@ -443,13 +451,47 @@ Matcher matchesSemanticsData({
     label: label,
     hint: hint,
     value: value,
+    increasedValue: increasedValue,
+    decreasedValue: decreasedValue,
     actions: actions,
     flags: flags,
     textDirection: textDirection,
     rect: rect,
+    size: size,
     customActions: customActions,
     hintOverrides: hintOverrides,
   );
+}
+
+/// Asserts that the currently rendered widget meets the provided accessibility
+/// `guideline`.
+///
+/// This matcher requires the result to be awaited and for semantics to be
+/// enabled first.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// handle.dispose();
+/// ```
+///
+/// Supported accessibility guidelines:
+///
+///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
+  return new _MatchesAccessibilityGuideline(guideline);
+}
+
+/// The inverse matcher of [meetsGuideline].
+///
+/// This is needed because the [isNot] matcher does not compose with an
+/// [AsyncMatcher].
+AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
+  return new _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -1041,6 +1083,11 @@ class _IsMethodCall extends Matcher {
 /// [RenderClipPath].
 const Matcher clipsWithBoundingRect = _ClipsWithBoundingRect();
 
+/// Asserts that a [Finder] locates a single object whose root RenderObject is
+/// not a [RenderClipRect], [RenderClipRRect], [RenderClipOval], or
+/// [RenderClipPath].
+const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
+
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
@@ -1099,7 +1146,53 @@ Matcher rendersOnPhysicalShape({
   );
 }
 
-abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject> extends Matcher {
+abstract class _FailWithDescriptionMatcher extends Matcher {
+  const _FailWithDescriptionMatcher();
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+      dynamic item,
+      Description mismatchDescription,
+      Map<dynamic, dynamic> matchState,
+      bool verbose
+  ) {
+    return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
+  const _MatchAnythingExceptClip();
+
+  @override
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+    final Iterable<Element> nodes = finder.evaluate();
+    if (nodes.length != 1)
+      return failWithDescription(matchState, 'did not have a exactly one child element');
+    final RenderObject renderObject = nodes.single.renderObject;
+
+    switch (renderObject.runtimeType) {
+      case RenderClipPath:
+      case RenderClipOval:
+      case RenderClipRect:
+      case RenderClipRRect:
+        return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
+      default:
+        return true;
+    }
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('does not have a clip as an immediate child');
+  }
+}
+
+abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject> extends _FailWithDescriptionMatcher {
   const _MatchRenderObject();
 
   bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, T renderObject);
@@ -1119,21 +1212,6 @@ abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject
       return renderObjectMatchesM(matchState, renderObject);
 
     return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
-  }
-
-  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
-    matchState['failure'] = description;
-    return false;
-  }
-
-  @override
-  Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose
-  ) {
-    return mismatchDescription.add(matchState['failure']);
   }
 }
 
@@ -1473,11 +1551,14 @@ class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
     this.label,
     this.value,
+    this.increasedValue,
+    this.decreasedValue,
     this.hint,
     this.flags,
     this.actions,
     this.textDirection,
     this.rect,
+    this.size,
     this.customActions,
     this.hintOverrides,
   });
@@ -1485,12 +1566,15 @@ class _MatchesSemanticsData extends Matcher {
   final String label;
   final String value;
   final String hint;
+  final String increasedValue;
+  final String decreasedValue;
   final SemanticsHintOverrides hintOverrides;
   final List<SemanticsAction> actions;
   final List<CustomSemanticsAction> customActions;
   final List<SemanticsFlag> flags;
   final TextDirection textDirection;
   final Rect rect;
+  final Size size;
 
   @override
   Description describe(Description description) {
@@ -1501,6 +1585,10 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with value: $value ');
     if (hint != null)
       description.add('with hint: $hint ');
+    if (increasedValue != null)
+      description.add('with increasedValue: $increasedValue');
+    if (decreasedValue != null)
+      description.add('with decreasedValue: $decreasedValue');
     if (actions != null)
       description.add('with actions:').addDescriptionOf(actions);
     if (flags != null)
@@ -1509,6 +1597,8 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with textDirection: $textDirection ');
     if (rect != null)
       description.add('with rect: $rect');
+    if (size != null)
+      description.add('with size: $size');
     if (customActions != null)
       description.add('with custom actions: $customActions');
     if (hintOverrides != null)
@@ -1528,11 +1618,16 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'hint was: ${data.hint}');
     if (value != null && value != data.value)
       return failWithDescription(matchState, 'value was: ${data.value}');
+    if (increasedValue != null && increasedValue != data.increasedValue)
+      return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
+    if (decreasedValue != null && decreasedValue != data.decreasedValue)
+      return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
-    if (rect != null && rect != data.rect) {
-      return failWithDescription(matchState, 'rect was: $rect');
-    }
+    if (rect != null && rect != data.rect)
+      return failWithDescription(matchState, 'rect was: ${data.rect}');
+    if (size != null && size != data.rect.size)
+      return failWithDescription(matchState, 'size was: ${data.rect.size}');
     if (actions != null) {
       int actionBits = 0;
       for (SemanticsAction action in actions)
@@ -1596,5 +1691,43 @@ class _MatchesSemanticsData extends Matcher {
       bool verbose
       ) {
     return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchesAccessibilityGuideline extends AsyncMatcher {
+  _MatchesAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add(guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return null;
+    return result.reason;
+  }
+}
+
+class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
+  _DoesNotMatchAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add('Does not ' + guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return 'Failed';
+    return null;
   }
 }

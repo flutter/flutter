@@ -4,10 +4,11 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/adb.dart';
+
+import 'common.dart';
 
 void main() {
   group('device', () {
@@ -90,6 +91,15 @@ void main() {
         expectLog(<CommandArgs>[
           cmd(command: 'dumpsys', arguments: <String>['power']),
           cmd(command: 'input', arguments: <String>['keyevent', '82']),
+        ]);
+      });
+    });
+
+    group('adb', () {
+      test('tap', () async {
+        await device.tap(100, 200);
+        expectLog(<CommandArgs>[
+          cmd(command: 'input', arguments: <String>['tap', '100', '200']),
         ]);
       });
     });

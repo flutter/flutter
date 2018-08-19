@@ -398,6 +398,8 @@ void main() {
         label: 'foo',
         hint: 'bar',
         value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
         textDirection: TextDirection.rtl,
         onTapHint: 'scan',
         onLongPressHint: 'fill',
@@ -412,6 +414,8 @@ void main() {
           label: 'foo',
           hint: 'bar',
           value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
           textDirection: TextDirection.rtl,
           hasTapAction: true,
           hasLongPressAction: true,
@@ -483,11 +487,11 @@ void main() {
       final SemanticsData data = new SemanticsData(
         flags: flags,
         actions: actions,
-        label: '',
-        increasedValue: '',
-        value: '',
-        decreasedValue: '',
-        hint: '',
+        label: 'a',
+        increasedValue: 'b',
+        value: 'c',
+        decreasedValue: 'd',
+        hint: 'e',
         textDirection: TextDirection.ltr,
         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         textSelection: null,
@@ -498,6 +502,8 @@ void main() {
       );
 
       expect(data, matchesSemanticsData(
+         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+         size: const Size(10.0, 10.0),
          /* Flags */
          hasCheckedState: true,
          isChecked: true,
@@ -517,6 +523,7 @@ void main() {
          isLiveRegion: true,
          hasToggledState: true,
          isToggled: true,
+         hasImplicitScrolling: true,
          /* Actions */
          hasTapAction: true,
          hasLongPressAction: true,

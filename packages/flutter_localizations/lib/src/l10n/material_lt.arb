@@ -41,5 +41,11 @@
   "popupMenuLabel": "Iššokantysis meniu",
   "dialogLabel": "Dialogo langas",
   "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "searchFieldLabel": "TBD",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD"
 }

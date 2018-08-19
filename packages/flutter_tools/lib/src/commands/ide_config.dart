@@ -231,13 +231,9 @@ class IdeConfigCommand extends FlutterCommand {
     }
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-    String dirPath = fs.path.normalize(
+    final String dirPath = fs.path.normalize(
       fs.directory(fs.path.absolute(Cache.flutterRoot)).absolute.path,
     );
-    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
-    if (fs.path.basename(dirPath) == '.') {
-      dirPath = fs.path.dirname(dirPath);
-    }
 
     final String error = _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
     if (error != null) {

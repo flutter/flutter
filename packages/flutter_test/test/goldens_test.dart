@@ -7,10 +7,8 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
-import 'package:test/test.dart' as test_package;
-import 'package:test/test.dart' hide test;
-
-import 'package:flutter_test/flutter_test.dart' show goldenFileComparator, LocalFileComparator;
+import 'package:flutter_test/flutter_test.dart' hide test;
+import 'package:flutter_test/flutter_test.dart' as test_package;
 
 const List<int> _kExpectedBytes = <int>[1, 2, 3];
 
@@ -59,7 +57,7 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, const isInstanceOf<LocalFileComparator>());
+      expect(goldenFileComparator, isInstanceOf<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });
@@ -133,7 +131,7 @@ void main() {
       group('fails', () {
         test('when golden file does not exist', () async {
           final Future<bool> comparison = doComparison();
-          expect(comparison, throwsA(const isInstanceOf<TestFailure>()));
+          expect(comparison, throwsA(isInstanceOf<TestFailure>()));
         });
 
         test('when golden bytes are leading subset of image bytes', () async {

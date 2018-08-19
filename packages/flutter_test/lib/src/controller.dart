@@ -15,8 +15,12 @@ import 'test_pointer.dart';
 
 /// Class that programmatically interacts with widgets.
 ///
-/// For a variant of this class suited specifically for unit tests, see [WidgetTester].
-class WidgetController {
+/// For a variant of this class suited specifically for unit tests, see
+/// [WidgetTester]. For one suitable for live tests on a device, consider
+/// [LiveWidgetController].
+///
+/// Concrete subclasses must implement the [pump] method.
+abstract class WidgetController {
   /// Creates a widget controller that uses the given binding.
   WidgetController(this.binding);
 
@@ -132,12 +136,8 @@ class WidgetController {
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
     return allElements
-           // TODO(vegorov) replace with Iterable.whereType, when it is available. https://github.com/dart-lang/sdk/issues/27827
-           .where((Element element) => element is StatefulElement)
-           .map((Element element) {
-             final StatefulElement statefulElement = element;
-             return statefulElement.state;
-           });
+           .whereType<StatefulElement>()
+           .map((StatefulElement element) => element.state);
   }
 
   /// The matching state in the widget tree.
@@ -147,7 +147,7 @@ class WidgetController {
   ///
   /// * Use [firstState] if you expect to match several states but only want the first.
   /// * Use [stateList] if you expect to match several states and want all of them.
-  T state<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T state<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().single, finder);
   }
@@ -159,7 +159,7 @@ class WidgetController {
   /// matching widget has no state.
   ///
   /// * Use [state] if you only expect to match one state.
-  T firstState<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T firstState<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().first, finder);
   }
@@ -171,12 +171,12 @@ class WidgetController {
   ///
   /// * Use [state] if you only expect to match one state.
   /// * Use [firstState] if you expect to match several but only want the first.
-  Iterable<T> stateList<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  Iterable<T> stateList<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map((Element element) => _stateOf<T>(element, finder));
   }
 
-  T _stateOf<T extends State<StatefulWidget>>(Element element, Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
     if (element is StatefulElement)
       return element.state;
@@ -266,6 +266,17 @@ class WidgetController {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
       return null;
+    });
+  }
+
+  /// Dispatch a pointer down at the center of the given widget, assuming it is
+  /// exposed.
+  ///
+  /// If the center of the widget is not exposed, this might send events to
+  /// another object.
+  Future<TestGesture> press(Finder finder, { int pointer }) {
+    return TestAsyncUtils.guard<TestGesture>(() {
+      return startGesture(getCenter(finder), pointer: pointer);
     });
   }
 
@@ -392,10 +403,11 @@ class WidgetController {
   /// This is invoked by [flingFrom], for instance, so that the sequence of
   /// pointer events occurs over time.
   ///
-  /// The default implementation does nothing.
-  ///
   /// The [WidgetTester] subclass implements this by deferring to the [binding].
-  Future<Null> pump(Duration duration) => new Future<Null>.value(null);
+  ///
+  /// See also [SchedulerBinding.endOfFrame], which returns a future that could
+  /// be appropriate to return in the implementation of this method.
+  Future<Null> pump(Duration duration);
 
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
@@ -515,4 +527,21 @@ class WidgetController {
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
   Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+}
+
+/// Variant of [WidgetController] that can be used in tests running
+/// on a device.
+///
+/// This is used, for instance, by [FlutterDriver].
+class LiveWidgetController extends WidgetController {
+  /// Creates a widget controller that uses the given binding.
+  LiveWidgetController(WidgetsBinding binding) : super(binding);
+
+  @override
+  Future<Null> pump(Duration duration) async {
+    if (duration != null)
+      await new Future<void>.delayed(duration);
+    binding.scheduleFrame();
+    await binding.endOfFrame;
+  }
 }

@@ -7,13 +7,10 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
-
-BasicProject _project = new BasicProject();
-FlutterTestDriver _flutter;
 
 /// This duration is arbitrary but is ideally:
 /// a) long enough to ensure that if the app is crashing at startup, we notice
@@ -22,15 +19,19 @@ const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
   group('flutter run', () {
+    final BasicProject _project = new BasicProject();
+    FlutterTestDriver _flutter;
+    Directory tempDir;
+
     setUp(() async {
-      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_lifetime_test.');
       await _project.setUpIn(tempDir);
       _flutter = new FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
       await _flutter.stop();
-      _project.cleanup();
+      tryToDelete(tempDir);
     });
 
     test('does not terminate when a debugger is attached', () async {

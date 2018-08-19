@@ -1,9 +1,14 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+
+import '../flutter_test_alternative.dart';
 
 void main() {
   group(consolidateHttpClientResponseBytes, () {
@@ -86,7 +91,7 @@ void main() {
       when(response.contentLength).thenReturn(-1);
 
       expect(consolidateHttpClientResponseBytes(response),
-          throwsA(const isInstanceOf<Exception>()));
+          throwsA(isInstanceOf<Exception>()));
     });
   });
 }

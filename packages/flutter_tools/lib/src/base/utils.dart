@@ -24,21 +24,24 @@ class BotDetector {
     return platform.environment['BOT'] != 'false'
        && (platform.environment['BOT'] == 'true'
 
-           // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+        // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
         || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
         || platform.environment.containsKey('CI') // Travis and AppVeyor
 
-           // https://www.appveyor.com/docs/environment-variables/
+        // https://www.appveyor.com/docs/environment-variables/
         || platform.environment.containsKey('APPVEYOR')
 
-           // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+        // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+        || platform.environment.containsKey('CIRRUS_CI')
+
+        // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
         || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
-           // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+        // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
         || platform.environment.containsKey('JENKINS_URL')
 
-           // Properties on Flutter's Chrome Infra bots.
+        // Properties on Flutter's Chrome Infra bots.
         || platform.environment['CHROME_HEADLESS'] == '1'
         || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
   }
@@ -70,6 +73,14 @@ String camelCase(String str) {
     index = str.indexOf('_');
   }
   return str;
+}
+
+final RegExp _upperRegex = new RegExp(r'[A-Z]');
+
+/// Convert `fooBar` to `foo_bar`.
+String snakeCase(String str, [String sep = '_']) {
+  return str.replaceAllMapped(_upperRegex,
+      (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
 
 String toTitleCase(String str) {

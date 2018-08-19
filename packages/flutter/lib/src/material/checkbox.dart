@@ -368,11 +368,4 @@ class _RenderCheckbox extends RenderToggleable {
       }
     }
   }
-
-  // TODO(hmuller): smooth segues for cases where the value changes
-  // in the middle of position's animation cycle.
-  // https://github.com/flutter/flutter/issues/14674
-
-  // TODO(hmuller): accessibility support for tristate checkboxes.
-  // https://github.com/flutter/flutter/issues/14677
 }

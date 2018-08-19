@@ -2681,11 +2681,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// The following table summarizes the above:
   ///
-  /// <table>
-  /// <tr><th><th>`newWidget == null`<th>`newWidget != null`
-  /// <tr><th>`child == null`<td>Returns null.<td>Returns new [Element].
-  /// <tr><th>`child != null`<td>Old child is removed, returns null.<td>Old child updated if possible, returns child or new [Element].
-  /// </table>
+  /// |                     | **newWidget == null**  | **newWidget != null**   |
+  /// | :-----------------: | :--------------------- | :---------------------- |
+  /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
+  /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     assert(() {
@@ -4025,7 +4024,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   }
 }
 
-/// An [Element] that uses a [InheritedWidget] as its configuration.
+/// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);

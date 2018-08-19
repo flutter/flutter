@@ -92,8 +92,8 @@ class TimelineSummary {
         .map((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
-          .map((TimedEvent event) => event.duration.inMicroseconds)
-          .toList(),
+        .map((TimedEvent event) => event.duration.inMicroseconds)
+        .toList(),
     };
   }
 
@@ -151,8 +151,8 @@ class TimelineSummary {
       if (events.moveNext()) {
         final TimelineEvent endEvent = events.current;
         result.add(new TimedEvent(
-            beginEvent.timestampMicros,
-            endEvent.timestampMicros
+          beginEvent.timestampMicros,
+          endEvent.timestampMicros,
         ));
       }
     }
@@ -197,14 +197,8 @@ class TimelineSummary {
 /// Timing information about an event that happened in the event loop.
 class TimedEvent {
   /// Creates a timed event given begin and end timestamps in microseconds.
-  TimedEvent(this.beginTimeMicros, this.endTimeMicros)
+  TimedEvent(int beginTimeMicros, int endTimeMicros)
     : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
-
-  /// The timestamp when the event began.
-  final int beginTimeMicros;
-
-  /// The timestamp when the event ended.
-  final int endTimeMicros;
 
   /// The duration of the event.
   final Duration duration;

@@ -363,7 +363,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                 ? const Text('Flutter gallery')
                 : new Text(_category.name),
             ),
-            frontHeading: widget.testMode ? null: new Container(height: 24.0),
+            frontHeading: widget.testMode ? null : new Container(height: 24.0),
             frontLayer: new AnimatedSwitcher(
               duration: _kFrontLayerSwitchDuration,
               switchOutCurve: switchOutCurve,

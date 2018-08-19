@@ -5,10 +5,9 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
-
 
 void main() {
   group('character input prompt', () {

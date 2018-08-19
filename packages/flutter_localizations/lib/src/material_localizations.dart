@@ -353,7 +353,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
-    return intl.Intl.plural(
+    return intl.Intl.pluralLogic(
       selectedRowCount,
       zero: selectedRowCountTitleZero,
       one: selectedRowCountTitleOne,

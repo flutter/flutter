@@ -129,10 +129,7 @@ class CreateCommand extends FlutterCommand {
     final bool generatePackage = template == 'package';
 
     final Directory projectDir = fs.directory(argResults.rest.first);
-    String dirPath = fs.path.normalize(projectDir.absolute.path);
-    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
-    if (fs.path.basename(dirPath) == '.')
-      dirPath = fs.path.dirname(dirPath);
+    final String dirPath = fs.path.normalize(projectDir.absolute.path);
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
@@ -286,8 +283,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
       );
     }
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
     final String organization = templateContext['organization'];
@@ -320,8 +316,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
       await project.ensureReadyForPlatformSpecificTooling();
     }
 
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     return generatedCount;
   }
@@ -373,7 +368,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     int filesCreated = 0;
     copyDirectorySync(
       cache.getArtifactDirectory('gradle_wrapper'),
-      project.android.directory,
+      project.android.hostAppGradleRoot,
       (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();

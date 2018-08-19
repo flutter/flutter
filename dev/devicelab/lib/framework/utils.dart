@@ -77,15 +77,23 @@ void fail(String message) {
   throw new BuildFailedError(message);
 }
 
-void rm(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync();
+// Remove the given file or directory.
+void rm(FileSystemEntity entity, { bool recursive = false}) {
+  if (entity.existsSync()) {
+    // This should not be necessary, but it turns out that
+    // on Windows it's common for deletions to fail due to
+    // bogus (we think) "access denied" errors.
+    try {
+      entity.deleteSync(recursive: recursive);
+    } on FileSystemException catch (error) {
+      print('Failed to delete ${entity.path}: $error');
+    }
+  }
 }
 
 /// Remove recursively.
 void rmTree(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync(recursive: true);
+  rm(entity, recursive: true);
 }
 
 List<FileSystemEntity> ls(Directory directory) => directory.listSync();
@@ -244,7 +252,7 @@ Future<Null> forceQuitRunningProcesses() async {
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
-    print('Force quitting process:\n$p');
+    print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
       print('Failed to force quit process');
     }
@@ -414,7 +422,7 @@ Future<Null> getFlutter(String revision) async {
   section('Get Flutter!');
 
   if (exists(flutterDirectory)) {
-    rmTree(flutterDirectory);
+    flutterDirectory.deleteSync(recursive: true);
   }
 
   await inDirectory(flutterDirectory.parent, () async {
@@ -528,8 +536,6 @@ int parseServicePort(String line, {
   // e.g. "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
   final RegExp pattern = new RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
   final Match match = pattern.firstMatch(line);
-  print(pattern);
-  print(match);
   return match == null ? null : int.parse(match.group(2));
 }
 
