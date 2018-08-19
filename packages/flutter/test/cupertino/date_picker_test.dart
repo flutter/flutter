@@ -127,6 +127,7 @@ void main() {
       );
     });
 
+    // Test for text direction.
 //    testWidgets('column order depends on text direction', (WidgetTester tester) async {
 //      await tester.pumpWidget(
 //        new Directionality(
@@ -138,10 +139,18 @@ void main() {
 //        ),
 //      );
 //
+//      // The texts that appear
+//      final List<String> texts = <String>['0','hours','1','min','2','sec'];
+//
 //      Offset lastOffset = tester.getTopLeft(
-//          find.widgetWithText(Container, '0'));
-//      expect(tester.getTopLeft(find.widgetWithText(Container, 'hours')) > lastOffset, true);
-//      lastOffset = tester.getTopLeft(find.widgetWithText(Container, '0'));
+//          find.widgetWithText(Container, texts[0]));
+//
+//      for (int i = 1; i < texts.length; i++) {
+//        expect(tester.getTopLeft(find.widgetWithText(Container, texts[i])) > lastOffset, true);
+//        lastOffset = tester.getTopLeft(find.widgetWithText(Container, texts[i]));
+//      }
 //    });
+
+    // Test for width fixed.
   });
 }

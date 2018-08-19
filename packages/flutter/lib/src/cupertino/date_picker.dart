@@ -140,7 +140,8 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final CupertinoLocalizations localizations =
+        CupertinoLocalizations.of(context) ?? const DefaultCupertinoLocalizations();
 
     return new Semantics(
       child: new Stack(
@@ -190,7 +191,8 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final CupertinoLocalizations localizations =
+        CupertinoLocalizations.of(context) ?? const DefaultCupertinoLocalizations();
 
     return new Semantics(
       child: new Stack(
@@ -239,7 +241,8 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
     final int textDirectionFactor =
       Directionality.of(context) == TextDirection.ltr ? 1 : -1;
 
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final CupertinoLocalizations localizations =
+        CupertinoLocalizations.of(context) ?? const DefaultCupertinoLocalizations();
 
     return new Semantics(
       child: new Stack(
@@ -289,8 +292,6 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
 
   @override
   Widget build(BuildContext context) {
-    assert(CupertinoLocalizations.of(context) != null, 'No cupertino localization is found.');
-
     return new MediaQuery(
       data: const MediaQueryData(
         // The iOS picker's text scaling is fixed, so we will also fix it in
