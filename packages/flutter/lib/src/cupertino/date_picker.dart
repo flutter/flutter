@@ -23,9 +23,12 @@ const Color _kBackgroundColor = CupertinoColors.white;
 /// If the maximum width given to the picker is smaller than [_kPickerWidth],
 /// the picker's layout will be broken.
 
-
-/// Builds a single column for the iOS picker. The align and padding parameters
-/// are of this column and the other parameters are for its child.
+/// Builds a single column for the picker. The align and padding parameters
+/// are properties of this column, and childWidth, childAlign, childPadding
+/// are properties of its child.
+///
+/// This general column builder is sufficient to build all kinds of column
+/// of the iOS picker.
 Widget _buildColumn(
   Alignment align,
   EdgeInsets padding,
@@ -64,7 +67,7 @@ class CupertinoCountdownTimerPicker extends StatefulWidget {
   /// [initialTimerDuration] defaults to 0 second and is limited from 0 second
   /// to 23 hours 59 minutes 59 seconds. Only hour, minute, and second values
   /// are extracted from [initialTimerDuration], so specifying other fields like
-  /// day or millisecond will not affect anything.
+  /// millisecond or microsecond will not affect anything.
   ///
   /// [minuteInterval] is the granularity of the minute spinner. Must be a factor
   /// of 60.
@@ -79,8 +82,8 @@ class CupertinoCountdownTimerPicker extends StatefulWidget {
   }) : assert(onTimerDurationChanged != null),
        assert(initialTimerDuration >= const Duration(seconds: 0)),
        assert(initialTimerDuration < const Duration(days: 1)),
-       assert(60 % minuteInterval == 0),
-       assert(60 % secondInterval == 0);
+       assert(minuteInterval > 0 && 60 % minuteInterval == 0),
+       assert(secondInterval > 0 && 60 % secondInterval == 0);
 
   /// The initial duration of the countdown timer.
   final Duration initialTimerDuration;
