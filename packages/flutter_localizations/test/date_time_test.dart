@@ -92,7 +92,6 @@ void main() {
       testWidgets('formats ${TimeOfDayFormat.h_colon_mm_space_a}', (WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('en', ''), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
         expect(await formatTimeOfDay(tester, const Locale('en', ''), const TimeOfDay(hour: 20, minute: 32)), '8:32 PM');
-        expect(await formatTimeOfDay(tester, const Locale('km', ''), const TimeOfDay(hour: 23, minute: 32)), '11:32 PM');
       });
 
       testWidgets('formats ${TimeOfDayFormat.HH_colon_mm}', (WidgetTester tester) async {
