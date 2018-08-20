@@ -50,8 +50,6 @@ class _ElevationDemoState extends State<ElevationDemo> {
           title: const Text('Elevation'),
           actions: <Widget>[
             new IconButton(
-                icon: new Icon(
-                    _shouldShowElevation ? Icons.layers_clear : Icons.layers),
                 icon: const Icon(Icons.sentiment_very_satisfied),
                 onPressed: () {
                   setState(() => _shouldShowElevation = !_shouldShowElevation);
