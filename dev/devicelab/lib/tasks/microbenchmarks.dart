@@ -141,7 +141,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
-  process.exitCode.then<int>((int code) async {
+  process.exitCode.then<void>((int code) async {
     await Future.wait<void>(<Future<void>>[
       stdoutSub.cancel(),
       stderrSub.cancel(),

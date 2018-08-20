@@ -58,6 +58,7 @@ Future<Null> main(List<String> rawArgs) async {
       (String line) => line.startsWith('intl:'),
       orElse: () {
         exitWithError('intl dependency not found in ${dotPackagesFile.path}');
+        return null; // unreachable
       },
     )
     .split(':')

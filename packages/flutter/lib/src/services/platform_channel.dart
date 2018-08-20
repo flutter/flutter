@@ -313,6 +313,11 @@ class MethodChannel {
   ///
   /// This is intended for testing. Method calls intercepted in this manner are
   /// not sent to platform plugins.
+  ///
+  /// The provided `handler` must return a `Future` that completes with the
+  /// return value of the call. The value will be encoded using
+  /// [MethodCodec.encodeSuccessEnvelope], to act as if platform plugin had
+  /// returned that value.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
     BinaryMessages.setMockMessageHandler(
       name,
@@ -413,6 +418,7 @@ class EventChannel {
             controller.addError(e);
           }
         }
+        return null;
       });
       try {
         await methodChannel.invokeMethod('listen', arguments);

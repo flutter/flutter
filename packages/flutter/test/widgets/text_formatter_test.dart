@@ -21,6 +21,7 @@ void main() {
       (TextEditingValue oldValue, TextEditingValue newValue) {
         calledOldValue = oldValue;
         calledNewValue = newValue;
+        return null;
       }
     );
 
