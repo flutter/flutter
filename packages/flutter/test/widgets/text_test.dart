@@ -182,7 +182,7 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, preciseRects: false));
     semantics.dispose();
   });
 }

@@ -222,6 +222,7 @@ class TestSemantics {
       bool ignoreRect = false,
       bool ignoreTransform = false,
       bool ignoreId = false,
+      bool preciseRects = true,
       DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
     }
   ) {
@@ -263,8 +264,17 @@ class TestSemantics {
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
-    if (!ignoreRect && rect != nodeData.rect)
-      return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
+    if (!ignoreRect && preciseRects) {
+      if (rect != nodeData.rect)
+        return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
+    } else if (!ignoreRect && !preciseRects) {
+      final double leftDelta = (rect.left - nodeData.rect.left).abs();
+      final double rightDelta = (rect.right - nodeData.rect.right).abs();
+      final double topDelta = (rect.top - nodeData.rect.top).abs();
+      final double bottomDelta = (rect.bottom - nodeData.rect.bottom).abs();
+      if (leftDelta > 0.01 || rightDelta > 0.01 || topDelta > 0.01 || bottomDelta <= 0.01)
+        return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
+    }
     if (!ignoreTransform && transform != nodeData.transform)
       return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
     if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset || textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
@@ -577,6 +587,7 @@ class _HasSemantics extends Matcher {
       @required this.ignoreTransform,
       @required this.ignoreId,
       @required this.childOrder,
+      @required this.preciseRects,
     }) : assert(_semantics != null),
          assert(ignoreRect != null),
          assert(ignoreId != null),
@@ -587,6 +598,7 @@ class _HasSemantics extends Matcher {
   final bool ignoreRect;
   final bool ignoreTransform;
   final bool ignoreId;
+  final bool preciseRects;
   final DebugSemanticsDumpOrder childOrder;
 
   @override
@@ -597,6 +609,7 @@ class _HasSemantics extends Matcher {
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
       ignoreId: ignoreId,
+      preciseRects: preciseRects,
       childOrder: childOrder,
     );
     if (!doesMatch) {
@@ -636,10 +649,14 @@ class _HasSemantics extends Matcher {
 }
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
+///
+/// If [preciseRects] is set to false, it checks equality within two decimal places
+/// on each value instead of using the default comparison.
 Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreRect = false,
   bool ignoreTransform = false,
   bool ignoreId = false,
+  bool preciseRects = true,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return new _HasSemantics(
@@ -647,6 +664,7 @@ Matcher hasSemantics(TestSemantics semantics, {
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
     ignoreId: ignoreId,
+    preciseRects: preciseRects,
     childOrder: childOrder,
   );
 }
