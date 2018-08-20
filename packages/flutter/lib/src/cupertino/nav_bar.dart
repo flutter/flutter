@@ -1814,12 +1814,13 @@ class _NavigationBarComponentsTransition {
     final KeyedSubtree bottomMiddle = bottomComponents.middleKey.currentWidget;
     final KeyedSubtree bottomLargeTitle = bottomComponents.largeTitleKey.currentWidget;
     final KeyedSubtree topBackLabel = topComponents.backLabelKey.currentWidget;
-    RenderAnimatedOpacity opacity = topComponents.backLabelKey.currentContext.ancestorRenderObjectOfType(
-      const TypeMatcher<RenderAnimatedOpacity>()
-    );
+    RenderAnimatedOpacity opacity =
+        topComponents.backLabelKey.currentContext?.ancestorRenderObjectOfType(
+          const TypeMatcher<RenderAnimatedOpacity>()
+        );
 
     Animation<double> midClickOpacity;
-    if (opacity.opacity.value < 1.0) {
+    if (opacity != null && opacity.opacity.value < 1.0) {
       midClickOpacity = new Tween<double>(
         begin: 0.0,
         end: opacity.opacity.value,
