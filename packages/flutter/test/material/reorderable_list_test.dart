@@ -350,6 +350,63 @@ void main() {
 
           handle.dispose();
         });
+
+        testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          final Widget reorderableListView = new ReorderableListView(
+            children: <Widget>[
+              const SizedBox(
+                key: Key('List tile 1'),
+                height: itemHeight,
+                child: Text('List tile 1'),
+              ),
+              new SizedBox(
+                key: const Key('Switch tile'),
+                height: itemHeight,
+                child: new Material(
+                  child: new SwitchListTile(
+                    title: const Text('Switch tile'),
+                    value: true,
+                    onChanged: (bool newValue) {},
+                  ),
+                ),
+              ),
+              const SizedBox(
+                key: Key('List tile 2'),
+                height: itemHeight,
+                child: Text('List tile 2'),
+              ),
+            ],
+            scrollDirection: Axis.vertical,
+            onReorder: (int oldIndex, int newIndex) {},
+          );
+          await tester.pumpWidget(new MaterialApp(
+            home: new SizedBox(
+              height: itemHeight * 10,
+              child: reorderableListView,
+            ),
+          ));
+
+          // Get the switch tile's semantics:
+          final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
+
+          // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
+          expect(semanticsData, matchesSemanticsData(
+            hasToggledState: true,
+            isToggled: true,
+            isEnabled: true,
+            hasEnabledState: true,
+            label: 'Switch tile',
+            hasTapAction: true,
+            customActions: const <CustomSemanticsAction>[
+              CustomSemanticsAction(label: 'Move up'),
+              CustomSemanticsAction(label: 'Move down'),
+              CustomSemanticsAction(label: 'Move to the end'),
+              CustomSemanticsAction(label: 'Move to the start'),
+            ],
+          ));
+          handle.dispose();
+        });
       });
     });
 
