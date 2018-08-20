@@ -1188,7 +1188,7 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
 
   @override
   Description describe(Description description) {
-    description.add('does not have a clip as an immediate child');
+    return description.add('does not have a clip as an immediate child');
   }
 }
 

@@ -106,6 +106,8 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   final List<String> output = exec.stdout.split('\n');
   if (output.first == 'Waiting for another flutter command to release the startup lock...')
     output.removeAt(0);
+  if (output.first.startsWith('Running "flutter packages get" in'))
+    output.removeAt(0);
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));
   final List<String> expectations = fs.file(fullTestExpectation).readAsLinesSync();

@@ -168,7 +168,11 @@ class _ListDemoState extends State<ReorderableListDemo> {
             },
           ),
           new IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: new Icon(
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
+            ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
           ),

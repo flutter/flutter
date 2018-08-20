@@ -67,7 +67,7 @@ void main() {
     });
     group('ArchiveCreator for $platformName', () {
       ArchiveCreator creator;
-      Directory tmpDir;
+      Directory tempDir;
       Directory flutterDir;
       FakeProcessManager processManager;
       final List<List<String>> args = <List<String>>[];
@@ -82,12 +82,12 @@ void main() {
         processManager = new FakeProcessManager();
         args.clear();
         namedArgs.clear();
-        tmpDir = await Directory.systemTemp.createTemp('flutter_');
-        flutterDir = new Directory(path.join(tmpDir.path, 'flutter'));
+        tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
+        flutterDir = new Directory(path.join(tempDir.path, 'flutter'));
         flutterDir.createSync(recursive: true);
         creator = new ArchiveCreator(
-          tmpDir,
-          tmpDir,
+          tempDir,
+          tempDir,
           testRef,
           Branch.dev,
           processManager: processManager,
@@ -99,16 +99,11 @@ void main() {
       });
 
       tearDown(() async {
-        // On Windows, the directory is locked and not able to be deleted yet. So
-        // we just leave some (very small, because we're not actually building
-        // archives here) trash around to be deleted at the next reboot.
-        if (!platform.isWindows) {
-          await tmpDir.delete(recursive: true);
-        }
+        tryToDelete(tempDir);
       });
 
       test('sets PUB_CACHE properly', () async {
-        final String createBase = path.join(tmpDir.absolute.path, 'create_');
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
@@ -116,7 +111,7 @@ void main() {
           'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
-          calls['7za x ${path.join(tmpDir.path, 'mingit.zip')}'] = null;
+          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
         }
         calls.addAll(<String, List<ProcessResult>>{
           '$flutter doctor': null,
@@ -128,7 +123,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
         });
-        final String archiveName = path.join(tmpDir.absolute.path,
+        final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         if (platform.isWindows) {
           calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
@@ -151,7 +146,7 @@ void main() {
       });
 
       test('calls the right commands for archive output', () async {
-        final String createBase = path.join(tmpDir.absolute.path, 'create_');
+        final String createBase = path.join(tempDir.absolute.path, 'create_');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
@@ -159,7 +154,7 @@ void main() {
           'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
-          calls['7za x ${path.join(tmpDir.path, 'mingit.zip')}'] = null;
+          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
         }
         calls.addAll(<String, List<ProcessResult>>{
           '$flutter doctor': null,
@@ -171,7 +166,7 @@ void main() {
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
         });
-        final String archiveName = path.join(tmpDir.absolute.path,
+        final String archiveName = path.join(tempDir.absolute.path,
             'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         if (platform.isWindows) {
           calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
@@ -182,8 +177,8 @@ void main() {
         }
         processManager.fakeResults = calls;
         creator = new ArchiveCreator(
-          tmpDir,
-          tmpDir,
+          tempDir,
+          tempDir,
           testRef,
           Branch.dev,
           processManager: processManager,
@@ -214,17 +209,11 @@ void main() {
 
       setUp(() async {
         processManager = new FakeProcessManager();
-        tempDir = await Directory.systemTemp.createTemp('flutter_');
-        tempDir.createSync();
+        tempDir = Directory.systemTemp.createTempSync('flutter_prepage_package_test.');
       });
 
       tearDown(() async {
-        // On Windows, the directory is locked and not able to be deleted yet. So
-        // we just leave some (very small, because we're not actually building
-        // archives here) trash around to be deleted at the next reboot.
-        if (!platform.isWindows) {
-          await tempDir.delete(recursive: true);
-        }
+        tryToDelete(tempDir);
       });
 
       test('calls the right processes', () async {

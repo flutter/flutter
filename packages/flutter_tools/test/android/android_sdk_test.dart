@@ -30,8 +30,10 @@ void main() {
     Directory sdkDir;
 
     tearDown(() {
-      sdkDir?.deleteSync(recursive: true);
-      sdkDir = null;
+      if (sdkDir != null) {
+        tryToDelete(sdkDir);
+        sdkDir = null;
+      }
     });
 
     testUsingContext('parse sdk', () {

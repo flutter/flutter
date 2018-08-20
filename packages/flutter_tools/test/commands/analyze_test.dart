@@ -20,7 +20,11 @@ void main() {
     fs = new MemoryFileSystem();
     fs.directory(_kFlutterRoot).createSync(recursive: true);
     Cache.flutterRoot = _kFlutterRoot;
-    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
+  });
+
+  tearDown(() {
+    tryToDelete(tempDir);
   });
 
   group('analyze', () {

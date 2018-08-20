@@ -366,7 +366,6 @@ class RenderTable extends RenderBox {
     TableBorder border,
     List<Decoration> rowDecorations,
     ImageConfiguration configuration = ImageConfiguration.empty,
-    Decoration defaultRowDecoration,
     TableCellVerticalAlignment defaultVerticalAlignment = TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children
