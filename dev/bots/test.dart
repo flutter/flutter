@@ -535,11 +535,11 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     })
     .map<String>((FileSystemEntity entity) {
       final File file = entity;
-      final String data = file.readAsStringSync();
       final String name = path.relative(file.path, from: workingDirectory);
       if (name.startsWith('bin/cache') ||
           name == 'dev/bots/test.dart')
         return null;
+      final String data = file.readAsStringSync();
       if (data.contains("import 'package:test/test.dart'")) {
         if (data.contains("// Defines a 'package:test' shim.")) {
           shims.add('  $name');
@@ -578,7 +578,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
           if (count == 1)
             return null;
         }
-        return '  $name: uses \'package:test\' directly.';
+        return '  $name: uses \'package:test\' directly';
       }
     })
     .where((String line) => line != null)
@@ -590,7 +590,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
     final String s1 = errors.length == 1 ? 's' : '';
     final String s2 = errors.length == 1 ? '' : 's';
-    print('${bold}The following file$s2 depend$s1 on \'package:test\' directly:$reset');
+    print('${bold}The following file$s2 use$s1 \'package:test\' incorrectly:$reset');
     print(errors.join('\n'));
     print('Rather than depending on \'package:test\' directly, use one of the shims:');
     print(shims.join('\n'));
