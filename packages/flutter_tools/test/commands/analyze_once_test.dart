@@ -95,8 +95,8 @@ void main() {
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
-          '2 issues found.',
         ],
+        exitMessageContains: '2 issues found.',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -122,8 +122,8 @@ void main() {
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '3 issues found.',
         ],
+        exitMessageContains: '3 issues found.',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -153,8 +153,8 @@ void bar() {
           arguments: <String>['analyze'],
           statusTextContains: <String>[
             'Analyzing',
-            '1 issue found.',
           ],
+          exitMessageContains: '1 issue found.',
           toolExit: true,
         );
       } finally {
