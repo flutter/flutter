@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
-class ElevationDemo extends StatelessWidget {
+class ElevationDemo extends StatefulWidget {
   static const String routeName = '/material/elevation';
+
+  @override
+  State<StatefulWidget> createState() => _ElevationDemoState();
+}
+
+class _ElevationDemoState extends State<ElevationDemo> {
+  bool _shouldShowElevation = true;
 
   List<Widget> buildCards() {
     final List<Widget> cards = <Widget>[];
@@ -39,7 +46,17 @@ class ElevationDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(title: const Text('Elevation')),
+        appBar: new AppBar(
+          title: const Text('Elevation'),
+          actions: <Widget>[
+            new IconButton(
+                icon: new Icon(
+                    _shouldShowElevation ? Icons.layers_clear : Icons.layers),
+                onPressed: () {
+                  setState(() => _shouldShowElevation = !_shouldShowElevation);
+                })
+          ],
+        ),
         body: new ListView(
           children: buildCards(),
         ));
