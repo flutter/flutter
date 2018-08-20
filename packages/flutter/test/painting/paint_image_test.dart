@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
 
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class TestImage implements ui.Image {
   TestImage({ this.width, this.height });

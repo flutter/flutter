@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -197,8 +196,8 @@ void main() {
         }
         fileFilter.addAll(fs.directory(pkgUri)
             .listSync(recursive: true)
-            .where((FileSystemEntity file) => file is File)
-            .map((FileSystemEntity file) => canonicalizePath(file.path))
+            .whereType<File>()
+            .map<String>((File file) => canonicalizePath(file.path))
             .toList());
       }
       final int bytes = await devFS.update(fileFilter: fileFilter);
@@ -460,15 +459,14 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('devfs${_tempDirs.length}');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.isNotEmpty) {
-    _tempDirs.removeLast().deleteSync(recursive: true);
-  }
+  while (_tempDirs.isNotEmpty)
+    tryToDelete(_tempDirs.removeLast());
 }
 
 Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {

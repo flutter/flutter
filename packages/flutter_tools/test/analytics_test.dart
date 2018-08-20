@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:mockito/mockito.dart';
+import 'package:quiver/time.dart';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -12,16 +15,13 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
   group('analytics', () {
-    Directory temp;
+    Directory tempDir;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -29,11 +29,11 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     // Ensure we don't send anything when analytics is disabled.
@@ -42,11 +42,11 @@ void main() {
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       flutterUsage.enabled = false;
-      await createProject(temp);
+      await createProject(tempDir);
       expect(count, 0);
 
       flutterUsage.enabled = true;
-      await createProject(temp);
+      await createProject(tempDir);
       expect(count, flutterUsage.isFirstRun ? 0 : 2);
 
       count = 0;
@@ -57,7 +57,7 @@ void main() {
       expect(count, 0);
     }, overrides: <Type, Generator>{
       FlutterVersion: () => new FlutterVersion(const Clock()),
-      Usage: () => new Usage(configDirOverride: temp.path),
+      Usage: () => new Usage(configDirOverride: tempDir.path),
     });
 
     // Ensure we don't send for the 'flutter config' command.
@@ -76,7 +76,7 @@ void main() {
       expect(count, 0);
     }, overrides: <Type, Generator>{
       FlutterVersion: () => new FlutterVersion(const Clock()),
-      Usage: () => new Usage(configDirOverride: temp.path),
+      Usage: () => new Usage(configDirOverride: tempDir.path),
     });
   });
 
@@ -151,9 +151,14 @@ void main() {
   });
 
   group('analytics bots', () {
-    Directory temp;
+    Directory tempDir;
+
     setUp(() {
-        temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
+    });
+
+    tearDown(() {
+      tryToDelete(tempDir);
     });
 
     testUsingContext('don\'t send on bots', () async {
@@ -166,7 +171,7 @@ void main() {
       Usage: () => new Usage(
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
-        configDirOverride: temp.path,
+        configDirOverride: tempDir.path,
       ),
     });
 
@@ -181,7 +186,7 @@ void main() {
       Usage: () => new Usage(
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
-        configDirOverride: temp.path,
+        configDirOverride: tempDir.path,
       ),
     });
   });

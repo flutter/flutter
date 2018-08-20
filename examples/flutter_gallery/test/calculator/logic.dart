@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_gallery/demo/calculator/logic.dart';
-import 'package:test/test.dart';
+
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('Test order of operations: 12 + 3 * 4 = 24', () {

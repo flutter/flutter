@@ -34,9 +34,8 @@ class VsCode {
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
         .listSync()
-        .where((FileSystemEntity d) => d is Directory)
-        .where(
-            (FileSystemEntity d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
+        .whereType<Directory>()
+        .where((Directory d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
