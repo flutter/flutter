@@ -239,29 +239,73 @@ class FuchsiaRemoteConnection {
     _pollDartVms = false;
   }
 
+  /// Helper method for [getMainIsolatesByPattern].
+  ///
+  /// Called when either there are no Isolates that exist that match
+  /// `pattern`, or there are not yet any active Dart VM's on the system
+  /// (possible when the Isolate we're attempting to connect to is in the only
+  /// instance of the Dart VM and its service port has not yet opened).
+  Future<List<IsolateRef>> _waitForMainIsolatesByPattern([
+    Pattern pattern,
+    Duration timeout = _kIsolateFindTimeout,
+  ]) async {
+    final Completer<List<IsolateRef>> completer =
+        new Completer<List<IsolateRef>>();
+    _onDartVmEvent.listen(
+      (DartVmEvent event) async {
+        if (event.eventType == DartVmEventType.started) {
+          _log.fine('New VM found on port: ${event.servicePort}. Searching '
+              'for Isolate: $pattern');
+          final DartVm vmService = await _getDartVm(event.uri.port);
+          final List<IsolateRef> result = await vmService
+              .getMainIsolatesByPattern(pattern)
+              .timeout(timeout);
+          if (result.isNotEmpty) {
+            if (!completer.isCompleted) {
+              completer.complete(result);
+            } else {
+              _log.warning('Found more than one Dart VM containing Isolates '
+                  'that match the pattern "$pattern".');
+            }
+          }
+        }
+      },
+      onDone: () {
+        if (!completer.isCompleted) {
+          _log.warning('Terminating isolate search for "$pattern"'
+              ' before timeout reached.');
+        }
+      },
+    );
+    return completer.future.timeout(timeout);
+  }
+
   /// Returns all Isolates running `main()` as matched by the [Pattern].
   ///
-  /// In the current state this is not capable of listening for an
-  /// Isolate to start up. The Isolate must already be running.
+  /// If there are no live Dart VM's or the Isolate cannot be found, waits until
+  /// either `timeout` is reached, or a Dart VM starts up with a name that
+  /// matches `pattern`.
   Future<List<IsolateRef>> getMainIsolatesByPattern(
     Pattern pattern, [
     Duration timeout = _kIsolateFindTimeout,
   ]) async {
+    // If for some reason there are no Dart VM's that are alive, wait for one to
+    // start with the Isolate in question.
     if (_dartVmPortMap.isEmpty) {
-      return null;
+      _log.fine('No live Dart VMs found. Awaiting new VM startup');
+      return _waitForMainIsolatesByPattern(pattern, timeout);
     }
     // Accumulate a list of eventual IsolateRef lists so that they can be loaded
     // simultaneously via Future.wait.
     final List<Future<List<IsolateRef>>> isolates =
         <Future<List<IsolateRef>>>[];
     for (PortForwarder fp in _dartVmPortMap.values) {
-      final DartVm vmService = await _getDartVm(fp.port);
+      final DartVm vmService = await _getDartVm(fp.port).timeout(timeout);
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    final Completer<List<IsolateRef>> completer =
-        new Completer<List<IsolateRef>>();
-    final List<IsolateRef> result =
-        await Future.wait(isolates).then((List<List<IsolateRef>> listOfLists) {
+    final List<IsolateRef> result = await Future.wait(isolates)
+        .timeout(timeout)
+        .then((List<List<IsolateRef>> listOfLists) {
       final List<List<IsolateRef>> mutableListOfLists =
           new List<List<IsolateRef>>.from(listOfLists)
             ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
@@ -285,24 +329,9 @@ class FuchsiaRemoteConnection {
     // TODO(awdavies): Set this up to handle multiple Isolates per Dart VM.
     if (result.isEmpty) {
       _log.fine('No instance of the Isolate found. Awaiting new VM startup');
-      _onDartVmEvent.listen(
-        (DartVmEvent event) async {
-          if (event.eventType == DartVmEventType.started) {
-            _log.fine('New VM found on port: ${event.servicePort}. Searching '
-                'for Isolate: $pattern');
-            final DartVm vmService = await _getDartVm(event.uri.port);
-            final List<IsolateRef> result =
-                await vmService.getMainIsolatesByPattern(pattern);
-            if (result.isNotEmpty) {
-              completer.complete(result);
-            }
-          }
-        },
-      );
-    } else {
-      completer.complete(result);
+      return _waitForMainIsolatesByPattern(pattern, timeout);
     }
-    return completer.future.timeout(timeout);
+    return result;
   }
 
   /// Returns a list of [FlutterView] objects.

@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'fake_platform_views.dart';
 
@@ -21,7 +21,7 @@ void main() {
       expect(
           () => PlatformViewsService.initAndroidView(
               id: 0, viewType: 'web').setSize(const Size(100.0, 100.0)),
-          throwsA(const isInstanceOf<PlatformException>()));
+          throwsA(isInstanceOf<PlatformException>()));
     });
 
     test('create Android views', () async {
@@ -45,7 +45,7 @@ void main() {
       expect(
           () => PlatformViewsService.initAndroidView(
               id: 0, viewType: 'web').setSize(const Size(100.0, 100.0)),
-          throwsA(const isInstanceOf<PlatformException>()));
+          throwsA(isInstanceOf<PlatformException>()));
     });
 
     test('dispose Android view', () async {

@@ -107,7 +107,7 @@ class AndroidApk extends ApplicationPackage {
       apkFile = fs.file(fs.path.join(getAndroidBuildDirectory(), 'app.apk'));
     }
 
-    final File manifest = androidProject.gradleManifestFile;
+    final File manifest = androidProject.appManifestFile;
 
     if (!manifest.existsSync())
       return null;
@@ -175,8 +175,7 @@ abstract class IOSApp extends ApplicationPackage {
       bundleDir = fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
-      final Directory tempDir = fs.systemTempDirectory.createTempSync(
-          'flutter_app_');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
       addShutdownHook(() async {
         await tempDir.delete(recursive: true);
       }, ShutdownStage.STILL_RECORDING);

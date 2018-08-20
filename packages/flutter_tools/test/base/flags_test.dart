@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/flags.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';

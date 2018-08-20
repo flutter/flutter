@@ -5,7 +5,7 @@
 import 'dart:ui' as ui show TextStyle, ParagraphStyle;
 
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('TextStyle control test', () {

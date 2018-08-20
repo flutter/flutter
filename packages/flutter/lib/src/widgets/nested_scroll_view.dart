@@ -1513,7 +1513,6 @@ class RenderSliverOverlapInjector extends RenderSliver {
   /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     @required SliverOverlapAbsorberHandle handle,
-    RenderSliver child,
   }) : assert(handle != null), _handle = handle;
 
   double _currentLayoutExtent;

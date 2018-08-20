@@ -13,7 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
   with ServicesBinding,

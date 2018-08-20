@@ -70,13 +70,13 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
     waitingFor = 'task process to exit';
-    await runner.exitCode.timeout(const Duration(seconds: 1));
+    await runner.exitCode.timeout(const Duration(seconds: 60));
     return taskResult;
   } on TimeoutException catch (timeout) {
     runner.kill(ProcessSignal.sigint);
     return <String, dynamic>{
       'success': false,
-      'reason': 'Timeout waiting for $waitingFor: ${timeout.message}',
+      'reason': 'Timeout in runner.dart waiting for $waitingFor: ${timeout.message}',
     };
   } finally {
     if (!runnerFinished)

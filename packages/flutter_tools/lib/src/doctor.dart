@@ -572,29 +572,27 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     try {
-      final Iterable<FileSystemEntity> installDirs = installPaths
-          .map((String installPath) => fs.directory(installPath))
-          .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-          .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
-          .where((FileSystemEntity mappedDir) => mappedDir is Directory);
-      for (FileSystemEntity dir in installDirs) {
-        if (dir is Directory) {
-          checkForIntelliJ(dir);
-          if (!dir.path.endsWith('.app')) {
-            for (FileSystemEntity subdir in dir.listSync()) {
-              if (subdir is Directory) {
-                checkForIntelliJ(subdir);
-              }
+      final Iterable<Directory> installDirs = installPaths
+              .map((String installPath) => fs.directory(installPath))
+              .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+              .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
+              .whereType<Directory>();
+      for (Directory dir in installDirs) {
+        checkForIntelliJ(dir);
+        if (!dir.path.endsWith('.app')) {
+          for (FileSystemEntity subdir in dir.listSync()) {
+            if (subdir is Directory) {
+              checkForIntelliJ(subdir);
             }
           }
         }
       }
     } on FileSystemException catch (e) {
       validators.add(new ValidatorWithResult(
-        'Cannot determine if IntelliJ is installed',
-        new ValidationResult(ValidationType.missing, <ValidationMessage>[
-          new ValidationMessage.error(e.message),
-        ]),
+          'Cannot determine if IntelliJ is installed',
+          new ValidationResult(ValidationType.missing, <ValidationMessage>[
+              new ValidationMessage.error(e.message),
+          ]),
       ));
     }
     return validators;
