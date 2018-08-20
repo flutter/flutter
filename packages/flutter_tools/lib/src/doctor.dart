@@ -47,13 +47,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
 
-      if (androidWorkflow.appliesToHostPlatform) {
+      if (androidWorkflow.appliesToHostPlatform)
         _validators.add(androidValidator);
-      }
 
-      if (iosWorkflow.appliesToHostPlatform) {
+      if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
-      }
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -375,13 +373,13 @@ class _FlutterValidator extends DoctorValidator {
 
     messages.add(new ValidationMessage('Flutter version ${version.frameworkVersion} at ${Cache.flutterRoot}'));
     messages.add(new ValidationMessage(
-        'Framework revision ${version.frameworkRevisionShort} '
-            '(${version.frameworkAge}), ${version.frameworkDate}'
+      'Framework revision ${version.frameworkRevisionShort} '
+      '(${version.frameworkAge}), ${version.frameworkDate}'
     ));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Dart version ${version.dartSdkVersion}'));
     final String genSnapshotPath =
-    artifacts.getArtifactPath(Artifact.genSnapshot);
+      artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
@@ -398,7 +396,7 @@ class _FlutterValidator extends DoctorValidator {
     }
 
     return new ValidationResult(valid, messages,
-        statusInfo: 'Channel ${version.channel}, v${version.frameworkVersion}, on ${os.name}, locale ${platform.localeName}'
+      statusInfo: 'Channel ${version.channel}, v${version.frameworkVersion}, on ${os.name}, locale ${platform.localeName}'
     );
   }
 }
@@ -459,17 +457,17 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
-          'For information about installing plugins, see\n'
-              'https://flutter.io/intellij-setup/#installing-the-plugins'
+        'For information about installing plugins, see\n'
+        'https://flutter.io/intellij-setup/#installing-the-plugins'
       ));
     }
 
     _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return new ValidationResult(
-        _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
-        messages,
-        statusInfo: 'version $version'
+      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
+      messages,
+      statusInfo: 'version $version'
     );
   }
 
@@ -488,7 +486,7 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     if (installedVersion < minVersion) {
       messages.add(new ValidationMessage.error(
-          'This install is older than the minimum recommended version of $minVersion.'
+        'This install is older than the minimum recommended version of $minVersion.'
       ));
     }
   }
@@ -510,7 +508,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
       final IntelliJValidatorOnLinuxAndWindows validator =
-      new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
+        new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {

@@ -41,14 +41,10 @@ class AndroidWorkflow implements Workflow {
   bool get canListDevices => getAdbPath(androidSdk) != null;
 
   @override
-  bool get canLaunchDevices =>
-      androidSdk != null && androidSdk
-          .validateSdkWellFormed()
-          .isEmpty;
+  bool get canLaunchDevices => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
 
   @override
-  bool get canListEmulators =>
-      getEmulatorPath(androidSdk) != null && getAvdPath() != null;
+  bool get canListEmulators => getEmulatorPath(androidSdk) != null && getAvdPath() != null;
 }
 
 class AndroidValidator extends DoctorValidator {
@@ -61,27 +57,21 @@ class AndroidValidator extends DoctorValidator {
   /// is not compatible.
   bool _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) {
     if (!processManager.canRun(javaBinary)) {
-      messages.add(new ValidationMessage.error(
-          'Cannot execute $javaBinary to determine the version'));
+      messages.add(new ValidationMessage.error('Cannot execute $javaBinary to determine the version'));
       return false;
     }
     String javaVersion;
     try {
       printTrace('java -version');
-      final ProcessResult result = processManager.runSync(
-          <String>[javaBinary, '-version']);
+      final ProcessResult result = processManager.runSync(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
-        javaVersion =
-        versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+        javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
-    } catch (_) {
-      /* ignore */
-    }
+    } catch (_) { /* ignore */ }
     if (javaVersion == null) {
       // Could not determine the java version.
-      messages.add(
-          new ValidationMessage.error('Could not determine java version'));
+      messages.add(new ValidationMessage.error('Could not determine java version'));
       return false;
     }
     messages.add(new ValidationMessage('Java version $javaVersion'));
