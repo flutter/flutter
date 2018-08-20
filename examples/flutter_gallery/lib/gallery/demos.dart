@@ -220,7 +220,8 @@ List<GalleryDemo> _buildGalleryDemos() {
     new GalleryDemo(
       title: 'Elevations',
       subtitle: 'Shadow values on cards',
-      icon: GalleryIcons.check_box,
+      // TODO(larche): Change to custom icon for elevations when one exists.
+      icon: GalleryIcons.cupertino_progress,
       category: _kMaterialComponents,
       routeName: ElevationDemo.routeName,
       buildRoute: (BuildContext context) => new ElevationDemo(),
