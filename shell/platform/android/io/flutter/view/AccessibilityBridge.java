@@ -302,6 +302,7 @@ class AccessibilityBridge
         result.setCheckable(hasCheckedState || hasToggledState);
         if (hasCheckedState) {
             result.setChecked(object.hasFlag(Flag.IS_CHECKED));
+            result.setContentDescription(object.getValueLabelHint());
             if (object.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP))
                 result.setClassName("android.widget.RadioButton");
             else
@@ -309,10 +310,14 @@ class AccessibilityBridge
         } else if (hasToggledState) {
             result.setChecked(object.hasFlag(Flag.IS_TOGGLED));
             result.setClassName("android.widget.Switch");
+            result.setContentDescription(object.getValueLabelHint());
+        } else {
+            // Setting the text directly instead of the content description
+            // will replace the "checked" or "not-checked" label.
+            result.setText(object.getValueLabelHint());
         }
 
         result.setSelected(object.hasFlag(Flag.IS_SELECTED));
-        result.setText(object.getValueLabelHint());
 
         // Accessibility Focus
         if (mA11yFocusedObject != null && mA11yFocusedObject.id == virtualViewId) {
