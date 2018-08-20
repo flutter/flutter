@@ -434,6 +434,7 @@ void Paragraph::Layout(double width, bool force) {
 
   records_.clear();
   line_heights_.clear();
+  line_baselines_.clear();
   glyph_lines_.clear();
   code_unit_runs_.clear();
 
