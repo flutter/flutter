@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
-import 'dart:developer';
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -1921,11 +1920,6 @@ void main() {
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
     });
-
-    // 2 focused text fields, both should
-    // Switch focus between two text fields, only the focused one should react
-    // Change the location of a text field using its global key, make sure it still reacts correctly
-
   });
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async{
