@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {

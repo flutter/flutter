@@ -4,7 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 

@@ -67,11 +67,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   Widget build(BuildContext context) {
     return new AbsorbPointer(
       absorbing: !_active,
-      // Redundant. TODO(xster): remove after https://github.com/flutter/flutter/issues/17179.
-      child: new IgnorePointer(
-        ignoring: !_active,
-        child: widget.child
-      ),
+      child: widget.child,
     );
   }
 }

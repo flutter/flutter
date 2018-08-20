@@ -12,6 +12,7 @@ import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
+import io.flutter.view.FlutterRunArguments;
 import io.flutter.view.FlutterView;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
@@ -91,8 +92,10 @@ public final class Flutter {
     lifecycle.addObserver(new LifecycleObserver() {
       @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
       public void onCreate() {
-        final String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
-        flutterView.runFromBundle(appBundlePath, null, "main", true);
+        final FlutterRunArguments arguments = new FlutterRunArguments();
+        arguments.bundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
+        arguments.entrypoint = "main";
+        flutterView.runFromBundle(arguments);
         GeneratedPluginRegistrant.registerWith(flutterView.getPluginRegistry());
       }
 

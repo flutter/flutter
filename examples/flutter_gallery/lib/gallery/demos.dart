@@ -402,11 +402,11 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
     ),
     new GalleryDemo(
-      title: 'Dialogs',
+      title: 'Alerts',
       icon: GalleryIcons.dialogs,
       category: _kCupertinoComponents,
-      routeName: CupertinoDialogDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoDialogDemo(),
+      routeName: CupertinoAlertDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoAlertDemo(),
     ),
     new GalleryDemo(
       title: 'Navigation',
@@ -428,6 +428,13 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kCupertinoComponents,
       routeName: CupertinoRefreshControlDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Segmented Control',
+      icon: GalleryIcons.tabs,
+      category: _kCupertinoComponents,
+      routeName: CupertinoSegmentedControlDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoSegmentedControlDemo(),
     ),
     new GalleryDemo(
       title: 'Sliders',

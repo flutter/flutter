@@ -6,8 +6,8 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 const String _kFlutterRoot = '/data/flutter';
@@ -20,7 +20,11 @@ void main() {
     fs = new MemoryFileSystem();
     fs.directory(_kFlutterRoot).createSync(recursive: true);
     Cache.flutterRoot = _kFlutterRoot;
-    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
+  });
+
+  tearDown(() {
+    tryToDelete(tempDir);
   });
 
   group('analyze', () {

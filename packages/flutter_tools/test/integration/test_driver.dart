@@ -23,6 +23,8 @@ const Duration appStartTimeout = Duration(seconds: 60);
 const Duration quitTimeout = Duration(seconds: 5);
 
 class FlutterTestDriver {
+  FlutterTestDriver(this._projectFolder);
+
   final Directory _projectFolder;
   Process _proc;
   int _procPid;
@@ -35,8 +37,6 @@ class FlutterTestDriver {
   Uri _vmServiceWsUri;
   int _vmServicePort;
   bool _hasExited = false;
-
-  FlutterTestDriver(this._projectFolder);
 
   VMServiceClient vmService;
   String get lastErrorInfo => _errorBuffer.toString();
@@ -318,24 +318,24 @@ class FlutterTestDriver {
   int id = 1;
   Future<dynamic> _sendRequest(String method, dynamic params) async {
     final int requestId = id++;
-    final Map<String, dynamic> req = <String, dynamic>{
+    final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
       'method': method,
       'params': params
     };
-    final String jsonEncoded = json.encode(<Map<String, dynamic>>[req]);
+    final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
     _debugPrint(jsonEncoded);
 
     // Set up the response future before we send the request to avoid any
     // races.
     final Future<Map<String, dynamic>> responseFuture = _waitFor(id: requestId);
     _proc.stdin.writeln(jsonEncoded);
-    final Map<String, dynamic> resp = await responseFuture;
+    final Map<String, dynamic> response = await responseFuture;
 
-    if (resp['error'] != null || resp['result'] == null)
+    if (response['error'] != null || response['result'] == null)
       _throwErrorResponse('Unexpected error response');
 
-    return resp['result'];
+    return response['result'];
   }
 
   void _throwErrorResponse(String msg) {

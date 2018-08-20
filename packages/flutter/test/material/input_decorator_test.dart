@@ -86,7 +86,7 @@ double getHintOpacity(WidgetTester tester) {
     find.ancestor(
       of: find.text('hint'),
       matching: find.byType(FadeTransition),
-    ).last
+    ).first
   );
   return opacityWidget.opacity.value;
 }

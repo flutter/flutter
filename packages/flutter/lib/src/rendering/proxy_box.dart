@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image;
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
+import 'dart:ui' as ui show ImageFilter, Gradient, Image, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -54,7 +53,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 /// This class can be used as a mixin for situations where the proxying behavior
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
-// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
+// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/31543 is fixed
 @optionalTypeArgs
 abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
   // This class is intended to be used as a mixin, and should not be
@@ -718,15 +717,22 @@ class RenderOpacity extends RenderProxyBox {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
-  RenderOpacity({ double opacity = 1.0, RenderBox child })
-    : assert(opacity != null),
-      assert(opacity >= 0.0 && opacity <= 1.0),
-      _opacity = opacity,
-      _alpha = _getAlphaFromOpacity(opacity),
-      super(child);
+  RenderOpacity({
+    double opacity = 1.0,
+    bool alwaysIncludeSemantics = false,
+    RenderBox child,
+  }) : assert(opacity != null),
+       assert(opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
+       _opacity = opacity,
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       _alpha = _getAlphaFromOpacity(opacity),
+       super(child);
 
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
+
+  int _alpha;
 
   /// The fraction to scale the child's alpha value.
   ///
@@ -756,13 +762,26 @@ class RenderOpacity extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  int _alpha;
+  /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
+  ///
+  /// Defaults to false.
+  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
+  bool _alwaysIncludeSemantics;
+  set alwaysIncludeSemantics(bool value) {
+    if (value == _alwaysIncludeSemantics)
+      return;
+    _alwaysIncludeSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      if (_alpha == 0)
+      if (_alpha == 0) {
         return;
+      }
       if (_alpha == 255) {
         context.paintChild(child, offset);
         return;
@@ -774,7 +793,7 @@ class RenderOpacity extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && _alpha != 0)
+    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
       visitor(child);
   }
 
@@ -782,6 +801,7 @@ class RenderOpacity extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DoubleProperty('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -832,6 +852,8 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   }
 
   /// Whether child semantics are included regardless of the opacity.
+  ///
+  /// If false, semantics are excluded when [opacity] is 0.0.
   ///
   /// Defaults to false.
   bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
@@ -894,6 +916,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -1118,8 +1141,8 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
     CustomClipper<T> clipper,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
-  }) : _clipper = clipper, assert(clipBehavior != null), assert(clipBehavior != Clip.none), super(child);
+    this.clipBehavior = Clip.antiAlias,
+  }) : _clipper = clipper, assert(clipBehavior != null), super(child);
 
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
@@ -1162,11 +1185,6 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]).
-  ///
-  /// [Clip.none] is not allowed here.
-  /// {@endtemplate}
   final Clip clipBehavior;
 
   @override
@@ -1227,6 +1245,8 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipRect({
     RenderBox child,
     CustomClipper<Rect> clipper,
@@ -1280,12 +1300,14 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// right-angled corners.
   ///
   /// If [clipper] is non-null, then [borderRadius] is ignored.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipRRect({
     RenderBox child,
     BorderRadius borderRadius = BorderRadius.zero,
     CustomClipper<RRect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
+  }) : assert(clipBehavior != Clip.none), _borderRadius = borderRadius, super(child: child, clipper: clipper, clipBehavior: clipBehavior) {
     assert(_borderRadius != null || clipper != null);
   }
 
@@ -1350,11 +1372,13 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipOval({
     RenderBox child,
     CustomClipper<Rect> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   Rect _cachedRect;
   Path _cachedPath;
@@ -1423,11 +1447,13 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [RenderClipRect], which can achieve the same effect more
   /// efficiently.
+  ///
+  /// The [clipBehavior] cannot be [Clip.none].
   RenderClipPath({
     RenderBox child,
     CustomClipper<Path> clipper,
     Clip clipBehavior = Clip.antiAlias,
-  }) : super(child: child, clipper: clipper, clipBehavior: clipBehavior);
+  }) : assert(clipBehavior != Clip.none), super(child: child, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);
@@ -1475,7 +1501,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    Clip clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
@@ -1554,7 +1580,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape = BoxShape.rectangle,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    Clip clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     BorderRadius borderRadius,
     double elevation = 0.0,
     @required Color color,
@@ -1713,7 +1739,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   RenderPhysicalShape({
     RenderBox child,
     @required CustomClipper<Path> clipper,
-    Clip clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    Clip clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     double elevation = 0.0,
     @required Color color,
     Color shadowColor = const Color(0xFF000000),
@@ -3217,7 +3243,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool hidden,
     bool image,
     bool liveRegion,
-    bool isSwitch,
     String label,
     String value,
     String increasedValue,
@@ -3240,6 +3265,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onPaste,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    MoveCursorHandler onMoveCursorForwardByWord,
+    MoveCursorHandler onMoveCursorBackwardByWord,
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
@@ -3285,6 +3312,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onPaste = onPaste,
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
+       _onMoveCursorForwardByWord = onMoveCursorForwardByWord,
+       _onMoveCursorBackwardByWord = onMoveCursorBackwardByWord,
        _onSetSelection = onSetSelection,
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
@@ -3873,6 +3902,42 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler _onMoveCursorForwardByWord;
+  set onMoveCursorForwardByWord(MoveCursorHandler handler) {
+    if (_onMoveCursorForwardByWord == handler)
+      return;
+    final bool hadValue = _onMoveCursorForwardByWord != null;
+    _onMoveCursorForwardByWord = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler _onMoveCursorBackwardByWord;
+  set onMoveCursorBackwardByWord(MoveCursorHandler handler) {
+    if (_onMoveCursorBackwardByWord == handler)
+      return;
+    final bool hadValue = _onMoveCursorBackwardByWord != null;
+    _onMoveCursorBackwardByWord = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.setSelection].
   ///
   /// This handler is invoked when the user either wants to change the currently
@@ -4060,6 +4125,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
     if (onMoveCursorBackwardByCharacter != null)
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
+    if (onMoveCursorForwardByWord != null)
+      config.onMoveCursorForwardByWord = _performMoveCursorForwardByWord;
+    if (onMoveCursorBackwardByWord != null)
+      config.onMoveCursorBackwardByWord = _performMoveCursorBackwardByWord;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
     if (onDidGainAccessibilityFocus != null)
@@ -4138,6 +4207,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
     if (onMoveCursorBackwardByCharacter != null)
       onMoveCursorBackwardByCharacter(extendSelection);
+  }
+
+  void _performMoveCursorForwardByWord(bool extendSelection) {
+    if (onMoveCursorForwardByWord != null)
+      onMoveCursorForwardByWord(extendSelection);
+  }
+
+  void _performMoveCursorBackwardByWord(bool extendSelection) {
+    if (onMoveCursorBackwardByWord != null)
+      onMoveCursorBackwardByWord(extendSelection);
   }
 
   void _performSetSelection(TextSelection selection) {

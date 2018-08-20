@@ -11,7 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:test/test.dart';
 
 import 'package:flutter_tools/runner.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
@@ -20,6 +19,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
