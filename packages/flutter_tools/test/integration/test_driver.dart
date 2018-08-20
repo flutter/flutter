@@ -76,13 +76,15 @@ class FlutterTestDriver {
 
   Future<void> _setupProcess(List<String> args, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
+    final List<String> flutterArgs = withDebugger
+        ? args.followedBy(<String>['--start-paused']).toList()
+        : args;
+    _debugPrint('Spawning flutter $flutterArgs in ${_projectFolder.path}');
 
     const ProcessManager _processManager = LocalProcessManager();
     _proc = await _processManager.start(
         <String>[flutterBin]
-            .followedBy(args)
-            .followedBy(withDebugger ? <String>['--start-paused'] : <String>[])
+            .followedBy(flutterArgs)
             .toList(),
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
