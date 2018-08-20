@@ -265,13 +265,15 @@ class FlutterTestDriver {
 
   Future<Map<String, dynamic>> _waitFor({String event, int id, Duration timeout}) async {
     final Completer<Map<String, dynamic>> response = new Completer<Map<String, dynamic>>();
-    final StreamSubscription<String> sub = _stdout.stream.listen((String line) {
+    StreamSubscription<String> sub;
+    sub = _stdout.stream.listen((String line) async {
       final dynamic json = _parseFlutterResponse(line);
       if (json == null) {
         return;
       } else if (
           (event != null && json['event'] == event)
           || (id != null && json['id'] == id)) {
+        await sub.cancel();
         response.complete(json);
       }
     });
