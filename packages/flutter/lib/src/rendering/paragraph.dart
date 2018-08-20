@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 
 import 'box.dart';
@@ -466,14 +465,13 @@ class RenderParagraph extends RenderBox {
     double order = 0.0;
     int start = 0;
     int end = 0;
-    double lastOffset = 0.0;
     // traverse all spans and collect them into adjacent compatible nodes.
     text.visitTextSpan((TextSpan span) {
       if (span.recognizer != null) {
         if (buffer != null) {
           final SemanticsNode child = new SemanticsNode();
           final SemanticsConfiguration childConfig = new SemanticsConfiguration();
-          child.rect = _getRectForSpan(start, end, lastOffset);
+          child.rect = _getRectForSpan(start, end);
           childConfig
             ..label = buffer.toString()
             ..textDirection = textDirection
@@ -482,7 +480,6 @@ class RenderParagraph extends RenderBox {
           child.updateWith(config: childConfig);
           newChildren.add(child);
           start = end;
-          lastOffset = child.rect.height;
         }
         end += span.text.length;
         final SemanticsNode child = new SemanticsNode();
@@ -497,11 +494,10 @@ class RenderParagraph extends RenderBox {
           final TapGestureRecognizer recognizer = span.recognizer;
           childConfig.onTap = recognizer.onTap;
         }
-        child.rect = _getRectForSpan(start, end, lastOffset);
+        child.rect = _getRectForSpan(start, end);
         child.updateWith(config: childConfig);
         newChildren.add(child);
         start = end;
-        lastOffset = child.rect.height;
       } else {
         buffer ??= new StringBuffer();
         buffer.write(span.text);
@@ -512,7 +508,7 @@ class RenderParagraph extends RenderBox {
     if (buffer != null && buffer.isNotEmpty) {
       final SemanticsNode child = new SemanticsNode();
       final SemanticsConfiguration childConfig = new SemanticsConfiguration();
-      child.rect = _getRectForSpan(start, end, lastOffset);
+      child.rect = _getRectForSpan(start, end);
       childConfig
         ..sortKey = new OrdinalSortKey(order++)
         ..label = buffer.toString()
@@ -523,15 +519,16 @@ class RenderParagraph extends RenderBox {
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
 
-  Rect _getRectForSpan(int start, int end, double lastOffset) {
-    print('from $start to $end');
+  Rect _getRectForSpan(int start, int end) {
     final TextSelection current = new TextSelection(baseOffset: start, extentOffset: end);
     final List<ui.TextBox> currentBoxes = getBoxesForSelection(current);
+    assert(currentBoxes.isNotEmpty);
     final double top = currentBoxes.first.top;
     double left = currentBoxes.first.left;
     double right = currentBoxes.first.right;
     double bottom = currentBoxes.first.bottom;
     for (TextBox box in currentBoxes.skip(1)) {
+      print('$box');
       if (box.left < left)
         left = box.left;
       if (box.right > right)
@@ -539,8 +536,7 @@ class RenderParagraph extends RenderBox {
       if (box.bottom > bottom)
         bottom = box.bottom;
     }
-    print('height: ${bottom - top}');
-    return new Rect.fromLTWH(left, top, right - left, bottom - top);
+    return new Rect.fromLTRB(left, top, right, bottom);
   }
 
 
