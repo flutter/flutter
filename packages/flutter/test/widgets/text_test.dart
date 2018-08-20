@@ -140,6 +140,7 @@ void main() {
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
     await tester.pumpWidget(
       new Text.rich(
         new TextSpan(
@@ -149,6 +150,7 @@ void main() {
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
           ],
+          style: textStyle,
         ),
         textDirection: TextDirection.ltr,
       ),
@@ -156,12 +158,15 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
+          rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             new TestSemantics(
+              rect: new Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
               label: 'hello ',
               textDirection: TextDirection.ltr,
             ),
             new TestSemantics(
+              rect: new Rect.fromLTRB(84.0, 0.0, 154.0, 14.0),
               label: 'world',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -169,6 +174,7 @@ void main() {
               ],
             ),
             new TestSemantics(
+              rect: new Rect.fromLTRB(154.0, 0.0, 476.0, 14.0),
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
             )
@@ -176,7 +182,7 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
     semantics.dispose();
   });
 }
