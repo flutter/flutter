@@ -59,15 +59,10 @@ Future<double> findCostsForRepo() async {
 }
 
 Future<int> countDependencies() async {
-  final Process subprocess = await startProcess(
-    'flutter',
-    <String>['update-packages', '--transitive-closure'],
-    workingDirectory: flutterDirectory.path,
-  );
-  final List<String> lines = await subprocess.stdout.transform(utf8.decoder).transform(const LineSplitter()).toList();
-  final int subprocessExitCode = await subprocess.exitCode;
-  if (subprocessExitCode != 0)
-    throw new Exception('flutter exit with unexpected error code $subprocessExitCode');
+  final List<String> lines = (await evalFlutter(
+    'update-packages',
+    options: <String>['--transitive-closure'],
+  )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
     throw new Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
