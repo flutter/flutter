@@ -216,6 +216,9 @@ class RenderEditable extends RenderBox {
     if (defaultTargetPlatform != TargetPlatform.android)
       return;
 
+    if (keyEvent is RawKeyUpEvent)
+      return;
+
     final RawKeyEventDataAndroid rawAndroidEvent = keyEvent.data;
     final int pressedKeyCode = rawAndroidEvent.keyCode;
     final int pressedKeyMetaState = rawAndroidEvent.metaState;
@@ -226,104 +229,120 @@ class RenderEditable extends RenderBox {
     }
 
     // Update current key states
-    final bool pressedDown = keyEvent is RawKeyDownEvent;
-    final bool shiftIsDown = pressedKeyMetaState & _kShiftMask > 0;
-    final bool ctrlIsDown = pressedKeyMetaState & _kControlMask > 0;
+    final bool shift = pressedKeyMetaState & _kShiftMask > 0;
+    final bool ctrl = pressedKeyMetaState & _kControlMask > 0;
 
-    final bool rightArrowDown = pressedKeyCode == _kRightArrowCode ? pressedDown : false;
-    final bool leftArrowDown = pressedKeyCode == _kLeftArrowCode ? pressedDown : false;
-    final bool upArrowDown = pressedKeyCode == _kUpArrowCode ? pressedDown : false;
-    final bool downArrowDown = pressedKeyCode == _kDownArrowCode ? pressedDown : false;
-    final bool arrowDown = leftArrowDown || rightArrowDown || upArrowDown || downArrowDown;
+    final bool rightArrow = pressedKeyCode == _kRightArrowCode;
+    final bool leftArrow = pressedKeyCode == _kLeftArrowCode;
+    final bool upArrow = pressedKeyCode == _kUpArrowCode;
+    final bool downArrow = pressedKeyCode == _kDownArrowCode;
+    final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
 
     // We will only move select or more the caret if an arrow is pressed
-    if (arrowDown) {
+    if (arrow) {
       int newOffset = _extentOffset;
 
-      // If control is pressed, we will decide which way to look for a word
-      // based on which arrow is pressed.
-      if (pressedDown && ctrlIsDown) {
-        if (leftArrowDown && _extentOffset > 2) {
-          final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
-          newOffset = textSelection.baseOffset + 1;
-        } else if (rightArrowDown && _extentOffset < text.text.length - 2) {
-          final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
-          newOffset = textSelection.extentOffset - 1;
-        }
-      }
+      newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
+      newOffset = _handleHorizontalArrows(rightArrow, leftArrow, shift, newOffset);
+      newOffset = _handleVerticalArrows(upArrow, downArrow, shift, newOffset);
+      newOffset = _handleSelection(rightArrow, leftArrow, shift, newOffset);
 
-      // Set the new offset to be +/- 1 depending on which arrow is pressed
-      // If shift is down, we also want to update the previous cursor location
-      if (rightArrowDown && _extentOffset < text.text.length) {
-        newOffset += 1;
-        if (shiftIsDown)
-          _previousCursorLocation += 1;
-      }
-      if (leftArrowDown && _extentOffset > 0) {
-        newOffset -= 1;
-        if (shiftIsDown)
-          _previousCursorLocation -= 1;
-      }
-
-      if (downArrowDown || upArrowDown) {
-        // The caret offset gives a location in the upper left hand corner of
-        // the caret so the middle of the line above is a half line above that
-        // point and the line below is 1.5 lines below that point.
-        final double plh = _textPainter.preferredLineHeight;
-        final double verticalOffset = upArrowDown ? -0.5 * plh : 1.5 * plh;
-
-        final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
-        final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
-        final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
-
-        // To account for the possibility where the user vertically highlights
-        // all the way to the top or bottom of the text, we hold the previous
-        // cursor location. This allows us to restore to this position in the
-        // case that the user wants to unhighlight some text.
-        if (position.offset == _extentOffset){
-          if (downArrowDown)
-            newOffset = text.text.length;
-          else if (upArrowDown)
-            newOffset = 0;
-          _resetCursor = shiftIsDown;
-        } else if (_resetCursor && shiftIsDown) {
-            newOffset = _previousCursorLocation;
-            _resetCursor = false;
-        } else {
-          newOffset = position.offset;
-          _previousCursorLocation = newOffset;
-        }
-      }
-
-      // For some reason, deletion only works if the base offset is less
-      // than the extent offset.
-      if (shiftIsDown) {
-        if (_baseOffset < newOffset)
-          onSelectionChanged(new TextSelection(
-            baseOffset: _baseOffset, extentOffset: newOffset),
-            this, SelectionChangedCause.keyboard);
-        else
-          onSelectionChanged(new TextSelection(
-            baseOffset: newOffset , extentOffset: _baseOffset),
-            this, SelectionChangedCause.keyboard);
-      }
-      // We want to put the cursor at the correct location depending on which
-      // arrow is used while there is a selection.
-      else if (pressedDown){
-        if (!selection.isCollapsed) {
-          if (leftArrowDown)
-            newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
-          else if (rightArrowDown)
-            newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
-        }
-        onSelectionChanged(new TextSelection.fromPosition(
-          new TextPosition(offset: newOffset)),
-          this, SelectionChangedCause.keyboard);
-      }
       _extentOffset = newOffset;
     }
   }
 
+  int _handleSelection(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    // For some reason, deletion only works if the base offset is less
+    // than the extent offset.
+    if (shift) {
+      if (_baseOffset < newOffset)
+        onSelectionChanged(new TextSelection(
+          baseOffset: _baseOffset, extentOffset: newOffset),
+          this, SelectionChangedCause.keyboard);
+      else
+        onSelectionChanged(new TextSelection(
+          baseOffset: newOffset , extentOffset: _baseOffset),
+          this, SelectionChangedCause.keyboard);
+    }
+    // We want to put the cursor at the correct location depending on which
+    // arrow is used while there is a selection.
+    else {
+      if (!selection.isCollapsed) {
+        if (leftArrow)
+          newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
+        else if (rightArrow)
+          newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
+      }
+      onSelectionChanged(new TextSelection.fromPosition(
+        new TextPosition(offset: newOffset)),
+        this, SelectionChangedCause.keyboard);
+    }
+    return newOffset;
+  }
+
+  int _handleVerticalArrows(bool upArrow, bool downArrow, bool shift, int newOffset) {
+    if (downArrow || upArrow) {
+      // The caret offset gives a location in the upper left hand corner of
+      // the caret so the middle of the line above is a half line above that
+      // point and the line below is 1.5 lines below that point.
+      final double plh = _textPainter.preferredLineHeight;
+      final double verticalOffset = upArrow ? -0.5 * plh : 1.5 * plh;
+
+      final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
+      final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+      final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
+
+      // To account for the possibility where the user vertically highlights
+      // all the way to the top or bottom of the text, we hold the previous
+      // cursor location. This allows us to restore to this position in the
+      // case that the user wants to unhighlight some text.
+      if (position.offset == _extentOffset){
+        if (downArrow)
+          newOffset = text.text.length;
+        else if (upArrow)
+          newOffset = 0;
+        _resetCursor = shift;
+      } else if (_resetCursor && shift) {
+        newOffset = _previousCursorLocation;
+        _resetCursor = false;
+      } else {
+        newOffset = position.offset;
+        _previousCursorLocation = newOffset;
+      }
+    }
+    return newOffset;
+  }
+
+  int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    // Set the new offset to be +/- 1 depending on which arrow is pressed
+    // If shift is down, we also want to update the previous cursor location
+    if (rightArrow && _extentOffset < text.text.length) {
+      newOffset += 1;
+      if (shift)
+        _previousCursorLocation += 1;
+    }
+    if (leftArrow && _extentOffset > 0) {
+      newOffset -= 1;
+      if (shift)
+        _previousCursorLocation -= 1;
+    }
+    return newOffset;
+  }
+
+  int _handleControl(bool rightArrow, bool leftArrow, bool ctrl, int newOffset) {
+    // If control is pressed, we will decide which way to look for a word
+    // based on which arrow is pressed.
+    if (ctrl) {
+      if (leftArrow && _extentOffset > 2) {
+        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
+        newOffset = textSelection.baseOffset + 1;
+      } else if (rightArrow && _extentOffset < text.text.length - 2) {
+        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
+        newOffset = textSelection.extentOffset - 1;
+      }
+    }
+    return newOffset;
+  }
 
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
@@ -428,7 +447,7 @@ class RenderEditable extends RenderBox {
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
   set hasFocus(bool value) {
-    debugPrint(value.toString() + " and " + this.hashCode.toString());
+//    debugPrint(value.toString() + " and " + this.hashCode.toString());
     assert(value != null);
     if (_hasFocus == value)
       return;

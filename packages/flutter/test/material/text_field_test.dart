@@ -2012,7 +2012,6 @@ void main() {
     }
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 10);
-
   });
 
 
@@ -2052,7 +2051,6 @@ void main() {
       ),
     );
 
-
     await tester.idle();
     await tester.tap(find.byType(TextField).first);
 
@@ -2069,7 +2067,6 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
 
-
     await tester.idle();
     await tester.tap(find.byType(TextField).last);
 
@@ -2082,94 +2079,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
-
   });
-
-  testWidgets('Simultaneous focus test', (WidgetTester tester) async{
-
-    final FocusNode focusNode = new FocusNode();
-    final FocusNode focusNode2 = new FocusNode();
-
-    final List<RawKeyEvent> events = <RawKeyEvent>[];
-    final List<RawKeyEvent> events2 = <RawKeyEvent>[];
-
-    final TextEditingController c1 = new TextEditingController();
-    final TextEditingController c2 = new TextEditingController();
-
-    await tester.pumpWidget(
-      new Column(
-        children: <Widget>[
-          new Container(
-            width: 200.0,
-            height: 200.0,
-            child:
-              new MaterialApp(
-                home:
-                Material(
-                  child:
-                  new RawKeyboardListener(
-                  focusNode: focusNode,
-                  onKey: events.add,
-                  child: TextField(
-                    controller: c1,
-                    maxLines: 3,
-                  ),
-                ) ,
-              ),
-            ),
-          ),
-          new Container(
-            width: 200.0,
-            height: 200.0,
-            child:
-              new MaterialApp(
-                home:
-                  Material(
-                  child:
-                  new RawKeyboardListener(
-                    focusNode: focusNode2,
-                    onKey: events2.add,
-                    child: TextField(
-                      controller: c2,
-                      maxLines: 3,
-//                    ),
-                  ) ,
-                ),
-              ),
-            ),
-          ],
-        ),
-    );
-//    debugger(when:true);
-    await tester.idle();
-    await tester.tap(find.byType(TextField).first);
-//    await tester.showKeyboard(find.byType(TextField).first);
-
-    const String testValue = 'a big house';
-    await tester.enterText(find.byType(TextField).first, testValue);
-
-    await tester.pumpAndSettle();
-
-    await tester.idle();
-    await tester.tap(find.byType(TextField).last);
-    await tester.showKeyboard(find.byType(TextField).last);
-
-    await tester.enterText(find.byType(TextField).last, testValue);
-
-    await tester.pumpAndSettle();
-
-    for (int i = 0; i < 5; i++) {
-      sendKeyEventWithCode(22, true, true, false); // DOWN_ARROW keydown
-      await tester.pumpAndSettle();
-    }
-
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
-    expect(c2.selection.extentOffset - c2.selection.extentOffset, 5);
-  });
-
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
