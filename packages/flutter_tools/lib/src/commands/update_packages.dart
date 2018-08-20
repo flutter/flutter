@@ -991,7 +991,9 @@ class PubspecDependency extends PubspecLine {
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
-      _lockTarget = fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length));
+      _lockTarget = fs.path.canonicalize(
+          fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length))
+      );
       _kind = DependencyKind.path;
     } else if (line.startsWith(_sdkPrefix)) {
       // We're an SDK dependency.
