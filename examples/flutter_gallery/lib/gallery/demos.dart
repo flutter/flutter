@@ -8,16 +8,16 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({this.name, this.icon});
-  @required
-  final String name;
-  @required
-  final IconData icon;
+  const GalleryDemoCategory._({ this.name, this.icon });
+  @required final String name;
+  @required final IconData icon;
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (runtimeType != other.runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
     final GalleryDemoCategory typedOther = other;
     return typedOther.name == name && typedOther.icon == icon;
   }
@@ -64,10 +64,10 @@ class GalleryDemo {
     @required this.category,
     @required this.routeName,
     @required this.buildRoute,
-  })  : assert(title != null),
-        assert(category != null),
-        assert(routeName != null),
-        assert(buildRoute != null);
+  }) : assert(title != null),
+       assert(category != null),
+       assert(routeName != null),
+       assert(buildRoute != null);
 
   final String title;
   final IconData icon;
@@ -401,8 +401,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.cupertino_progress,
       category: _kCupertinoComponents,
       routeName: CupertinoProgressIndicatorDemo.routeName,
-      buildRoute: (BuildContext context) =>
-          new CupertinoProgressIndicatorDemo(),
+      buildRoute: (BuildContext context) => new CupertinoProgressIndicatorDemo(),
     ),
     new GalleryDemo(
       title: 'Buttons',
@@ -483,8 +482,7 @@ List<GalleryDemo> _buildGalleryDemos() {
   // Keep Pesto around for its regression test value. It is not included
   // in (release builds) the performance tests.
   assert(() {
-    galleryDemos.insert(
-      0,
+    galleryDemos.insert(0,
       new GalleryDemo(
         title: 'Pesto',
         subtitle: 'Simple recipe browser',
@@ -502,16 +500,13 @@ List<GalleryDemo> _buildGalleryDemos() {
 
 final List<GalleryDemo> kAllGalleryDemos = _buildGalleryDemos();
 
-final Set<GalleryDemoCategory> kAllGalleryDemoCategories = kAllGalleryDemos
-    .map<GalleryDemoCategory>((GalleryDemo demo) => demo.category)
-    .toSet();
+final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
+  kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
-    new Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
-  kAllGalleryDemoCategories,
-  value: (dynamic category) {
-    return kAllGalleryDemos
-        .where((GalleryDemo demo) => demo.category == category)
-        .toList();
-  },
-);
+  new Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
+    kAllGalleryDemoCategories,
+    value: (dynamic category) {
+      return kAllGalleryDemos.where((GalleryDemo demo) => demo.category == category).toList();
+    },
+  );
