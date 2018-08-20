@@ -25,15 +25,15 @@ class _ElevationDemoState extends State<ElevationDemo> {
     ];
 
     for (double i in elevations) {
-      cards.add(Center(
-        child: Card(
+      cards.add(new Center(
+        child: new Card(
           margin: const EdgeInsets.all(20.0),
           elevation: _shouldShowElevation ? i : 0.0,
-          child: SizedBox(
+          child: new SizedBox(
             height: 100.0,
             width: 100.0,
-            child: Center(
-              child: Text('${i.toStringAsFixed(0)} pt'),
+            child: new Center(
+              child: new Text('${i.toStringAsFixed(0)} pt'),
             ),
           ),
         ),
