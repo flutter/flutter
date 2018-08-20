@@ -391,10 +391,15 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       //
       // We also apply the relevant custom accessibility actions for moving the item
       // up, down, to the start, and to the end of the list.
-      return new KeyedSubtree(key: keyIndexGlobalKey, child: new Semantics(
-        customSemanticsActions: semanticsActions,
-        child: toWrap,
-      ));
+      return new KeyedSubtree(
+        key: keyIndexGlobalKey,
+        child: new MergeSemantics(
+          child: new Semantics(
+            customSemanticsActions: semanticsActions,
+            child: toWrap,
+          ),
+        ),
+      );
     }
 
     Widget buildDragTarget(BuildContext context, List<Key> acceptedCandidates, List<dynamic> rejectedCandidates) {

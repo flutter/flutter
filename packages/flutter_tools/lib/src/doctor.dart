@@ -91,7 +91,7 @@ class Doctor {
   }
 
   List<Workflow> get workflows {
-    return new List<Workflow>.from(validators.where((DoctorValidator validator) => validator is Workflow));
+    return validators.whereType<Workflow>().toList();
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
@@ -479,19 +479,17 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     }
 
     try {
-      final Iterable<FileSystemEntity> installDirs = installPaths
+      final Iterable<Directory> installDirs = installPaths
               .map((String installPath) => fs.directory(installPath))
               .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
               .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
-              .where((FileSystemEntity mappedDir) => mappedDir is Directory);
-      for (FileSystemEntity dir in installDirs) {
-        if (dir is Directory) {
-          checkForIntelliJ(dir);
-          if (!dir.path.endsWith('.app')) {
-            for (FileSystemEntity subdir in dir.listSync()) {
-              if (subdir is Directory) {
-                checkForIntelliJ(subdir);
-              }
+              .whereType<Directory>();
+      for (Directory dir in installDirs) {
+        checkForIntelliJ(dir);
+        if (!dir.path.endsWith('.app')) {
+          for (FileSystemEntity subdir in dir.listSync()) {
+            if (subdir is Directory) {
+              checkForIntelliJ(subdir);
             }
           }
         }

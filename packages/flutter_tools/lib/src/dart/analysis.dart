@@ -201,7 +201,8 @@ class AnalysisError implements Comparable<AnalysisError> {
   String toString() {
     return '${severity.toLowerCase().padLeft(7)} $_separator '
         '$messageSentenceFragment $_separator '
-        '${fs.path.relative(file)}:$startLine:$startColumn';
+        '${fs.path.relative(file)}:$startLine:$startColumn $_separator '
+        '$code';
   }
 
   String toLegacyString() {

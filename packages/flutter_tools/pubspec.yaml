@@ -10,7 +10,7 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   analyzer: 0.32.4
-  archive: 2.0.2
+  archive: 2.0.3
   args: 1.5.0
   cli_util: 0.1.3+2
   completion: 0.2.1+1
@@ -36,6 +36,8 @@ dependencies:
   web_socket_channel: 1.0.9
   xml: 3.0.1
   yaml: 2.1.15
+  flutter_goldens_client:
+    path: ../flutter_goldens_client
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -88,4 +90,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: ce8c
+# PUBSPEC CHECKSUM: 548d

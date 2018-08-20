@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -27,7 +28,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'flutter_gallery_assets': '0.1.4', // See //examples/flutter_gallery/pubspec.yaml
+  'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -106,6 +107,13 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isPrintPaths = argResults['paths'];
     final bool isPrintTransitiveClosure = argResults['transitive-closure'];
     final bool isVerifyOnly = argResults['verify-only'];
+
+    // The dev/integration_tests/android_views integration test depends on an assets
+    // package that is in the goldens repository. We need to make sure that the goldens
+    // repository is cloned locally before we verify or update pubspecs.
+    printStatus('Cloning goldens repository...');
+    final GoldensClient goldensClient = new GoldensClient();
+    await goldensClient.prepare();
 
     if (isVerifyOnly) {
       bool needsUpdate = false;
@@ -983,7 +991,9 @@ class PubspecDependency extends PubspecLine {
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
-      _lockTarget = fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length));
+      _lockTarget = fs.path.canonicalize(
+          fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length))
+      );
       _kind = DependencyKind.path;
     } else if (line.startsWith(_sdkPrefix)) {
       // We're an SDK dependency.
