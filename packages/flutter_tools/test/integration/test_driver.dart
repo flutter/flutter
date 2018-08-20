@@ -263,7 +263,8 @@ class FlutterTestDriver {
     return script.sourceLocation(frame.location.token);
   }
 
-  Future<Map<String, dynamic>> _waitFor({String event, int id, Duration timeout}) async {
+  Future<Map<String, dynamic>> _waitFor({String event, int id, Duration timeout,
+      bool ignoreAppStopEvent = false}) async {
     final Completer<Map<String, dynamic>> response = new Completer<Map<String, dynamic>>();
     StreamSubscription<String> sub;
     sub = _stdout.stream.listen((String line) async {
@@ -275,7 +276,7 @@ class FlutterTestDriver {
           || (id != null && json['id'] == id)) {
         await sub.cancel();
         response.complete(json);
-      } else if (json['event'] == 'app.stop') {
+      } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
         await sub.cancel();
         final StringBuffer error = new StringBuffer();
         error.write('Received app.stop event while waiting for ');
@@ -341,8 +342,10 @@ class FlutterTestDriver {
     _debugPrint(jsonEncoded);
 
     // Set up the response future before we send the request to avoid any
-    // races.
-    final Future<Map<String, dynamic>> responseFuture = _waitFor(id: requestId);
+    // races. If the method we're calling is app.stop then we tell waitFor not
+    // to throw if it sees an app.stop event before the response to this request.
+    final Future<Map<String, dynamic>> responseFuture = _waitFor(id: requestId,
+        ignoreAppStopEvent: method == 'app.stop');
     _proc.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> response = await responseFuture;
 
