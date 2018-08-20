@@ -62,6 +62,7 @@ class PlatformViewsService {
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
+    @required TextDirection layoutDirection,
     PlatformViewCreatedCallback onPlatformViewCreated,
   }) {
     assert(id != null);
@@ -69,6 +70,7 @@ class PlatformViewsService {
     return new AndroidViewController._(
         id,
         viewType,
+        layoutDirection,
         onPlatformViewCreated
     );
   }
@@ -343,10 +345,13 @@ class AndroidViewController {
   AndroidViewController._(
     this.id,
     String viewType,
+    TextDirection layoutDirection,
     PlatformViewCreatedCallback onPlatformViewCreated,
   ) : assert(id != null),
       assert(viewType != null),
+      assert(layoutDirection != null),
       _viewType = viewType,
+      _layoutDirection = layoutDirection,
       _onPlatformViewCreated = onPlatformViewCreated,
       _state = _AndroidViewState.waitingForSize;
 
@@ -380,6 +385,12 @@ class AndroidViewController {
   /// Android's [MotionEvent.ACTION_POINTER_UP](https://developer.android.com/reference/android/view/MotionEvent#ACTION_POINTER_UP)
   static const int kActionPointerUp =  6;
 
+  /// Android's [View.LAYOUT_DIRECTION_LTR](https://developer.android.com/reference/android/view/View.html#LAYOUT_DIRECTION_LTR) value.
+  static const int kAndroidLayoutDirectionLtr = 0;
+
+  /// Android's [View.LAYOUT_DIRECTION_RTL](https://developer.android.com/reference/android/view/View.html#LAYOUT_DIRECTION_RTL) value.
+  static const int kAndroidLayoutDirectionRtl = 1;
+
   /// The unique identifier of the Android view controlled by this controller.
   final int id;
 
@@ -395,6 +406,8 @@ class AndroidViewController {
   /// Returns null if the Android view has not been successfully created, or if it has been
   /// disposed.
   int get textureId => _textureId;
+
+  TextDirection _layoutDirection;
 
   _AndroidViewState _state;
 
@@ -430,6 +443,37 @@ class AndroidViewController {
     });
   }
 
+  /// Sets the layout direction for the Android view.
+  Future<void> setLayoutDirection(TextDirection layoutDirection) async {
+    if (_state == _AndroidViewState.disposed)
+      throw new FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
+
+    if (layoutDirection == _layoutDirection)
+      return;
+
+    assert(layoutDirection != null);
+    _layoutDirection = layoutDirection;
+
+    // If the view was not yet created we just update _layoutDirection and return, as the new
+    // direction will be used in _create.
+    if (_state == _AndroidViewState.waitingForSize)
+      return;
+
+    await SystemChannels.platform_views.invokeMethod('setDirection', <String, dynamic> {
+      'id': id,
+      'direction': _getAndroidDirection(layoutDirection),
+    });
+  }
+
+  static int _getAndroidDirection(TextDirection direction) {
+    switch (direction) {
+      case TextDirection.ltr:
+        return kAndroidLayoutDirectionLtr;
+      case TextDirection.rtl:
+        return kAndroidLayoutDirectionRtl;
+    }
+  }
+
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
   /// to the view.
   ///
@@ -454,6 +498,7 @@ class AndroidViewController {
       'viewType': _viewType,
       'width': size.width,
       'height': size.height,
+      'direction': _getAndroidDirection(_layoutDirection),
     });
     if (_onPlatformViewCreated != null)
       _onPlatformViewCreated(id);

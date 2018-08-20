@@ -24,7 +24,7 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 100.0,
-          child: AndroidView(viewType: 'webview'),
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -32,7 +32,7 @@ void main() {
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
-        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
       ]),
     );
   });
@@ -46,7 +46,7 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 100.0,
-          child: AndroidView(viewType: 'webview'),
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -58,7 +58,7 @@ void main() {
         child: SizedBox(
           width: 100.0,
           height: 50.0,
-          child: AndroidView(viewType: 'webview'),
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -70,7 +70,7 @@ void main() {
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
-        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
       ]),
     );
 
@@ -80,7 +80,7 @@ void main() {
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
-        new FakePlatformView(currentViewId + 1, 'webview', const Size(100.0, 50.0))
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(100.0, 50.0), AndroidViewController.kAndroidLayoutDirectionLtr)
       ]),
     );
   });
@@ -95,7 +95,7 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 100.0,
-          child: AndroidView(viewType: 'webview'),
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -105,7 +105,7 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 100.0,
-          child: AndroidView(viewType: 'maps'),
+          child: AndroidView(viewType: 'maps', layoutDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -113,7 +113,7 @@ void main() {
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
-        new FakePlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0))
+        new FakePlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
       ]),
     );
   });
@@ -126,7 +126,7 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 100.0,
-          child: AndroidView(viewType: 'webview'),
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -156,7 +156,7 @@ void main() {
         child: new SizedBox(
           width: 200.0,
           height: 100.0,
-          child: new AndroidView(viewType: 'webview', key: key),
+          child: new AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
         ),
       ),
     );
@@ -167,7 +167,7 @@ void main() {
           child: new SizedBox(
             width: 200.0,
             height: 100.0,
-            child: new AndroidView(viewType: 'webview', key: key),
+            child: new AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr, key: key),
           ),
         ),
       ),
@@ -176,7 +176,7 @@ void main() {
     expect(
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
-        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0))
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
       ]),
     );
   });
@@ -191,7 +191,7 @@ void main() {
         child: SizedBox(
           width: 200.0,
           height: 100.0,
-          child: AndroidView(viewType: 'webview'),
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr,),
         ),
       ),
     );
@@ -230,6 +230,7 @@ void main() {
                 child: AndroidView(
                   viewType: 'webview',
                   hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+                  layoutDirection: TextDirection.ltr,
                 ),
               ),
             ),
@@ -272,6 +273,7 @@ void main() {
                 child: AndroidView(
                   viewType: 'webview',
                   hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+                  layoutDirection: TextDirection.ltr,
                 ),
               ),
             ),
@@ -316,6 +318,7 @@ void main() {
                 child: AndroidView(
                   viewType: 'webview',
                   hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                  layoutDirection: TextDirection.ltr,
                 ),
               ),
             ),
@@ -350,7 +353,7 @@ void main() {
           child: const SizedBox(
             width: 200.0,
             height: 100.0,
-            child: AndroidView(viewType: 'webview'),
+            child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       ),
@@ -364,6 +367,90 @@ void main() {
       orderedEquals(<FakeMotionEvent> [
         const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(40.0, 40.0)]),
         const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(40.0, 40.0)]),
+      ]),
+    );
+  });
+
+  testWidgets('Android view directionality', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('maps');
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'maps', layoutDirection: TextDirection.rtl),
+        ),
+      ),
+    );
+
+    expect(
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl)
+      ]),
+    );
+
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(viewType: 'maps', layoutDirection: TextDirection.ltr),
+        ),
+      ),
+    );
+
+    expect(
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
+      ]),
+    );
+  });
+
+  testWidgets('Android view ambient directionality', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('maps');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(viewType: 'maps'),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionRtl)
+      ]),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(viewType: 'maps'),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
       ]),
     );
   });
