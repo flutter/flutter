@@ -191,7 +191,7 @@ Future<Null> _analyzeRepo() async {
   await _checkForTrailingSpaces();
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
-  final String outDir = Directory.systemTemp.createTempSync('mega_gallery').path;
+  final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
 
   try {
     await _runCommand(dart,
@@ -199,17 +199,13 @@ Future<Null> _analyzeRepo() async {
         '--preview-dart-2',
         path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
         '--out',
-        outDir,
+        outDir.path,
       ],
       workingDirectory: flutterRoot,
     );
-    await _runFlutterAnalyze(outDir, options: <String>['--watch', '--benchmark']);
+    await _runFlutterAnalyze(outDir.path, options: <String>['--watch', '--benchmark']);
   } finally {
-    try {
-      new Directory(outDir).deleteSync(recursive: true);
-    } catch (e) {
-      // ignore
-    }
+    outDir.deleteSync(recursive: true);
   }
 
   print('${bold}DONE: Analysis successful.$reset');
@@ -539,11 +535,11 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     })
     .map<String>((FileSystemEntity entity) {
       final File file = entity;
-      final String data = file.readAsStringSync();
       final String name = path.relative(file.path, from: workingDirectory);
       if (name.startsWith('bin/cache') ||
           name == 'dev/bots/test.dart')
         return null;
+      final String data = file.readAsStringSync();
       if (data.contains("import 'package:test/test.dart'")) {
         if (data.contains("// Defines a 'package:test' shim.")) {
           shims.add('  $name');
@@ -582,7 +578,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
           if (count == 1)
             return null;
         }
-        return '  $name: uses \'package:test\' directly.';
+        return '  $name: uses \'package:test\' directly';
       }
     })
     .where((String line) => line != null)
@@ -594,7 +590,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
     final String s1 = errors.length == 1 ? 's' : '';
     final String s2 = errors.length == 1 ? '' : 's';
-    print('${bold}The following file$s2 depend$s1 on \'package:test\' directly:$reset');
+    print('${bold}The following file$s2 use$s1 \'package:test\' incorrectly:$reset');
     print(errors.join('\n'));
     print('Rather than depending on \'package:test\' directly, use one of the shims:');
     print(shims.join('\n'));
@@ -614,8 +610,8 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
     .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
     .toList()..sort();
   final List<String> directories = new Directory(srcPath).listSync()
-    .where((FileSystemEntity entity) => entity is Directory)
-    .map<String>((FileSystemEntity entity) => path.basename(entity.path))
+    .whereType<Directory>()
+    .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
   if (!_matches(packages, directories)) {
     errors.add(

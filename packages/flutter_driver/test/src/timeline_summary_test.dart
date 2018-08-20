@@ -287,11 +287,11 @@ void main() {
 
       setUp(() {
         useMemoryFileSystemForTesting();
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test.');
       });
 
       tearDown(() {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
         restoreFileSystem();
       });
 

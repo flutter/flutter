@@ -970,6 +970,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -986,6 +987,8 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1000,6 +1003,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1007,7 +1011,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('can move cursor with a11y means', (WidgetTester tester) async {
+  testWidgets('can move cursor with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     const bool doNotExtendSelection = false;
 
@@ -1030,6 +1034,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
           ],
         ));
 
@@ -1054,6 +1059,8 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1078,6 +1085,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1092,7 +1100,104 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('can extend selection with a11y means',
+  testWidgets('can move cursor with a11y means - word', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const bool doNotExtendSelection = false;
+
+    controller.text = 'test for words';
+    controller.selection =
+    new TextSelection.collapsed(offset: controller.text.length);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+          ],
+        ));
+
+    final RenderEditable render = tester.allRenderObjects
+        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final int semanticsId = render.debugSemantics.id;
+
+    expect(controller.selection.baseOffset, 14);
+    expect(controller.selection.extentOffset, 14);
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 9);
+    expect(controller.selection.extentOffset, 9);
+
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 5);
+    expect(controller.selection.extentOffset, 5);
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorBackwardByWord, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 0);
+
+    await tester.pumpAndSettle();
+    expect(
+        semantics,
+        includesNodeWith(
+          value: 'test for words',
+          actions: <SemanticsAction>[
+            SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
+            SemanticsAction.setSelection,
+          ],
+        ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 5);
+    expect(controller.selection.extentOffset, 5);
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+        SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 9);
+    expect(controller.selection.extentOffset, 9);
+
+    semantics.dispose();
+  });
+
+  testWidgets('can extend selection with a11y means - character',
       (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     const bool extendSelection = true;
@@ -1117,6 +1222,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
           ],
         ));
 
@@ -1141,6 +1247,8 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorBackwardByWord,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1165,6 +1273,7 @@ void main() {
           value: 'test',
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.moveCursorForwardByWord,
             SemanticsAction.setSelection,
           ],
         ));
@@ -1184,6 +1293,105 @@ void main() {
     expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
+  });
+
+  testWidgets('can extend selection with a11y means - word',
+          (WidgetTester tester) async {
+      final SemanticsTester semantics = new SemanticsTester(tester);
+      const bool extendSelection = true;
+      const bool doNotExtendSelection = false;
+
+      controller.text = 'test for words';
+      controller.selection =
+      new TextSelection.collapsed(offset: controller.text.length);
+
+      await tester.pumpWidget(new MaterialApp(
+        home: new EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        ),
+      ));
+
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test for words',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
+            ],
+          ));
+
+      final RenderEditable render = tester.allRenderObjects
+          .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+      final int semanticsId = render.debugSemantics.id;
+
+      expect(controller.selection.baseOffset, 14);
+      expect(controller.selection.extentOffset, 14);
+
+      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+          SemanticsAction.moveCursorBackwardByWord, extendSelection);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 14);
+      expect(controller.selection.extentOffset, 9);
+
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test for words',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorForwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
+              SemanticsAction.moveCursorForwardByWord,
+              SemanticsAction.setSelection,
+            ],
+          ));
+
+      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+          SemanticsAction.moveCursorBackwardByWord, extendSelection);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 14);
+      expect(controller.selection.extentOffset, 5);
+
+      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+          SemanticsAction.moveCursorBackwardByWord, extendSelection);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 14);
+      expect(controller.selection.extentOffset, 0);
+
+      await tester.pumpAndSettle();
+      expect(
+          semantics,
+          includesNodeWith(
+            value: 'test for words',
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorForwardByCharacter,
+              SemanticsAction.moveCursorForwardByWord,
+              SemanticsAction.setSelection,
+            ],
+          ));
+
+      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+          SemanticsAction.moveCursorForwardByWord, doNotExtendSelection);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 5);
+      expect(controller.selection.extentOffset, 5);
+
+      tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId,
+          SemanticsAction.moveCursorForwardByWord, extendSelection);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, 5);
+      expect(controller.selection.extentOffset, 9);
+
+      semantics.dispose();
   });
 
   testWidgets('password fields have correct semantics',
@@ -1279,6 +1487,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
             ],
           ));
@@ -1291,6 +1500,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.copy,
             ],
@@ -1305,6 +1515,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.paste,
             ],
@@ -1319,6 +1530,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.cut,
             ],
@@ -1334,6 +1546,7 @@ void main() {
             value: 'test',
             actions: <SemanticsAction>[
               SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.moveCursorBackwardByWord,
               SemanticsAction.setSelection,
               SemanticsAction.cut,
               SemanticsAction.copy,
@@ -1377,6 +1590,7 @@ void main() {
                             ],
                             actions: <SemanticsAction>[
                               SemanticsAction.moveCursorBackwardByCharacter,
+                              SemanticsAction.moveCursorBackwardByWord,
                               SemanticsAction.setSelection,
                               SemanticsAction.copy,
                               SemanticsAction.cut,

@@ -119,7 +119,6 @@ class _SerializeConfig {
   _SerializeConfig.merge(
     _SerializeConfig base, {
     int subtreeDepth,
-    bool omitChildren,
     Iterable<Diagnosticable> pathToInclude,
   }) :
     groupName = base.groupName,
@@ -837,7 +836,7 @@ class WidgetInspectorService {
               new _SerializeConfig.merge(config, pathToInclude: config.pathToInclude.skip(1)),
             );
           } else {
-            return _nodeToJson(node, new _SerializeConfig.merge(config, omitChildren: true));
+            return _nodeToJson(node, new _SerializeConfig.merge(config));
           }
         }
         // The tricky special case here is that when in the detailsTree,

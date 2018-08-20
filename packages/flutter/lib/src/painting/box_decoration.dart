@@ -83,7 +83,7 @@ class BoxDecoration extends Decoration {
     this.backgroundBlendMode,
     this.shape = BoxShape.rectangle,
   }) : assert(shape != null),
-       // TODO(mattcarroll): Use "backgroundBlendMode == null" when https://github.com/dart-lang/sdk/issues/31140 is in.
+       // TODO(mattcarroll): Use "backgroundBlendMode == null" when https://github.com/dart-lang/sdk/issues/34180 is in.
        assert(
          identical(backgroundBlendMode, null) || color != null || gradient != null,
          'backgroundBlendMode applies to BoxDecoration\'s background color or '

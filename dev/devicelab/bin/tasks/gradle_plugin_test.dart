@@ -14,25 +14,25 @@ String errorMessage;
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
-  final Directory tmp = await Directory.systemTemp.createTemp('gradle');
-  final FlutterProject project = await FlutterProject.create(tmp, 'hello');
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
+  final FlutterProject project = await FlutterProject.create(tempDir, 'hello');
 
   try {
     await testFunction(project);
   } finally {
-    project.parent.deleteSync(recursive: true);
+    rmTree(tempDir);
   }
 }
 
 /// Runs the given [testFunction] on a freshly generated Flutter plugin project.
 Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject pluginProject)) async {
-  final Directory tmp = await Directory.systemTemp.createTemp('gradle');
-  final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tmp, 'aaa');
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
+  final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tempDir, 'aaa');
 
   try {
     await testFunction(pluginProject);
   } finally {
-    pluginProject.parent.deleteSync(recursive: true);
+    rmTree(tempDir);
   }
 }
 

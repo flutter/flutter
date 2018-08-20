@@ -28,18 +28,13 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
       projectPath = fs.path.join(tempDir.path, 'flutter_project');
       libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
     });
 
     tearDownAll(() {
-      try {
-        tempDir?.deleteSync(recursive: true);
-      } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
-      }
+      tryToDelete(tempDir);
     });
 
     // Create a project to be analyzed
@@ -100,8 +95,8 @@ void main() {
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
-          '2 issues found.',
         ],
+        exitMessageContains: '2 issues found.',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -127,14 +122,14 @@ void main() {
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '3 issues found.',
         ],
+        exitMessageContains: '3 issues found.',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
 
       try {
         final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
@@ -158,12 +153,12 @@ void bar() {
           arguments: <String>['analyze'],
           statusTextContains: <String>[
             'Analyzing',
-            '1 issue found.',
           ],
+          exitMessageContains: '1 issue found.',
           toolExit: true,
         );
       } finally {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
       }
     });
 
@@ -171,7 +166,7 @@ void bar() {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync();
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
@@ -180,7 +175,7 @@ StringBuffer bar = StringBuffer('baz');
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
       }
     });
 

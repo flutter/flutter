@@ -101,51 +101,6 @@ bool _isInAccessibilityMode(BuildContext context) {
   return data != null && data.textScaleFactor > _kMaxRegularTextScaleFactor;
 }
 
-/// An iOS-style dialog.
-///
-/// This dialog widget does not have any opinion about the contents of the
-/// dialog. Rather than using this widget directly, consider using
-/// [CupertinoAlertDialog], which implement a specific kind of dialog.
-///
-/// Push with `Navigator.of(..., rootNavigator: true)` when using with
-/// [CupertinoTabScaffold] to ensure that the dialog appears above the tabs.
-///
-/// See also:
-///
-///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
-///    actions.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-class CupertinoDialog extends StatelessWidget {
-  /// Creates an iOS-style dialog.
-  const CupertinoDialog({
-    Key key,
-    this.child,
-  }) : super(key: key);
-
-  /// The widget below this widget in the tree.
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return new Center(
-      child: new ClipRRect(
-        borderRadius: BorderRadius.circular(_kDialogCornerRadius),
-        child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-          child: new Container(
-            width: _kCupertinoDialogWidth,
-            decoration: _kCupertinoDialogBlurOverlayDecoration,
-            child: new Container(
-              color: _kDialogColor,
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// An iOS-style alert dialog.
 ///
 /// An alert dialog informs the user about situations that require
@@ -166,7 +121,8 @@ class CupertinoDialog extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [CupertinoDialog], which is a generic iOS-style dialog.
+///  * [CupertinoPopupSurface], which is a generic iOS-style popup surface that
+///    holds arbitrary content to create custom popups.
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
@@ -277,26 +233,107 @@ class CupertinoAlertDialog extends StatelessWidget {
               width: isInAccessibilityMode
                   ? _kAccessibilityCupertinoDialogWidth
                   : _kCupertinoDialogWidth,
-              // The following clip is critical. The BackdropFilter needs to have
-              // rounded corners, but Skia cannot internally create a blurred rounded
-              // rect. Therefore, we have no choice but to clip, ourselves.
-              // TODO(mattcarroll): Skia bug filed: https://bugs.chromium.org/p/skia/issues/detail?id=8238
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(_kDialogCornerRadius),
-                child: new BackdropFilter(
-                  filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
-                  child: new Container(
-                    decoration: _kCupertinoDialogBlurOverlayDecoration,
-                    child: new _CupertinoDialogRenderWidget(
-                      contentSection: _buildContent(),
-                      actionsSection: _buildActions(),
-                    ),
-                  ),
+              child: new CupertinoPopupSurface(
+                isSurfacePainted: false,
+                child: new _CupertinoDialogRenderWidget(
+                  contentSection: _buildContent(),
+                  actionsSection: _buildActions(),
                 ),
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+/// An iOS-style dialog.
+///
+/// This dialog widget does not have any opinion about the contents of the
+/// dialog. Rather than using this widget directly, consider using
+/// [CupertinoAlertDialog], which implement a specific kind of dialog.
+///
+/// Push with `Navigator.of(..., rootNavigator: true)` when using with
+/// [CupertinoTabScaffold] to ensure that the dialog appears above the tabs.
+///
+/// See also:
+///
+///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
+///    actions.
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+@Deprecated('Use CupertinoAlertDialog for alert dialogs. Use CupertinoPopupSurface for custom popups.')
+class CupertinoDialog extends StatelessWidget {
+  /// Creates an iOS-style dialog.
+  const CupertinoDialog({
+    Key key,
+    this.child,
+  }) : super(key: key);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Center(
+      child: new SizedBox(
+        width: _kCupertinoDialogWidth,
+        child: new CupertinoPopupSurface(
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Rounded rectangle surface that looks like an iOS popup surface, e.g., alert dialog
+/// and action sheet.
+///
+/// A [CupertinoPopupSurface] can be configured to paint or not paint a white
+/// color on top of its blurred area. Typical usage should paint white on top
+/// of the blur. However, the white paint can be disabled for the purpose of
+/// rendering divider gaps for a more complicated layout, e.g., [CupertinoAlertDialog].
+/// Additionally, the white paint can be disabled to render a blurred rounded
+/// rectangle without any color (similar to iOS's volume control popup).
+///
+/// See also:
+///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
+///    actions.
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
+class CupertinoPopupSurface extends StatelessWidget {
+  /// Creates an iOS-style rounded rectangle popup surface.
+  const CupertinoPopupSurface({
+    Key key,
+    this.isSurfacePainted = true,
+    this.child,
+  }) : super(key: key);
+
+  /// Whether or not to paint a translucent white on top of this surface's
+  /// blurred background. [isSurfacePainted] should be true for a typical popup
+  /// that contains content without any dividers. A popup that requires dividers
+  /// should set [isSurfacePainted] to false and then paint its own surface area.
+  ///
+  /// Some popups, like iOS's volume control popup, choose to render a blurred
+  /// area without any white paint covering it. To achieve this effect,
+  /// [isSurfacePainted] should be set to false.
+  final bool isSurfacePainted;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new ClipRRect(
+      borderRadius: BorderRadius.circular(_kDialogCornerRadius),
+      child: new BackdropFilter(
+        filter: new ImageFilter.blur(sigmaX: _kBlurAmount, sigmaY: _kBlurAmount),
+        child: new Container(
+          decoration: _kCupertinoDialogBlurOverlayDecoration,
+          child: new Container(
+            color: isSurfacePainted ? _kDialogColor : null,
+            child: child,
+          ),
+        ),
       ),
     );
   }
