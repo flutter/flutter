@@ -140,7 +140,7 @@ void main() {
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
     await tester.pumpWidget(
       new Text.rich(
         new TextSpan(
