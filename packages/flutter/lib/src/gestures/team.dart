@@ -110,11 +110,13 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// the horizontal nor vertical drag recognizers can claim victory) the tap
 /// recognizer still actually wins, despite being in the team.
 ///
-/// [AndroidView] is using a team with a captain to decide which gestures are
+/// [AndroidView] uses a team with a captain to decide which gestures are
 /// forwarded to the native view. For example if we want to forward taps and
 /// vertical scrolls to a native Android view, [TapGestureRecognizers] and
-/// [VerticalDragGestureRecognizer] are added to a team with a captain, once the
-/// captain wins then gesture is forwarded to the Android view.
+/// [VerticalDragGestureRecognizer] are added to a team with a captain, the
+/// captain allows [AndroidView] to know when any gestures in the team has been
+/// recognized (or all other arena members are out), once the captain wins the
+/// gesture is forwarded to the Android view.
 ///
 /// To assign a gesture recognizer to a team, set
 /// [OneSequenceGestureRecognizer.team] to an instance of [GestureArenaTeam].
