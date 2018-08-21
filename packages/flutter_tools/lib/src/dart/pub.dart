@@ -176,6 +176,7 @@ Future<Null> pub(List<String> arguments, {
 Future<Null> pubInteractively(List<String> arguments, {
   String directory,
 }) async {
+  Cache.releaseLockEarly();
   final int code = await runInteractively(
     _pubCommand(arguments),
     workingDirectory: directory,
