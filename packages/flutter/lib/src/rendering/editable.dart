@@ -166,6 +166,9 @@ class RenderEditable extends RenderBox {
       ..onTap = _handleTap;
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
+    _drag = new PanGestureRecognizer(debugOwner: this)
+      ..onStart = _handleDragStart
+      ..onEnd = _handleDragEnd;
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -203,9 +206,14 @@ class RenderEditable extends RenderBox {
   static const int _kUpArrowCode = 19;
   static const int _kDownArrowCode = 20;
 
+  // The current extent offset used to calculate the selection
   int _extentOffset = -1;
+
+  // The current base offset used to calculate the selection
   int _baseOffset = -1;
 
+  // The previous text index of the cursor in the case that the user attempts
+  // to highlight until the end or beginning of the text field.
   int _previousCursorLocation = -1;
   bool _resetCursor = false;
 
@@ -238,6 +246,9 @@ class RenderEditable extends RenderBox {
     final bool downArrow = pressedKeyCode == _kDownArrowCode;
     final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
 
+    // TODO: all this should be changed to work in terms of extended grapheme
+    // TODO: clusters instead of UTF-16 words
+
     // We will only move select or more the caret if an arrow is pressed
     if (arrow) {
       int newOffset = _extentOffset;
@@ -254,33 +265,34 @@ class RenderEditable extends RenderBox {
     }
   }
 
-  // Handles the final selection of text or removal of the selection and placing
-  // of the caret
-  int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
-    // For some reason, deletion only works if the base offset is less
-    // than the extent offset.
-    if (shift) {
-      if (_baseOffset < newOffset)
-        onSelectionChanged(new TextSelection(
-          baseOffset: _baseOffset, extentOffset: newOffset),
-          this, SelectionChangedCause.keyboard);
-      else
-        onSelectionChanged(new TextSelection(
-          baseOffset: newOffset , extentOffset: _baseOffset),
-          this, SelectionChangedCause.keyboard);
-    }
-    // We want to put the cursor at the correct location depending on which
-    // arrow is used while there is a selection.
-    else {
-      if (!selection.isCollapsed) {
-        if (leftArrow)
-          newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
-        else if (rightArrow)
-          newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
+  // Handles full word traversal using control.
+  int _handleControl(bool rightArrow, bool leftArrow, bool ctrl, int newOffset) {
+    // If control is pressed, we will decide which way to look for a word
+    // based on which arrow is pressed.
+    if (ctrl) {
+      if (leftArrow && _extentOffset > 2) {
+        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
+        newOffset = textSelection.baseOffset + 1;
+      } else if (rightArrow && _extentOffset < text.text.length - 2) {
+        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
+        newOffset = textSelection.extentOffset - 1;
       }
-      onSelectionChanged(new TextSelection.fromPosition(
-        new TextPosition(offset: newOffset)),
-        this, SelectionChangedCause.keyboard);
+    }
+    return newOffset;
+  }
+
+  int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    // Set the new offset to be +/- 1 depending on which arrow is pressed
+    // If shift is down, we also want to update the previous cursor location
+    if (rightArrow && _extentOffset < text.text.length) {
+      newOffset += 1;
+      if (shift)
+        _previousCursorLocation += 1;
+    }
+    if (leftArrow && _extentOffset > 0) {
+      newOffset -= 1;
+      if (shift)
+        _previousCursorLocation -= 1;
     }
     return newOffset;
   }
@@ -304,7 +316,7 @@ class RenderEditable extends RenderBox {
       // all the way to the top or bottom of the text, we hold the previous
       // cursor location. This allows us to restore to this position in the
       // case that the user wants to unhighlight some text.
-      if (position.offset == _extentOffset){
+      if (position.offset == _extentOffset) {
         if (downArrow)
           newOffset = text.text.length;
         else if (upArrow)
@@ -321,35 +333,38 @@ class RenderEditable extends RenderBox {
     return newOffset;
   }
 
-  // Simply handles the horizontal arrows
-  int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
-    // Set the new offset to be +/- 1 depending on which arrow is pressed
-    // If shift is down, we also want to update the previous cursor location
-    if (rightArrow && _extentOffset < text.text.length) {
-      newOffset += 1;
-      if (shift)
-        _previousCursorLocation += 1;
-    }
-    if (leftArrow && _extentOffset > 0) {
-      newOffset -= 1;
-      if (shift)
-        _previousCursorLocation -= 1;
-    }
-    return newOffset;
-  }
-
-  // Handles full word traversal using control.
-  int _handleControl(bool rightArrow, bool leftArrow, bool ctrl, int newOffset) {
-    // If control is pressed, we will decide which way to look for a word
-    // based on which arrow is pressed.
-    if (ctrl) {
-      if (leftArrow && _extentOffset > 2) {
-        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
-        newOffset = textSelection.baseOffset + 1;
-      } else if (rightArrow && _extentOffset < text.text.length - 2) {
-        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
-        newOffset = textSelection.extentOffset - 1;
+  // Handles the selection of text or removal of the selection and placing
+  // of the caret.
+  int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    if (onSelectionChanged != null)
+      return newOffset;
+      // For some reason, deletion only works if the base offset is less
+    // than the extent offset.
+    if (shift) {
+      if (_baseOffset < newOffset) {
+        onSelectionChanged(
+          new TextSelection(
+            baseOffset: _baseOffset, extentOffset: newOffset),
+            this, SelectionChangedCause.keyboard);
+      } else {
+        onSelectionChanged(
+          new TextSelection(
+            baseOffset: newOffset, extentOffset: _baseOffset),
+            this, SelectionChangedCause.keyboard);
       }
+    } else {
+      // We want to put the cursor at the correct location depending on which
+      // arrow is used while there is a selection.
+      if (!selection.isCollapsed) {
+        if (leftArrow)
+          newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
+        else if (rightArrow)
+          newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
+      }
+      onSelectionChanged(
+        new TextSelection.fromPosition(
+          new TextPosition(offset: newOffset)),
+          this, SelectionChangedCause.keyboard);
     }
     return newOffset;
   }
@@ -793,6 +808,7 @@ class RenderEditable extends RenderBox {
 
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
+  DragGestureRecognizer _drag;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -857,6 +873,18 @@ class RenderEditable extends RenderBox {
   void _handleLongPress() {
     assert(!ignorePointer);
     handleLongPress();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    if (details.deviceKind == PointerDeviceKind.mouse) {
+//      details.
+    }
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    if (details.deviceKind == PointerDeviceKind.mouse) {
+
+    }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
