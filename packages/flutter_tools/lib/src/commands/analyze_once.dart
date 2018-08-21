@@ -73,7 +73,11 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(sdkPath, directories.toList());
+    final AnalysisServer server = new AnalysisServer(
+      sdkPath,
+      directories.toList(),
+      useCfe: argResults.wasParsed('use-cfe') ? argResults['use-cfe'] : null,
+    );
 
     StreamSubscription<bool> subscription;
     subscription = server.onAnalyzing.listen((bool isAnalyzing) {
