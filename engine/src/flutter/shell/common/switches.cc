@@ -11,6 +11,7 @@
 
 #include "flutter/fml/paths.h"
 #include "flutter/fml/string_view.h"
+#include "flutter/shell/version/version.h"
 
 // Include once for the default enum definition.
 #include "flutter/shell/common/switches.h"
@@ -41,6 +42,14 @@ namespace shell {
 
 void PrintUsage(const std::string& executable_name) {
   std::cerr << std::endl << "  " << executable_name << std::endl << std::endl;
+
+  std::cerr << "Versions: " << std::endl << std::endl;
+
+  std::cerr << "Flutter Engine Version: " << GetFlutterEngineVersion()
+            << std::endl;
+  std::cerr << "Skia Version: " << GetSkiaVersion() << std::endl;
+
+  std::cerr << "Dart Version: " << GetDartVersion() << std::endl << std::endl;
 
   std::cerr << "Available Flags:" << std::endl;
 

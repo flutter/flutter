@@ -1,0 +1,18 @@
+# Copyright 2018 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("version.gni")
+
+source_set("version") {
+  sources = [
+    "version.cc",
+    "version.h",
+  ]
+
+  defines = [
+    "SHELL_FLUTTER_ENGINE_VERSION=\"$shell_engine_version\"",
+    "SHELL_SKIA_VERSION=\"$shell_skia_version\"",
+    "SHELL_DART_VERSION=\"$shell_dart_version\"",
+  ]
+}
