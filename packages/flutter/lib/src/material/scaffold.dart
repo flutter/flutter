@@ -706,6 +706,8 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding = true,
     this.primary = true,
+    this.drawerCallback,
+    this.endDrawerCallback,
   }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
@@ -842,6 +844,9 @@ class Scaffold extends StatefulWidget {
   /// The default value of this property, like the default value of
   /// [AppBar.primary], is true.
   final bool primary;
+  /// Optional callback that is called when a [Drawer] is opened or closed.
+  final DrawerCallback drawerCallback;
+  final DrawerCallback endDrawerCallback;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1025,12 +1030,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void _drawerOpenedCallback(bool isOpened) {
     setState(() {
       _drawerOpened = isOpened;
+      if(widget.drawerCallback != null){
+        widget.drawerCallback(_drawerOpened);
+      }
     });
   }
 
   void _endDrawerOpenedCallback(bool isOpened) {
     setState(() {
       _endDrawerOpened = isOpened;
+      if(widget.endDrawerCallback != null){
+        widget.endDrawerCallback(_endDrawerOpened);
+      }
     });
   }
 
