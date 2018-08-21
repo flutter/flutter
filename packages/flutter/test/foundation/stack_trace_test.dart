@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
 void main() {
-  // TODO(8128): These tests and the filtering mechanism should be revisited to account for causal async stack traces.
-
+  // TODO(ianh): These tests and the filtering mechanism should be revisited to
+  // account for causal async stack traces. https://github.com/flutter/flutter/issues/8128
   test('FlutterError.defaultStackFilter', () {
     final List<String> filtered = FlutterError.defaultStackFilter(StackTrace.current.toString().trimRight().split('\n')).toList();
     expect(filtered.length, greaterThanOrEqualTo(4));
