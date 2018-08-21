@@ -135,6 +135,7 @@ tasks:
       Tests embedded Android views.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   run_release_test:
     description: >
