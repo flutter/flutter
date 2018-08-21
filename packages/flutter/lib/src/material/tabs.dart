@@ -744,6 +744,7 @@ class _TabBarState extends State<TabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(debugCheckHasMaterial(context));
     _updateTabController();
     _initIndicatorPainter();
   }
