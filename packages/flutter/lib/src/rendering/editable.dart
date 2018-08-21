@@ -203,15 +203,15 @@ class RenderEditable extends RenderBox {
   static const int _kUpArrowCode = 19;
   static const int _kDownArrowCode = 20;
 
-  // The current extent offset used to calculate the selection
   int _extentOffset = -1;
-
-  // The current base offset used to calculate the selection
   int _baseOffset = -1;
 
-  // The previous text index of the cursor in the case that the user attempts
-  // to highlight until the end or beginning of the text field.
+  // Holds the last location the user selected in the case that he selects all
+  // the way to the end or beginning of the field.
   int _previousCursorLocation = -1;
+
+  // Whether we should reset the location of the cursor in the case the user
+  // selects all the way to the end or the beginning of a field.
   bool _resetCursor = false;
 
   static const int _kShiftMask = 1;
@@ -242,9 +242,6 @@ class RenderEditable extends RenderBox {
     final bool upArrow = pressedKeyCode == _kUpArrowCode;
     final bool downArrow = pressedKeyCode == _kDownArrowCode;
     final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
-
-    // TODO: all this should be changed to work in terms of extended grapheme
-    // TODO: clusters instead of UTF-16 words
 
     // We will only move select or more the caret if an arrow is pressed
     if (arrow) {
@@ -333,9 +330,7 @@ class RenderEditable extends RenderBox {
   // Handles the selection of text or removal of the selection and placing
   // of the caret.
   int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
-    if (onSelectionChanged != null)
-      return newOffset;
-      // For some reason, deletion only works if the base offset is less
+    // For some reason, deletion only works if the base offset is less
     // than the extent offset.
     if (shift) {
       if (_baseOffset < newOffset) {
@@ -365,6 +360,11 @@ class RenderEditable extends RenderBox {
     }
     return newOffset;
   }
+
+
+
+
+
 
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
