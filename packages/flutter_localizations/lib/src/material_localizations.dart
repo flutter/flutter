@@ -395,10 +395,10 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   /// The script category used by [localTextGeometry]. Must be one of the strings
   /// declared in [MaterialTextGeometry].
-  ///
-  /// TODO(ianh): make this return a TextTheme from MaterialTextGeometry.
-  /// TODO(ianh): drop the constructor on MaterialTextGeometry.
-  /// TODO(ianh): drop the strings on MaterialTextGeometry.
+  //
+  // TODO(ianh): make this return a TextTheme from MaterialTextGeometry.
+  // TODO(ianh): drop the constructor on MaterialTextGeometry.
+  // TODO(ianh): drop the strings on MaterialTextGeometry.
   @protected
   String get scriptCategory;
 

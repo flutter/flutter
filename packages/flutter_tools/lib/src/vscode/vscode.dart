@@ -13,8 +13,6 @@ import '../base/version.dart';
 const bool _includeInsiders = false;
 
 class VsCode {
-  static const String extensionIdentifier = 'Dart-Code.flutter';
-
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
       : this.version = version ?? Version.unknown {
 
@@ -51,6 +49,8 @@ class VsCode {
   final String extensionDirectory;
   final Version version;
   final String edition;
+
+  static const String extensionIdentifier = 'Dart-Code.flutter';
 
   bool _isValid = false;
   Version _extensionVersion;
@@ -118,7 +118,7 @@ class VsCode {
   // Windows:
   //   $programfiles(x86)\Microsoft VS Code
   //   $programfiles(x86)\Microsoft VS Code Insiders
-  // TODO: Confirm these are correct for 64bit
+  // TODO(dantup): Confirm these are correct for 64bit
   //   $programfiles\Microsoft VS Code
   //   $programfiles\Microsoft VS Code Insiders
   // Windows Extensions:
@@ -187,10 +187,10 @@ class VsCode {
 }
 
 class _VsCodeInstallLocation {
+  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
+    : this.isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;
   final bool isInsiders;
-  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : this.isInsiders = isInsiders ?? false;
 }
