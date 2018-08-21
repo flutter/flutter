@@ -8,10 +8,9 @@ class ElevationDemo extends StatefulWidget {
 }
 
 class _ElevationDemoState extends State<ElevationDemo> {
-  bool _shouldShowElevation = true;
+  bool _showElevation = true;
 
   List<Widget> buildCards() {
-    final List<Widget> cards = <Widget>[];
     const List<double> elevations = <double>[
       0.0,
       1.0,
@@ -24,40 +23,40 @@ class _ElevationDemoState extends State<ElevationDemo> {
       24.0,
     ];
 
-    for (double i in elevations) {
-      cards.add(new Center(
+    return elevations.map((double elevation) {
+      return new Center(
         child: new Card(
           margin: const EdgeInsets.all(20.0),
-          elevation: _shouldShowElevation ? i : 0.0,
+          elevation: _showElevation ? elevation : 0.0,
           child: new SizedBox(
             height: 100.0,
             width: 100.0,
             child: new Center(
-              child: new Text('${i.toStringAsFixed(0)} pt'),
+              child: new Text('${elevation.toStringAsFixed(0)} pt'),
             ),
           ),
         ),
-      ));
-    }
-
-    return cards;
+      );
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          title: const Text('Elevation'),
-          actions: <Widget>[
-            new IconButton(
-                icon: const Icon(Icons.sentiment_very_satisfied),
-                onPressed: () {
-                  setState(() => _shouldShowElevation = !_shouldShowElevation);
-                })
-          ],
-        ),
-        body: new ListView(
-          children: buildCards(),
-        ));
+      appBar: new AppBar(
+        title: const Text('Elevation'),
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() => _showElevation = !_showElevation);
+            },
+          )
+        ],
+      ),
+      body: new ListView(
+        children: buildCards(),
+      ),
+    );
   }
 }
