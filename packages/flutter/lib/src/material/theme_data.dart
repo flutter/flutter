@@ -185,15 +185,9 @@ class ThemeData extends Diagnosticable {
     hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
+    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(
-      color: Colors.black,
-      opacity: _kIconThemeDefaultColorOpacity,
-    );
-    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(
-      color: Colors.black,
-      opacity: _kIconThemeDefaultColorOpacity,
-    );
-    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(
       color: Colors.black,
       opacity: _kIconThemeDefaultColorOpacity,
     );
