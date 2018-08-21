@@ -240,7 +240,9 @@ class MockPortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
     hostPort ??= 0;
-    if (hostPort == 0) return availablePort;
+    if (hostPort == 0) {
+      return availablePort;
+    }
     return hostPort;
   }
 
