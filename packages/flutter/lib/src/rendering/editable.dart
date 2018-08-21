@@ -456,7 +456,7 @@ class RenderEditable extends RenderBox {
   /// Whether the editable is currently focused.
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
-  bool _listenerAttached;
+  bool _listenerAttached = false;
   set hasFocus(bool value) {
     assert(value != null);
     if (_hasFocus == value)
@@ -625,8 +625,6 @@ class RenderEditable extends RenderBox {
     super.attach(owner);
     _offset.addListener(markNeedsPaint);
     _showCursor.addListener(markNeedsPaint);
-    if (!_listenerAttached)
-      RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
   @override
