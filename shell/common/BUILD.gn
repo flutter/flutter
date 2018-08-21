@@ -106,6 +106,7 @@ source_set("common") {
   ]
 
   public_deps = [
+    "$flutter_root/shell/version",
     "$flutter_root/third_party/txt",
     "//third_party/tonic",
   ]

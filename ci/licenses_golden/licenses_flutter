@@ -609,6 +609,8 @@ FILE: ../../../flutter/shell/platform/android/platform_message_response_android.
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
+FILE: ../../../flutter/shell/version/version.cc
+FILE: ../../../flutter/shell/version/version.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Flutter Authors. All rights reserved.
 
