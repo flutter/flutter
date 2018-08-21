@@ -144,7 +144,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children, //ignore:prefer_initializing_formals
+  }) : children = children, // ignore: prefer_initializing_formals
        assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
