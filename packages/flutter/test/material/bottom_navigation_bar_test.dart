@@ -769,7 +769,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(_backgroundColor, Colors.green);
     expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
-
   });
 }
 
