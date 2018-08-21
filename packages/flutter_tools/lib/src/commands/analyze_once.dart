@@ -76,7 +76,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final AnalysisServer server = new AnalysisServer(
       sdkPath,
       directories.toList(),
-      useCFE: argResults.wasParsed('use-cfe') ? argResults['use-cfe'] : null,
+      useCfe: argResults.wasParsed('use-cfe') ? argResults['use-cfe'] : null,
     );
 
     StreamSubscription<bool> subscription;
