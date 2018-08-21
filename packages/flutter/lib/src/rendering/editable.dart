@@ -242,16 +242,21 @@ class RenderEditable extends RenderBox {
     if (arrow) {
       int newOffset = _extentOffset;
 
+      // Because the user can use multiple keys to change how he selects
+      // the new offset variable is threaded through these four functions
+      // and potentially changes after each one.
       newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
       newOffset = _handleHorizontalArrows(rightArrow, leftArrow, shift, newOffset);
       newOffset = _handleVerticalArrows(upArrow, downArrow, shift, newOffset);
-      newOffset = _handleSelection(rightArrow, leftArrow, shift, newOffset);
+      newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
     }
   }
 
-  int _handleSelection(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+  // Handles the final selection of text or removal of the selection and placing
+  // of the caret
+  int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
     // For some reason, deletion only works if the base offset is less
     // than the extent offset.
     if (shift) {
@@ -280,6 +285,9 @@ class RenderEditable extends RenderBox {
     return newOffset;
   }
 
+  // Handles moving the cursor vertically as well as taking care of the
+  // case where the user moves the cursor to the end or beginning of the text
+  // and then back up or down.
   int _handleVerticalArrows(bool upArrow, bool downArrow, bool shift, int newOffset) {
     if (downArrow || upArrow) {
       // The caret offset gives a location in the upper left hand corner of
@@ -313,6 +321,7 @@ class RenderEditable extends RenderBox {
     return newOffset;
   }
 
+  // Simply handles the horizontal arrows
   int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
     // Set the new offset to be +/- 1 depending on which arrow is pressed
     // If shift is down, we also want to update the previous cursor location
@@ -329,6 +338,7 @@ class RenderEditable extends RenderBox {
     return newOffset;
   }
 
+  // Handles full word traversal using control.
   int _handleControl(bool rightArrow, bool leftArrow, bool ctrl, int newOffset) {
     // If control is pressed, we will decide which way to look for a word
     // based on which arrow is pressed.
@@ -446,16 +456,20 @@ class RenderEditable extends RenderBox {
   /// Whether the editable is currently focused.
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
+  bool _listenerAttached;
   set hasFocus(bool value) {
-//    debugPrint(value.toString() + " and " + this.hashCode.toString());
     assert(value != null);
     if (_hasFocus == value)
       return;
     _hasFocus = value;
-    if (_hasFocus)
+    if (_hasFocus) {
       RawKeyboard.instance.addListener(_handleKeyEvent);
-    else
+      _listenerAttached = true;
+    }
+    else {
       RawKeyboard.instance.removeListener(_handleKeyEvent);
+      _listenerAttached = false;
+    }
 
     markNeedsSemanticsUpdate();
   }
@@ -611,13 +625,16 @@ class RenderEditable extends RenderBox {
     super.attach(owner);
     _offset.addListener(markNeedsPaint);
     _showCursor.addListener(markNeedsPaint);
+    if (!_listenerAttached)
+      RawKeyboard.instance.addListener(_handleKeyEvent);
   }
 
   @override
   void detach() {
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
-    RawKeyboard.instance.removeListener(_handleKeyEvent);
+    if (_listenerAttached)
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
   }
 
