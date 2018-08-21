@@ -513,4 +513,75 @@ void main() {
       ]),
     );
   });
+
+  testWidgets('Android view can lose gesture arenas', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    bool verticalDragAcceptedByParent = false;
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: new Container(
+          margin: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) { verticalDragAcceptedByParent = true; },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await gesture.up();
+
+    expect(verticalDragAcceptedByParent, true);
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      isNull,
+    );
+  });
+
+  testWidgets('Android view gesture recognizers', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    bool verticalDragAcceptedByParent = false;
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          onVerticalDragStart: (DragStartDetails d) { verticalDragAcceptedByParent = true; },
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              gestureRecognizers: <OneSequenceGestureRecognizer> [new VerticalDragGestureRecognizer()],
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await gesture.up();
+
+    expect(verticalDragAcceptedByParent, false);
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionMove, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+      ]),
+    );
+  });
 }
