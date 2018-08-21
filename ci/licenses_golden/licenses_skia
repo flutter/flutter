@@ -1,4 +1,4 @@
-Signature: f1c97abf1b8999d79b46e9c3c638e32b
+Signature: a5e7406c25539f9c8db6c2e23c3ff0a2
 
 UNUSED LICENSES:
 
@@ -1386,6 +1386,7 @@ FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNimaActor.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNimaActor.h
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
+FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
 FILE: ../../../third_party/skia/src/compute/common/vk/event_pool.c
