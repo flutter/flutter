@@ -272,7 +272,7 @@ class TestSemantics {
       final double rightDelta = (rect.right - nodeData.rect.right).abs();
       final double topDelta = (rect.top - nodeData.rect.top).abs();
       final double bottomDelta = (rect.bottom - nodeData.rect.bottom).abs();
-      if (leftDelta > 0.01 || rightDelta > 0.01 || topDelta > 0.01 || bottomDelta <= 0.01)
+      if (leftDelta > 0.01 || rightDelta > 0.01 || topDelta > 0.01 || bottomDelta > 0.01)
         return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
     }
     if (!ignoreTransform && transform != nodeData.transform)
