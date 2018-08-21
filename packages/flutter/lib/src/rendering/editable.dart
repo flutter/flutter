@@ -166,9 +166,6 @@ class RenderEditable extends RenderBox {
       ..onTap = _handleTap;
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
-    _drag = new PanGestureRecognizer(debugOwner: this)
-      ..onStart = _handleDragStart
-      ..onEnd = _handleDragEnd;
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -808,7 +805,6 @@ class RenderEditable extends RenderBox {
 
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
-  DragGestureRecognizer _drag;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -873,18 +869,6 @@ class RenderEditable extends RenderBox {
   void _handleLongPress() {
     assert(!ignorePointer);
     handleLongPress();
-  }
-
-  void _handleDragStart(DragStartDetails details) {
-    if (details.deviceKind == PointerDeviceKind.mouse) {
-//      details.
-    }
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    if (details.deviceKind == PointerDeviceKind.mouse) {
-
-    }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
