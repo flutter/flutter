@@ -11,8 +11,8 @@ import 'package:file/local.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
-import 'client.dart';
-export 'client.dart';
+import 'package:flutter_goldens_client/client.dart';
+export 'package:flutter_goldens_client/client.dart';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that

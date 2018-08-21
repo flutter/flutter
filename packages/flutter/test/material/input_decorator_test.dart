@@ -1697,13 +1697,50 @@ void main() {
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
-
     expect(
       const InputDecorationTheme(
         contentPadding: EdgeInsetsDirectional.only(start: 5.0),
       ).toString(),
       contains('contentPadding: EdgeInsetsDirectional(5.0, 0.0, 0.0, 0.0)'),
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/20374
+    expect(
+      const InputDecorationTheme(
+        contentPadding: EdgeInsets.only(left: 5.0),
+      ).toString(),
+      contains('contentPadding: EdgeInsets(5.0, 0.0, 0.0, 0.0)'),
+    );
+
+    // Verify that the toString() method succeeds.
+    final String debugString = const InputDecorationTheme(
+      labelStyle: TextStyle(height: 1.0),
+      helperStyle: TextStyle(height: 2.0),
+      hintStyle: TextStyle(height: 3.0),
+      errorStyle: TextStyle(height: 4.0),
+      errorMaxLines: 5,
+      isDense: true,
+      contentPadding: EdgeInsets.only(right: 6.0),
+      isCollapsed: true,
+      prefixStyle: TextStyle(height: 7.0),
+      suffixStyle: TextStyle(height: 8.0),
+      counterStyle: TextStyle(height: 9.0),
+      filled: true,
+      fillColor: Color(10),
+      errorBorder: UnderlineInputBorder(),
+      focusedBorder: OutlineInputBorder(),
+      focusedErrorBorder: UnderlineInputBorder(),
+      disabledBorder: OutlineInputBorder(),
+      enabledBorder: UnderlineInputBorder(),
+      border: OutlineInputBorder(),
+    ).toString();
+
+    // Spot check
+    expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
+    expect(debugString, contains('isDense: true'));
+    expect(debugString, contains('fillColor: Color(0x0000000a)'));
+    expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
+    expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
 
   testWidgets('InputDecoration borders', (WidgetTester tester) async {
