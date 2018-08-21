@@ -36,9 +36,6 @@ const Color _kLightThemeSplashColor = Color(0x66C8C8C8);
 const Color _kDarkThemeHighlightColor = Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 
-// Material Guidelines say icons are black with 87% opacity by default.
-const double _kIconThemeDefaultColorOpacity = 0.87;
-
 /// Configures the tap target and layout size of certain Material widgets.
 ///
 /// Changing the value in [ThemeData.materialTapTargetSize] will affect the
@@ -187,10 +184,7 @@ class ThemeData extends Diagnosticable {
     inputDecorationTheme ??= const InputDecorationTheme();
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(
-      color: Colors.black,
-      opacity: _kIconThemeDefaultColorOpacity,
-    );
+    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
     final Typography typography = new Typography(platform: platform);
     final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
