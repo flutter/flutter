@@ -48,7 +48,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  AndroidValidator(): super('Android toolchain - develop for Android devices',
+  const AndroidValidator(): super('Android toolchain - develop for Android devices',
                             ValidatorCategory.androidToolchain);
 
   static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';

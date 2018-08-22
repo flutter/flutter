@@ -321,7 +321,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   }
 
   @override
-  List<Workflow> get workflows => [];
+  List<Workflow> get workflows => <Workflow>[];
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
