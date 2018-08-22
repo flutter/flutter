@@ -455,8 +455,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Free pipe file.
   tempDir?.deleteSync(recursive: true);
   printStatus(
-    'Xcode build done.',
-    ansiAlternative: 'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
+    'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
         + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
   );
 
