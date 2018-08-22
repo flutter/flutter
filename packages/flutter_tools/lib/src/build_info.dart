@@ -272,7 +272,7 @@ String getBuildDirectory() {
 
 /// Returns the Android build output directory.
 String getAndroidBuildDirectory() {
-  // TODO(cbracken) move to android subdir.
+  // TODO(cbracken): move to android subdir.
   return getBuildDirectory();
 }
 

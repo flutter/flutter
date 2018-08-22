@@ -38,6 +38,8 @@ void main() {
       expect(localizations.popupMenuLabel, isNotNull);
       expect(localizations.dialogLabel, isNotNull);
       expect(localizations.alertDialogLabel, isNotNull);
+      expect(localizations.collapsedIconTapHint, isNotNull);
+      expect(localizations.expandedIconTapHint, isNotNull);
 
       expect(localizations.aboutListTileTitle('FOO'), isNotNull);
       expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

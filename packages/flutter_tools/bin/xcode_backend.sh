@@ -280,7 +280,7 @@ ThinAppFrameworks() {
 
 # Main entry point.
 
-# TODO(cbracken) improve error handling, then enable set -e
+# TODO(cbracken): improve error handling, then enable set -e
 
 if [[ $# == 0 ]]; then
   # Backwards-compatibility: if no args are provided, build.

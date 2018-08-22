@@ -911,7 +911,7 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
   Widget build(BuildContext context) {
     return new _ActionButtonParentDataWidget(
       isPressed: _isPressed,
-      // TODO:(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
+      // TODO(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
       child: new GestureDetector(
         excludeFromSemantics: true,
         behavior: HitTestBehavior.opaque,
