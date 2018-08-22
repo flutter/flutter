@@ -1,4 +1,4 @@
-Signature: a5e7406c25539f9c8db6c2e23c3ff0a2
+Signature: e4d152ec0fdc2776f4f6bb1090c2266b
 
 UNUSED LICENSES:
 
@@ -1353,7 +1353,11 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieLayer.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieLayerEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottiePrecompLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieShapeLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTextLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
