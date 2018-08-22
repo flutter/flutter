@@ -69,10 +69,9 @@ const _HeroTag _heroTag = _HeroTag();
 
 class _HeroTag {
   const _HeroTag();
-  // This class exists because the Gallery smoke test wants all widgets from
-  // debugDumpApp() to have a toString();
+  // Let the Hero tag be described in tree dumps.
   @override
-  String toString() => "Cupertino navigation bars' Hero tag";
+  String toString() => 'Default Hero tag for Cupertino navigation bars';
 }
 
 TextStyle _navBarItemStyle(Color color) {
@@ -86,14 +85,17 @@ TextStyle _navBarItemStyle(Color color) {
 
 /// Returns `child` wrapped with background and a bottom border if background color
 /// is opaque. Otherwise, also blur with [BackdropFilter].
+///
+/// When `updateSystemUiOverlay` is true, the nav bar will update the OS
+/// status bar's color theme based on the background color of the nav bar.
 Widget _wrapWithBackground({
   Border border,
   Color backgroundColor,
   Widget child,
-  bool annotate = true,
+  bool updateSystemUiOverlay = true,
 }) {
   Widget result = child;
-  if (annotate) {
+  if (updateSystemUiOverlay) {
     final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
     final SystemUiOverlayStyle overlayStyle = darkBackground
         ? SystemUiOverlayStyle.light
@@ -127,7 +129,7 @@ Widget _wrapWithBackground({
 bool _isTransitionable(BuildContext context) {
   final ModalRoute<dynamic> route = ModalRoute.of(context);
 
-  // Fullscreen dialogs never transitions its nav bar with other push-style
+  // Fullscreen dialogs never transitions their nav bar with other push-style
   // pages' nav bars or with other fullscreen dialog pages on the way in or on
   // the way out.
   return route is PageRoute && !route.fullscreenDialog;
@@ -412,8 +414,9 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// on top of the routes instead of inside it if the route being transitioned
 /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
 /// with [transitionBetweenRoutes] set to true. If [transitionBetweenRoutes] is
-/// true, none of the [Widget] parameters can contain a key in its subtree since
-/// that widget will exist in multiple places in the tree simultaneously.
+/// true, none of the [Widget] parameters can contain any [GlobalKey]s in their
+/// subtrees since those widgets will exist in multiple places in the tree
+/// simultaneously.
 ///
 /// See also:
 ///
@@ -441,8 +444,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
        assert(automaticallyImplyTitle != null),
        assert(
          automaticallyImplyTitle == true || largeTitle != null,
-         'A largeTitle must be provided. Otherwise, automaticallyImplyTitle '
-         'must be true.'
+         'No largeTitle has been provided but automaticallyImplyTitle is also '
+         'false. Either provide a largeTitle or set automaticallyImplyTitle to '
+         'true.'
        ),
        super(key: key);
 
@@ -465,8 +469,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// title will be created if the current route is a [CupertinoPageRoute] and
   /// has a `title`.
   ///
-  /// This parameter must either be non-null or [automaticallyImplyTitle] must
-  /// be true and the route has a title.
+  /// This parameter must either be non-null or the route must have a title
+  /// ([CupertinoPageRoute.title]) and [automaticallyImplyTitle] must be true.
   final Widget largeTitle;
 
   /// {@macro flutter.cupertino.navBar.leading}
@@ -525,9 +529,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   bool get opaque => backgroundColor.alpha == 0xFF;
 
   @override
-  _CupertinoSliverNavigationBarState createState() {
-    return new _CupertinoSliverNavigationBarState();
-  }
+  _CupertinoSliverNavigationBarState createState() => new _CupertinoSliverNavigationBarState();
 }
 
 // A state class exists for the nav bar so that the keys of its sub-components
@@ -826,13 +828,13 @@ class _PersistentNavigationBar extends StatelessWidget {
 @immutable
 class _NavigationBarStaticComponentsKeys {
   _NavigationBarStaticComponentsKeys()
-      : navBarBoxKey = new GlobalKey(),
-        leadingKey = new GlobalKey(),
-        backChevronKey = new GlobalKey(),
-        backLabelKey = new GlobalKey(),
-        middleKey = new GlobalKey(),
-        trailingKey = new GlobalKey(),
-        largeTitleKey = new GlobalKey();
+      : navBarBoxKey = new GlobalKey(debugLabel: 'Navigation bar render box'),
+        leadingKey = new GlobalKey(debugLabel: 'Leading'),
+        backChevronKey = new GlobalKey(debugLabel: 'Back chevron'),
+        backLabelKey = new GlobalKey(debugLabel: 'Back label'),
+        middleKey = new GlobalKey(debugLabel: 'Middle'),
+        trailingKey = new GlobalKey(debugLabel: 'Trailing'),
+        largeTitleKey = new GlobalKey(debugLabel: 'Large title');
 
   final GlobalKey navBarBoxKey;
   final GlobalKey leadingKey;
@@ -1102,7 +1104,7 @@ class _NavigationBarStaticComponents {
 
     assert(
       largeTitleContent != null,
-      'largeTitle was not provided and there was no title from the route',
+      'largeTitle was not provided and there was no title from the route.',
     );
 
     return new KeyedSubtree(
@@ -1419,7 +1421,8 @@ class _NavigationBarTransition extends StatelessWidget {
         animation: animation,
         builder: (BuildContext context, Widget child) {
           return _wrapWithBackground(
-            annotate: false,
+            // Don't update the system status bar color mid-flight.
+            updateSystemUiOverlay: false,
             backgroundColor: backgroundTween.evaluate(animation),
             border: borderTween.evaluate(animation),
             child: new SizedBox(
