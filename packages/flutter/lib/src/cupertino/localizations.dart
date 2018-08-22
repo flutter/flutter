@@ -14,12 +14,44 @@ import 'package:flutter/widgets.dart';
 ///
 ///  * [DefaultCupertinoLocalizations], the default, English-only, implementation
 ///    of this interface.
+// TODO(xster): Supply non-english strings.
 abstract class CupertinoLocalizations {
-  /// The given number in local numerical alphabet.
+  /// The given number in local writing system.
+  ///
+  /// Different languages can have different numeral systems, and this function
+  /// will return the given number written in the local language.
+  /// Example of some numeral systems can be found here:
+  /// https://en.wikipedia.org/wiki/List_of_numeral_systems
   String number(int num);
 
-  /// Name of the month corresponding to the given integer.
-  String month(int month);
+  /// Month that is shown in [CupertinoDatePicker] corresponding to the given
+  /// month index.
+  ///
+  /// Examples: datePickerMonth(1) in:
+  ///
+  ///  - US English: January
+  ///  - Korean: 1월
+  String datePickerMonth(int monthIndex);
+
+  /// Day of month that is shown in [CupertinoDatePicker] corresponding to
+  /// the given day index.
+  ///
+  ///
+  /// Examples: datePickerDayOfMonth(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Korean: 1일
+  String datePickerDayOfMonth(int dayIndex);
+
+  /// Year that is shown in [CupertinoDatePicker] corresponding to the given
+  /// year index.
+  ///
+  ///
+  /// Examples: datePickerDayOfMonth(1) in:
+  ///
+  ///  - US English: 2018
+  ///  - Korean: 2018년
+  String datePickerYear(int yearIndex);
 
   /// Formats the date using a medium-width format.
   ///
@@ -30,11 +62,11 @@ abstract class CupertinoLocalizations {
   ///
   /// - US English: Wed Sep 27
   /// - Russian: ср сент. 27
-  String formatMediumDate(DateTime date);
+  String datePickerMediumDate(DateTime date);
 
-  /// The date order of the current locale. Can be any permutation of 'DMY'.
-  /// This will affect how the cupertino date picker orders its children.
-  String get dateOrder;
+  /// The order of the date elements that will be shown in [CupertinoDatePicker].
+  /// Can be any permutation of 'DMY' ('D': day, 'M': month, 'Y': year).
+  String get datePickerDateOrder;
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.
   String get anteMeridiemAbbreviation;
@@ -42,14 +74,14 @@ abstract class CupertinoLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
-  /// Label for the hour picker. This appears in [CupertinoCountdownTimerPicker].
-  String get hourLabel;
+  /// Label that is next to the hour picker in [CupertinoCountdownTimerPicker].
+  String get timerPickerHourLabel;
 
-  /// Label for the minute picker. This appears in [CupertinoCountdownTimerPicker].
-  String get minuteLabel;
+  /// Label that is next to the minute picker in [CupertinoCountdownTimerPicker].
+  String get timerPickerMinuteLabel;
 
-  /// Label for the second picker. This appears in [CupertinoCountdownTimerPicker].
-  String get secondLabel;
+  /// Label that is next to the second picker in [CupertinoCountdownTimerPicker].
+  String get timerPickerSecondLabel;
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -134,17 +166,23 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String number(int num) => num.toString();
 
   @override
-  String month(int month) => _months[month - 1];
+  String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
 
   @override
-  String formatMediumDate(DateTime date) {
+  String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
+
+  @override
+  String datePickerYear(int yearIndex) => yearIndex.toString();
+
+  @override
+  String datePickerMediumDate(DateTime date) {
     return '${_shortWeekdays[date.weekday - DateTime.monday]} '
         '${_shortMonths[date.month - DateTime.january]} '
         '${date.day}';
   }
 
   @override
-  String get dateOrder => 'MDY';
+  String get datePickerDateOrder => 'MDY';
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
@@ -153,13 +191,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get hourLabel => 'hours';
+  String get timerPickerHourLabel => 'hours';
 
   @override
-  String get minuteLabel => 'min';
+  String get timerPickerMinuteLabel => 'min';
 
   @override
-  String get secondLabel => 'sec';
+  String get timerPickerSecondLabel => 'sec';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.
