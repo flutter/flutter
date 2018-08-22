@@ -9,11 +9,16 @@ import 'colors.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
 /// 180 deg when pressed, then reverts the animation on a second press.
 /// The underlying icon is [Icons.expand_more].
+///
+/// The expand icon does not include a semantic label for accessibility. In
+/// order to be accessible it should be combined with a label using
+/// [MergeSemantics]. This is done automatically by the [ExpansionPanel] widget.
 ///
 /// See [IconButton] for a more general implementation of a pressable button
 /// with an icon.
@@ -104,14 +109,20 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new IconButton(
-      padding: widget.padding,
-      color: Colors.black38,
-      onPressed: widget.onPressed == null ? null : _handlePressed,
-      icon: new RotationTransition(
-        turns: _iconTurns,
-        child: const Icon(Icons.expand_more)
-      )
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
+
+    return new Semantics(
+      onTapHint: widget.onPressed == null ? null : onTapHint,
+      child: new IconButton(
+        padding: widget.padding,
+        color: Colors.black38,
+        onPressed: widget.onPressed == null ? null : _handlePressed,
+        icon: new RotationTransition(
+          turns: _iconTurns,
+          child: const Icon(Icons.expand_more)
+        ),
+      ),
     );
   }
 }

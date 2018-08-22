@@ -347,4 +347,59 @@ void main() {
     expect(find.text('E'), findsOneWidget);
     expect(find.text('F'), findsNothing);
   });
+
+  testWidgets('Panel header has semantics', (WidgetTester tester) async {
+    const Key expandedKey = Key('expanded');
+    const Key collapsedKey = Key('collapsed');
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return const Text('Expanded', key: expandedKey);
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: true,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return const Text('Collapsed', key: collapsedKey);
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: false,
+      ),
+    ];
+
+    final ExpansionPanelList _expansionList = new ExpansionPanelList(
+      children: _demoItems,
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: _expansionList,
+        ),
+      ),
+    );
+
+    expect(tester.getSemanticsData(find.byKey(expandedKey)), matchesSemanticsData(
+      label: 'Expanded',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      onTapHint: localizations.expandedIconTapHint,
+    ));
+
+    expect(tester.getSemanticsData(find.byKey(collapsedKey)), matchesSemanticsData(
+      label: 'Collapsed',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      onTapHint: localizations.collapsedIconTapHint,
+    ));
+
+    handle.dispose();
+  });
 }
