@@ -7,7 +7,9 @@ A new mobile app SDK to help developers and designers build modern mobile apps f
 * **Main site: [flutter.io][]**
 * [Install](https://flutter.io/setup/)
 * [Get started](https://flutter.io/getting-started/)
+* [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
 * [Contribute](CONTRIBUTING.md)
+
 
 ## Fast development
 
@@ -104,7 +106,7 @@ Future<Null> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or 
+Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
 write <a href="https://flutter.io/platform-channels/">platform channels</a>,
 to access native code, APIs, and SDKs.
 
@@ -162,7 +164,7 @@ existing Java/ObjC/Swift investment.
 
 Learn more about what makes Flutter special in the
 <a href="https://flutter.io/technical-overview/">technical overview</a>.
-  
+
 Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our public mailing list,
 [flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
 
