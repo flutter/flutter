@@ -65,7 +65,15 @@ const TextStyle _kLargeTitleTextStyle = TextStyle(
 
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
-const Object _heroTag = Object();
+const _HeroTag _heroTag = _HeroTag();
+
+class _HeroTag {
+  const _HeroTag();
+  // This class exists because the Gallery smoke test wants all widgets from
+  // debugDumpApp() to have a toString();
+  @override
+  String toString() => "Cupertino navigation bars' Hero tag";
+}
 
 TextStyle _navBarItemStyle(Color color) {
   return new TextStyle(
