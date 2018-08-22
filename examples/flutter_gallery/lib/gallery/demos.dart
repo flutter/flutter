@@ -218,6 +218,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new DialogDemo(),
     ),
     new GalleryDemo(
+      title: 'Elevations',
+      subtitle: 'Shadow values on cards',
+      // TODO(larche): Change to custom icon for elevations when one exists.
+      icon: GalleryIcons.cupertino_progress,
+      category: _kMaterialComponents,
+      routeName: ElevationDemo.routeName,
+      buildRoute: (BuildContext context) => new ElevationDemo(),
+    ),
+    new GalleryDemo(
       title: 'Expand/collapse list control',
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
