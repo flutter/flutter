@@ -89,6 +89,8 @@ def to_gn_args(args):
     gn_args['is_debug'] = args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
     gn_args['is_clang'] = not sys.platform.startswith(('cygwin', 'win'))
+    
+    gn_args['embedder_for_target'] = args.embedder_for_target
 
     enable_lto = args.lto
     if args.unoptimized:
@@ -234,8 +236,9 @@ def parse_args(args):
   parser.add_argument('--target-sysroot', type=str)
   parser.add_argument('--toolchain-prefix', type=str)
 
-  parser.add_argument('--use-glfw', action='store_true', default=False)
   parser.add_argument('--enable-vulkan', action='store_true', default=False)
+
+  parser.add_argument('--embedder-for-target', dest='embedder_for_target', action='store_true', default=False)
 
   return parser.parse_args(args)
 

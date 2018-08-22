@@ -4,6 +4,7 @@
 
 import("$flutter_root/testing/testing.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/shell/platform/embedder/embedder.gni")
 
 shell_gpu_configuration("embedder_gpu_configuration") {
   enable_software = false
@@ -205,14 +206,21 @@ if (is_mac) {
 }
 
 group("flutter_engine") {
-  # All platforms require the embedder dylib and headers.
-  deps = [
-    ":copy_headers",
-    ":flutter_engine_library",
-  ]
+  deps = []
 
-  # For the Mac, the dylib is packaged in a framework with the appropriate headers.
-  if (is_mac) {
-    deps += [ ":flutter_embedder_framework" ]
+  build_embedder_api =
+      current_toolchain == host_toolchain || embedder_for_target
+
+  if (build_embedder_api) {
+    # All platforms require the embedder dylib and headers.
+    deps += [
+      ":copy_headers",
+      ":flutter_engine_library",
+    ]
+
+    # For the Mac, the dylib is packaged in a framework with the appropriate headers.
+    if (is_mac) {
+      deps += [ ":flutter_embedder_framework" ]
+    }
   }
 }
