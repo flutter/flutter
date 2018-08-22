@@ -40,27 +40,26 @@ const Tolerance _kFlingTolerance = Tolerance(
 
 /// Configures how an [AnimationController] behaves when animations are disabled.
 ///
-/// When [AccessibilityFeatures.disableAnimations] is enabled, animations are
-/// speed up or modified to remove most of the visual component. This enum is
-/// used to allow certain AnimationControllers to opt out of this behavior, for
-/// the purpose of preserving some visual animation or simulation behavior for
-/// accessibility.
+/// When [AccessibilityFeatures.disableAnimations] is true, the device is asking
+/// flutter to reduce or disable animations as much as possible. To honor this,
+/// we reduce the duration and the corresponding number of frames for animations.
+/// This enum is used to allow certain [AnimationControllers] to opt out of this
+/// behavior.
 ///
-/// For example, the [AnimationController which controls the physics simulation
-/// for a scrollable list will have [AnimationBehavior.unscalable] so that when a
-/// user attempts to scroll it does not jump to the end/beginning too quickly.
+/// For example, the [AnimationController] which controls the physics simulation
+/// for a scrollable list will have [AnimationBehavior.preserve] so that when
+/// a user attempts to scroll it does not jump to the end/beginning too quickly.
 enum AnimationBehavior {
-  /// The [AnimationController] will reduce or remove the visual component by
-  /// adjusting simulation logic.
+  /// The [AnimationController] will reduce its duration when
+  /// [AccessibilityFeatures.disableAnimations] is true.
   normal,
 
   /// The [AnimationController] will preserve its behavior.
   ///
   /// This is the default for repeating animations in order to prevent them from
-  /// flashing rapidly on the screen. Instead, the components it question should
-  /// display a keyframe or other non-animating substitute when
-  /// [AccessibilityFeatures.disableAnimations] is enabled.
-  unscalable,
+  /// flashing rapidly on the screen if the widget does not take the
+  /// [AccessibilityFeatures.disableAnimations] flag into account.
+  preserve,
 }
 
 /// A controller for an animation.
@@ -177,7 +176,7 @@ class AnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     @required TickerProvider vsync,
-    this.animationBehavior = AnimationBehavior.unscalable,
+    this.animationBehavior = AnimationBehavior.preserve,
   }) : assert(value != null),
        assert(vsync != null),
        lowerBound = double.negativeInfinity,
@@ -199,9 +198,9 @@ class AnimationController extends Animation<double>
 
   /// The behavior of the animation or simulation when animations are disabled.
   ///
-  /// Defaults to [AnimationBehavior.normal] for the [new AnimationBehavior()]
-  /// constructor, and [AnimationBehavior.unscalable] for the
-  /// [new AnimationBehavior.unbounded()] constructor.
+  /// Defaults to [AnimationBehavior.normal] for the [new AnimationBehavior]
+  /// constructor, and [AnimationBehavior.preserve] for the
+  /// [new AnimationBehavior.unbounded] constructor.
   ///
   /// See also:
   ///
@@ -409,7 +408,7 @@ class AnimationController extends Animation<double>
         case AnimationBehavior.normal:
           scale = 0.05;
           break;
-        case AnimationBehavior.unscalable:
+        case AnimationBehavior.preserve:
           break;
       }
     }
@@ -501,7 +500,7 @@ class AnimationController extends Animation<double>
         case AnimationBehavior.normal:
           scale = 200.0;
           break;
-        case AnimationBehavior.unscalable:
+        case AnimationBehavior.preserve:
           break;
       }
     }

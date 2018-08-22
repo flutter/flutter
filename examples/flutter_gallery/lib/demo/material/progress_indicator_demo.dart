@@ -21,7 +21,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
-      animationBehavior: AnimationBehavior.unscalable,
+      animationBehavior: AnimationBehavior.preserve,
     )..forward();
 
     _animation = new CurvedAnimation(
