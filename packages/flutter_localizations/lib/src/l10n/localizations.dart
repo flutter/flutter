@@ -66,6 +66,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'إغلاق';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'متابعة';
 
   @override
@@ -82,6 +85,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'قائمة تنقل';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'إخفاء الحسابات';
@@ -243,6 +249,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Затваряне';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'НАПРЕД';
 
   @override
@@ -259,6 +268,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Меню за навигация';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Скриване на профилите';
@@ -420,6 +432,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zatvaranje';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'NASTAVI';
 
   @override
@@ -436,6 +451,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigacijski izbornik';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Sakrijte račune';
@@ -597,6 +615,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Tanca';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'CONTINUA';
 
   @override
@@ -613,6 +634,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menú de navegació';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Amaga els comptes';
@@ -774,6 +798,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zavřít';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'POKRAČOVAT';
 
   @override
@@ -790,6 +817,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigační nabídka';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Skrýt účty';
@@ -951,6 +981,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Luk';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'FORTSÆT';
 
   @override
@@ -967,6 +1000,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigationsmenu';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Skjul konti';
@@ -1128,6 +1164,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Schließen';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'WEITER';
 
   @override
@@ -1144,6 +1183,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigationsmenü';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Konten ausblenden';
@@ -1335,6 +1377,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Κλείσιμο';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'ΣΥΝΕΧΕΙΑ';
 
   @override
@@ -1351,6 +1396,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Μενού πλοήγησης';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Απόκρυψη λογαριασμών';
@@ -1512,6 +1560,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Close';
 
   @override
+  String get collapsedIconTapHint => r'Expand';
+
+  @override
   String get continueButtonLabel => r'CONTINUE';
 
   @override
@@ -1528,6 +1579,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigation menu';
+
+  @override
+  String get expandedIconTapHint => r'Collapse';
 
   @override
   String get hideAccountsLabel => r'Hide accounts';
@@ -1950,6 +2004,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Cerrar';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'CONTINUAR';
 
   @override
@@ -1966,6 +2023,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menú de navegación';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Ocultar cuentas';
@@ -3450,6 +3510,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Sule';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'JÄTKA';
 
   @override
@@ -3466,6 +3529,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigeerimismenüü';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Peida kontod';
@@ -3627,6 +3693,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'بستن';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'ادامه';
 
   @override
@@ -3643,6 +3712,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'منوی پیمایش';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'پنهان کردن حساب‌ها';
@@ -3804,6 +3876,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Sulje';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'JATKA';
 
   @override
@@ -3820,6 +3895,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigointivalikko';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Piilota tilit';
@@ -3981,6 +4059,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Isara';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'MAGPATULOY';
 
   @override
@@ -3997,6 +4078,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu ng navigation';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Itago ang mga account';
@@ -4158,6 +4242,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Fermer';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'CONTINUER';
 
   @override
@@ -4174,6 +4261,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu de navigation';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Masquer les comptes';
@@ -4362,6 +4452,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Schließen';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'WEITER';
 
   @override
@@ -4378,6 +4471,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigationsmenü';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Konten ausblenden';
@@ -4539,6 +4635,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'סגירה';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'המשך';
 
   @override
@@ -4555,6 +4654,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'תפריט ניווט';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'הסתרת החשבונות';
@@ -4716,6 +4818,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'बंद करें';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'जारी रखें';
 
   @override
@@ -4732,6 +4837,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'नेविगेशन मेन्यू';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'खाते छिपाएं';
@@ -4893,6 +5001,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zatvaranje';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'NASTAVI';
 
   @override
@@ -4909,6 +5020,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigacijski izbornik';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Sakrijte račune';
@@ -5070,6 +5184,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Bezárás';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'TOVÁBB';
 
   @override
@@ -5086,6 +5203,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigációs menü';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Fiókok elrejtése';
@@ -5247,6 +5367,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Tutup';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'LANJUTKAN';
 
   @override
@@ -5263,6 +5386,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu navigasi';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Sembunyikan akun';
@@ -5424,6 +5550,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Chiudi';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'CONTINUA';
 
   @override
@@ -5440,6 +5569,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu di navigazione';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Nascondi account';
@@ -5601,6 +5733,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'閉じる';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'続行';
 
   @override
@@ -5617,6 +5752,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'ナビゲーション メニュー';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'アカウントを非表示';
@@ -5778,6 +5916,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'닫기';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'계속';
 
   @override
@@ -5794,6 +5935,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'탐색 메뉴';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'계정 숨기기';
@@ -5955,6 +6099,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Uždaryti';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'TĘSTI';
 
   @override
@@ -5971,6 +6118,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Naršymo meniu';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Slėpti paskyras';
@@ -6132,6 +6282,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Aizvērt';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'TURPINĀT';
 
   @override
@@ -6148,6 +6301,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigācijas izvēlne';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Slēpt kontus';
@@ -6309,6 +6465,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Tutup';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'TERUSKAN';
 
   @override
@@ -6325,6 +6484,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu navigasi';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Sembunyikan akaun';
@@ -6486,6 +6648,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Lukk';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'FORTSETT';
 
   @override
@@ -6502,6 +6667,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigasjonsmeny';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Skjul kontoer';
@@ -6663,6 +6831,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Sluiten';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'DOORGAAN';
 
   @override
@@ -6679,6 +6850,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigatiemenu';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Accounts verbergen';
@@ -6840,6 +7014,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zamknij';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'DALEJ';
 
   @override
@@ -6856,6 +7033,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu nawigacyjne';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Ukryj konta';
@@ -7017,6 +7197,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'بنده';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'منځپانګې';
 
   @override
@@ -7033,6 +7216,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'د نیویگیشن مینو';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'حسابونه پټ کړئ';
@@ -7194,6 +7380,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Fechar';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'CONTINUAR';
 
   @override
@@ -7210,6 +7399,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu de navegação';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Ocultar contas';
@@ -7440,6 +7632,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Închideți';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'CONTINUAȚI';
 
   @override
@@ -7456,6 +7651,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Meniu de navigare';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Ascundeți conturile';
@@ -7617,6 +7815,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Закрыть';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'ПРОДОЛЖИТЬ';
 
   @override
@@ -7633,6 +7834,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Меню навигации';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Скрыть аккаунты';
@@ -7794,6 +7998,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zavrieť';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'POKRAČOVAŤ';
 
   @override
@@ -7810,6 +8017,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigačná ponuka';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Skryť účty';
@@ -7971,6 +8181,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Zapiranje';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'NAPREJ';
 
   @override
@@ -7987,6 +8200,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Meni za krmarjenje';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Skrivanje računov';
@@ -8148,6 +8364,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Затворите';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'НАСТАВИ';
 
   @override
@@ -8164,6 +8383,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Мени за навигацију';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Сакриј налоге';
@@ -8463,6 +8685,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Stäng';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'FORTSÄTT';
 
   @override
@@ -8479,6 +8704,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Navigeringsmeny';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Dölj konton';
@@ -8640,6 +8868,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'ปิด';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'ต่อไป';
 
   @override
@@ -8656,6 +8887,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'เมนูการนำทาง';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'ซ่อนบัญชี';
@@ -8817,6 +9051,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Isara';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'MAGPATULOY';
 
   @override
@@ -8833,6 +9070,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu ng navigation';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Itago ang mga account';
@@ -8994,6 +9234,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Kapat';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'DEVAM';
 
   @override
@@ -9010,6 +9253,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Gezinme menüsü';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Hesapları gizle';
@@ -9171,6 +9417,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Закрити';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'ПРОДОВЖИТИ';
 
   @override
@@ -9187,6 +9436,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Меню навігації';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Сховати облікові записи';
@@ -9348,6 +9600,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'بند کریں';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'جاری رکھیں';
 
   @override
@@ -9364,6 +9619,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'نیویگیشن مینو';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'اکاؤنٹس چھپائیں';
@@ -9525,6 +9783,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Đóng';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'TIẾP TỤC';
 
   @override
@@ -9541,6 +9802,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'Menu di chuyển';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'Ẩn tài khoản';
@@ -9702,6 +9966,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'关闭';
 
   @override
+  String get collapsedIconTapHint => r'TBD';
+
+  @override
   String get continueButtonLabel => r'继续';
 
   @override
@@ -9718,6 +9985,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get drawerLabel => r'导航菜单';
+
+  @override
+  String get expandedIconTapHint => r'TBD';
 
   @override
   String get hideAccountsLabel => r'隐藏帐号';
