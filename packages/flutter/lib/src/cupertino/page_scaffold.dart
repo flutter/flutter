@@ -72,17 +72,17 @@ class CupertinoPageScaffold extends StatelessWidget {
       final double topPadding =
           navigationBar.preferredSize.height + existingMediaQuery.padding.top;
 
+      // TODO: refactor with MediaQuery.padding.bottom
+      final double bottomPadding = resizeToAvoidBottomPadding
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
+
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
       if (navigationBar.fullObstruction) {
         paddedContent = new Padding(
-          padding: new EdgeInsets.only(
-            top: topPadding,
-            bottom: resizeToAvoidBottomPadding
-                ? existingMediaQuery.viewInsets.bottom
-                : 0.0,
-          ),
+          padding: new EdgeInsets.only(top: topPadding, bottom: bottomPadding),
           child: child,
         );
       } else {
@@ -90,10 +90,7 @@ class CupertinoPageScaffold extends StatelessWidget {
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
-              bottom: existingMediaQuery.padding.bottom +
-                  (resizeToAvoidBottomPadding
-                      ? existingMediaQuery.viewInsets.bottom
-                      : 0.0),
+              bottom: bottomPadding,
             ),
           ),
           child: child,
