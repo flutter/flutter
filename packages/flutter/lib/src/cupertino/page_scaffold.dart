@@ -24,8 +24,8 @@ class CupertinoPageScaffold extends StatelessWidget {
     this.backgroundColor = CupertinoColors.white,
     this.resizeToAvoidBottomPadding = true,
     @required this.child,
-  }) : assert(child != null),
-       super(key: key);
+  })  : assert(child != null),
+        super(key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
@@ -69,8 +69,8 @@ class CupertinoPageScaffold extends StatelessWidget {
 
       // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
-      final double topPadding = navigationBar.preferredSize.height
-          + existingMediaQuery.padding.top;
+      final double topPadding =
+          navigationBar.preferredSize.height + existingMediaQuery.padding.top;
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
@@ -79,7 +79,9 @@ class CupertinoPageScaffold extends StatelessWidget {
         paddedContent = new Padding(
           padding: new EdgeInsets.only(
             top: topPadding,
-            bottom: resizeToAvoidBottomPadding ? existingMediaQuery.viewInsets.bottom : 0.0,
+            bottom: resizeToAvoidBottomPadding
+                ? existingMediaQuery.viewInsets.bottom
+                : 0.0,
           ),
           child: child,
         );
@@ -88,7 +90,10 @@ class CupertinoPageScaffold extends StatelessWidget {
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
-              bottom: resizeToAvoidBottomPadding ? existingMediaQuery.viewInsets.bottom : 0.0,
+              bottom: existingMediaQuery.padding.bottom +
+                  (resizeToAvoidBottomPadding
+                      ? existingMediaQuery.viewInsets.bottom
+                      : 0.0),
             ),
           ),
           child: child,
