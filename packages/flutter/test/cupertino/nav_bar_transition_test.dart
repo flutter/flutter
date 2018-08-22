@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../widgets/semantics_tester.dart';
 
 Future<void> startTransitionBetween(
   WidgetTester tester, {
@@ -96,7 +91,7 @@ Finder flying(WidgetTester tester, Finder finder) {
 }
 
 void checkBackgroundBoxHeight(WidgetTester tester, double height) {
-  Widget transitionBackgroundBox =
+  final Widget transitionBackgroundBox =
       tester.widget<Stack>(flying(tester, find.byType(Stack))).children[0];
   expect(
     tester
@@ -156,7 +151,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     // The transition's stack is ordered. The bottom middle is inserted first.
-    RenderParagraph bottomMiddle =
+    final RenderParagraph bottomMiddle =
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomMiddle.text.style.color, const Color(0xFF00070F));
     expect(bottomMiddle.text.style.fontWeight, FontWeight.w600);
@@ -168,7 +163,7 @@ void main() {
 
     // The top back label is styled exactly the same way. But the opacity tweens
     // are flipped.
-    RenderParagraph topBackLabel =
+    final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style.color, const Color(0xFF00070F));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w600);
@@ -235,7 +230,7 @@ void main() {
       tester,
       from: const CupertinoNavigationBar(
         transitionBetweenRoutes: false,
-        middle: const Text('Page 1'),
+        middle: Text('Page 1'),
       ),
       toTitle: 'Page 2',
     );
@@ -263,7 +258,7 @@ void main() {
 
     void checkColorAndPositionAt50ms() {
       // The transition's stack is ordered. The bottom middle is inserted first.
-      RenderParagraph bottomMiddle =
+      final RenderParagraph bottomMiddle =
           tester.renderObject(flying(tester, find.text('Page 1')).first);
       expect(bottomMiddle.text.style.color, const Color(0xFF00070F));
       expect(
@@ -273,7 +268,7 @@ void main() {
 
       // The top back label is styled exactly the same way. But the opacity tweens
       // are flipped.
-      RenderParagraph topBackLabel =
+      final RenderParagraph topBackLabel =
           tester.renderObject(flying(tester, find.text('Page 1')).last);
       expect(topBackLabel.text.style.color, const Color(0xFF00070F));
       expect(
@@ -380,10 +375,10 @@ void main() {
 
   testWidgets('Exact widget is reused to build inside the transition',
       (WidgetTester tester) async {
-    Widget userMiddle = const Placeholder();
+    const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
-      from: CupertinoSliverNavigationBar(
+      from: const CupertinoSliverNavigationBar(
         middle: userMiddle,
       ),
       fromTitle: 'Page 1',
@@ -413,7 +408,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    Finder backChevron = flying(tester,
+    final Finder backChevron = flying(tester,
         find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
@@ -439,7 +434,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
 
-    Finder backChevrons = flying(tester,
+    final Finder backChevrons = flying(tester,
         find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
@@ -681,7 +676,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     // The transition's stack is ordered. The bottom large title is inserted first.
-    RenderParagraph bottomLargeTitle =
+    final RenderParagraph bottomLargeTitle =
         tester.renderObject(flying(tester, find.text('Page 1')).first);
     expect(bottomLargeTitle.text.style.color, const Color(0xFF00070F));
     expect(bottomLargeTitle.text.style.fontWeight, FontWeight.w700);
@@ -689,7 +684,7 @@ void main() {
     expect(bottomLargeTitle.text.style.letterSpacing, 0.21141128540039061);
 
     // The top back label is styled exactly the same way.
-    RenderParagraph topBackLabel =
+    final RenderParagraph topBackLabel =
         tester.renderObject(flying(tester, find.text('Page 1')).last);
     expect(topBackLabel.text.style.color, const Color(0xFF00070F));
     expect(topBackLabel.text.style.fontWeight, FontWeight.w700);

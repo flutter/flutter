@@ -102,12 +102,12 @@ class CupertinoTabView extends StatefulWidget {
   final List<NavigatorObserver> navigatorObservers;
 
   @override
-  CupertinoTabViewState createState() {
-    return new CupertinoTabViewState();
+  _CupertinoTabViewState createState() {
+    return new _CupertinoTabViewState();
   }
 }
 
-class CupertinoTabViewState extends State<CupertinoTabView> {
+class _CupertinoTabViewState extends State<CupertinoTabView> {
   HeroController _heroController;
   List<NavigatorObserver> _navigatorObservers;
 

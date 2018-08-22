@@ -51,7 +51,7 @@ void main() {
           return new CupertinoPageScaffold(
             child: new CustomScrollView(
               slivers: const <Widget>[
-                const CupertinoSliverNavigationBar(),
+                CupertinoSliverNavigationBar(),
               ],
             ),
           );

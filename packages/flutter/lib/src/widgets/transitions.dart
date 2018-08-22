@@ -672,7 +672,16 @@ class AlignTransition extends AnimatedWidget {
   }
 }
 
+/// Animated version of a [DefaultTextStyle] that animates the different properties
+/// of its [TextStyle].
+///
+/// See also:
+///
+/// * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
+///   but is not animated.
 class DefaultTextStyleTransition extends AnimatedWidget {
+  /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
+  /// the widget.
   const DefaultTextStyleTransition({
     Key key,
     @required Animation<TextStyle> style,
@@ -683,6 +692,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
     this.maxLines,
   }) : super(key: key, listenable: style);
 
+  /// The animation that controls the descendants' text style.
   Animation<TextStyle> get style => listenable;
 
   /// How the text should be aligned horizontally.

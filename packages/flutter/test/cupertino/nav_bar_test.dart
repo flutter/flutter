@@ -321,8 +321,8 @@ void main() {
                   child: new CupertinoSegmentedControl<int>(
                     key: segmentedControlsKey,
                     children: const <int, Widget>{
-                      0: const Text('Option A'),
-                      1: const Text('Option B'),
+                      0: Text('Option A'),
+                      1: Text('Option B'),
                     },
                     onValueChanged: (int selected) { },
                     groupValue: 0,
