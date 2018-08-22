@@ -128,22 +128,8 @@ class _AndroidSemanticsMatcher extends Matcher {
       return _failWithMessage('Expected size: $size', matchState);
     if (actions != null) {
       final List<AndroidSemanticsAction> itemActions = item.getActions();
-      if (actions.length != itemActions.length) {
+      if (!unorderedEquals(actions).matches(itemActions, matchState))
         return _failWithMessage('Expected actions: $actions', matchState);
-      }
-      final List<int> usedIds = <int>[];
-      outer: for (int i = 0; i < actions.length; i++) {
-        final AndroidSemanticsAction leftAction = actions[i];
-        for (int j = 0; j < actions.length; j++) {
-          if (usedIds.contains(j))
-            continue;
-          if (itemActions[j] == leftAction) {
-            usedIds.add(j);
-            continue outer;
-          }
-        }
-        return _failWithMessage('Expected actions: $actions', matchState);
-      }
     }
     if (isChecked != null && isChecked != item.isChecked)
       return _failWithMessage('Expected isChecked: $isChecked', matchState);

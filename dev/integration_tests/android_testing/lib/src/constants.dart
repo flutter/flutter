@@ -31,6 +31,158 @@ class AndroidSemanticsAction {
   /// The Android id of the action.
   final int id;
 
+  static const int _kFocusIndex = 1 << 0;
+  static const int _kClearFocusIndex = 1 << 1;
+  static const int _kSelectIndex = 1 << 2;
+  static const int _kClearSelectionIndex = 1 << 3;
+  static const int _kClickIndex = 1 << 4;
+  static const int _kLongClickIndex = 1 << 5;
+  static const int _kAccessibilityFocusIndex = 1 << 6;
+  static const int _kClearAccessibilityFocusIndex = 1 << 7;
+  static const int _kNextAtMovementGranularityIndex = 1 << 8;
+  static const int _kPreviousAtMovementGranularityIndex = 1 << 9;
+  static const int _kNextHtmlElementIndex = 1 << 10;
+  static const int _kPreviousHtmlElementIndex = 1 << 11;
+  static const int _kScrollForwardIndex = 1 << 12;
+  static const int _kScrollBackwardIndex = 1 << 13;
+  static const int _kCutIndex = 1 << 14;
+  static const int _kCopyIndex = 1 << 15;
+  static const int _kPasteIndex = 1 << 16;
+  static const int _kSetSelectionIndex = 1 << 17;
+  static const int _kExpandIndex = 1 << 18;
+  static const int _kCollapseIndex = 1 << 19;
+
+  /// Matches `AccessibilityAction.ACTION_FOCUS`.
+  static const AndroidSemanticsAction focus = AndroidSemanticsAction._(_kFocusIndex);
+
+  /// Matches `AccessibilityAction.ACTION_CLEAR_FOCUS`.
+  static const AndroidSemanticsAction clearFocus = AndroidSemanticsAction._(_kClearFocusIndex);
+
+  /// Matches `AccessibilityAction.ACTION_SELECT`.
+  static const AndroidSemanticsAction select = AndroidSemanticsAction._(_kSelectIndex);
+
+  /// Matches `AccessibilityAction.ACTION_CLEAR_SELECTION`.
+  static const AndroidSemanticsAction clearSelection = AndroidSemanticsAction._(_kClearSelectionIndex);
+
+  /// Matches `AccessibilityAction.ACTION_CLICK`.
+  static const AndroidSemanticsAction click = AndroidSemanticsAction._(_kClickIndex);
+
+  /// Matches `AccessibilityAction.ACTION_LONG_CLICK`.
+  static const AndroidSemanticsAction longClick = AndroidSemanticsAction._(_kLongClickIndex);
+
+  /// Matches `AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS`.
+  static const AndroidSemanticsAction accessibilityFocus = AndroidSemanticsAction._(_kAccessibilityFocusIndex);
+
+  /// Matches `AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS`.
+  static const AndroidSemanticsAction clearAccessibilityFocus = AndroidSemanticsAction._(_kClearAccessibilityFocusIndex);
+
+  /// Matches `AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY`.
+  static const AndroidSemanticsAction nextAtMovementGranularity = AndroidSemanticsAction._(_kNextAtMovementGranularityIndex);
+
+  /// Matches `AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY`.
+  static const AndroidSemanticsAction previousAtMovementGranularity = AndroidSemanticsAction._(_kPreviousAtMovementGranularityIndex);
+
+  /// Matches `AccessibilityAction.ACTION_NEXT_HTML_ELEMENT`.
+  static const AndroidSemanticsAction nextHtmlElement = AndroidSemanticsAction._(_kNextHtmlElementIndex);
+
+  /// Matches `AccessibilityAction.ACTION_PREVIOUS_HTML_ELEMENT`.
+  static const AndroidSemanticsAction previousHtmlElement = AndroidSemanticsAction._(_kPreviousHtmlElementIndex);
+
+  /// Matches `AccessibilityAction.ACTION_SCROLL_FORWARD`.
+  static const AndroidSemanticsAction scrollForward = AndroidSemanticsAction._(_kScrollForwardIndex);
+
+  /// Matches `AccessibilityAction.ACTION_SCROLL_BACKWARD`.
+  static const AndroidSemanticsAction scrollBackward = AndroidSemanticsAction._(_kScrollBackwardIndex);
+
+  /// Matches `AccessibilityAction.ACTION_CUT`.
+  static const AndroidSemanticsAction cut = AndroidSemanticsAction._(_kCutIndex);
+
+  /// Matches `AccessibilityAction.ACTION_COPY`.
+  static const AndroidSemanticsAction copy = AndroidSemanticsAction._(_kCopyIndex);
+
+  /// Matches `AccessibilityAction.ACTION_PASTE`.
+  static const AndroidSemanticsAction paste = AndroidSemanticsAction._(_kPasteIndex);
+
+  /// Matches `AccessibilityAction.ACTION_SET_SELECTION`.
+  static const AndroidSemanticsAction setSelection = AndroidSemanticsAction._(_kSetSelectionIndex);
+
+  /// Matches `AccessibilityAction.ACTION_EXPAND`.
+  static const AndroidSemanticsAction expand = AndroidSemanticsAction._(_kExpandIndex);
+
+  /// Matches `AccessibilityAction.ACTION_COLLAPSE`.
+  static const AndroidSemanticsAction collapse = AndroidSemanticsAction._(_kCollapseIndex);
+
+  @override
+  String toString() {
+    switch (id) {
+      case _kFocusIndex:
+        return 'AndroidSemanticsAction.focus';
+      case _kClearFocusIndex:
+        return 'AndroidSemanticsAction.clearFocus';
+      case _kSelectIndex:
+        return 'AndroidSemanticsAction.select';
+      case _kClearSelectionIndex:
+        return 'AndroidSemanticsAction.clearSelection';
+      case _kClickIndex:
+        return 'AndroidSemanticsAction.click';
+      case _kLongClickIndex:
+        return 'AndroidSemanticsAction.longClick';
+      case _kAccessibilityFocusIndex:
+        return 'AndroidSemanticsAction.accessibilityFocus';
+      case _kClearAccessibilityFocusIndex:
+        return 'AndroidSemanticsAction.clearAccessibilityFocus';
+      case _kNextAtMovementGranularityIndex:
+        return 'AndroidSemanticsAction.nextAtMovementGranularity';
+      case _kPreviousAtMovementGranularityIndex:
+        return 'AndroidSemanticsAction.nextAtMovementGranularity';
+      case _kNextHtmlElementIndex:
+        return 'AndroidSemanticsAction.nextHtmlElement';
+      case _kPreviousHtmlElementIndex:
+        return 'AndroidSemanticsAction.previousHtmlElement';
+      case _kScrollForwardIndex:
+        return 'AndroidSemanticsAction.scrollForward';
+      case _kScrollBackwardIndex:
+        return 'AndroidSemanticsAction.scrollBackward';
+      case _kCutIndex:
+        return 'AndroidSemanticsAction.cut';
+      case _kCopyIndex:
+        return 'AndroidSemanticsAction.copy';
+      case _kPasteIndex:
+        return 'AndroidSemanticsAction.paste';
+      case _kSetSelectionIndex:
+        return 'AndroidSemanticsAction.setSelection';
+      case _kExpandIndex:
+        return 'AndroidSemanticsAction.expand';
+      case _kCollapseIndex:
+        return 'AndroidSemanticsAction.collapse';
+      default:
+        return null;
+    }
+  }
+
+  static const Map<int, AndroidSemanticsAction> _kactionById = <int, AndroidSemanticsAction>{
+    _kFocusIndex: focus,
+    _kClearFocusIndex: clearFocus,
+    _kSelectIndex: select,
+    _kClearSelectionIndex: clearSelection,
+    _kClickIndex: click,
+    _kLongClickIndex: longClick,
+    _kAccessibilityFocusIndex: accessibilityFocus,
+    _kClearAccessibilityFocusIndex: clearAccessibilityFocus,
+    _kNextAtMovementGranularityIndex: nextAtMovementGranularity,
+    _kPreviousAtMovementGranularityIndex: nextAtMovementGranularity,
+    _kNextHtmlElementIndex: nextHtmlElement,
+    _kPreviousHtmlElementIndex: previousHtmlElement,
+    _kScrollForwardIndex: scrollForward,
+    _kScrollBackwardIndex: scrollBackward,
+    _kCutIndex: cut,
+    _kCopyIndex: copy,
+    _kPasteIndex: paste,
+    _kSetSelectionIndex: setSelection,
+    _kExpandIndex: expand,
+    _kCollapseIndex: collapse,
+  };
+
   @override
   int get hashCode => id.hashCode;
 
@@ -42,121 +194,10 @@ class AndroidSemanticsAction {
     return id == typedOther.id;
   }
 
-  /// Matches `AccessibilityAction.ACTION_FOCUS`.
-  static const AndroidSemanticsAction focus = AndroidSemanticsAction._(0x1);
-
-  /// Matches `AccessibilityAction.ACTION_CLEAR_FOCUS`.
-  static const AndroidSemanticsAction clearFocus = AndroidSemanticsAction._(0x2);
-
-  /// Matches `AccessibilityAction.ACTION_SELECT`.
-  static const AndroidSemanticsAction select = AndroidSemanticsAction._(0x4);
-
-  /// Matches `AccessibilityAction.ACTION_CLEAR_SELECTION`.
-  static const AndroidSemanticsAction clearSelection = AndroidSemanticsAction._(0x8);
-
-  /// Matches `AccessibilityAction.ACTION_CLICK`.
-  static const AndroidSemanticsAction click = AndroidSemanticsAction._(0x10);
-
-  /// Matches `AccessibilityAction.ACTION_LONG_CLICK`.
-  static const AndroidSemanticsAction longClick = AndroidSemanticsAction._(0x20);
-
-  /// Matches `AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS`.
-  static const AndroidSemanticsAction accessibilityFocus = AndroidSemanticsAction._(0x40);
-
-  /// Matches `AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS`.
-  static const AndroidSemanticsAction clearAccessibilityFocus = AndroidSemanticsAction._(0x80);
-
-  /// Matches `AccessibilityAction.ACTION_NEXT_AT_MOVEMENT_GRANULARITY`.
-  static const AndroidSemanticsAction nextAtMovementGranularity = AndroidSemanticsAction._(0x100);
-
-  /// Matches `AccessibilityAction.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY`.
-  static const AndroidSemanticsAction previousAtMovementGranularity = AndroidSemanticsAction._(0x200);
-
-  /// Matches `AccessibilityAction.ACTION_NEXT_HTML_ELEMENT`.
-  static const AndroidSemanticsAction nextHtmlElement = AndroidSemanticsAction._(0x400);
-
-  /// Matches `AccessibilityAction.ACTION_PREVIOUS_HTML_ELEMENT`.
-  static const AndroidSemanticsAction previousHtmlElement = AndroidSemanticsAction._(0x800);
-
-  /// Matches `AccessibilityAction.ACTION_SCROLL_FORWARD`.
-  static const AndroidSemanticsAction scrollForward = AndroidSemanticsAction._(0x1000);
-
-  /// Matches `AccessibilityAction.ACTION_SCROLL_BACKWARD`.
-  static const AndroidSemanticsAction scrollBackward = AndroidSemanticsAction._(0x2000);
-
-  /// Matches `AccessibilityAction.ACTION_CUT`.
-  static const AndroidSemanticsAction cut = AndroidSemanticsAction._(0x4000);
-
-  /// Matches `AccessibilityAction.ACTION_COPY`.
-  static const AndroidSemanticsAction copy = AndroidSemanticsAction._(0x8000);
-
-  /// Matches `AccessibilityAction.ACTION_PASTE`.
-  static const AndroidSemanticsAction paste = AndroidSemanticsAction._(0x10000);
-
-  /// Matches `AccessibilityAction.ACTION_SET_SELECTION`.
-  static const AndroidSemanticsAction setSelection = AndroidSemanticsAction._(0x20000);
-
-  /// Matches `AccessibilityAction.ACTION_EXPAND`.
-  static const AndroidSemanticsAction expand = AndroidSemanticsAction._(0x40000);
-
-  /// Matches `AccessibilityAction.ACTION_COLLAPSE`.
-  static const AndroidSemanticsAction collapse = AndroidSemanticsAction._(0x80000);
-
-  @override
-  String toString() {
-    switch (id) {
-      case 0x1:
-        return 'AndroidSemanticsAction.focus';
-      case 0x2:
-        return 'AndroidSemanticsAction.clearFoucs';
-      case 0x4:
-        return 'AndroidSemanticsAction.select';
-      case 0x8:
-        return 'AndroidSemanticsAction.clearSelection';
-      case 0x10:
-        return 'AndroidSemanticsAction.click';
-      case 0x20:
-        return 'AndroidSemanticsAction.longClick';
-      case 0x40:
-        return 'AndroidSemanticsAction.accessibilityFocus';
-      case 0x80:
-        return 'AndroidSemanticsAction.clearAccessibilityFocus';
-      case 0x100:
-        return 'AndroidSemanticsAction.nextAtMovementGranularity';
-      case 0x200:
-        return 'AndroidSemanticsAction.previousAtMovementGranularity';
-      case 0x400:
-        return 'AndroidSemanticsAction.nextHtmlElement';
-      case 0x800:
-        return 'AndroidSemanticsAction.previousHtmlElement';
-      case 0x1000:
-        return 'AndroidSemanticsAction.scrollForward';
-      case 0x2000:
-        return 'AndroidSemanticsAction.scrollBackward';
-      case 0x4000:
-        return 'AndroidSemanticsAction.cut';
-      case 0x8000:
-        return 'AndroidSemanticsAction.copy';
-      case 0x10000:
-        return 'AndroidSemanticsAction.paste';
-      case 0x20000:
-        return 'AndroidSemanticsAction.setSelection';
-      case 0x40000:
-        return 'AndroidSemanticsAction.expand';
-      case 0x80000:
-        return 'AndroidSemanticsAction.collapse';
-      default:
-        throw new UnsupportedError('Unknown semantics action: $id');
-    }
-  }
-
   /// Creates a new [AndroidSemanticsAction] from an integer `value`.
   ///
-  /// Throws An [UnsupportedError] if the id is not a known Android
-  /// accessibility action.
+  /// Returns `null` if the id is not a known Android accessibility action.
   static AndroidSemanticsAction deserialize(int value) {
-    final AndroidSemanticsAction action = new AndroidSemanticsAction._(value);
-    action.toString();
-    return action;
+    return _kactionById[value];
   }
 }
