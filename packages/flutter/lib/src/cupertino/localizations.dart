@@ -16,16 +16,17 @@ import 'package:flutter/widgets.dart';
 ///    of this interface.
 // TODO(xster): Supply non-english strings.
 abstract class CupertinoLocalizations {
-  /// The given number in local writing system.
+  /// Year that is shown in [CupertinoDatePicker] spinner corresponding to the
+  /// given year index.
   ///
-  /// Different languages can have different numeral systems, and this function
-  /// will return the given number written in the local language.
-  /// Example of some numeral systems can be found here:
-  /// https://en.wikipedia.org/wiki/List_of_numeral_systems
-  String number(int num);
+  /// Examples: datePickerYear(1) in:
+  ///
+  ///  - US English: 2018
+  ///  - Korean: 2018년
+  String datePickerYear(int yearIndex);
 
-  /// Month that is shown in [CupertinoDatePicker] corresponding to the given
-  /// month index.
+  /// Month that is shown in [CupertinoDatePicker] spinner corresponding to
+  /// the given month index.
   ///
   /// Examples: datePickerMonth(1) in:
   ///
@@ -33,9 +34,8 @@ abstract class CupertinoLocalizations {
   ///  - Korean: 1월
   String datePickerMonth(int monthIndex);
 
-  /// Day of month that is shown in [CupertinoDatePicker] corresponding to
-  /// the given day index.
-  ///
+  /// Day of month that is shown in [CupertinoDatePicker] spinner corresponding
+  /// to the given day index.
   ///
   /// Examples: datePickerDayOfMonth(1) in:
   ///
@@ -43,26 +43,32 @@ abstract class CupertinoLocalizations {
   ///  - Korean: 1일
   String datePickerDayOfMonth(int dayIndex);
 
-  /// Year that is shown in [CupertinoDatePicker] corresponding to the given
-  /// year index.
-  ///
-  ///
-  /// Examples: datePickerDayOfMonth(1) in:
-  ///
-  ///  - US English: 2018
-  ///  - Korean: 2018년
-  String datePickerYear(int yearIndex);
-
-  /// Formats the date using a medium-width format.
-  ///
-  /// Abbreviates month and days of week. This appears in the date spinner of
-  /// [CupertinoDatePicker].
+  /// The medium-width date format that is shown in [CupertinoDatePicker]
+  /// spinner. Abbreviates month and days of week.
   ///
   /// Examples:
   ///
   /// - US English: Wed Sep 27
   /// - Russian: ср сент. 27
   String datePickerMediumDate(DateTime date);
+
+  /// Hour that is shown in [CupertinoDatePicker] spinner corresponding
+  /// to the given hour value.
+  ///
+  /// Examples: datePickerHour(1) in:
+  ///
+  ///  - US English: 01
+  ///  - Arabic: ٠١
+  String datePickerHour(int hour);
+
+  /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
+  /// to the given minute value.
+  ///
+  /// Examples: datePickerMinute(1) in:
+  ///
+  ///  - US English: 01
+  ///  - Arabic: ٠١
+  String datePickerMinute(int minute);
 
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
   /// Can be any permutation of 'DMY' ('D': day, 'M': month, 'Y': year).
@@ -74,19 +80,31 @@ abstract class CupertinoLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
+  /// Hour that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// the given hour value.
+  String timerPickerHour(int hour);
+
+  /// Minute that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// the given minute value.
+  String timerPickerMinute(int minute);
+
+  /// Second that is shown in [CupertinoCountdownTimerPicker] corresponding to
+  /// the given second value.
+  String timerPickerSecond(int second);
+
   /// Label that appears next to the hour picker in
-  /// [CupertinoCountdownTimerPicker] when selected hour value is ```hour```.
-  /// This function will deal with pluralization based on the ```hour``` parameter.
+  /// [CupertinoCountdownTimerPicker] when selected hour value is `hour`.
+  /// This function will deal with pluralization based on the `hour` parameter.
   String timerPickerHourLabel(int hour);
 
   /// Label that appears next to the minute picker in
-  /// [CupertinoCountdownTimerPicker] when selected minute value is ```minute```.
-  /// This function will deal with pluralization based on the ```minute``` parameter.
+  /// [CupertinoCountdownTimerPicker] when selected minute value is `minute`.
+  /// This function will deal with pluralization based on the `minute` parameter.
   String timerPickerMinuteLabel(int minute);
 
   /// Label that appears next to the minute picker in
-  /// [CupertinoCountdownTimerPicker] when selected minute value is ```second```.
-  /// This function will deal with pluralization based on the ```second``` parameter.
+  /// [CupertinoCountdownTimerPicker] when selected minute value is `second`.
+  /// This function will deal with pluralization based on the `second` parameter.
   String timerPickerSecondLabel(int second);
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
@@ -99,7 +117,7 @@ abstract class CupertinoLocalizations {
   /// written in terms of this method. For example:
   ///
   /// ```dart
-  /// CupertinoLocalizations.of(context).month(1);
+  /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
   static CupertinoLocalizations of(BuildContext context) {
     return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
@@ -169,7 +187,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   ];
 
   @override
-  String number(int num) => num.toString();
+  String datePickerYear(int yearIndex) => yearIndex.toString();
 
   @override
   String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
@@ -178,7 +196,10 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
 
   @override
-  String datePickerYear(int yearIndex) => yearIndex.toString();
+  String datePickerHour(int hour) => hour.toString().padLeft(2, '0');
+
+  @override
+  String datePickerMinute(int minute) => minute.toString().padLeft(2, '0');
 
   @override
   String datePickerMediumDate(DateTime date) {
@@ -195,6 +216,15 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String timerPickerHour(int hour) => hour.toString();
+
+  @override
+  String timerPickerMinute(int minute) => minute.toString();
+
+  @override
+  String timerPickerSecond(int second) => second.toString();
 
   @override
   String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';

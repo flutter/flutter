@@ -9,22 +9,20 @@ void main() {
   testWidgets('English translations exist for all CupertinoLocalization properties', (WidgetTester tester) async {
     const CupertinoLocalizations localizations = DefaultCupertinoLocalizations();
 
-    for (int i = 0; i < 10; i++)
-      expect(localizations.number(i), isNotNull);
-
-    for (int i = 1; i <= 12; i++)
-      expect(localizations.datePickerMonth(i), isNotNull);
-
-    for (int i = 1; i <= 31; i++)
-      expect(localizations.datePickerDayOfMonth(i), isNotNull);
-
-    for (int i= 2000; i <= 2050; i++)
-      expect(localizations.datePickerYear(i), isNotNull);
-
+    expect(localizations.datePickerYear(2018), isNotNull);
+    expect(localizations.datePickerMonth(1), isNotNull);
+    expect(localizations.datePickerDayOfMonth(1), isNotNull);
+    expect(localizations.datePickerHour(0), isNotNull);
+    expect(localizations.datePickerMinute(0), isNotNull);
     expect(localizations.datePickerMediumDate(DateTime.now()), isNotNull);
     expect(localizations.datePickerDateOrder, isNotNull);
+
     expect(localizations.anteMeridiemAbbreviation, isNotNull);
     expect(localizations.postMeridiemAbbreviation, isNotNull);
+
+    expect(localizations.timerPickerHour(0), isNotNull);
+    expect(localizations.timerPickerMinute(0), isNotNull);
+    expect(localizations.timerPickerSecond(0), isNotNull);
     expect(localizations.timerPickerHourLabel(0), isNotNull);
     expect(localizations.timerPickerMinuteLabel(0), isNotNull);
     expect(localizations.timerPickerSecondLabel(0), isNotNull);
