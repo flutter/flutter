@@ -636,9 +636,6 @@ class _HasSemantics extends Matcher {
 }
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
-///
-/// If [preciseRects] is set to false, it checks equality within two decimal places
-/// on each value instead of using the default comparison.
 Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreRect = false,
   bool ignoreTransform = false,
