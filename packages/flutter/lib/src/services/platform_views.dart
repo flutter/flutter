@@ -59,6 +59,8 @@ class PlatformViewsService {
   ///
   /// The Android view will only be created after [AndroidViewController.setSize] is called for the
   /// first time.
+  ///
+  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   static AndroidViewController initAndroidView({
     @required int id,
     @required String viewType,
@@ -67,6 +69,7 @@ class PlatformViewsService {
   }) {
     assert(id != null);
     assert(viewType != null);
+    assert(layoutDirection != null);
     return new AndroidViewController._(
         id,
         viewType,

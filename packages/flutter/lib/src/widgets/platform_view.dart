@@ -97,8 +97,7 @@ class _AndroidViewState extends State<AndroidView> {
       return;
     }
     _initialized = true;
-    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
-    _layoutDirection = widget.layoutDirection ?? Directionality.of(context);
+    _layoutDirection = _findLayoutDirection();
     _createNewAndroidView();
   }
 
@@ -112,6 +111,8 @@ class _AndroidViewState extends State<AndroidView> {
     _layoutDirection = newLayoutDirection;
 
     if (didChangeLayoutDirection) {
+      // The native view will update asynchronously, in the meantime we don't want
+      // to block the framework. (so this is intentionally not awaiting).
       _controller.setLayoutDirection(_layoutDirection);
     }
   }
