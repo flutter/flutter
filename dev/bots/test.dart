@@ -363,7 +363,7 @@ Future<Null> _pubRunTest(
   if (enableAsserts) {
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
-    var toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
     if (!toolsArgs.contains('--enable-asserts'))
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
