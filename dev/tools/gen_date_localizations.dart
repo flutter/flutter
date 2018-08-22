@@ -149,7 +149,7 @@ String _jsonToMap(dynamic json) {
 }
 
 Iterable<String> _materialLocales() sync* {
-  final RegExp filenameRE = new RegExp(r'.*_(\w+)\.arb$');
+  final RegExp filenameRE = new RegExp(r'.material_(\w+)\.arb$');
   final Directory materialLocalizationsDirectory = new Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   for (FileSystemEntity entity in materialLocalizationsDirectory.listSync()) {
     final String filePath = entity.path;
