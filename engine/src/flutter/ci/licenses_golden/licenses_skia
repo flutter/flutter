@@ -1,4 +1,4 @@
-Signature: e4d152ec0fdc2776f4f6bb1090c2266b
+Signature: 2a35085138cda016c723f5f974945718
 
 UNUSED LICENSES:
 
@@ -786,7 +786,6 @@ FILE: ../../../third_party/skia/gm/bug615686.cpp
 FILE: ../../../third_party/skia/gm/circulararcs.cpp
 FILE: ../../../third_party/skia/gm/clip_error.cpp
 FILE: ../../../third_party/skia/gm/colorfilteralpha8.cpp
-FILE: ../../../third_party/skia/gm/colorspacexform.cpp
 FILE: ../../../third_party/skia/gm/complexclip4.cpp
 FILE: ../../../third_party/skia/gm/complexclip_blur_tiled.cpp
 FILE: ../../../third_party/skia/gm/croppedrects.cpp
@@ -1002,8 +1001,6 @@ FILE: ../../../third_party/skia/src/core/SkRasterPipeline.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkRecordedDrawable.cpp
 FILE: ../../../third_party/skia/src/core/SkRecordedDrawable.h
-FILE: ../../../third_party/skia/src/core/SkSRGB.cpp
-FILE: ../../../third_party/skia/src/core/SkSRGB.h
 FILE: ../../../third_party/skia/src/core/SkScaleToSides.h
 FILE: ../../../third_party/skia/src/core/SkScopeExit.h
 FILE: ../../../third_party/skia/src/core/SkSinglyLinkedList.h
@@ -1648,6 +1645,8 @@ LIBRARY: skia
 LIBRARY: vulkan
 ORIGIN: ../../../flutter/third_party/txt/LICENSE
 TYPE: LicenseType.apache
+FILE: ../../../third_party/skia/experimental/pathkit/npm-asmjs/example.html
+FILE: ../../../third_party/skia/experimental/pathkit/npm-asmjs/package.json
 FILE: ../../../third_party/skia/experimental/pathkit/npm-wasm/example.html
 FILE: ../../../third_party/skia/experimental/pathkit/npm-wasm/package.json
 FILE: ../../../third_party/skia/src/images/SkWebpEncoder.cpp
@@ -1966,7 +1965,6 @@ FILE: ../../../third_party/skia/experimental/docs/utilities.js
 FILE: ../../../third_party/skia/experimental/pathkit/chaining.js
 FILE: ../../../third_party/skia/experimental/pathkit/externs.js
 FILE: ../../../third_party/skia/experimental/pathkit/helper.js
-FILE: ../../../third_party/skia/experimental/pathkit/karma-docker.conf.js
 FILE: ../../../third_party/skia/experimental/pathkit/karma.conf.js
 FILE: ../../../third_party/skia/experimental/pathkit/package.json
 FILE: ../../../third_party/skia/infra/bots/android_bin.isolate
@@ -2035,6 +2033,8 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.ex
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Static.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-SwiftShader.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-asmjs-Debug-PathKit.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-asmjs-Release-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Debug-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-EMCC-wasm-Release-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/build/examples/full.expected/Build-Debian9-GCC-arm-Release-Chromecast.json
@@ -2168,7 +2168,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekee
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5-GPU-Adreno330-arm-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_NoGPUThreads.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Android-Clang-NexusPlayer-GPU-PowerVR-x86-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-ChromeOS-Clang-ASUSChromebookFlipC100-GPU-MaliT764-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Chromecast-Clang-Chorizo-CPU-Cortex_A7-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Chromecast-Clang-Chorizo-GPU-Cortex_A7-arm-Release-All.json
@@ -2203,7 +2202,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Debug-All-Android_CCPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5-GPU-Adreno330-arm-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus7-CPU-Tegra3-arm-Release-All-Android.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NexusPlayer-GPU-PowerVR-x86-Release-All-Android_Vulkan.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NexusPlayer-GPU-PowerVR-x86-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm-Debug-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-AcerChromebookR13Convertible-GPU-PowerVRGX6250-arm-Debug-All.json
@@ -2252,7 +2251,9 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_pull.jso
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_push.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_2.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/trybot.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_test.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Debug-All-PathKit.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-wasm-Debug-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/trybot.json
