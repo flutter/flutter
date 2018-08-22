@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show defaultClipBehavior; // ignore: deprecated_member_use
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -51,7 +53,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 class OutlineButton extends StatefulWidget {
   /// Create a filled button.
   ///
-  /// The [highlightElevation], and [borderWidth]
+  /// The [highlightElevation], [borderWidth], and [clipBehavior]
   /// arguments must not be null.
   const OutlineButton({
     Key key,
@@ -68,8 +70,10 @@ class OutlineButton extends StatefulWidget {
     this.highlightedBorderColor,
     this.padding,
     this.shape,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Create an outline button from a pair of widgets that serve as the button's
@@ -78,7 +82,8 @@ class OutlineButton extends StatefulWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [highlightElevation], [icon], and [label] must not be null.
+  /// The [highlightElevation], [icon], [label], and [clipBehavior] must not be
+  /// null.
   OutlineButton.icon({
     Key key,
     @required this.onPressed,
@@ -93,11 +98,13 @@ class OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     this.shape,
+    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(icon != null),
        assert(label != null),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,
@@ -222,6 +229,9 @@ class OutlineButton extends StatefulWidget {
   /// button has a [highlightElevation], then its drop shadow is defined by this
   /// shape as well.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The button's label.
   ///
@@ -415,6 +425,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
             shape: widget.shape ?? buttonTheme.shape,
             side: _getOutline(theme, buttonTheme),
           ),
+          clipBehavior: widget.clipBehavior,
           animationDuration: _kElevationDuration,
           child: widget.child,
         );

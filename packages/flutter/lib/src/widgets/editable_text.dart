@@ -201,7 +201,7 @@ class EditableText extends StatefulWidget {
     this.selectionColor,
     this.selectionControls,
     TextInputType keyboardType,
-    this.textInputAction = TextInputAction.done,
+    this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.onChanged,
     this.onEditingComplete,
@@ -597,9 +597,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputType: widget.keyboardType,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
-              inputAction: widget.keyboardType == TextInputType.multiline
+              inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
-                  : widget.textInputAction,
+                  : TextInputAction.done
+              ),
               textCapitalization: widget.textCapitalization,
           )
       )..setEditingState(localValue);

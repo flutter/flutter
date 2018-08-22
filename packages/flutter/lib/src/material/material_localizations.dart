@@ -138,7 +138,7 @@ abstract class MaterialLocalizations {
   /// Label read out by accessibility tools (TalkBack or VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
-  /// A modal barrier can for example be found behind a alert or popup to block
+  /// A modal barrier can for example be found behind an alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
 
@@ -300,6 +300,12 @@ abstract class MaterialLocalizations {
   /// The semantics label used for [ReorderableList] to reorder an item in the
   /// list one space right in the list.
   String get reorderItemRight;
+
+  /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
+  String get expandedIconTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
+  String get collapsedIconTapHint => 'Expand';
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -680,6 +686,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get reorderItemToStart => 'Move to the start';
+
+  @override
+  String get expandedIconTapHint => 'Collapse';
+
+  @override
+  String get collapsedIconTapHint => 'Expand';
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.

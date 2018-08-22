@@ -889,7 +889,7 @@ class _NestedScrollController extends ScrollController {
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions sync* {
-    // TODO(vegorov) use instance method version of castFrom when it is available.
+    // TODO(vegorov): use instance method version of castFrom when it is available.
     yield* Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
   }
 }
@@ -1513,7 +1513,6 @@ class RenderSliverOverlapInjector extends RenderSliver {
   /// The [handle] must not be null.
   RenderSliverOverlapInjector({
     @required SliverOverlapAbsorberHandle handle,
-    RenderSliver child,
   }) : assert(handle != null), _handle = handle;
 
   double _currentLayoutExtent;

@@ -6,30 +6,28 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:test/test.dart';
+
 import 'package:vm_service_client/vm_service_client.dart';
 
+import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
-BasicProject _project = new BasicProject();
-FlutterTestDriver _flutter;
-
 void main() {
   group('expression evaluation', () {
+    Directory tempDir;
+    final BasicProject _project = new BasicProject();
+    FlutterTestDriver _flutter;
+
     setUp(() async {
-      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
       await _project.setUpIn(tempDir);
       _flutter = new FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
-      try {
-        await _flutter.stop();
-        _project.cleanup();
-      } catch (e) {
-        // Don't fail tests if we failed to clean up temp folder.
-      }
+      await _flutter.stop();
+      tryToDelete(tempDir);
     });
 
     Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -112,5 +110,5 @@ void main() {
     // https://github.com/flutter/flutter/issues/17833
     // The test appears to be flaky and time out some times, skipping while
     // investigation is ongoing: https://github.com/flutter/flutter/issues/19542
-  }, timeout: const Timeout.factor(3), skip: true);
+  }, timeout: const Timeout.factor(6), skip: true);
 }

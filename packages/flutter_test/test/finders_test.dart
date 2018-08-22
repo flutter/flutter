@@ -56,6 +56,34 @@ void main() {
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
   });
+
+  testWidgets('ChainedFinders chain properly', (WidgetTester tester) async {
+    final GlobalKey key1 = new GlobalKey();
+    await tester.pumpWidget(
+      _boilerplate(new Column(
+        children: <Widget>[
+          new Container(
+            key: key1,
+            child: const Text('1'),
+          ),
+          new Container(
+            child: const Text('2'),
+          )
+        ],
+      )),
+    );
+
+    // Get the text back. By correctly chaining the descendant finder's
+    // candidates, it should find 1 instead of 2. If the _LastFinder wasn't
+    // correctly chained after the descendant's candidates, the last element
+    // with a Text widget would have been 2.
+    final Text text = find.descendant(
+      of: find.byKey(key1),
+      matching: find.byType(Text),
+    ).last.evaluate().single.widget;
+
+    expect(text.data, '1');
+  });
 }
 
 Widget _boilerplate(Widget child) {

@@ -191,7 +191,7 @@ class DefaultTextStyle extends InheritedWidget {
 ///       const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
 ///     ],
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// ## Interactivity

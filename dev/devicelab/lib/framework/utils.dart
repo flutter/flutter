@@ -77,15 +77,23 @@ void fail(String message) {
   throw new BuildFailedError(message);
 }
 
-void rm(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync();
+// Remove the given file or directory.
+void rm(FileSystemEntity entity, { bool recursive = false}) {
+  if (entity.existsSync()) {
+    // This should not be necessary, but it turns out that
+    // on Windows it's common for deletions to fail due to
+    // bogus (we think) "access denied" errors.
+    try {
+      entity.deleteSync(recursive: recursive);
+    } on FileSystemException catch (error) {
+      print('Failed to delete ${entity.path}: $error');
+    }
+  }
 }
 
 /// Remove recursively.
 void rmTree(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync(recursive: true);
+  rm(entity, recursive: true);
 }
 
 List<FileSystemEntity> ls(Directory directory) => directory.listSync();
@@ -257,7 +265,7 @@ Future<int> exec(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
 
@@ -292,7 +300,7 @@ Future<String> eval(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
 
@@ -324,7 +332,7 @@ Future<String> eval(
 
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
@@ -335,7 +343,7 @@ Future<int> flutter(String command, {
 /// Runs a `flutter` command and returns the standard output as a string.
 Future<String> evalFlutter(String command, {
   List<String> options = const <String>[],
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
@@ -414,7 +422,7 @@ Future<Null> getFlutter(String revision) async {
   section('Get Flutter!');
 
   if (exists(flutterDirectory)) {
-    rmTree(flutterDirectory);
+    flutterDirectory.deleteSync(recursive: true);
   }
 
   await inDirectory(flutterDirectory.parent, () async {

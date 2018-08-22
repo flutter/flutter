@@ -141,7 +141,7 @@ abstract class FlutterCommand extends Command<Null> {
         valueHelp: 'x.y.z');
   }
 
-  void addBuildModeFlags({bool defaultToRelease = true}) {
+  void addBuildModeFlags({bool defaultToRelease = true, bool verboseHelp = false}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -153,6 +153,11 @@ abstract class FlutterCommand extends Command<Null> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    argParser.addFlag('dynamic',
+      hide: !verboseHelp,
+      negatable: false,
+      help: 'Enable dynamic code. This flag is intended for use with\n'
+            '--release or --profile; --debug always has this enabled.');
   }
 
   set defaultBuildMode(BuildMode value) {
@@ -163,12 +168,15 @@ abstract class FlutterCommand extends Command<Null> {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+    final bool dynamicFlag = argParser.options.containsKey('dynamic')
+        ? argResults['dynamic']
+        : false;
     if (argResults['debug'])
       return BuildMode.debug;
     if (argResults['profile'])
-      return BuildMode.profile;
+      return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
     if (argResults['release'])
-      return BuildMode.release;
+      return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
     return _defaultBuildMode;
   }
 
@@ -216,9 +224,9 @@ abstract class FlutterCommand extends Command<Null> {
         : null,
       previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
-      buildSnapshot: argParser.options.containsKey('build-snapshot')
-          ? argResults['build-snapshot']
-          : false,
+      compilationTraceFilePath: argParser.options.containsKey('precompile')
+          ? argResults['precompile']
+          : null,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -466,6 +474,15 @@ abstract class FlutterCommand extends Command<Null> {
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
+
+    final bool dynamicFlag = argParser.options.containsKey('dynamic')
+        ? argResults['dynamic'] : false;
+    final String compilationTraceFilePath = argParser.options.containsKey('precompile')
+        ? argResults['precompile'] : null;
+    if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
+      throw new ToolExit('Error: --precompile is not allowed when --debug is specified.');
+    if (compilationTraceFilePath != null && !dynamicFlag)
+      throw new ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
   }
 
   ApplicationPackageStore applicationPackages;

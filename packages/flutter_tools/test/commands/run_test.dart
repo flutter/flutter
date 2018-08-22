@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/commands/run.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';

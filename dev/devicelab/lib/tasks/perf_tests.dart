@@ -73,8 +73,7 @@ TaskFunction createBasicMaterialCompileTest() {
     const String sampleAppName = 'sample_flutter_app';
     final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
-    if (await sampleDir.exists())
-      rmTree(sampleDir);
+    rmTree(sampleDir);
 
     await inDirectory(Directory.systemTemp, () async {
       await flutter('create', options: <String>[sampleAppName]);
@@ -90,8 +89,6 @@ TaskFunction createBasicMaterialCompileTest() {
 
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = Duration(minutes: 5);
-
   const StartupTest(this.testDirectory, { this.reportMetrics = true });
 
   final String testDirectory;
@@ -111,7 +108,7 @@ class StartupTest {
         '--trace-startup',
         '-d',
         deviceId,
-      ]).timeout(_startupTimeout);
+      ]);
       final Map<String, dynamic> data = json.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
 
       if (!reportMetrics)

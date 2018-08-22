@@ -17,7 +17,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
-import '../base/utils.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -452,7 +451,7 @@ class AndroidDevice extends Device {
     // device has printed "Observatory is listening on...".
     printTrace('Waiting for observatory port to be available...');
 
-    // TODO(danrubel) Waiting for observatory services can be made common across all devices.
+    // TODO(danrubel): Waiting for observatory services can be made common across all devices.
     try {
       Uri observatoryUri;
 
@@ -518,32 +517,6 @@ class AndroidDevice extends Device {
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
-  }
-
-  // TODO(dantup): discoverApps is no longer used and can possibly be removed.
-  // Waiting for a response here:
-  // https://github.com/flutter/flutter/pull/18873#discussion_r198862179
-  @override
-  Future<List<DiscoveredApp>> discoverApps() async {
-    final RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');
-    final List<DiscoveredApp> result = <DiscoveredApp>[];
-    final StreamSubscription<String> logs = getLogReader().logLines.listen((String line) {
-      final Match match = discoverExp.firstMatch(line);
-      if (match != null) {
-        final Map<String, dynamic> app = json.decode(match.group(1));
-        result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
-      }
-    });
-
-    await runCheckedAsync(adbCommandForDevice(<String>[
-      'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
-    ]));
-
-    await waitGroup<Null>(<Future<Null>>[
-      new Future<Null>.delayed(const Duration(seconds: 1)),
-      logs.cancel(),
-    ]);
-    return result;
   }
 }
 

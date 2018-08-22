@@ -136,10 +136,9 @@ void main() {
 
     expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(#12357): Update this test when text rendering is fixed.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
     expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
-
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
@@ -160,7 +159,7 @@ void main() {
     );
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
-    // TODO(#12357): Update this test when text rendering is fixed.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
     expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
@@ -179,6 +178,7 @@ void main() {
           splashColor: directSplashColor,
           highlightColor: directHighlightColor,
           onPressed: () { /* to make sure the button is enabled */ },
+          clipBehavior: Clip.antiAlias,
         ),
       ),
     );
@@ -224,6 +224,7 @@ void main() {
       child: new Center(
         child: new MaterialButton(
           onPressed: () { /* to make sure the button is enabled */ },
+          clipBehavior: Clip.antiAlias,
         ),
       ),
     );
@@ -279,6 +280,35 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('MaterialButton has no clip by default', (WidgetTester tester) async {
+    final GlobalKey buttonKey = new GlobalKey();
+    final Widget buttonWidget = new Material(
+      child: new Center(
+        child: new MaterialButton(
+          key: buttonKey,
+          onPressed: () { /* to make sure the button is enabled */ },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Theme(
+          data: new ThemeData(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          child: buttonWidget,
+        ),
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byKey(buttonKey)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
+  }, skip: true);
 
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
