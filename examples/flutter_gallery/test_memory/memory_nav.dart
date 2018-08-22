@@ -12,6 +12,8 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> endOfAnimation() async {
+  // await at least a single frame.
+  await new Future<void>.value(null);
   do {
     await SchedulerBinding.instance.endOfFrame;
   } while (SchedulerBinding.instance.hasScheduledFrame);
@@ -55,7 +57,7 @@ Future<void> main() async {
   final Finder demoList = find.byKey(const Key('GalleryDemoList'));
   final Finder demoItem = find.text('Text fields');
   do {
-    await controller.drag(demoList, const Offset(0.0, -50.0));
+    await controller.drag(demoList, const Offset(0.0, -300.0));
     await new Future<Null>.delayed(const Duration(milliseconds: 20));
   } while (!demoItem.precache());
 
