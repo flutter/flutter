@@ -22,6 +22,7 @@ class CupertinoPageScaffold extends StatelessWidget {
     Key key,
     this.navigationBar,
     this.backgroundColor = CupertinoColors.white,
+    this.resizeToAvoidBottomPadding = true,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -49,6 +50,15 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// By default uses [CupertinoColors.white] color.
   final Color backgroundColor;
 
+  /// Whether the [child] should size itself to avoid the window's bottom padding.
+  ///
+  /// For example, if there is an onscreen keyboard displayed above the
+  /// scaffold, the body can be resized to avoid overlapping the keyboard, which
+  /// prevents widgets inside the body from being obscured by the keyboard.
+  ///
+  /// Defaults to true.
+  final bool resizeToAvoidBottomPadding;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
@@ -67,7 +77,10 @@ class CupertinoPageScaffold extends StatelessWidget {
       // obstructed area.
       if (navigationBar.fullObstruction) {
         paddedContent = new Padding(
-          padding: new EdgeInsets.only(top: topPadding),
+          padding: new EdgeInsets.only(
+            top: topPadding,
+            bottom: resizeToAvoidBottomPadding ? existingMediaQuery.viewInsets.bottom : 0.0,
+          ),
           child: child,
         );
       } else {
@@ -75,6 +88,7 @@ class CupertinoPageScaffold extends StatelessWidget {
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
+              bottom: resizeToAvoidBottomPadding ? existingMediaQuery.viewInsets.bottom : 0.0,
             ),
           ),
           child: child,
