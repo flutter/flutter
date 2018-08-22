@@ -82,14 +82,29 @@ abstract class CupertinoLocalizations {
 
   /// Hour that is shown in [CupertinoCountdownTimerPicker] corresponding to
   /// the given hour value.
+  ///
+  /// Examples: timerPickerHour(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ١
   String timerPickerHour(int hour);
 
   /// Minute that is shown in [CupertinoCountdownTimerPicker] corresponding to
   /// the given minute value.
+  ///
+  /// Examples: timerPickerMinute(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ١
   String timerPickerMinute(int minute);
 
   /// Second that is shown in [CupertinoCountdownTimerPicker] corresponding to
   /// the given second value.
+  ///
+  /// Examples: timerPickerSecond(1) in:
+  ///
+  ///  - US English: 1
+  ///  - Arabic: ١
   String timerPickerSecond(int second);
 
   /// Label that appears next to the hour picker in
