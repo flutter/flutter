@@ -5,6 +5,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'semantics_tester.dart';
 
@@ -161,12 +162,12 @@ void main() {
           rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             new TestSemantics(
-              rect: new Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
+              rect: new Rect.fromLTRB(-4.0, -4.0, 88.0, 18.0),
               label: 'hello ',
               textDirection: TextDirection.ltr,
             ),
             new TestSemantics(
-              rect: new Rect.fromLTRB(84.0, 0.0, 154.0, 14.0),
+              rect: new Rect.fromLTRB(80.0, -4.0, 158.0, 18.0),
               label: 'world',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -174,7 +175,7 @@ void main() {
               ],
             ),
             new TestSemantics(
-              rect: new Rect.fromLTRB(154.0, 0.0, 476.0, 14.0),
+              rect: new Rect.fromLTRB(150.0, -4.0, 480.0, 18.0),
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
             )
@@ -182,7 +183,69 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, preciseRects: false));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      new RichText(
+        text: new TextSpan(
+          style: textStyle,
+          children: <TextSpan>[
+            const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
+            new TextSpan(text: 'BOY', recognizer: new LongPressGestureRecognizer()..onLongPress = () {}),
+            const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
+            new TextSpan(text: 'SIR', recognizer: new TapGestureRecognizer()..onTap = () {}),
+            const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+      )
+    );
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          children: <TestSemantics>[
+            new TestSemantics(
+              rect: new Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
+              label: 'hello world${Unicode.RLE}${Unicode.RLO} ',
+              textDirection: TextDirection.ltr, // text direction is declared as LTR.
+            ),
+            new TestSemantics(
+              rect: new Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
+              label: 'BOY',
+              textDirection: TextDirection.rtl, // in the last string we switched to RTL using RLE.
+              actions: <SemanticsAction>[
+                SemanticsAction.longPress,
+              ],
+            ),
+            new TestSemantics(
+              rect: new Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
+              label: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO ', // Still RTL.
+              textDirection: TextDirection.rtl,
+            ),
+            new TestSemantics(
+              rect: new Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
+              label: 'SIR',
+              textDirection: TextDirection.rtl, // Still RTL.
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            new TestSemantics(
+              rect: new Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
+              label: '${Unicode.PDF}${Unicode.PDF} good bye', // Begin as RTL but pop to LTR.
+              textDirection: TextDirection.rtl,
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
     semantics.dispose();
   });
 }
