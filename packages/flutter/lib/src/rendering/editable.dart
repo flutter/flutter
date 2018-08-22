@@ -205,7 +205,7 @@ class RenderEditable extends RenderBox {
 
   // The extent offset of the current selection
   int _extentOffset = -1;
-  
+
   // The base offset of the current selection
   int _baseOffset = -1;
 
@@ -334,7 +334,7 @@ class RenderEditable extends RenderBox {
   // of the caret.
   int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
     if (onSelectionChanged == null)
-      return;
+      return newOffset;
     // For some reason, deletion only works if the base offset is less
     // than the extent offset.
     if (shift) {
