@@ -20,7 +20,7 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef Tween<Rect> CreateRectTween(Rect begin, Rect end);
 
-/// A function that lets Heros self supply a [Widget] that is shown during the
+/// A function that lets [Hero]s self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
 typedef Widget HeroFlightShuttleBuilder(
@@ -33,9 +33,23 @@ typedef Widget HeroFlightShuttleBuilder(
 
 typedef void _OnFlightEnded(_HeroFlight flight);
 
+/// Direction of the hero's flight based on the navigation operation.
 enum HeroFlightDirection {
-  push, // Fly the "to" hero and animate with the "to" route.
-  pop, // Fly the "to" hero and animate with the "from" route.
+  /// A flight triggered by a route push.
+  ///
+  /// The animation goes from 0 to 1.
+  ///
+  /// If no custom [HeroFlightShuttleBuilder] is supplied, the top route's
+  /// [Hero] child is shown in flight.
+  push,
+
+  /// A flight triggered by a route pop.
+  ///
+  /// The animation goes from 1 to 0.
+  ///
+  /// If no custom [HeroFlightShuttleBuilder] is supplied, the bottom route's
+  /// [Hero] child is shown in flight.
+  pop,
 }
 
 // The bounding box for context in global coordinates.
@@ -128,8 +142,23 @@ class Hero extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Optional override to supply a widget that's shown during the hero's flight.
+  ///
+  /// This in-flight widget can depend on the route transition's animation as
+  /// well as the incoming and outgoing routes' [Hero] descendants' widgets and
+  /// layout.
+  ///
+  /// When both the source and destination [Hero]s provide a [flightShuttleBuilder],
+  /// the source's [flightShuttleBuilder] takes precedence.
+  ///
+  /// If none is provided, the destination route's Hero child is shown in-flight
+  /// by default.
   final HeroFlightShuttleBuilder flightShuttleBuilder;
 
+  /// Placeholder widget left in place as the Hero's child once the flight takes off.
+  ///
+  /// By default, an empty SizedBox keeping the Hero child's original size is
+  /// left in place once the Hero shuttle has taken flight.
   final TransitionBuilder launchPadBuilder;
 
   // Returns a map of all of the heroes in context, indexed by hero tag.
@@ -596,10 +625,14 @@ class HeroController extends NavigatorObserver {
     _flights.remove(flight.manifest.tag);
   }
 
-  static Widget _defaultHeroFlightShuttleBuilder(
+  static final HeroFlightShuttleBuilder _defaultHeroFlightShuttleBuilder = (
+    BuildContext flightContext,
     Animation<double> animation,
     HeroFlightDirection flightDirection,
-    Hero fromWidget,
-    Hero toWidget,
-  ) => toWidget;
+    BuildContext fromHeroContext,
+    BuildContext toHeroContext,
+  ) {
+    final Hero toHero = toHeroContext.widget;
+    return toHero.child;
+  };
 }

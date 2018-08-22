@@ -765,4 +765,50 @@ void main() {
       const Offset(134.04275512695312, 54.0),
     );
   });
+
+  testWidgets('Components are not unnecessarily rebuilt during transitions',
+          (WidgetTester tester) async {
+    int bottomBuildTimes = 0;
+    int topBuildTimes = 0;
+    await startTransitionBetween(
+      tester,
+      from: new CupertinoNavigationBar(
+        middle: new Builder(builder: (BuildContext context) {
+          bottomBuildTimes++;
+          return const Text('Page 1');
+        }),
+      ),
+      to: new CupertinoSliverNavigationBar(
+        largeTitle: new Builder(builder: (BuildContext context) {
+          topBuildTimes++;
+          return const Text('Page 2');
+        }),
+      ),
+    );
+
+    expect(bottomBuildTimes, 1);
+    // RenderSliverPersistentHeader.layoutChild causes 2 builds.
+    expect(topBuildTimes, 2);
+
+    await tester.pump();
+
+    // The shuttle builder builds the component widgets one more time.
+    expect(bottomBuildTimes, 2);
+    expect(topBuildTimes, 3);
+
+    // Subsequent animation needs to use reprojection of children.
+    await tester.pump();
+    expect(bottomBuildTimes, 2);
+    expect(topBuildTimes, 3);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(bottomBuildTimes, 2);
+    expect(topBuildTimes, 3);
+
+    // Finish animations.
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(bottomBuildTimes, 2);
+    expect(topBuildTimes, 3);
+  });
 }

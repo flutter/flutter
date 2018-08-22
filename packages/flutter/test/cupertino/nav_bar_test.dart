@@ -450,7 +450,6 @@ void main() {
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    debugDumpApp();
 
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);

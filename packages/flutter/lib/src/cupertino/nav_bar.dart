@@ -115,9 +115,13 @@ Widget _wrapWithBackground({
   );
 }
 
+// Whether the current route supports nav bar hero transitions from or to.
 bool _isTransitionable(BuildContext context) {
   final ModalRoute<dynamic> route = ModalRoute.of(context);
 
+  // Fullscreen dialogs never transitions its nav bar with other push-style
+  // pages' nav bars or with other fullscreen dialog pages on the way in or on
+  // the way out.
   return route is PageRoute && !route.fullscreenDialog;
 }
 
@@ -307,6 +311,9 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   }
 }
 
+// A state class exists for the nav bar so that the keys of its sub-components
+// don't change when rebuilding the nav bar, causing the sub-components to
+// lose their own states.
 class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
   _NavigationBarStaticComponentsKeys keys;
 
@@ -515,6 +522,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   }
 }
 
+// A state class exists for the nav bar so that the keys of its sub-components
+// don't change when rebuilding the nav bar, causing the sub-components to
+// lose their own states.
 class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigationBar> {
   _NavigationBarStaticComponentsKeys keys;
 
@@ -748,6 +758,8 @@ class _PersistentNavigationBar extends StatelessWidget {
         style: _kMiddleTitleTextStyle,
         child: new Semantics(header: true, child: middle),
       );
+      // When the middle's visibility can change on the fly like with large title
+      // slivers, wrap with animated opacity.
       middle = middleVisible == null
         ? middle
         : new AnimatedOpacity(
@@ -800,7 +812,9 @@ class _PersistentNavigationBar extends StatelessWidget {
 // A collection of keys always used when building static routes' nav bars's
 // components with _NavigationBarStaticComponents and read in
 // _NavigationBarTransition in Hero flights in order to reference the components'
-// RenderBoxes.
+// RenderBoxes for their positions.
+//
+// These keys should never re-appear inside the Hero flights.
 @immutable
 class _NavigationBarStaticComponentsKeys {
   _NavigationBarStaticComponentsKeys()
@@ -824,7 +838,7 @@ class _NavigationBarStaticComponentsKeys {
 // Based on various user Widgets and other parameters, construct KeyedSubtree
 // components that are used in common by the CupertinoNavigationBar and
 // CupertinoSliverNavigationBar. The KeyedSubtrees are inserted into static
-// routes and the KeyedSubtrees' child are reused in the Hero transitions.
+// routes and the KeyedSubtrees' child are reused in the Hero flights.
 @immutable
 class _NavigationBarStaticComponents {
   _NavigationBarStaticComponents({
@@ -1272,6 +1286,8 @@ class _BackLabel extends StatelessWidget {
   }
 }
 
+/// This should always be the first child of Hero widgets.
+///
 /// This class helps each Hero transition obtain the start or end navigation
 /// bar's box size and the inner components of the navigation bar that will
 /// move around.
@@ -1443,12 +1459,12 @@ class _NavigationBarTransition extends StatelessWidget {
 /// It animates these transitional components both in terms of position and
 /// their appearance.
 ///
-/// Instead of running the components through their normal static navigation
-/// bar layout logic, this creates transitional widgets that are based on
-/// these widgets' existing render objects' layout and position.
+/// Instead of running the transitional components through their normal static
+/// navigation bar layout logic, this creates transitional widgets that are based
+/// on these widgets' existing render objects' layout and position.
 ///
 /// This is possible because this widget is only used during Hero transitions
-/// where both the from and to routes are already built and layed out.
+/// where both the from and to routes are already built and laid out.
 ///
 /// The components' existing layout constraints and positions are then
 /// replicated using [Positioned] or [PositionedTransition] wrappers.
@@ -1823,21 +1839,22 @@ class _NavigationBarComponentsTransition {
     final KeyedSubtree bottomMiddle = bottomComponents.middleKey.currentWidget;
     final KeyedSubtree bottomLargeTitle = bottomComponents.largeTitleKey.currentWidget;
     final KeyedSubtree topBackLabel = topComponents.backLabelKey.currentWidget;
-    final RenderAnimatedOpacity opacity =
+
+    if (topBackLabel == null) {
+      return null;
+    }
+
+    final RenderAnimatedOpacity topBackLabelOpacity =
         topComponents.backLabelKey.currentContext?.ancestorRenderObjectOfType(
           const TypeMatcher<RenderAnimatedOpacity>()
         );
 
     Animation<double> midClickOpacity;
-    if (opacity != null && opacity.opacity.value < 1.0) {
+    if (topBackLabelOpacity != null && topBackLabelOpacity.opacity.value < 1.0) {
       midClickOpacity = new Tween<double>(
         begin: 0.0,
-        end: opacity.opacity.value,
+        end: topBackLabelOpacity.opacity.value,
       ).animate(animation);
-    }
-
-    if (topBackLabel == null) {
-      return null;
     }
 
     // Pick up from an incoming transition from the large title. This is
@@ -1977,7 +1994,7 @@ class _NavigationBarComponentsTransition {
 }
 
 /// Navigation bars' hero rect tween that will move between the static bars
-/// but keep a constant size that can contain both navigation bars.
+/// but keep a constant size that's the bigger of both navigation bars.
 CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect begin, Rect end) {
   final Size largestSize = new Size(
     math.max(begin.size.width, end.size.width),
@@ -1989,7 +2006,7 @@ CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect begin, Rect end
   );
 };
 
-TransitionBuilder _navBarHeroLaunchPadBuilder = (
+final TransitionBuilder _navBarHeroLaunchPadBuilder = (
   BuildContext context,
   Widget child,
 ) {
@@ -2015,7 +2032,7 @@ TransitionBuilder _navBarHeroLaunchPadBuilder = (
 };
 
 /// Navigation bars' hero flight shuttle builder.
-HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
+final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
   BuildContext flightContext,
   Animation<double> animation,
   HeroFlightDirection flightDirection,
