@@ -18,7 +18,7 @@ import 'route.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 ///
-/// This height is constant and independent of accessibility as is in iOS.
+/// This height is constant and independent of accessibility as it is in iOS.
 const double _kNavBarPersistentHeight = 44.0;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
@@ -34,20 +34,20 @@ const double _kNavBarEdgePadding = 16.0;
 const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
-const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
+const Duration _kNavBarTitleFadeDuration = Duration(milliseconds: 150);
 
-const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
-const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
+const Color _kDefaultNavBarBackgroundColor = Color(0xCCF8F8F8);
+const Color _kDefaultNavBarBorderColor = Color(0x4C000000);
 
-const Border _kDefaultNavBarBorder = const Border(
-  bottom: const BorderSide(
+const Border _kDefaultNavBarBorder = Border(
+  bottom: BorderSide(
     color: _kDefaultNavBarBorderColor,
     width: 0.0, // One physical pixel.
     style: BorderStyle.solid,
   ),
 );
 
-const TextStyle _kMiddleTitleTextStyle = const TextStyle(
+const TextStyle _kMiddleTitleTextStyle = TextStyle(
   fontFamily: '.SF UI Text',
   fontSize: 17.0,
   fontWeight: FontWeight.w600,
@@ -55,7 +55,7 @@ const TextStyle _kMiddleTitleTextStyle = const TextStyle(
   color: CupertinoColors.black,
 );
 
-const TextStyle _kLargeTitleTextStyle = const TextStyle(
+const TextStyle _kLargeTitleTextStyle = TextStyle(
   fontFamily: '.SF Pro Display',
   fontSize: 34.0,
   fontWeight: FontWeight.w700,
@@ -65,7 +65,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
-const Object _heroTag = const Object();
+const Object _heroTag = Object();
 
 TextStyle _navBarItemStyle(Color color) {
   return new TextStyle(
@@ -116,7 +116,7 @@ Widget _wrapWithBackground({
 }
 
 bool _isTransitionable(BuildContext context) {
-  final ModalRoute route = ModalRoute.of(context);
+  final ModalRoute<dynamic> route = ModalRoute.of(context);
 
   return route is PageRoute && !route.fullscreenDialog;
 }
@@ -424,6 +424,11 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.transitionBetweenRoutes = true,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
+       assert(
+         automaticallyImplyTitle == true || largeTitle != null,
+         'A largeTitle must be provided. Otherwise, automaticallyImplyTitle '
+         'must be true.'
+       ),
        super(key: key);
 
   /// The navigation bar's title.
@@ -444,6 +449,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// If null and [automaticallyImplyTitle] is true, an appropriate [Text]
   /// title will be created if the current route is a [CupertinoPageRoute] and
   /// has a `title`.
+  ///
+  /// This parameter must either be non-null or [automaticallyImplyTitle] must
+  /// be true and the route has a title.
   final Widget largeTitle;
 
   /// {@macro flutter.cupertino.navBar.leading}
@@ -957,7 +965,7 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return new KeyedSubtree(key: backChevronKey, child: new _BackChevron());
+    return new KeyedSubtree(key: backChevronKey, child: const _BackChevron());
   }
 
   /// This widget is not decorated with a font since the font style could
@@ -1070,9 +1078,10 @@ class _NavigationBarStaticComponents {
       currentRoute: route,
     );
 
-    if (largeTitleContent == null) {
-      return null;
-    }
+    assert(
+      largeTitleContent != null,
+      'largeTitle was not provided and there was no title from the route',
+    );
 
     return new KeyedSubtree(
       key: largeTitleKey,
@@ -1814,7 +1823,7 @@ class _NavigationBarComponentsTransition {
     final KeyedSubtree bottomMiddle = bottomComponents.middleKey.currentWidget;
     final KeyedSubtree bottomLargeTitle = bottomComponents.largeTitleKey.currentWidget;
     final KeyedSubtree topBackLabel = topComponents.backLabelKey.currentWidget;
-    RenderAnimatedOpacity opacity =
+    final RenderAnimatedOpacity opacity =
         topComponents.backLabelKey.currentContext?.ancestorRenderObjectOfType(
           const TypeMatcher<RenderAnimatedOpacity>()
         );
