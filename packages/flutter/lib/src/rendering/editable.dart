@@ -203,7 +203,10 @@ class RenderEditable extends RenderBox {
   static const int _kUpArrowCode = 19;
   static const int _kDownArrowCode = 20;
 
+  // The extent offset of the current selection
   int _extentOffset = -1;
+  
+  // The base offset of the current selection
   int _baseOffset = -1;
 
   // Holds the last location the user selected in the case that he selects all
