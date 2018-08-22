@@ -179,6 +179,8 @@ class FlutterTestDriver {
     return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
   }
 
+  Future<int> quit() => _killGracefully();
+
   Future<int> _killGracefully() async {
     if (_procPid == null)
       return -1;
