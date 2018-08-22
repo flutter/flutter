@@ -32,7 +32,7 @@ final RegExp licenseNotAccepted = new RegExp(r'licenses? not accepted', caseSens
 final RegExp licenseAccepted = new RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
-  const AndroidWorkflow();
+  AndroidWorkflow();
 
   @override
   bool get appliesToHostPlatform => true;
@@ -48,7 +48,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  const AndroidValidator(): super('Android toolchain - develop for Android devices',
+  AndroidValidator(): super('Android toolchain - develop for Android devices',
                             ValidatorCategory.androidToolchain);
 
   static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
