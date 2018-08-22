@@ -1,7 +1,7 @@
 
 import 'package:android_testing/android_testing.dart';
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // JSON matching a serialized Android AccessibilityNodeInfo.
 const String source = r'''
@@ -60,7 +60,7 @@ void main() {
 
     test('fails if passed a bogus id', () {
       expect(() => AndroidSemanticsAction.deserialize(23),
-        throwsA(const isInstanceOf<UnsupportedError>()));
+        throwsA(isInstanceOf<UnsupportedError>()));
     });
   });
 
