@@ -330,19 +330,27 @@ class RenderEditable extends RenderBox {
   // Handles the selection of text or removal of the selection and placing
   // of the caret.
   int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    if (onSelectionChanged == null)
+      return;
     // For some reason, deletion only works if the base offset is less
     // than the extent offset.
     if (shift) {
       if (_baseOffset < newOffset) {
         onSelectionChanged(
           new TextSelection(
-            baseOffset: _baseOffset, extentOffset: newOffset),
-            this, SelectionChangedCause.keyboard);
+            baseOffset: _baseOffset,
+            extentOffset: newOffset
+          ),
+          this,
+          SelectionChangedCause.keyboard);
       } else {
         onSelectionChanged(
           new TextSelection(
-            baseOffset: newOffset, extentOffset: _baseOffset),
-            this, SelectionChangedCause.keyboard);
+            baseOffset: newOffset,
+            extentOffset: _baseOffset
+          ),
+          this,
+          SelectionChangedCause.keyboard);
       }
     } else {
       // We want to put the cursor at the correct location depending on which
@@ -355,16 +363,15 @@ class RenderEditable extends RenderBox {
       }
       onSelectionChanged(
         new TextSelection.fromPosition(
-          new TextPosition(offset: newOffset)),
-          this, SelectionChangedCause.keyboard);
+          new TextPosition(
+              offset: newOffset
+          )
+        ),
+        this,
+        SelectionChangedCause.keyboard);
     }
     return newOffset;
   }
-
-
-
-
-
 
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
@@ -475,10 +482,12 @@ class RenderEditable extends RenderBox {
       return;
     _hasFocus = value;
     if (_hasFocus) {
+      assert(!_listenerAttached);
       RawKeyboard.instance.addListener(_handleKeyEvent);
       _listenerAttached = true;
     }
     else {
+      assert(!_listenerAttached);
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
