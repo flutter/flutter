@@ -95,8 +95,8 @@ void main() {
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
-          '2 issues found.',
         ],
+        exitMessageContains: '2 issues found.',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -122,8 +122,8 @@ void main() {
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
           'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '3 issues found.',
         ],
+        exitMessageContains: '3 issues found.',
         toolExit: true,
       );
     }, timeout: allowForSlowAnalyzeTests);
@@ -153,8 +153,8 @@ void bar() {
           arguments: <String>['analyze'],
           statusTextContains: <String>[
             'Analyzing',
-            '1 issue found.',
           ],
+          exitMessageContains: '1 issue found.',
           toolExit: true,
         );
       } finally {
@@ -176,6 +176,23 @@ StringBuffer bar = StringBuffer('baz');
         );
       } finally {
         tryToDelete(tempDir);
+      }
+    });
+
+    testUsingContext('use-cfe flag is recognized', () async {
+      const String contents = '''
+StringBuffer bar = StringBuffer('baz');
+''';
+      final Directory tempDir = fs.systemTempDirectory.createTempSync();
+      tempDir.childFile('main.dart').writeAsStringSync(contents);
+      try {
+        await runCommand(
+          command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          arguments: <String>['analyze', '--no-use-cfe'],
+          statusTextContains: <String>['No issues found!'],
+        );
+      } finally {
+        tempDir.deleteSync(recursive: true);
       }
     });
   });

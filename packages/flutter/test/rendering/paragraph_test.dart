@@ -255,8 +255,7 @@ void main() {
     paragraph.layout(const BoxConstraints());
     // anyOf is needed here because Linux and Mac have different text
     // rendering widths in tests.
-    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
-    // text rendering is replaced.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(paragraph.size.width, anyOf(79.0, 78.0));
     expect(paragraph.size.height, 26.0);
 
@@ -272,8 +271,7 @@ void main() {
 
     // anyOf is needed here and below because Linux and Mac have different text
     // rendering widths in tests.
-    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
-    // text rendering is replaced.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[0].toRect().height, closeTo(13.0, 0.0001));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
