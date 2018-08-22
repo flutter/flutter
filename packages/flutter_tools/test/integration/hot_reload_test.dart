@@ -45,5 +45,5 @@ void main() {
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
       // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
     }, skip: !platform.isLinux);
-  }, timeout: const Timeout.factor(3));
+  }, timeout: const Timeout.factor(6));
 }
