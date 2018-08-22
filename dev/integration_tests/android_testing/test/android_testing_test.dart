@@ -60,9 +60,8 @@ void main() {
       expect(AndroidSemanticsAction.deserialize(0x1), AndroidSemanticsAction.focus);
     });
 
-    test('fails if passed a bogus id', () {
-      expect(() => AndroidSemanticsAction.deserialize(23),
-        throwsA(isInstanceOf<UnsupportedError>()));
+    test('returns null passed a bogus id', () {
+      expect(AndroidSemanticsAction.deserialize(23), isNull);
     });
   });
 
