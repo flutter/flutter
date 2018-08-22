@@ -219,8 +219,8 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   @override
   String datePickerMediumDate(DateTime date) {
     return '${_shortWeekdays[date.weekday - DateTime.monday]} '
-        '${_shortMonths[date.month - DateTime.january]} '
-        '${date.day}';
+      '${_shortMonths[date.month - DateTime.january]} '
+      '${date.day}';
   }
 
   @override
