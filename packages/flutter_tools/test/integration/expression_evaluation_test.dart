@@ -110,5 +110,5 @@ void main() {
     // https://github.com/flutter/flutter/issues/17833
     // The test appears to be flaky and time out some times, skipping while
     // investigation is ongoing: https://github.com/flutter/flutter/issues/19542
-  }, timeout: const Timeout.factor(3), skip: true);
+  }, timeout: const Timeout.factor(6), skip: true);
 }
