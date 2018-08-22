@@ -238,10 +238,10 @@ void main() {
         Widget buildWithScrollController(ScrollController controller) {
           return new MaterialApp(
             home: new PrimaryScrollController(
-              controller: controller, 
+              controller: controller,
               child: new SizedBox(
-                height: 100.0, 
-                width: 100.0, 
+                height: 100.0,
+                width: 100.0,
                 child: reorderableList,
               ),
             ),
@@ -275,13 +275,13 @@ void main() {
             DefaultWidgetsLocalizations.delegate,
           ],
           child:new SizedBox(
-            width: 100.0, 
-            height: 100.0, 
+            width: 100.0,
+            height: 100.0,
             child: new Directionality(
               textDirection: TextDirection.ltr,
               child: reorderableList,
-              )
             ),
+          ),
         );
         try {
           await tester.pumpWidget(boilerplate);
