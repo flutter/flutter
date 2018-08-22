@@ -296,7 +296,7 @@ Future<Null> _runToolTests() async {
 
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
-    enableAsserts: true,
+    enableFlutterToolAsserts: true,
   );
 
   print('${bold}DONE: All tests successful.$reset');
@@ -349,7 +349,7 @@ Future<Null> _runCoverage() async {
 Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool enableAsserts = false
+  bool enableFlutterToolAsserts = false
 }) {
   final List<String> args = <String>['run', 'test', '-j1', '-rcompact'];
   if (!hasColor)
@@ -360,7 +360,7 @@ Future<Null> _pubRunTest(
   if (new Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
-  if (enableAsserts) {
+  if (enableFlutterToolAsserts) {
     // If an existing env variable exists append to it, but only if
     // it doesn't appear to already include enable-asserts.
     String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
