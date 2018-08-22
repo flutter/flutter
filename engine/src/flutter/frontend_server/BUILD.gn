@@ -5,7 +5,6 @@
 import("//third_party/dart/utils/application_snapshot.gni")
 
 application_snapshot("frontend_server") {
-  dart_version = 2
   main_dart = "bin/starter.dart"
   deps = [
     "$flutter_root/lib/snapshot:kernel_platform_files",
