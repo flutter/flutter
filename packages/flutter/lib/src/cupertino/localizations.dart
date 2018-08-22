@@ -74,14 +74,20 @@ abstract class CupertinoLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
-  /// Label that is next to the hour picker in [CupertinoCountdownTimerPicker].
-  String get timerPickerHourLabel;
+  /// Label that appears next to the hour picker in
+  /// [CupertinoCountdownTimerPicker] when selected hour value is ```hour```.
+  /// This function will deal with pluralization based on the ```hour``` parameter.
+  String timerPickerHourLabel(int hour);
 
-  /// Label that is next to the minute picker in [CupertinoCountdownTimerPicker].
-  String get timerPickerMinuteLabel;
+  /// Label that appears next to the minute picker in
+  /// [CupertinoCountdownTimerPicker] when selected minute value is ```minute```.
+  /// This function will deal with pluralization based on the ```minute``` parameter.
+  String timerPickerMinuteLabel(int minute);
 
-  /// Label that is next to the second picker in [CupertinoCountdownTimerPicker].
-  String get timerPickerSecondLabel;
+  /// Label that appears next to the minute picker in
+  /// [CupertinoCountdownTimerPicker] when selected minute value is ```second```.
+  /// This function will deal with pluralization based on the ```second``` parameter.
+  String timerPickerSecondLabel(int second);
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -191,13 +197,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  String get timerPickerHourLabel => 'hours';
+  String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';
 
   @override
-  String get timerPickerMinuteLabel => 'min';
+  String timerPickerMinuteLabel(int minute) => 'min';
 
   @override
-  String get timerPickerSecondLabel => 'sec';
+  String timerPickerSecondLabel(int second) => 'sec';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.
