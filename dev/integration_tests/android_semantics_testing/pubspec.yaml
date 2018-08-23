@@ -1,5 +1,5 @@
-name: android_testing
-description: Integration testing library for Android
+name: android_semantics_testing
+description: Integration testing library for Android semantics
 
 dependencies:
   flutter:

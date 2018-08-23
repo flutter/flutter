@@ -10,7 +10,8 @@ import 'constants.dart';
 /// A semantics node created from Android accessibility information.
 ///
 /// This object represents Android accessibility information derived from an
-/// [AccessibilityNodeInfo] object. The purpose is to verify in integration
+/// [AccessibilityNodeInfo](https://developer.android.com/reference/android/view/accessibility/AccessibilityNodeInfo)
+/// object. The purpose is to verify in integration
 /// tests that our semantics framework produces the correct accessibility info
 /// on Android.
 ///

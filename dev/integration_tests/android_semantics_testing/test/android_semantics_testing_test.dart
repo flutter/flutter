@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:android_testing/android_testing.dart';
+import 'package:android_semantics_testing/android_semantics_testing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // JSON matching a serialized Android AccessibilityNodeInfo.
