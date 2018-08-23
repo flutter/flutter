@@ -217,9 +217,10 @@ class RenderEditable extends RenderBox {
   // selects all the way to the end or the beginning of a field.
   bool _resetCursor = false;
 
-  static const int _kShiftMask = 1;
-  static const int _kControlMask = 1 << 12;
+  static const int _kShiftMask = 1; // https://developer.android.com/reference/android/view/KeyEvent.html#META_SHIFT_ON
+  static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
 
+  // TODO: All this should be changed to work in terms of extended grapheme clusters instead of UTF-16 words
   void _handleKeyEvent(RawKeyEvent keyEvent){
     if (defaultTargetPlatform != TargetPlatform.android)
       return;
@@ -253,7 +254,7 @@ class RenderEditable extends RenderBox {
       // Because the user can use multiple keys to change how he selects
       // the new offset variable is threaded through these four functions
       // and potentially changes after each one.
-      if (ctrl) 
+      if (ctrl)
         newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
       newOffset = _handleHorizontalArrows(rightArrow, leftArrow, shift, newOffset);
       if (downArrow || upArrow)
@@ -333,8 +334,8 @@ class RenderEditable extends RenderBox {
   int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
     if (onSelectionChanged == null)
       return newOffset;
-    // For some reason, deletion only works if the base offset is less
-    // than the extent offset.
+    // In the text_selection class, a TextSelection is defined such that the
+    // base offset is always less than the extent offset.
     if (shift) {
       if (_baseOffset < newOffset) {
         onSelectionChanged(
@@ -343,7 +344,8 @@ class RenderEditable extends RenderBox {
             extentOffset: newOffset
           ),
           this,
-          SelectionChangedCause.keyboard);
+          SelectionChangedCause.keyboard,
+        );
       } else {
         onSelectionChanged(
           new TextSelection(
@@ -351,7 +353,8 @@ class RenderEditable extends RenderBox {
             extentOffset: _baseOffset
           ),
           this,
-          SelectionChangedCause.keyboard);
+          SelectionChangedCause.keyboard,
+        );
       }
     } else {
       // We want to put the cursor at the correct location depending on which
@@ -369,7 +372,8 @@ class RenderEditable extends RenderBox {
           )
         ),
         this,
-        SelectionChangedCause.keyboard);
+        SelectionChangedCause.keyboard,
+      );
     }
     return newOffset;
   }
