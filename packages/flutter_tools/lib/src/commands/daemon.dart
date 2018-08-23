@@ -772,6 +772,7 @@ class NotifyingLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation = false,
+    bool multilineOutput,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
@@ -928,6 +929,7 @@ class _AppRunLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation = false,
+    bool multilineOutput,
     int progressIndicatorPadding = 52,
   }) {
     final int id = _nextProgressId++;
