@@ -72,10 +72,10 @@ class CupertinoPageScaffold extends StatelessWidget {
       final double topPadding =
           navigationBar.preferredSize.height + existingMediaQuery.padding.top;
 
-      // TODO: refactor with MediaQuery.padding.bottom
+      // Propagate bottom padding and include viewInsets if appropriate
       final double bottomPadding = resizeToAvoidBottomPadding
-          ? existingMediaQuery.viewInsets.bottom
-          : 0.0;
+              ? existingMediaQuery.viewInsets.bottom
+              : 0.0;
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
@@ -90,7 +90,7 @@ class CupertinoPageScaffold extends StatelessWidget {
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
-              bottom: bottomPadding,
+              bottom: existingMediaQuery.padding.bottom + bottomPadding,
             ),
           ),
           child: child,
