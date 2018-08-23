@@ -54,7 +54,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   Widget _buildColorPicker() {
     final FixedExtentScrollController scrollController =
-    new FixedExtentScrollController(initialItem: _selectedColorIndex);
+      new FixedExtentScrollController(initialItem: _selectedColorIndex);
     return new CupertinoPicker(
       scrollController: scrollController,
       itemExtent: _kPickerItemHeight,
