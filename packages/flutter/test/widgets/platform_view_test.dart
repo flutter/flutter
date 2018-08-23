@@ -37,6 +37,26 @@ void main() {
     );
   });
 
+  testWidgets('Zero sized Android view is not created', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+        ),
+      ),
+    );
+
+    expect(
+      viewsController.views,
+      isEmpty,
+    );
+  });
+
   testWidgets('Resize Android view', (WidgetTester tester) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);

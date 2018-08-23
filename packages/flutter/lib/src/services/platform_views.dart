@@ -427,7 +427,8 @@ class AndroidViewController {
 
   /// Sizes the Android View.
   ///
-  /// `size` is the view's new size in logical pixel, and must not be null.
+  /// `size` is the view's new size in logical pixel, it must not be null and must
+  /// be bigger than zero.
   ///
   /// The first time a size is set triggers the creation of the Android view.
   Future<void> setSize(Size size) async {
@@ -435,6 +436,7 @@ class AndroidViewController {
       throw new FlutterError('trying to size a disposed Android View. View id: $id');
 
     assert(size != null);
+    assert(!size.isEmpty);
 
     if (_state == _AndroidViewState.waitingForSize)
       return _create(size);
