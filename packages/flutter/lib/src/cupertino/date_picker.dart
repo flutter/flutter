@@ -24,7 +24,7 @@ const Color _kBackgroundColor = CupertinoColors.white;
 /// If the maximum width given to the picker is smaller than [_kPickerWidth],
 /// the picker's layout will be broken.
 
-///
+
 /// A countdown timer picker in iOS style.
 ///
 /// This picker shows duration as hour, minute and second spinners. The duration
@@ -193,7 +193,6 @@ class _CountdownTimerState extends State<CupertinoCountdownTimerPicker> {
 
     return new CupertinoPicker(
       scrollController: minuteController,
-      offAxisFraction: 0.0,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
