@@ -15,6 +15,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(2.0)),
     ));
     expect(theme.alignedDropdown, false);
+    expect(theme.layoutBehavior, ButtonBarLayoutBehavior.padded);
   });
 
   test('ButtonThemeData default overrides', () {

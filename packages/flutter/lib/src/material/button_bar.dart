@@ -47,23 +47,35 @@ class ButtonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     // We divide by 4.0 because we want half of the average of the left and right padding.
-    final double paddingUnit = ButtonTheme.of(context).padding.horizontal / 4.0;
-    return new Padding(
-      padding: new EdgeInsets.symmetric(
-        vertical: 2.0 * paddingUnit,
-        horizontal: paddingUnit
-      ),
-      child: new Row(
-        mainAxisAlignment: alignment,
-        mainAxisSize: mainAxisSize,
-        children: children.map<Widget>((Widget child) {
-          return new Padding(
+    final double paddingUnit = buttonTheme.padding.horizontal / 4.0;
+    final Widget child = new Row(
+      mainAxisAlignment: alignment,
+      mainAxisSize: mainAxisSize,
+      children: children.map<Widget>((Widget child) {
+        return new Padding(
             padding: new EdgeInsets.symmetric(horizontal: paddingUnit),
             child: child
-          );
-        }).toList()
-      )
+        );
+      }).toList()
     );
+    switch (buttonTheme.layoutBehavior) {
+      case ButtonBarLayoutBehavior.padded:
+        return new Padding(
+          padding: new EdgeInsets.symmetric(
+            vertical: 2.0 * paddingUnit,
+            horizontal: paddingUnit
+          ),
+          child: child,
+        );
+      case ButtonBarLayoutBehavior.constrained:
+        return new Container(
+          padding: new EdgeInsets.symmetric(horizontal: paddingUnit),
+          constraints: const BoxConstraints(minHeight: 52.0),
+          alignment: Alignment.center,
+          child: child,
+        );
+    }
   }
 }
