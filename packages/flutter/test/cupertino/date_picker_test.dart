@@ -127,30 +127,100 @@ void main() {
       );
     });
 
-    // Test for text direction.
-//    testWidgets('column order depends on text direction', (WidgetTester tester) async {
-//      await tester.pumpWidget(
-//        new Directionality(
-//          textDirection: TextDirection.ltr,
-//          child: new CupertinoCountdownTimerPicker(
-//            onTimerDurationChanged: (_) {},
-//            initialTimerDuration: Duration(hours: 0, minutes: 1, seconds: 2),
-//          ),
-//        ),
-//      );
-//
-//      // The texts that appear
-//      final List<String> texts = <String>['0','hours','1','min','2','sec'];
-//
-//      Offset lastOffset = tester.getTopLeft(
-//          find.widgetWithText(Container, texts[0]));
-//
-//      for (int i = 1; i < texts.length; i++) {
-//        expect(tester.getTopLeft(find.widgetWithText(Container, texts[i])) > lastOffset, true);
-//        lastOffset = tester.getTopLeft(find.widgetWithText(Container, texts[i]));
-//      }
-//    });
+    testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new CupertinoCountdownTimerPicker(
+            onTimerDurationChanged: (_) {},
+            initialTimerDuration: Duration(hours: 12, minutes: 30, seconds: 59),
+          ),
+        ),
+      );
 
-    // Test for width fixed.
+      Offset lastOffset = tester.getTopLeft(find.text('12'));
+
+      expect(tester.getTopLeft(find.text('hours')).dx > lastOffset.dx, true);
+      lastOffset = tester.getTopLeft(find.text('hours'));
+
+      expect(tester.getTopLeft(find.text('30')).dx > lastOffset.dx, true);
+      lastOffset = tester.getTopLeft(find.text('30'));
+
+      expect(tester.getTopLeft(find.text('min')).dx > lastOffset.dx, true);
+      lastOffset = tester.getTopLeft(find.text('min'));
+
+      expect(tester.getTopLeft(find.text('59')).dx > lastOffset.dx, true);
+      lastOffset = tester.getTopLeft(find.text('59'));
+
+      expect(tester.getTopLeft(find.text('sec')).dx > lastOffset.dx, true);
+    });
+
+    testWidgets('columns are ordered correctly when text direction is rtl', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new CupertinoCountdownTimerPicker(
+            onTimerDurationChanged: (_) {},
+            initialTimerDuration: Duration(hours: 12, minutes: 30, seconds: 59),
+          ),
+        ),
+      );
+
+      Offset lastOffset = tester.getTopLeft(find.text('12'));
+
+      expect(tester.getTopLeft(find.text('hours')).dx > lastOffset.dx, false);
+      lastOffset = tester.getTopLeft(find.text('hours'));
+
+      expect(tester.getTopLeft(find.text('30')).dx > lastOffset.dx, false);
+      lastOffset = tester.getTopLeft(find.text('30'));
+
+      expect(tester.getTopLeft(find.text('min')).dx > lastOffset.dx, false);
+      lastOffset = tester.getTopLeft(find.text('min'));
+
+      expect(tester.getTopLeft(find.text('59')).dx > lastOffset.dx, false);
+      lastOffset = tester.getTopLeft(find.text('59'));
+
+      expect(tester.getTopLeft(find.text('sec')).dx > lastOffset.dx, false);
+    });
+
+    testWidgets('width of picker is consistent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoCountdownTimerPicker(
+              onTimerDurationChanged: (_) {},
+              initialTimerDuration: Duration(hours: 12, minutes: 30, seconds: 59),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first column and the last column.
+      final double distance =
+        tester.getCenter(find.text('sec')).dx - tester.getCenter(find.text('12')).dx;
+
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 800.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoCountdownTimerPicker(
+              onTimerDurationChanged: (_) {},
+              initialTimerDuration: Duration(hours: 12, minutes: 30, seconds: 59),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first and the last column should be the same.
+      expect(
+        tester.getCenter(find.text('sec')).dx - tester.getCenter(find.text('12')).dx,
+        distance,
+      );
+    });
   });
 }
