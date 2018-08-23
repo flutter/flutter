@@ -115,9 +115,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           <Widget>[
             const Text('Countdown Timer'),
             new Text(
-              "${timer.inHours}:"
-                "${(timer.inMinutes % 60).toString().padLeft(2,'0')}:"
-                "${(timer.inSeconds % 60).toString().padLeft(2,'0')}",
+              '${timer.inHours}:'
+                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
+                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
               style: const TextStyle(color: CupertinoColors.inactiveGray),
             ),
           ]
