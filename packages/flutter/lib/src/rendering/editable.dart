@@ -253,9 +253,11 @@ class RenderEditable extends RenderBox {
       // Because the user can use multiple keys to change how he selects
       // the new offset variable is threaded through these four functions
       // and potentially changes after each one.
-      newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
+      if (ctrl) 
+        newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
       newOffset = _handleHorizontalArrows(rightArrow, leftArrow, shift, newOffset);
-      newOffset = _handleVerticalArrows(upArrow, downArrow, shift, newOffset);
+      if (downArrow || upArrow)
+        newOffset = _handleVerticalArrows(upArrow, downArrow, shift, newOffset);
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
@@ -266,14 +268,12 @@ class RenderEditable extends RenderBox {
   int _handleControl(bool rightArrow, bool leftArrow, bool ctrl, int newOffset) {
     // If control is pressed, we will decide which way to look for a word
     // based on which arrow is pressed.
-    if (ctrl) {
-      if (leftArrow && _extentOffset > 2) {
-        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
-        newOffset = textSelection.baseOffset + 1;
-      } else if (rightArrow && _extentOffset < text.text.length - 2) {
-        final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
-        newOffset = textSelection.extentOffset - 1;
-      }
+    if (leftArrow && _extentOffset > 2) {
+      final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
+      newOffset = textSelection.baseOffset + 1;
+    } else if (rightArrow && _extentOffset < text.text.length - 2) {
+      final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
+      newOffset = textSelection.extentOffset - 1;
     }
     return newOffset;
   }
@@ -298,34 +298,32 @@ class RenderEditable extends RenderBox {
   // case where the user moves the cursor to the end or beginning of the text
   // and then back up or down.
   int _handleVerticalArrows(bool upArrow, bool downArrow, bool shift, int newOffset) {
-    if (downArrow || upArrow) {
-      // The caret offset gives a location in the upper left hand corner of
-      // the caret so the middle of the line above is a half line above that
-      // point and the line below is 1.5 lines below that point.
-      final double plh = _textPainter.preferredLineHeight;
-      final double verticalOffset = upArrow ? -0.5 * plh : 1.5 * plh;
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double plh = _textPainter.preferredLineHeight;
+    final double verticalOffset = upArrow ? -0.5 * plh : 1.5 * plh;
 
-      final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
-      final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
-      final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
+    final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
+    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+    final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
 
-      // To account for the possibility where the user vertically highlights
-      // all the way to the top or bottom of the text, we hold the previous
-      // cursor location. This allows us to restore to this position in the
-      // case that the user wants to unhighlight some text.
-      if (position.offset == _extentOffset) {
-        if (downArrow)
-          newOffset = text.text.length;
-        else if (upArrow)
-          newOffset = 0;
-        _resetCursor = shift;
-      } else if (_resetCursor && shift) {
-        newOffset = _previousCursorLocation;
-        _resetCursor = false;
-      } else {
-        newOffset = position.offset;
-        _previousCursorLocation = newOffset;
-      }
+    // To account for the possibility where the user vertically highlights
+    // all the way to the top or bottom of the text, we hold the previous
+    // cursor location. This allows us to restore to this position in the
+    // case that the user wants to unhighlight some text.
+    if (position.offset == _extentOffset) {
+      if (downArrow)
+        newOffset = text.text.length;
+      else if (upArrow)
+        newOffset = 0;
+      _resetCursor = shift;
+    } else if (_resetCursor && shift) {
+      newOffset = _previousCursorLocation;
+      _resetCursor = false;
+    } else {
+      newOffset = position.offset;
+      _previousCursorLocation = newOffset;
     }
     return newOffset;
   }

@@ -1789,25 +1789,22 @@ void main() {
   }
 
   group('Keyboard Tests', (){
-    List<RawKeyEvent> events;
     TextEditingController controller;
 
     setUp( () {
-      events = <RawKeyEvent>[];
       controller = new TextEditingController();
     });
 
     MaterialApp setupWidget() {
 
       final FocusNode focusNode = new FocusNode();
-      events = <RawKeyEvent>[];
       controller = new TextEditingController();
 
       return new MaterialApp(
         home:  Material(
           child: new RawKeyboardListener(
             focusNode: focusNode,
-            onKey: events.add,
+            onKey: null,
             child: TextField(
               controller: controller,
               maxLines: 3,
