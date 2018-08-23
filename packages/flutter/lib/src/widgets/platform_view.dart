@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
@@ -45,6 +47,7 @@ class AndroidView extends StatefulWidget {
     @required this.viewType,
     this.onPlatformViewCreated,
     this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    this.layoutDirection,
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
        super(key: key);
@@ -66,6 +69,11 @@ class AndroidView extends StatefulWidget {
   /// This defaults to [PlatformViewHitTestBehavior.opaque].
   final PlatformViewHitTestBehavior hitTestBehavior;
 
+  /// The text direction to use for the embedded view.
+  ///
+  /// If this is null, the ambient [Directionality] is used instead.
+  final TextDirection layoutDirection;
+
   @override
   State createState() => new _AndroidViewState();
 }
@@ -73,6 +81,8 @@ class AndroidView extends StatefulWidget {
 class _AndroidViewState extends State<AndroidView> {
   int _id;
   AndroidViewController _controller;
+  TextDirection _layoutDirection;
+  bool _initialized = false;
 
   @override
   Widget build(BuildContext context) {
@@ -82,19 +92,53 @@ class _AndroidViewState extends State<AndroidView> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _layoutDirection = _findLayoutDirection();
     _createNewAndroidView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeOnce();
+
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    if (didChangeLayoutDirection) {
+      // The native view will update asynchronously, in the meantime we don't want
+      // to block the framework. (so this is intentionally not awaiting).
+      _controller.setLayoutDirection(_layoutDirection);
+    }
   }
 
   @override
   void didUpdateWidget(AndroidView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.viewType == oldWidget.viewType)
+
+    final TextDirection newLayoutDirection = _findLayoutDirection();
+    final bool didChangeLayoutDirection = _layoutDirection != newLayoutDirection;
+    _layoutDirection = newLayoutDirection;
+
+    if (widget.viewType != oldWidget.viewType) {
+      _controller.dispose();
+      _createNewAndroidView();
       return;
-    _controller.dispose();
-    _createNewAndroidView();
+    }
+
+    if (didChangeLayoutDirection) {
+      _controller.setLayoutDirection(_layoutDirection);
+    }
+  }
+
+  TextDirection _findLayoutDirection() {
+    assert(widget.layoutDirection != null || debugCheckHasDirectionality(context));
+    return widget.layoutDirection ?? Directionality.of(context);
   }
 
   @override
@@ -108,10 +152,10 @@ class _AndroidViewState extends State<AndroidView> {
     _controller = PlatformViewsService.initAndroidView(
         id: _id,
         viewType: widget.viewType,
+        layoutDirection: _layoutDirection,
         onPlatformViewCreated: widget.onPlatformViewCreated
     );
   }
-
 }
 
 class _AndroidPlatformView extends LeafRenderObjectWidget {
