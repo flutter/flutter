@@ -1297,7 +1297,7 @@ void main() {
             new Hero(
               tag: 'a',
               child: const Text('Batman'),
-              launchPadBuilder: (BuildContext context, Widget child) {
+              placeholderBuilder: (BuildContext context, Widget child) {
                 return const Text('Venom');
               },
             ),
@@ -1310,7 +1310,7 @@ void main() {
                       child: new Hero(
                         tag: 'a',
                         child: const Text('Wolverine'),
-                        launchPadBuilder: (BuildContext context, Widget child) {
+                        placeholderBuilder: (BuildContext context, Widget child) {
                           return const Text('Joker');
                         },
                       ),

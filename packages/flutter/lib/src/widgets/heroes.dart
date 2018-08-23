@@ -67,8 +67,8 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 /// be helpful for orienting the user for the feature to physically move from
 /// one page to the other during the routes' transition. Such an animation
 /// is called a *hero animation*. The hero widgets "fly" in the Navigator's
-/// overlay during the transition and while they're in-flight they're
-/// not shown in their original locations in the old and new routes.
+/// overlay during the transition and while they're in-flight they're, by
+/// default, not shown in their original locations in the old and new routes.
 ///
 /// To label a widget as such a feature, wrap it in a [Hero] widget. When
 /// navigation happens, the [Hero] widgets on each route are identified
@@ -77,6 +77,9 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 ///
 /// If a [Hero] is already in flight when navigation occurs, its
 /// flight animation will be redirected to its new destination.
+
+/// The widget shown in-flight during the transition is, by default, the
+/// destination route's [Hero]'s child.
 ///
 /// Routes must not contain more than one [Hero] for each [tag].
 ///
@@ -92,12 +95,20 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 ///
 /// To make the animations look good, it's critical that the widget tree for the
 /// hero in both locations be essentially identical. The widget of the *target*
-/// is used to do the transition: when going from route A to route B, route B's
-/// hero's widget is placed over route A's hero's widget, and route A's hero is
-/// hidden. Then the widget is animated to route B's hero's position, and then
-/// the widget is inserted into route B. When going back from B to A, route A's
-/// hero's widget is placed over where route B's hero's widget was, and then the
-/// animation goes the other way.
+/// is, by default, used to do the transition: when going from route A to route
+/// B, route B's hero's widget is placed over route A's hero's widget. If a
+/// [flightShuttleBuilder] is supplied, its output widget is shown during the
+/// flight transition instead.
+///
+/// By default, both route A and route B's heroes are hidden while the
+/// transitioning widget is animating in-flight above the 2 routes.
+/// [placeholderBuilder] can be used to show a custom widget in their place
+/// instead once the transition has taken flight.
+///
+/// During the transition, the transition widget is animated to route B's hero's
+/// position, and then the widget is inserted into route B. When going back from
+/// B to A, route A's hero's widget is, by default, placed over where route B's
+/// hero's widget was, and then the animation goes the other way.
 class Hero extends StatefulWidget {
   /// Create a hero.
   ///
@@ -107,7 +118,7 @@ class Hero extends StatefulWidget {
     @required this.tag,
     this.createRectTween,
     this.flightShuttleBuilder,
-    this.launchPadBuilder,
+    this.placeholderBuilder,
     @required this.child,
   }) : assert(tag != null),
        assert(child != null),
@@ -149,7 +160,7 @@ class Hero extends StatefulWidget {
   /// layout.
   ///
   /// When both the source and destination [Hero]s provide a [flightShuttleBuilder],
-  /// the source's [flightShuttleBuilder] takes precedence.
+  /// the destination's [flightShuttleBuilder] takes precedence.
   ///
   /// If none is provided, the destination route's Hero child is shown in-flight
   /// by default.
@@ -159,7 +170,7 @@ class Hero extends StatefulWidget {
   ///
   /// By default, an empty SizedBox keeping the Hero child's original size is
   /// left in place once the Hero shuttle has taken flight.
-  final TransitionBuilder launchPadBuilder;
+  final TransitionBuilder placeholderBuilder;
 
   // Returns a map of all of the heroes in context, indexed by hero tag.
   static Map<Object, _HeroState> _allHeroesFor(BuildContext context) {
@@ -227,13 +238,13 @@ class _HeroState extends State<Hero> {
   @override
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
-      if (widget.launchPadBuilder == null) {
+      if (widget.placeholderBuilder == null) {
         return new SizedBox(
           width: _placeholderSize.width,
           height: _placeholderSize.height
         );
       } else {
-        return widget.launchPadBuilder(context, widget.child);
+        return widget.placeholderBuilder(context, widget.child);
       }
     }
     return new KeyedSubtree(
@@ -608,7 +619,7 @@ class HeroController extends NavigatorObserver {
           toHero: toHeroes[tag],
           createRectTween: createRectTween,
           shuttleBuilder:
-              fromShuttleBuilder ?? toShuttleBuilder ?? _defaultHeroFlightShuttleBuilder,
+              toShuttleBuilder ?? fromShuttleBuilder ?? _defaultHeroFlightShuttleBuilder,
         );
 
         if (_flights[tag] != null)

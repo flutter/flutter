@@ -65,7 +65,7 @@ const TextStyle _kLargeTitleTextStyle = TextStyle(
 
 // There's a single tag for all instances of navigation bars because they can
 // all transition between each other (per Navigator) via Hero transitions.
-const _HeroTag _heroTag = _HeroTag();
+const _HeroTag _defaultHeroTag = _HeroTag();
 
 class _HeroTag {
   const _HeroTag();
@@ -185,9 +185,20 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
     this.transitionBetweenRoutes = true,
+    this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyMiddle != null),
        assert(transitionBetweenRoutes != null),
+       assert(
+         heroTag != null,
+         'heroTag cannot be null. Use transitionBetweenRoutes = false to '
+         'disable Hero transition on this navigation bar.'
+       ),
+       assert(
+         !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
+         'Cannot specify a heroTag override if this navigation bar does not '
+         'transition due to transitionBetweenRoutes = false.'
+       ),
        super(key: key);
 
   /// {@template flutter.cupertino.navBar.leading}
@@ -300,11 +311,25 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// to also has a [CupertinoNavigationBar] or a [CupertinoSliverNavigationBar]
   /// with [transitionBetweenRoutes] set to true.
   ///
-  /// When set to true, only one navigation bar can be present per route.
+  /// When set to true, only one navigation bar can be present per route unless
+  /// [heroTag] is also set.
   ///
   /// This value defaults to true and cannot be null.
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
+
+  /// {@template flutter.cupertino.navBar.heroTag}
+  /// Tag for the navigation bar's Hero widget if [transitionBetweenRoutes] is true.
+  ///
+  /// Defaults to a common tag between all [CupertinoNavigationBar] and
+  /// [CupertinoSliverNavigationBar] instances so they can all transition
+  /// between each other as long as there's only one per route. Use this tag
+  /// override with different tags to have multiple navigation bars per route.
+  ///
+  /// Cannot be null. To disable Hero transitions for this navigation bar,
+  /// set [transitionBetweenRoutes] to false.
+  /// {@endtemplate}
+  final Object heroTag;
 
   /// True if the navigation bar's background color has no transparency.
   @override
@@ -364,9 +389,9 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     }
 
     return new Hero(
-      tag: _heroTag,
+      tag: widget.heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
-      launchPadBuilder: _navBarHeroLaunchPadBuilder,
+      placeholderBuilder: _navBarHeroLaunchPadBuilder,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
       child: new _TransitionableNavigationBar(
         componentsKeys: keys,
@@ -440,6 +465,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
     this.transitionBetweenRoutes = true,
+    this.heroTag = _defaultHeroTag,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
        assert(
@@ -525,6 +551,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.navBar.transitionBetweenRoutes}
   final bool transitionBetweenRoutes;
 
+  /// {@macro flutter.cupertino.navBar.heroTag}
+  final Object heroTag;
+
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
@@ -562,6 +591,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         padding: widget.padding,
         actionsForegroundColor: widget.actionsForegroundColor,
         transitionBetweenRoutes: widget.transitionBetweenRoutes,
+        heroTag: widget.heroTag,
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
         alwaysShowMiddle: widget.middle != null,
       ),
@@ -585,6 +615,7 @@ class _LargeTitleNavigationBarSliverDelegate
     @required this.padding,
     @required this.actionsForegroundColor,
     @required this.transitionBetweenRoutes,
+    @required this.heroTag,
     @required this.persistentHeight,
     @required this.alwaysShowMiddle,
   }) : assert(persistentHeight != null),
@@ -604,6 +635,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final EdgeInsetsDirectional padding;
   final Color actionsForegroundColor;
   final bool transitionBetweenRoutes;
+  final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
 
@@ -701,10 +733,10 @@ class _LargeTitleNavigationBarSliverDelegate
     }
 
     return new Hero(
-      tag: _heroTag,
+      tag: heroTag,
       createRectTween: _linearTranslateWithLargestRectSizeTween,
       flightShuttleBuilder: _navBarHeroFlightShuttleBuilder,
-      launchPadBuilder: _navBarHeroLaunchPadBuilder,
+      placeholderBuilder: _navBarHeroLaunchPadBuilder,
       // This is all the way down here instead of being at the top level of
       // CupertinoSliverNavigationBar like CupertinoNavigationBar because it
       // needs to wrap the top level RenderBox rather than a RenderSliver.
