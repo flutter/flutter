@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'dart:ui' as ui show window, AccessibilityFeatures;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -21,7 +21,7 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-abstract class RendererBinding extends BindingBase with ServicesBinding, SchedulerBinding, HitTestable {
+abstract class RendererBinding extends BindingBase with ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory RendererBinding._() => null;
@@ -137,19 +137,6 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     _pipelineOwner.rootNode = value;
   }
 
-  /// The currently active set of [AccessibilityFeatures].
-  ///
-  /// This is initialized the first time [runApp] is called and updated whenever
-  /// a flag is changed.
-  ///
-  /// To listen to changes to accessibility features, create a
-  /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
-  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
-  ui.AccessibilityFeatures _accessibilityFeatures;
-
-  /// Whether the device is requesting that animations be disabled.
-  bool get disableAnimations => accessibilityFeatures.disableAnimations;
-
   /// Called when the system metrics change.
   ///
   /// See [Window.onMetricsChanged].
@@ -165,14 +152,6 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   /// See [Window.onTextScaleFactorChanged].
   @protected
   void handleTextScaleFactorChanged() { }
-
-  /// Called when the platform accessibility features change.
-  ///
-  /// See [Window.onAccessibilityFeaturesChanged].
-  @protected
-  void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
-  }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
@@ -356,7 +335,7 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// that layer's binding.
 ///
 /// See also [BindingBase].
-class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, RendererBinding {
+class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, RendererBinding {
   /// Creates a binding for the rendering layer.
   ///
   /// The `root` render box is attached directly to the [renderView] and is
