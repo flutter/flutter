@@ -107,8 +107,7 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-    // https://github.com/flutter/flutter/issues/17833
-    // The test appears to be flaky and time out some times, skipping while
-    // investigation is ongoing: https://github.com/flutter/flutter/issues/19542
-  }, timeout: const Timeout.factor(6), skip: true);
+    // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
+    // https://github.com/flutter/flutter/issues/17833.
+  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
 }
