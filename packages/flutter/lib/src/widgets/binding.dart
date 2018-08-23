@@ -250,7 +250,6 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
     ui.window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
   }
@@ -379,7 +378,6 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
@@ -676,19 +674,6 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// This is initialized the first time [runApp] is called.
   Element get renderViewElement => _renderViewElement;
   Element _renderViewElement;
-
-  /// The currently active set of [AccessibilityFeatures].
-  ///
-  /// This is initialized the first time [runApp] is called and updated whenever
-  /// the a flag is changed.
-  ///
-  /// To listen to changes to accessibility features, create a
-  /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
-  AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
-  AccessibilityFeatures _accessibilityFeatures;
-
-  /// Whether the device is requesting that animations be disabled.
-  bool get disableAnimations => accessibilityFeatures.disableAnimations;
 
   /// Takes a widget and attaches it to the [renderViewElement], creating it if
   /// necessary.

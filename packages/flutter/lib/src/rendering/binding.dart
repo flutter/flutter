@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
-import 'dart:ui' as ui show window;
+import 'dart:ui' as ui show window, AccessibilityFeatures;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -137,6 +137,19 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     _pipelineOwner.rootNode = value;
   }
 
+  /// The currently active set of [AccessibilityFeatures].
+  ///
+  /// This is initialized the first time [runApp] is called and updated whenever
+  /// a flag is changed.
+  ///
+  /// To listen to changes to accessibility features, create a
+  /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
+  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
+  ui.AccessibilityFeatures _accessibilityFeatures;
+
+  /// Whether the device is requesting that animations be disabled.
+  bool get disableAnimations => accessibilityFeatures.disableAnimations;
+
   /// Called when the system metrics change.
   ///
   /// See [Window.onMetricsChanged].
@@ -157,7 +170,9 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   ///
   /// See [Window.onAccessibilityFeaturesChanged].
   @protected
-  void handleAccessibilityFeaturesChanged() {}
+  void handleAccessibilityFeaturesChanged() {
+    _accessibilityFeatures = ui.window.accessibilityFeatures;
+  }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.

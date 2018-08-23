@@ -7,8 +7,8 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
 
 import 'animation.dart';
 import 'curves.dart';
@@ -197,16 +197,12 @@ class AnimationController extends Animation<double>
   /// identifying animation controller instances in debug output.
   final String debugLabel;
 
-  /// The behavior of the animation when [AccessibilityFeatures.disableAnimations]
+  /// The behavior of the controller when [AccessibilityFeatures.disableAnimations]
   /// is true.
   ///
   /// Defaults to [AnimationBehavior.normal] for the [new AnimationBehavior]
   /// constructor, and [AnimationBehavior.preserve] for the
   /// [new AnimationBehavior.unbounded] constructor.
-  ///
-  /// See also:
-  ///
-  ///   * [AnimationBehavior], for a description of how this enum configures the controller.
   final AnimationBehavior animationBehavior;
 
   /// Returns an [Animation<double>] for this animation controller, so that a
@@ -405,7 +401,7 @@ class AnimationController extends Animation<double>
   TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear, AnimationBehavior animationBehavior }) {
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     double scale = 1.0;
-    if (WidgetsBinding.instance.disableAnimations) {
+    if (RendererBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
           scale = 0.05;
@@ -497,7 +493,7 @@ class AnimationController extends Animation<double>
                                          : upperBound + _kFlingTolerance.distance;
     double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
-    if (WidgetsBinding.instance.disableAnimations) {
+    if (RendererBinding.instance.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
           scale = 200.0;
