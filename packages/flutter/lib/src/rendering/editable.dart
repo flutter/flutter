@@ -490,7 +490,7 @@ class RenderEditable extends RenderBox {
       _listenerAttached = true;
     }
     else {
-      assert(!_listenerAttached);
+      assert(_listenerAttached);
       RawKeyboard.instance.removeListener(_handleKeyEvent);
       _listenerAttached = false;
     }
