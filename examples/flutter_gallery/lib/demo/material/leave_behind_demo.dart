@@ -147,7 +147,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
                 value: LeaveBehindDemoAction.reset,
                 child: Text('Reset the list')
               ),
-              const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+              const PopupMenuDivider(),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,

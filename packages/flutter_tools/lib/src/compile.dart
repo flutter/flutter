@@ -90,7 +90,7 @@ class KernelCompiler {
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
 
-    // TODO(cbracken) eliminate pathFilter.
+    // TODO(cbracken): eliminate pathFilter.
     // Currently the compiler emits buildbot paths for the core libs in the
     // depfile. None of these are available on the local host.
     Fingerprinter fingerprinter;
@@ -101,6 +101,7 @@ class KernelCompiler {
         properties: <String, String>{
           'entryPoint': mainPath,
           'trackWidgetCreation': trackWidgetCreation.toString(),
+          'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),

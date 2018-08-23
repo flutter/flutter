@@ -289,6 +289,10 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
             actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
           ),
         ]
@@ -313,5 +317,46 @@ void main() {
     ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    double value = 0.5;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new CupertinoSlider(
+        value: value,
+        onChanged: (double v) { },
+      ),
+    ));
+
+    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+      hasIncreaseAction: true,
+      hasDecreaseAction: true,
+      value: '50%',
+      increasedValue: '60%',
+      decreasedValue: '40%',
+      textDirection: TextDirection.ltr,
+    ));
+
+    value = 0.6;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new CupertinoSlider(
+        value: value,
+        onChanged: (double v) { },
+      ),
+    ));
+
+    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+      hasIncreaseAction: true,
+      hasDecreaseAction: true,
+      value: '60%',
+      increasedValue: '70%',
+      decreasedValue: '50%',
+      textDirection: TextDirection.ltr,
+    ));
+
+    handle.dispose();
   });
 }

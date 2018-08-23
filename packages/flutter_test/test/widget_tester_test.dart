@@ -45,7 +45,7 @@ void main() {
       test_package.expect(completed, isFalse);
       await future;
       test_package.expect(completed, isTrue);
-    }, skip: true /* Enable once https://github.com/dart-lang/test/pull/831 lands */);
+    });
   });
 
   group('findsOneWidget', () {

@@ -1277,8 +1277,8 @@ void main() {
   testWidgets('Overflowing RTL tab bar', (WidgetTester tester) async {
     final List<Widget> tabs = new List<Widget>.filled(100,
       // For convenience padded width of each tab will equal 100:
-      // 76 + kTabLabelPadding.horizontal(24)
-      new SizedBox(key: new UniqueKey(), width: 76.0, height: 40.0),
+      // 68 + kTabLabelPadding.horizontal(32)
+      new SizedBox(key: new UniqueKey(), width: 68.0, height: 40.0),
     );
 
     final TabController controller = new TabController(
@@ -1384,15 +1384,15 @@ void main() {
                         actions: SemanticsAction.tap.index,
                         flags: SemanticsFlag.isSelected.index,
                         label: 'TAB #0\nTab 1 of 2',
-                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                        rect: new Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
                       ),
                       new TestSemantics(
                         id: 5,
                         actions: SemanticsAction.tap.index,
                         label: 'TAB #1\nTab 2 of 2',
-                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-                        transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+                        rect: new Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                        transform: new Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
                     ]
                 )
@@ -1647,15 +1647,15 @@ void main() {
                         actions: SemanticsAction.tap.index,
                         flags: SemanticsFlag.isSelected.index,
                         label: 'Semantics override 0\nTab 1 of 2',
-                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                        rect: new Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
                       ),
                       new TestSemantics(
                         id: 5,
                         actions: SemanticsAction.tap.index,
                         label: 'Semantics override 1\nTab 2 of 2',
-                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-                        transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+                        rect: new Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                        transform: new Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
                     ]
                 )

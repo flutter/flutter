@@ -227,8 +227,8 @@ abstract class ScrollView extends StatelessWidget {
     final AxisDirection axisDirection = getDirection(context);
 
     final ScrollController scrollController = primary
-        ? PrimaryScrollController.of(context)
-        : controller;
+      ? PrimaryScrollController.of(context)
+      : controller;
     final Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
@@ -495,6 +495,63 @@ abstract class BoxScrollView extends ScrollView {
 ///   },
 /// )
 /// ```
+///
+/// ## Child elements' lifecycle
+///
+/// ### Creation
+///
+/// While laying out the list, visible children's elements, states and render
+/// objects will be created lazily based on existing widgets (such as when using
+/// the default constructor) or lazily provided ones (such as when using the
+/// [ListView.builder] constructor).
+///
+/// ### Destruction
+///
+/// When a child is scrolled out of view, the associated element subtree,
+/// states and render objects are destroyed. A new child at the same position
+/// in the list will be lazily recreated along with new elements, states and
+/// render objects when it is scrolled back.
+///
+/// ### Destruction mitigation
+///
+/// In order to preserve state as child elements are scrolled in and out of
+/// view, the following options are possible:
+///
+///  * Moving the ownership of non-trivial UI-state-driving business logic
+///    out of the list child subtree. For instance, if a list contains posts
+///    with their number of upvotes coming from a cached network response, store
+///    the list of posts and upvote number in a data model outside the list. Let
+///    the list child UI subtree be easily recreate-able from the
+///    source-of-truth model object. Use [StatefulWidget]s in the child
+///    widget subtree to store instantaneous UI state only.
+///
+///  * Letting [KeepAlive] be the root widget of the list child widget subtree
+///    that needs to be preserved. The [KeepAlive] widget marks the child
+///    subtree's top render object child for keep-alive. When the associated top
+///    render object is scrolled out of view, the list keeps the child's render
+///    object (and by extension, its associated elements and states) in a cache
+///    list instead of destroying them. When scrolled back into view, the render
+///    object is repainted as-is (if it wasn't marked dirty in the interim).
+///
+///    This only works if [addAutomaticKeepAlives] and [addRepaintBoundaries]
+///    are false since those parameters cause the [ListView] to wrap each child
+///    widget subtree with other widgets.
+///
+///  * Using [AutomaticKeepAlive] widgets (inserted by default when
+///    [addAutomaticKeepAlives] is true). Instead of unconditionally caching the
+///    child element subtree when scrolling off-screen like [KeepAlive],
+///    [AutomaticKeepAlive] can let whether to cache the subtree be determined
+///    by descendant logic in the subtree.
+///
+///    As an example, the [EditableText] widget signals its list child element
+///    subtree to stay alive while its text field has input focus. If it doesn't
+///    have focus and no other descendants signaled for keep-alive via a
+///    [KeepAliveNotification], the list child element subtree will be destroyed
+///    when scrolled away.
+///
+///    [AutomaticKeepAlive] descendants typically signal it to be kept alive
+///    by using the [AutomaticKeepAliveClientMixin], then implementing the
+///    [wantKeepAlive] getter and calling [updateKeepAlive].
 ///
 /// ## Transitioning to [CustomScrollView]
 ///
@@ -799,7 +856,7 @@ class ListView extends BoxScrollView {
          physics: physics,
          shrinkWrap: shrinkWrap,
          padding: padding,
-        cacheExtent: cacheExtent,
+         cacheExtent: cacheExtent,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll

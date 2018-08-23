@@ -57,7 +57,7 @@ class TestAsyncUtils {
   /// this one before this one has finished will throw an exception.
   ///
   /// This method first calls [guardSync].
-  static Future<Null> guard(Future<Null> body()) {
+  static Future<T> guard<T>(Future<T> body()) {
     guardSync();
     final Zone zone = Zone.current.fork(
       zoneValues: <dynamic, dynamic>{
@@ -66,8 +66,9 @@ class TestAsyncUtils {
     );
     final _AsyncScope scope = new _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
-    final Future<Null> result = scope.zone.run(body);
-    Future<Null> completionHandler(dynamic error, StackTrace stack) {
+    final Future<T> result = scope.zone.run<Future<T>>(body);
+    T resultValue; // This is set when the body of work completes with a result value.
+    Future<T> completionHandler(dynamic error, StackTrace stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
@@ -102,11 +103,12 @@ class TestAsyncUtils {
         throw new FlutterError(message.toString().trimRight());
       }
       if (error != null)
-        return new Future<Null>.error(error, stack);
-      return new Future<Null>.value(null);
+        return new Future<T>.error(error, stack);
+      return new Future<T>.value(resultValue);
     }
-    return result.then<Null>(
-      (Null value) {
+    return result.then<T>(
+      (T value) {
+        resultValue = value;
         return completionHandler(null, null);
       },
       onError: completionHandler

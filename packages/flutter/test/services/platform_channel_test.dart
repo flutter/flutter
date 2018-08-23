@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('BasicMessageChannel', () {
@@ -215,7 +215,7 @@ void main() {
       await new Future<Null>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
-      expect(errors[0], const isInstanceOf<PlatformException>());
+      expect(errors[0], isInstanceOf<PlatformException>());
       final PlatformException error = errors[0];
       expect(error.code, '404');
       expect(error.message, 'Not Found.');

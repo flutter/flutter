@@ -54,30 +54,18 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['flutter-repo']) {
       // check for conflicting dependencies
-      final PackageDependencyTracker dependencies =
-          new PackageDependencyTracker();
+      final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
-
       directories.addAll(repoRoots);
-
-      if (argResults.wasParsed('current-package') &&
-          argResults['current-package']) {
+      if (argResults.wasParsed('current-package') && argResults['current-package'])
         directories.add(currentDirectory);
-      }
     } else {
-      if (argResults['current-package']) {
+      if (argResults['current-package'])
         directories.add(currentDirectory);
-      }
     }
 
-    if (argResults['dartdocs'] && !argResults['flutter-repo']) {
-      throwToolExit(
-          'The --dartdocs option is currently only supported with --flutter-repo.');
-    }
-
-    if (directories.isEmpty) {
+    if (directories.isEmpty)
       throwToolExit('Nothing to analyze.', exitCode: 0);
-    }
 
     // analyze all
     final Completer<Null> analysisCompleter = new Completer<Null>();
@@ -85,7 +73,11 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(sdkPath, directories.toList());
+    final AnalysisServer server = new AnalysisServer(
+      sdkPath,
+      directories.toList(),
+      useCfe: argResults.wasParsed('use-cfe') ? argResults['use-cfe'] : null,
+    );
 
     StreamSubscription<bool> subscription;
     subscription = server.onAnalyzing.listen((bool isAnalyzing) {
@@ -96,8 +88,6 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      fileErrors.errors
-          .removeWhere((AnalysisError error) => error.type == 'TODO');
       errors.addAll(fileErrors.errors);
     });
 
@@ -123,62 +113,50 @@ class AnalyzeOnce extends AnalyzeBase {
     progress?.cancel();
     timer.stop();
 
-    // report dartdocs
-    int undocumentedMembers = 0;
-
-    if (argResults['flutter-repo']) {
-      undocumentedMembers = errors.where((AnalysisError error) {
-        return error.code == 'public_member_api_docs';
-      }).length;
-
-      if (!argResults['dartdocs']) {
-        errors.removeWhere(
-            (AnalysisError error) => error.code == 'public_member_api_docs');
-      }
-    }
+    // count missing dartdocs
+    final int undocumentedMembers = errors.where((AnalysisError error) {
+      return error.code == 'public_member_api_docs';
+    }).length;
+    if (!argResults['dartdocs'])
+      errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
 
     // emit benchmarks
-    if (isBenchmarking) {
+    if (isBenchmarking)
       writeBenchmark(timer, errors.length, undocumentedMembers);
-    }
 
-    // report results
-    dumpErrors(
-        errors.map<String>((AnalysisError error) => error.toLegacyString()));
+    // --write
+    dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
-    if (errors.isNotEmpty && argResults['preamble']) {
+    // report errors
+    if (errors.isNotEmpty && argResults['preamble'])
       printStatus('');
-    }
     errors.sort();
-    for (AnalysisError error in errors) {
+    for (AnalysisError error in errors)
       printStatus(error.toString());
-    }
 
-    final String seconds =
-        (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+    final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+
+    String dartdocMessage;
+    if (undocumentedMembers == 1) {
+      dartdocMessage = 'one public member lacks documentation';
+    } else {
+      dartdocMessage = '$undocumentedMembers public members lack documentation';
+    }
 
     // We consider any level of error to be an error exit (we don't report different levels).
     if (errors.isNotEmpty) {
+      final int errorCount = errors.length;
       printStatus('');
-
-      printStatus(
-          '${errors.length} ${pluralize('issue', errors.length)} found. (ran in ${seconds}s)');
-
       if (undocumentedMembers > 0) {
-        throwToolExit('[lint] $undocumentedMembers public '
-            '${ undocumentedMembers == 1
-            ? "member lacks"
-            : "members lack" } documentation');
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
       } else {
-        throwToolExit(null);
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }
     }
 
     if (argResults['congratulate']) {
       if (undocumentedMembers > 0) {
-        printStatus('No issues found! (ran in ${seconds}s; '
-            '$undocumentedMembers public ${ undocumentedMembers ==
-            1 ? "member lacks" : "members lack" } documentation)');
+        printStatus('No issues found! (ran in ${seconds}s; $dartdocMessage)');
       } else {
         printStatus('No issues found! (ran in ${seconds}s)');
       }
