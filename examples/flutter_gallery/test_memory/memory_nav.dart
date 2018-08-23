@@ -12,8 +12,6 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> endOfAnimation() async {
-  // await at least a single frame.
-  await new Future<void>.value(null);
   do {
     await SchedulerBinding.instance.endOfFrame;
   } while (SchedulerBinding.instance.hasScheduledFrame);
