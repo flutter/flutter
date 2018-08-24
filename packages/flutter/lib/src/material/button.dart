@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui'as ui show defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -47,7 +46,7 @@ class RawMaterialButton extends StatefulWidget {
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
+    this.clipBehavior = Clip.none,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
   }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -269,7 +268,7 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.padding,
     this.materialTapTargetSize,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
+    this.clipBehavior = Clip.none,
     @required this.onPressed,
     this.child
   }) : assert(clipBehavior != null), super(key: key);
