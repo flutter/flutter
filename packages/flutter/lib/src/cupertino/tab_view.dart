@@ -42,6 +42,7 @@ class CupertinoTabView extends StatelessWidget {
   const CupertinoTabView({
     Key key,
     this.builder,
+    this.defaultTitle,
     this.routes,
     this.onGenerateRoute,
     this.onUnknownRoute,
@@ -55,6 +56,9 @@ class CupertinoTabView extends StatelessWidget {
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
   final WidgetBuilder builder;
+
+  /// The title of the default route.
+  final String defaultTitle;
 
   /// This tab view's routing table.
   ///
@@ -109,13 +113,17 @@ class CupertinoTabView extends StatelessWidget {
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
     WidgetBuilder routeBuilder;
-    if (name == Navigator.defaultRouteName && builder != null)
+    String title;
+    if (name == Navigator.defaultRouteName && builder != null) {
       routeBuilder = builder;
+      title = defaultTitle;
+    }
     else if (routes != null)
       routeBuilder = routes[name];
     if (routeBuilder != null) {
       return new CupertinoPageRoute<dynamic>(
         builder: routeBuilder,
+        title: title,
         settings: settings,
       );
     }
