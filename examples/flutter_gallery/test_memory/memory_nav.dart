@@ -17,6 +17,11 @@ Future<void> endOfAnimation() async {
   } while (SchedulerBinding.instance.hasScheduledFrame);
 }
 
+Rect boundsFor(WidgetController controller, Finder item) {
+  final RenderBox box = controller.renderObject<RenderBox>(item);
+  return box.localToGlobal(Offset.zero) & box.size;
+}
+
 Future<void> main() async {
   MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   final Completer<void> ready = new Completer<void>();
@@ -59,12 +64,21 @@ Future<void> main() async {
     await new Future<Null>.delayed(const Duration(milliseconds: 20));
   } while (!demoItem.precache());
 
+  // Ensure that the center of the "Text fields" item is visible
+  // because that's where we're going to tap
+  final Rect demoItemBounds = boundsFor(controller, demoItem);
+  final Rect demoListBounds = boundsFor(controller, demoList);
+  if (!demoListBounds.contains(demoItemBounds.center)) {
+    await controller.drag(demoList, new Offset(0.0, demoListBounds.center.dy - demoItemBounds.center.dy));
+    await endOfAnimation();
+  }
+
   for (int iteration = 0; iteration < 15; iteration += 1) {
     debugPrint('Tapping... (iteration $iteration)');
     await controller.tap(demoItem);
     await endOfAnimation();
     debugPrint('Backing out...');
-    await controller.tap(find.byTooltip('Back').last);
+    await controller.tap(find.byTooltip('Back'));
     await endOfAnimation();
   }
 

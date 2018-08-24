@@ -239,7 +239,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        super(child);
 
   /// A constructor to be used only when the extending class also has a mixin.
-  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/15101 is fixed.
+  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/31543 is fixed.
   @protected
   RenderAligningShiftedBox.mixin(AlignmentGeometry alignment,TextDirection textDirection, RenderBox child)
     : this(alignment: alignment, textDirection: textDirection, child: child);

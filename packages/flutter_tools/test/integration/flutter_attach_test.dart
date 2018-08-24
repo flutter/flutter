@@ -24,8 +24,11 @@ void main() {
   });
 
   tearDown(() async {
+    // We can't call stop() on both of these because they'll both try to stop the
+    // same app. Just quit the attach process and then send a stop to the original
+    // process.
+    await _flutterAttach.quit();
     await _flutterRun.stop();
-    await _flutterAttach.stop();
     tryToDelete(tempDir);
   });
 
@@ -36,5 +39,5 @@ void main() {
       await _flutterAttach.hotReload();
     });
     // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
-  }, timeout: const Timeout.factor(3), skip: platform.isWindows);
+  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
 }

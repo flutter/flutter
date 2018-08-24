@@ -47,6 +47,8 @@ class FakePlatformViewsController {
         return _resize(call);
       case 'touch':
         return _touch(call);
+      case 'setDirection':
+        return _setDirection(call);
     }
     return new Future<Null>.sync(() => null);
   }
@@ -57,6 +59,7 @@ class FakePlatformViewsController {
     final String viewType = args['viewType'];
     final double width = args['width'];
     final double height = args['height'];
+    final int layoutDirection = args['direction'];
 
     if (_views.containsKey(id))
       throw new PlatformException(
@@ -70,7 +73,7 @@ class FakePlatformViewsController {
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
 
-    _views[id] = new FakePlatformView(id, viewType, new Size(width, height));
+    _views[id] = new FakePlatformView(id, viewType, new Size(width, height), layoutDirection);
     final int textureId = _textureCounter++;
     return new Future<int>.sync(() => textureId);
   }
@@ -130,15 +133,31 @@ class FakePlatformViewsController {
     return new Future<Null>.sync(() => null);
   }
 
+  Future<dynamic> _setDirection(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    final int layoutDirection = args['direction'];
+
+    if (!_views.containsKey(id))
+      throw new PlatformException(
+        code: 'error',
+        message: 'Trying to resize a platform view with unknown id: $id',
+      );
+
+    _views[id].layoutDirection = layoutDirection;
+
+    return new Future<Null>.sync(() => null);
+  }
 }
 
 class FakePlatformView {
 
-  FakePlatformView(this.id, this.type, this.size);
+  FakePlatformView(this.id, this.type, this.size, this.layoutDirection);
 
   final int id;
   final String type;
   Size size;
+  int layoutDirection;
 
   @override
   bool operator ==(dynamic other) {
@@ -151,11 +170,11 @@ class FakePlatformView {
   }
 
   @override
-  int get hashCode => hashValues(id, type, size);
+  int get hashCode => hashValues(id, type, size, layoutDirection);
 
   @override
   String toString() {
-    return 'FakePlatformView(id: $id, type: $type, size: $size)';
+    return 'FakePlatformView(id: $id, type: $type, size: $size, layoutDirection: $layoutDirection)';
   }
 }
 

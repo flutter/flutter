@@ -119,7 +119,6 @@ class _SerializeConfig {
   _SerializeConfig.merge(
     _SerializeConfig base, {
     int subtreeDepth,
-    bool omitChildren,
     Iterable<Diagnosticable> pathToInclude,
   }) :
     groupName = base.groupName,
@@ -813,8 +812,9 @@ class WidgetInspectorService {
   /// the value is returned over the Observatory protocol and when the
   /// separate observatory protocol command has to be used to retrieve its full
   /// contents.
-  /// TODO(jacobr): Replace this with a better solution once
-  /// https://github.com/dart-lang/sdk/issues/32919 is fixed.
+  //
+  // TODO(jacobr): Replace this with a better solution once
+  // https://github.com/dart-lang/sdk/issues/32919 is fixed.
   String _safeJsonEncode(Object object) {
     final String jsonString = json.encode(object);
     _serializeRing[_serializeRingIndex] = jsonString;
@@ -837,7 +837,7 @@ class WidgetInspectorService {
               new _SerializeConfig.merge(config, pathToInclude: config.pathToInclude.skip(1)),
             );
           } else {
-            return _nodeToJson(node, new _SerializeConfig.merge(config, omitChildren: true));
+            return _nodeToJson(node, new _SerializeConfig.merge(config));
           }
         }
         // The tricky special case here is that when in the detailsTree,

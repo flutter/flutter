@@ -393,7 +393,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byType(CupertinoButton), findsOneWidget);
-    expect(find.byType(Icon), findsOneWidget);
+    expect(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       fullscreenDialog: true,
@@ -418,12 +418,55 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
 
-    await tester.tap(find.byType(Icon));
+    await tester.tap(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.text('Home page'), findsOneWidget);
+  });
+
+  testWidgets('Long back label turns into "back"', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      new CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              previousPageTitle: '0123456789',
+            ),
+            child: Placeholder(),
+          );
+        }
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.widgetWithText(CupertinoButton, '0123456789'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      new CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              previousPageTitle: '01234567890',
+            ),
+            child: Placeholder(),
+          );
+        }
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
   });
 
   testWidgets('Border should be displayed by default', (WidgetTester tester) async {

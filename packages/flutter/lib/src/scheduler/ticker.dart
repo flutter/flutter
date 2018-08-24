@@ -225,7 +225,6 @@ class Ticker {
     _animationId = null;
 
     _startTime ??= timeStamp;
-
     _onTick(timeStamp - _startTime);
 
     // The onTick callback may have scheduled another tick already, for

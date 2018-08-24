@@ -111,15 +111,15 @@ abstract class Route<T> {
   ///
   /// The returned value resolves when the push transition is complete.
   ///
-  /// The [didChangeNext] method is typically called immediately after this
-  /// method is called.
+  /// The [didChangeNext] and [didChangePrevious] methods are typically called
+  /// immediately after this method is called.
   @protected
   TickerFuture didPush() => new TickerFuture.complete();
 
   /// Called after [install] when the route replaced another in the navigator.
   ///
-  /// The [didChangeNext] method is typically called immediately after this
-  /// method is called.
+  /// The [didChangeNext] and [didChangePrevious] methods are typically called
+  /// immediately after this method is called.
   @protected
   @mustCallSuper
   void didReplace(Route<dynamic> oldRoute) { }
@@ -201,9 +201,8 @@ abstract class Route<T> {
 
   /// This route's previous route has changed to the given new route. This is
   /// called on a route whenever the previous route changes for any reason, so
-  /// long as it is in the history, except for immediately after the route has
-  /// been pushed (in which case [didPush] or [didReplace] will be called
-  /// instead). `previousRoute` will be null if there's no previous route.
+  /// long as it is in the history. `previousRoute` will be null if there's no
+  /// previous route.
   @protected
   @mustCallSuper
   void didChangePrevious(Route<dynamic> previousRoute) { }
@@ -1326,7 +1325,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (plannedInitialRoutes.contains(null)) {
         assert(() {
           FlutterError.reportError(
-            new FlutterErrorDetails( // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/29952
+            new FlutterErrorDetails(
               exception:
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
@@ -1539,8 +1538,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _history.add(route);
     route.didPush();
     route.didChangeNext(null);
-    if (oldRoute != null)
+    if (oldRoute != null) {
       oldRoute.didChangeNext(route);
+      route.didChangePrevious(oldRoute);
+    }
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
@@ -1589,8 +1590,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       }
     });
     newRoute.didChangeNext(null);
-    if (index > 0)
+    if (index > 0) {
       _history[index - 1].didChangeNext(newRoute);
+      newRoute.didChangePrevious(_history[index - 1]);
+    }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     assert(() { _debugLocked = false; return true; }());
@@ -1684,8 +1687,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     } else {
       newRoute.didChangeNext(null);
     }
-    if (index > 0)
+    if (index > 0) {
       _history[index - 1].didChangeNext(newRoute);
+      newRoute.didChangePrevious(_history[index - 1]);
+    }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     oldRoute.dispose();

@@ -49,5 +49,7 @@
   "reorderItemUp": "TBD",
   "reorderItemDown": "TBD",
   "reorderItemLeft": "TBD",
-  "reorderItemRight": "TBD"
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD"
 }

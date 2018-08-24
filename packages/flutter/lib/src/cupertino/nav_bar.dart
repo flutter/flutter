@@ -12,6 +12,7 @@ import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'page_scaffold.dart';
+import 'route.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 const double _kNavBarPersistentHeight = 44.0;
@@ -62,6 +63,10 @@ const TextStyle _kLargeTitleTextStyle = TextStyle(
 /// close button in case of a fullscreen dialog) to pop the current route if none
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
+/// The [middle] widget will automatically be a title text from the current
+/// route if none is provided and [automaticallyImplyMiddle] is true (true by
+/// default).
+///
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
 ///
@@ -80,6 +85,8 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     Key key,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.automaticallyImplyMiddle = true,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
@@ -87,35 +94,83 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
+       assert(automaticallyImplyMiddle != null),
        super(key: key);
 
+  /// {@template flutter.cupertino.navBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
+  ///
+  /// If null and [automaticallyImplyLeading] is true, an appropriate button
+  /// will be automatically created.
+  /// {@endtemplate}
   final Widget leading;
 
+  /// {@template flutter.cupertino.navBar.automaticallyImplyLeading}
   /// Controls whether we should try to imply the leading widget if null.
   ///
   /// If true and [leading] is null, automatically try to deduce what the [leading]
   /// widget should be. If [leading] widget is not null, this parameter has no effect.
   ///
+  /// Specifically this navigation bar will:
+  ///
+  /// 1. Show a 'Close' button if the current route is a `fullscreenDialog`.
+  /// 2. Show a back chevron with [previousPageTitle] if [previousPageTitle] is
+  ///    not null.
+  /// 3. Show a back chevron with the previous route's `title` if the current
+  ///    route is a [CupertinoPageRoute] and the previous route is also a
+  ///    [CupertinoPageRoute].
+  ///
   /// This value cannot be null.
+  /// {@endtemplate}
   final bool automaticallyImplyLeading;
+
+  /// Controls whether we should try to imply the middle widget if null.
+  ///
+  /// If true and [middle] is null, automatically fill in a [Text] widget with
+  /// the current route's `title` if the route is a [CupertinoPageRoute].
+  /// If [middle] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
+  final bool automaticallyImplyMiddle;
+
+  /// {@template flutter.cupertino.navBar.previousPageTitle}
+  /// Manually specify the previous route's title when automatically implying
+  /// the leading back button.
+  ///
+  /// Overrides the text shown with the back chevron instead of automatically
+  /// showing the previous [CupertinoPageRoute]'s `title` when
+  /// [automaticallyImplyLeading] is true.
+  ///
+  /// Has no effect when [leading] is not null or if [automaticallyImplyLeading]
+  /// is false.
+  /// {@endtemplate}
+  final String previousPageTitle;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
   /// a segmented control.
+  ///
+  /// If null and [automaticallyImplyMiddle] is true, an appropriate [Text]
+  /// title will be created if the current route is a [CupertinoPageRoute] and
+  /// has a `title`.
   final Widget middle;
 
+  /// {@template flutter.cupertino.navBar.trailing}
   /// Widget to place at the end of the navigation bar. Normally additional actions
   /// taken on the page such as a search or edit function.
+  /// {@endtemplate}
   final Widget trailing;
 
   // TODO(xster): implement support for double row navigation bars.
 
+  /// {@template flutter.cupertino.navBar.backgroundColor}
   /// The background color of the navigation bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
   /// behind it.
+  /// {@endtemplate}
   final Color backgroundColor;
 
+  /// {@template flutter.cupertino.navBar.padding}
   /// Padding for the contents of the navigation bar.
   ///
   /// If null, the navigation bar will adopt the following defaults:
@@ -127,11 +182,14 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   ///    which case the padding will be 0.
   ///
   /// Vertical padding won't change the height of the nav bar.
+  /// {@endtemplate}
   final EdgeInsetsDirectional padding;
 
+  /// {@template flutter.cupertino.navBar.border}
   /// The border of the navigation bar. By default renders a single pixel bottom border side.
   ///
   /// If a border is null, the navigation bar will not display a border.
+  /// {@endtemplate}
   final Border border;
 
   /// Default color used for text and icons of the [leading] and [trailing]
@@ -152,13 +210,20 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 
   @override
   Widget build(BuildContext context) {
+    final Widget effectiveMiddle = _effectiveTitle(
+      title: middle,
+      automaticallyImplyTitle: automaticallyImplyMiddle,
+      currentRoute: ModalRoute.of(context),
+    );
+
     return _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
-        middle: new Semantics(child: middle, header: true),
+        previousPageTitle: previousPageTitle,
+        middle: effectiveMiddle,
         trailing: trailing,
         padding: padding,
         actionsForegroundColor: actionsForegroundColor,
@@ -192,6 +257,10 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
 /// close button in case of a fullscreen dialog) to pop the current route if none
 /// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
+/// The [largeTitle] widget will automatically be a title text from the current
+/// route if none is provided and [automaticallyImplyTitle] is true (true by
+/// default).
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -202,17 +271,19 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// The [largeTitle] argument is required and must not be null.
   const CupertinoSliverNavigationBar({
     Key key,
-    @required this.largeTitle,
+    this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading = true,
+    this.automaticallyImplyTitle = true,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor = _kDefaultNavBarBackgroundColor,
     this.padding,
     this.actionsForegroundColor = CupertinoColors.activeBlue,
-  }) : assert(largeTitle != null),
-       assert(automaticallyImplyLeading != null),
+  }) : assert(automaticallyImplyLeading != null),
+       assert(automaticallyImplyTitle != null),
        super(key: key);
 
   /// The navigation bar's title.
@@ -229,21 +300,31 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// any [GlobalKey]s, and that it not rely on maintaining state (for example,
   /// animations will not survive the transition from one location to the other,
   /// and may in fact be visible in two places at once during the transition).
+  ///
+  /// If null and [automaticallyImplyTitle] is true, an appropriate [Text]
+  /// title will be created if the current route is a [CupertinoPageRoute] and
+  /// has a `title`.
   final Widget largeTitle;
 
-  /// Widget to place at the start of the static navigation bar. Normally a back button
-  /// for a normal page or a cancel button for full page dialogs.
+  /// {@macro flutter.cupertino.navBar.leading}
   ///
   /// This widget is visible in both collapsed and expanded states.
   final Widget leading;
 
-  /// Controls whether we should try to imply the leading widget if null.
+  /// {@macro flutter.cupertino.navBar.automaticallyImplyLeading}
+  final bool automaticallyImplyLeading;
+
+  /// Controls whether we should try to imply the [largeTitle] widget if null.
   ///
-  /// If true and [leading] is null, automatically try to deduce what the [leading]
-  /// widget should be. If [leading] widget is not null, this parameter has no effect.
+  /// If true and [largeTitle] is null, automatically fill in a [Text] widget
+  /// with the current route's `title` if the route is a [CupertinoPageRoute].
+  /// If [largeTitle] widget is not null, this parameter has no effect.
   ///
   /// This value cannot be null.
-  final bool automaticallyImplyLeading;
+  final bool automaticallyImplyTitle;
+
+  /// {@macro flutter.cupertino.navBar.previousPageTitle}
+  final String previousPageTitle;
 
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
@@ -253,39 +334,24 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   /// [middle] widget is provided.
   final Widget middle;
 
-  /// Widget to place at the end of the static navigation bar. Normally
-  /// additional actions taken on the page such as a search or edit function.
+  /// {@macro flutter.cupertino.navBar.trailing}
   ///
   /// This widget is visible in both collapsed and expanded states.
   final Widget trailing;
 
-  /// Padding for the contents of the navigation bar.
-  ///
-  /// If null, the navigation bar will adopt the following defaults:
-  ///
-  ///  * Vertically, contents will be sized to the same height as the navigation
-  ///    bar itself minus the status bar.
-  ///  * Horizontally, padding will be 16 pixels according to iOS specifications
-  ///    unless the leading widget is an automatically inserted back button, in
-  ///    which case the padding will be 0.
-  ///
-  /// Vertical padding won't change the height of the nav bar.
+  /// {@macro flutter.cupertino.navBar.backgroundColor}
+  final Color backgroundColor;
+
+  /// {@macro flutter.cupertino.navBar.padding}
   final EdgeInsetsDirectional padding;
 
-  /// The border of the navigation bar. By default renders a single pixel bottom border side.
-  ///
-  /// If a border is null, the navigation bar will not display a border.
+  /// {@macro flutter.cupertino.navBar.border}
   final Border border;
-
-  /// The background color of the navigation bar. If it contains transparency, the
-  /// tab bar will automatically produce a blurring effect to the content
-  /// behind it.
-  final Color backgroundColor;
 
   /// Default color used for text and icons of the [leading] and [trailing]
   /// widgets in the navigation bar.
   ///
-  /// The default color for text in the [middle] slot is always black, as per
+  /// The default color for text in the [largeTitle] slot is always black, as per
   /// iOS standard design.
   final Color actionsForegroundColor;
 
@@ -294,13 +360,20 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget effectiveTitle = _effectiveTitle(
+      title: largeTitle,
+      automaticallyImplyTitle: automaticallyImplyTitle,
+      currentRoute: ModalRoute.of(context),
+    );
+
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-        title: largeTitle,
+        largeTitle: effectiveTitle,
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
+        previousPageTitle: previousPageTitle,
         middle: middle,
         trailing: trailing,
         padding: padding,
@@ -309,6 +382,137 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
         actionsForegroundColor: actionsForegroundColor,
       ),
     );
+  }
+}
+
+class _CupertinoLargeTitleNavigationBarSliverDelegate
+    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
+  _CupertinoLargeTitleNavigationBarSliverDelegate({
+    @required this.persistentHeight,
+    @required this.largeTitle,
+    this.leading,
+    this.automaticallyImplyLeading,
+    this.previousPageTitle,
+    this.middle,
+    this.trailing,
+    this.padding,
+    this.border,
+    this.backgroundColor,
+    this.actionsForegroundColor,
+  }) : assert(persistentHeight != null);
+
+  final double persistentHeight;
+
+  final Widget largeTitle;
+
+  final Widget leading;
+
+  final bool automaticallyImplyLeading;
+
+  final String previousPageTitle;
+
+  final Widget middle;
+
+  final Widget trailing;
+
+  final EdgeInsetsDirectional padding;
+
+  final Color backgroundColor;
+
+  final Border border;
+
+  final Color actionsForegroundColor;
+
+  @override
+  double get minExtent => persistentHeight;
+
+  @override
+  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
+
+    final _CupertinoPersistentNavigationBar persistentNavigationBar =
+        new _CupertinoPersistentNavigationBar(
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      previousPageTitle: previousPageTitle,
+      middle: middle ?? largeTitle,
+      trailing: trailing,
+      // If middle widget exists, always show it. Otherwise, show title
+      // when collapsed.
+      middleVisible: middle != null ? null : !showLargeTitle,
+      padding: padding,
+      actionsForegroundColor: actionsForegroundColor,
+    );
+
+    return _wrapWithBackground(
+      border: border,
+      backgroundColor: backgroundColor,
+      child: new Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          new Positioned(
+            top: persistentHeight,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: new ClipRect(
+              // The large title starts at the persistent bar.
+              // It's aligned with the bottom of the sliver and expands clipped
+              // and behind the persistent bar.
+              child: new OverflowBox(
+                minHeight: 0.0,
+                maxHeight: double.infinity,
+                alignment: AlignmentDirectional.bottomStart,
+                child: new Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: 8.0, // Bottom has a different padding.
+                  ),
+                  child: new DefaultTextStyle(
+                    style: _kLargeTitleTextStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    child: new AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: new SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: new Semantics(
+                          header: true,
+                          child: largeTitle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          new Positioned(
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            child: persistentNavigationBar,
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
+    return persistentHeight != oldDelegate.persistentHeight
+        || largeTitle != oldDelegate.largeTitle
+        || leading != oldDelegate.leading
+        || middle != oldDelegate.middle
+        || trailing != oldDelegate.trailing
+        || border != oldDelegate.border
+        || backgroundColor != oldDelegate.backgroundColor
+        || actionsForegroundColor != oldDelegate.actionsForegroundColor;
   }
 }
 
@@ -347,6 +551,22 @@ Widget _wrapWithBackground({
   );
 }
 
+Widget _effectiveTitle({
+  Widget title,
+  bool automaticallyImplyTitle,
+  ModalRoute<dynamic> currentRoute,
+}) {
+  // Auto use the CupertinoPageRoute's title if middle not provided.
+  if (title == null &&
+      automaticallyImplyTitle &&
+      currentRoute is CupertinoPageRoute &&
+      currentRoute.title != null) {
+    return new Text(currentRoute.title);
+  }
+
+  return title;
+}
+
 /// The top part of the navigation bar that's never scrolled away.
 ///
 /// Consists of the entire navigation bar without background and border when used
@@ -357,6 +577,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     Key key,
     this.leading,
     this.automaticallyImplyLeading,
+    this.previousPageTitle,
     this.middle,
     this.trailing,
     this.padding,
@@ -367,6 +588,8 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   final Widget leading;
 
   final bool automaticallyImplyLeading;
+
+  final String previousPageTitle;
 
   final Widget middle;
 
@@ -418,14 +641,16 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
     // Let the middle be black rather than `actionsForegroundColor` in case
     // it's a plain text title.
-    final Widget styledMiddle = middle == null ? null : new DefaultTextStyle(
-      style: actionsStyle.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.08,
-        color: CupertinoColors.black,
-      ),
-      child: middle,
-    );
+    final Widget styledMiddle = middle == null
+        ? null
+        : new DefaultTextStyle(
+          style: actionsStyle.copyWith(
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.08,
+            color: CupertinoColors.black,
+          ),
+          child: new Semantics(child: middle, header: true),
+        );
 
     final Widget animatedStyledMiddle = middleVisible == null
       ? styledMiddle
@@ -437,23 +662,26 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
     // Auto add back button if leading not provided.
     Widget backOrCloseButton;
-    bool useBackButton = false;
     if (styledLeading == null && automaticallyImplyLeading) {
       final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
       if (currentRoute?.canPop == true) {
-        useBackButton = !(currentRoute is PageRoute && currentRoute?.fullscreenDialog == true);
-        backOrCloseButton = new CupertinoButton(
-          child: useBackButton
-              ? new Container(
-                height: _kNavBarPersistentHeight,
-                width: _kNavBarBackButtonTapWidth,
-                alignment: AlignmentDirectional.centerStart,
-                child: const Icon(CupertinoIcons.back, size: 34.0,)
-              )
-              : const Text('Close'),
-          padding: EdgeInsets.zero,
-          onPressed: () { Navigator.maybePop(context); },
-        );
+        if (currentRoute is PageRoute && currentRoute?.fullscreenDialog == true) {
+          backOrCloseButton = new CupertinoButton(
+            child: const Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: _kNavBarEdgePadding,
+              ),
+              child: Text('Close'),
+            ),
+            padding: EdgeInsets.zero,
+            onPressed: () { Navigator.maybePop(context); },
+          );
+        } else {
+          backOrCloseButton = new CupertinoNavigationBarBackButton(
+            color: actionsForegroundColor,
+            previousPageTitle: previousPageTitle,
+          );
+        }
       }
     }
 
@@ -462,6 +690,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       middle: animatedStyledMiddle,
       trailing: styledTrailing,
       centerMiddle: true,
+      middleSpacing: 6.0,
     );
 
     if (padding != null) {
@@ -476,143 +705,164 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
     return new SizedBox(
       height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-      child: IconTheme.merge(
-        data: new IconThemeData(
-          color: actionsForegroundColor,
-          size: 22.0,
-        ),
-        child: new SafeArea(
-          bottom: false,
-          child: paddedToolbar,
-        ),
+      child: new SafeArea(
+        bottom: false,
+        child: paddedToolbar,
       ),
     );
   }
 }
 
-class _CupertinoLargeTitleNavigationBarSliverDelegate
-    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
-  _CupertinoLargeTitleNavigationBarSliverDelegate({
-    @required this.persistentHeight,
-    @required this.title,
-    this.leading,
-    this.automaticallyImplyLeading,
-    this.middle,
-    this.trailing,
-    this.padding,
-    this.border,
-    this.backgroundColor,
-    this.actionsForegroundColor,
-  }) : assert(persistentHeight != null);
+/// A nav bar back button typically used in [CupertinoNavigationBar].
+///
+/// This is automatically inserted into [CupertinoNavigationBar] and
+/// [CupertinoSliverNavigationBar]'s `leading` slot when
+/// `automaticallyImplyLeading` is true.
+///
+/// Shows a back chevron and the previous route's title when available from
+/// the previous [CupertinoPageRoute.title]. If [previousPageTitle] is specified,
+/// it will be shown instead.
+class CupertinoNavigationBarBackButton extends StatelessWidget {
+  /// Construct a [CupertinoNavigationBarBackButton] that can be used to pop
+  /// the current route.
+  ///
+  /// The [color] parameter must not be null.
+  const CupertinoNavigationBarBackButton({
+    @required this.color,
+    this.previousPageTitle,
+  }) : assert(color != null);
 
-  final double persistentHeight;
+  /// The [Color] of the back chevron.
+  ///
+  /// Must not be null.
+  final Color color;
 
-  final Widget title;
-
-  final Widget leading;
-
-  final bool automaticallyImplyLeading;
-
-  final Widget middle;
-
-  final Widget trailing;
-
-  final EdgeInsetsDirectional padding;
-
-  final Color backgroundColor;
-
-  final Border border;
-
-  final Color actionsForegroundColor;
+  /// An override for showing the previous route's title. If null, it will be
+  /// automatically derived from [CupertinoPageRoute.title] if the current and
+  /// previous routes are both [CupertinoPageRoute]s.
+  final String previousPageTitle;
 
   @override
-  double get minExtent => persistentHeight;
-
-  @override
-  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
-
-    final _CupertinoPersistentNavigationBar persistentNavigationBar =
-        new _CupertinoPersistentNavigationBar(
-      leading: leading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      middle: new Semantics(child: middle ?? title, header: true),
-      trailing: trailing,
-      // If middle widget exists, always show it. Otherwise, show title
-      // when collapsed.
-      middleVisible: middle != null ? null : !showLargeTitle,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
+  Widget build(BuildContext context) {
+    final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
+    assert(
+      currentRoute.canPop,
+      'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
     );
 
-    return _wrapWithBackground(
-      border: border,
-      backgroundColor: backgroundColor,
-      child: new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new Positioned(
-            top: persistentHeight,
-            left: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: new ClipRect(
-              // The large title starts at the persistent bar.
-              // It's aligned with the bottom of the sliver and expands clipped
-              // and behind the persistent bar.
-              child: new OverflowBox(
-                minHeight: 0.0,
-                maxHeight: double.infinity,
-                alignment: AlignmentDirectional.bottomStart,
-                child: new Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: _kNavBarEdgePadding,
-                    bottom: 8.0, // Bottom has a different padding.
-                  ),
-                  child: new DefaultTextStyle(
-                    style: _kLargeTitleTextStyle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    child: new AnimatedOpacity(
-                      opacity: showLargeTitle ? 1.0 : 0.0,
-                      duration: _kNavBarTitleFadeDuration,
-                      child: new SafeArea(
-                        top: false,
-                        bottom: false,
-                        child: new Semantics(
-                          header: true,
-                          child: title,
-                        ),
-                      ),
-                    ),
-                  ),
+    return new CupertinoButton(
+      child: new Semantics(
+        container: true,
+        excludeSemantics: true,
+        label: 'Back',
+        button: true,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: _kNavBarBackButtonTapWidth),
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              const Padding(padding: EdgeInsetsDirectional.only(start: 8.0)),
+              new _BackChevron(color: color),
+              const Padding(padding: EdgeInsetsDirectional.only(start: 6.0)),
+              new Flexible(
+                child: new _BackLabel(
+                  specifiedPreviousTitle: previousPageTitle,
+                  route: currentRoute,
                 ),
               ),
-            ),
+            ],
           ),
-          new Positioned(
-            left: 0.0,
-            right: 0.0,
-            top: 0.0,
-            child: persistentNavigationBar,
-          ),
-        ],
+        ),
+      ),
+      padding: EdgeInsets.zero,
+      onPressed: () { Navigator.maybePop(context); },
+    );
+  }
+}
+
+class _BackChevron extends StatelessWidget {
+  const _BackChevron({
+    @required this.color,
+  }) : assert(color != null);
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextDirection textDirection = Directionality.of(context);
+
+    // Replicate the Icon logic here to get a tightly sized icon and add
+    // custom non-square padding.
+    Widget iconWidget = new Text.rich(
+      new TextSpan(
+        text: new String.fromCharCode(CupertinoIcons.back.codePoint),
+        style: new TextStyle(
+          inherit: false,
+          color: color,
+          fontSize: 34.0,
+          fontFamily: CupertinoIcons.back.fontFamily,
+          package: CupertinoIcons.back.fontPackage,
+        ),
       ),
     );
+    switch (textDirection) {
+      case TextDirection.rtl:
+        iconWidget = new Transform(
+          transform: new Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+          alignment: Alignment.center,
+          transformHitTests: false,
+          child: iconWidget,
+        );
+        break;
+      case TextDirection.ltr:
+        break;
+    }
+
+    return iconWidget;
+  }
+}
+
+/// A widget that shows next to the back chevron when `automaticallyImplyLeading`
+/// is true.
+class _BackLabel extends StatelessWidget {
+  const _BackLabel({
+    @required this.specifiedPreviousTitle,
+    @required this.route,
+  }) : assert(route != null);
+
+  final String specifiedPreviousTitle;
+  final ModalRoute<dynamic> route;
+
+  // `child` is never passed in into ValueListenableBuilder so it's always
+  // null here and unused.
+  Widget _buildPreviousTitleWidget(BuildContext context, String previousTitle, Widget child) {
+    if (previousTitle == null) {
+      return const SizedBox(height: 0.0, width: 0.0);
+    }
+
+    if (previousTitle.length > 10) {
+      return const Text('Back');
+    }
+
+    return new Text(previousTitle, maxLines: 1);
   }
 
   @override
-  bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return persistentHeight != oldDelegate.persistentHeight
-        || title != oldDelegate.title
-        || leading != oldDelegate.leading
-        || middle != oldDelegate.middle
-        || trailing != oldDelegate.trailing
-        || border != oldDelegate.border
-        || backgroundColor != oldDelegate.backgroundColor
-        || actionsForegroundColor != oldDelegate.actionsForegroundColor;
+  Widget build(BuildContext context) {
+    if (specifiedPreviousTitle != null) {
+      return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
+    } else if (route is CupertinoPageRoute<dynamic>) {
+      final CupertinoPageRoute<dynamic> cupertinoRoute = route;
+      // There is no timing issue because the previousTitle Listenable changes
+      // happen during route modifications before the ValueListenableBuilder
+      // is built.
+      return new ValueListenableBuilder<String>(
+        valueListenable: cupertinoRoute.previousTitle,
+        builder: _buildPreviousTitleWidget,
+      );
+    } else {
+      return const SizedBox(height: 0.0, width: 0.0);
+    }
   }
 }
