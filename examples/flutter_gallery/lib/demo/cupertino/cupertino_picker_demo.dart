@@ -95,11 +95,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   Widget _buildCountdownTimerPicker(BuildContext context) {
     return new GestureDetector(
       onTap: () async {
-        await showModalBottomSheet<void>(
+        await showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
             return _buildBottomPicker(
-              CupertinoCountdownTimerPicker(
+              new CupertinoTimerPicker(
                 initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
                   setState(() {
@@ -144,7 +144,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               const Padding(padding: EdgeInsets.only(top: 32.0)),
               new GestureDetector(
                 onTap: () async {
-                  await showModalBottomSheet<void>(
+                  await showCupertinoModalPopup<void>(
                     context: context,
                     builder: (BuildContext context) {
                       return _buildBottomPicker(_buildColorPicker());
