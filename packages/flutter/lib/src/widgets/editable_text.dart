@@ -904,6 +904,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
+              editableTextState: this,
             ),
           ),
         );
@@ -967,6 +968,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
+    this.editableTextState,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -990,6 +992,7 @@ class _Editable extends LeafRenderObjectWidget {
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final Radius cursorRadius;
+  final EditableTextState editableTextState;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -1012,6 +1015,7 @@ class _Editable extends LeafRenderObjectWidget {
       obscureText: obscureText,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
+      editableTextState: editableTextState,
     );
   }
 
