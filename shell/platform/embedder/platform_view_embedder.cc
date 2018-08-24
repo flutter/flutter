@@ -10,26 +10,37 @@ namespace shell {
 
 PlatformViewEmbedder::PlatformViewEmbedder(PlatformView::Delegate& delegate,
                                            blink::TaskRunners task_runners,
-                                           DispatchTable dispatch_table)
+                                           DispatchTable dispatch_table,
+                                           bool fbo_reset_after_present)
     : PlatformView(delegate, std::move(task_runners)),
-      dispatch_table_(dispatch_table) {}
+      dispatch_table_(dispatch_table),
+      fbo_reset_after_present_(fbo_reset_after_present) {}
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
+// |shell::GPUSurfaceGLDelegate|
 bool PlatformViewEmbedder::GLContextMakeCurrent() {
   return dispatch_table_.gl_make_current_callback();
 }
 
+// |shell::GPUSurfaceGLDelegate|
 bool PlatformViewEmbedder::GLContextClearCurrent() {
   return dispatch_table_.gl_clear_current_callback();
 }
 
+// |shell::GPUSurfaceGLDelegate|
 bool PlatformViewEmbedder::GLContextPresent() {
   return dispatch_table_.gl_present_callback();
 }
 
+// |shell::GPUSurfaceGLDelegate|
 intptr_t PlatformViewEmbedder::GLContextFBO() const {
   return dispatch_table_.gl_fbo_callback();
+}
+
+// |shell::GPUSurfaceGLDelegate|
+bool PlatformViewEmbedder::GLContextFBOResetAfterPresent() const {
+  return fbo_reset_after_present_;
 }
 
 void PlatformViewEmbedder::HandlePlatformMessage(

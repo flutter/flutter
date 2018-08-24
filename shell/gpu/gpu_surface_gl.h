@@ -22,6 +22,8 @@ class GPUSurfaceGLDelegate {
 
   virtual intptr_t GLContextFBO() const = 0;
 
+  virtual bool GLContextFBOResetAfterPresent() const { return false; }
+
   virtual bool UseOffscreenSurface() const { return false; }
 };
 

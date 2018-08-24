@@ -234,7 +234,25 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     onscreen_surface_->getCanvas()->flush();
   }
 
-  delegate_->GLContextPresent();
+  if (!delegate_->GLContextPresent()) {
+    return false;
+  }
+
+  if (delegate_->GLContextFBOResetAfterPresent()) {
+    auto current_size =
+        SkISize::Make(onscreen_surface_->width(), onscreen_surface_->height());
+
+    // The FBO has changed, ask the delegate for the new FBO and do a surface
+    // re-wrap.
+    auto new_onscreen_surface = WrapOnscreenSurface(
+        context_.get(), current_size, delegate_->GLContextFBO());
+
+    if (!new_onscreen_surface) {
+      return false;
+    }
+
+    onscreen_surface_ = std::move(new_onscreen_surface);
+  }
 
   return true;
 }

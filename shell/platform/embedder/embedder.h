@@ -42,6 +42,11 @@ typedef struct {
   BoolCallback present;
   UIntCallback fbo_callback;
   BoolCallback make_resource_current;
+  // By default, the renderer config assumes that the FBO does not change for
+  // the duration of the engine run. If this argument is true, the
+  // engine will ask the embedder for an updated FBO target (via an fbo_callback
+  // invocation) after a present call.
+  bool fbo_reset_after_present;
 } FlutterOpenGLRendererConfig;
 
 typedef struct {

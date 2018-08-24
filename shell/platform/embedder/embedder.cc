@@ -128,6 +128,9 @@ FlutterResult FlutterEngineRun(size_t version,
                                       user_data]() { return ptr(user_data); };
   }
 
+  bool fbo_reset_after_present =
+      SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
+
   std::string icu_data_path;
   if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
     icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
@@ -194,11 +197,12 @@ FlutterResult FlutterEngineRun(size_t version,
   };
 
   shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =
-      [dispatch_table](shell::Shell& shell) {
+      [dispatch_table, fbo_reset_after_present](shell::Shell& shell) {
         return std::make_unique<shell::PlatformViewEmbedder>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
-            dispatch_table           // embedder dispatch table
+            dispatch_table,          // embedder dispatch table
+            fbo_reset_after_present  // fbo reset after present
         );
       };
 

@@ -29,7 +29,8 @@ class PlatformViewEmbedder final : public PlatformView,
 
   PlatformViewEmbedder(PlatformView::Delegate& delegate,
                        blink::TaskRunners task_runners,
-                       DispatchTable dispatch_table);
+                       DispatchTable dispatch_table,
+                       bool fbo_reset_after_present);
 
   ~PlatformViewEmbedder() override;
 
@@ -45,12 +46,16 @@ class PlatformViewEmbedder final : public PlatformView,
   // |shell::GPUSurfaceGLDelegate|
   intptr_t GLContextFBO() const override;
 
+  // |shell::GPUSurfaceGLDelegate|
+  bool GLContextFBOResetAfterPresent() const override;
+
   // |shell::PlatformView|
   void HandlePlatformMessage(
       fml::RefPtr<blink::PlatformMessage> message) override;
 
  private:
   DispatchTable dispatch_table_;
+  bool fbo_reset_after_present_;
 
   // |shell::PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
