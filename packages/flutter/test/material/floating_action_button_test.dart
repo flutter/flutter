@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -436,6 +437,26 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('floating_action_button_test.clip.1.png'),
       skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+    final GlobalKey buttonKey = new GlobalKey();
+    await tester.pumpWidget(
+      new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new FloatingActionButton(
+              key: buttonKey,
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byKey(buttonKey)),
+        paintsExactlyCountTimes(#clipPath, 0)
     );
   });
 }

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   testWidgets('FlatButton implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
@@ -28,5 +30,25 @@ void main() {
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
     ]);
+  });
+
+  testWidgets('FlatButton has no clip by default', (WidgetTester tester) async{
+    final GlobalKey buttonKey = new GlobalKey();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new FlatButton(
+            key: buttonKey,
+            onPressed: () { /* to make sure the button is enabled */ },
+          ),
+        )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byKey(buttonKey)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
   });
 }
