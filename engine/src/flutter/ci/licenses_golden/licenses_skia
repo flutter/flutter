@@ -1,4 +1,4 @@
-Signature: f287f510c01a0801b93788acd8fb6fa3
+Signature: 8444d8c2aff937fa592973e17e79b81d
 
 UNUSED LICENSES:
 
@@ -1435,6 +1435,7 @@ FILE: ../../../third_party/skia/src/core/SkRRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.cpp
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
+FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCacheImpl.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
 FILE: ../../../third_party/skia/src/core/SkSpan.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
