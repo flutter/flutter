@@ -142,3 +142,21 @@ components need to be updated or installed, follow the steps below:
 6. Run upload_android_tools.py -t ndk
    `$ cd ../..`
    `$ dev/bots/upload_android_tools.py -t ndk`
+
+## Flutter codelabs build test
+
+The Flutter codelabs exercise Material Components in the form of a demo application.
+The Flutter codelabs build test ensures that the final version of
+[Material Components for Flutter Codelabs](https://github.com/material-components/material-components-flutter-codelabs)
+can be built. If a PR fails the codelabs build test check, run through the following steps.
+
+1. Make sure no other checks are failing as well.
+
+2. If your PR makes a change to a component that the Flutter codelabs use, submit a PR to the
+    [codelabs repo](https://github.com/material-components/material-components-flutter-codelabs)
+    with the appropriate changes to account for the adjusted component. Do this for the branch with 
+    the completed code (the branch with the highest number).
+
+3. Merge the PR to the codelabs repo, then rerun the codelabs build script on Cirrus. 
+
+4. Merge your flutter/flutter PR.
