@@ -37,6 +37,7 @@ class AndroidSemanticsNode  {
   ///         "isLongClickable": bool,
   ///       },
   ///       "text": String,
+  ///       "contentDescription": String,
   ///       "className": String,
   ///       "id": int,
   ///       "rect": {
@@ -63,6 +64,15 @@ class AndroidSemanticsNode  {
   /// This is produced by combining the value, label, and hint fields from
   /// the Flutter [SemanticsNode].
   String get text => _values['text'];
+
+  /// The contentDescription of the semantics node.
+  ///
+  /// This field is used for controls like switches, radios, and checkboxes
+  /// instead of [text].
+  ///
+  /// This is produced by combining the value. label, and hint fields from
+  /// the Flutter [SemanticsNode].
+  String get contentDescription => _values['contentDescription'];
 
   /// The className of the semantics node.
   ///
