@@ -1764,6 +1764,316 @@ void main() {
     semantics.dispose();
   });
 
+  void sendFakeKeyEvent(Map<String, dynamic> data) {
+    BinaryMessages.handlePlatformMessage(
+      SystemChannels.keyEvent.name,
+      SystemChannels.keyEvent.codec.encodeMessage(data),
+          (ByteData data) { },
+    );
+  }
+
+  void sendKeyEventWithCode(int code, bool down, bool shiftDown, bool ctrlDown) {
+
+    int metaState = shiftDown ? 1 : 0;
+    if (ctrlDown)
+      metaState |= 1 << 12;
+
+    sendFakeKeyEvent(<String, dynamic>{
+      'type': down ? 'keydown' : 'keyup',
+      'keymap': 'android',
+      'keyCode' : code,
+      'hidUsage': 0x04,
+      'codePoint': 0x64,
+      'metaState': metaState,
+    });
+  }
+
+  group('Keyboard Tests', (){
+    TextEditingController controller;
+
+    setUp( () {
+      controller = new TextEditingController();
+    });
+
+    MaterialApp setupWidget() {
+
+      final FocusNode focusNode = new FocusNode();
+      controller = new TextEditingController();
+
+      return new MaterialApp(
+        home:  Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: TextField(
+              controller: controller,
+              maxLines: 3,
+            ),
+          ) ,
+        ),
+      );
+    }
+
+    testWidgets('Shift test 1', (WidgetTester tester) async{
+
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'a big house';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      sendKeyEventWithCode(22, true, true, false);     // RIGHT_ARROW keydown, SHIFT_ON
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+    });
+
+    testWidgets('Control Shift test', (WidgetTester tester) async{
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'their big house';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(22, true, true, true);         // RIGHT_ARROW keydown SHIFT_ON, CONTROL_ON
+
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+    });
+
+    testWidgets('Down and up test', (WidgetTester tester) async{
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'a big house';
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      sendKeyEventWithCode(20, true, true, false);         // DOWN_ARROW keydown
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
+
+      sendKeyEventWithCode(20, false, true, false);          // DOWN_ARROW keyup
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, true, true, false);           // UP_ARROW keydown
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+    });
+
+
+    testWidgets('Down and up test 2', (WidgetTester tester) async{
+      await tester.pumpWidget(setupWidget());
+      const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
+      await tester.enterText(find.byType(TextField), testValue);
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      for (int i = 0; i < 5; i += 1) {
+        sendKeyEventWithCode(22, true, false, false);             // RIGHT_ARROW keydown
+        await tester.pumpAndSettle();
+        sendKeyEventWithCode(22, false, false, false);            // RIGHT_ARROW keyup
+        await tester.pumpAndSettle();
+      }
+      sendKeyEventWithCode(20, true, true, false);               // DOWN_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20, false, true, false);              // DOWN_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
+
+      sendKeyEventWithCode(20, true, true, false);                 // DOWN_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(20, false, true, false);                // DOWN_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 32);
+
+      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 12);
+
+      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
+
+      sendKeyEventWithCode(19, true, true, false);               // UP_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(19, false, true, false);              // UP_ARROW keyup
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+    });
+  });
+
+  testWidgets('Changing positions of text fields', (WidgetTester tester) async{
+
+    final FocusNode focusNode = new FocusNode();
+    final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+    final TextEditingController c1 = new TextEditingController();
+    final TextEditingController c2 = new TextEditingController();
+    final Key key1 = new UniqueKey();
+    final Key key2 = new UniqueKey();
+
+   await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: events.add,
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  controller: c1,
+                  maxLines: 3,
+                ),
+                TextField(
+                  key: key2,
+                  controller: c2,
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'a big house';
+    await tester.enterText(find.byType(TextField).first, testValue);
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+    }
+
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: events.add,
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  key: key2,
+                  controller: c2,
+                  maxLines: 3,
+                ),
+                TextField(
+                  key: key1,
+                  controller: c1,
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+    }
+
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, 10);
+  });
+
+
+  testWidgets('Changing focus test', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+    final List<RawKeyEvent> events = <RawKeyEvent>[];
+
+    final TextEditingController c1 = new TextEditingController();
+    final TextEditingController c2 = new TextEditingController();
+    final Key key1 = new UniqueKey();
+    final Key key2 = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: events.add,
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                TextField(
+                  key: key1,
+                  controller: c1,
+                  maxLines: 3,
+                ),
+                TextField(
+                  key: key2,
+                  controller: c2,
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+
+    const String testValue = 'a big house';
+    await tester.enterText(find.byType(TextField).first, testValue);
+
+    await tester.pumpAndSettle();
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+    }
+
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+    expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).last);
+
+    await tester.enterText(find.byType(TextField).last, testValue);
+
+    await tester.pumpAndSettle();
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+    }
+
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
+    expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
+  });
+
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
 
