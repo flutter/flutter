@@ -58,8 +58,12 @@ class SingleViewPresentation extends Presentation {
     private final PlatformViewFactory mViewFactory;
 
     // This is the view id assigned by the Flutter framework to the embedded view, we keep it here
-    // so when we create the platform we can tell it its view id.
+    // so when we create the platform view we can tell it its view id.
     private int mViewId;
+
+    // This is the creation parameters for the platform view, we keep it here
+    // so when we create the platform view we can tell it its view id.
+    private Object mCreateParams;
 
     // The root view for the presentation, it has 2 childs: mContainer which contains the embedded view, and
     // mFakeWindowRootView which contains views that were added directly to the presentation's window manager.
@@ -74,10 +78,16 @@ class SingleViewPresentation extends Presentation {
      * Creates a presentation that will use the view factory to create a new
      * platform view in the presentation's onCreate, and attach it.
      */
-    public SingleViewPresentation(Context outerContext, Display display, PlatformViewFactory viewFactory, int viewId) {
+    public SingleViewPresentation(
+            Context outerContext,
+            Display display,
+            PlatformViewFactory viewFactory,
+            int viewId,
+            Object createParams) {
         super(outerContext, display);
         mViewFactory = viewFactory;
         mViewId = viewId;
+        mCreateParams = createParams;
         mState = new PresentationState();
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -117,7 +127,7 @@ class SingleViewPresentation extends Presentation {
         PresentationContext context = new PresentationContext(getContext(), mState.mWindowManagerHandler);
 
         if (mState.mView == null) {
-            mState.mView = mViewFactory.create(context, mViewId);
+            mState.mView = mViewFactory.create(context, mViewId, mCreateParams);
         }
 
         mContainer.addView(mState.mView.getView());

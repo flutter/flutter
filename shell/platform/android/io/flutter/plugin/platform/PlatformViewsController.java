@@ -15,6 +15,7 @@ import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -140,6 +141,11 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
             return;
         }
 
+        Object createParams = null;
+        if (args.containsKey("params")) {
+            createParams = viewFactory.getCreateArgsCodec().decodeMessage(ByteBuffer.wrap((byte[]) args.get("params")));
+        }
+
         TextureRegistry.SurfaceTextureEntry textureEntry = mFlutterView.createSurfaceTexture();
         VirtualDisplayController vdController = VirtualDisplayController.create(
                 mFlutterView.getContext(),
@@ -147,7 +153,8 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
                 textureEntry.surfaceTexture(),
                 toPhysicalPixels(logicalWidth),
                 toPhysicalPixels(logicalHeight),
-                id
+                id,
+                createParams
         );
 
         if (vdController == null) {
