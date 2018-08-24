@@ -2,13 +2,13 @@
 [![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
 [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
-A new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an open-source project currently in beta.
+Flutter is Google’s mobile app SDK for crafting high-quality native interfaces on iOS and Android in record time. Flutter works with existing code, is used by developers and organizations around the world, and is free and open source.
 
 ### Documentation
 
 * **Main site: [flutter.io][]**
-* [Install](https://flutter.io/setup/)
-* [Get started](https://flutter.io/getting-started/)
+* [Install](https://flutter.io/get-started/install/)
+* [Get started](https://flutter.io/get-started/)
 * [Contribute](CONTRIBUTING.md)
 
 ## Fast development
@@ -20,7 +20,7 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app is changed instantly.">
+<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app changes instantly.">
 
 ## Expressive, beautiful UIs
 
