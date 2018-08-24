@@ -23,9 +23,9 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app changes instantly.">
+<img src="https://raw.githubusercontent.com/flutter/website/master/src/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
-## Expressive and Flexible UIpl
+## Expressive and Flexible UI
 Quickly ship features with a focus on native end-user experiences.
 Layered architecture allows full customization, which results in incredibly
 fast rendering and expressive and flexible designs.
