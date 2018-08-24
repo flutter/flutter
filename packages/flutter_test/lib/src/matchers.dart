@@ -283,8 +283,8 @@ Matcher matchesGoldenFile(dynamic key) {
 /// Asserts that a [SemanticsData] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
-/// provided, then they are not part of the comparison.  All of the boolean
-/// flag and action fields must match, and default to false.
+/// provided, then they are not part of the comparison. All of the boolean
+/// flag and action fields must match and default to false.
 ///
 /// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
@@ -1611,7 +1611,7 @@ class _MatchesSemanticsData extends Matcher {
   bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
     if (data == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
-        'Maybe you forgot to enabled semantics?');
+        'Maybe you forgot to enable semantics?');
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)
