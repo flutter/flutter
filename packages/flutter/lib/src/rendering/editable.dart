@@ -435,10 +435,18 @@ class RenderEditable extends RenderBox {
   }
 
   int _handleDelete(bool del) {
-    _editableTextState.textEditingValue = new TextEditingValue(
-        text: selection.textBefore(text.text)
-            + selection.textAfter(text.text).substring(1),
-        selection: new TextSelection.collapsed(offset: selection.start));
+    if (selection.textAfter(text.text).isNotEmpty) {
+      _editableTextState.textEditingValue = new TextEditingValue(
+          text: selection.textBefore(text.text)
+              + selection.textAfter(text.text).substring(1),
+          selection: new TextSelection.collapsed(offset: selection.start));
+    }
+    else {
+      _editableTextState.textEditingValue = new TextEditingValue(
+        text: selection.textBefore(text.text),
+        selection: new TextSelection.collapsed(offset: selection.start)
+      );
+    }
   }
 
   /// Marks the render object as needing to be laid out again and have its text
