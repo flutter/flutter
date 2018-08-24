@@ -23,7 +23,8 @@ class VirtualDisplayController {
             SurfaceTexture surfaceTexture,
             int width,
             int height,
-            int viewId
+            int viewId,
+            Object createParams
     ) {
         surfaceTexture.setDefaultBufferSize(width, height);
         Surface surface = new Surface(surfaceTexture);
@@ -43,7 +44,8 @@ class VirtualDisplayController {
             return null;
         }
 
-        return new VirtualDisplayController(context, virtualDisplay, viewFactory, surface, surfaceTexture, viewId);
+        return new VirtualDisplayController(
+                context, virtualDisplay, viewFactory, surface, surfaceTexture, viewId, createParams);
     }
 
     private final Context mContext;
@@ -60,14 +62,16 @@ class VirtualDisplayController {
             PlatformViewFactory viewFactory,
             Surface surface,
             SurfaceTexture surfaceTexture,
-            int viewId
+            int viewId,
+            Object createParams
     ) {
         mSurfaceTexture = surfaceTexture;
         mSurface = surface;
         mContext = context;
         mVirtualDisplay = virtualDisplay;
         mDensityDpi = context.getResources().getDisplayMetrics().densityDpi;
-        mPresentation = new SingleViewPresentation(context, mVirtualDisplay.getDisplay(), viewFactory, viewId);
+        mPresentation = new SingleViewPresentation(
+                context, mVirtualDisplay.getDisplay(), viewFactory, viewId, createParams);
         mPresentation.show();
     }
 
