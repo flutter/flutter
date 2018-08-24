@@ -38,6 +38,8 @@ void main() {
       expect(localizations.popupMenuLabel, isNotNull);
       expect(localizations.dialogLabel, isNotNull);
       expect(localizations.alertDialogLabel, isNotNull);
+      expect(localizations.collapsedIconTapHint, isNotNull);
+      expect(localizations.expandedIconTapHint, isNotNull);
 
       expect(localizations.aboutListTileTitle('FOO'), isNotNull);
       expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
@@ -107,5 +109,23 @@ void main() {
     expect(localizations.selectedRowCountTitle(10000), '10.000 de articole selectate');
     expect(localizations.selectedRowCountTitle(10019), '10.019 articole selectate');
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
+  });
+
+  testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
+    MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', ''));
+    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Thu, Jul 23');
+    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
+
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'GB'));
+    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Thu 23 Jul');
+    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
+
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es', ''));
+    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'jue., 23 jul.');
+    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
+
+    localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de', ''));
+    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Do., 23. Juli');
+    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
   });
 }

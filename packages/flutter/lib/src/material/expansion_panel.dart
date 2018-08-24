@@ -288,7 +288,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           key: new _SaltedKey<BuildContext, int>(context, index * 2),
           child: new Column(
             children: <Widget>[
-              header,
+              new MergeSemantics(child: header),
               new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
                 secondChild: child.body,

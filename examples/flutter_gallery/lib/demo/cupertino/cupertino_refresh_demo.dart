@@ -50,6 +50,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
                 largeTitle: Text('Cupertino Refresh'),
+                previousPageTitle: 'Cupertino',
               ),
               new CupertinoSliverRefreshControl(
                 onRefresh: () {

@@ -308,7 +308,7 @@ void main() {
         tester.renderObject(find.byKey(buttonKey)),
         paintsExactlyCountTimes(#clipPath, 0)
     );
-  }, skip: true);
+  });
 
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);

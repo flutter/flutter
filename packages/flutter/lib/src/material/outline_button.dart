@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show defaultClipBehavior; // ignore: deprecated_member_use
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -70,7 +68,7 @@ class OutlineButton extends StatefulWidget {
     this.highlightedBorderColor,
     this.padding,
     this.shape,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
+    this.clipBehavior = Clip.none,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(clipBehavior != null),
@@ -98,7 +96,7 @@ class OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     this.shape,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
+    this.clipBehavior = Clip.none,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),

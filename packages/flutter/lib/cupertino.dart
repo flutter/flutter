@@ -15,6 +15,7 @@ export 'src/cupertino/button.dart';
 export 'src/cupertino/colors.dart';
 export 'src/cupertino/dialog.dart';
 export 'src/cupertino/icons.dart';
+export 'src/cupertino/localizations.dart';
 export 'src/cupertino/nav_bar.dart';
 export 'src/cupertino/page_scaffold.dart';
 export 'src/cupertino/picker.dart';
