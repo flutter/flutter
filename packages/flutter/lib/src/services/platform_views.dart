@@ -476,6 +476,8 @@ class AndroidViewController {
         return kAndroidLayoutDirectionLtr;
       case TextDirection.rtl:
         return kAndroidLayoutDirectionRtl;
+      default:
+        throw new UnsupportedError('Direction $direction is not supported');
     }
   }
 
