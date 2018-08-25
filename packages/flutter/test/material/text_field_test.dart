@@ -2580,11 +2580,14 @@ void main() {
         child: new TextField(
           key: key,
           controller: controller,
+          maxLengthSemanticFormatterCallback: (int current, int max) {
+            return '$current characters out of $max';
+          },
+          maxLength: 10,
           decoration: const InputDecoration(
             labelText: 'label',
             hintText: 'hint',
             helperText: 'helper',
-            counterText: 'counter',
           ),
         ),
       ),
@@ -2593,7 +2596,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'label\nhelper\ncounter',
+          label: 'label\nhelper',
           id: 1,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
@@ -2601,6 +2604,13 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
+          ],
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 2,
+              label: '0 characters out of 10',
+              textDirection: TextDirection.ltr,
+            ),
           ],
         ),
       ],
@@ -2612,7 +2622,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'hint\nhelper\ncounter',
+          label: 'hint\nhelper',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
@@ -2625,6 +2635,13 @@ void main() {
             SemanticsFlag.isTextField,
             SemanticsFlag.isFocused,
           ],
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 2,
+              label: '0 characters out of 10',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
         ),
       ],
     ), ignoreTransform: true, ignoreRect: true));
@@ -2634,4 +2651,49 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('InputDecoration counterText can have a semanticCounterText', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final TextEditingController controller = new TextEditingController();
+    final Key key = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'label',
+            hintText: 'hint',
+            helperText: 'helper',
+            counterText: '0/10',
+            semanticCounterText: '0 characters out of 10',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'label\nhelper',
+          id: 1,
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          children: <TestSemantics>[
+            new TestSemantics(
+              label: '0 characters out of 10',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+
+    semantics.dispose();
+  });
 }
