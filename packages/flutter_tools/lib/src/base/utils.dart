@@ -15,21 +15,41 @@ import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
+const BotDetector _kBotDetector = BotDetector();
+
+class BotDetector {
+  const BotDetector();
+
+  bool get isRunningOnBot {
+    return platform.environment['BOT'] != 'false'
+       && (platform.environment['BOT'] == 'true'
+
+        // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+        || platform.environment['TRAVIS'] == 'true'
+        || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
+        || platform.environment.containsKey('CI') // Travis and AppVeyor
+
+        // https://www.appveyor.com/docs/environment-variables/
+        || platform.environment.containsKey('APPVEYOR')
+
+        // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+        || platform.environment.containsKey('CIRRUS_CI')
+
+        // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+        || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
+
+        // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+        || platform.environment.containsKey('JENKINS_URL')
+
+        // Properties on Flutter's Chrome Infra bots.
+        || platform.environment['CHROME_HEADLESS'] == '1'
+        || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
+  }
+}
+
 bool get isRunningOnBot {
-  return
-    platform.environment['BOT'] == 'true' ||
-
-    // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-    platform.environment['TRAVIS'] == 'true' ||
-    platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
-    platform.environment.containsKey('CI') || // Travis and AppVeyor
-
-    // https://www.appveyor.com/docs/environment-variables/
-    platform.environment.containsKey('APPVEYOR') ||
-
-    // Properties on Flutter's Chrome Infra bots.
-    platform.environment['CHROME_HEADLESS'] == '1' ||
-    platform.environment.containsKey('BUILDBOT_BUILDERNAME');
+  final BotDetector botDetector = context[BotDetector] ?? _kBotDetector;
+  return botDetector.isRunningOnBot;
 }
 
 String hex(List<int> bytes) {
@@ -53,6 +73,14 @@ String camelCase(String str) {
     index = str.indexOf('_');
   }
   return str;
+}
+
+final RegExp _upperRegex = new RegExp(r'[A-Z]');
+
+/// Convert `fooBar` to `foo_bar`.
+String snakeCase(String str, [String sep = '_']) {
+  return str.replaceAllMapped(_upperRegex,
+      (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
 
 String toTitleCase(String str) {
@@ -97,7 +125,7 @@ final NumberFormat kSecondsFormat = new NumberFormat('0.0');
 final NumberFormat kMillisecondsFormat = new NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
-  final double seconds = duration.inMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+  final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
   return '${kSecondsFormat.format(seconds)}s';
 }
 
@@ -109,7 +137,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 /// absolute path.
 String getDisplayPath(String fullPath) {
   final String cwd = fs.currentDirectory.path + fs.path.separator;
-  return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
 /// A class to maintain a list of items, fire events when items are added or
@@ -184,15 +212,15 @@ class SettingsFile {
 ///
 ///     f47ac10b-58cc-4372-a567-0e02b2c3d479
 ///
-/// The generated uuids are 128 bit numbers encoded in a specific string format.
+/// The generated UUIDs are 128 bit numbers encoded in a specific string format.
 ///
 /// For more information, see
 /// http://en.wikipedia.org/wiki/Universally_unique_identifier.
 class Uuid {
   final Random _random = new Random();
 
-  /// Generate a version 4 (random) uuid. This is a uuid scheme that only uses
-  /// random numbers as the source of the generated uuid.
+  /// Generate a version 4 (random) UUID. This is a UUID scheme that only uses
+  /// random numbers as the source of the generated UUID.
   String generateV4() {
     // Generate xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx / 8-4-4-4-12.
     final int special = 8 + _random.nextInt(4);
@@ -201,7 +229,7 @@ class Uuid {
       '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}-'
           '${_bitsDigits(16, 4)}-'
           '4${_bitsDigits(12, 3)}-'
-          '${_printDigits(special,  1)}${_bitsDigits(12, 3)}-'
+          '${_printDigits(special, 1)}${_bitsDigits(12, 3)}-'
           '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}';
   }
 
@@ -214,7 +242,14 @@ class Uuid {
       value.toRadixString(16).padLeft(count, '0');
 }
 
-Clock get clock => context.putIfAbsent(Clock, () => const Clock());
+/// Given a data structure which is a Map of String to dynamic values, return
+/// the same structure (`Map<String, dynamic>`) with the correct runtime types.
+Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
+  final Map<dynamic, dynamic> map = untyped;
+  return map.cast<String, dynamic>();
+}
+
+Clock get clock => context[Clock];
 
 typedef Future<Null> AsyncCallback();
 
@@ -222,7 +257,7 @@ typedef Future<Null> AsyncCallback();
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.ZERO }) {
+  Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
     new Future<Null>.delayed(initialDelay, _handleCallback);
   }
 

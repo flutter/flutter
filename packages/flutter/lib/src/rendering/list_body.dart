@@ -31,7 +31,7 @@ class RenderListBody extends RenderBox
   /// By default, children are arranged along the vertical axis.
   RenderListBody({
     List<RenderBox> children,
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
   }) : assert(axisDirection != null),
        _axisDirection = axisDirection {
     addAll(children);
@@ -179,9 +179,9 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
   }
 
   double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {

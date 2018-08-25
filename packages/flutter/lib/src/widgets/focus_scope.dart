@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
@@ -30,7 +27,7 @@ class _FocusScopeMarker extends InheritedWidget {
 /// The focus tree keeps track of which widget is the user's current focus. The
 /// focused widget often listens for keyboard events.
 ///
-/// The a focus scope does not itself receive focus but instead helps remember
+/// A focus scope does not itself receive focus but instead helps remember
 /// previous focus states. A scope is currently active when its [node] is the
 /// first focus of its parent scope. To activate a [FocusScope], either use the
 /// [autofocus] property or explicitly make the [node] the first focus in the
@@ -55,7 +52,7 @@ class FocusScope extends StatefulWidget {
   const FocusScope({
     Key key,
     @required this.node,
-    this.autofocus: false,
+    this.autofocus = false,
     this.child,
   }) : assert(node != null),
        assert(autofocus != null),
@@ -69,13 +66,15 @@ class FocusScope extends StatefulWidget {
   final bool autofocus;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Returns the [node] of the [FocusScope] that most tightly encloses the
   /// given [BuildContext].
   static FocusScopeNode of(BuildContext context) {
     final _FocusScopeMarker scope = context.inheritFromWidgetOfExactType(_FocusScopeMarker);
-    return scope?.node ?? WidgetsBinding.instance.focusManager.rootScope;
+    return scope?.node ?? context.owner.focusManager.rootScope;
   }
 
   @override

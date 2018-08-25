@@ -20,7 +20,7 @@ class Velocity {
   }) : assert(pixelsPerSecond != null);
 
   /// A velocity that isn't moving at all.
-  static const Velocity zero = const Velocity(pixelsPerSecond: Offset.zero);
+  static const Velocity zero = Velocity(pixelsPerSecond: Offset.zero);
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
@@ -79,7 +79,7 @@ class Velocity {
 /// A two dimensional velocity estimate.
 ///
 /// VelocityEstimates are computed by [VelocityTracker.getVelocityEstimate]. An
-/// estimate's [confidence] measures how well the the velocity tracker's position
+/// estimate's [confidence] measures how well the velocity tracker's position
 /// data fit a straight line, [duration] is the time that elapsed between the
 /// first and last position sample used to compute the velocity, and [offset]
 /// is similarly the difference between the first and last positions.
@@ -147,19 +147,19 @@ class _PointAtTime {
 /// The quality of the velocity estimation will be better if more data points
 /// have been received.
 class VelocityTracker {
-  static const int _kAssumePointerMoveStoppedMilliseconds = 40;
-  static const int _kHistorySize = 20;
-  static const int _kHorizonMilliseconds = 100;
-  static const int _kMinSampleSize = 3;
+  static const int _assumePointerMoveStoppedMilliseconds = 40;
+  static const int _historySize = 20;
+  static const int _horizonMilliseconds = 100;
+  static const int _minSampleSize = 3;
 
   // Circular buffer; current sample at _index.
-  final List<_PointAtTime> _samples = new List<_PointAtTime>(_kHistorySize);
+  final List<_PointAtTime> _samples = new List<_PointAtTime>(_historySize);
   int _index = 0;
 
   /// Adds a position as the given time to the tracker.
   void addPosition(Duration time, Offset position) {
     _index += 1;
-    if (_index == _kHistorySize)
+    if (_index == _historySize)
       _index = 0;
     _samples[_index] = new _PointAtTime(position, time);
   }
@@ -195,7 +195,7 @@ class VelocityTracker {
       final double age = (newestSample.time - sample.time).inMilliseconds.toDouble();
       final double delta = (sample.time - previousSample.time).inMilliseconds.abs().toDouble();
       previousSample = sample;
-      if (age > _kHorizonMilliseconds || delta > _kAssumePointerMoveStoppedMilliseconds)
+      if (age > _horizonMilliseconds || delta > _assumePointerMoveStoppedMilliseconds)
         break;
 
       oldestSample = sample;
@@ -204,12 +204,12 @@ class VelocityTracker {
       y.add(position.dy);
       w.add(1.0);
       time.add(-age);
-      index = (index == 0 ? _kHistorySize : index) - 1;
+      index = (index == 0 ? _historySize : index) - 1;
 
       sampleCount += 1;
-    } while (sampleCount < _kHistorySize);
+    } while (sampleCount < _historySize);
 
-    if (sampleCount >= _kMinSampleSize) {
+    if (sampleCount >= _minSampleSize) {
       final LeastSquaresSolver xSolver = new LeastSquaresSolver(time, x, w);
       final PolynomialFit xFit = xSolver.solve(2);
       if (xFit != null) {

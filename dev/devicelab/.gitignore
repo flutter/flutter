@@ -1,9 +1,0 @@
-.DS_Store
-.buildlog
-.idea
-.packages
-.pub/
-build/
-packages
-pubspec.lock
-.atom/

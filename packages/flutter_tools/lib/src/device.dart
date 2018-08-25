@@ -7,15 +7,14 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+import 'tester/flutter_tester.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 
@@ -28,6 +27,7 @@ class DeviceManager {
     _deviceDiscoverers.add(new AndroidDevices());
     _deviceDiscoverers.add(new IOSDevices());
     _deviceDiscoverers.add(new IOSSimulators());
+    _deviceDiscoverers.add(new FlutterTesterDevices());
   }
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
@@ -93,6 +93,20 @@ class DeviceManager {
       }
     }
   }
+
+  /// Whether we're capable of listing any devices given the current environment configuration.
+  bool get canListAnything {
+    return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
+  }
+
+  /// Get diagnostics about issues with any connected devices.
+  Future<List<String>> getDeviceDiagnostics() async {
+    final List<String> diagnostics = <String>[];
+    for (DeviceDiscovery discoverer in _platformDiscoverers) {
+      diagnostics.addAll(await discoverer.getDiagnostics());
+    }
+    return diagnostics;
+  }
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.
@@ -104,6 +118,10 @@ abstract class DeviceDiscovery {
   bool get canListAnything;
 
   Future<List<Device>> get devices;
+
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices (will be an empty list if there are no issues).
+  Future<List<String>> getDiagnostics() => new Future<List<String>>.value(<String>[]);
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -111,8 +129,8 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingInterval = const Duration(seconds: 4);
-  static const Duration _pollingTimeout = const Duration(seconds: 30);
+  static const Duration _pollingInterval = Duration(seconds: 4);
+  static const Duration _pollingTimeout = Duration(seconds: 30);
 
   final String name;
   ItemListNotifier<Device> _items;
@@ -174,6 +192,25 @@ abstract class Device {
   /// Whether it is an emulated device running on localhost.
   Future<bool> get isLocalEmulator;
 
+  /// Whether the device is a simulator on a platform which supports hardware rendering.
+  Future<bool> get supportsHardwareRendering async {
+    assert(await isLocalEmulator);
+    switch (await targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        return true;
+      case TargetPlatform.ios:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:
+      default:
+        return false;
+    }
+  }
+
   /// Check if a version of the given app is already installed
   Future<bool> isAppInstalled(ApplicationPackage app);
 
@@ -206,22 +243,6 @@ abstract class Device {
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
 
-  Future<int> forwardPort(int devicePort, {int hostPort}) async {
-    try {
-      hostPort = await portForwarder
-          .forward(devicePort, hostPort: hostPort)
-          .timeout(const Duration(seconds: 60), onTimeout: () {
-            throw new ToolExit(
-                'Timeout while atempting to foward device port $devicePort');
-          });
-      printTrace('Forwarded host port $hostPort to device port $devicePort');
-      return hostPort;
-    } catch (e) {
-      throw new ToolExit(
-          'Unable to forward host port $hostPort to device port $devicePort: $e');
-    }
-  }
-
   /// Clear the device's logs.
   void clearLogs();
 
@@ -240,9 +261,10 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false,
-    bool usesTerminalUi: true,
+    bool prebuiltApplication = false,
+    bool applicationNeedsRebuild = false,
+    bool usesTerminalUi = true,
+    bool ipv6 = false,
   });
 
   /// Does this device implement support for hot reloading / restarting?
@@ -253,11 +275,7 @@ abstract class Device {
 
   bool get supportsScreenshot => false;
 
-  Future<Null> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
-
-  /// Find the apps that are currently running on this device.
-  Future<List<DiscoveredApp>> discoverApps() =>
-      new Future<List<DiscoveredApp>>.value(<DiscoveredApp>[]);
+  Future<void> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;
@@ -315,10 +333,11 @@ abstract class Device {
 
 class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
-    this.startPaused: false,
-    this.enableSoftwareRendering: false,
-    this.traceSkia: false,
-    this.useTestFonts: false,
+    this.startPaused = false,
+    this.enableSoftwareRendering = false,
+    this.skiaDeterministicRendering = false,
+    this.traceSkia = false,
+    this.useTestFonts = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
@@ -327,6 +346,7 @@ class DebuggingOptions {
     useTestFonts = false,
     startPaused = false,
     enableSoftwareRendering = false,
+    skiaDeterministicRendering = false,
     traceSkia = false,
     observatoryPort = null;
 
@@ -335,19 +355,12 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final bool enableSoftwareRendering;
+  final bool skiaDeterministicRendering;
   final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
-
-  /// Return the user specified observatory port. If that isn't available,
-  /// return [kDefaultObservatoryPort], or a port close to that one.
-  Future<int> findBestObservatoryPort() {
-    if (hasObservatoryPort)
-      return new Future<int>.value(observatoryPort);
-    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
-  }
 }
 
 class LaunchResult {
@@ -387,9 +400,9 @@ abstract class DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts;
 
   /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null, will auto select a host port.
+  /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
   Future<Null> unforward(ForwardedPort forwardedPort);
@@ -405,7 +418,7 @@ abstract class DeviceLogReader {
   @override
   String toString() => name;
 
-  /// Process ID of the app on the deivce.
+  /// Process ID of the app on the device.
   int appPid;
 }
 

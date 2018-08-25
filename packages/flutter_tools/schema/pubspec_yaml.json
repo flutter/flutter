@@ -6,7 +6,10 @@
     "properties": {
         "name": { "type": "string" },
         "flutter": {
-            "type": "object",
+            "oneOf": [
+                { "type": "object" },
+                { "type": "null" }
+            ],
             "additionalProperties": false,
             "properties": {
                 "uses-material-design": { "type": "boolean" },
@@ -40,13 +43,21 @@
                         }
                     }
                 },
+                "module": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "androidPackage": { "type": "string" }
+                    }
+                },
                 "plugin": {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
                         "androidPackage": { "type": "string" },
+                        "iosPrefix": { "type": "string" },
                         "pluginClass": { "type": "string" }
-                    } 
+                    }
                 }
             }
         }

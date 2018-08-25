@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'dart:io';
 
 Process daemon;
 
@@ -15,19 +15,21 @@ Process daemon;
 //   start: start an app
 //   stop: stop a running app
 //   devices: list devices
+//   emulators: list emulators
+//   launch: launch an emulator
 
 Future<Null> main() async {
   daemon = await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen((String line) => print('<== $line'));
   daemon.stderr.listen((dynamic data) => stderr.add(data));
 
   stdout.write('> ');
-  stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
+  stdin.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
@@ -62,6 +64,15 @@ Future<Null> main() async {
       }
     } else if (line == 'devices') {
       _send(<String, dynamic>{'method': 'device.getDevices'});
+    } else if (line == 'emulators') {
+      _send(<String, dynamic>{'method': 'emulator.getEmulators'});
+    } else if (words.first == 'emulator-launch') {
+      _send(<String, dynamic>{
+        'method': 'emulator.launch',
+        'params': <String, dynamic>{
+          'emulatorId': words[1]
+        }
+      });
     } else if (line == 'enable') {
       _send(<String, dynamic>{'method': 'device.enable'});
     } else {
@@ -80,7 +91,7 @@ int id = 0;
 
 void _send(Map<String, dynamic> map) {
   map['id'] = id++;
-  final String str = '[${JSON.encode(map)}]';
+  final String str = '[${json.encode(map)}]';
   daemon.stdin.writeln(str);
   print('==> $str');
 }

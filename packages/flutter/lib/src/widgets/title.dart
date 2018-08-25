@@ -17,7 +17,7 @@ class Title extends StatelessWidget {
   /// [color] and [child] are required arguments.
   Title({
     Key key,
-    this.title: '',
+    this.title = '',
     @required this.color,
     @required this.child,
   }) : assert(title != null),
@@ -28,12 +28,14 @@ class Title extends StatelessWidget {
   /// Must not be null.
   final String title;
 
-  /// A color that the window manager should use to identify this app.  Must be
+  /// A color that the window manager should use to identify this app. Must be
   /// an opaque color (i.e. color.alpha must be 255 (0xFF)), and must not be
   /// null.
   final Color color;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -48,9 +50,9 @@ class Title extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('title', title, defaultValue: ''));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('title', title, defaultValue: ''));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

@@ -30,7 +30,7 @@ void main() {
                         width: 100.0,
                         height: 100.0,
                         child: const Center(
-                          child: const Text('X', textDirection: TextDirection.ltr),
+                          child: Text('X', textDirection: TextDirection.ltr),
                         ),
                       ),
                     ),
@@ -51,8 +51,8 @@ void main() {
     await tester.pumpWidget(
       new Row(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          const Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
+        children: const <Widget>[
+          Flexible(child: SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
     );
@@ -65,9 +65,9 @@ void main() {
     await tester.pumpWidget(
       new Row(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          const Expanded(flex: null, child: const Text('one', textDirection: TextDirection.ltr)),
-          const Flexible(flex: null, child: const Text('two', textDirection: TextDirection.ltr)),
+        children: const <Widget>[
+          Expanded(flex: null, child: Text('one', textDirection: TextDirection.ltr)),
+          Flexible(flex: null, child: Text('two', textDirection: TextDirection.ltr)),
         ],
       ),
     );
@@ -109,5 +109,35 @@ void main() {
         ),
       ),
     );
+  });
+
+  testWidgets('Error information is printed correctly', (WidgetTester tester) async {
+    // We run this twice, the first time without an error, so that the second time
+    // we only get a single exception. Otherwise we'd get two, the one we want and
+    // an extra one when we discover we never computed a size.
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget>[
+          new Column(),
+        ],
+      ),
+      Duration.zero,
+      EnginePhase.layout,
+    );
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget>[
+          new Column(
+            children: <Widget>[
+              new Expanded(child: new Container()),
+            ],
+          ),
+        ],
+      ),
+      Duration.zero,
+      EnginePhase.layout,
+    );
+    final String message = tester.takeException().toString();
+    expect(message, contains('\nSee also:'));
   });
 }

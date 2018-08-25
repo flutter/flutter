@@ -95,7 +95,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
     } else if (event.down) {
       result = _hitTests[event.pointer];
     } else {
-      return;  // We currently ignore add, remove, and hover move events.
+      return; // We currently ignore add, remove, and hover move events.
     }
     if (result != null)
       dispatchEvent(event, result);
@@ -168,7 +168,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     this.event,
     this.hitTestEntry,
     InformationCollector informationCollector,
-    bool silent: false
+    bool silent = false
   }) : super(
     exception: exception,
     stack: stack,

@@ -2,15 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:ui';
 
-const List<Widget> fooBarTexts = const <Text>[
-  const Text('foo', textDirection: TextDirection.ltr),
-  const Text('bar', textDirection: TextDirection.ltr),
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart' as test_package;
+import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
+
+const List<Widget> fooBarTexts = <Text>[
+  Text('foo', textDirection: TextDirection.ltr),
+  Text('bar', textDirection: TextDirection.ltr),
 ];
 
 void main() {
+  group('expectLater', () {
+    testWidgets('completes when matcher completes', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      final Future<void> future = expectLater(null, new FakeMatcher(completer));
+      String value;
+      future.then((void _) {
+        value = '123';
+      });
+      test_package.expect(value, isNull);
+      completer.complete();
+      test_package.expect(value, isNull);
+      await future;
+      await tester.pump();
+      test_package.expect(value, '123');
+    });
+
+    testWidgets('respects the skip flag', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      final Future<void> future = expectLater(null, new FakeMatcher(completer), skip: 'testing skip');
+      bool completed = false;
+      future.then((void _) {
+        completed = true;
+      });
+      test_package.expect(completed, isFalse);
+      await future;
+      test_package.expect(completed, isTrue);
+    });
+  });
+
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
@@ -21,7 +58,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsOneWidget);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -44,7 +81,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsNothing);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -62,7 +99,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo'), findsNothing);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -113,11 +150,11 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      final String customDescription = 'custom description';
+      const String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -130,11 +167,11 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      final String customDescription = 'custom description';
+      const String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -177,7 +214,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          new Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
           const Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
@@ -195,7 +232,71 @@ void main() {
       expect(failure, isNotNull);
       expect(
         failure.message,
-        contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
+        contains(
+          'Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type "Column" which is an ancestor of text "foo"',
+        ),
+      );
+    });
+  });
+
+  group('find.ancestor', () {
+    testWidgets('finds one ancestor', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: fooBarTexts),
+        ],
+      ));
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.widgetWithText(Row, 'foo'),
+      ), findsOneWidget);
+    });
+
+    testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Row(
+            children: <Widget>[
+              new Row(children: fooBarTexts),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.byType(Row),
+      ), findsNWidgets(2));
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          const Text('bar', textDirection: TextDirection.ltr),
+        ],
+      ));
+
+      TestFailure failure;
+      try {
+        expect(find.ancestor(
+          of: find.text('bar'),
+          matching: find.widgetWithText(Column, 'foo'),
+        ), findsOneWidget);
+      } catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains(
+          'Actual: ?:<zero widgets with type "Column" which is an ancestor of text "foo" which is an ancestor of text "bar"',
+        ),
       );
     });
 
@@ -207,9 +308,9 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.byType(Row),
+      expect(find.ancestor(
+        of: find.byType(Column),
+        matching: find.widgetWithText(Column, 'foo'),
       ), findsNothing);
     });
 
@@ -222,12 +323,99 @@ void main() {
       ));
 
       expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.byType(Row),
+        of: find.byType(Column),
+        matching: find.widgetWithText(Column, 'foo'),
         matchRoot: true,
       ), findsOneWidget);
     });
+  });
 
+  group('pageBack', (){
+    testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(new Container());
+
+      expect(
+        expectAsync0(tester.pageBack),
+        throwsA(isInstanceOf<TestFailure>()),
+      );
+    });
+
+    testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Center(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new RaisedButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, new MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new Scaffold(
+                          appBar: new AppBar(
+                            title: const Text('Page 2'),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
+
+    testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Center(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new CupertinoButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, new CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new CupertinoPageScaffold(
+                          navigationBar: const CupertinoNavigationBar(
+                            middle: Text('Page 2'),
+                          ),
+                          child: new Container(),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
   });
 
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
@@ -265,4 +453,181 @@ void main() {
     controller.forward();
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
   });
+
+  group('runAsync', () {
+    testWidgets('works with no async calls', (WidgetTester tester) async {
+      String value;
+      await tester.runAsync(() async {
+        value = '123';
+      });
+      expect(value, '123');
+    });
+
+    testWidgets('works with real async calls', (WidgetTester tester) async {
+      final StringBuffer buf = new StringBuffer('1');
+      await tester.runAsync(() async {
+        buf.write('2');
+        await Directory.current.stat();
+        buf.write('3');
+      });
+      buf.write('4');
+      expect(buf.toString(), '1234');
+    });
+
+    testWidgets('propagates return values', (WidgetTester tester) async {
+      final String value = await tester.runAsync<String>(() async {
+        return '123';
+      });
+      expect(value, '123');
+    });
+
+    testWidgets('reports errors via framework', (WidgetTester tester) async {
+      final String value = await tester.runAsync<String>(() async {
+        throw new ArgumentError();
+      });
+      expect(value, isNull);
+      expect(tester.takeException(), isArgumentError);
+    });
+
+    testWidgets('disallows re-entry', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      tester.runAsync<void>(() => completer.future);
+      expect(() => tester.runAsync(() async {}), throwsA(isInstanceOf<TestFailure>()));
+      completer.complete();
+    });
+
+    testWidgets('maintains existing zone values', (WidgetTester tester) async {
+      final Object key = new Object();
+      await runZoned(() {
+        expect(Zone.current[key], 'abczed');
+        return tester.runAsync<String>(() async {
+          expect(Zone.current[key], 'abczed');
+        });
+      }, zoneValues: <dynamic, dynamic>{
+        key: 'abczed',
+      });
+    });
+  });
+
+  testWidgets('showKeyboard can be called twice', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(),
+          ),
+        ),
+      ),
+    );
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.pump();
+  });
+
+  group('getSemanticsData', () {
+    testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: const Scaffold(
+            body: Text('hello'),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemanticsData(find.text('hello')),
+        throwsA(isInstanceOf<StateError>()));
+    });
+
+    testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Scaffold(
+            body: new Row(
+              children: const <Widget>[
+                Text('hello'),
+                Text('hello'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(() => tester.getSemanticsData(find.text('hello')),
+          throwsA(isInstanceOf<StateError>()));
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Scaffold(
+            body: new Container(
+              child: new OutlineButton(
+                  onPressed: () {},
+                  child: const Text('hello')
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsData semantics = tester.getSemanticsData(find.text('hello'));
+      expect(semantics.label, 'hello');
+      expect(semantics.hasAction(SemanticsAction.tap), true);
+      expect(semantics.hasFlag(SemanticsFlag.isButton), true);
+      semanticsHandle.dispose();
+    });
+
+    testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle semanticsHandle = tester.ensureSemantics();
+      const Key key = Key('test');
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Scaffold(
+            body: new Semantics(
+              label: 'A',
+              child: new Semantics(
+                label: 'B',
+                child: new Semantics(
+                  key: key,
+                  label: 'C',
+                  child: new Container(),
+                ),
+              ),
+            )
+          ),
+        ),
+      );
+
+      final SemanticsData semantics = tester.getSemanticsData(find.byKey(key));
+      expect(semantics.label, 'A\nB\nC');
+      semanticsHandle.dispose();
+    });
+  });
+}
+
+class FakeMatcher extends AsyncMatcher {
+  FakeMatcher(this.completer);
+
+  final Completer<void> completer;
+
+  @override
+  Future<String> matchAsync(dynamic object) {
+    return completer.future.then<String>((void _) {
+      return object?.toString();
+    });
+  }
+
+  @override
+  Description describe(Description description) => description.add('--fake--');
 }

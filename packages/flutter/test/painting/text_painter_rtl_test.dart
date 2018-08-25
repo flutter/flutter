@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +18,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'ABC DEF\nGHI',
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     painter.layout();
 
@@ -41,7 +43,7 @@ void main() {
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
            //      0       12345678      9      101234567       18     90123456       27
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     expect(painter.text.text.length, 28);
     painter.layout();
@@ -118,9 +120,9 @@ void main() {
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 27)),
       const <TextBox>[
-        const TextBox.fromLTRBD(160.0, 0.0, 240.0, 10.0, TextDirection.rtl), // HEBREW1
-        const TextBox.fromLTRBD( 80.0, 0.0, 160.0, 10.0, TextDirection.ltr), // english2
-        const TextBox.fromLTRBD(  0.0, 0.0,  80.0, 10.0, TextDirection.rtl), // HEBREW3
+        TextBox.fromLTRBD(160.0, 0.0, 240.0, 10.0, TextDirection.rtl), // HEBREW1
+        TextBox.fromLTRBD( 80.0, 0.0, 160.0, 10.0, TextDirection.ltr), // english2
+        TextBox.fromLTRBD(  0.0, 0.0,  80.0, 10.0, TextDirection.rtl), // HEBREW3
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
@@ -130,34 +132,34 @@ void main() {
     for (int index = 0; index < painter.text.text.length; index += 1)
       list.add(painter.getBoxesForSelection(new TextSelection(baseOffset: index, extentOffset: index + 1)));
     expect(list, const <List<TextBox>>[
-      const <TextBox>[], // U+202E, non-printing Unicode bidi formatting character
-      const <TextBox>[const TextBox.fromLTRBD(230.0, 0.0, 240.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(220.0, 0.0, 230.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(210.0, 0.0, 220.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(200.0, 0.0, 210.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(190.0, 0.0, 200.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(180.0, 0.0, 190.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(170.0, 0.0, 180.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(160.0, 0.0, 170.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[], // U+202D, non-printing Unicode bidi formatting character
-      const <TextBox>[const TextBox.fromLTRBD(80.0, 0.0, 90.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(90.0, 0.0, 100.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(100.0, 0.0, 110.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(110.0, 0.0, 120.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(120.0, 0.0, 130.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(130.0, 0.0, 140.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(140.0, 0.0, 150.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(150.0, 0.0, 160.0, 10.0, TextDirection.ltr)],
-      const <TextBox>[], // U+202C, non-printing Unicode bidi formatting character
-      const <TextBox>[const TextBox.fromLTRBD(70.0, 0.0, 80.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(60.0, 0.0, 70.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(50.0, 0.0, 60.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(40.0, 0.0, 50.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(20.0, 0.0, 30.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(10.0, 0.0, 20.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(0.0, 0.0, 10.0, 10.0, TextDirection.rtl)],
-      const <TextBox>[], // U+202C, non-printing Unicode bidi formatting character
+      <TextBox>[], // U+202E, non-printing Unicode bidi formatting character
+      <TextBox>[TextBox.fromLTRBD(230.0, 0.0, 240.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(220.0, 0.0, 230.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(210.0, 0.0, 220.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(200.0, 0.0, 210.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(190.0, 0.0, 200.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(180.0, 0.0, 190.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(170.0, 0.0, 180.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(160.0, 0.0, 170.0, 10.0, TextDirection.rtl)],
+      <TextBox>[], // U+202D, non-printing Unicode bidi formatting character
+      <TextBox>[TextBox.fromLTRBD(80.0, 0.0, 90.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(90.0, 0.0, 100.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(100.0, 0.0, 110.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(110.0, 0.0, 120.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(120.0, 0.0, 130.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(130.0, 0.0, 140.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(140.0, 0.0, 150.0, 10.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(150.0, 0.0, 160.0, 10.0, TextDirection.ltr)],
+      <TextBox>[], // U+202C, non-printing Unicode bidi formatting character
+      <TextBox>[TextBox.fromLTRBD(70.0, 0.0, 80.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(60.0, 0.0, 70.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(50.0, 0.0, 60.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(40.0, 0.0, 50.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(20.0, 0.0, 30.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(10.0, 0.0, 20.0, 10.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(0.0, 0.0, 10.0, 10.0, TextDirection.rtl)],
+      <TextBox>[], // U+202C, non-printing Unicode bidi formatting character
       // The list currently has one extra bogus entry (the last entry, for the
       // trailing U+202C PDF, should be empty but is one-pixel-wide instead).
     ], skip: skipExpectsWithKnownBugs);
@@ -170,7 +172,7 @@ void main() {
     painter.text = const TextSpan(
       text: '${Unicode.RLO}HEBREW1 ${Unicode.LRO}english2${Unicode.PDF} HEBREW3${Unicode.PDF}',
            //      0       12345678      9      101234567       18     90123456       27
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     expect(painter.text.text.length, 28);
     painter.layout();
@@ -243,9 +245,9 @@ void main() {
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 27)),
       const <TextBox>[
-        const TextBox.fromLTRBD(160.0, 0.0, 240.0, 10.0, TextDirection.rtl), // HEBREW1
-        const TextBox.fromLTRBD( 80.0, 0.0, 160.0, 10.0, TextDirection.ltr), // english2
-        const TextBox.fromLTRBD(  0.0, 0.0,  80.0, 10.0, TextDirection.rtl), // HEBREW3
+        TextBox.fromLTRBD(160.0, 0.0, 240.0, 10.0, TextDirection.rtl), // HEBREW1
+        TextBox.fromLTRBD( 80.0, 0.0, 160.0, 10.0, TextDirection.ltr), // english2
+        TextBox.fromLTRBD(  0.0, 0.0,  80.0, 10.0, TextDirection.rtl), // HEBREW3
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
@@ -259,7 +261,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'A\u05D0', // A, Alef
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     expect(painter.text.text.length, 2);
     painter.layout(maxWidth: 10.0);
@@ -287,7 +289,6 @@ void main() {
     expect( // between A and Alef, before the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.downstream), Rect.zero),
       const Offset(10.0, 10.0),
-      skip: skipExpectsWithKnownBugs, // this ends up on the wrong line currently - this is a major bug
     );
 
     expect( // after the Alef
@@ -302,39 +303,41 @@ void main() {
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 2)),
       const <TextBox>[
-        const TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
-        const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
+        TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
+        TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 1)),
       const <TextBox>[
-        const TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
+        TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
       ],
     );
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 1, extentOffset: 2)),
       const <TextBox>[
-        const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
+        TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  }, skip: skipTestsWithKnownBugs);
+  },
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  skip: Platform.isWindows || Platform.isMacOS);
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-      children: const <TextSpan>[
-        const TextSpan(
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      children: <TextSpan>[
+        TextSpan(
           text: 'hello', // width 50
         ),
-        const TextSpan(
+        TextSpan(
           text: 'lovely', // width 120
-          style: const TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
         ),
-        const TextSpan(
+        TextSpan(
           text: 'world', // width 50
         ),
       ],
@@ -344,10 +347,10 @@ void main() {
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 16)),
       const <TextBox>[
-        const TextBox.fromLTRBD( 0.0,  8.0,  50.0, 18.0, TextDirection.ltr),
-        const TextBox.fromLTRBD(50.0,  0.0, 110.0, 20.0, TextDirection.ltr),
-        const TextBox.fromLTRBD( 0.0, 20.0,  60.0, 40.0, TextDirection.ltr),
-        const TextBox.fromLTRBD(60.0, 28.0, 110.0, 38.0, TextDirection.ltr),
+        TextBox.fromLTRBD( 0.0,  8.0,  50.0, 18.0, TextDirection.ltr),
+        TextBox.fromLTRBD(50.0,  0.0, 110.0, 20.0, TextDirection.ltr),
+        TextBox.fromLTRBD( 0.0, 20.0,  60.0, 40.0, TextDirection.ltr),
+        TextBox.fromLTRBD(60.0, 28.0, 110.0, 38.0, TextDirection.ltr),
       ],
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );
@@ -358,16 +361,16 @@ void main() {
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-      children: const <TextSpan>[
-        const TextSpan(
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      children: <TextSpan>[
+        TextSpan(
           text: 'hello', // width 50
         ),
-        const TextSpan(
+        TextSpan(
           text: '\u062C\u0645\u064A\u0644', // width 80
-          style: const TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
         ),
-        const TextSpan(
+        TextSpan(
           text: 'world', // width 50
         ),
       ],
@@ -377,10 +380,10 @@ void main() {
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 16)),
       const <TextBox>[
-        const TextBox.fromLTRBD( 0.0,  8.0, 50.0, 18.0, TextDirection.ltr),
-        const TextBox.fromLTRBD(50.0,  0.0, 90.0, 20.0, TextDirection.rtl),
-        const TextBox.fromLTRBD( 0.0, 20.0, 40.0, 40.0, TextDirection.rtl),
-        const TextBox.fromLTRBD(60.0, 28.0, 90.0, 38.0, TextDirection.ltr),
+        TextBox.fromLTRBD( 0.0,  8.0, 50.0, 18.0, TextDirection.ltr),
+        TextBox.fromLTRBD(50.0,  0.0, 90.0, 20.0, TextDirection.rtl),
+        TextBox.fromLTRBD( 0.0, 20.0, 40.0, 40.0, TextDirection.rtl),
+        TextBox.fromLTRBD(40.0, 28.0, 90.0, 38.0, TextDirection.ltr),
       ],
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );
@@ -390,20 +393,20 @@ void main() {
       list.add(painter.getBoxesForSelection(new TextSelection(baseOffset: index, extentOffset: index + 1)));
     print(list);
     expect(list, const <List<TextBox>>[
-      const <TextBox>[const TextBox.fromLTRBD(0.0, 8.0, 10.0, 18.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(10.0, 8.0, 20.0, 18.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(20.0, 8.0, 30.0, 18.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(30.0, 8.0, 40.0, 18.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(40.0, 8.0, 50.0, 18.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(70.0, 0.0, 90.0, 20.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(50.0, 0.0, 70.0, 20.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(20.0, 20.0, 40.0, 40.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(0.0, 20.0, 20.0, 40.0, TextDirection.rtl)],
-      const <TextBox>[const TextBox.fromLTRBD(40.0, 28.0, 50.0, 38.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(50.0, 28.0, 60.0, 38.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(60.0, 28.0, 70.0, 38.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(70.0, 28.0, 80.0, 38.0, TextDirection.ltr)],
-      const <TextBox>[const TextBox.fromLTRBD(80.0, 28.0, 90.0, 38.0, TextDirection.ltr)]
+      <TextBox>[TextBox.fromLTRBD(0.0, 8.0, 10.0, 18.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(10.0, 8.0, 20.0, 18.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(20.0, 8.0, 30.0, 18.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(30.0, 8.0, 40.0, 18.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(40.0, 8.0, 50.0, 18.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(70.0, 0.0, 90.0, 20.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(50.0, 0.0, 70.0, 20.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(20.0, 20.0, 40.0, 40.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(0.0, 20.0, 20.0, 40.0, TextDirection.rtl)],
+      <TextBox>[TextBox.fromLTRBD(40.0, 28.0, 50.0, 38.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(50.0, 28.0, 60.0, 38.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(60.0, 28.0, 70.0, 38.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(70.0, 28.0, 80.0, 38.0, TextDirection.ltr)],
+      <TextBox>[TextBox.fromLTRBD(80.0, 28.0, 90.0, 38.0, TextDirection.ltr)]
     ]);
   }, skip: skipTestsWithKnownBugs);
 
@@ -412,16 +415,16 @@ void main() {
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
-      children: const <TextSpan>[
-        const TextSpan(
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      children: <TextSpan>[
+        TextSpan(
           text: 'hello', // width 50
         ),
-        const TextSpan(
+        TextSpan(
           text: '\u062C\u0645\u064A\u0644', // width 80
-          style: const TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+          style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
         ),
-        const TextSpan(
+        TextSpan(
           text: 'world', // width 50
         ),
       ],
@@ -431,10 +434,10 @@ void main() {
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 16)),
       const <TextBox>[
-        const TextBox.fromLTRBD(40.0,  8.0, 90.0, 18.0, TextDirection.ltr),
-        const TextBox.fromLTRBD( 0.0,  0.0, 40.0, 20.0, TextDirection.rtl),
-        const TextBox.fromLTRBD(50.0, 20.0, 90.0, 40.0, TextDirection.rtl),
-        const TextBox.fromLTRBD( 0.0, 28.0, 50.0, 38.0, TextDirection.ltr),
+        TextBox.fromLTRBD(40.0,  8.0, 90.0, 18.0, TextDirection.ltr),
+        TextBox.fromLTRBD( 0.0,  0.0, 40.0, 20.0, TextDirection.rtl),
+        TextBox.fromLTRBD(50.0, 20.0, 90.0, 40.0, TextDirection.rtl),
+        TextBox.fromLTRBD( 0.0, 28.0, 50.0, 38.0, TextDirection.ltr),
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
@@ -456,15 +459,15 @@ void main() {
     expect(
       painter.getBoxesForSelection(new TextSelection(baseOffset: 0, extentOffset: pyramid.length)),
       const <TextBox>[
-        const TextBox.fromLTRBD(90.0, 0.0, 100.0, 10.0, TextDirection.rtl), // outer R, start (right)
-        const TextBox.fromLTRBD(10.0, 0.0,  20.0, 10.0, TextDirection.ltr), // level 1 L, start (left)
-        const TextBox.fromLTRBD(70.0, 0.0,  80.0, 10.0, TextDirection.rtl), // level 2 R, start (right)
-        const TextBox.fromLTRBD(30.0, 0.0,  40.0, 10.0, TextDirection.ltr), // level 3 L, start (left)
-        const TextBox.fromLTRBD(40.0, 0.0,  60.0, 10.0, TextDirection.rtl), // inner-most RR
-        const TextBox.fromLTRBD(60.0, 0.0,  70.0, 10.0, TextDirection.ltr), // lever 3 L, end (right)
-        const TextBox.fromLTRBD(20.0, 0.0,  30.0, 10.0, TextDirection.rtl), // level 2 R, end (left)
-        const TextBox.fromLTRBD(80.0, 0.0,  90.0, 10.0, TextDirection.ltr), // level 1 L, end (right)
-        const TextBox.fromLTRBD( 0.0, 0.0,  10.0, 10.0, TextDirection.rtl), // outer R, end (left)
+        TextBox.fromLTRBD(90.0, 0.0, 100.0, 10.0, TextDirection.rtl), // outer R, start (right)
+        TextBox.fromLTRBD(10.0, 0.0,  20.0, 10.0, TextDirection.ltr), // level 1 L, start (left)
+        TextBox.fromLTRBD(70.0, 0.0,  80.0, 10.0, TextDirection.rtl), // level 2 R, start (right)
+        TextBox.fromLTRBD(30.0, 0.0,  40.0, 10.0, TextDirection.ltr), // level 3 L, start (left)
+        TextBox.fromLTRBD(40.0, 0.0,  60.0, 10.0, TextDirection.rtl), // inner-most RR
+        TextBox.fromLTRBD(60.0, 0.0,  70.0, 10.0, TextDirection.ltr), // lever 3 L, end (right)
+        TextBox.fromLTRBD(20.0, 0.0,  30.0, 10.0, TextDirection.rtl), // level 2 R, end (left)
+        TextBox.fromLTRBD(80.0, 0.0,  90.0, 10.0, TextDirection.ltr), // level 1 L, end (right)
+        TextBox.fromLTRBD( 0.0, 0.0,  10.0, 10.0, TextDirection.rtl), // outer R, end (left)
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
@@ -479,7 +482,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: 'ABC\u05D0\u05D1\u05D2DEF', // A B C Alef Bet Gimel D E F -- but the Hebrew letters are RTL
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     painter.layout();
 
@@ -561,7 +564,7 @@ void main() {
 
     painter.text = const TextSpan(
       text: '\u05D0\u05D1\u05D2ABC\u05D3\u05D4\u05D5',
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     painter.layout();
 
@@ -606,16 +609,19 @@ void main() {
 
     painter.text = const TextSpan(
       text: ' ',
-      style: const TextStyle(fontFamily: 'Ahem', fontSize: 100.0),
-      children: const <TextSpan>[
-        const TextSpan(
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 100.0),
+      children: <TextSpan>[
+        TextSpan(
           text: ' ',
-          style: const TextStyle(fontSize: 10.0),
+          style: TextStyle(fontSize: 10.0),
         ),
-        const TextSpan(
+        TextSpan(
           text: ' ',
-          style: const TextStyle(fontSize: 200.0),
+          style: TextStyle(fontSize: 200.0),
         ),
+        // Add a non-whitespace character because the renderer's line breaker
+        // may strip trailing whitespace on a line.
+        TextSpan(text: 'A'),
       ],
     );
     painter.layout();
@@ -641,20 +647,34 @@ void main() {
     //                 |        |           |
     //                 |________v___________|
 
-    expect(painter.width, 310.0);
+    expect(painter.width, 410.0);
     expect(painter.height, 200.0);
     expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 160.0);
     expect(painter.preferredLineHeight, 100.0);
 
     expect(
-      painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 2)),
+      painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 3)),
       const <TextBox>[
-        const TextBox.fromLTRBD(  0.0,  80.0, 100.0, 180.0, TextDirection.ltr),
-        const TextBox.fromLTRBD(100.0, 152.0, 110.0, 162.0, TextDirection.ltr),
-        const TextBox.fromLTRBD(110.0,   0.0, 310.0, 200.0, TextDirection.ltr),
+        TextBox.fromLTRBD(  0.0,  80.0, 100.0, 180.0, TextDirection.ltr),
+        TextBox.fromLTRBD(100.0, 152.0, 110.0, 162.0, TextDirection.ltr),
+        TextBox.fromLTRBD(110.0,   0.0, 310.0, 200.0, TextDirection.ltr),
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
-      // Somehow today we also lose the last space.
+      skip: skipExpectsWithKnownBugs,
+    );
+  }, skip: skipTestsWithKnownBugs);
+
+  test('TextPainter - empty text baseline', () {
+    final TextPainter painter = new TextPainter()
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(
+      text: '',
+      style: TextStyle(fontFamily: 'Ahem', fontSize: 100.0, height: 1.0),
+    );
+    painter.layout();
+    expect(
+      // Returns -1
+      painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 80.0,
       skip: skipExpectsWithKnownBugs,
     );
   }, skip: skipTestsWithKnownBugs);

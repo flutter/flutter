@@ -9,12 +9,12 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   test('BoxDecoration with BorderRadiusDirectional', () {
-    final BoxDecoration decoration = const BoxDecoration(
-      color: const Color(0xFF000000),
-      borderRadius: const BorderRadiusDirectional.only(topStart: const Radius.circular(100.0)),
+    const BoxDecoration decoration = BoxDecoration(
+      color: Color(0xFF000000),
+      borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(100.0)),
     );
     final BoxPainter painter = decoration.createBoxPainter();
-    const Size size = const Size(1000.0, 1000.0);
+    const Size size = Size(1000.0, 1000.0);
     expect(
       (Canvas canvas) {
         painter.paint(
@@ -41,5 +41,31 @@ void main() {
     );
     expect(decoration.hitTest(size, const Offset(10.0, 10.0), textDirection: TextDirection.ltr), isFalse);
     expect(decoration.hitTest(size, const Offset(990.0, 10.0), textDirection: TextDirection.ltr), isTrue);
+  });
+
+  test('BoxDecoration with LinearGradient using AlignmentDirectional', () {
+    const BoxDecoration decoration = BoxDecoration(
+      color: Color(0xFF000000),
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.centerStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: <Color>[
+          Color(0xFF000000),
+          Color(0xFFFFFFFF),
+        ],
+      ),
+    );
+    final BoxPainter painter = decoration.createBoxPainter();
+    const Size size = Size(1000.0, 1000.0);
+    expect(
+        (Canvas canvas) {
+        painter.paint(
+          canvas,
+          const Offset(0.0, 0.0),
+          const ImageConfiguration(size: size, textDirection: TextDirection.rtl),
+        );
+      },
+      paints..rect(rect: Offset.zero & size),
+    );
   });
 }

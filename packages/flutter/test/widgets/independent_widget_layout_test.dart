@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-const Size _kTestViewSize = const Size(800.0, 600.0);
+const Size _kTestViewSize = Size(800.0, 600.0);
 
 class OffscreenRenderView extends RenderView {
   OffscreenRenderView() : super(configuration: const ViewConfiguration(size: _kTestViewSize));
@@ -96,6 +96,38 @@ class TriggerableState extends State<TriggerableWidget> {
   }
 }
 
+class TestFocusable extends StatefulWidget {
+  const TestFocusable({
+    Key key,
+    this.focusNode,
+    this.autofocus = true,
+  }) : super(key: key);
+
+  final bool autofocus;
+  final FocusNode focusNode;
+
+  @override
+  TestFocusableState createState() => new TestFocusableState();
+}
+
+class TestFocusableState extends State<TestFocusable> {
+  bool _didAutofocus = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didAutofocus && widget.autofocus) {
+      _didAutofocus = true;
+      FocusScope.of(context).autofocus(widget.focusNode);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Test focus node', textDirection: TextDirection.ltr);
+  }
+}
+
 void main() {
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
     final Trigger trigger1 = new Trigger();
@@ -146,4 +178,28 @@ void main() {
     expect(counter1.count, equals(3));
     expect(counter2.count, equals(3));
   });
+
+  testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
+    final OffscreenWidgetTree tree = new OffscreenWidgetTree();
+    final FocusNode onscreenFocus = new FocusNode();
+    final FocusNode offscreenFocus = new FocusNode();
+    await tester.pumpWidget(
+      new TestFocusable(
+        focusNode: onscreenFocus,
+      ),
+    );
+    tree.pumpWidget(
+      new TestFocusable(
+        focusNode: offscreenFocus,
+      ),
+    );
+
+    // Autofocus is delayed one frame.
+    await tester.pump();
+    tree.pumpFrame();
+
+    expect(onscreenFocus.hasFocus, isTrue);
+    expect(offscreenFocus.hasFocus, isTrue);
+  });
+
 }

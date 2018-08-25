@@ -120,7 +120,7 @@ class CalculationManager {
     if (isRunning) {
       _state = CalculationState.idle;
       if (_isolate != null) {
-        _isolate.kill(priority: Isolate.IMMEDIATE);
+        _isolate.kill(priority: Isolate.immediate);
         _isolate = null;
         _completed = 0.0;
         _total = 1.0;
@@ -132,11 +132,10 @@ class CalculationManager {
   Isolate _isolate;
 
   void _runCalculation() {
-    // Load the JSON string. Note that this is done in the main isolate; at the
-    // moment, spawned isolates do not have access to Mojo services, including
-    // the root bundle (see https://github.com/flutter/flutter/issues/3294).
-    // However, the loading process is asynchronous, so the UI will not block
-    // while the file is loaded.
+    // Load the JSON string. This is done in the main isolate because spawned
+    // isolates do not have access to the root bundle. However, the loading
+    // process is asynchronous, so the UI will not block while the file is
+    // loaded.
     rootBundle.loadString('services/data.json').then<Null>((String data) {
       if (isRunning) {
         final CalculationMessage message = new CalculationMessage(data, _receivePort.sendPort);
@@ -144,7 +143,7 @@ class CalculationManager {
         // is synchronous, so if done in the main isolate, the UI would block.
         Isolate.spawn(_calculate, message).then<Null>((Isolate isolate) {
           if (!isRunning) {
-            isolate.kill(priority: Isolate.IMMEDIATE);
+            isolate.kill(priority: Isolate.immediate);
           } else {
             _state = CalculationState.calculating;
             _isolate = isolate;

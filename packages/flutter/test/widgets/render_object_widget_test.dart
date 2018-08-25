@@ -6,10 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final Border nullBorder = null; // we want these instances to be separate instances so that we're not just checking with a single object
-final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nullBorder);
-final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nullBorder);
-final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nullBorder);
+final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nonconst(null));
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });
@@ -27,9 +26,9 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
     final Orientation orientation = MediaQuery.of(context).orientation;
     switch (orientation) {
       case Orientation.landscape:
-        return const BoxDecoration(color: const Color(0xFF00FF00));
+        return const BoxDecoration(color: Color(0xFF00FF00));
       case Orientation.portrait:
-        return const BoxDecoration(color: const Color(0xFF0000FF));
+        return const BoxDecoration(color: Color(0xFF0000FF));
     }
     assert(orientation != null);
     return null;
@@ -195,7 +194,7 @@ void main() {
     final TestOrientedBox box = new TestOrientedBox(key: boxKey);
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
       child: box
     ));
 
@@ -204,7 +203,7 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
       child: box
     ));
 

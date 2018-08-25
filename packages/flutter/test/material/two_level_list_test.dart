@@ -22,9 +22,9 @@ void main() {
                 new ExpansionTile(
                   key: sublistKey,
                   title: const Text('Sublist'),
-                  children: <Widget>[
-                    const ListTile(title: const Text('0')),
-                    const ListTile(title: const Text('1'))
+                  children: const <Widget>[
+                    ListTile(title: Text('0')),
+                    ListTile(title: Text('1'))
                   ]
                 ),
                 new ListTile(title: const Text('Bottom'), key: bottomKey)
@@ -81,9 +81,9 @@ void main() {
                   onExpansionChanged: (bool opened) {
                     didChangeOpen = opened;
                   },
-                  children: <Widget>[
-                    const ListTile(title: const Text('0')),
-                    const ListTile(title: const Text('1'))
+                  children: const <Widget>[
+                    ListTile(title: Text('0')),
+                    ListTile(title: Text('1'))
                   ]
                 ),
               ]
@@ -110,17 +110,17 @@ void main() {
         return new Material(
           child: new SingleChildScrollView(
             child: new Column(
-              children: <Widget>[
-                const ListTile(title: const Text('Top')),
-                new ExpansionTile(
-                  title: const Text('Sublist'),
+              children: const <Widget>[
+                ListTile(title: Text('Top')),
+                ExpansionTile(
+                  title: Text('Sublist'),
                   children: <Widget>[
-                    const ListTile(title: const Text('0')),
-                    const ListTile(title: const Text('1'))
+                    ListTile(title: Text('0')),
+                    ListTile(title: Text('1'))
                   ],
-                  trailing: const Icon(Icons.inbox),
+                  trailing: Icon(Icons.inbox),
                 ),
-                const ListTile(title: const Text('Bottom'))
+                ListTile(title: Text('Bottom'))
               ]
             )
           )

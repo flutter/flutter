@@ -47,8 +47,8 @@ void main() {
 
     expect(behavior, isNotNull);
     expect(behavior.flag, isTrue);
-    expect(position.physics, const isInstanceOf<ClampingScrollPhysics>());
-    ScrollMetrics metrics = position.cloneMetrics();
+    expect(position.physics, isInstanceOf<ClampingScrollPhysics>());
+    ScrollMetrics metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
 
@@ -62,9 +62,9 @@ void main() {
 
     expect(behavior, isNotNull);
     expect(behavior.flag, isFalse);
-    expect(position.physics, const isInstanceOf<BouncingScrollPhysics>());
+    expect(position.physics, isInstanceOf<BouncingScrollPhysics>());
     // Regression test for https://github.com/flutter/flutter/issues/5856
-    metrics = position.cloneMetrics();
+    metrics = position.copyWith();
     expect(metrics.extentAfter, equals(400.0));
     expect(metrics.viewportDimension, equals(600.0));
   });

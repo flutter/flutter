@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Slightly longer than task timeout that gives the task runner a chance to
 /// clean-up before forcefully quitting it.
-const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
+const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
@@ -22,15 +22,14 @@ const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) async {
+Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  final int vmServicePort = await findAvailablePort();
   final Process runner = await startProcess(dartBin, <String>[
-    '--enable-vm-service=$vmServicePort',
+    '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
     taskExecutable,
   ]);
@@ -41,10 +40,17 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
     runnerFinished = true;
   });
 
+  final Completer<int> port = new Completer<int>();
+
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .listen((String line) {
+    if (!port.isCompleted) {
+      final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
+      if (portValue != null)
+        port.complete(portValue);
+    }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
     }
@@ -59,22 +65,22 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
 
   String waitingFor = 'connection';
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(vmServicePort);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await port.future);
     waitingFor = 'task completion';
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
     waitingFor = 'task process to exit';
-    await runner.exitCode.timeout(const Duration(seconds: 1));
+    await runner.exitCode.timeout(const Duration(seconds: 60));
     return taskResult;
   } on TimeoutException catch (timeout) {
-    runner.kill(ProcessSignal.SIGINT);
+    runner.kill(ProcessSignal.sigint);
     return <String, dynamic>{
       'success': false,
-      'reason': 'Timeout waiting for $waitingFor: ${timeout.message}',
+      'reason': 'Timeout in runner.dart waiting for $waitingFor: ${timeout.message}',
     };
   } finally {
     if (!runnerFinished)
-      runner.kill(ProcessSignal.SIGKILL);
+      runner.kill(ProcessSignal.sigkill);
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -105,7 +111,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         throw 'not ready yet';
       return isolate;
     } catch (error) {
-      const Duration connectionTimeout = const Duration(seconds: 2);
+      const Duration connectionTimeout = Duration(seconds: 10);
       if (new DateTime.now().difference(started) > connectionTimeout) {
         throw new TimeoutException(
           'Failed to connect to the task runner process',
@@ -113,7 +119,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
         );
       }
       print('VM service not ready yet: $error');
-      const Duration pauseBetweenRetries = const Duration(milliseconds: 200);
+      const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
       await new Future<Null>.delayed(pauseBetweenRetries);
     }

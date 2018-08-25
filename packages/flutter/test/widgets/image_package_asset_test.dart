@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('AssetImage from package', () {
-    final AssetImage image = const AssetImage(
+    const AssetImage image = AssetImage(
       'assets/image.png',
       package: 'test_package',
     );
@@ -16,7 +15,7 @@ void main() {
   });
 
   test('ExactAssetImage from package', () {
-    final ExactAssetImage image = const ExactAssetImage(
+    const ExactAssetImage image = ExactAssetImage(
       'assets/image.png',
       scale: 1.5,
       package: 'test_package',
@@ -41,7 +40,7 @@ void main() {
       package: 'test_package',
     );
     assert(imageWidget.image is ExactAssetImage);
-    final ExactAssetImage asssetImage = imageWidget.image;
-    expect(asssetImage.keyName, 'packages/test_package/assets/image.png');
+    final ExactAssetImage assetImage = imageWidget.image;
+    expect(assetImage.keyName, 'packages/test_package/assets/image.png');
   });
 }

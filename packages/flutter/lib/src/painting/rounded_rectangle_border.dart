@@ -29,8 +29,8 @@ class RoundedRectangleBorder extends ShapeBorder {
   ///
   /// The arguments must not be null.
   const RoundedRectangleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
        assert(borderRadius != null);
 
@@ -55,6 +55,7 @@ class RoundedRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
+    assert(t != null);
     if (a is RoundedRectangleBorder) {
       return new RoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -73,6 +74,7 @@ class RoundedRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
+    assert(t != null);
     if (b is RoundedRectangleBorder) {
       return new RoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -140,8 +142,8 @@ class RoundedRectangleBorder extends ShapeBorder {
 
 class _RoundedRectangleToCircleBorder extends ShapeBorder {
   const _RoundedRectangleToCircleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
     @required this.circleness,
   }) : assert(side != null),
        assert(borderRadius != null),
@@ -169,6 +171,7 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
+    assert(t != null);
     if (a is RoundedRectangleBorder) {
       return new _RoundedRectangleToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),

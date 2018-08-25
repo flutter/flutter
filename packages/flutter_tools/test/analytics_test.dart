@@ -3,22 +3,25 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:mockito/mockito.dart';
+import 'package:quiver/time.dart';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/usage.dart';
-import 'package:mockito/mockito.dart';
-import 'package:quiver/time.dart';
-import 'package:test/test.dart';
+import 'package:flutter_tools/src/version.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
   group('analytics', () {
-    Directory temp;
+    Directory tempDir;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -26,11 +29,11 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     // Ensure we don't send anything when analytics is disabled.
@@ -39,11 +42,11 @@ void main() {
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       flutterUsage.enabled = false;
-      await createProject(temp);
+      await createProject(tempDir);
       expect(count, 0);
 
       flutterUsage.enabled = true;
-      await createProject(temp);
+      await createProject(tempDir);
       expect(count, flutterUsage.isFirstRun ? 0 : 2);
 
       count = 0;
@@ -53,7 +56,8 @@ void main() {
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      Usage: () => new Usage(),
+      FlutterVersion: () => new FlutterVersion(const Clock()),
+      Usage: () => new Usage(configDirOverride: tempDir.path),
     });
 
     // Ensure we don't send for the 'flutter config' command.
@@ -71,7 +75,8 @@ void main() {
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      Usage: () => new Usage(),
+      FlutterVersion: () => new FlutterVersion(const Clock()),
+      Usage: () => new Usage(configDirOverride: tempDir.path),
     });
   });
 
@@ -93,7 +98,7 @@ void main() {
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false)).thenReturn(true);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -101,7 +106,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
       );
     }, overrides: <Type, Generator>{
@@ -112,7 +117,7 @@ void main() {
 
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false)).thenReturn(false);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -120,7 +125,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
       );
     }, overrides: <Type, Generator>{
@@ -128,9 +133,34 @@ void main() {
       Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });
+
+    testUsingContext('single command usage path', () async {
+      final FlutterCommand doctorCommand = new DoctorCommand();
+      expect(await doctorCommand.usagePath, 'doctor');
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('compound command usage path', () async {
+      final BuildCommand buildCommand = new BuildCommand();
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'];
+      expect(await buildApkCommand.usagePath, 'build/apk');
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
+    });
   });
 
   group('analytics bots', () {
+    Directory tempDir;
+
+    setUp(() {
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
+    });
+
+    tearDown(() {
+      tryToDelete(tempDir);
+    });
+
     testUsingContext('don\'t send on bots', () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
@@ -141,6 +171,22 @@ void main() {
       Usage: () => new Usage(
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
+        configDirOverride: tempDir.path,
+      ),
+    });
+
+    testUsingContext('don\'t send on bots even when opted in', () async {
+      int count = 0;
+      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      flutterUsage.enabled = true;
+
+      await createTestCommandRunner().run(<String>['--version']);
+      expect(count, 0);
+    }, overrides: <Type, Generator>{
+      Usage: () => new Usage(
+        settingsName: 'flutter_bot_test',
+        versionOverride: 'dev/unknown',
+        configDirOverride: tempDir.path,
       ),
     });
   });

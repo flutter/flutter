@@ -7,37 +7,37 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
-import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
+import 'tracing.dart';
 
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    this.traceStartup: false,
+    bool usesTerminalUI = true,
+    this.traceStartup = false,
     this.applicationBinary,
-    this.previewDart2 : false,
-    bool stayResident: true,
+    bool stayResident = true,
+    bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
-             stayResident: stayResident);
+             stayResident: stayResident,
+             ipv6: ipv6);
 
   final bool traceStartup;
-  final String applicationBinary;
-  final bool previewDart2;
+  final File applicationBinary;
 
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild: true
+    bool shouldBuild = true
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -125,22 +125,29 @@ class ColdRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
+    bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.observatoryUris != null) {
-        for (Uri uri in device.observatoryUris)
+        for (Uri uri in device.observatoryUris) {
           printStatus('An Observatory debugger and profiler on $dname is available at $uri');
+          haveAnything = true;
+        }
       }
     }
     if (supportsServiceProtocol) {
       haveDetails = true;
-      if (details)
+      if (details) {
         printHelpDetails();
+        haveAnything = true;
+      }
     }
     if (haveDetails && !details) {
       printStatus('For a more detailed help message, press "h". To quit, press "q".');
-    } else {
+    } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". To quit, press "q".');
+    } else {
+      printStatus('To quit, press "q".');
     }
   }
 

@@ -16,7 +16,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'page.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'theme.dart';
@@ -52,7 +51,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
   bool shouldRelayout(_ToolbarContainerLayout oldDelegate) => false;
 }
 
-// TODO(eseidel) Toolbar needs to change size based on orientation:
+// TODO(eseidel): Toolbar needs to change size based on orientation:
 // http://material.google.com/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp
@@ -80,7 +79,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// ![The leading widget is in the top left, the actions are in the top right,
 /// the title is between them. The bottom is, naturally, at the bottom, and the
-/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/material/app_bar.png)
+/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/assets/material/app_bar.png)
 ///
 /// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
 /// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
@@ -136,21 +135,21 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   AppBar({
     Key key,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
     this.flexibleSpace,
     this.bottom,
-    this.elevation: 4.0,
+    this.elevation = 4.0,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
     this.textTheme,
-    this.primary: true,
+    this.primary = true,
     this.centerTitle,
-    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
-    this.toolbarOpacity: 1.0,
-    this.bottomOpacity: 1.0,
+    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
+    this.toolbarOpacity = 1.0,
+    this.bottomOpacity = 1.0,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation != null),
        assert(primary != null),
@@ -162,12 +161,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A widget to display before the [title].
   ///
-  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
-  /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
-  /// that also has a [Drawer], the [Scaffold] will fill this widget with an
-  /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
-  /// [Navigator] can go back, the [AppBar] will use a [BackButton] that calls
-  /// [Navigator.maybePop].
+  /// If this is null and [automaticallyImplyLeading] is set to true, the
+  /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
+  /// in a [Scaffold] that also has a [Drawer], the [Scaffold] will fill this
+  /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
+  /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
+  /// will use a [BackButton] that calls [Navigator.maybePop].
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -189,27 +188,28 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// For example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
+  /// new Scaffold(
   ///   appBar: new AppBar(
   ///     title: new Text('Hello World'),
   ///     actions: <Widget>[
   ///       new IconButton(
   ///         icon: new Icon(Icons.shopping_cart),
   ///         tooltip: 'Open shopping cart',
-  ///         onPressed: _openCart,
+  ///         onPressed: () {
+  ///           // ...
+  ///         },
   ///       ),
   ///     ],
   ///   ),
-  ///   body: _buildBody(),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
   /// changes the [AppBar]'s size. A [SliverAppBar] in a [CustomScrollView]
@@ -339,16 +339,11 @@ class _AppBarState extends State<AppBar> {
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
-    final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
+    final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
-
-    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-      ? SystemUiOverlayStyle.light
-      : SystemUiOverlayStyle.dark);
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
@@ -383,11 +378,24 @@ class _AppBarState extends State<AppBar> {
 
     Widget title = widget.title;
     if (title != null) {
+      bool namesRoute;
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+           namesRoute = true;
+           break;
+        case TargetPlatform.iOS:
+          break;
+      }
       title = new DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: title,
+        child: new Semantics(
+          namesRoute: namesRoute,
+          child: title,
+          header: true,
+        ),
       );
     }
 
@@ -403,18 +411,15 @@ class _AppBarState extends State<AppBar> {
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      );      
+      );
     }
 
-    final Widget toolbar = new Padding(
-      padding: const EdgeInsetsDirectional.only(end: 4.0),
-      child: new NavigationToolbar(
-        leading: leading,
-        middle: title,
-        trailing: actions,
-        centerMiddle: widget._getEffectiveCenterTitle(themeData),
-        middleSpacing: widget.titleSpacing,
-      ),
+    final Widget toolbar = new NavigationToolbar(
+      leading: leading,
+      middle: title,
+      trailing: actions,
+      centerMiddle: widget._getEffectiveCenterTitle(themeData),
+      middleSpacing: widget.titleSpacing,
     );
 
     // If the toolbar is allocated less than kToolbarHeight make it
@@ -431,7 +436,6 @@ class _AppBarState extends State<AppBar> {
         ),
       ),
     );
-
     if (widget.bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -472,11 +476,22 @@ class _AppBarState extends State<AppBar> {
         ],
       );
     }
+    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
+    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
 
-    return new Material(
-      color: widget.backgroundColor ?? themeData.primaryColor,
-      elevation: widget.elevation,
-      child: appBar,
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: new Material(
+          color: widget.backgroundColor ?? themeData.primaryColor,
+          elevation: widget.elevation,
+          child: appBar,
+        ),
+      ),
     );
   }
 }
@@ -606,7 +621,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
-        flexibleSpace: flexibleSpace,
+        flexibleSpace: (title == null && flexibleSpace != null)
+          ? new Semantics(child: flexibleSpace, header: true)
+          : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
         backgroundColor: backgroundColor,
@@ -711,24 +728,24 @@ class SliverAppBar extends StatefulWidget {
   const SliverAppBar({
     Key key,
     this.leading,
-    this.automaticallyImplyLeading: true,
+    this.automaticallyImplyLeading = true,
     this.title,
     this.actions,
     this.flexibleSpace,
     this.bottom,
     this.elevation,
-    this.forceElevated: false,
+    this.forceElevated = false,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
     this.textTheme,
-    this.primary: true,
+    this.primary = true,
     this.centerTitle,
-    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
+    this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.expandedHeight,
-    this.floating: false,
-    this.pinned: false,
-    this.snap: false,
+    this.floating = false,
+    this.pinned = false,
+    this.snap = false,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -768,11 +785,11 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// For example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
-  ///   body: new CustomView(
+  /// new Scaffold(
+  ///   body: new CustomScrollView(
   ///     primary: true,
   ///     slivers: <Widget>[
   ///       new SliverAppBar(
@@ -790,12 +807,12 @@ class SliverAppBar extends StatefulWidget {
   ///       // ...rest of body...
   ///     ],
   ///   ),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
@@ -897,7 +914,7 @@ class SliverAppBar extends StatefulWidget {
 
   /// Whether the app bar should remain visible at the start of the scroll view.
   ///
-  /// The app bar can still expand an contract as the user scrolls, but it will
+  /// The app bar can still expand and contract as the user scrolls, but it will
   /// remain visible rather than being scrolled out of view.
   final bool pinned;
 
@@ -954,31 +971,35 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? widget.bottom.preferredSize.height + topPadding : null;
 
-    return new SliverPersistentHeader(
-      floating: widget.floating,
-      pinned: widget.pinned,
-      delegate: new _SliverAppBarDelegate(
-        leading: widget.leading,
-        automaticallyImplyLeading: widget.automaticallyImplyLeading,
-        title: widget.title,
-        actions: widget.actions,
-        flexibleSpace: widget.flexibleSpace,
-        bottom: widget.bottom,
-        elevation: widget.elevation,
-        forceElevated: widget.forceElevated,
-        backgroundColor: widget.backgroundColor,
-        brightness: widget.brightness,
-        iconTheme: widget.iconTheme,
-        textTheme: widget.textTheme,
-        primary: widget.primary,
-        centerTitle: widget.centerTitle,
-        titleSpacing: widget.titleSpacing,
-        expandedHeight: widget.expandedHeight,
-        collapsedHeight: collapsedHeight,
-        topPadding: topPadding,
+    return new MediaQuery.removePadding(
+      context: context,
+      removeBottom: true,
+      child: new SliverPersistentHeader(
         floating: widget.floating,
         pinned: widget.pinned,
-        snapConfiguration: _snapConfiguration,
+        delegate: new _SliverAppBarDelegate(
+          leading: widget.leading,
+          automaticallyImplyLeading: widget.automaticallyImplyLeading,
+          title: widget.title,
+          actions: widget.actions,
+          flexibleSpace: widget.flexibleSpace,
+          bottom: widget.bottom,
+          elevation: widget.elevation,
+          forceElevated: widget.forceElevated,
+          backgroundColor: widget.backgroundColor,
+          brightness: widget.brightness,
+          iconTheme: widget.iconTheme,
+          textTheme: widget.textTheme,
+          primary: widget.primary,
+          centerTitle: widget.centerTitle,
+          titleSpacing: widget.titleSpacing,
+          expandedHeight: widget.expandedHeight,
+          collapsedHeight: collapsedHeight,
+          topPadding: topPadding,
+          floating: widget.floating,
+          pinned: widget.pinned,
+          snapConfiguration: _snapConfiguration,
+        ),
       ),
     );
   }

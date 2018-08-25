@@ -4,18 +4,18 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
@@ -23,7 +23,7 @@ import 'theme.dart';
 /// A material design data table that shows data using multiple pages.
 ///
 /// A paginated data table shows [rowsPerPage] rows of data per page and
-/// provies controls for showing other pages.
+/// provides controls for showing other pages.
 ///
 /// Data is read lazily from from a [DataTableSource]. The widget is presented
 /// as a [Card].
@@ -31,7 +31,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [DataTable], which is not paginated.
-///  * <https://material.io/guidelines/components/data-tables.html#data-tables-tables-within-cards>
+///  * <https://material.io/go/design-data-tables#data-tables-tables-within-cards>
 class PaginatedDataTable extends StatefulWidget {
   /// Creates a widget describing a paginated [DataTable] on a [Card].
   ///
@@ -66,12 +66,12 @@ class PaginatedDataTable extends StatefulWidget {
     this.actions,
     @required this.columns,
     this.sortColumnIndex,
-    this.sortAscending: true,
+    this.sortAscending = true,
     this.onSelectAll,
-    this.initialFirstRowIndex: 0,
+    this.initialFirstRowIndex = 0,
     this.onPageChanged,
-    this.rowsPerPage: defaultRowsPerPage,
-    this.availableRowsPerPage: const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
+    this.rowsPerPage = defaultRowsPerPage,
+    this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     @required this.source
   }) : assert(header != null),
@@ -240,13 +240,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
-        return const DataCell(const CircularProgressIndicator());
+        return const DataCell(CircularProgressIndicator());
       }
       return DataCell.empty;
     }).toList();
     if (!haveProgressIndicator) {
       haveProgressIndicator = true;
-      cells[0] = const DataCell(const CircularProgressIndicator());
+      cells[0] = const DataCell(CircularProgressIndicator());
     }
     return new DataRow.byIndex(
       index: index,
@@ -324,7 +324,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
-        .where((int value) => value <= _rowCount)
+        .where((int value) => value <= _rowCount || value == widget.rowsPerPage)
         .map<DropdownMenuItem<int>>((int value) {
           return new DropdownMenuItem<int>(
             value: value,
@@ -333,15 +333,22 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         })
         .toList();
       footerWidgets.addAll(<Widget>[
+        new Container(width: 14.0), // to match trailing padding in case we overflow and end up scrolling
         new Text(localizations.rowsPerPageTitle),
-        new DropdownButtonHideUnderline(
-          child: new DropdownButton<int>(
-            items: availableRowsPerPage,
-            value: widget.rowsPerPage,
-            onChanged: widget.onRowsPerPageChanged,
-            style: footerTextStyle,
-            iconSize: 24.0
-          )
+        new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 64.0), // 40.0 for the text, 24.0 for the icon
+          child: new Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: new DropdownButtonHideUnderline(
+              child: new DropdownButton<int>(
+                items: availableRowsPerPage,
+                value: widget.rowsPerPage,
+                onChanged: widget.onRowsPerPageChanged,
+                style: footerTextStyle,
+                iconSize: 24.0,
+              ),
+            ),
+          ),
         ),
       ]);
     }
@@ -374,34 +381,37 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
     // CARD
     return new Card(
+      semanticContainer: false,
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          new DefaultTextStyle(
-            // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-            // list and then tweak them appropriately.
-            // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
-            style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
-                                         : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-            child: IconTheme.merge(
-              data: const IconThemeData(
-                opacity: 0.54
+          new Semantics(
+            container: true,
+            child: new DefaultTextStyle(
+              // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+              // list and then tweak them appropriately.
+              // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+              style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+                                           : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+              child: IconTheme.merge(
+                data: const IconThemeData(
+                  opacity: 0.54
+                ),
+                child: new ButtonTheme.bar(
+                  child: new Ink(
+                    height: 64.0,
+                    color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                    child: new Padding(
+                      padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: headerWidgets
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              child: new ButtonTheme.bar(
-                child: new Container(
-                  height: 64.0,
-                  padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                  // TODO(ianh): This decoration will prevent ink splashes from being visible.
-                  // Instead, we should have a widget that prints the decoration on the material.
-                  // See https://github.com/flutter/flutter/issues/3782
-                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                  child: new Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: headerWidgets
-                  )
-                )
-              )
-            )
+            ),
           ),
           new SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -422,15 +432,18 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               ),
               child: new Container(
                 height: 56.0,
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: footerWidgets
-                )
-              )
-            )
-          )
-        ]
-      )
+                child: new SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: new Row(
+                    children: footerWidgets,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

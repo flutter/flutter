@@ -10,6 +10,31 @@ import 'package:flutter/widgets.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// ADDING A NEW STRING
+//
+// If you (someone contributing to the Flutter framework) want to add a new
+// string to the MaterialLocalizations object (e.g. because you've added a new
+// widget and it has a tooltip), follow these steps:
+//
+// 1. Add the new getter to MaterialLocalizations below.
+//
+// 2. Implement a default value in DefaultMaterialLocalizations below.
+//
+// 3. Add a test to test/material/localizations_test.dart that verifies that
+//    this new value is implemented.
+//
+// 4. Update the flutter_localizations package. To add a new string to the
+//    flutter_localizations package, you must first add it to the English
+//    translations (lib/src/l10n/material_en.arb), including a description, then
+//    you must add it to every other language (all the other *.arb files in that
+//    same directory), listing the translation as `TBD`. After that you have to
+//    re-generate lib/src/l10n/localizations.dart by running
+//    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
+//    file with further information in the lib/src/l10n/ directory.
+//
+// 5. If you are a Google employee, you should then also follow the instructions
+//    at go/flutter-l10n. If you're not, don't worry about it.
+
 /// Defines the localized resource values used by the Material widgets.
 ///
 /// See also:
@@ -19,7 +44,7 @@ import 'typography.dart';
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
 abstract class MaterialLocalizations {
-  /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button.
+  /// The tooltip for the leading [AppBar] menu (a.k.a. 'hamburger') button.
   String get openAppDrawerTooltip;
 
   /// The [BackButton]'s tooltip.
@@ -27,6 +52,9 @@ abstract class MaterialLocalizations {
 
   /// The [CloseButton]'s tooltip.
   String get closeButtonTooltip;
+
+  /// The tooltip for the delete button on a [Chip].
+  String get deleteButtonTooltip;
 
   /// The tooltip for the [MonthPicker]'s "next month" button.
   String get nextMonthTooltip;
@@ -54,6 +82,14 @@ abstract class MaterialLocalizations {
 
   /// Title for the [PaginatedDataTable]'s "rows per page" footer.
   String get rowsPerPageTitle;
+
+  /// The accessibility label used on a tab in a [TabBar].
+  ///
+  /// This message describes the index of the selected tab and how many tabs
+  /// there are, e.g. 'Tab 1 of 2' in United States English.
+  ///
+  /// `tabIndex` and `tabCount` must be greater than or equal to one.
+  String tabLabel({int tabIndex, int tabCount});
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -91,11 +127,46 @@ abstract class MaterialLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
+  /// The text-to-speech announcement made when a time picker invoked using
+  /// [showTimePicker] is set to the hour picker mode.
+  String get timePickerHourModeAnnouncement;
+
+  /// The text-to-speech announcement made when a time picker invoked using
+  /// [showTimePicker] is set to the minute picker mode.
+  String get timePickerMinuteModeAnnouncement;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) for a modal
+  /// barrier to indicate that a tap dismisses the barrier.
+  ///
+  /// A modal barrier can for example be found behind an alert or popup to block
+  /// user interaction with elements behind it.
+  String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// drawer widget is opened.
+  String get drawerLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// popup menu widget is opened.
+  String get popupMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a
+  /// dialog widget is opened.
+  String get dialogLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when an
+  /// alert dialog widget is opened.
+  String get alertDialogLabel;
+
+  /// Label indicating that a text field is a search field. This will be used
+  /// as a hint text in the text field.
+  String get searchFieldLabel;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false });
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
 
   /// Provides geometric text preferences for the current locale.
   ///
@@ -111,7 +182,7 @@ abstract class MaterialLocalizations {
   /// obtained from [Theme.of] no longer inherits text style properties and
   /// contains a complete set of properties needed to style a [Text] widget.
   ///
-  /// See also: https://material.io/guidelines/style/typography.html
+  /// See also: https://material.io/go/design-typography
   TextTheme get localTextGeometry;
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
@@ -123,7 +194,7 @@ abstract class MaterialLocalizations {
   ///
   /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
   /// rather than the default for the current locale.
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
@@ -135,7 +206,7 @@ abstract class MaterialLocalizations {
   /// rather than the default for the current locale. This value is usually
   /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
   /// specific behavior.
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -150,6 +221,17 @@ abstract class MaterialLocalizations {
   /// - US English: Wed, Sep 27
   /// - Russian: ср, сент. 27
   String formatMediumDate(DateTime date);
+
+  /// Formats day of week, month, day of month and year in a long-width format.
+  ///
+  /// Does not abbreviate names. Appears in spoken announcements of the date
+  /// picker invoked using [showDatePicker], when accessibility mode is on.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wednesday, September 27, 2017
+  /// - Russian: Среда, Сентябрь 27, 2017
+  String formatFullDate(DateTime date);
 
   /// Formats the month and the year of the given [date].
   ///
@@ -182,6 +264,48 @@ abstract class MaterialLocalizations {
   /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
+
+  /// The semantics label used to indicate which account is signed in in the
+  /// [UserAccountsDrawerHeader] widget.
+  String get signedInLabel;
+
+  /// The semantics label used for the button on [UserAccountsDrawerHeader] that
+  /// hides the list of accounts.
+  String get hideAccountsLabel;
+
+  /// The semantics label used for the button on [UserAccountsDrawerHeader] that
+  /// shows the list of accounts.
+  String get showAccountsLabel;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list to the start of the list.
+  String get reorderItemToStart;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list to the end of the list.
+  String get reorderItemToEnd;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space up the list.
+  String get reorderItemUp;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space down the list.
+  String get reorderItemDown;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space left in the list.
+  String get reorderItemLeft;
+
+  /// The semantics label used for [ReorderableList] to reorder an item in the
+  /// list one space right in the list.
+  String get reorderItemRight;
+
+  /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
+  String get expandedIconTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
+  String get collapsedIconTapHint => 'Expand';
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -229,9 +353,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultMaterialLocalizations();
 
-
-  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
-  static const List<String>_shortWeekdays = const <String>[
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
+  static const List<String> _shortWeekdays = <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -241,7 +364,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sun',
   ];
 
-  static const List<String> _narrowWeekdays = const <String>[
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
+  static const List<String> _weekdays = <String>[
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  static const List<String> _narrowWeekdays = <String>[
     'S',
     'M',
     'T',
@@ -251,7 +385,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'S',
   ];
 
-  static const List<String> _shortMonths = const <String>[
+  static const List<String> _shortMonths = <String>[
     'Jan',
     'Feb',
     'Mar',
@@ -266,7 +400,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Dec',
   ];
 
-  static const List<String> _months = const <String>[
+  static const List<String> _months = <String>[
     'January',
     'February',
     'March',
@@ -282,7 +416,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ];
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
     switch (format) {
       case TimeOfDayFormat.h_colon_mm_space_a:
@@ -316,15 +450,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatMediumDate(DateTime date) {
-    final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
-    final String month = _shortMonths[date.month - DateTime.JANUARY];
+    final String day = _shortWeekdays[date.weekday - DateTime.monday];
+    final String month = _shortMonths[date.month - DateTime.january];
     return '$day, $month ${date.day}';
+  }
+
+  @override
+  String formatFullDate(DateTime date) {
+    final String month = _months[date.month - DateTime.january];
+    return '${_weekdays[date.weekday - DateTime.monday]}, $month ${date.day}, ${date.year}';
   }
 
   @override
   String formatMonthYear(DateTime date) {
     final String year = formatYear(date);
-    final String month = _months[date.month - DateTime.JANUARY];
+    final String month = _months[date.month - DateTime.january];
     return '$month $year';
   }
 
@@ -361,7 +501,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -400,6 +540,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get closeButtonTooltip => 'Close';
 
   @override
+  String get deleteButtonTooltip => 'Delete';
+
+  @override
   String get nextMonthTooltip => 'Next month';
 
   @override
@@ -415,6 +558,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get showMenuTooltip => 'Show menu';
 
   @override
+  String get drawerLabel => 'Navigation menu';
+
+  @override
+  String get popupMenuLabel => 'Popup menu';
+
+  @override
+  String get dialogLabel => 'Dialog';
+
+  @override
+  String get alertDialogLabel => 'Alert';
+
+  @override
+  String get searchFieldLabel => 'Search';
+
+  @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
 
   @override
@@ -428,7 +586,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get rowsPerPageTitle => 'Rows per page';
+  String get rowsPerPageTitle => 'Rows per page:';
+
+  @override
+  String tabLabel({int tabIndex, int tabCount}) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    return 'Tab $tabIndex of $tabCount';
+  }
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
@@ -476,7 +641,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
+  String get timePickerHourModeAnnouncement => 'Select hours';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Select minutes';
+
+  @override
+  String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;
@@ -485,6 +659,39 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
   TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
+
+  @override
+  String get signedInLabel => 'Signed in';
+
+  @override
+  String get hideAccountsLabel => 'Hide accounts';
+
+  @override
+  String get showAccountsLabel => 'Show accounts';
+
+  @override
+  String get reorderItemUp => 'Move up';
+
+  @override
+  String get reorderItemDown => 'Move down';
+
+  @override
+  String get reorderItemLeft => 'Move left';
+
+  @override
+  String get reorderItemRight => 'Move right';
+
+  @override
+  String get reorderItemToEnd => 'Move to the end';
+
+  @override
+  String get reorderItemToStart => 'Move to the start';
+
+  @override
+  String get expandedIconTapHint => 'Collapse';
+
+  @override
+  String get collapsedIconTapHint => 'Expand';
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.
@@ -501,5 +708,5 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// to create an instance of this class.
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
 }

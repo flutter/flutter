@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('channel suite', () {
     FlutterDriver driver;
 
     setUpAll(() async {
-      driver = await FlutterDriver.connect();
+      driver = await FlutterDriver.connect(printCommunication: true);
     });
 
     test('step through', () async {

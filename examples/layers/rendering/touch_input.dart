@@ -48,7 +48,7 @@ class RenderDots extends RenderBox {
   @override
   bool get sizedByParent => true;
 
-  /// By selecting the biggest value permitted by the incomming constraints
+  /// By selecting the biggest value permitted by the incoming constraints
   /// during layout, this function makes this render object as large as
   /// possible (i.e., fills the entire screen).
   @override
@@ -86,7 +86,7 @@ class RenderDots extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     // The "size" property indicates the size of that this render box was
-    // alotted during layout. Here we paint our bounds white. Notice that we're
+    // allotted during layout. Here we paint our bounds white. Notice that we're
     // located at "offset" from the origin of the canvas' coordinate system.
     // Passing offset during the render tree's paint walk is an optimization to
     // avoid having to change the origin of the canvas's coordinate system too
@@ -103,7 +103,7 @@ void main() {
   // Create some styled text to tell the user to interact with the app.
   final RenderParagraph paragraph = new RenderParagraph(
     const TextSpan(
-      style: const TextStyle(color: Colors.black87),
+      style: TextStyle(color: Colors.black87),
       text: 'Touch me!',
     ),
     textDirection: TextDirection.ltr,

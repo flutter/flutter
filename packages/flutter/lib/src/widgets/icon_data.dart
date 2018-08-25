@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show hashValues;
+
 import 'package:flutter/foundation.dart';
 
 /// A description of an icon fulfilled by a font glyph.
@@ -21,6 +23,7 @@ class IconData {
     this.codePoint, {
     this.fontFamily,
     this.fontPackage,
+    this.matchTextDirection = false,
   });
 
   /// The Unicode code point at which this icon is stored in the icon font.
@@ -39,16 +42,26 @@ class IconData {
   ///  * [TextStyle], which describes how to use fonts from other packages.
   final String fontPackage;
 
+  /// Whether this icon should be automatically mirrored in right-to-left
+  /// environments.
+  ///
+  /// The [Icon] widget respects this value by mirroring the icon when the
+  /// [Directionality] is [TextDirection.rtl].
+  final bool matchTextDirection;
+
   @override
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
     final IconData typedOther = other;
-    return codePoint == typedOther.codePoint;
+    return codePoint == typedOther.codePoint
+        && fontFamily == typedOther.fontFamily
+        && fontPackage == typedOther.fontPackage
+        && matchTextDirection == typedOther.matchTextDirection;
   }
 
   @override
-  int get hashCode => codePoint.hashCode;
+  int get hashCode => hashValues(codePoint, fontFamily, fontPackage, matchTextDirection);
 
   @override
   String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';

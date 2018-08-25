@@ -38,7 +38,7 @@ typedef void AnimationStatusListener(AnimationStatus status);
 ///
 /// To create a new animation that you can run forward and backward, consider
 /// using [AnimationController].
-abstract class Animation<T> extends Listenable {
+abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Animation();
@@ -71,6 +71,7 @@ abstract class Animation<T> extends Listenable {
   AnimationStatus get status;
 
   /// The current value of the animation.
+  @override
   T get value;
 
   /// Whether this animation is stopped at the beginning.

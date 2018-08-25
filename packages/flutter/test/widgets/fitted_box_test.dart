@@ -338,4 +338,150 @@ void main() {
       expect(insideBottomRight, equals(outsideBottomRight));
     }
   });
+
+  testWidgets('FittedBox layers - contain', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 100.0,
+          height: 10.0,
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: RepaintBoundary(
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getLayers(), <Type>[TransformLayer, TransformLayer, OffsetLayer]);
+  });
+
+  testWidgets('FittedBox layers - cover - horizontal', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 100.0,
+          height: 10.0,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: 10.0,
+              height: 50.0,
+              child: RepaintBoundary(
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getLayers(), <Type>[TransformLayer, ClipRectLayer, TransformLayer, OffsetLayer]);
+  });
+
+  testWidgets('FittedBox layers - cover - vertical', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox(
+          width: 10.0,
+          height: 100.0,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: 50.0,
+              height: 10.0,
+              child: RepaintBoundary(
+                child: Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getLayers(), <Type>[TransformLayer, ClipRectLayer, TransformLayer, OffsetLayer]);
+  });
+
+  testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
+    final List<double> values = <double>[10.0, 50.0, 100.0];
+    for (double a in values) {
+      for (double b in values) {
+        for (double c in values) {
+          for (double d in values) {
+            await tester.pumpWidget(
+              new Center(
+                child: new SizedBox(
+                  width: a,
+                  height: b,
+                  child: new FittedBox(
+                    fit: BoxFit.none,
+                    child: new SizedBox(
+                      width: c,
+                      height: d,
+                      child: const RepaintBoundary(
+                        child: Placeholder(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            if (a < c || b < d) {
+              expect(getLayers(), <Type>[TransformLayer, ClipRectLayer, OffsetLayer]);
+            } else {
+              expect(getLayers(), <Type>[TransformLayer, OffsetLayer]);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  testWidgets('Big child into small fitted box - hit testing', (WidgetTester tester) async {
+    final GlobalKey key1 = new GlobalKey();
+    bool _pointerDown = false;
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 100.0,
+          height: 100.0,
+          child: new FittedBox(
+            fit: BoxFit.contain,
+            alignment: FractionalOffset.center,
+            child: new SizedBox(
+              width: 1000.0,
+              height: 1000.0,
+              child: new Listener(
+                onPointerDown: (PointerDownEvent event) {
+                  _pointerDown = true;
+                },
+                child: new Container(
+                  key: key1,
+                  color: const Color(0xFF000000),
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+    expect(_pointerDown, isFalse);
+    await tester.tap(find.byKey(key1));
+    expect(_pointerDown, isTrue);
+  });
+}
+
+List<Type> getLayers() {
+  final List<Type> layers = <Type>[];
+  Layer layer = RendererBinding.instance.renderView.debugLayer;
+  while (layer is ContainerLayer) {
+    final ContainerLayer container = layer;
+    layers.add(container.runtimeType);
+    expect(container.firstChild, same(container.lastChild));
+    layer = container.firstChild;
+  }
+  return layers;
 }

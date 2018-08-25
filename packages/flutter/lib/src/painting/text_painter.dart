@@ -13,8 +13,6 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
-
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -43,11 +41,12 @@ class TextPainter {
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     TextSpan text,
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     TextDirection textDirection,
-    double textScaleFactor: 1.0,
+    double textScaleFactor = 1.0,
     int maxLines,
     String ellipsis,
+    Locale locale,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -57,7 +56,8 @@ class TextPainter {
        _textDirection = textDirection,
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
-       _ellipsis = ellipsis;
+       _ellipsis = ellipsis,
+       _locale = locale;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -105,7 +105,7 @@ class TextPainter {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
@@ -167,6 +167,17 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// The locale used to select region-specific glyphs.
+  Locale get locale => _locale;
+  Locale _locale;
+  set locale(Locale value) {
+    if (_locale == value)
+      return;
+    _locale = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
   /// An optional maximum number of lines for the text to span, wrapping if
   /// necessary.
   ///
@@ -199,15 +210,17 @@ class TextPainter {
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
       ellipsis: _ellipsis,
+      locale: _locale,
     ) ?? new ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
       ellipsis: ellipsis,
+      locale: locale,
     );
   }
 
-  /// The height of a zero-width space in [text] in logical pixels.
+  /// The height of a space in [text] in logical pixels.
   ///
   /// Not every line of text in [text] will have this height, but this height
   /// is "typical" for text in [text] and useful for sizing other objects
@@ -223,12 +236,12 @@ class TextPainter {
     if (_layoutTemplate == null) {
       final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
         _createParagraphStyle(TextDirection.rtl),
-      ); // direction doesn't matter, text is just a zero width space
+      ); // direction doesn't matter, text is just a space
       if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
-      builder.addText(_kZeroWidthSpace);
+      builder.addText(' ');
       _layoutTemplate = builder.build()
-        ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
+        ..layout(new ui.ParagraphConstraints(width: double.infinity));
     }
     return _layoutTemplate.height;
   }
@@ -328,7 +341,7 @@ class TextPainter {
   ///
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
-  void layout({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
+  void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     assert(text != null, 'TextPainter.text must be set to a non-null value before using the TextPainter.');
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     if (!_needsLayout && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)
@@ -378,6 +391,26 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  /// Returns the closest offset after `offset` at which the input cursor can be
+  /// positioned.
+  int getOffsetAfter(int offset) {
+    final int nextCodeUnit = _text.codeUnitAt(offset);
+    if (nextCodeUnit == null)
+      return null;
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+    return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+  }
+
+  /// Returns the closest offset before `offset` at which the inout cursor can
+  /// be positioned.
+  int getOffsetBefore(int offset) {
+    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    if (prevCodeUnit == null)
+      return null;
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+    return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+  }
+
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
@@ -393,7 +426,7 @@ class TextPainter {
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    final int nextCodeUnit = _text.codeUnitAt(offset - 1);
     if (nextCodeUnit == null)
       return null;
     final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;

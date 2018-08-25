@@ -3,9 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show BASE64, UTF8;
+import 'dart:convert' show base64, utf8;
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
@@ -35,6 +34,11 @@ abstract class DevFSContent {
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
 
+  /// Return true if this is the first time this method is called
+  /// or if the entry has been modified after the given time
+  /// or if the given time is null.
+  bool isModifiedAfter(DateTime time);
+
   int get size;
 
   Future<List<int>> contentsAsBytes();
@@ -42,7 +46,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(GZIP.encoder);
+    return contentsAsStream().transform(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -82,7 +86,7 @@ class DevFSFileContent extends DevFSContent {
       return;
     }
     _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.LINK) {
+    if (_fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
@@ -102,6 +106,13 @@ class DevFSFileContent extends DevFSContent {
     final FileStat _oldFileStat = _fileStat;
     _stat();
     return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    final FileStat _oldFileStat = _fileStat;
+    _stat();
+    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
   }
 
   @override
@@ -125,12 +136,14 @@ class DevFSByteContent extends DevFSContent {
   List<int> _bytes;
 
   bool _isModified = true;
+  DateTime _modificationTime = new DateTime.now();
 
   List<int> get bytes => _bytes;
 
   set bytes(List<int> value) {
     _bytes = value;
     _isModified = true;
+    _modificationTime = new DateTime.now();
   }
 
   /// Return true only once so that the content is written to the device only once.
@@ -139,6 +152,11 @@ class DevFSByteContent extends DevFSContent {
     final bool modified = _isModified;
     _isModified = false;
     return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
   }
 
   @override
@@ -154,7 +172,7 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string) : _string = string, super(UTF8.encode(string));
+  DevFSStringContent(String string) : _string = string, super(utf8.encode(string));
 
   String _string;
 
@@ -162,12 +180,12 @@ class DevFSStringContent extends DevFSByteContent {
 
   set string(String value) {
     _string = value;
-    super.bytes = UTF8.encode(_string);
+    super.bytes = utf8.encode(_string);
   }
 
   @override
   set bytes(List<int> value) {
-    string = UTF8.decode(value);
+    string = utf8.decode(value);
   }
 }
 
@@ -205,7 +223,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     } catch (e) {
       return e;
     }
-    final String fileContents = BASE64.encode(bytes);
+    final String fileContents = base64.encode(bytes);
     try {
       return await vmService.vm.invokeRpcRaw(
         '_writeDevFSFile',
@@ -278,10 +296,10 @@ class _DevFSHttpWriter {
   ]) async {
     try {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
-      request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
+      request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
-          BASE64.encode(UTF8.encode(deviceUri.toString())));
+          base64.encode(utf8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
@@ -311,7 +329,7 @@ class _DevFSHttpWriter {
 }
 
 class DevFS {
-  /// Create a [DevFS] named [fsName] for the local files in [directory].
+  /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(VMService serviceProtocol,
         this.fsName,
         this.rootDirectory, {
@@ -379,15 +397,22 @@ class DevFS {
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
   }
 
-  /// Update files on the device and return the number of bytes sync'd
+  /// Updates files on the device.
+  ///
+  /// Returns the number of bytes synced.
   Future<int> update({
     String mainPath,
     String target,
     AssetBundle bundle,
-    bool bundleDirty: false,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload = false,
+    bool bundleDirty = false,
     Set<String> fileFilter,
     ResidentCompiler generator,
-    bool fullRestart: false,
+    String dillOutputPath,
+    bool fullRestart = false,
+    String projectRootPath,
+    String pathToReload,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -400,14 +425,15 @@ class DevFS {
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
+    final bool previewDart2 = generator != null;
     if (fs.isFileSync(_packagesFilePath)) {
       printTrace('Scanning package files');
-      await _scanPackages(fileFilter);
+      await _scanPackages(fileFilter, previewDart2);
     }
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content, bundleDirty);
+        _scanBundleEntry(archivePath, content);
       });
     }
 
@@ -418,7 +444,8 @@ class DevFS {
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, deviceUri);
+            _operations.deleteFile(fsName, deviceUri)
+            .then((dynamic v) => v?.cast<String,dynamic>());
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(deviceUri);
@@ -446,19 +473,14 @@ class DevFS {
       // that isModified does not reset last check timestamp because we
       // want to report all modified files to incremental compiler next time
       // user does hot reload.
-      // TODO(aam): Remove this logic once we switch to using incremental
-      // compiler for full application compilation when doing full restart.
-      if (fullRestart && generator != null && content is DevFSFileContent) {
-        content = DevFSFileContent.clone(content);
-      }
-      if (content.isModified || (bundleDirty && archivePath != null)) {
+      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
-        if (archivePath != null)
+        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
           assetPathsToEvict.add(archivePath);
       }
     });
-    if (generator != null) {
+    if (previewDart2) {
       // We run generator even if [dirtyEntries] was empty because we want
       // to keep logic of accepting/rejecting generator's output simple:
       // we must accept/reject generator's output after every [update] call.
@@ -466,7 +488,7 @@ class DevFS {
       // that it is initiated by user key press).
       final List<String> invalidatedFiles = <String>[];
       final Set<Uri> filesUris = new Set<Uri>();
-      for (Uri uri in dirtyEntries.keys) {
+      for (Uri uri in dirtyEntries.keys.toList()) {
         if (!uri.path.startsWith(assetBuildDirPrefix)) {
           final DevFSContent content = dirtyEntries[uri];
           if (content is DevFSFileContent) {
@@ -480,16 +502,24 @@ class DevFS {
       // host and result of compilation is single kernel file.
       filesUris.forEach(dirtyEntries.remove);
       printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-      final String compiledBinary = fullRestart
-        ? await compile(
-              sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-              mainPath: mainPath)
-        : await generator.recompile(mainPath, invalidatedFiles);
-      if (compiledBinary != null && compiledBinary.isNotEmpty)
-        dirtyEntries.putIfAbsent(
-          Uri.parse(target + '.dill'),
-          () => new DevFSFileContent(fs.file(compiledBinary))
-        );
+      if (fullRestart) {
+        generator.reset();
+      }
+      final CompilerOutput compilerOutput =
+          await generator.recompile(mainPath, invalidatedFiles,
+              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+              packagesFilePath : _packagesFilePath);
+      final String compiledBinary = compilerOutput?.outputFilename;
+      if (compiledBinary != null && compiledBinary.isNotEmpty) {
+        final Uri entryUri = fs.path.toUri(projectRootPath != null ?
+            fs.path.relative(pathToReload, from: projectRootPath):
+            pathToReload);
+        if (!dirtyEntries.containsKey(entryUri)) {
+          final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
+          dirtyEntries[entryUri] = content;
+          numBytes += content.size;
+        }
+      }
     }
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
@@ -507,7 +537,8 @@ class DevFS {
         // Make service protocol requests for each.
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           final Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, deviceUri, content);
+              _operations.writeFile(fsName, deviceUri, content)
+                  .then((dynamic v) => v?.cast<String, dynamic>());
           if (operation != null)
             _pendingOperations.add(operation);
         });
@@ -525,7 +556,7 @@ class DevFS {
     content._exists = true;
   }
 
-  void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
+  void _scanBundleEntry(String archivePath, DevFSContent content) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
     final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
@@ -549,16 +580,18 @@ class DevFS {
   bool _shouldSkip(FileSystemEntity file,
                    String relativePath,
                    Uri directoryUriOnDevice, {
-                   bool ignoreDotFiles: true,
+                   bool ignoreDotFiles = true,
                    }) {
     if (file is Directory) {
       // Skip non-files.
       return true;
     }
     assert((file is Link) || (file is File));
-    if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
-      // Skip dot files.
-      return true;
+    final String basename = fs.path.basename(file.path);
+    if (ignoreDotFiles && basename.startsWith('.')) {
+      // Skip dot files, but not the '.packages' file (even though in dart1
+      // mode devfs['.packages'] will be overwritten with synthesized string content).
+      return basename != '.packages';
     }
     return false;
   }
@@ -581,7 +614,7 @@ class DevFS {
   Future<bool> _scanFilteredDirectory(Set<String> fileFilter,
                                       Directory directory,
                                       {Uri directoryUriOnDevice,
-                                       bool ignoreDotFiles: true}) async {
+                                       bool ignoreDotFiles = true}) async {
     directoryUriOnDevice =
         _directoryUriOnDevice(directoryUriOnDevice, directory);
     try {
@@ -612,8 +645,8 @@ class DevFS {
   /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
   Future<bool> _scanDirectory(Directory directory,
                               {Uri directoryUriOnDevice,
-                               bool recursive: false,
-                               bool ignoreDotFiles: true,
+                               bool recursive = false,
+                               bool ignoreDotFiles = true,
                                Set<String> fileFilter}) async {
     directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
     if ((fileFilter != null) && fileFilter.isNotEmpty) {
@@ -633,7 +666,7 @@ class DevFS {
           try {
             final FileSystemEntityType linkType =
                 fs.statSync(file.resolveSymbolicLinksSync()).type;
-            if (linkType == FileSystemEntityType.DIRECTORY)
+            if (linkType == FileSystemEntityType.directory)
               continue;
           } on FileSystemException catch (e) {
             _printScanDirectoryError(file.path, e);
@@ -664,7 +697,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<Null> _scanPackages(Set<String> fileFilter, bool previewDart2) async {
     StringBuffer sb;
     final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
@@ -696,6 +729,14 @@ class DevFS {
         sb ??= new StringBuffer();
         sb.writeln('$packageName:$directoryUriOnDevice');
       }
+    }
+    if (previewDart2) {
+      // When in previewDart2 mode we don't update .packages-file entry
+      // so actual file will get invalidated in frontend.
+      // We don't need to synthesize device-correct .packages file because
+      // it is not going to be used on the device anyway - compilation
+      // is done on the host.
+      return;
     }
     if (sb != null) {
       final DevFSContent content = _entries[fs.path.toUri('.packages')];

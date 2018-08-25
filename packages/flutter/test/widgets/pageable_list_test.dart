@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 Size pageSize = const Size(600.0, 300.0);
-const List<int> defaultPages = const <int>[0, 1, 2, 3, 4, 5];
+const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
 final List<GlobalKey> globalKeys = defaultPages.map((_) => new GlobalKey()).toList();
 int currentPage;
 
@@ -22,8 +22,8 @@ Widget buildPage(int page) {
 }
 
 Widget buildFrame({
-  bool reverse: false,
-  List<int> pages: defaultPages,
+  bool reverse = false,
+  List<int> pages = defaultPages,
   @required TextDirection textDirection,
 }) {
   final PageView child = new PageView(

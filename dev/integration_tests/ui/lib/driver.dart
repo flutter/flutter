@@ -7,10 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
-  enableFlutterDriverExtension(handler: (String message) async {
-    // TODO(cbernaschina) remove when test flakiness is resolved
-    return 'driver';
-  });
+  enableFlutterDriverExtension();
   runApp(new DriverTestApp());
 }
 
@@ -43,7 +40,7 @@ class DriverTestAppState extends State<DriverTestApp> {
                 new RaisedButton(
                   child: const Text(
                     'toggle',
-                    key: const ValueKey<String>('togglePresent'),
+                    key: ValueKey<String>('togglePresent'),
                   ),
                   onPressed: () {
                     setState(() {
@@ -56,7 +53,7 @@ class DriverTestAppState extends State<DriverTestApp> {
             new Row(
               children: <Widget>[
                 const Expanded(
-                  child: const Text('hit testability'),
+                  child: Text('hit testability'),
                 ),
                 new DropdownButton<Letter>(
                   key: const ValueKey<String>('dropdown'),
@@ -66,22 +63,25 @@ class DriverTestAppState extends State<DriverTestApp> {
                       _selectedValue = newValue;
                     });
                   },
-                  items: <DropdownMenuItem<Letter>>[
-                    const DropdownMenuItem<Letter>(
+                  items: const <DropdownMenuItem<Letter>>[
+                    DropdownMenuItem<Letter>(
                       value: Letter.a,
-                      child: const Text('Aaa', key: const ValueKey<String>('a')),
+                      child: Text('Aaa', key: ValueKey<String>('a')),
                     ),
-                    const DropdownMenuItem<Letter>(
+                    DropdownMenuItem<Letter>(
                       value: Letter.b,
-                      child: const Text('Bbb', key: const ValueKey<String>('b')),
+                      child: Text('Bbb', key: ValueKey<String>('b')),
                     ),
-                    const DropdownMenuItem<Letter>(
+                    DropdownMenuItem<Letter>(
                       value: Letter.c,
-                      child: const Text('Ccc', key: const ValueKey<String>('c')),
+                      child: Text('Ccc', key: ValueKey<String>('c')),
                     ),
                   ],
                 ),
               ],
+            ),
+            const TextField(
+              key: ValueKey<String>('enter-text-field'),
             ),
           ],
         ),

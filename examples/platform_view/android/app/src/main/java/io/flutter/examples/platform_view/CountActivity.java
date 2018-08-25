@@ -22,14 +22,14 @@ public class CountActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.android_full_screen_layout);
-    Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+    Toolbar myToolbar = findViewById(R.id.my_toolbar);
     myToolbar.setTitle("Platform View");
     setSupportActionBar(myToolbar);
 
     counter = getIntent().getIntExtra(EXTRA_COUNTER, 0);
     updateText();
 
-    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+    FloatingActionButton fab = findViewById(R.id.fab);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -38,7 +38,7 @@ public class CountActivity extends AppCompatActivity {
       }
     });
 
-    Button switchViewButton = (Button) findViewById(R.id.button);
+    Button switchViewButton = findViewById(R.id.button);
     switchViewButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -48,7 +48,7 @@ public class CountActivity extends AppCompatActivity {
   }
 
   private void updateText() {
-    TextView textView = (TextView) findViewById(R.id.button_tap);
+    TextView textView = findViewById(R.id.button_tap);
     String value = "Button tapped " + counter + (counter == 1 ? " time" : " times");
     textView.setText(value);
   }

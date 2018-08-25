@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -88,7 +87,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
     @required this.context,
   });
 
-  // A description of a [Scrollable]'s contents, useful for modeling the state
+  /// A description of a [Scrollable]'s contents, useful for modeling the state
   /// of its viewport.
   final ScrollMetrics metrics;
 
@@ -186,7 +185,7 @@ class OverscrollNotification extends ScrollNotification {
     @required BuildContext context,
     this.dragDetails,
     @required this.overscroll,
-    this.velocity: 0.0,
+    this.velocity = 0.0,
   }) : assert(overscroll != null),
        assert(overscroll.isFinite),
        assert(overscroll != 0.0),
@@ -245,7 +244,7 @@ class ScrollEndNotification extends ScrollNotification {
   /// If a drag ends with some residual velocity, a typical [ScrollPhysics] will
   /// start a ballistic scroll, which delays the [ScrollEndNotification] until
   /// the ballistic simulation completes, at which time [dragDetails] will
-  /// be null. If the residtual velocity is too small to trigger ballistic
+  /// be null. If the residual velocity is too small to trigger ballistic
   /// scrolling, then the [ScrollEndNotification] will be dispatched immediately
   /// and [dragDetails] will be non-null.
   final DragEndDetails dragDetails;
@@ -287,8 +286,8 @@ class UserScrollNotification extends ScrollNotification {
 /// listen to notifications from their children.
 typedef bool ScrollNotificationPredicate(ScrollNotification notification);
 
-/// A [ScrollNotificationPredicate] that checks whether 
-/// `notification.depth == 0`, which means that the notification diid not bubble
+/// A [ScrollNotificationPredicate] that checks whether
+/// `notification.depth == 0`, which means that the notification did not bubble
 /// through any intervening scrolling widgets.
 bool defaultScrollNotificationPredicate(ScrollNotification notification) {
   return notification.depth == 0;

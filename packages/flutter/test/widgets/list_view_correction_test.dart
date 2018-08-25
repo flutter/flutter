@@ -12,6 +12,65 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new ListView(
+          cacheExtent: 0.0,
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 400.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+            new Container(height: 400.0, child: const Text('4')),
+            new Container(height: 400.0, child: const Text('5')),
+            new Container(height: 400.0, child: const Text('6')),
+          ],
+        ),
+      ),
+    );
+
+    controller.jumpTo(1000.0);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          cacheExtent: 0.0,
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 200.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+            new Container(height: 400.0, child: const Text('4')),
+            new Container(height: 400.0, child: const Text('5')),
+            new Container(height: 400.0, child: const Text('6')),
+          ],
+        ),
+      ),
+    );
+
+    expect(controller.offset, equals(1000.0));
+    expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
+
+    controller.jumpTo(300.0);
+    await tester.pump();
+
+    expect(controller.offset, equals(300.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(100.0));
+
+    controller.jumpTo(50.0);
+    await tester.pump();
+
+    expect(controller.offset, equals(0.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(200.0));
+  });
+
+  testWidgets('ListView can handle shrinking top elements with cache extent', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
           controller: controller,
           children: <Widget>[
             new Container(height: 400.0, child: const Text('1')),
@@ -53,14 +112,14 @@ void main() {
     controller.jumpTo(300.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('2')).dy, equals(100.0));
+    expect(controller.offset, equals(250.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(-50.0));
 
     controller.jumpTo(50.0);
-
     await tester.pump();
 
-    expect(controller.offset, equals(0.0));
-    expect(tester.getTopLeft(find.text('2')).dy, equals(200.0));
+    expect(controller.offset, equals(50.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(150.0));
   });
 
   testWidgets('ListView can handle inserts at 0', (WidgetTester tester) async {

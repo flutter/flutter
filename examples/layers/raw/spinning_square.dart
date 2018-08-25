@@ -26,8 +26,8 @@ void beginFrame(Duration timeStamp) {
 
   // Here we determine the rotation according to the timeStamp given to us by
   // the engine.
-  final double t = timeStamp.inMicroseconds / Duration.MICROSECONDS_PER_MILLISECOND / 1800.0;
-  canvas.rotate(math.PI * (t % 1.0));
+  final double t = timeStamp.inMicroseconds / Duration.microsecondsPerMillisecond / 1800.0;
+  canvas.rotate(math.pi * (t % 1.0));
 
   canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));

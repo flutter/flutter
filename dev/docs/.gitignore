@@ -1,8 +1,0 @@
-.pub/
-packages
-.packages
-pubspec.lock
-
-pubspec.yaml
-doc/
-lib/

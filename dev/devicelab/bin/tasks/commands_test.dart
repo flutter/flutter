@@ -30,21 +30,23 @@ void main() {
       );
       final StreamController<String> stdout = new StreamController<String>.broadcast();
       run.stdout
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
-          if (lineContainsServicePort(line)) {
+          if (vmServicePort == null) {
             vmServicePort = parseServicePort(line);
-            print('service protocol connection available at port $vmServicePort');
-            print('run: ready!');
-            ready.complete();
-            ok ??= true;
+            if (vmServicePort != null) {
+              print('service protocol connection available at port $vmServicePort');
+              print('run: ready!');
+              ready.complete();
+              ok ??= true;
+            }
           }
         });
       run.stderr
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
@@ -81,9 +83,9 @@ void main() {
       await reloadEndingText;
       await driver.drive('none');
       final Future<String> restartStartingText =
-        stdout.stream.firstWhere((String line) => line.endsWith('full restart...'));
+        stdout.stream.firstWhere((String line) => line.endsWith('hot restart...'));
       final Future<String> restartEndingText =
-        stdout.stream.firstWhere((String line) => line.contains('Restart performed in '));
+        stdout.stream.firstWhere((String line) => line.contains('Hot restart performed in '));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
       await restartStartingText;
@@ -112,13 +114,13 @@ class DriveHelper {
       <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
     );
     drive.stdout
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
       print('drive:stdout: $line');
     });
     drive.stderr
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
       stderr.writeln('drive:stderr: $line');

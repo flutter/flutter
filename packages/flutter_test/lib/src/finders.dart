@@ -15,7 +15,7 @@ typedef bool WidgetPredicate(Widget widget);
 typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.
-final CommonFinders find = const CommonFinders._();
+const CommonFinders find = CommonFinders._();
 
 /// Provides lightweight syntax for getting frequently used widget [Finder]s.
 ///
@@ -23,56 +23,54 @@ final CommonFinders find = const CommonFinders._();
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] widgets containing string equal to the `text`
-  /// argument.
+  /// Finds [Text] and [EditableText] widgets containing string equal to the
+  /// `text` argument.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.text('Back'), findsOneWidget);
-  ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder text(String text, { bool skipOffstage: true }) => new _TextFinder(text, skipOffstage: skipOffstage);
-
-  /// Finds [Icon] widgets containing icon data equal to the `icon`
-  /// argument.
-  ///
-  /// Example:
-  ///
-  ///     expect(find.icon(Icons.chevron_left), findsOneWidget);
+  /// ```dart
+  /// expect(find.text('Back'), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder icon(IconData icon, { bool skipOffstage: true }) => new _IconFinder(icon, skipOffstage: skipOffstage);
+  Finder text(String text, { bool skipOffstage = true }) => new _TextFinder(text, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     // Suppose you have a button with text 'Update' in it:
-  ///     new Button(
-  ///       child: new Text('Update')
-  ///     )
+  /// ```dart
+  /// // Suppose you have a button with text 'Update' in it:
+  /// new Button(
+  ///   child: new Text('Update')
+  /// )
   ///
-  ///     // You can find and tap on it like this:
-  ///     tester.tap(find.widgetWithText(Button, 'Update'));
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithText(Button, 'Update'));
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder widgetWithText(Type widgetType, String text, { bool skipOffstage: true }) {
-    return new _WidgetWithTextFinder(widgetType, text, skipOffstage: skipOffstage);
+  Finder widgetWithText(Type widgetType, String text, { bool skipOffstage = true }) {
+    return find.ancestor(
+      of: find.text(text, skipOffstage: skipOffstage),
+      matching: find.byType(widgetType, skipOffstage: skipOffstage),
+    );
   }
 
   /// Finds widgets by searching for one with a particular [Key].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byKey(backKey), findsOneWidget);
+  /// ```dart
+  /// expect(find.byKey(backKey), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byKey(Key key, { bool skipOffstage: true }) => new _KeyFinder(key, skipOffstage: skipOffstage);
+  Finder byKey(Key key, { bool skipOffstage = true }) => new _KeyFinder(key, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets with a particular type.
   ///
@@ -82,23 +80,52 @@ class CommonFinders {
   ///
   /// The `type` argument must be a subclass of [Widget].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byType(IconButton), findsOneWidget);
+  /// ```dart
+  /// expect(find.byType(IconButton), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byType(Type type, { bool skipOffstage: true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
+  Finder byType(Type type, { bool skipOffstage = true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
-  /// Finds widgets by searching for widgets with a particular icon data.
+  /// Finds [Icon] widgets containing icon data equal to the `icon`
+  /// argument.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byIcon(Icons.inbox), findsOneWidget);
+  /// ```dart
+  /// expect(find.byIcon(Icons.inbox), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byIcon(IconData icon, { bool skipOffstage: true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
+  Finder byIcon(IconData icon, { bool skipOffstage = true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
+
+  /// Looks for widgets that contain an [Icon] descendant displaying [IconData]
+  /// `icon` in it.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // Suppose you have a button with icon 'arrow_forward' in it:
+  /// new Button(
+  ///   child: new Icon(Icons.arrow_forward)
+  /// )
+  ///
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithIcon(Button, Icons.arrow_forward));
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage = true }) {
+    return find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(widgetType),
+    );
+  }
 
   /// Finds widgets by searching for elements with a particular type.
   ///
@@ -108,39 +135,45 @@ class CommonFinders {
   ///
   /// The `type` argument must be a subclass of [Element].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
+  /// ```dart
+  /// expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementType(Type type, { bool skipOffstage: true }) => new _ElementTypeFinder(type, skipOffstage: skipOffstage);
+  Finder byElementType(Type type, { bool skipOffstage = true }) => new _ElementTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds widgets whose current widget is the instance given by the
   /// argument.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     // Suppose you have a button created like this:
-  ///     Widget myButton = new Button(
-  ///       child: new Text('Update')
-  ///     );
+  /// ```dart
+  /// // Suppose you have a button created like this:
+  /// Widget myButton = new Button(
+  ///   child: new Text('Update')
+  /// );
   ///
-  ///     // You can find and tap on it like this:
-  ///     tester.tap(find.byWidget(myButton));
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.byWidget(myButton));
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidget(Widget widget, { bool skipOffstage: true }) => new _WidgetFinder(widget, skipOffstage: skipOffstage);
+  Finder byWidget(Widget widget, { bool skipOffstage = true }) => new _WidgetFinder(widget, skipOffstage: skipOffstage);
 
   /// Finds widgets using a widget [predicate].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byWidgetPredicate(
-  ///       (Widget widget) => widget is Tooltip && widget.message == 'Back',
-  ///       description: 'widget with tooltip "Back"',
-  ///     ), findsOneWidget);
+  /// ```dart
+  /// expect(find.byWidgetPredicate(
+  ///   (Widget widget) => widget is Tooltip && widget.message == 'Back',
+  ///   description: 'widget with tooltip "Back"',
+  /// ), findsOneWidget);
+  /// ```
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -149,19 +182,21 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage: true }) {
+  Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage = true }) {
     return new _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds Tooltip widgets with the given message.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byTooltip('Back'), findsOneWidget);
+  /// ```dart
+  /// expect(find.byTooltip('Back'), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byTooltip(String message, { bool skipOffstage: true }) {
+  Finder byTooltip(String message, { bool skipOffstage = true }) {
     return byWidgetPredicate(
       (Widget widget) => widget is Tooltip && widget.message == message,
       skipOffstage: skipOffstage,
@@ -170,15 +205,17 @@ class CommonFinders {
 
   /// Finds widgets using an element [predicate].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byElementPredicate(
-  ///       // finds elements of type SingleChildRenderObjectElement, including
-  ///       // those that are actually subclasses of that type.
-  ///       // (contrast with byElementType, which only returns exact matches)
-  ///       (Element element) => element is SingleChildRenderObjectElement,
-  ///       description: '$SingleChildRenderObjectElement element',
-  ///     ), findsOneWidget);
+  /// ```dart
+  /// expect(find.byElementPredicate(
+  ///   // finds elements of type SingleChildRenderObjectElement, including
+  ///   // those that are actually subclasses of that type.
+  ///   // (contrast with byElementType, which only returns exact matches)
+  ///   (Element element) => element is SingleChildRenderObjectElement,
+  ///   description: '$SingleChildRenderObjectElement element',
+  /// ), findsOneWidget);
+  /// ```
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -187,35 +224,62 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage: true }) {
+  Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage = true }) {
     return new _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets that are descendants of the [of] parameter and that match
   /// the [matching] parameter.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.descendant(
-  ///       of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
-  ///     ), findsOneWidget);
+  /// ```dart
+  /// expect(find.descendant(
+  ///   of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
+  /// ), findsOneWidget);
+  /// ```
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the descendants.
   ///
   /// If the [skipOffstage] argument is true (the default), then nodes that are
   /// [Offstage] or that are from inactive [Route]s are skipped.
-  Finder descendant({ Finder of, Finder matching, bool matchRoot: false, bool skipOffstage: true }) {
+  Finder descendant({ Finder of, Finder matching, bool matchRoot = false, bool skipOffstage = true }) {
     return new _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
+  }
+
+  /// Finds widgets that are ancestors of the [of] parameter and that match
+  /// the [matching] parameter.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // Test if a Text widget that contains 'faded' is the
+  /// // descendant of an Opacity widget with opacity 0.5:
+  /// expect(
+  ///   tester.widget<Opacity>(
+  ///     find.ancestor(
+  ///       of: find.text('faded'),
+  ///       matching: find.byType('Opacity'),
+  ///     )
+  ///   ).opacity,
+  ///   0.5
+  /// );
+  /// ```
+  ///
+  /// If the [matchRoot] argument is true then the widget(s) specified by [of]
+  /// will be matched along with the ancestors.
+  Finder ancestor({ Finder of, Finder matching, bool matchRoot = false}) {
+    return new _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class Finder {
-  /// Initialises a Finder. Used by subclasses to initialize the [skipOffstage]
+  /// Initializes a Finder. Used by subclasses to initialize the [skipOffstage]
   /// property.
-  Finder({ this.skipOffstage: true });
+  Finder({ this.skipOffstage = true });
 
   /// Describes what the finder is looking for. The description should be
   /// a brief English noun phrase describing the finder's pattern.
@@ -294,7 +358,7 @@ abstract class Finder {
   ///
   /// The [at] parameter specifies the location relative to the size of the
   /// target element where the hit test is performed.
-  Finder hitTestable({ Alignment at: Alignment.center }) => new _HitTestableFinder(this, at);
+  Finder hitTestable({ Alignment at = Alignment.center }) => new _HitTestableFinder(this, at);
 
   @override
   String toString() {
@@ -311,38 +375,55 @@ abstract class Finder {
   }
 }
 
-class _FirstFinder extends Finder {
-  _FirstFinder(this.parent);
+/// Applies additional filtering against a [parent] [Finder].
+abstract class ChainedFinder extends Finder {
+  /// Create a Finder chained against the candidates of another [Finder].
+  ChainedFinder(this.parent) : assert(parent != null);
 
+  /// Another [Finder] that will run first.
   final Finder parent;
+
+  /// Return another [Iterable] when given an [Iterable] of candidates from a
+  /// parent [Finder].
+  ///
+  /// This is the method to implement when subclassing [ChainedFinder].
+  Iterable<Element> filter(Iterable<Element> parentCandidates);
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return filter(parent.apply(candidates));
+  }
+
+  @override
+  Iterable<Element> get allCandidates => parent.allCandidates;
+}
+
+class _FirstFinder extends ChainedFinder {
+  _FirstFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but first)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).first;
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.first;
   }
 }
 
-class _LastFinder extends Finder {
-  _LastFinder(this.parent);
-
-  final Finder parent;
+class _LastFinder extends ChainedFinder {
+  _LastFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but last)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).last;
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.last;
   }
 }
 
-class _IndexFinder extends Finder {
-  _IndexFinder(this.parent, this.index);
-
-  final Finder parent;
+class _IndexFinder extends ChainedFinder {
+  _IndexFinder(Finder parent, this.index) : super(parent);
 
   final int index;
 
@@ -350,23 +431,22 @@ class _IndexFinder extends Finder {
   String get description => '${parent.description} (ignoring all but index $index)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).elementAt(index);
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.elementAt(index);
   }
 }
 
-class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.alignment);
+class _HitTestableFinder extends ChainedFinder {
+  _HitTestableFinder(Finder parent, this.alignment) : super(parent);
 
-  final Finder parent;
   final Alignment alignment;
 
   @override
   String get description => '${parent.description} (considering only hit-testable ones)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    for (final Element candidate in parent.apply(candidates)) {
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    for (final Element candidate in parentCandidates) {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
@@ -385,9 +465,9 @@ class _HitTestableFinder extends Finder {
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class MatchFinder extends Finder {
-  /// Initialises a predicate-based Finder. Used by subclasses to initialize the
+  /// Initializes a predicate-based Finder. Used by subclasses to initialize the
   /// [skipOffstage] property.
-  MatchFinder({ bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  MatchFinder({ bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   /// Returns true if the given element matches the pattern.
   ///
@@ -401,7 +481,7 @@ abstract class MatchFinder extends Finder {
 }
 
 class _TextFinder extends MatchFinder {
-  _TextFinder(this.text, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _TextFinder(this.text, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   final String text;
 
@@ -410,66 +490,21 @@ class _TextFinder extends MatchFinder {
 
   @override
   bool matches(Element candidate) {
-    if (candidate.widget is! Text)
-      return false;
-    final Text textWidget = candidate.widget;
-    return textWidget.data == text;
-  }
-}
-
-class _IconFinder extends MatchFinder {
-  _IconFinder(this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
-
-  final IconData icon;
-
-  @override
-  String get description => 'icon "$icon"';
-
-  @override
-  bool matches(Element candidate) {
-    if (candidate.widget is! Icon)
-      return false;
-    final Icon iconWidget = candidate.widget;
-    return iconWidget.icon == icon;
-  }
-}
-
-class _WidgetWithTextFinder extends Finder {
-  _WidgetWithTextFinder(this.widgetType, this.text, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
-
-  final Type widgetType;
-  final String text;
-
-  @override
-  String get description => 'type $widgetType with text "$text"';
-
-  @override
-  Iterable<Element> apply(Iterable<Element> candidates) {
-    return candidates
-      .map((Element textElement) {
-        if (textElement.widget is! Text)
-          return null;
-
-        final Text textWidget = textElement.widget;
-        if (textWidget.data == text) {
-          try {
-            textElement.visitAncestorElements((Element element) {
-              if (element.widget.runtimeType == widgetType)
-                throw element;
-              return true;
-            });
-          } on Element catch (result) {
-            return result;
-          }
-        }
-        return null;
-      })
-      .where((Element element) => element != null);
+    if (candidate.widget is Text) {
+      final Text textWidget = candidate.widget;
+      if (textWidget.data != null)
+        return textWidget.data == text;
+      return textWidget.textSpan.toPlainText() == text;
+    } else if (candidate.widget is EditableText) {
+      final EditableText editable = candidate.widget;
+      return editable.controller.text == text;
+    }
+    return false;
   }
 }
 
 class _KeyFinder extends MatchFinder {
-  _KeyFinder(this.key, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _KeyFinder(this.key, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   final Key key;
 
@@ -483,7 +518,7 @@ class _KeyFinder extends MatchFinder {
 }
 
 class _WidgetTypeFinder extends MatchFinder {
-  _WidgetTypeFinder(this.widgetType, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _WidgetTypeFinder(this.widgetType, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   final Type widgetType;
 
@@ -497,7 +532,7 @@ class _WidgetTypeFinder extends MatchFinder {
 }
 
 class _WidgetIconFinder extends MatchFinder {
-  _WidgetIconFinder(this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _WidgetIconFinder(this.icon, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   final IconData icon;
 
@@ -512,7 +547,7 @@ class _WidgetIconFinder extends MatchFinder {
 }
 
 class _ElementTypeFinder extends MatchFinder {
-  _ElementTypeFinder(this.elementType, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _ElementTypeFinder(this.elementType, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   final Type elementType;
 
@@ -526,7 +561,7 @@ class _ElementTypeFinder extends MatchFinder {
 }
 
 class _WidgetFinder extends MatchFinder {
-  _WidgetFinder(this.widget, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _WidgetFinder(this.widget, { bool skipOffstage = true }) : super(skipOffstage: skipOffstage);
 
   final Widget widget;
 
@@ -540,7 +575,7 @@ class _WidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateFinder extends MatchFinder {
-  _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage: true })
+  _WidgetPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
       : _description = description,
         super(skipOffstage: skipOffstage);
 
@@ -557,7 +592,7 @@ class _WidgetPredicateFinder extends MatchFinder {
 }
 
 class _ElementPredicateFinder extends MatchFinder {
-  _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage: true })
+  _ElementPredicateFinder(this.predicate, { String description, bool skipOffstage = true })
       : _description = description,
         super(skipOffstage: skipOffstage);
 
@@ -575,8 +610,8 @@ class _ElementPredicateFinder extends MatchFinder {
 
 class _DescendantFinder extends Finder {
   _DescendantFinder(this.ancestor, this.descendant, {
-    this.matchRoot: false,
-    bool skipOffstage: true,
+    this.matchRoot = false,
+    bool skipOffstage = true,
   }) : super(skipOffstage: skipOffstage);
 
   final Finder ancestor;
@@ -603,6 +638,42 @@ class _DescendantFinder extends Finder {
     ).toSet().toList();
     if (matchRoot)
       candidates.insertAll(0, ancestorElements);
+    return candidates;
+  }
+}
+
+class _AncestorFinder extends Finder {
+  _AncestorFinder(this.descendant, this.ancestor, { this.matchRoot = false }) : super(skipOffstage: false);
+
+  final Finder ancestor;
+  final Finder descendant;
+  final bool matchRoot;
+
+  @override
+  String get description {
+    if (matchRoot)
+      return 'ancestor ${ancestor.description} beginning with ${descendant.description}';
+    return '${ancestor.description} which is an ancestor of ${descendant.description}';
+  }
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return candidates.where((Element element) => ancestor.evaluate().contains(element));
+  }
+
+  @override
+  Iterable<Element> get allCandidates {
+    final List<Element> candidates = <Element>[];
+    for (Element root in descendant.evaluate()) {
+      final List<Element> ancestors = <Element>[];
+      if (matchRoot)
+        ancestors.add(root);
+      root.visitAncestorElements((Element element) {
+        ancestors.add(element);
+        return true;
+      });
+      candidates.addAll(ancestors);
+    }
     return candidates;
   }
 }

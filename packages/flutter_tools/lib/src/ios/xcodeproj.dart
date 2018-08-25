@@ -2,29 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../project.dart';
 
-final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
+final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties({
-  @required String projectPath,
+/// Writes or rewrites Xcode property files with the specified information.
+///
+/// targetOverride: Optional parameter, if null or unspecified the default value
+/// from xcode_backend.sh is used 'lib/main.dart'.
+Future<void> updateGeneratedXcodeProperties({
+  @required FlutterProject project,
   @required BuildInfo buildInfo,
-  @required String target,
-  @required bool hasPlugins,
-}) {
+  String targetOverride,
+  @required bool previewDart2,
+}) async {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -33,10 +44,11 @@ void updateXcodeGeneratedProperties({
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(projectPath)}');
+  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
-  localsBuffer.writeln('FLUTTER_TARGET=$target');
+  if (targetOverride != null)
+    localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
   // The runtime mode for the current build.
   localsBuffer.writeln('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
@@ -46,31 +58,128 @@ void updateXcodeGeneratedProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
+  if (!project.isModule) {
+    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
+    // explicitly. Rather we rely on the xcode backend script and the Podfile
+    // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
+    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
+  }
+
+  final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
+  if (buildName != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
+  }
+
+  final int buildNumber = buildInfo?.buildNumber ?? project.manifest.buildNumber;
+  if (buildNumber != null) {
+    localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
+  }
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+
+    // Tell Xcode not to build universal binaries for local engines, which are
+    // single-architecture.
+    //
+    // NOTE: this assumes that local engine binary paths are consistent with
+    // the conventions uses in the engine: 32-bit iOS engines are built to
+    // paths ending in _arm, 64-bit builds are not.
+    final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+    localsBuffer.writeln('ARCHS=$arch');
   }
 
-  // Add dependency to CocoaPods' generated project only if plugins are used.
-  if (hasPlugins)
-    localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
+  if (previewDart2) {
+    localsBuffer.writeln('PREVIEW_DART_2=true');
+  }
 
-  final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
-  localsFile.createSync(recursive: true);
-  localsFile.writeAsStringSync(localsBuffer.toString());
+  if (buildInfo.trackWidgetCreation) {
+    localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
+  }
+
+  final File generatedXcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
+  generatedXcodePropertiesFile.createSync(recursive: true);
+  generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
-Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
-  final String absProjPath = fs.path.absolute(xcodeProjPath);
-  final String out = runCheckedSync(<String>[
-    '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
-  ]);
+XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter];
+
+/// Interpreter of Xcode projects.
+class XcodeProjectInterpreter {
+  static const String _executable = '/usr/bin/xcodebuild';
+  static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
+
+  void _updateVersion() {
+    if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
+      return;
+    }
+    try {
+      final ProcessResult result = processManager.runSync(<String>[_executable, '-version']);
+      if (result.exitCode != 0) {
+        return;
+      }
+      _versionText = result.stdout.trim().replaceAll('\n', ', ');
+      final Match match = _versionRegex.firstMatch(versionText);
+      if (match == null)
+        return;
+      final String version = match.group(1);
+      final List<String> components = version.split('.');
+      _majorVersion = int.parse(components[0]);
+      _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+    } on ProcessException {
+      // Ignore: leave values null.
+    }
+  }
+
+  bool get isInstalled => majorVersion != null;
+
+  String _versionText;
+  String get versionText {
+    if (_versionText == null)
+      _updateVersion();
+    return _versionText;
+  }
+
+  int _majorVersion;
+  int get majorVersion {
+    if (_majorVersion == null)
+      _updateVersion();
+    return _majorVersion;
+  }
+
+  int _minorVersion;
+  int get minorVersion {
+    if (_minorVersion == null)
+      _updateVersion();
+    return _minorVersion;
+  }
+
+  Map<String, String> getBuildSettings(String projectPath, String target) {
+    final String out = runCheckedSync(<String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-target',
+      target,
+      '-showBuildSettings'
+    ], workingDirectory: projectPath);
+    return parseXcodeBuildSettings(out);
+  }
+
+  XcodeProjectInfo getInfo(String projectPath) {
+    final String out = runCheckedSync(<String>[
+      _executable, '-list',
+    ], workingDirectory: projectPath);
+    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+  }
+}
+
+Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (String line in out.split('\n').where(_settingExpr.hasMatch)) {
-    final Match match = _settingExpr.firstMatch(line);
-    settings[match[1]] = match[2];
+  for (Match match in showBuildSettingsOutput.split('\n').map(_settingExpr.firstMatch)) {
+    if (match != null) {
+      settings[match[1]] = match[2];
+    }
   }
   return settings;
 }
@@ -90,13 +199,6 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
   XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
-
-  factory XcodeProjectInfo.fromProjectSync(String projectPath) {
-    final String out = runCheckedSync(<String>[
-      '/usr/bin/xcodebuild', '-list',
-    ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
-  }
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
     final List<String> targets = <String>[];

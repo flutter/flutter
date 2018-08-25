@@ -3,85 +3,57 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JsonEncoder;
+import 'dart:convert' show JsonEncoder, JsonDecoder;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-class Demo {
-  const Demo(this.title, {this.synchronized = true, this.profiled = false});
+const FileSystem _fs = LocalFileSystem();
 
-  /// The title of the demo.
-  final String title;
-
-  /// True if frameSync should be enabled for this test.
-  final bool synchronized;
-
-  // True if timeline data should be collected for this test.
-  //
-  // Warning: The number of tests executed with timeline collection enabled
-  // significantly impacts heap size of the running app. When run with
-  // --trace-startup, as we do in this test, the VM stores trace events in an
-  // endless buffer instead of a ring buffer.
-  final bool profiled;
-}
-
-// Warning: this list must be kept in sync with the value of
-// kAllGalleryItems.map((GalleryItem item) => item.title).toList();
-const List<Demo> demos = const <Demo>[
-  // Demos
-  const Demo('Shrine', profiled: true),
-  const Demo('Contact profile', profiled: true),
-  const Demo('Animation', profiled: true),
-
-  // Material Components
-  const Demo('Bottom navigation', profiled: true),
-  const Demo('Buttons', profiled: true),
-  const Demo('Cards', profiled: true),
-  const Demo('Chips', profiled: true),
-  const Demo('Date and time pickers', profiled: true),
-  const Demo('Dialog', profiled: true),
-  const Demo('Drawer'),
-  const Demo('Expand/collapse list control'),
-  const Demo('Expansion panels'),
-  const Demo('Floating action button'),
-  const Demo('Grid'),
-  const Demo('Icons'),
-  const Demo('Leave-behind list items'),
-  const Demo('List'),
-  const Demo('Menus'),
-  const Demo('Modal bottom sheet'),
-  const Demo('Page selector'),
-  const Demo('Persistent bottom sheet'),
-  const Demo('Progress indicators', synchronized: false),
-  const Demo('Pull to refresh'),
-  const Demo('Scrollable tabs'),
-  const Demo('Selection controls'),
-  const Demo('Sliders'),
-  const Demo('Snackbar'),
-  const Demo('Tabs'),
-  const Demo('Text fields'),
-  const Demo('Tooltips'),
-
-  // Cupertino Components
-  const Demo('Activity Indicator', synchronized: false),
-  const Demo('Buttons'),
-  const Demo('Dialogs'),
-  const Demo('Navigation'),
-  const Demo('Sliders'),
-  const Demo('Switches'),
-
-  // Style
-  const Demo('Colors'),
-  const Demo('Typography'),
+// Demos for which timeline data will be collected using
+// FlutterDriver.traceAction().
+//
+// Warning: The number of tests executed with timeline collection enabled
+// significantly impacts heap size of the running app. When run with
+// --trace-startup, as we do in this test, the VM stores trace events in an
+// endless buffer instead of a ring buffer.
+//
+// These names must match GalleryItem titles from kAllGalleryDemos
+// in examples/flutter_gallery/lib/gallery/demos.dart
+const List<String> kProfiledDemos = <String>[
+  'Shrine@Studies',
+  'Contact profile@Studies',
+  'Animation@Studies',
+  'Bottom navigation@Material',
+  'Buttons@Material',
+  'Cards@Material',
+  'Chips@Material',
+  'Dialogs@Material',
+  'Pickers@Material',
 ];
 
-final FileSystem _fs = const LocalFileSystem();
+// Demos that will be backed out of within FlutterDriver.runUnsynchronized();
+//
+// These names must match GalleryItem titles from kAllGalleryDemos
+// in examples/flutter_gallery/lib/gallery/demos.dart
+const List<String> kUnsynchronizedDemos = <String>[
+  'Progress indicators@Material',
+  'Activity Indicator@Cupertino',
+  'Video@Media',
+];
 
-const Duration kWaitBetweenActions = const Duration(milliseconds: 250);
+const List<String> kSkippedDemos = <String>[
+  'Pull to refresh@Cupertino', // The back button lacks a tooltip.
+];
+
+// All of the gallery demos, identified as "title@category".
+//
+// These names are reported by the test app, see _handleMessages()
+// in transitions_perf.dart.
+List<String> _allDemos = <String>[];
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
@@ -151,28 +123,52 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<Null> runDemos(Iterable<Demo> demos, FlutterDriver driver) async {
-  for (Demo demo in demos) {
-    print('Testing "${demo.title}" demo');
-    final SerializableFinder menuItem = find.text(demo.title);
-    await driver.scrollIntoView(menuItem, alignment: 0.5);
-    await new Future<Null>.delayed(kWaitBetweenActions);
+Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
+  final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
+  String currentDemoCategory;
+
+  for (String demo in demos) {
+    if (kSkippedDemos.contains(demo))
+      continue;
+
+    final String demoName = demo.substring(0, demo.indexOf('@'));
+    final String demoCategory = demo.substring(demo.indexOf('@') + 1);
+    print('> $demo');
+
+    if (currentDemoCategory == null) {
+      await driver.tap(find.text(demoCategory));
+    } else if (currentDemoCategory != demoCategory) {
+      await driver.tap(find.byTooltip('Back'));
+      await driver.tap(find.text(demoCategory));
+      // Scroll back to the top
+      await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
+    }
+    currentDemoCategory = demoCategory;
+
+    final SerializableFinder demoItem = find.text(demoName);
+    await driver.scrollUntilVisible(demoList, demoItem,
+      dyScroll: -48.0,
+      alignment: 0.5,
+      timeout: const Duration(seconds: 30),
+    );
 
     for (int i = 0; i < 2; i += 1) {
-      await driver.tap(menuItem); // Launch the demo
-      await new Future<Null>.delayed(kWaitBetweenActions);
-      if (demo.synchronized) {
-        await driver.tap(find.byTooltip('Back'));
-      } else {
+      await driver.tap(demoItem); // Launch the demo
+
+      if (kUnsynchronizedDemos.contains(demo)) {
         await driver.runUnsynchronized<Future<Null>>(() async {
-          await new Future<Null>.delayed(kWaitBetweenActions);
           await driver.tap(find.byTooltip('Back'));
         });
+      } else {
+        await driver.tap(find.byTooltip('Back'));
       }
-      await new Future<Null>.delayed(kWaitBetweenActions);
     }
-    print('Success');
+
+    print('< Success');
   }
+
+  // Return to the home screen
+  await driver.tap(find.byTooltip('Back'));
 }
 
 void main([List<String> args = const <String>[]]) {
@@ -180,10 +176,16 @@ void main([List<String> args = const <String>[]]) {
     FlutterDriver driver;
     setUpAll(() async {
       driver = await FlutterDriver.connect();
+
       if (args.contains('--with_semantics')) {
         print('Enabeling semantics...');
         await driver.setSemantics(true);
       }
+
+      // See _handleMessages() in transitions_perf.dart.
+      _allDemos = new List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
+      if (_allDemos.isEmpty)
+        throw 'no demo names found';
     });
 
     tearDownAll(() async {
@@ -192,15 +194,17 @@ void main([List<String> args = const <String>[]]) {
     });
 
     test('all demos', () async {
+
       // Collect timeline data for just a limited set of demos to avoid OOMs.
-      final Timeline timeline = await driver.traceAction(() async {
-        final Iterable<Demo> profiledDemos = demos.where((Demo demo) => demo.profiled);
-        await runDemos(profiledDemos, driver);
-      },
-      streams: const <TimelineStream>[
-        TimelineStream.dart,
-        TimelineStream.embedder,
-      ]);
+      final Timeline timeline = await driver.traceAction(
+        () async {
+          await runDemos(kProfiledDemos, driver);
+        },
+        streams: const <TimelineStream>[
+          TimelineStream.dart,
+          TimelineStream.embedder,
+        ],
+      );
 
       // Save the duration (in microseconds) of the first timeline Frame event
       // that follows a 'Start Transition' event. The Gallery app adds a
@@ -208,12 +212,14 @@ void main([List<String> args = const <String>[]]) {
       final TimelineSummary summary = new TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-      await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
+      await saveDurationsHistogram(
+          new List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
+          histogramPath);
 
       // Execute the remaining tests.
-      final Iterable<Demo> unprofiledDemos = demos.where((Demo demo) => !demo.profiled);
-      await runDemos(unprofiledDemos, driver);
+      final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+      await runDemos(unprofiledDemos.toList(), driver);
 
-    }, timeout: const Timeout(const Duration(minutes: 5)));
+    }, timeout: const Timeout(Duration(minutes: 5)));
   });
 }

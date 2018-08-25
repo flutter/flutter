@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// A [ValueKey] that defines where [PageStorage] values will be saved.
@@ -20,7 +18,7 @@ import 'framework.dart';
 ///
 /// For example, to ensure that the scroll offsets for the scrollable within
 /// each `MyScrollableTabView` below are restored when the [TabBarView]
-/// is recreated, we've specified [PageStorageKey]s whose values are the the
+/// is recreated, we've specified [PageStorageKey]s whose values are the
 /// tabs' string labels.
 ///
 /// ```dart
@@ -39,9 +37,8 @@ class PageStorageKey<T> extends ValueKey<T> {
 }
 
 class _StorageEntryIdentifier {
-  _StorageEntryIdentifier(this.keys) {
-    assert(keys != null);
-  }
+  _StorageEntryIdentifier(this.keys)
+    : assert(keys != null);
 
   final List<PageStorageKey<dynamic>> keys;
 
@@ -147,6 +144,8 @@ class PageStorage extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The page storage bucket to use for this subtree.

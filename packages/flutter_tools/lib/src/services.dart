@@ -78,7 +78,7 @@ Future<String> getServiceFromUrl(String url, String rootDir, String serviceName)
   if (url.startsWith('android-sdk:') && androidSdk != null) {
     // It's something shipped in the standard android SDK.
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
-  } else if (url.startsWith('http')) {
+  } else if (url.startsWith('http:') || url.startsWith('https:')) {
     // It's a regular file to download.
     return await cache.getThirdPartyFile(url, serviceName);
   } else {
@@ -103,8 +103,8 @@ File generateServiceDefinitions(
         'class': service['android-class']
       }).toList();
 
-  final Map<String, dynamic> json = <String, dynamic>{ 'services': services };
+  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
+  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
   return servicesFile;
 }

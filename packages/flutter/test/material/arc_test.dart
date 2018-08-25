@@ -68,19 +68,19 @@ void main() {
   });
 
   test('MaterialPointArcTween', () {
-    final Offset begin = const Offset(180.0, 110.0);
-    final Offset end = const Offset(37.0, 250.0);
+    const Offset begin = Offset(180.0, 110.0);
+    const Offset end = Offset(37.0, 250.0);
 
     MaterialPointArcTween tween = new MaterialPointArcTween(begin: begin, end: end);
     expect(tween.lerp(0.0), begin);
-    expect((tween.lerp(0.25) - const Offset(126.0, 120.0)).distance, closeTo(0.0, 2.0));
-    expect((tween.lerp(0.75) - const Offset(48.0, 196.0)).distance, closeTo(0.0, 2.0));
+    expect(tween.lerp(0.25), within<Offset>(distance: 2.0, from: const Offset(126.0, 120.0)));
+    expect(tween.lerp(0.75), within<Offset>(distance: 2.0, from: const Offset(48.0, 196.0)));
     expect(tween.lerp(1.0), end);
 
     tween = new MaterialPointArcTween(begin: end, end: begin);
     expect(tween.lerp(0.0), end);
-    expect((tween.lerp(0.25) - const Offset(91.0, 239.0)).distance, closeTo(0.0, 2.0));
-    expect((tween.lerp(0.75) - const Offset(168.3, 163.8)).distance, closeTo(0.0, 2.0));
+    expect(tween.lerp(0.25), within<Offset>(distance: 2.0, from: const Offset(91.0, 239.0)));
+    expect(tween.lerp(0.75), within<Offset>(distance: 2.0, from: const Offset(168.3, 163.8)));
     expect(tween.lerp(1.0), begin);
   });
 

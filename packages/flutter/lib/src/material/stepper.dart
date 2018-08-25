@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
+import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'flat_button.dart';
@@ -54,18 +53,18 @@ enum StepperType {
   horizontal,
 }
 
-const TextStyle _kStepStyle = const TextStyle(
+const TextStyle _kStepStyle = TextStyle(
   fontSize: 12.0,
   color: Colors.white,
 );
-final Color _kErrorLight = Colors.red;
+const Color _kErrorLight = Colors.red;
 final Color _kErrorDark = Colors.red.shade400;
 const Color _kCircleActiveLight = Colors.white;
 const Color _kCircleActiveDark = Colors.black87;
 const Color _kDisabledLight = Colors.black38;
 const Color _kDisabledDark = Colors.white30;
 const double _kStepSize = 24.0;
-const double _kTriangleHeight = _kStepSize * 0.866025; // Traingle height. sqrt(3.0) / 2.0
+const double _kTriangleHeight = _kStepSize * 0.866025; // Triangle height. sqrt(3.0) / 2.0
 
 /// A material step used in [Stepper]. The step can have a title and subtitle,
 /// an icon within its circle, some content and a state that governs its
@@ -84,8 +83,8 @@ class Step {
     @required this.title,
     this.subtitle,
     @required this.content,
-    this.state: StepState.indexed,
-    this.isActive: false,
+    this.state = StepState.indexed,
+    this.isActive = false,
   }) : assert(title != null),
        assert(content != null),
        assert(state != null);
@@ -104,7 +103,7 @@ class Step {
   /// Below the content, every step has a 'continue' and 'cancel' button.
   final Widget content;
 
-  /// The state of the step which determines the styling of its componenents
+  /// The state of the step which determines the styling of its components
   /// and whether steps are interactive.
   final StepState state;
 
@@ -136,8 +135,8 @@ class Stepper extends StatefulWidget {
   Stepper({
     Key key,
     @required this.steps,
-    this.type: StepperType.vertical,
-    this.currentStep: 0,
+    this.type = StepperType.vertical,
+    this.currentStep = 0,
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,

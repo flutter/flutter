@@ -4,9 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import '../flutter_test_alternative.dart';
 import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
@@ -15,10 +15,10 @@ void main() {
     final Matrix4 identity = new Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
     expect(description, equals(<String>[
-      '  [0] 1.0,0.0,0.0,0.0',
-      '  [1] 0.0,1.0,0.0,0.0',
-      '  [2] 0.0,0.0,1.0,0.0',
-      '  [3] 0.0,0.0,0.0,1.0',
+      '[0] 1.0,0.0,0.0,0.0',
+      '[1] 0.0,1.0,0.0,0.0',
+      '[2] 0.0,0.0,1.0,0.0',
+      '[3] 0.0,0.0,0.0,1.0',
     ]));
   });
 

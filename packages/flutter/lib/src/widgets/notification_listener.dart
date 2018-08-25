@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'framework.dart';
 
 /// Signature for [Notification] listeners.
@@ -99,6 +97,8 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// The widget directly below this widget in the tree.
   ///
   /// This is not necessarily the widget that dispatched the notification.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Called when a notification of the appropriate type arrives at this

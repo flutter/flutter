@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -19,7 +20,7 @@ import 'ticker_provider.dart';
 
 /// A backend for a [ScrollActivity].
 ///
-/// Used by subclases of [ScrollActivity] to manipulate the scroll view that
+/// Used by subclasses of [ScrollActivity] to manipulate the scroll view that
 /// they are acting upon.
 ///
 /// See also:
@@ -227,12 +228,18 @@ class ScrollDragController implements Drag {
     @required DragStartDetails details,
     this.onDragCanceled,
     this.carriedVelocity,
+    this.motionStartDistanceThreshold,
   }) : assert(delegate != null),
        assert(details != null),
+       assert(
+         motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
+         'motionStartDistanceThreshold must be a positive number or null'
+       ),
        _delegate = delegate,
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
-       _lastNonStationaryTimestamp = details.sourceTimeStamp;
+       _lastNonStationaryTimestamp = details.sourceTimeStamp,
+       _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -245,14 +252,30 @@ class ScrollDragController implements Drag {
   /// began.
   final double carriedVelocity;
 
+  /// Amount of pixels in either direction the drag has to move by to start
+  /// scroll movement again after each time scrolling came to a stop.
+  final double motionStartDistanceThreshold;
+
   Duration _lastNonStationaryTimestamp;
   bool _retainMomentum;
+  /// Null if already in motion or has no [motionStartDistanceThreshold].
+  double _offsetSinceLastStop;
 
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before losing the momentum carried from a previous
   /// scroll activity.
-  static const Duration momentumRetainStationaryThreshold =
-      const Duration(milliseconds: 20);
+  static const Duration momentumRetainStationaryDurationThreshold =
+      Duration(milliseconds: 20);
+
+  /// Maximum amount of time interval the drag can have consecutive stationary
+  /// pointer update events before needing to break the
+  /// [motionStartDistanceThreshold] to start motion again.
+  static const Duration motionStoppedDurationThreshold =
+      Duration(milliseconds: 50);
+
+  /// The drag distance past which, a [motionStartDistanceThreshold] breaking
+  /// drag is considered a deliberate fling.
+  static const double _bigThresholdBreakDistance = 24.0;
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 
@@ -265,21 +288,85 @@ class ScrollDragController implements Drag {
     _delegate = value;
   }
 
+  /// Determines whether to lose the existing incoming velocity when starting
+  /// the drag.
+  void _maybeLoseMomentum(double offset, Duration timestamp) {
+    if (_retainMomentum &&
+        offset == 0.0 &&
+        (timestamp == null || // If drag event has no timestamp, we lose momentum.
+         timestamp - _lastNonStationaryTimestamp > momentumRetainStationaryDurationThreshold)) {
+      // If pointer is stationary for too long, we lose momentum.
+      _retainMomentum = false;
+    }
+  }
+
+  /// If a motion start threshold exists, determine whether the threshold needs
+  /// to be broken to scroll. Also possibly apply an offset adjustment when
+  /// threshold is first broken.
+  ///
+  /// Returns `0.0` when stationary or within threshold. Returns `offset`
+  /// transparently when already in motion.
+  double _adjustForScrollStartThreshold(double offset, Duration timestamp) {
+    if (timestamp == null) {
+      // If we can't track time, we can't apply thresholds.
+      // May be null for proxied drags like via accessibility.
+      return offset;
+    }
+
+    if (offset == 0.0) {
+      if (motionStartDistanceThreshold != null &&
+          _offsetSinceLastStop == null &&
+          timestamp - _lastNonStationaryTimestamp > motionStoppedDurationThreshold) {
+        // Enforce a new threshold.
+        _offsetSinceLastStop = 0.0;
+      }
+      // Not moving can't break threshold.
+      return 0.0;
+    } else {
+      if (_offsetSinceLastStop == null) {
+        // Already in motion or no threshold behavior configured such as for
+        // Android. Allow transparent offset transmission.
+        return offset;
+      } else {
+        _offsetSinceLastStop += offset;
+        if (_offsetSinceLastStop.abs() > motionStartDistanceThreshold) {
+          // Threshold broken.
+          _offsetSinceLastStop = null;
+          if (offset.abs() > _bigThresholdBreakDistance) {
+            // This is heuristically a very deliberate fling. Leave the motion
+            // unaffected.
+            return offset;
+          } else {
+            // This is a normal speed threshold break.
+            return math.min(
+              // Ease into the motion when the threshold is initially broken
+              // to avoid a visible jump.
+              motionStartDistanceThreshold / 3.0,
+              offset.abs()
+            ) * offset.sign;
+          }
+        } else {
+          return 0.0;
+        }
+      }
+    }
+  }
+
   @override
   void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
     _lastDetails = details;
     double offset = details.primaryDelta;
-    if (offset == 0.0) {
-      if (_retainMomentum &&
-          (details.sourceTimeStamp == null || // If drag event has no timestamp, we lose momentum.
-              details.sourceTimeStamp - _lastNonStationaryTimestamp > momentumRetainStationaryThreshold )) {
-        // If pointer is stationary for too long, we lose momentum.
-        _retainMomentum = false;
-      }
-      return;
-    } else {
+    if (offset != 0.0) {
       _lastNonStationaryTimestamp = details.sourceTimeStamp;
+    }
+    // By default, iOS platforms carries momentum and has a start threshold
+    // (configured in [BouncingScrollPhysics]). The 2 operations below are
+    // no-ops on Android.
+    _maybeLoseMomentum(offset, details.sourceTimeStamp);
+    offset = _adjustForScrollStartThreshold(offset, details.sourceTimeStamp);
+    if (offset == 0.0) {
+      return;
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
@@ -511,7 +598,7 @@ class DrivenScrollActivity extends ScrollActivity {
   }) : assert(from != null),
        assert(to != null),
        assert(duration != null),
-       assert(duration > Duration.ZERO),
+       assert(duration > Duration.zero),
        assert(curve != null),
        super(delegate) {
     _completer = new Completer<Null>();

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
+const Duration _kHighlightFadeDuration = Duration(milliseconds: 200);
 
 /// A visual emphasis on a part of a [Material] receiving user interaction.
 ///
@@ -25,7 +25,7 @@ const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 ///  * [Material], which is the widget on which the ink highlight is painted.
 ///  * [InkSplash], which is an ink feature that shows a reaction to user input
 ///    on a [Material].
-class InkHighlight extends InkFeature {
+class InkHighlight extends InteractiveInkFeature {
   /// Begin a highlight animation.
   ///
   /// The [controller] argument is typically obtained via
@@ -39,17 +39,18 @@ class InkHighlight extends InkFeature {
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     @required Color color,
-    BoxShape shape: BoxShape.rectangle,
+    BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     RectCallback rectCallback,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
-       _color = color,
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
        _rectCallback = rectCallback,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
@@ -64,20 +65,11 @@ class InkHighlight extends InkFeature {
 
   final BoxShape _shape;
   final BorderRadius _borderRadius;
+  final ShapeBorder _customBorder;
   final RectCallback _rectCallback;
 
   Animation<int> _alpha;
   AnimationController _alphaController;
-
-  /// The color of the ink used to emphasize part of the material.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    if (value == _color)
-      return;
-    _color = value;
-    controller.markNeedsPaint();
-  }
 
   /// Whether this part of the material is being visually emphasized.
   bool get active => _active;
@@ -108,6 +100,10 @@ class InkHighlight extends InkFeature {
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
     assert(_shape != null);
+    canvas.save();
+    if (_customBorder != null) {
+      canvas.clipPath(_customBorder.getOuterPath(rect));
+    }
     switch (_shape) {
       case BoxShape.circle:
         canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
@@ -125,13 +121,14 @@ class InkHighlight extends InkFeature {
         }
         break;
     }
+    canvas.restore();
   }
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
-    final Rect rect = (_rectCallback != null ? _rectCallback() : Offset.zero & referenceBox.size);
+    final Rect rect = _rectCallback != null ? _rectCallback() : Offset.zero & referenceBox.size;
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);

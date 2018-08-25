@@ -23,7 +23,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
-    expect(notification, const isInstanceOf<ScrollStartNotification>());
+    expect(notification, isInstanceOf<ScrollStartNotification>());
     expect(notification.depth, equals(0));
     final ScrollStartNotification start = notification;
     expect(start.dragDetails, isNotNull);
@@ -31,7 +31,7 @@ void main() {
 
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
-    expect(notification, const isInstanceOf<ScrollUpdateNotification>());
+    expect(notification, isInstanceOf<ScrollUpdateNotification>());
     expect(notification.depth, equals(0));
     final ScrollUpdateNotification update = notification;
     expect(update.dragDetails, isNotNull);
@@ -40,7 +40,7 @@ void main() {
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
-    expect(notification, const isInstanceOf<ScrollEndNotification>());
+    expect(notification, isInstanceOf<ScrollEndNotification>());
     expect(notification.depth, equals(0));
     final ScrollEndNotification end = notification;
     expect(end.dragDetails, isNotNull);

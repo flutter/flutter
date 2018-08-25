@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'feedback.dart';
+import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
+import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType;
-
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
 /// A material design text field.
 ///
@@ -40,7 +42,9 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 /// extra padding introduced by the decoration to save space for the labels.
 ///
 /// If [decoration] is non-null (which is the default), the text field requires
-/// one of its ancestors to be a [Material] widget.
+/// one of its ancestors to be a [Material] widget. When the [TextField] is
+/// tapped an ink splash that paints on the material is triggered, see
+/// [ThemeData.splashFactory].
 ///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
@@ -67,9 +71,7 @@ class TextField extends StatefulWidget {
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
   /// the number of lines. By default, it is one, meaning this is a single-line
-  /// text field. [maxLines] must not be zero. If [maxLines] is not one, then
-  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard
-  /// type is used.
+  /// text field. [maxLines] must not be zero.
   ///
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
@@ -85,8 +87,8 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
-  /// [autocorrect] arguments must not be null.
+  /// The [textAlign], [autofocus], [obscureText], and [autocorrect] arguments
+  /// must not be null.
   ///
   /// See also:
   ///
@@ -96,28 +98,37 @@ class TextField extends StatefulWidget {
     Key key,
     this.controller,
     this.focusNode,
-    this.decoration: const InputDecoration(),
-    TextInputType keyboardType: TextInputType.text,
+    this.decoration = const InputDecoration(),
+    TextInputType keyboardType,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
     this.style,
-    this.textAlign: TextAlign.start,
-    this.autofocus: false,
-    this.obscureText: false,
-    this.autocorrect: true,
-    this.maxLines: 1,
+    this.textAlign = TextAlign.start,
+    this.autofocus = false,
+    this.obscureText = false,
+    this.autocorrect = true,
+    this.maxLines = 1,
     this.maxLength,
-    this.maxLengthEnforced: true,
+    this.maxLengthEnforced = true,
     this.onChanged,
+    this.onEditingComplete,
     this.onSubmitted,
     this.inputFormatters,
-  }) : assert(keyboardType != null),
-       assert(textAlign != null),
+    this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorRadius,
+    this.cursorColor,
+    this.keyboardAppearance,
+    this.scrollPadding = const EdgeInsets.all(20.0),
+  }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
-       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
   /// Controls the text being edited.
@@ -135,22 +146,40 @@ class TextField extends StatefulWidget {
   /// By default, draws a horizontal line under the text field but can be
   /// configured to show an icon, label, hint text, and error text.
   ///
-  /// Set this field to null to remove the decoration entirely (including the
+  /// Specify null to remove the decoration entirely (including the
   /// extra padding introduced by the decoration to save space for the labels).
   final InputDecoration decoration;
 
   /// The type of keyboard to use for editing the text.
   ///
-  /// Defaults to [TextInputType.text]. Must not be null. If
-  /// [maxLines] is not one, then [keyboardType] is ignored, and the
-  /// [TextInputType.multiline] keyboard type is used.
+  /// Defaults to [TextInputType.text] if [maxLines] is one and
+  /// [TextInputType.multiline] otherwise.
   final TextInputType keyboardType;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to [TextInputAction.newline] if [keyboardType] is
+  /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
+  final TextInputAction textInputAction;
+
+  /// Configures how the platform keyboard will select an uppercase or
+  /// lowercase keyboard.
+  ///
+  /// Only supports text keyboards, other keyboard types will ignore this
+  /// configuration. Capitalization is locale-aware.
+  ///
+  /// Defaults to [TextCapitalization.none]. Must not be null.
+  ///
+  /// See also:
+  ///
+  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  final TextCapitalization textCapitalization;
 
   /// The style to use for the text being edited.
   ///
   /// This text style is also used as the base style for the [decoration].
   ///
-  /// If null, defaults to a text style from the current [Theme].
+  /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle style;
 
   /// How the text being edited should be aligned horizontally.
@@ -211,6 +240,8 @@ class TextField extends StatefulWidget {
   /// characters may be entered, but the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
+  /// ## Limitations
+  ///
   /// The TextField does not currently count Unicode grapheme clusters (i.e.
   /// characters visible to the user), it counts Unicode scalar values, which
   /// leaves out a number of useful possible characters (like many emoji and
@@ -221,7 +252,7 @@ class TextField extends StatefulWidget {
   /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
   /// which is the letter "o" followed by a composed diaeresis "¨", or it can
   /// be represented as '\u{00F6}', which is the Unicode scalar value "LATIN
-  /// SMALL LETTER O WITH DIAERESIS".  In the first case, the text field will
+  /// SMALL LETTER O WITH DIAERESIS". In the first case, the text field will
   /// count two characters, and the second case will be counted as one
   /// character, even though the user can see no difference in the input.
   ///
@@ -232,6 +263,7 @@ class TextField extends StatefulWidget {
   /// characters.
   ///
   /// See also:
+  ///
   ///  * [LengthLimitingTextInputFormatter] for more information on how it
   ///    counts characters, and how it may differ from the intuitive meaning.
   final int maxLength;
@@ -247,6 +279,24 @@ class TextField extends StatefulWidget {
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
 
+  /// Called when the user submits editable content (e.g., user presses the "done"
+  /// button on the keyboard).
+  ///
+  /// The default implementation of [onEditingComplete] executes 2 different
+  /// behaviors based on the situation:
+  ///
+  ///  - When a completion action is pressed, such as "done", "go", "send", or
+  ///    "search", the user's content is submitted to the [controller] and then
+  ///    focus is given up.
+  ///
+  ///  - When a non-completion action is pressed, such as "next" or "previous",
+  ///    the user's content is submitted to the [controller], but focus is not
+  ///    given up because developers may want to immediately move focus to
+  ///    another input widget within [onSubmitted].
+  ///
+  /// Providing [onEditingComplete] prevents the aforementioned default behavior.
+  final VoidCallback onEditingComplete;
+
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   final ValueChanged<String> onSubmitted;
@@ -256,28 +306,67 @@ class TextField extends StatefulWidget {
   /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
+  /// If false the textfield is "disabled": it ignores taps and its
+  /// [decoration] is rendered in grey.
+  ///
+  /// If non-null this property overrides the [decoration]'s
+  /// [Decoration.enabled] property.
+  final bool enabled;
+
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0.
+  final double cursorWidth;
+
+  /// How rounded the corners of the cursor should be.
+  /// By default, the cursor has a null Radius
+  final Radius cursorRadius;
+
+  /// The color to use when painting the cursor.
+  final Color cursorColor;
+
+  /// The appearance of the keyboard.
+  ///
+  /// This setting is only honored on iOS devices.
+  ///
+  /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
+  final Brightness keyboardAppearance;
+
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  ///
+  /// Defaults to EdgeInserts.all(20.0).
+  final EdgeInsets scrollPadding;
+
   @override
   _TextFieldState createState() => new _TextFieldState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
-    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
-    description.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    description.add(new IntProperty('maxLength', maxLength, defaultValue: null));
-    description.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(new IntProperty('maxLength', maxLength, defaultValue: null));
+    properties.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 
-class _TextFieldState extends State<TextField> {
+class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
   final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+
+  Set<InteractiveInkFeature> _splashes;
+  InteractiveInkFeature _currentSplash;
 
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
@@ -290,11 +379,16 @@ class _TextFieldState extends State<TextField> {
     && widget.decoration.counterText == null;
 
   InputDecoration _getEffectiveDecoration() {
-    if (!needsCounter)
-      return widget.decoration;
+    final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
+      .applyDefaults(Theme.of(context).inputDecorationTheme)
+      .copyWith(
+        enabled: widget.enabled,
+      );
 
-    final InputDecoration effectiveDecoration = widget?.decoration ?? const InputDecoration();
-    final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
+    if (!needsCounter)
+      return effectiveDecoration;
+
+    final String counterText = '${_effectiveController.value.text.runes.length}/${widget.maxLength}';
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
@@ -321,6 +415,11 @@ class _TextFieldState extends State<TextField> {
       _controller = new TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
+    final bool isEnabled = widget.enabled ?? widget.decoration?.enabled ?? true;
+    final bool wasEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
+    if (wasEnabled && !isEnabled) {
+      _effectiveFocusNode.unfocus();
+    }
   }
 
   @override
@@ -333,15 +432,107 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _onSelectionChanged(BuildContext context, bool longPress) {
-    if (longPress)
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
+    if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
+  }
+
+  InteractiveInkFeature _createInkFeature(TapDownDetails details) {
+    final MaterialInkController inkController = Material.of(context);
+    final BuildContext editableContext = _editableTextKey.currentContext;
+    final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
+    final Offset position = referenceBox.globalToLocal(details.globalPosition);
+    final Color color = Theme.of(context).splashColor;
+
+    InteractiveInkFeature splash;
+    void handleRemoved() {
+      if (_splashes != null) {
+        assert(_splashes.contains(splash));
+        _splashes.remove(splash);
+        if (_currentSplash == splash)
+          _currentSplash = null;
+        updateKeepAlive();
+      } // else we're probably in deactivate()
+    }
+
+    splash = Theme.of(context).splashFactory.create(
+      controller: inkController,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: true,
+      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
+      borderRadius: BorderRadius.zero,
+      onRemoved: handleRemoved,
+    );
+
+    return splash;
+  }
+
+  RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
+
+  void _handleTapDown(TapDownDetails details) {
+    _renderEditable.handleTapDown(details);
+    _startSplash(details);
+  }
+
+  void _handleTap() {
+    _renderEditable.handleTap();
+    _requestKeyboard();
+    _confirmCurrentSplash();
+  }
+
+  void _handleTapCancel() {
+    _cancelCurrentSplash();
+  }
+
+  void _handleLongPress() {
+    _renderEditable.handleLongPress();
+    _confirmCurrentSplash();
+  }
+
+  void _startSplash(TapDownDetails details) {
+    if (_effectiveFocusNode.hasFocus)
+      return;
+    final InteractiveInkFeature splash = _createInkFeature(details);
+    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes.add(splash);
+    _currentSplash = splash;
+    updateKeepAlive();
+  }
+
+  void _confirmCurrentSplash() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+  }
+
+  void _cancelCurrentSplash() {
+    _currentSplash?.cancel();
+  }
+
+  @override
+  bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
+
+  @override
+  void deactivate() {
+    if (_splashes != null) {
+      final Set<InteractiveInkFeature> splashes = _splashes;
+      _splashes = null;
+      for (InteractiveInkFeature splash in splashes)
+        splash.dispose();
+      _currentSplash = null;
+    }
+    assert(_currentSplash == null);
+    super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // See AutomaticKeepAliveClientMixin.
+    assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
+    final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
@@ -354,21 +545,29 @@ class _TextFieldState extends State<TextField> {
         controller: controller,
         focusNode: focusNode,
         keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
         style: style,
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
-        cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
             : materialTextSelectionControls,
         onChanged: widget.onChanged,
+        onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
-        onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
+        onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
+        rendererIgnoresPointer: true,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        scrollPadding: widget.scrollPadding,
+        keyboardAppearance: keyboardAppearance,
       ),
     );
 
@@ -389,10 +588,24 @@ class _TextFieldState extends State<TextField> {
       );
     }
 
-    return new GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _requestKeyboard,
-      child: child,
+    return new Semantics(
+      onTap: () {
+        if (!_effectiveController.selection.isValid)
+          _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
+        _requestKeyboard();
+      },
+      child: new IgnorePointer(
+        ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
+        child: new GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTapDown: _handleTapDown,
+          onTap: _handleTap,
+          onTapCancel: _handleTapCancel,
+          onLongPress: _handleLongPress,
+          excludeFromSemantics: true,
+          child: child,
+        ),
+      ),
     );
   }
 }

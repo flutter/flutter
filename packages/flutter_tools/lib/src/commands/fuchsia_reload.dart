@@ -4,16 +4,16 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
+import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
@@ -27,7 +27,7 @@ import '../vmservice.dart';
 // $ flutter fuchsia_reload -f ~/fuchsia -a 192.168.1.39 \
 //       -g //lib/flutter/examples/flutter_gallery:flutter_gallery
 
-final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
+final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 
 class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {
@@ -35,32 +35,31 @@ class FuchsiaReloadCommand extends FlutterCommand {
     argParser.addOption('address',
       abbr: 'a',
       help: 'Fuchsia device network name or address.');
-    argParser.addOption('build-type',
+    argParser.addOption('build-dir',
       abbr: 'b',
-      defaultsTo: 'release-x86-64',
-      help: 'Fuchsia build type, e.g. release-x86-64.');
-    argParser.addOption('fuchsia-root',
-      abbr: 'f',
-      defaultsTo: platform.environment['FUCHSIA_ROOT'],
-      help: 'Path to Fuchsia source tree.');
+      defaultsTo: null,
+      help: 'Fuchsia build directory, e.g. out/release-x86-64.');
     argParser.addOption('gn-target',
       abbr: 'g',
       help: 'GN target of the application, e.g //path/to/app:app.');
+    argParser.addOption('isolate-number',
+      abbr: 'i',
+      help: 'To reload only one instance, specify the isolate number, e.g. '
+            'the number in foo\$main-###### given by --list.');
     argParser.addFlag('list',
       abbr: 'l',
       defaultsTo: false,
-      help: 'Lists the running modules. '
-            'Requires the flags --address(-a) and --fuchsia-root(-f).');
+      help: 'Lists the running modules. ');
     argParser.addOption('name-override',
       abbr: 'n',
       help: 'On-device name of the application binary.');
-    argParser.addOption('isolate-number',
-      abbr: 'i',
-      help: 'To reload only one instance, speficy the isolate number, e.g. '
-            'the number in foo\$main-###### given by --list.');
+    argParser.addFlag('preview-dart-2',
+      abbr: '2',
+      defaultsTo: false,
+      help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: flx.defaultMainPath,
+      defaultsTo: bundle.defaultMainPath,
       help: 'Target app path / main entry-point file. '
             'Relative to --gn-target path, e.g. lib/main.dart.');
   }
@@ -71,8 +70,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   @override
   final String description = 'Hot reload on Fuchsia.';
 
-  String _fuchsiaRoot;
-  String _buildType;
+  String _buildDir;
   String _projectRoot;
   String _projectName;
   String _binaryName;
@@ -88,7 +86,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   Future<Null> runCommand() async {
     Cache.releaseLockEarly();
 
-    _validateArguments();
+    await _validateArguments();
 
     // Find the network ports used on the device by VM service instances.
     final List<int> deviceServicePorts = await _getServicePorts();
@@ -136,7 +134,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
       ).toList();
       final FuchsiaDevice device = new FuchsiaDevice(
           fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = new FlutterDevice(device);
+      final FlutterDevice flutterDevice = new FlutterDevice(
+        device,
+        trackWidgetCreation: false,
+        previewDart2: false,
+      );
       flutterDevice.observatoryUris = observatoryUris;
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
@@ -155,35 +157,20 @@ class FuchsiaReloadCommand extends FlutterCommand {
   // A cache of VMService connections.
   final HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
 
-  VMService _getVMService(int port) {
+  Future<VMService> _getVMService(int port) async {
     if (!_vmServiceCache.containsKey(port)) {
       final String addr = 'http://$ipv4Loopback:$port';
       final Uri uri = Uri.parse(addr);
-      final VMService vmService = VMService.connect(uri);
+      final VMService vmService = await VMService.connect(uri);
       _vmServiceCache[port] = vmService;
     }
     return _vmServiceCache[port];
   }
 
-  Future<bool> _checkPort(int port) async {
-    bool connected = true;
-    Socket s;
-    try {
-      s = await Socket.connect(ipv4Loopback, port);
-    } catch (_) {
-      connected = false;
-    }
-    if (s != null)
-      await s.close();
-    return connected;
-  }
-
   Future<List<FlutterView>> _getViews(List<int> ports) async {
     final List<FlutterView> views = <FlutterView>[];
     for (int port in ports) {
-      if (!await _checkPort(port))
-        continue;
-      final VMService vmService = _getVMService(port);
+      final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       views.addAll(vmService.vm.views);
@@ -196,6 +183,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
     printTrace('Looing for view $viewFilter');
     final List<int> result = <int>[];
     for (FlutterView v in await _getViews(ports)) {
+      if (v.uiIsolate == null)
+        continue;
       final Uri addr = v.owner.vmService.httpAddress;
       printTrace('At $addr, found view: ${v.uiIsolate.name}');
       if (v.uiIsolate.name.contains(viewFilter))
@@ -207,8 +196,9 @@ class FuchsiaReloadCommand extends FlutterCommand {
   static const String _bold = '\u001B[0;1m';
   static const String _reset = '\u001B[0m';
 
-  String _vmServiceToString(VMService vmService, {int tabDepth: 0}) {
+  String _vmServiceToString(VMService vmService, {int tabDepth = 0}) {
     final Uri addr = vmService.httpAddress;
+    final String embedder = vmService.vm.embedder;
     final int numIsolates = vmService.vm.isolates.length;
     final String maxRSS = getSizeAsMB(vmService.vm.maxRSS);
     final String heapSize = getSizeAsMB(vmService.vm.heapAllocatedMemoryUsage);
@@ -233,7 +223,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final String tabs = '\t' * tabDepth;
     final String extraTabs = '\t' * (tabDepth + 1);
     final StringBuffer stringBuffer = new StringBuffer(
-      '$tabs${_bold}VM at $addr$_reset\n'
+      '$tabs$_bold$embedder at $addr$_reset\n'
       '${extraTabs}RSS: $maxRSS\n'
       '${extraTabs}Native allocations: $heapSize\n'
       '${extraTabs}New Spaces: $newUsed of $newCap\n'
@@ -247,11 +237,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return stringBuffer.toString();
   }
 
-  String _isolateToString(Isolate isolate, {int tabDepth: 0}) {
+  String _isolateToString(Isolate isolate, {int tabDepth = 0}) {
     final Uri vmServiceAddr = isolate.owner.vmService.httpAddress;
     final String name = isolate.name;
     final String shortName = name.substring(0, name.indexOf('\$'));
-    final String main = '\$main-';
+    const String main = '\$main-';
     final String number = name.substring(name.indexOf(main) + main.length);
 
     // The Observatory requires somewhat non-standard URIs that the Uri class
@@ -283,27 +273,35 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   Future<Null> _listVMs(List<int> ports) async {
     for (int port in ports) {
-      final VMService vmService = _getVMService(port);
+      final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       printStatus(_vmServiceToString(vmService));
     }
   }
 
-  void _validateArguments() {
-    _fuchsiaRoot = argResults['fuchsia-root'];
-    if (_fuchsiaRoot == null)
-      throwToolExit('Please give the location of the Fuchsia tree with --fuchsia-root.');
-    if (!_directoryExists(_fuchsiaRoot))
-      throwToolExit('Specified --fuchsia-root "$_fuchsiaRoot" does not exist.');
+  Future<Null> _validateArguments() async {
+    _buildDir = argResults['build-dir'];
+    if (_buildDir == null) {
+      final ProcessResult result = await processManager.run(<String>['fx', 'get-build-dir']);
+      if (result.exitCode == 0)
+        _buildDir = result.stdout.trim();
+      else
+        printStatus('get-build-dir failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+    }
+    if (!_directoryExists(_buildDir))
+      throwToolExit('Specified --build-dir "$_buildDir" does not exist.');
 
     _address = argResults['address'];
+    if (_address == null) {
+      final ProcessResult result = await processManager.run(<String>['fx', 'netaddr', '--fuchsia']);
+      if (result.exitCode == 0)
+        _address = result.stdout.trim();
+      else
+        printStatus('netaddr failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+    }
     if (_address == null)
       throwToolExit('Give the address of the device running Fuchsia with --address.');
-
-    _buildType = argResults['build-type'];
-    if (_buildType == null)
-      throwToolExit('Give the build type with --build-type.');
 
     _list = argResults['list'];
     if (_list) {
@@ -317,7 +315,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final List<String> targetInfo = _extractPathAndName(gnTarget);
     _projectRoot = targetInfo[0];
     _projectName = targetInfo[1];
-    _fuchsiaProjectPath = '$_fuchsiaRoot/$_projectRoot';
+    _fuchsiaProjectPath = '$_buildDir/../../$_projectRoot';
     if (!_directoryExists(_fuchsiaProjectPath))
       throwToolExit('Target does not exist in the Fuchsia tree: $_fuchsiaProjectPath.');
 
@@ -328,17 +326,19 @@ class FuchsiaReloadCommand extends FlutterCommand {
     if (!_fileExists(_target))
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
-    final String packagesFileName = '${_projectName}_dart_package.packages';
-    _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/gen/$_projectRoot/$packagesFileName';
-    if (!_fileExists(_dotPackagesPath))
-      throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
-
     final String nameOverride = argResults['name-override'];
     if (nameOverride == null) {
       _binaryName = _projectName;
     } else {
       _binaryName = nameOverride;
     }
+
+    // When there's an override of the on-device binary name, use that name
+    // to locate the .packages file.
+    final String packagesFileName = '${_binaryName}_dart_library.packages';
+    _dotPackagesPath = '$_buildDir/dartlang/gen/$_projectRoot/$packagesFileName';
+    if (!_fileExists(_dotPackagesPath))
+      throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 
     final String isolateNumber = argResults['isolate-number'];
     if (isolateNumber == null) {
@@ -364,26 +364,33 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return <String>[path, name];
   }
 
-  Future<List<_PortForwarder>> _forwardPorts(List<int> remotePorts) {
-    final String config = '$_fuchsiaRoot/out/$_buildType/ssh-keys/ssh_config';
-    return Future.wait(remotePorts.map((int remotePort) {
-      return _PortForwarder.start(config, _address, remotePort);
-    }));
+  Future<List<_PortForwarder>> _forwardPorts(List<int> remotePorts) async {
+    final String config = '$_buildDir/ssh-keys/ssh_config';
+    final List<_PortForwarder> forwarders = <_PortForwarder>[];
+    for (int port in remotePorts) {
+      final _PortForwarder f =
+          await _PortForwarder.start(config, _address, port);
+      forwarders.add(f);
+    }
+    return forwarders;
   }
 
   Future<List<int>> _getServicePorts() async {
     final FuchsiaDeviceCommandRunner runner =
-        new FuchsiaDeviceCommandRunner(_address, _fuchsiaRoot, _buildType);
+        new FuchsiaDeviceCommandRunner(_address, _buildDir);
     final List<String> lsOutput = await runner.run('ls /tmp/dart.services');
     final List<int> ports = <int>[];
-    for (String s in lsOutput) {
-      final String trimmed = s.trim();
-      final int lastSpace = trimmed.lastIndexOf(' ');
-      final String lastWord = trimmed.substring(lastSpace + 1);
-      if ((lastWord != '.') && (lastWord != '..')) {
-        final int value = int.parse(lastWord, onError: (_) => null);
-        if (value != null)
-          ports.add(value);
+    if (lsOutput != null) {
+      for (String s in lsOutput) {
+        final String trimmed = s.trim();
+        final int lastSpace = trimmed.lastIndexOf(' ');
+        final String lastWord = trimmed.substring(lastSpace + 1);
+        if ((lastWord != '.') && (lastWord != '..')) {
+
+          final int value = int.tryParse(lastWord);
+          if (value != null)
+            ports.add(value);
+        }
       }
     }
     return ports;
@@ -427,11 +434,16 @@ class _PortForwarder {
           '_PortForwarder failed to find a local port for $address:$remotePort');
       return new _PortForwarder._(null, 0, 0, null, null);
     }
+    const String dummyRemoteCommand = 'date';
     final List<String> command = <String>[
-        'ssh', '-F', sshConfig, '-nNT',
-        '-L', '$localPort:$ipv4Loopback:$remotePort', address];
+        'ssh', '-F', sshConfig, '-nNT', '-vvv', '-f',
+        '-L', '$localPort:$ipv4Loopback:$remotePort', address, dummyRemoteCommand];
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((String data) { printTrace(data); });
     process.exitCode.then((int c) {
       printTrace("'${command.join(' ')}' exited with exit code $c");
     });
@@ -447,7 +459,7 @@ class _PortForwarder {
     }
     // Cancel the forwarding request.
     final List<String> command = <String>[
-        'ssh', '-F', _sshConfig, '-O', 'cancel',
+        'ssh', '-F', _sshConfig, '-O', 'cancel', '-vvv',
         '-L', '$_localPort:$ipv4Loopback:$_remotePort', _remoteAddress];
     final ProcessResult result = await processManager.run(command);
     printTrace(command.join(' '));
@@ -473,16 +485,13 @@ class _PortForwarder {
 }
 
 class FuchsiaDeviceCommandRunner {
-  // TODO(zra): Get rid of _address and instead use
-  // $_fuchsiaRoot/out/build-magenta/tools/netaddr --fuchsia
   final String _address;
-  final String _buildType;
-  final String _fuchsiaRoot;
+  final String _buildDir;
 
-  FuchsiaDeviceCommandRunner(this._address, this._fuchsiaRoot, this._buildType);
+  FuchsiaDeviceCommandRunner(this._address, this._buildDir);
 
   Future<List<String>> run(String command) async {
-    final String config = '$_fuchsiaRoot/out/$_buildType/ssh-keys/ssh_config';
+    final String config = '$_buildDir/ssh-keys/ssh_config';
     final List<String> args = <String>['ssh', '-F', config, _address, command];
     printTrace(args.join(' '));
     final ProcessResult result = await processManager.run(args);

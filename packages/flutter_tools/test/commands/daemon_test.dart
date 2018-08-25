@@ -5,26 +5,23 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
-import 'package:test/test.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
   Daemon daemon;
-  AppContext appContext;
   NotifyingLogger notifyingLogger;
 
   group('daemon', () {
     setUp(() {
-      appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
-      appContext.setVariable(Logger, notifyingLogger);
     });
 
     tearDown(() {
@@ -50,51 +47,51 @@ void main() {
       commands.close();
     });
 
-    testUsingContext('printError should send daemon.logMessage event', () {
-      return appContext.runInZone(() async {
-        final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
-        final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
-        daemon = new Daemon(
-          commands.stream,
-          responses.add,
-          notifyingLogger: notifyingLogger
-        );
-        printError('daemon.logMessage test');
-        final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
-          return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
-        });
-        expect(response['id'], isNull);
-        expect(response['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage = response['params'];
-        expect(logMessage['level'], 'error');
-        expect(logMessage['message'], 'daemon.logMessage test');
-        responses.close();
-        commands.close();
+    testUsingContext('printError should send daemon.logMessage event', () async {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      printError('daemon.logMessage test');
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
+        return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
       });
+      expect(response['id'], isNull);
+      expect(response['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = response['params'].cast<String, String>();
+      expect(logMessage['level'], 'error');
+      expect(logMessage['message'], 'daemon.logMessage test');
+      responses.close();
+      commands.close();
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
     });
 
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = new StringBuffer();
 
       await runZoned(() async {
-        return appContext.runInZone(() async {
-          final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
-          final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
-          daemon = new Daemon(
-            commands.stream,
-            responses.add,
-            notifyingLogger: notifyingLogger,
-            logToStdout: true
-          );
-          printStatus('daemon.logMessage test');
-          // Service the event loop.
-          await new Future<Null>.value();
-        });
+        final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+        final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+        daemon = new Daemon(
+          commands.stream,
+          responses.add,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+        );
+        printStatus('daemon.logMessage test');
+        // Service the event loop.
+        await new Future<Null>.value();
       }, zoneSpecification: new ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         buffer.writeln(line);
       }));
 
       expect(buffer.toString().trim(), 'daemon.logMessage test');
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
     });
 
     testUsingContext('daemon.shutdown command should stop daemon', () async {
@@ -113,27 +110,6 @@ void main() {
       });
     });
 
-    testUsingContext('app.start without a deviceId should report an error', () async {
-      final DaemonCommand command = new DaemonCommand();
-      applyMocksToCommand(command);
-
-      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
-      daemon = new Daemon(
-        commands.stream,
-        responses.add,
-        daemonCommand: command,
-        notifyingLogger: notifyingLogger
-      );
-
-      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.start' });
-      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('deviceId is required'));
-      responses.close();
-      commands.close();
-    });
-
     testUsingContext('app.restart without an appId should report an error', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
@@ -144,7 +120,7 @@ void main() {
         commands.stream,
         responses.add,
         daemonCommand: command,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.restart' });
@@ -165,7 +141,7 @@ void main() {
           commands.stream,
           responses.add,
           daemonCommand: command,
-          notifyingLogger: notifyingLogger
+          notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{
@@ -192,7 +168,7 @@ void main() {
         commands.stream,
         responses.add,
         daemonCommand: command,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
@@ -212,7 +188,8 @@ void main() {
           notifyingLogger: notifyingLogger,
       );
 
-      final Map<String, dynamic> response = await responses.stream.first;
+      final Map<String, dynamic> response =
+        await responses.stream.skipWhile(_isConnectedEvent).first;
       expect(response['event'], 'daemon.showMessage');
       expect(response['params'], isMap);
       expect(response['params'], containsPair('level', 'warning'));
@@ -252,7 +229,7 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(new MockAndroidDevice());
 
-      return responses.stream.first.then((Map<String, dynamic> response) {
+      return responses.stream.skipWhile(_isConnectedEvent).first.then((Map<String, dynamic> response) {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
@@ -266,20 +243,76 @@ void main() {
       AndroidWorkflow: () => new MockAndroidWorkflow(),
       IOSWorkflow: () => new MockIOSWorkflow(),
     });
+
+    testUsingContext('emulator.launch without an emulatorId should report an error', () async {
+      final DaemonCommand command = new DaemonCommand();
+      applyMocksToCommand(command);
+
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        responses.add,
+        daemonCommand: command,
+        notifyingLogger: notifyingLogger
+      );
+
+      commands.add(<String, dynamic>{ 'id': 0, 'method': 'emulator.launch' });
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['error'], contains('emulatorId is required'));
+      responses.close();
+      commands.close();
+    });
+
+    testUsingContext('emulator.getEmulators should respond with list', () async {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger
+      );
+      commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'});
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
+      expect(response['id'], 0);
+      expect(response['result'], isList);
+      responses.close();
+      commands.close();
+    });
+  });
+
+  group('daemon serialization', () {
+    test('OperationResult', () {
+      expect(
+        jsonEncodeObject(OperationResult.ok),
+        '{"code":0,"message":""}'
+      );
+      expect(
+        jsonEncodeObject(new OperationResult(1, 'foo')),
+        '{"code":1,"message":"foo"}'
+      );
+      expect(
+        jsonEncodeObject(new OperationResult(0, 'foo', hintMessage: 'my hint', hintId: 'myId')),
+        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}'
+      );
+    });
   });
 }
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
+bool _isConnectedEvent(Map<String, dynamic> map) => map['event'] == 'daemon.connected';
+
 class MockAndroidWorkflow extends AndroidWorkflow {
-  MockAndroidWorkflow({ this.canListDevices: true });
+  MockAndroidWorkflow({ this.canListDevices = true });
 
   @override
   final bool canListDevices;
 }
 
 class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({ this.canListDevices:true });
+  MockIOSWorkflow({ this.canListDevices =true });
 
   @override
   final bool canListDevices;

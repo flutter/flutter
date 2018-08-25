@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 class TestCanvas implements Canvas {
   TestCanvas([this.invocations]);
 
@@ -77,8 +79,16 @@ void main() {
       ),
     ));
 
-    final CustomPaint custom = tester.widget(find.descendant(of: find.byType(Scrollbar), matching: find.byType(CustomPaint)).first);
+    final CustomPaint custom = tester.widget(find.descendant(
+      of: find.byType(Scrollbar),
+      matching: find.byType(CustomPaint)).first
+    );
     final dynamic scrollPainter = custom.foregroundPainter;
+    // Dragging makes the scrollbar first appear.
+    await tester.drag(find.text('0'), const Offset(0.0, -10.0));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
+
     final ScrollMetrics metrics = new FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 0.0,
@@ -87,13 +97,46 @@ void main() {
       axisDirection: AxisDirection.down
     );
     scrollPainter.update(metrics, AxisDirection.down);
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(milliseconds: 200));
 
     final List<Invocation> invocations = <Invocation>[];
     final TestCanvas canvas = new TestCanvas(invocations);
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
     final Rect thumbRect = invocations.single.positionalArguments[0];
     expect(thumbRect.isFinite, isTrue);
+  });
+
+  testWidgets('Adaptive scrollbar', (WidgetTester tester) async {
+    Widget viewWithScroll(TargetPlatform platform) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Theme(
+          data: new ThemeData(
+            platform: platform
+          ),
+          child: new Scrollbar(
+            child: new SingleChildScrollView(
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.android));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    // Scrollbar fully showing
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(Scrollbar), paints..rect());
+
+    await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.byType(Scrollbar), paints..rrect());
   });
 }

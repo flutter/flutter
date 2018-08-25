@@ -16,42 +16,45 @@ void main() {
     await tester.pumpWidget(
       // The bug only manifests itself when the screen's orientation is portrait
       const Center(
-        child: const SizedBox(
-          width: 400.0,
+        child: SizedBox(
+          width: 450.0,
           height: 800.0,
-          child: const GalleryApp()
+          child: GalleryApp(testMode: true)
         )
       )
     );
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
+    await tester.tap(find.text('Studies'));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Pesto'));
-    await tester.pump(); // Launch pesto
-    await tester.pump(const Duration(seconds: 1)); // transition is complete
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Pesto Bruschetta'));
-    await tester.pump(); // Launch the recipe page
-    await tester.pump(const Duration(seconds: 1)); // transition is complete
+    await tester.tap(find.text('Roasted Chicken'));
+    await tester.pumpAndSettle();
 
-    await tester.drag(find.text('Pesto Bruschetta'), const Offset(0.0, -300.0));
-    await tester.pump();
+    await tester.drag(find.text('Roasted Chicken'), const Offset(0.0, -300.0));
+    await tester.pumpAndSettle();
 
     Navigator.pop(find.byType(Scaffold).evaluate().single);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // transition is complete
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
-    await tester.pumpWidget(const GalleryApp());
+    await tester.pumpWidget(const GalleryApp(testMode: true));
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+    await tester.pump(); // triggers a frame
+
+    await tester.tap(find.text('Studies'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Pesto'));
-    await tester.pump(); // Launch pesto
-    await tester.pump(const Duration(seconds: 1)); // transition is complete
+    await tester.pumpAndSettle();
 
-    await tester.fling(find.text('Pesto Bruschetta'), const Offset(0.0, -200.0), 10000.0);
+    await tester.fling(find.text('Roasted Chicken'), const Offset(0.0, -200.0), 10000.0);
     await tester.pumpAndSettle(); // start and finish fling
-    expect(find.text('Sicilian-Style sardines'), findsOneWidget);
+    expect(find.text('Spanakopita'), findsOneWidget);
   });
 }

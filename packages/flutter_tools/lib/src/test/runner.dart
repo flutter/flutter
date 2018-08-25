@@ -4,44 +4,58 @@
 
 import 'dart:async';
 
-// ignore: implementation_imports
-import 'package:test/src/executable.dart' as test;
+import 'package:args/command_runner.dart';
+import 'package:meta/meta.dart';
+import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../test/flutter_platform.dart' as loader;
+import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
 Future<int> runTests(
-    List<String> testFiles, {
-    Directory workDir,
-    List<String> names: const <String>[],
-    List<String> plainNames: const <String>[],
-    bool enableObservatory: false,
-    bool startPaused: false,
-    bool ipv6: false,
-    bool machine: false,
-    TestWatcher watcher,
-    }) async {
+  List<String> testFiles, {
+  Directory workDir,
+  List<String> names = const <String>[],
+  List<String> plainNames = const <String>[],
+  bool enableObservatory = false,
+  bool startPaused = false,
+  bool ipv6 = false,
+  bool machine = false,
+  bool previewDart2 = false,
+  String precompiledDillPath,
+  bool trackWidgetCreation = false,
+  bool updateGoldens = false,
+  TestWatcher watcher,
+  @required int concurrency,
+}) async {
+  if (trackWidgetCreation && !previewDart2) {
+    throw new UsageException(
+      '--track-widget-creation is valid only when --preview-dart-2 is specified.',
+      null,
+    );
+  }
+
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
-  if (!terminal.supportsColor)
-    testArgs.addAll(<String>['--no-color', '-rexpanded']);
-
-  if (enableObservatory) {
-    // (In particular, for collecting code coverage.)
-    testArgs.add('--concurrency=1');
+  if (!terminal.supportsColor) {
+    testArgs.addAll(<String>['--no-color']);
   }
 
   if (machine) {
     testArgs.addAll(<String>['-r', 'json']);
+  } else {
+    testArgs.addAll(<String>['-r', 'compact']);
   }
+
+  testArgs.add('--concurrency=$concurrency');
 
   for (String name in names) {
     testArgs..add('--name')..add(name);
@@ -56,11 +70,11 @@ Future<int> runTests(
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!fs.isFileSync(shellPath))
+  if (!processManager.canRun(shellPath))
     throwToolExit('Cannot find Flutter shell at $shellPath');
 
   final InternetAddressType serverType =
-      ipv6 ? InternetAddressType.IP_V6 : InternetAddressType.IP_V4;
+      ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
   loader.installHook(
     shellPath: shellPath,
@@ -69,6 +83,10 @@ Future<int> runTests(
     machine: machine,
     startPaused: startPaused,
     serverType: serverType,
+    previewDart2: previewDart2,
+    precompiledDillPath: precompiledDillPath,
+    trackWidgetCreation: trackWidgetCreation,
+    updateGoldens: updateGoldens,
   );
 
   // Make the global packages path absolute.
@@ -88,7 +106,6 @@ Future<int> runTests(
     await test.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
-    // TODO(skybrian): restore previous value?
     printTrace('test package returned with exit code $exitCode');
 
     return exitCode;

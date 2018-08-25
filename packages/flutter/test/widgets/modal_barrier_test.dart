@@ -23,7 +23,7 @@ void main() {
       child: const SizedBox(
         width: 10.0,
         height: 10.0,
-        child: const Text('target', textDirection: TextDirection.ltr)
+        child: Text('target', textDirection: TextDirection.ltr)
       )
     );
   });
@@ -73,13 +73,13 @@ void main() {
 
     // Tapping on X routes to the barrier
     await tester.tap(find.text('X'));
-    await tester.pump();  // begin transition
-    await tester.pump(const Duration(seconds: 1));  // end transition
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
 
     // Tap on the barrier to dismiss it
     await tester.tap(find.byKey(const ValueKey<String>('barrier')));
-    await tester.pump();  // begin transition
-    await tester.pump(const Duration(seconds: 1));  // end transition
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
 
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
       reason: 'The route should have been dismissed by tapping the barrier.');
@@ -99,24 +99,25 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(const ModalBarrier(dismissible: true));
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: ModalBarrier(
+        dismissible: true,
+        semanticsLabel: 'Dismiss',
+      ),
+    ));
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
           rect: TestSemantics.fullScreen,
-          children: <TestSemantics>[
-            new TestSemantics(
-              id: 2,
-              rect: TestSemantics.fullScreen,
-              actions: SemanticsAction.tap.index,
-            ),
-          ]
+          actions: SemanticsAction.tap.index,
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
         ),
       ]
     );
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     semantics.dispose();
     debugDefaultTargetPlatformOverride = null;
@@ -151,7 +152,7 @@ class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
   return const ModalBarrier(
-    key: const ValueKey<String>('barrier'),
+    key: ValueKey<String>('barrier'),
     dismissible: true
   );
   }

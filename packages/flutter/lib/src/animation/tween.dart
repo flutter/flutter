@@ -204,7 +204,12 @@ class ColorTween extends Tween<Color> {
   /// Creates a [Color] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
-  /// is treated as transparent black.
+  /// is treated as transparent.
+  ///
+  /// We recommend that you do not pass [Colors.transparent] as [begin]
+  /// or [end] if you want the effect of fading in or out of transparent.
+  /// Instead prefer null. [Colors.transparent] refers to black transparent and
+  /// thus will fade out of or into black which is likely unwanted.
   ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
@@ -298,6 +303,19 @@ class StepTween extends Tween<int> {
   int lerp(double t) => (begin + (end - begin) * t).floor();
 }
 
+/// A tween with a constant value.
+class ConstantTween<T> extends Tween<T> {
+  /// Create a tween whose [begin] and [end] values equal [value].
+  ConstantTween(T value) : super(begin: value, end: value);
+
+  /// This tween doesn't interpolate, it always returns [value].
+  @override
+  T lerp(double t) => begin;
+
+  @override
+  String toString() => '$runtimeType(value: begin)';
+}
+
 /// Transforms the value of the given animation by the given curve.
 ///
 /// This class differs from [CurvedAnimation] in that [CurvedAnimation] applies
@@ -322,4 +340,7 @@ class CurveTween extends Animatable<double> {
     }
     return curve.transform(t);
   }
+
+  @override
+  String toString() => '$runtimeType(curve: $curve)';
 }

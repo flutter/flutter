@@ -12,15 +12,17 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
+import 'build_bundle.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
 
 class BuildCommand extends FlutterCommand {
-  BuildCommand({bool verboseHelp: false}) {
-    addSubcommand(new BuildApkCommand());
-    addSubcommand(new BuildAotCommand());
-    addSubcommand(new BuildIOSCommand());
-    addSubcommand(new BuildFlxCommand(verboseHelp: verboseHelp));
+  BuildCommand({bool verboseHelp = false}) {
+    addSubcommand(new BuildApkCommand(verboseHelp: verboseHelp));
+    addSubcommand(new BuildAotCommand(verboseHelp: verboseHelp));
+    addSubcommand(new BuildIOSCommand(verboseHelp: verboseHelp));
+    addSubcommand(new BuildFlxCommand());
+    addSubcommand(new BuildBundleCommand(verboseHelp: verboseHelp));
   }
 
   @override

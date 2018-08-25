@@ -33,7 +33,7 @@ class TextRange {
       end = offset;
 
   /// A text range that contains nothing and is not in the text.
-  static const TextRange empty = const TextRange(start: -1, end: -1);
+  static const TextRange empty = TextRange(start: -1, end: -1);
 
   /// The index of the first character in the range.
   ///
@@ -102,8 +102,8 @@ class TextSelection extends TextRange {
   const TextSelection({
     @required this.baseOffset,
     @required this.extentOffset,
-    this.affinity: TextAffinity.downstream,
-    this.isDirectional: false
+    this.affinity = TextAffinity.downstream,
+    this.isDirectional = false
   }) : super(
          start: baseOffset < extentOffset ? baseOffset : extentOffset,
          end: baseOffset < extentOffset ? extentOffset : baseOffset
@@ -118,7 +118,7 @@ class TextSelection extends TextRange {
   /// The [offset] argument must not be null.
   const TextSelection.collapsed({
     @required int offset,
-    this.affinity: TextAffinity.downstream
+    this.affinity = TextAffinity.downstream
   }) : baseOffset = offset, extentOffset = offset, isDirectional = false, super.collapsed(offset);
 
   /// Creates a collapsed selection at the given text position.
@@ -147,7 +147,7 @@ class TextSelection extends TextRange {
   /// Might be larger than, smaller than, or equal to base.
   final int extentOffset;
 
-  /// If the the text range is collapsed and has more than one visual location
+  /// If the text range is collapsed and has more than one visual location
   /// (e.g., occurs at a line break), which of the two locations to use when
   /// painting the caret.
   final TextAffinity affinity;
@@ -203,7 +203,7 @@ class TextSelection extends TextRange {
   /// Creates a new [TextSelection] based on the current selection, with the
   /// provided parameters overridden.
   TextSelection copyWith({
-    int baseOffset, 
+    int baseOffset,
     int extentOffset,
     TextAffinity affinity,
     bool isDirectional,

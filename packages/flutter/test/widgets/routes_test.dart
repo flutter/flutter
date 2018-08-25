@@ -45,9 +45,11 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didReplace(covariant TestRoute oldRoute) {
-    log('didReplace ${oldRoute.name}');
-    super.didReplace(oldRoute);
+  void didReplace(Route<dynamic> oldRoute) {
+    expect(oldRoute, isInstanceOf<TestRoute>());
+    final TestRoute castRoute = oldRoute;
+    log('didReplace ${castRoute.name}');
+    super.didReplace(castRoute);
   }
 
   @override
@@ -60,15 +62,19 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didPopNext(covariant TestRoute nextRoute) {
-    log('didPopNext ${nextRoute.name}');
-    super.didPopNext(nextRoute);
+  void didPopNext(Route<dynamic> nextRoute) {
+    expect(nextRoute, isInstanceOf<TestRoute>());
+    final TestRoute castRoute = nextRoute;
+    log('didPopNext ${castRoute.name}');
+    super.didPopNext(castRoute);
   }
 
   @override
-  void didChangeNext(covariant TestRoute nextRoute) {
-    log('didChangeNext ${nextRoute?.name}');
-    super.didChangeNext(nextRoute);
+  void didChangeNext(Route<dynamic> nextRoute) {
+    expect(nextRoute, anyOf(isNull, isInstanceOf<TestRoute>()));
+    final TestRoute castRoute = nextRoute;
+    log('didChangeNext ${castRoute?.name}');
+    super.didChangeNext(castRoute);
   }
 
   @override
@@ -98,7 +104,7 @@ Future<Null> runNavigatorTest(
 
 void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
-    final RouteSettings settings = const RouteSettings(name: 'A');
+    const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
     final RouteSettings settings2 = settings.copyWith(name: 'B');
     expect(settings2.name, 'B');
@@ -451,6 +457,31 @@ void main() {
 
       observer.didPush(route, pageRoute);
       observer.didPop(route, pageRoute);
+      verifyNoMoreInteractions(pageRouteAware);
+    });
+
+    test('does not call listeners when already subscribed', () {
+      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = new MockRouteAware();
+      final MockPageRoute pageRoute = new MockPageRoute();
+      observer.subscribe(pageRouteAware, pageRoute);
+      observer.subscribe(pageRouteAware, pageRoute);
+      verify(pageRouteAware.didPush()).called(1);
+    });
+
+    test('does not call listeners when unsubscribed', () {
+      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = new MockRouteAware();
+      final MockPageRoute pageRoute = new MockPageRoute();
+      final MockPageRoute nextPageRoute = new MockPageRoute();
+      observer.subscribe(pageRouteAware, pageRoute);
+      observer.subscribe(pageRouteAware, nextPageRoute);
+      verify(pageRouteAware.didPush()).called(2);
+
+      observer.unsubscribe(pageRouteAware);
+
+      observer.didPush(nextPageRoute, pageRoute);
+      observer.didPop(nextPageRoute, pageRoute);
       verifyNoMoreInteractions(pageRouteAware);
     });
   });

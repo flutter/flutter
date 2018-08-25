@@ -42,7 +42,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatefulWidget {
-  const Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
+  const Dot({ Key key, this.color, this.size, this.child, this.tappable = false }) : super(key: key);
 
   final Color color;
   final double size;
@@ -77,8 +77,8 @@ class ExampleDragSource extends StatelessWidget {
   const ExampleDragSource({
     Key key,
     this.color,
-    this.heavy: false,
-    this.under: true,
+    this.heavy = false,
+    this.under = true,
     this.child
   }) : super(key: key);
 
@@ -151,7 +151,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   const DashOutlineCirclePainter();
 
   static const int segments = 17;
-  static const double deltaTheta = math.PI * 2 / segments; // radians
+  static const double deltaTheta = math.pi * 2 / segments; // radians
   static const double segmentArc = deltaTheta / 2.0; // radians
   static const double startOffset = 1.0; // radians
 
@@ -164,13 +164,13 @@ class DashOutlineCirclePainter extends CustomPainter {
       ..strokeWidth = radius / 10.0;
     final Path path = new Path();
     final Rect box = Offset.zero & size;
-    for (double theta = 0.0; theta < math.PI * 2.0; theta += deltaTheta)
+    for (double theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta)
       path.addArc(box, theta + startOffset, segmentArc);
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(DashOutlineCirclePainter oldPainter) => false;
+  bool shouldRepaint(DashOutlineCirclePainter oldDelegate) => false;
 }
 
 class MovableBall extends StatelessWidget {
@@ -193,14 +193,14 @@ class MovableBall extends StatelessWidget {
         color: Colors.blue.shade700,
         size: kBallSize,
         tappable: true,
-        child: const Center(child: const Text('BALL'))
+        child: const Center(child: Text('BALL'))
       )
     );
     final Widget dashedBall = new Container(
       width: kBallSize,
       height: kBallSize,
       child: const CustomPaint(
-        painter: const DashOutlineCirclePainter()
+        painter: DashOutlineCirclePainter()
       )
     );
     if (position == ballPosition) {

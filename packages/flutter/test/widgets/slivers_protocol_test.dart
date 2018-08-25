@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   final RenderObject target = key.currentContext.findRenderObject();
-  expect(target.parent, const isInstanceOf<RenderViewport>());
+  expect(target.parent, isInstanceOf<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
@@ -34,7 +34,7 @@ void main() {
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    final double max = RenderBigSliver.height * 3.0 + (RenderOverlappingSliver.totalHeight) * 2.0 - 600.0; // 600 is the height of the test viewport
+    const double max = RenderBigSliver.height * 3.0 + (RenderOverlappingSliver.totalHeight) * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
     expect(position.pixels, 0.0);

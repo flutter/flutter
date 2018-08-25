@@ -4,8 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
+import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
+
+import '../flutter_test_alternative.dart';
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding { }
 
@@ -32,6 +34,7 @@ class GestureTester {
 
 typedef void GestureTest(GestureTester tester);
 
+@isTest
 void testGesture(String description, GestureTest callback) {
   test(description, () {
     new FakeAsync().run((FakeAsync async) {

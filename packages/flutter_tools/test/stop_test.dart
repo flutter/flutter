@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/stop.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -23,7 +22,7 @@ void main() {
       final StopCommand command = new StopCommand();
       applyMocksToCommand(command);
       final MockAndroidDevice device = new MockAndroidDevice();
-      when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
+      when(device.stopApp(any)).thenAnswer((Invocation invocation) => new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
       await createTestCommandRunner(command).run(<String>['stop']);
     });
@@ -32,7 +31,7 @@ void main() {
       final StopCommand command = new StopCommand();
       applyMocksToCommand(command);
       final MockIOSDevice device = new MockIOSDevice();
-      when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
+      when(device.stopApp(any)).thenAnswer((Invocation invocation) => new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['stop']);

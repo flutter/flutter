@@ -187,10 +187,10 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 ///
 /// See also:
 ///
-///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
-///    many languages.
-///  * [WidgetsApp.delegates], which automatically includes
-///    [DefaultWidgetsLocalizations.delegate] by default.
+/// * [GlobalWidgetsLocalizations], which provides widgets localizations for
+///   many languages.
+/// * [WidgetsApp.delegates], which automatically includes
+///   [DefaultWidgetsLocalizations.delegate] by default.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
   /// library for US English (only).
@@ -216,20 +216,19 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// to create an instance of this class.
   ///
   /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
-  static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 
 class _LocalizationsScope extends InheritedWidget {
-  _LocalizationsScope ({
+  const _LocalizationsScope ({
     Key key,
     @required this.locale,
     @required this.localizationsState,
     @required this.typeToResources,
     Widget child,
-  }) : super(key: key, child: child) {
-    assert(localizationsState != null);
-    assert(typeToResources != null);
-  }
+  }) : assert(localizationsState != null),
+       assert(typeToResources != null),
+       super(key: key, child: child);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -258,9 +257,9 @@ class _LocalizationsScope extends InheritedWidget {
 ///   @override
 ///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
 ///
-///  @override
-///  bool shouldReload(MyLocalizationsDelegate old) => false;
-///}
+///   @override
+///   bool shouldReload(MyLocalizationsDelegate old) => false;
+/// }
 /// ```
 ///
 /// Each delegate can be viewed as a factory for objects that encapsulate a
@@ -337,11 +336,10 @@ class Localizations extends StatefulWidget {
     @required this.locale,
     @required this.delegates,
     this.child,
-  }) : super(key: key) {
-    assert(locale != null);
-    assert(delegates != null);
-    assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
-  }
+  }) : assert(locale != null),
+       assert(delegates != null),
+       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
+       super(key: key);
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -396,6 +394,8 @@ class Localizations extends StatefulWidget {
   final List<LocalizationsDelegate<dynamic>> delegates;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The locale of the Localizations widget for the widget tree that
@@ -404,7 +404,7 @@ class Localizations extends StatefulWidget {
   /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
   /// method will throw an exception, unless the `nullOk` argument is set to
   /// true, in which case it returns null.
-  static Locale localeOf(BuildContext context, { bool nullOk: false }) {
+  static Locale localeOf(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
@@ -449,10 +449,10 @@ class Localizations extends StatefulWidget {
   _LocalizationsState createState() => new _LocalizationsState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Locale>('locale', locale));
-    description.add(new IterableProperty<LocalizationsDelegate<dynamic>>('delegates', delegates));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale));
+    properties.add(new IterableProperty<LocalizationsDelegate<dynamic>>('delegates', delegates));
   }
 }
 
@@ -544,14 +544,17 @@ class _LocalizationsState extends State<Localizations> {
   Widget build(BuildContext context) {
     if (_locale == null)
       return new Container();
-    return new _LocalizationsScope(
-      key: _localizedResourcesScopeKey,
-      locale: _locale,
-      localizationsState: this,
-      typeToResources: _typeToResources,
-      child: new Directionality(
-        textDirection: _textDirection,
-        child: widget.child,
+    return new Semantics(
+      textDirection: _textDirection,
+      child: new _LocalizationsScope(
+        key: _localizedResourcesScopeKey,
+        locale: _locale,
+        localizationsState: this,
+        typeToResources: _typeToResources,
+        child: new Directionality(
+          textDirection: _textDirection,
+          child: widget.child,
+        ),
       ),
     );
   }

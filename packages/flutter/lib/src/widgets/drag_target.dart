@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -36,6 +35,11 @@ typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData,
 ///
 /// Used by [Draggable.onDraggableCanceled].
 typedef void DraggableCanceledCallback(Velocity velocity, Offset offset);
+
+/// Signature for when a [Draggable] leaves a [DragTarget].
+///
+/// Used by [DragTarget.onLeave].
+typedef void DragTargetLeave<T>(T data);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -88,22 +92,38 @@ class Draggable<T> extends StatefulWidget {
     @required this.child,
     @required this.feedback,
     this.data,
+    this.axis,
     this.childWhenDragging,
-    this.feedbackOffset: Offset.zero,
-    this.dragAnchor: DragAnchor.child,
+    this.feedbackOffset = Offset.zero,
+    this.dragAnchor = DragAnchor.child,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
     this.onDraggableCanceled,
     this.onDragCompleted,
+    this.ignoringFeedbackSemantics = true,
   }) : assert(child != null),
        assert(feedback != null),
+       assert(ignoringFeedbackSemantics != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
 
 
   /// The data that will be dropped by this draggable.
   final T data;
+
+  /// The [Axis] to restrict this draggable's movement, if specified.
+  ///
+  /// When axis is set to [Axis.horizontal], this widget can only be dragged
+  /// horizontally. Behavior is similar for [Axis.vertical].
+  ///
+  /// Defaults to allowing drag on both [Axis.horizontal] and [Axis.vertical].
+  ///
+  /// When null, allows drag on both [Axis.horizontal] and [Axis.vertical].
+  ///
+  /// For the direction of gestures this widget competes with to start a drag
+  /// event, see [Draggable.affinity].
+  final Axis axis;
 
   /// The widget below this widget in the tree.
   ///
@@ -116,6 +136,8 @@ class Draggable<T> extends StatefulWidget {
   ///
   /// To limit the number of simultaneous drags on multitouch devices, see
   /// [maxSimultaneousDrags].
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The widget to display instead of [child] when one or more drags are under way.
@@ -144,6 +166,17 @@ class Draggable<T> extends StatefulWidget {
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
 
+  /// Whether the semantics of the [feedback] widget is ignored when building
+  /// the semantics tree.
+  ///
+  /// This value should be set to false when the [feedback] widget is intended
+  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// widget will ensure semantic focus is kept on the element as it moves in
+  /// and out of the feedback position.
+  ///
+  /// Defaults to true.
+  final bool ignoringFeedbackSemantics;
+
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
   /// If affinity is null, this widget initiates a drag as soon as it recognizes
@@ -158,6 +191,9 @@ class Draggable<T> extends StatefulWidget {
   /// affinity, pointer motion in any direction will result in a drag rather
   /// than in a scroll because the draggable widget, being the more specific
   /// widget, will out-compete the [Scrollable] for vertical gestures.
+  ///
+  /// For the directions this widget can be dragged in after the drag event
+  /// starts, see [Draggable.axis].
   final Axis affinity;
 
   /// How many simultaneous drags to support.
@@ -223,32 +259,42 @@ class LongPressDraggable<T> extends Draggable<T> {
     @required Widget child,
     @required Widget feedback,
     T data,
+    Axis axis,
     Widget childWhenDragging,
-    Offset feedbackOffset: Offset.zero,
-    DragAnchor dragAnchor: DragAnchor.child,
+    Offset feedbackOffset = Offset.zero,
+    DragAnchor dragAnchor = DragAnchor.child,
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
-    DraggableCanceledCallback onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled,
+    VoidCallback onDragCompleted,
+    this.hapticFeedbackOnStart = true,
+    bool ignoringFeedbackSemantics = true,
   }) : super(
     key: key,
     child: child,
     feedback: feedback,
     data: data,
+    axis: axis,
     childWhenDragging: childWhenDragging,
     feedbackOffset: feedbackOffset,
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
-    onDraggableCanceled: onDraggableCanceled
+    onDraggableCanceled: onDraggableCanceled,
+    onDragCompleted: onDragCompleted,
+    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
+
+  /// Whether haptic feedback should be triggered on drag start.
+  final bool hapticFeedbackOnStart;
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Offset position) {
         final Drag result = onStart(position);
-        if (result != null)
-          HapticFeedback.vibrate();
+        if (result != null && hapticFeedbackOnStart)
+          HapticFeedback.selectionClick();
         return result;
       };
   }
@@ -303,7 +349,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
         break;
       case DragAnchor.pointer:
         dragStartPoint = Offset.zero;
-      break;
+        break;
     }
     setState(() {
       _activeCount += 1;
@@ -311,10 +357,12 @@ class _DraggableState<T> extends State<Draggable<T>> {
     final _DragAvatar<T> avatar = new _DragAvatar<T>(
       overlayState: Overlay.of(context, debugRequiredFor: widget),
       data: widget.data,
+      axis: widget.axis,
       initialPosition: position,
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
+      ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
           setState(() {
@@ -368,7 +416,8 @@ class DragTarget<T> extends StatefulWidget {
     Key key,
     @required this.builder,
     this.onWillAccept,
-    this.onAccept
+    this.onAccept,
+    this.onLeave,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -379,10 +428,18 @@ class DragTarget<T> extends StatefulWidget {
 
   /// Called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
+  ///
+  /// Called when a piece of data enters the target. This will be followed by
+  /// either [onAccept], if the data is dropped, or [onLeave], if the drag
+  /// leaves the target.
   final DragTargetWillAccept<T> onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
+
+  /// Called when a given piece of data being dragged over this target leaves
+  /// the target.
+  final DragTargetLeave<T> onLeave;
 
   @override
   _DragTargetState<T> createState() => new _DragTargetState<T>();
@@ -417,6 +474,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
+    if (widget.onLeave != null)
+      widget.onLeave(avatar.data);
   }
 
   void didDrop(_DragAvatar<dynamic> avatar) {
@@ -447,17 +506,20 @@ typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
 // overlay goes away. _DraggableState has some delicate logic to continue
-// eeding this object pointer events even after it has been disposed.
+// needing this object pointer events even after it has been disposed.
 class _DragAvatar<T> extends Drag {
   _DragAvatar({
     @required this.overlayState,
     this.data,
+    this.axis,
     Offset initialPosition,
-    this.dragStartPoint: Offset.zero,
+    this.dragStartPoint = Offset.zero,
     this.feedback,
-    this.feedbackOffset: Offset.zero,
-    this.onDragEnd
+    this.feedbackOffset = Offset.zero,
+    this.onDragEnd,
+    @required this.ignoringFeedbackSemantics,
   }) : assert(overlayState != null),
+       assert(ignoringFeedbackSemantics != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null) {
     _entry = new OverlayEntry(builder: _build);
@@ -467,11 +529,13 @@ class _DragAvatar<T> extends Drag {
   }
 
   final T data;
+  final Axis axis;
   final Offset dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
   final _OnDragEnd onDragEnd;
   final OverlayState overlayState;
+  final bool ignoringFeedbackSemantics;
 
   _DragTargetState<T> _activeTarget;
   final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
@@ -481,14 +545,15 @@ class _DragAvatar<T> extends Drag {
 
   @override
   void update(DragUpdateDetails details) {
-    _position += details.delta;
+    _position += _restrictAxis(details.delta);
     updateDrag(_position);
   }
 
   @override
   void end(DragEndDetails details) {
-    finishDrag(_DragEndKind.dropped, details.velocity);
+    finishDrag(_DragEndKind.dropped, _restrictVelocityAxis(details.velocity));
   }
+
 
   @override
   void cancel() {
@@ -577,8 +642,28 @@ class _DragAvatar<T> extends Drag {
       left: _lastOffset.dx - overlayTopLeft.dx,
       top: _lastOffset.dy - overlayTopLeft.dy,
       child: new IgnorePointer(
-        child: feedback
+        child: feedback,
+        ignoringSemantics: ignoringFeedbackSemantics,
       )
     );
+  }
+
+  Velocity _restrictVelocityAxis(Velocity velocity) {
+    if (axis == null) {
+      return velocity;
+    }
+    return new Velocity(
+      pixelsPerSecond: _restrictAxis(velocity.pixelsPerSecond),
+    );
+  }
+
+  Offset _restrictAxis(Offset offset) {
+    if (axis == null) {
+      return offset;
+    }
+    if (axis == Axis.horizontal) {
+      return new Offset(offset.dx, 0.0);
+    }
+    return new Offset(0.0, offset.dy);
   }
 }

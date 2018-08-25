@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -28,7 +26,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -36,9 +34,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: false,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
                   selected: true,
@@ -60,13 +58,13 @@ void main() {
               id: 2,
               label: 'child1',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlags.isSelected.index,
+              flags: SemanticsFlag.isSelected.index,
             ),
             new TestSemantics(
               id: 3,
               label: 'child2',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlags.isSelected.index,
+              flags: SemanticsFlag.isSelected.index,
             ),
           ],
         ),
@@ -82,7 +80,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -90,9 +88,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: true,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
                   selected: true,
@@ -110,7 +108,7 @@ void main() {
           id: 1,
           label: 'child1',
           rect: TestSemantics.fullScreen,
-          flags: SemanticsFlags.isSelected.index,
+          flags: SemanticsFlag.isSelected.index,
         )
       ],
     )));
@@ -124,7 +122,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -132,9 +130,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: false,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
                   selected: true,
@@ -156,13 +154,13 @@ void main() {
               id: 4,
               label: 'child1',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlags.isSelected.index,
+              flags: SemanticsFlag.isSelected.index,
             ),
             new TestSemantics(
               id: 3,
               label: 'child2',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
-              flags: SemanticsFlags.isSelected.index,
+              flags: SemanticsFlag.isSelected.index,
             ),
           ],
         ),

@@ -7,7 +7,6 @@ import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
 
-
 import 'common.dart' show throwToolExit;
 import 'context.dart';
 import 'platform.dart';
@@ -17,46 +16,41 @@ export 'package:file/file.dart';
 export 'package:file/local.dart';
 
 const String _kRecordingType = 'file';
-const FileSystem _kLocalFs = const LocalFileSystem();
+const FileSystem _kLocalFs = LocalFileSystem();
 
 /// Currently active implementation of the file system.
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
-FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
+FileSystem get fs => context[FileSystem] ?? _kLocalFs;
 
-/// Enables recording of file system activity to the specified base recording
-/// [location].
-///
-/// This sets the [active file system](fs) to one that records all invocation
-/// activity before delegating to a [LocalFileSystem].
+/// Gets a [FileSystem] that will record file system activity to the specified
+/// base recording [location].
 ///
 /// Activity will be recorded in a subdirectory of [location] named `"file"`.
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"file"` subdirectory.
-void enableRecordingFileSystem(String location) {
-  final FileSystem originalFileSystem = fs;
+RecordingFileSystem getRecordingFileSystem(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
   final RecordingFileSystem fileSystem = new RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
-    await fileSystem.recording.flush();
-    context.setVariable(FileSystem, originalFileSystem);
+    await fileSystem.recording.flush(
+      pendingResultTimeout: const Duration(seconds: 5),
+    );
   }, ShutdownStage.SERIALIZE_RECORDING);
-  context.setVariable(FileSystem, fileSystem);
+  return fileSystem;
 }
 
-/// Enables file system replay mode.
-///
-/// This sets the [active file system](fs) to one that replays invocation
-/// activity from a previously recorded set of invocations.
+/// Gets a [FileSystem] that replays invocation activity from a previously
+/// recorded set of invocations.
 ///
 /// [location] must represent a directory to which file system activity has
 /// been recorded (i.e. the result of having been previously passed to
-/// [enableRecordingFileSystem]), or a [ToolExit] will be thrown.
-void enableReplayFileSystem(String location) {
+/// [getRecordingFileSystem]), or a [ToolExit] will be thrown.
+ReplayFileSystem getReplayFileSystem(String location) {
   final Directory dir = getReplaySource(location, _kRecordingType);
-  context.setVariable(FileSystem, new ReplayFileSystem(recording: dir));
+  return new ReplayFileSystem(recording: dir);
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.
@@ -110,15 +104,15 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
 Directory getRecordingSink(String dirname, String basename) {
   final String location = _kLocalFs.path.join(dirname, basename);
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
-    case FileSystemEntityType.FILE:
-    case FileSystemEntityType.LINK:
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.link:
       throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
-    case FileSystemEntityType.DIRECTORY:
+    case FileSystemEntityType.directory:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
         throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
-    case FileSystemEntityType.NOT_FOUND:
+    case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
   }
   return _kLocalFs.directory(location);
@@ -140,7 +134,7 @@ Directory getReplaySource(String dirname, String basename) {
 
 /// Canonicalizes [path].
 ///
-/// This function implements the behaviour of `canonicalize` from
+/// This function implements the behavior of `canonicalize` from
 /// `package:path`. However, unlike the original, it does not change the ASCII
 /// case of the path. Changing the case can break hot reload in some situations,
 /// for an example see: https://github.com/flutter/flutter/issues/9539.

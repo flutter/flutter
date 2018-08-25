@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
+import 'debug_overflow_indicator.dart';
 import 'object.dart';
 
 /// How the child is inscribed into the available space.
@@ -262,19 +262,20 @@ typedef double _ChildSizingFunction(RenderBox child, double extent);
 ///  * [Flex], the widget equivalent.
 ///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
-                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
+                                        RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData>,
+                                        DebugOverflowIndicatorMixin {
   /// Creates a flex render object.
   ///
   /// By default, the flex layout is horizontal and children are aligned to the
   /// start of the main axis and the center of the cross axis.
   RenderFlex({
     List<RenderBox> children,
-    Axis direction: Axis.horizontal,
-    MainAxisSize mainAxisSize: MainAxisSize.max,
-    MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
-    CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
+    Axis direction = Axis.horizontal,
+    MainAxisSize mainAxisSize = MainAxisSize.max,
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
-    VerticalDirection verticalDirection: VerticalDirection.down,
+    VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
@@ -467,7 +468,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return true;
   }
 
-  /// Set during layout if overflow occurred on the main axis.
+  // Set during layout if overflow occurred on the main axis.
   double _overflow;
 
   @override
@@ -523,11 +524,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (flex == 0) {
           switch (_direction) {
               case Axis.horizontal:
-                mainSize = child.getMaxIntrinsicWidth(double.INFINITY);
+                mainSize = child.getMaxIntrinsicWidth(double.infinity);
                 crossSize = childSize(child, mainSize);
                 break;
               case Axis.vertical:
-                mainSize = child.getMaxIntrinsicHeight(double.INFINITY);
+                mainSize = child.getMaxIntrinsicHeight(double.infinity);
                 crossSize = childSize(child, mainSize);
                 break;
           }
@@ -638,10 +639,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.INFINITY;
+    final bool canFlex = maxMainSize < double.infinity;
 
     double crossSize = 0.0;
-    double allocatedSize = 0.0; // Sum of the sizes of the the non-flexible children.
+    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     RenderBox child = firstChild;
     RenderBox lastFlexChild;
     while (child != null) {
@@ -680,7 +681,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             if (node != null) {
               information.writeln('The nearest ancestor providing an unbounded width constraint is:');
               information.write('  ');
-              information.write(node.toStringShallow(joiner: '\n  '));
+              information.writeln(node.toStringShallow(joiner: '\n  '));
             }
             information.writeln('See also: https://flutter.io/layout/');
             addendum = information.toString();
@@ -747,16 +748,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double allocatedFlexSpace = 0.0;
     double maxBaselineDistance = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
-      final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.NAN;
+      final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
       child = firstChild;
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.INFINITY;
+          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.infinity;
           double minChildExtent;
           switch (_getFit(child)) {
             case FlexFit.tight:
-              assert(maxChildExtent < double.INFINITY);
+              assert(maxChildExtent < double.infinity);
               minChildExtent = maxChildExtent;
               break;
             case FlexFit.loose:
@@ -924,28 +925,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return defaultHitTestChildren(result, position: position);
   }
 
-  static const Color _black = const Color(0xBF000000);
-  static const Color _yellow = const Color(0xBFFFFF00);
-  static const double _kMarkerSize = 0.1;
-  static const TextStyle _debugMarkerTextStyle = const TextStyle(
-    color: const Color(0xFF900000),
-    fontSize: 7.5,
-    fontWeight: FontWeight.w800,
-  );
-  static Paint _debugMarkerPaint;
-  TextPainter _debugMarkerLabel;
-
-  bool _debugReportOverflow = true;
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    assert(() {
-      _debugReportOverflow = true;
-      return true;
-    }());
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_overflow <= 0.0) {
@@ -961,111 +940,35 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
     assert(() {
-      // In debug mode, if you have overflow, we highlight where the overflow
-      // would be by painting the edge of that area with a yellow and black
-      // striped bar.
-      _debugMarkerPaint ??= new Paint()
-        ..shader = new ui.Gradient.linear(
-          const Offset(0.0, 0.0),
-          const Offset(10.0, 10.0),
-          <Color>[_black, _yellow, _yellow, _black],
-          <double>[0.25, 0.25, 0.75, 0.75],
-          TileMode.repeated,
-        );
+      // Only set this if it's null to save work. It gets reset to null if the
+      // _direction changes.
+      final String debugOverflowHints =
+        'The overflowing $runtimeType has an orientation of $_direction.\n'
+        'The edge of the $runtimeType that is overflowing has been marked '
+        'in the rendering with a yellow and black striped pattern. This is '
+        'usually caused by the contents being too big for the $runtimeType. '
+        'Consider applying a flex factor (e.g. using an Expanded widget) to '
+        'force the children of the $runtimeType to fit within the available '
+        'space instead of being sized to their natural size.\n'
+        'This is considered an error condition because it indicates that there '
+        'is content that cannot be seen. If the content is legitimately bigger '
+        'than the available space, consider clipping it with a ClipRect widget '
+        'before putting it in the flex, or using a scrollable container rather '
+        'than a Flex, like a ListView.';
 
-      String pixels;
-      if (_overflow > 10.0) {
-        pixels = _overflow.toStringAsFixed(0);
-      } else if (_overflow > 1.0) {
-        pixels = _overflow.toStringAsFixed(1);
-      } else {
-        pixels = _overflow.toStringAsPrecision(3);
-      }
-
-      Rect markerRect;
-      String label;
-      Offset labelOffset;
-      double labelAngle;
-      switch (direction) {
+      // Simulate a child rect that overflows by the right amount. This child
+      // rect is never used for drawing, just for determining the overflow
+      // location and amount.
+      Rect overflowChildRect;
+      switch (_direction) {
         case Axis.horizontal:
-          if (textDirection != null) {
-            final Size markerSize = new Size(size.width * _kMarkerSize, size.height);
-            switch (textDirection) {
-              case TextDirection.rtl:
-                labelAngle = math.PI / 2.0;
-                markerRect = offset + new Offset(-size.width * _kMarkerSize, 0.0) & markerSize;
-                labelOffset = markerRect.centerLeft;
-                break;
-              case TextDirection.ltr:
-                labelAngle = -math.PI / 2.0;
-                markerRect = offset + new Offset(size.width * (1.0 - _kMarkerSize), 0.0) & markerSize;
-                labelOffset = markerRect.centerRight;
-                break;
-            }
-          } else {
-            markerRect = (offset & size).deflate(size.shortestSide * _kMarkerSize);
-            labelOffset = markerRect.center;
-            labelAngle = 0.0;
-          }
-          label = 'ROW OVERFLOWED BY $pixels PIXELS';
+          overflowChildRect = new Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
           break;
         case Axis.vertical:
-          markerRect = offset + new Offset(0.0, size.height * (1.0 - _kMarkerSize)) &
-                                new Size(size.width, size.height * _kMarkerSize);
-          label = 'COLUMN OVERFLOWED BY $pixels PIXELS';
+          overflowChildRect = new Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
           break;
       }
-      context.canvas.drawRect(markerRect, _debugMarkerPaint);
-
-      _debugMarkerLabel ??= new TextPainter()
-        ..textDirection = TextDirection.ltr; // This label is in English.
-      _debugMarkerLabel.text = new TextSpan( // This is a no-op if the label hasn't changed.
-        text: label,
-        style: _debugMarkerTextStyle,
-      );
-      _debugMarkerLabel.layout(); // This is a no-op if the label hasn't changed.
-
-      switch (direction) {
-        case Axis.horizontal:
-          context.canvas.save();
-          context.canvas.translate(labelOffset.dx, labelOffset.dy);
-          context.canvas.rotate(labelAngle);
-          _debugMarkerLabel.paint(context.canvas, new Offset(-_debugMarkerLabel.width / 2.0, 0.0));
-          context.canvas.restore();
-          break;
-        case Axis.vertical:
-          _debugMarkerLabel.paint(context.canvas, markerRect.bottomCenter - new Offset(_debugMarkerLabel.width / 2.0, 0.0));
-          break;
-      }
-
-      if (_debugReportOverflow) {
-        _debugReportOverflow = false;
-        FlutterError.reportError(new FlutterErrorDetailsForRendering(
-          exception: 'A ${describeEnum(direction)} $runtimeType overflowed by $pixels pixels.',
-          library: 'rendering library',
-          context: 'during layout',
-          renderObject: this,
-          informationCollector: (StringBuffer information) {
-            information.writeln(
-              'The edge of the $runtimeType that is overflowing has been marked in the rendering '
-              'with a yellow and black striped pattern. This is usually caused by the contents '
-              'being too big for the $runtimeType. Consider applying a flex factor (e.g. using '
-              'an Expanded widget) to force the children of the $runtimeType to fit within the '
-              'available space instead of being sized to their natural size.'
-            );
-            information.writeln(
-              'This is considered an error condition because it indicates that there is content '
-              'that cannot be seen. If the content is legitimately bigger than the available '
-              'space, consider clipping it with a ClipRect widget before putting it in the flex, '
-              'or using a scrollable container rather than a Flex, for example using ListView.'
-            );
-            information.writeln('The specific $runtimeType in question is:');
-            information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-            information.writeln('◢◤' * (FlutterError.wrapWidth ~/ 2));
-          }
-        ));
-      }
-
+      paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
       return true;
     }());
   }
@@ -1082,15 +985,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('direction', direction));
-    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
-    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
-    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
-    description.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<Axis>('direction', direction));
+    properties.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    properties.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
+    properties.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
+    properties.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
-
 }

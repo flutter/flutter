@@ -1,0 +1,6 @@
+# This file exists to simulate a project root. The testing library should stop
+# scanning for a `flutter_test_config.dart` file when it reaches this directory
+
+name: dummy
+
+# PUBSPEC CHECKSUM: 0000

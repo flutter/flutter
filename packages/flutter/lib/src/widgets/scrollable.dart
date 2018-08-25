@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -75,12 +74,14 @@ class Scrollable extends StatefulWidget {
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     Key key,
-    this.axisDirection: AxisDirection.down,
+    this.axisDirection = AxisDirection.down,
     this.controller,
     this.physics,
     @required this.viewportBuilder,
+    this.excludeFromSemantics = false,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
+       assert(excludeFromSemantics != null),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -147,6 +148,19 @@ class Scrollable extends StatefulWidget {
   ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
 
+  /// Whether the scroll actions introduced by this [Scrollable] are exposed
+  /// in the semantics tree.
+  ///
+  /// Text fields with an overflow are usually scrollable to make sure that the
+  /// user can get to the beginning/end of the entered text. However, these
+  /// scrolling actions are generally not exposed to the semantics layer.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureDetector.excludeFromSemantics], which is used to accomplish the
+  ///    exclusion.
+  final bool excludeFromSemantics;
+
   /// The axis along which the scroll view scrolls.
   ///
   /// Determined by the [axisDirection].
@@ -156,10 +170,10 @@ class Scrollable extends StatefulWidget {
   ScrollableState createState() => new ScrollableState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -177,9 +191,9 @@ class Scrollable extends StatefulWidget {
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
   static Future<Null> ensureVisible(BuildContext context, {
-    double alignment: 0.0,
-    Duration duration: Duration.ZERO,
-    Curve curve: Curves.ease,
+    double alignment = 0.0,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
   }) {
     final List<Future<Null>> futures = <Future<Null>>[];
 
@@ -195,11 +209,11 @@ class Scrollable extends StatefulWidget {
       scrollable = Scrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.ZERO)
+    if (futures.isEmpty || duration == Duration.zero)
       return new Future<Null>.value();
     if (futures.length == 1)
       return futures.single;
-    return Future.wait<Null>(futures);
+    return Future.wait<Null>(futures).then((List<Null> _) => null);
   }
 }
 
@@ -260,7 +274,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
       controller?.detach(oldPosition);
-      oldPosition.removeListener(_sendSemanticsScrollEvent);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
@@ -269,27 +282,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
       ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
-    _position.addListener(_sendSemanticsScrollEvent);
-
     assert(position != null);
     controller?.attach(position);
-  }
-
-  bool _semanticsScrollEventScheduled = false;
-
-  void _sendSemanticsScrollEvent() {
-    if (_semanticsScrollEventScheduled)
-      return;
-    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-      _gestureDetectorKey.currentState?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent(
-        axis: position.axis,
-        pixels: position.pixels,
-        minScrollExtent: position.minScrollExtent,
-        maxScrollExtent: position.maxScrollExtent,
-      ));
-      _semanticsScrollEventScheduled = false;
-    });
-    _semanticsScrollEventScheduled = true;
   }
 
   @override
@@ -332,7 +326,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
 
-  // SEMANTICS ACTIONS
+  // SEMANTICS
+
+  final GlobalKey _scrollSemanticsKey = new GlobalKey();
 
   @override
   @protected
@@ -440,8 +436,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   void _handleDragStart(DragStartDetails details) {
+    // It's possible for _hold to become null between _handleDragDown and
+    // _handleDragStart, for example if some user code calls jumpTo or otherwise
+    // triggers a new activity to begin.
     assert(_drag == null);
-    assert(_hold != null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
     assert(_hold == null);
@@ -485,27 +483,163 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    final Widget result = new RawGestureDetector(
+    Widget result = new RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,
-      child: new IgnorePointer(
-        key: _ignorePointerKey,
-        ignoring: _shouldIgnorePointer,
-        ignoringSemantics: false,
-        child: new _ScrollableScope(
-          scrollable: this,
-          position: position,
-          child: widget.viewportBuilder(context, position),
+      excludeFromSemantics: widget.excludeFromSemantics,
+      child: new Semantics(
+        explicitChildNodes: !widget.excludeFromSemantics,
+        child: new IgnorePointer(
+          key: _ignorePointerKey,
+          ignoring: _shouldIgnorePointer,
+          ignoringSemantics: false,
+          child: new _ScrollableScope(
+            scrollable: this,
+            position: position,
+            child: widget.viewportBuilder(context, position),
+          ),
         ),
       ),
     );
+
+    if (!widget.excludeFromSemantics) {
+      result = new _ScrollSemantics(
+        key: _scrollSemanticsKey,
+        child: result,
+        position: position,
+        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
+      );
+    }
+
     return _configuration.buildViewportChrome(context, result, widget.axisDirection);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ScrollPosition>('position', position));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<ScrollPosition>('position', position));
+  }
+}
+
+/// With [_ScrollSemantics] certain child [SemanticsNode]s can be
+/// excluded from the scrollable area for semantics purposes.
+///
+/// Nodes, that are to be excluded, have to be tagged with
+/// [RenderViewport.excludeFromScrolling] and the [RenderAbstractViewport] in
+/// use has to add the [RenderViewport.useTwoPaneSemantics] tag to its
+/// [SemanticsConfiguration] by overriding
+/// [RenderObject.describeSemanticsConfiguration].
+///
+/// If the tag [RenderViewport.useTwoPaneSemantics] is present on the viewport,
+/// two semantics nodes will be used to represent the [Scrollable]: The outer
+/// node will contain all children, that are excluded from scrolling. The inner
+/// node, which is annotated with the scrolling actions, will house the
+/// scrollable children.
+class _ScrollSemantics extends SingleChildRenderObjectWidget {
+  const _ScrollSemantics({
+    Key key,
+    @required this.position,
+    @required this.allowImplicitScrolling,
+    Widget child
+  }) : assert(position != null), super(key: key, child: child);
+
+  final ScrollPosition position;
+  final bool allowImplicitScrolling;
+
+  @override
+  _RenderScrollSemantics createRenderObject(BuildContext context) {
+    return new _RenderScrollSemantics(
+      position: position,
+      allowImplicitScrolling: allowImplicitScrolling,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
+    renderObject
+      ..allowImplicitScrolling = allowImplicitScrolling
+      ..position = position;
+  }
+}
+
+class _RenderScrollSemantics extends RenderProxyBox {
+  _RenderScrollSemantics({
+    @required ScrollPosition position,
+    @required bool allowImplicitScrolling,
+    RenderBox child,
+  }) : _position = position,
+       _allowImplicitScrolling = allowImplicitScrolling,
+       assert(position != null), super(child) {
+    position.addListener(markNeedsSemanticsUpdate);
+  }
+
+  /// Whether this render object is excluded from the semantic tree.
+  ScrollPosition get position => _position;
+  ScrollPosition _position;
+  set position(ScrollPosition value) {
+    assert(value != null);
+    if (value == _position)
+      return;
+    _position.removeListener(markNeedsSemanticsUpdate);
+    _position = value;
+    _position.addListener(markNeedsSemanticsUpdate);
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether this node can be scrolled implicitly.
+  bool get allowImplicitScrolling => _allowImplicitScrolling;
+  bool _allowImplicitScrolling;
+  set allowImplicitScrolling(bool value) {
+    if (value == _allowImplicitScrolling)
+      return;
+    _allowImplicitScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    if (position.haveDimensions) {
+      config
+          ..hasImplicitScrolling = allowImplicitScrolling
+          ..scrollPosition = _position.pixels
+          ..scrollExtentMax = _position.maxScrollExtent
+          ..scrollExtentMin = _position.minScrollExtent;
+    }
+  }
+
+  SemanticsNode _innerNode;
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
+      super.assembleSemanticsNode(node, config, children);
+      return;
+    }
+
+    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
+    _innerNode
+      ..isMergedIntoParent = node.isPartOfNodeMerging
+      ..rect = Offset.zero & node.rect.size;
+
+    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (SemanticsNode child in children) {
+      assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
+      if (child.isTagged(RenderViewport.excludeFromScrolling))
+        excluded.add(child);
+      else
+        included.add(child);
+    }
+    node.updateWith(config: null, childrenInInversePaintOrder: excluded);
+    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
+  }
+
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _innerNode = null;
   }
 }

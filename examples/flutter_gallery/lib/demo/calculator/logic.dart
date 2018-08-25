@@ -246,7 +246,7 @@ class CalcExpression {
   /// Append a minus sign to the current expression and return a new expression
   /// representing the result. Returns null to indicate that it is not legal
   /// to append a minus sign in the current state. Depending on the current
-  /// state the minus sign will be interpretted as either a leading negative
+  /// state the minus sign will be interpreted as either a leading negative
   /// sign or a subtraction operation.
   CalcExpression appendMinus() {
     switch (state) {
@@ -284,7 +284,7 @@ class CalcExpression {
     final List<ExpressionToken> list = _list.toList();
     // We obey order-of-operations by computing the sum of the 'terms',
     // where a "term" is defined to be a sequence of numbers separated by
-    // multiplcation or division symbols.
+    // multiplication or division symbols.
     num currentTermValue = removeNextTerm(list);
     while (list.isNotEmpty) {
       final OperationToken opToken = list.removeAt(0);

@@ -12,7 +12,7 @@ import 'typography.dart';
 export 'theme_data.dart' show Brightness, ThemeData;
 
 /// The duration over which theme changes animate by default.
-const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
+const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 
 /// Applies a theme to descendant widgets.
 ///
@@ -39,7 +39,7 @@ class Theme extends StatelessWidget {
   const Theme({
     Key key,
     @required this.data,
-    this.isMaterialAppTheme: false,
+    this.isMaterialAppTheme = false,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
@@ -60,6 +60,8 @@ class Theme extends StatelessWidget {
   final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
@@ -121,7 +123,7 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
-  static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
+  static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
     final _InheritedTheme inheritedTheme =
         context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
@@ -148,9 +150,9 @@ class Theme extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ThemeData>('data', data, showName: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<ThemeData>('data', data, showName: false));
   }
 }
 
@@ -204,9 +206,9 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   const AnimatedTheme({
     Key key,
     @required this.data,
-    this.isMaterialAppTheme: false,
-    Curve curve: Curves.linear,
-    Duration duration: kThemeAnimationDuration,
+    this.isMaterialAppTheme = false,
+    Curve curve = Curves.linear,
+    Duration duration = kThemeAnimationDuration,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
@@ -219,6 +221,8 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

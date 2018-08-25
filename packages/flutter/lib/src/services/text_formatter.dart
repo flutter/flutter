@@ -95,7 +95,7 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
   /// The [blacklistedPattern] must not be null.
   BlacklistingTextInputFormatter(
     this.blacklistedPattern, {
-    this.replacementString: '',
+    this.replacementString = '',
   }) : assert(blacklistedPattern != null);
 
   /// A [Pattern] to match and replace incoming [TextEditingValue]s.
@@ -155,7 +155,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
   /// which is the letter "o" followed by a composed diaeresis "¨", or it can
   /// be represented as '\u{00F6}', which is the Unicode scalar value "LATIN
-  /// SMALL LETTER O WITH DIAERESIS".  In the first case, the text field will
+  /// SMALL LETTER O WITH DIAERESIS". In the first case, the text field will
   /// count two characters, and the second case will be counted as one
   /// character, even though the user can see no difference in the input.
   ///
@@ -265,10 +265,17 @@ TextEditingValue _selectionAwareTextManipulation(
       value.text.substring(selectionEndIndex)
     );
     manipulatedText = beforeSelection + inSelection + afterSelection;
-    manipulatedSelection = value.selection.copyWith(
-      baseOffset: beforeSelection.length,
-      extentOffset: beforeSelection.length + inSelection.length,
-    );
+    if (value.selection.baseOffset > value.selection.extentOffset) {
+      manipulatedSelection = value.selection.copyWith(
+        baseOffset: beforeSelection.length + inSelection.length,
+        extentOffset: beforeSelection.length,
+      );
+    } else {
+      manipulatedSelection = value.selection.copyWith(
+        baseOffset: beforeSelection.length,
+        extentOffset: beforeSelection.length + inSelection.length,
+      );
+    }
   }
   return new TextEditingValue(
     text: manipulatedText,

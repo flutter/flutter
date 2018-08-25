@@ -7,15 +7,14 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'sections.dart';
 import 'widgets.dart';
 
-const Color _kAppBackgroundColor = const Color(0xFF353662);
-const Duration _kScrollDuration = const Duration(milliseconds: 400);
+const Color _kAppBackgroundColor = Color(0xFF353662);
+const Duration _kScrollDuration = Duration(milliseconds: 400);
 const Curve _kScrollCurve = Curves.fastOutSlowIn;
 
 // This app's contents start out at _kHeadingMaxHeight and they function like
@@ -78,7 +77,7 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   const _StatusBarPaddingSliver({
     Key key,
     @required this.maxHeight,
-    this.scrollFactor: 5.0,
+    this.scrollFactor = 5.0,
   }) : assert(maxHeight != null && maxHeight >= 0.0),
        assert(scrollFactor != null && scrollFactor >= 1.0),
        super(key: key);
@@ -200,7 +199,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
     // When tCollapsed > 0, the indicators move closer together
     //final double rowIndicatorWidth = 48.0 + (1.0 - tCollapsed) * (rowTitleWidth - 48.0);
-    final double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
+    const double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
     final double rowIndicatorWidth = paddedSectionIndicatorWidth +
       (1.0 - tCollapsed) * (rowTitleWidth - paddedSectionIndicatorWidth);
     double rowIndicatorX = (size.width - rowIndicatorWidth) / 2.0 - selectedIndex * rowIndicatorWidth;
@@ -216,12 +215,8 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
-        // Add a small horizontal gap between the cards.
-        final Rect insetRect = new Rect.fromLTWH(
-          cardRect.left + 0.5, cardRect.top, cardRect.width - 1.0, cardRect.height
-        );
-        layoutChild(cardId, new BoxConstraints.tight(insetRect.size));
-        positionChild(cardId, insetRect.topLeft);
+        layoutChild(cardId, new BoxConstraints.tight(cardRect.size));
+        positionChild(cardId, cardRect.topLeft);
       }
 
       // Layout the title for index.
@@ -270,7 +265,7 @@ class _AllSectionsView extends AnimatedWidget {
     this.minHeight,
     this.midHeight,
     this.maxHeight,
-    this.sectionCards: const <Widget>[],
+    this.sectionCards = const <Widget>[],
   }) : assert(sections != null),
        assert(sectionCards != null),
        assert(sectionCards.length == sections.length),
@@ -379,7 +374,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 
   @override
   _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new _SnappingScrollPhysics(parent: buildParent(ancestor),  midScrollOffset: midScrollOffset);
+    return new _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
@@ -402,7 +397,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // If the simulation is headed up towards midScrollOffset but will not reach it,
       // then snap it there. Similarly if the simulation is headed down past
       // midScrollOffset but will not reach zero, then snap it to zero.
-      final double simulationEnd = simulation.x(double.INFINITY);
+      final double simulationEnd = simulation.x(double.infinity);
       if (simulationEnd >= midScrollOffset)
         return simulation;
       if (dragVelocity > 0.0)
@@ -411,11 +406,11 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     } else {
       // The user ended the drag with little or no velocity. If they
-      // didn't leave the the offset above midScrollOffset, then
+      // didn't leave the offset above midScrollOffset, then
       // snap to midScrollOffset if they're more than halfway there,
       // otherwise snap to zero.
       final double snapThreshold = midScrollOffset / 2.0;
-      if (offset >=  snapThreshold && offset < midScrollOffset)
+      if (offset >= snapThreshold && offset < midScrollOffset)
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
       if (offset > 0.0 && offset < snapThreshold)
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);
@@ -455,7 +450,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     if (_scrollController.offset >= midScrollOffset)
       _scrollController.animateTo(0.0, curve: _kScrollCurve, duration: _kScrollDuration);
     else
-      Navigator.of(context).maybePop();
+      Navigator.maybePop(context);
   }
 
   // Only enable paging for the heading when the user has scrolled to midScrollOffset.
@@ -549,7 +544,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final double screenHeight = mediaQueryData.size.height;
     final double appBarMaxHeight = screenHeight - statusBarHeight;
 
-    // The scrolloffset that reveals the appBarMidHeight appbar.
+    // The scroll offset that reveals the appBarMidHeight appbar.
     final double appBarMidScrollOffset = statusBarHeight + appBarMaxHeight - _kAppBarMidHeight;
 
     return new SizedBox.expand(
@@ -614,12 +609,16 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             left: 0.0,
             child: new IconTheme(
               data: const IconThemeData(color: Colors.white),
-              child: new IconButton(
-                icon: const BackButtonIcon(),
-                tooltip: 'Back',
-                onPressed: () {
-                  _handleBackButton(appBarMidScrollOffset);
-                }
+              child: new SafeArea(
+                top: false,
+                bottom: false,
+                child: new IconButton(
+                  icon: const BackButtonIcon(),
+                  tooltip: 'Back',
+                  onPressed: () {
+                    _handleBackButton(appBarMidScrollOffset);
+                  }
+                ),
               ),
             ),
           ),

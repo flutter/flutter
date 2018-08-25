@@ -13,7 +13,7 @@ enum GestureDisposition {
   /// This gesture was accepted as the interpretation of the user's input.
   accepted,
 
-  /// This gesture was rejected as the interpretation  of the user's input.
+  /// This gesture was rejected as the interpretation of the user's input.
   rejected,
 }
 
@@ -60,7 +60,7 @@ class _GestureArena {
   bool hasPendingSweep = false;
 
   /// If a gesture attempts to win while the arena is still open, it becomes the
-  /// "eager winnner". We look for an eager winner when closing the arena to new
+  /// "eager winner". We look for an eager winner when closing the arena to new
   /// participants, and if there is one, we resolve the arena in its favor at
   /// that time.
   GestureArenaMember eagerWinner;
@@ -92,7 +92,7 @@ class _GestureArena {
   }
 }
 
-/// The first member to accept or the last member to not to reject wins.
+/// The first member to accept or the last member to not reject wins.
 ///
 /// See [https://flutter.io/gestures/#gesture-disambiguation] for more
 /// information about the role this class plays in the gesture system.
@@ -119,7 +119,7 @@ class GestureArenaManager {
   void close(int pointer) {
     final _GestureArena state = _arenas[pointer];
     if (state == null)
-      return;  // This arena either never existed or has been resolved.
+      return; // This arena either never existed or has been resolved.
     state.isOpen = false;
     assert(_debugLogDiagnostic(pointer, 'Closing', state));
     _tryToResolveArena(pointer, state);
@@ -141,12 +141,12 @@ class GestureArenaManager {
   void sweep(int pointer) {
     final _GestureArena state = _arenas[pointer];
     if (state == null)
-      return;  // This arena either never existed or has been resolved.
+      return; // This arena either never existed or has been resolved.
     assert(!state.isOpen);
     if (state.isHeld) {
       state.hasPendingSweep = true;
       assert(_debugLogDiagnostic(pointer, 'Delaying sweep', state));
-      return;  // This arena is being held for a long-lived member.
+      return; // This arena is being held for a long-lived member.
     }
     assert(_debugLogDiagnostic(pointer, 'Sweeping', state));
     _arenas.remove(pointer);
@@ -175,7 +175,7 @@ class GestureArenaManager {
   void hold(int pointer) {
     final _GestureArena state = _arenas[pointer];
     if (state == null)
-      return;  // This arena either never existed or has been resolved.
+      return; // This arena either never existed or has been resolved.
     state.isHeld = true;
     assert(_debugLogDiagnostic(pointer, 'Holding', state));
   }
@@ -192,7 +192,7 @@ class GestureArenaManager {
   void release(int pointer) {
     final _GestureArena state = _arenas[pointer];
     if (state == null)
-      return;  // This arena either never existed or has been resolved.
+      return; // This arena either never existed or has been resolved.
     state.isHeld = false;
     assert(_debugLogDiagnostic(pointer, 'Releasing', state));
     if (state.hasPendingSweep)
@@ -205,7 +205,7 @@ class GestureArenaManager {
   void _resolve(int pointer, GestureArenaMember member, GestureDisposition disposition) {
     final _GestureArena state = _arenas[pointer];
     if (state == null)
-      return;  // This arena has already resolved.
+      return; // This arena has already resolved.
     assert(_debugLogDiagnostic(pointer, '${ disposition == GestureDisposition.accepted ? "Accepting" : "Rejecting" }: $member'));
     assert(state.members.contains(member));
     if (disposition == GestureDisposition.rejected) {
@@ -240,7 +240,7 @@ class GestureArenaManager {
 
   void _resolveByDefault(int pointer, _GestureArena state) {
     if (!_arenas.containsKey(pointer))
-      return;  // Already resolved earlier.
+      return; // Already resolved earlier.
     assert(_arenas[pointer] == state);
     assert(!state.isOpen);
     final List<GestureArenaMember> members = state.members;

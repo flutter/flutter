@@ -11,19 +11,19 @@ void main() {
     await tester.pumpWidget(new MaterialApp( // Creates the outer Localizations widget.
       home: new ListView(
         children: <Widget>[
-          const LocalizationTracker(key: const ValueKey<String>('outer')),
+          const LocalizationTracker(key: ValueKey<String>('outer')),
           new Localizations(
             locale: const Locale('zh', 'CN'),
             delegates: GlobalMaterialLocalizations.delegates,
-            child: const LocalizationTracker(key: const ValueKey<String>('inner')),
+            child: const LocalizationTracker(key: ValueKey<String>('inner')),
           ),
         ],
       ),
     ));
 
-    final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer')));
+    final LocalizationTrackerState outerTracker = tester.state(find.byKey(const ValueKey<String>('outer'), skipOffstage: false));
     expect(outerTracker.captionFontSize, 12.0);
-    final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner')));
+    final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner'), skipOffstage: false));
     expect(innerTracker.captionFontSize, 13.0);
   });
 
@@ -32,8 +32,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         supportedLocales: const <Locale>[
-          const Locale('en', 'US'),
-          const Locale('es', 'ES'),
+          Locale('en', 'US'),
+          Locale('es', 'ES'),
         ],
         localizationsDelegates: <LocalizationsDelegate<dynamic>>[
           new _DummyLocalizationsDelegate(),
@@ -46,6 +46,28 @@ void main() {
     await tester.binding.setLocale('es', 'US');
     await tester.pump();
     await tester.pumpWidget(new Container());
+  });
+
+  testWidgets('Locale without coutryCode', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/16782
+    await tester.pumpWidget(
+      new MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+        ],
+        supportedLocales: const <Locale>[
+          Locale('es', 'ES'),
+          Locale('zh'),
+        ],
+        home: new Container(),
+      )
+    );
+
+    await tester.binding.setLocale('zh', null);
+    await tester.pump();
+    await tester.binding.setLocale('es', 'US');
+    await tester.pump();
+
   });
 }
 

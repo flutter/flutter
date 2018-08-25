@@ -30,10 +30,10 @@ class _DebugSize extends Size {
 ///
 /// The constraints themselves must satisfy these relations:
 ///
-/// * 0.0 <= [minWidth] <= [maxWidth] <= [double.INFINITY]
-/// * 0.0 <= [minHeight] <= [maxHeight] <= [double.INFINITY]
+/// * 0.0 <= [minWidth] <= [maxWidth] <= [double.infinity]
+/// * 0.0 <= [minHeight] <= [maxHeight] <= [double.infinity]
 ///
-/// [double.INFINITY] is a legal value for each constraint.
+/// [double.infinity] is a legal value for each constraint.
 ///
 /// ## The box layout model
 ///
@@ -75,6 +75,10 @@ class _DebugSize extends Size {
 /// _expanding_ if it is tightly infinite (its minimum and maximum constraints
 /// are both infinite). See: [new BoxConstraints.expand].
 ///
+/// An axis whose _minimum_ constraint is infinite is just said to be _infinite_
+/// (since by definition the maximum constraint must also be infinite in that
+/// case). See: [hasInfiniteWidth], [hasInfiniteHeight].
+///
 /// A size is _constrained_ when it satisfies a [BoxConstraints] description.
 /// See: [constrain], [constrainWidth], [constrainHeight],
 /// [constrainDimensions], [constrainSizeAndAttemptToPreserveAspectRatio],
@@ -82,10 +86,10 @@ class _DebugSize extends Size {
 class BoxConstraints extends Constraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints({
-    this.minWidth: 0.0,
-    this.maxWidth: double.INFINITY,
-    this.minHeight: 0.0,
-    this.maxHeight: double.INFINITY
+    this.minWidth = 0.0,
+    this.maxWidth = double.infinity,
+    this.minHeight = 0.0,
+    this.maxHeight = double.infinity
   });
 
   /// The minimum width that satisfies the constraints.
@@ -93,7 +97,7 @@ class BoxConstraints extends Constraints {
 
   /// The maximum width that satisfies the constraints.
   ///
-  /// Might be [double.INFINITY].
+  /// Might be [double.infinity].
   final double maxWidth;
 
   /// The minimum height that satisfies the constraints.
@@ -101,7 +105,7 @@ class BoxConstraints extends Constraints {
 
   /// The maximum height that satisfies the constraints.
   ///
-  /// Might be [double.INFINITY].
+  /// Might be [double.infinity].
   final double maxHeight;
 
   /// Creates box constraints that is respected only by the given size.
@@ -122,9 +126,9 @@ class BoxConstraints extends Constraints {
     double width,
     double height
   }): minWidth = width != null ? width : 0.0,
-      maxWidth = width != null ? width : double.INFINITY,
+      maxWidth = width != null ? width : double.infinity,
       minHeight = height != null ? height : 0.0,
-      maxHeight = height != null ? height : double.INFINITY;
+      maxHeight = height != null ? height : double.infinity;
 
   /// Creates box constraints that require the given width or height, except if
   /// they are infinite.
@@ -134,12 +138,12 @@ class BoxConstraints extends Constraints {
   ///  * [new BoxConstraints.tightFor], which is similar but instead of being
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
-    double width: double.INFINITY,
-    double height: double.INFINITY
-  }): minWidth = width != double.INFINITY ? width : 0.0,
-      maxWidth = width != double.INFINITY ? width : double.INFINITY,
-      minHeight = height != double.INFINITY ? height : 0.0,
-      maxHeight = height != double.INFINITY ? height : double.INFINITY;
+    double width = double.infinity,
+    double height = double.infinity
+  }): minWidth = width != double.infinity ? width : 0.0,
+      maxWidth = width != double.infinity ? width : double.infinity,
+      minHeight = height != double.infinity ? height : 0.0,
+      maxHeight = height != double.infinity ? height : double.infinity;
 
   /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
@@ -155,10 +159,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.expand({
     double width,
     double height
-  }): minWidth = width != null ? width : double.INFINITY,
-      maxWidth = width != null ? width : double.INFINITY,
-      minHeight = height != null ? height : double.INFINITY,
-      maxHeight = height != null ? height : double.INFINITY;
+  }): minWidth = width != null ? width : double.infinity,
+      maxWidth = width != null ? width : double.infinity,
+      minHeight = height != null ? height : double.infinity,
+      maxHeight = height != null ? height : double.infinity;
 
   /// Creates a copy of this box constraints but with the given fields replaced with the new values.
   BoxConstraints copyWith({
@@ -243,14 +247,14 @@ class BoxConstraints extends Constraints {
 
   /// Returns the width that both satisfies the constraints and is as close as
   /// possible to the given width.
-  double constrainWidth([double width = double.INFINITY]) {
+  double constrainWidth([double width = double.infinity]) {
     assert(debugAssertIsValid());
     return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
-  double constrainHeight([double height = double.INFINITY]) {
+  double constrainHeight([double height = double.infinity]) {
     assert(debugAssertIsValid());
     return height.clamp(minHeight, maxHeight);
   }
@@ -329,7 +333,7 @@ class BoxConstraints extends Constraints {
     return result;
   }
 
-  /// The biggest size that satisifes the constraints.
+  /// The biggest size that satisfies the constraints.
   Size get biggest => new Size(constrainWidth(), constrainHeight());
 
   /// The smallest size that satisfies the constraints.
@@ -341,15 +345,57 @@ class BoxConstraints extends Constraints {
   /// Whether there is exactly one height value that satisfies the constraints.
   bool get hasTightHeight => minHeight >= maxHeight;
 
-  /// Whether there is exactly one size that satifies the constraints.
+  /// Whether there is exactly one size that satisfies the constraints.
   @override
   bool get isTight => hasTightWidth && hasTightHeight;
 
   /// Whether there is an upper bound on the maximum width.
-  bool get hasBoundedWidth => maxWidth < double.INFINITY;
+  ///
+  /// See also:
+  ///
+  ///  * [hasBoundedHeight], the equivalent for the vertical axis.
+  ///  * [hasInfiniteWidth], which describes whether the minimum width
+  ///    constraint is infinite.
+  bool get hasBoundedWidth => maxWidth < double.infinity;
 
   /// Whether there is an upper bound on the maximum height.
-  bool get hasBoundedHeight => maxHeight < double.INFINITY;
+  ///
+  /// See also:
+  ///
+  ///  * [hasBoundedWidth], the equivalent for the horizontal axis.
+  ///  * [hasInfiniteHeight], which describes whether the minimum height
+  ///    constraint is infinite.
+  bool get hasBoundedHeight => maxHeight < double.infinity;
+
+  /// Whether the width constraint is infinite.
+  ///
+  /// Such a constraint is used to indicate that a box should grow as large as
+  /// some other constraint (in this case, horizontally). If constraints are
+  /// infinite, then they must have other (non-infinite) constraints [enforce]d
+  /// upon them, or must be [tighten]ed, before they can be used to derive a
+  /// [Size] for a [RenderBox.size].
+  ///
+  /// See also:
+  ///
+  ///  * [hasInfiniteHeight], the equivalent for the vertical axis.
+  ///  * [hasBoundedWidth], which describes whether the maximum width
+  ///    constraint is finite.
+  bool get hasInfiniteWidth => minWidth >= double.infinity;
+
+  /// Whether the height constraint is infinite.
+  ///
+  /// Such a constraint is used to indicate that a box should grow as large as
+  /// some other constraint (in this case, vertically). If constraints are
+  /// infinite, then they must have other (non-infinite) constraints [enforce]d
+  /// upon them, or must be [tighten]ed, before they can be used to derive a
+  /// [Size] for a [RenderBox.size].
+  ///
+  /// See also:
+  ///
+  ///  * [hasInfiniteWidth], the equivalent for the horizontal axis.
+  ///  * [hasBoundedHeight], which describes whether the maximum height
+  ///    constraint is finite.
+  bool get hasInfiniteHeight => minHeight >= double.infinity;
 
   /// Whether the given size satisfies the constraints.
   bool isSatisfiedBy(Size size) {
@@ -402,7 +448,20 @@ class BoxConstraints extends Constraints {
   ///
   /// If either is null, this function interpolates from a [BoxConstraints]
   /// object whose fields are all set to 0.0.
+  ///
+  /// The `t` argument represents position on the timeline, with 0.0 meaning
+  /// that the interpolation has not started, returning `a` (or something
+  /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+  /// returning `b` (or something equivalent to `b`), and values in between
+  /// meaning that the interpolation is at the relevant point on the timeline
+  /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+  /// 1.0, so negative values and values greater than 1.0 are valid (and can
+  /// easily be generated by curves such as [Curves.elasticInOut]).
+  ///
+  /// Values for `t` are usually obtained from an [Animation<double>], such as
+  /// an [AnimationController].
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
+    assert(t != null);
     if (a == null && b == null)
       return null;
     if (a == null)
@@ -411,15 +470,15 @@ class BoxConstraints extends Constraints {
       return a * (1.0 - t);
     assert(a.debugAssertIsValid());
     assert(b.debugAssertIsValid());
-    assert((a.minWidth.isFinite && b.minWidth.isFinite) || (a.minWidth == double.INFINITY && b.minWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
-    assert((a.maxWidth.isFinite && b.maxWidth.isFinite) || (a.maxWidth == double.INFINITY && b.maxWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
-    assert((a.minHeight.isFinite && b.minHeight.isFinite) || (a.minHeight == double.INFINITY && b.minHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
-    assert((a.maxHeight.isFinite && b.maxHeight.isFinite) || (a.maxHeight == double.INFINITY && b.maxHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.minWidth.isFinite && b.minWidth.isFinite) || (a.minWidth == double.infinity && b.minWidth == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxWidth.isFinite && b.maxWidth.isFinite) || (a.maxWidth == double.infinity && b.maxWidth == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.minHeight.isFinite && b.minHeight.isFinite) || (a.minHeight == double.infinity && b.minHeight == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxHeight.isFinite && b.maxHeight.isFinite) || (a.maxHeight == double.infinity && b.maxHeight == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
     return new BoxConstraints(
-      minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t) : double.INFINITY,
-      maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t) : double.INFINITY,
-      minHeight: a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t) : double.INFINITY,
-      maxHeight: a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t) : double.INFINITY,
+      minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t) : double.infinity,
+      maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t) : double.infinity,
+      minHeight: a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t) : double.infinity,
+      maxHeight: a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t) : double.infinity,
     );
   }
 
@@ -444,7 +503,7 @@ class BoxConstraints extends Constraints {
 
   @override
   bool debugAssertIsValid({
-    bool isAppliedConstraint: false,
+    bool isAppliedConstraint = false,
     InformationCollector informationCollector,
   }) {
     assert(() {
@@ -544,10 +603,10 @@ class BoxConstraints extends Constraints {
   @override
   String toString() {
     final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
-    if (minWidth == double.INFINITY && minHeight == double.INFINITY)
+    if (minWidth == double.infinity && minHeight == double.infinity)
       return 'BoxConstraints(biggest$annotation)';
-    if (minWidth == 0 && maxWidth == double.INFINITY &&
-        minHeight == 0 && maxHeight == double.INFINITY)
+    if (minWidth == 0 && maxWidth == double.infinity &&
+        minHeight == 0 && maxHeight == double.infinity)
       return 'BoxConstraints(unconstrained$annotation)';
     String describe(double min, double max, String dim) {
       if (min == max)
@@ -617,7 +676,7 @@ class _IntrinsicDimensionsCacheEntry {
   int get hashCode => hashValues(dimension, argument);
 }
 
-/// A render object in a 2D cartesian coordinate system.
+/// A render object in a 2D Cartesian coordinate system.
 ///
 /// The [size] of each box is expressed as a width and a height. Each box has
 /// its own coordinate system in which its upper left corner is placed at (0,
@@ -640,7 +699,7 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// One would implement a new [RenderBox] subclass to describe a new layout
 /// model, new paint model, new hit-testing model, or new semantics model, while
-/// remaining in the cartesian space defined by the [RenderBox] protocol.
+/// remaining in the Cartesian space defined by the [RenderBox] protocol.
 ///
 /// To create a new protocol, consider subclassing [RenderObject] instead.
 ///
@@ -735,7 +794,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// Children can have additional data owned by the parent but stored on the
 /// child using the [parentData] field. The class used for that data must
 /// inherit from [ParentData]. The [setupParentData] method is used to
-/// initialise the [parentData] field of a child when the child is attached.
+/// initialize the [parentData] field of a child when the child is attached.
 ///
 /// By convention, [RenderBox] objects that have [RenderBox] children use the
 /// [BoxParentData] class, which has a [BoxParentData.offset] field to store the
@@ -1076,7 +1135,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The height argument to getMinIntrinsicWidth was null.\n'
           'The argument to getMinIntrinsicWidth must not be negative or null. '
-          'If you do not have a specific height in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific height in mind, then pass double.infinity instead.'
         );
       }
       if (height < 0.0) {
@@ -1215,7 +1274,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The height argument to getMaxIntrinsicWidth was null.\n'
           'The argument to getMaxIntrinsicWidth must not be negative or null. '
-          'If you do not have a specific height in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific height in mind, then pass double.infinity instead.'
         );
       }
       if (height < 0.0) {
@@ -1291,7 +1350,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The width argument to getMinIntrinsicHeight was null.\n'
           'The argument to getMinIntrinsicHeight must not be negative or null. '
-          'If you do not have a specific width in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific width in mind, then pass double.infinity instead.'
         );
       }
       if (width < 0.0) {
@@ -1364,7 +1423,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The width argument to getMaxIntrinsicHeight was null.\n'
           'The argument to getMaxIntrinsicHeight must not be negative or null. '
-          'If you do not have a specific width in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific width in mind, then pass double.infinity instead.'
         );
       }
       if (width < 0.0) {
@@ -1427,10 +1486,10 @@ abstract class RenderBox extends RenderObject {
   ///
   /// The size of a box should be set only during the box's [performLayout] or
   /// [performResize] functions. If you wish to change the size of a box outside
-  /// of those functins, call [markNeedsLayout] instead to schedule a layout of
+  /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
   Size get size {
-    assert(hasSize);
+    assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
       if (_size is _DebugSize) {
         final _DebugSize _size = this._size;
@@ -1451,10 +1510,10 @@ abstract class RenderBox extends RenderObject {
     return _size;
   }
   Size _size;
-  @protected
   /// Setting the size, in checked mode, triggers some analysis of the render box,
   /// as implemented by [debugAssertDoesMeetConstraints], including calling the intrinsic
   /// sizing methods and checking that they meet certain invariants.
+  @protected
   set size(Size value) {
     assert(!(debugDoingThisResize && debugDoingThisLayout));
     assert(sizedByParent || !debugDoingThisResize);
@@ -1586,9 +1645,12 @@ abstract class RenderBox extends RenderObject {
   /// Only call this function after calling [layout] on this box. You
   /// are only allowed to call this from the parent of this box during
   /// that parent's [performLayout] or [paint] functions.
-  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal: false }) {
+  ///
+  /// When implementing a [RenderBox] subclass, to override the baseline
+  /// computation, override [computeDistanceToActualBaseline].
+  double getDistanceToBaseline(TextBaseline baseline, { bool onlyReal = false }) {
+    assert(!_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     assert(!debugNeedsLayout);
-    assert(!_debugDoingBaseline);
     assert(() {
       final RenderObject parent = this.parent;
       if (owner.debugDoingLayout)
@@ -1615,7 +1677,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_debugDoingBaseline);
+    assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     _cachedBaselines ??= <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
@@ -1625,17 +1687,29 @@ abstract class RenderBox extends RenderObject {
   /// the y-coordinate of the first given baseline in the box's contents, if
   /// any, or null otherwise.
   ///
-  /// Do not call this function directly. Instead, call [getDistanceToBaseline]
-  /// if you need to know the baseline of a child from an invocation of
-  /// [performLayout] or [paint] and call [getDistanceToActualBaseline] if you
-  /// are implementing [computeDistanceToActualBaseline] and need to defer to a
-  /// child.
+  /// Do not call this function directly. If you need to know the baseline of a
+  /// child from an invocation of [performLayout] or [paint], call
+  /// [getDistanceToBaseline].
   ///
   /// Subclasses should override this method to supply the distances to their
-  /// baselines.
+  /// baselines. When implementing this method, there are generally three
+  /// strategies:
+  ///
+  ///  * For classes that use the [ContainerRenderObjectMixin] child model,
+  ///    consider mixing in the [RenderBoxContainerDefaultsMixin] class and
+  ///    using
+  ///    [RenderBoxContainerDefaultsMixin.defaultComputeDistanceToFirstActualBaseline].
+  ///
+  ///  * For classes that define a particular baseline themselves, return that
+  ///    value directly.
+  ///
+  ///  * For classes that have a child to which they wish to defer the
+  ///    computation, call [getDistanceToActualBaseline] on the child (not
+  ///    [computeDistanceToActualBaseline], the internal implementation, and not
+  ///    [getDistanceToBaseline], the public entry point for this API).
   @protected
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    assert(_debugDoingBaseline);
+    assert(_debugDoingBaseline, 'Please see the documentation for computeDistanceToActualBaseline for the required calling conventions of this method.');
     return null;
   }
 
@@ -1734,8 +1808,8 @@ abstract class RenderBox extends RenderObject {
           }
         }
 
-        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.INFINITY);
-        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.INFINITY);
+        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
+        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
         if (constraints.hasBoundedWidth)
           testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxWidth);
         if (constraints.hasBoundedHeight)
@@ -1807,9 +1881,10 @@ abstract class RenderBox extends RenderObject {
   /// absorbs the hit (preventing objects below this one from being hit).
   /// Returns false if the hit can continue to other objects below this one.
   ///
-  /// The caller is responsible for transforming [position] into the local
-  /// coordinate space of the callee. The callee is responsible for checking
-  /// whether the given position is within its bounds.
+  /// The caller is responsible for transforming [position] from global
+  /// coordinates to its location relative to the origin of this [RenderBox].
+  /// This [RenderBox] is responsible for checking whether the given position is
+  /// within its bounds.
   ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]
@@ -1857,6 +1932,11 @@ abstract class RenderBox extends RenderObject {
   /// Override this method if this render object can be hit even if its
   /// children were not hit.
   ///
+  /// The caller is responsible for transforming [position] from global
+  /// coordinates to its location relative to the origin of this [RenderBox].
+  /// This [RenderBox] is responsible for checking whether the given position is
+  /// within its bounds.
+  ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
@@ -1868,6 +1948,11 @@ abstract class RenderBox extends RenderObject {
   /// Typically children should be hit-tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
+  ///
+  /// The caller is responsible for transforming [position] from global
+  /// coordinates to its location relative to the origin of this [RenderBox].
+  /// This [RenderBox] is responsible for checking whether the given position is
+  /// within its bounds.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
@@ -1911,7 +1996,7 @@ abstract class RenderBox extends RenderObject {
     transform.translate(offset.dx, offset.dy);
   }
 
-  /// Convert the given point from the global coodinate system in logical pixels
+  /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
@@ -1974,9 +2059,8 @@ abstract class RenderBox extends RenderObject {
   ///   // ... handle the event ...
   /// }
   /// ```
-  // TODO(ianh): Fix the type of the argument here once https://github.com/dart-lang/sdk/issues/25232 is fixed
   @override
-  void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     super.handleEvent(event, entry);
   }
 
@@ -2092,9 +2176,9 @@ abstract class RenderBox extends RenderObject {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Size>('size', _size, missingIfNull: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Size>('size', _size, missingIfNull: true));
   }
 }
 

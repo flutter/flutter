@@ -15,17 +15,17 @@ void main() {
           data: const MediaQueryData(),
           child: new CustomScrollView(
             controller: controller,
-            slivers: <Widget>[
-              const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: const Text('A')),
-              const SliverAppBar(primary: false, pinned: true, title: const Text('B')),
-              new SliverList(
-                delegate: new SliverChildListDelegate(
+            slivers: const <Widget>[
+              SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+              SliverAppBar(primary: false, pinned: true, title: Text('B')),
+              SliverList(
+                delegate: SliverChildListDelegate(
                   <Widget>[
-                    const Text('C'),
-                    const Text('D'),
-                    const SizedBox(height: 500.0),
-                    const Text('E'),
-                    const SizedBox(height: 500.0),
+                    Text('C'),
+                    Text('D'),
+                    SizedBox(height: 500.0),
+                    Text('E'),
+                    SizedBox(height: 500.0),
                   ],
                 ),
               ),
@@ -34,7 +34,7 @@ void main() {
         ),
       ),
     );
-    const Offset textPositionInAppBar = const Offset(16.0, 18.0);
+    const Offset textPositionInAppBar = Offset(16.0, 18.0);
     expect(tester.getTopLeft(find.text('A')), textPositionInAppBar);
     // top app bar is 200.0 high at this point
     expect(tester.getTopLeft(find.text('B')), const Offset(0.0, 200.0) + textPositionInAppBar);

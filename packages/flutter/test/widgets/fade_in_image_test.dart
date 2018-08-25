@@ -7,12 +7,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../services/image_test_utils.dart';
+import '../painting/image_test_utils.dart';
 
 Future<Null> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
   final ui.Image placeholderImage = await createTestImage();
+  final ui.Image secondPlaceholderImage = await createTestImage();
 
   group('FadeInImage', () {
     testWidgets('animates uncached image and shows cached image immediately', (WidgetTester tester) async {
@@ -34,26 +35,26 @@ Future<Null> main() async {
         fadeInDuration: const Duration(milliseconds: 50),
       ));
 
-      expect(displayedImage().image, null);  // image providers haven't completed yet
+      expect(displayedImage().image, null); // image providers haven't completed yet
       placeholderProvider.complete();
       await tester.pump();
 
-      expect(displayedImage().image, same(placeholderImage));  // placeholder completed
+      expect(displayedImage().image, same(placeholderImage)); // placeholder completed
       expect(state().phase, FadeInImagePhase.waiting);
 
-      imageProvider.complete();  // load the image
-      expect(state().phase, FadeInImagePhase.fadeOut);  // fade out placeholder
+      imageProvider.complete(); // load the image
+      expect(state().phase, FadeInImagePhase.fadeOut); // fade out placeholder
       for (int i = 0; i < 7; i += 1) {
         expect(displayedImage().image, same(placeholderImage));
         await tester.pump(const Duration(milliseconds: 10));
       }
       expect(displayedImage().image, same(targetImage));
-      expect(state().phase, FadeInImagePhase.fadeIn);  // fade in image
+      expect(state().phase, FadeInImagePhase.fadeIn); // fade in image
       for (int i = 0; i < 6; i += 1) {
         expect(displayedImage().image, same(targetImage));
         await tester.pump(const Duration(milliseconds: 10));
       }
-      expect(state().phase, FadeInImagePhase.completed);  // done
+      expect(state().phase, FadeInImagePhase.completed); // done
       expect(displayedImage().image, same(targetImage));
 
       // Test case: re-use state object (didUpdateWidget)
@@ -64,12 +65,12 @@ Future<Null> main() async {
       ));
       final dynamic stateAfterDidUpdateWidget = state();
       expect(stateAfterDidUpdateWidget, same(stateBeforeDidUpdateWidget));
-      expect(stateAfterDidUpdateWidget.phase, FadeInImagePhase.completed);  // completes immediately
+      expect(stateAfterDidUpdateWidget.phase, FadeInImagePhase.completed); // completes immediately
       expect(displayedImage().image, same(targetImage));
 
       // Test case: new state object but cached image
       final dynamic stateBeforeRecreate = state();
-      await tester.pumpWidget(new Container());  // clear widget tree to prevent state reuse
+      await tester.pumpWidget(new Container()); // clear widget tree to prevent state reuse
       await tester.pumpWidget(new FadeInImage(
         placeholder: placeholderProvider,
         image: imageProvider,
@@ -77,8 +78,43 @@ Future<Null> main() async {
       expect(displayedImage().image, same(targetImage));
       final dynamic stateAfterRecreate = state();
       expect(stateAfterRecreate, isNot(same(stateBeforeRecreate)));
-      expect(stateAfterRecreate.phase, FadeInImagePhase.completed);  // completes immediately
+      expect(stateAfterRecreate.phase, FadeInImagePhase.completed); // completes immediately
       expect(displayedImage().image, same(targetImage));
+    });
+
+    testWidgets('handles a updating the placeholder image', (WidgetTester tester) async {
+      RawImage displayedImage() => tester.widget(find.byType(RawImage));
+
+      // The placeholder is expected to be already loaded
+      final TestImageProvider placeholderProvider = new TestImageProvider(placeholderImage);
+      final TestImageProvider secondPlaceholderProvider = new TestImageProvider(secondPlaceholderImage);
+
+      // Test case: long loading image
+      final TestImageProvider imageProvider = new TestImageProvider(targetImage);
+
+      await tester.pumpWidget(new FadeInImage(
+        placeholder: placeholderProvider,
+        image: imageProvider,
+        fadeOutDuration: const Duration(milliseconds: 50),
+        fadeInDuration: const Duration(milliseconds: 50),
+      ));
+      placeholderProvider.complete();
+      await tester.pump();
+
+      expect(displayedImage().image, same(placeholderImage)); // placeholder completed
+      expect(displayedImage().image, isNot(same(secondPlaceholderImage)));
+
+      await tester.pumpWidget(new FadeInImage(
+        placeholder: secondPlaceholderProvider,
+        image: imageProvider,
+        fadeOutDuration: const Duration(milliseconds: 50),
+        fadeInDuration: const Duration(milliseconds: 50),
+      ));
+      secondPlaceholderProvider.complete();
+      await tester.pump();
+
+      expect(displayedImage().image, isNot(same(placeholderImage))); // placeholder replaced
+      expect(displayedImage().image, same(secondPlaceholderImage));
     });
   });
 }

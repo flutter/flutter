@@ -8,7 +8,7 @@ import 'context.dart';
 
 /// command-line flags and options that were specified during the invocation of
 /// the Flutter tool.
-Flags get flags => context?.getVariable(Flags) ?? const _EmptyFlags();
+Flags get flags => context[Flags];
 
 /// Encapsulation of the command-line flags and options that were specified
 /// during the invocation of the Flutter tool.
@@ -17,9 +17,8 @@ Flags get flags => context?.getVariable(Flags) ?? const _EmptyFlags();
 /// the Flutter tool (immediately after the arguments have been parsed in
 /// [FlutterCommandRunner]) and is available via the [flags] global property.
 class Flags {
-  Flags(this._globalResults) {
-    assert(_globalResults != null);
-  }
+  Flags(this._globalResults)
+    : assert(_globalResults != null);
 
   final ArgResults _globalResults;
 
@@ -45,7 +44,7 @@ class Flags {
   }
 
   /// `true` iff the given flag/option was either explicitly specified by the
-  /// user at  the command-line or it was defined to have a default value.
+  /// user at the command-line or it was defined to have a default value.
   bool contains(String key) {
     final ArgResults commandResults = _globalResults.command;
     final Iterable<String> options = commandResults?.options;
@@ -53,8 +52,8 @@ class Flags {
   }
 }
 
-class _EmptyFlags implements Flags {
-  const _EmptyFlags();
+class EmptyFlags implements Flags {
+  const EmptyFlags();
 
   @override
   ArgResults get _globalResults => null;

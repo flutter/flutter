@@ -2,13 +2,94 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../painting/image_data.dart';
 import '../rendering/mock_canvas.dart';
 
-void main() {
+class TestImageProvider extends ImageProvider<TestImageProvider> {
+  TestImageProvider(this.future);
+
+  final Future<Null> future;
+
+  static ui.Image image;
+
+  @override
+  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(TestImageProvider key) {
+    return new OneFrameImageStreamCompleter(
+      future.then<ImageInfo>((Null value) => new ImageInfo(image: image))
+    );
+  }
+}
+
+Future<Null> main() async {
+  TestImageProvider.image = await decodeImageFromList(new Uint8List.fromList(kTransparentImage));
+
+  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    final Completer<Null> completer = new Completer<Null>();
+    await tester.pumpWidget(
+      new KeyedSubtree(
+        key: key,
+        child: new DecoratedBox(
+          decoration: new BoxDecoration(
+            image: new DecorationImage(
+              image: new TestImageProvider(completer.future),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    completer.complete();
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
+
+  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+    final Completer<Null> completer = new Completer<Null>();
+    final Widget subtree = new KeyedSubtree(
+      key: new GlobalKey(),
+      child: new RepaintBoundary(
+        child: new DecoratedBox(
+          decoration: new BoxDecoration(
+            image: new DecorationImage(
+              image: new TestImageProvider(completer.future),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(subtree);
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pumpWidget(new Container(child: subtree));
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    completer.complete(); // schedules microtask, does not run it
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.idle(); // runs microtask
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
+
   testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Container(
@@ -23,7 +104,7 @@ void main() {
   });
 
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
-    final Key key = const Key('outerContainer');
+    const Key key = Key('outerContainer');
     await tester.pumpWidget(
       new Center(
         child: new Container(
@@ -42,7 +123,7 @@ void main() {
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
-    final Key key = const Key('Container with BoxDecoration');
+    const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       return new Center(
         child: new Container(
@@ -54,7 +135,7 @@ void main() {
       );
     }
 
-    final Color black = const Color(0xFF000000);
+    const Color black = Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(new Border.all()));
     expect(find.byKey(key), paints
@@ -64,25 +145,25 @@ void main() {
     expect(find.byKey(key), paints
       ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
-    final Color green = const Color(0xFF00FF00);
-    final BorderSide greenSide = new BorderSide(color: green, width: 10.0);
+    const Color green = Color(0xFF00FF00);
+    const BorderSide greenSide = BorderSide(color: green, width: 10.0);
 
-    await tester.pumpWidget(buildFrame(new Border(top: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(top: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    await tester.pumpWidget(buildFrame(new Border(left: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(left: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    await tester.pumpWidget(buildFrame(new Border(right: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(right: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    await tester.pumpWidget(buildFrame(new Border(bottom: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(bottom: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    final Color blue = const Color(0xFF0000FF);
-    final BorderSide blueSide = new BorderSide(color: blue, width: 0.0);
+    const Color blue = Color(0xFF0000FF);
+    const BorderSide blueSide = BorderSide(color: blue, width: 0.0);
 
-    await tester.pumpWidget(buildFrame(new Border(top: blueSide, right: greenSide, bottom: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(top: blueSide, right: greenSide, bottom: greenSide)));
     expect(find.byKey(key), paints
       ..path() // There's not much point checking the arguments to these calls because paintBorder
       ..path() // reuses the same Paint object each time, configured differently, and so they will
@@ -100,22 +181,22 @@ void main() {
             width: 100.0,
             height: 100.0,
             decoration: const BoxDecoration(
-              border: const Border(
-                top: const BorderSide(
+              border: Border(
+                top: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFEEEEEE),
+                  color: Color(0xFFEEEEEE),
                 ),
-                left: const BorderSide(
+                left: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
-                right: const BorderSide(
+                right: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
-                bottom: const BorderSide(
+                bottom: BorderSide(
                   width: 10.0,
-                  color: const Color(0xFFFFFFFF),
+                  color: Color(0xFFFFFFFF),
                 ),
               ),
             ),
@@ -139,7 +220,7 @@ void main() {
                 color: const Color(0xFFFFFFFF),
               ),
               borderRadius: const BorderRadius.only(
-                topRight: const Radius.circular(10.0),
+                topRight: Radius.circular(10.0),
               ),
             ),
           ),
@@ -187,7 +268,7 @@ void main() {
 
     List<int> itemsTapped;
 
-    final Key key = const Key('Container with BoxDecoration');
+    const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(
@@ -224,7 +305,7 @@ void main() {
 
     List<int> itemsTapped;
 
-    final Key key = const Key('Container with BoxDecoration');
+    const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(

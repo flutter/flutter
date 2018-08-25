@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'route.dart';
@@ -29,6 +28,10 @@ import 'route.dart';
 /// These navigation properties are not shared with any sibling [CupertinoTabView]
 /// nor any ancestor or descendant [Navigator] instances.
 ///
+/// To push a route above this [CupertinoTabView] instead of inside it (such
+/// as when showing a dialog on top of all tabs), use
+/// `Navigator.of(rootNavigator: true)`.
+///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold], a typical host that supports switching between tabs.
@@ -39,10 +42,11 @@ class CupertinoTabView extends StatelessWidget {
   const CupertinoTabView({
     Key key,
     this.builder,
+    this.defaultTitle,
     this.routes,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorObservers: const <NavigatorObserver>[],
+    this.navigatorObservers = const <NavigatorObserver>[],
   }) : assert(navigatorObservers != null),
        super(key: key);
 
@@ -52,6 +56,9 @@ class CupertinoTabView extends StatelessWidget {
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
   final WidgetBuilder builder;
+
+  /// The title of the default route.
+  final String defaultTitle;
 
   /// This tab view's routing table.
   ///
@@ -106,13 +113,17 @@ class CupertinoTabView extends StatelessWidget {
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
     WidgetBuilder routeBuilder;
-    if (name == Navigator.defaultRouteName && builder != null)
+    String title;
+    if (name == Navigator.defaultRouteName && builder != null) {
       routeBuilder = builder;
+      title = defaultTitle;
+    }
     else if (routes != null)
       routeBuilder = routes[name];
     if (routeBuilder != null) {
       return new CupertinoPageRoute<dynamic>(
         builder: routeBuilder,
+        title: title,
         settings: settings,
       );
     }

@@ -10,7 +10,7 @@ class TestFocusable extends StatefulWidget {
     Key key,
     this.no,
     this.yes,
-    this.autofocus: true,
+    this.autofocus = true,
   }) : super(key: key);
 
   final String no;
@@ -58,12 +58,12 @@ void main() {
   testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Column(
-        children: <Widget>[
-          const TestFocusable(
+        children: const <Widget>[
+          TestFocusable(
             no: 'a',
             yes: 'A FOCUSED',
           ),
-          const TestFocusable(
+          TestFocusable(
             no: 'b',
             yes: 'B FOCUSED',
           ),
@@ -146,8 +146,8 @@ void main() {
         autofocus: true,
         child: new Row(
           textDirection: TextDirection.ltr,
-          children: <Widget>[
-            const TestFocusable(
+          children: const <Widget>[
+            TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,
@@ -221,8 +221,8 @@ void main() {
         node: parentFocusScope,
         child: new Row(
           textDirection: TextDirection.ltr,
-          children: <Widget>[
-            const TestFocusable(
+          children: const <Widget>[
+            TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,

@@ -13,12 +13,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             opacity: 0.5
           ),
-          child: const Icon(const IconData(0xd0a0, fontFamily: 'Arial'))
+          child: Icon(IconData(0xd0a0, fontFamily: 'Arial'))
         ),
       ),
     );
@@ -30,8 +30,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(null),
+        child: Center(
+          child: Icon(null),
         ),
       ),
     );
@@ -44,8 +44,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             null,
             size: 96.0,
           ),
@@ -61,10 +61,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const IconTheme(
-            data: const IconThemeData(size: 36.0),
-            child: const Icon(null),
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(size: 36.0),
+            child: Icon(null),
           ),
         ),
       ),
@@ -78,10 +78,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const IconTheme(
-            data: const IconThemeData(size: 36.0),
-            child: const Icon(
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(size: 36.0),
+            child: Icon(
               null,
               size: 48.0,
             ),
@@ -98,10 +98,10 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const IconTheme(
-            data: const IconThemeData(),
-            child: const Icon(null),
+        child: Center(
+          child: IconTheme(
+            data: IconThemeData(),
+            child: Icon(null),
           ),
         ),
       ),
@@ -116,8 +116,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(const IconData(0x41, fontFamily: 'Roboto')),
+        child: Center(
+          child: Icon(IconData(0x41, fontFamily: 'Roboto')),
         ),
       ),
     );
@@ -132,8 +132,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             Icons.title,
             semanticLabel: 'a label',
           ),
@@ -142,6 +142,8 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(label: 'a label'));
+
+    semantics.dispose();
   });
 
   testWidgets('Null icon with semantic label', (WidgetTester tester) async {
@@ -150,8 +152,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             null,
             semanticLabel: 'a label',
           ),
@@ -160,14 +162,16 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(label: 'a label'));
+
+    semantics.dispose();
   });
 
   testWidgets('Changing semantic label from null doesn\'t rebuild tree ', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(Icons.time_to_leave),
+        child: Center(
+          child: Icon(Icons.time_to_leave),
         ),
       ),
     );
@@ -177,8 +181,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const Center(
-          child: const Icon(
+        child: Center(
+          child: Icon(
             Icons.time_to_leave,
             semanticLabel: 'a label',
           ),
@@ -191,5 +195,17 @@ void main() {
     // Compare a leaf Element in the Icon subtree before and after changing the
     // semanticLabel to make sure the subtree was not rebuilt.
     expect(richText2, same(richText1));
+  });
+
+  testWidgets('IconData comparison', (WidgetTester tester) async {
+    expect(const IconData(123), const IconData(123));
+    expect(const IconData(123), isNot(const IconData(123, matchTextDirection: true)));
+    expect(const IconData(123), isNot(const IconData(123, fontFamily: 'f')));
+    expect(const IconData(123), isNot(const IconData(123, fontPackage: 'p')));
+    expect(const IconData(123).hashCode, const IconData(123).hashCode);
+    expect(const IconData(123).hashCode, isNot(const IconData(123, matchTextDirection: true).hashCode));
+    expect(const IconData(123).hashCode, isNot(const IconData(123, fontFamily: 'f').hashCode));
+    expect(const IconData(123).hashCode, isNot(const IconData(123, fontPackage: 'p').hashCode));
+    expect(const IconData(123).toString(), 'IconData(U+0007B)');
   });
 }

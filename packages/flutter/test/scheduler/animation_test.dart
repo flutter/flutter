@@ -4,11 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:test/test.dart';
+import 'package:flutter/services.dart';
+
+import '../flutter_test_alternative.dart';
 
 import 'scheduler_tester.dart';
 
-class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
+class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
 
 void main() {
   final SchedulerBinding scheduler = new TestSchedulerBinding();

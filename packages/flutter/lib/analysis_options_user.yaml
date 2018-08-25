@@ -7,29 +7,28 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are three similar analysis options files in the flutter repo:
+# There are four similar analysis options files in the flutter repos:
 #   - analysis_options.yaml
-#   - analysis_options_repo.yaml
 #   - packages/flutter/lib/analysis_options_user.yaml (this file)
+#   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
+#   - https://github.com/flutter/engine/blob/master/analysis_options.yaml
 #
-# This file contains the analysis options used by "flutter analyze"
-# and the dartanalyzer when analyzing code outside the flutter repository.
-# It isn't named 'analysis_options.yaml' because otherwise editors like Atom
-# would use it when analyzing the flutter tool itself.
+# This file contains the analysis options used by "flutter analyze" and the
+# dartanalyzer when analyzing code outside the flutter repository. It isn't named
+# 'analysis_options.yaml' because otherwise editors would use it when analyzing
+# the flutter tool itself.
 #
-# When editing, make sure you keep /analysis_options.yaml consistent.
+# When editing, make sure you keep this and /analysis_options.yaml consistent.
 
 analyzer:
   language:
-    enableStrictCallChecks: true
     enableSuperMixins: true
-    enableAssertInitializer: true
-  strong-mode: true
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
-    missing_return: warning
+    # TODO(ianh): https://github.com/flutter/flutter/issues/20114
+    missing_return: ignore
     # allow having TODOs in the code
     todo: ignore
 
@@ -37,44 +36,37 @@ linter:
   rules:
     # these rules are documented on and in the same order as
     # the Dart Lint rules page to make maintenance easier
-    # http://dart-lang.github.io/linter/lints/
-
-    # === error rules ===
-    - avoid_empty_else
-    - cancel_subscriptions
-    - close_sinks
-    # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
-    - control_flow_in_finally
-    - empty_statements
-    - hash_and_equals
-    # - invariant_booleans
-    # - iterable_contains_unrelated_type
-    # - list_remove_unrelated_type
-    # - literal_only_boolean_expressions
-    - test_types_in_equals
-    - throw_in_finally
-    - unrelated_type_equality_checks
-    - valid_regexps
-
-    # === style rules ===
+    # https://github.com/dart-lang/linter/blob/master/example/all.yaml
     # - always_declare_return_types
     # - always_specify_types
     # - annotate_overrides
     # - avoid_as
+    - avoid_empty_else
     - avoid_init_to_null
     - avoid_return_types_on_setters
     - await_only_futures
     - camel_case_types
+    - cancel_subscriptions
+    - close_sinks
+    # - comment_references # we do not presume as to what people want to reference in their dartdocs
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
+    - control_flow_in_finally
     - empty_constructor_bodies
+    - empty_statements
+    - hash_and_equals
     - implementation_imports
+    # - invariant_booleans
+    # - iterable_contains_unrelated_type
     - library_names
     # - library_prefixes
+    # - list_remove_unrelated_type
+    # - literal_only_boolean_expressions
     - non_constant_identifier_names
     # - one_member_abstracts
     # - only_throw_errors
     # - overridden_fields
     - package_api_docs
+    - package_names
     - package_prefixed_library_names
     - prefer_is_not_empty
     # - public_member_api_docs
@@ -82,11 +74,13 @@ linter:
     # - sort_constructors_first
     # - sort_unnamed_constructors_first
     - super_goes_last
+    - test_types_in_equals
+    - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures
     - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
-
-    # === pub rules ===
-    - package_names
+    - unnecessary_statements
+    - unrelated_type_equality_checks
+    - valid_regexps

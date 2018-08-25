@@ -37,21 +37,21 @@ enum PerformanceOverlayOption {
 
   /// Display the engine frame times as they change over a set period of time
   /// in the form of a graph. The y axis of the graph denotes the total time
-  /// spent by the eninge as a fraction of the total frame slice. When the bar
+  /// spent by the engine as a fraction of the total frame slice. When the bar
   /// turns red, a frame is lost.
   visualizeEngineStatistics,
 }
 
 /// Displays performance statistics.
 ///
-/// The overlay show two time series. The first shows how much time was required
-/// on this thread to produce each frame. The second shows how much time was
-/// required on the GPU thread to produce each frame. Ideally, both these values
-/// would be less than the total frame budget for the hardware on which the app
-/// is running. For example, if the hardware has a screen that updates at 60 Hz,
-/// each thread should ideally spend less than 16ms producing each frame. This
-/// ideal condition is indicated by a green vertical line for each thread.
-/// Otherwise, the performance overlay shows a red vertical line.
+/// The overlay shows two time series. The first shows how much time was
+/// required on this thread to produce each frame. The second shows how much
+/// time was required on the GPU thread to produce each frame. Ideally, both
+/// these values would be less than the total frame budget for the hardware on
+/// which the app is running. For example, if the hardware has a screen that
+/// updates at 60 Hz, each thread should ideally spend less than 16ms producing
+/// each frame. This ideal condition is indicated by a green vertical line for
+/// each thread. Otherwise, the performance overlay shows a red vertical line.
 ///
 /// The simplest way to show the performance overlay is to set
 /// [MaterialApp.showPerformanceOverlay] or [WidgetsApp.showPerformanceOverlay]
@@ -62,10 +62,10 @@ class RenderPerformanceOverlay extends RenderBox {
   /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
   /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
-    int optionsMask: 0,
-    int rasterizerThreshold: 0,
-    bool checkerboardRasterCacheImages: false,
-    bool checkerboardOffscreenLayers: false,
+    int optionsMask = 0,
+    int rasterizerThreshold = 0,
+    bool checkerboardRasterCacheImages = false,
+    bool checkerboardOffscreenLayers = false,
   }) : assert(optionsMask != null),
        assert(rasterizerThreshold != null),
        assert(checkerboardRasterCacheImages != null),
@@ -162,7 +162,7 @@ class RenderPerformanceOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(new Size(double.INFINITY, _intrinsicHeight));
+    size = constraints.constrain(new Size(double.infinity, _intrinsicHeight));
   }
 
   @override

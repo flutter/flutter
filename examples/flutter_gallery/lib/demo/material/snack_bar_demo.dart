@@ -29,39 +29,43 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
   int _snackBarIndex = 1;
 
   Widget buildBody(BuildContext context) {
-    return new ListView(
-      padding: const EdgeInsets.all(24.0),
-      children: <Widget>[
-        const Text(_text1),
-        const Text(_text2),
-        new Center(
-          child: new RaisedButton(
-            child: const Text('SHOW A SNACKBAR'),
-            onPressed: () {
-              final int thisSnackBarIndex = _snackBarIndex++;
-              Scaffold.of(context).showSnackBar(new SnackBar(
-                content: new Text('This is snackbar #$thisSnackBarIndex.'),
-                action: new SnackBarAction(
-                  label: 'ACTION',
-                  onPressed: () {
-                    Scaffold.of(context).showSnackBar(new SnackBar(
-                      content: new Text('You pressed snackbar $thisSnackBarIndex\'s action.')
-                    ));
-                  }
-                )
-              ));
-            }
-          )
-        ),
-        const Text(_text3),
-      ]
-      .map((Widget child) {
-        return new Container(
-          margin: const EdgeInsets.symmetric(vertical: 12.0),
-          child: child
-        );
-      })
-      .toList()
+    return new SafeArea(
+      top: false,
+      bottom: false,
+      child: new ListView(
+        padding: const EdgeInsets.all(24.0),
+        children: <Widget>[
+          const Text(_text1),
+          const Text(_text2),
+          new Center(
+            child: new RaisedButton(
+              child: const Text('SHOW A SNACKBAR'),
+              onPressed: () {
+                final int thisSnackBarIndex = _snackBarIndex++;
+                Scaffold.of(context).showSnackBar(new SnackBar(
+                  content: new Text('This is snackbar #$thisSnackBarIndex.'),
+                  action: new SnackBarAction(
+                    label: 'ACTION',
+                    onPressed: () {
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                        content: new Text('You pressed snackbar $thisSnackBarIndex\'s action.')
+                      ));
+                    }
+                  ),
+                ));
+              }
+            ),
+          ),
+          const Text(_text3),
+        ]
+        .map((Widget child) {
+          return new Container(
+            margin: const EdgeInsets.symmetric(vertical: 12.0),
+            child: child
+          );
+        })
+        .toList()
+      ),
     );
   }
 

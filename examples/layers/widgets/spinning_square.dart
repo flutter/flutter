@@ -17,7 +17,7 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
     super.initState();
     // We use 3600 milliseconds instead of 1800 milliseconds because 0.0 -> 1.0
     // represents an entire turn of the square whereas in the other examples
-    // we used 0.0 -> math.PI, which is only half a turn.
+    // we used 0.0 -> math.pi, which is only half a turn.
     _animation = new AnimationController(
       duration: const Duration(milliseconds: 3600),
       vsync: this,

@@ -44,14 +44,14 @@ import 'thumb_painter.dart';
 /// See also:
 ///
 ///  * [Switch], the material design equivalent.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/switches/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   const CupertinoSwitch({
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.activeColor: CupertinoColors.activeGreen,
+    this.activeColor,
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -82,16 +82,18 @@ class CupertinoSwitch extends StatefulWidget {
   final ValueChanged<bool> onChanged;
 
   /// The color to use when this switch is on.
+  ///
+  /// Defaults to [CupertinoColors.activeGreen].
   final Color activeColor;
 
   @override
   _CupertinoSwitchState createState() => new _CupertinoSwitchState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
-    description.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
+    properties.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 
@@ -100,7 +102,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   Widget build(BuildContext context) {
     return new _CupertinoSwitchRenderObjectWidget(
       value: widget.value,
-      activeColor: widget.activeColor,
+      activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
       onChanged: widget.onChanged,
       vsync: this,
     );
@@ -153,8 +155,8 @@ const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
 
 const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
-const Duration _kReactionDuration = const Duration(milliseconds: 300);
-const Duration _kToggleDuration = const Duration(milliseconds: 200);
+const Duration _kReactionDuration = Duration(milliseconds: 300);
+const Duration _kToggleDuration = Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({
@@ -214,7 +216,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
     _position
       ..curve = Curves.ease
       ..reverseCurve = Curves.ease.flipped;
@@ -378,10 +380,11 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.isSemanticBoundary = isInteractive;
     if (isInteractive)
-      config.addAction(SemanticsAction.tap, _handleTap);
-    config.isChecked = _value;
+      config.onTap = _handleTap;
+
+    config.isEnabled = isInteractive;
+    config.isToggled = _value;
   }
 
   final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();

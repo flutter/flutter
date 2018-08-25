@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:flutter_tools/src/commands/fuchsia_reload.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -18,8 +18,7 @@ void main() {
     testUsingContext('a test', () async {
       final FuchsiaDeviceCommandRunner commandRunner =
           new FuchsiaDeviceCommandRunner('8.8.9.9',
-                                         '~/fuchsia',
-                                         'release-x86-64');
+                                         '~/fuchsia/out/release-x86-64');
       final List<String> ports = await commandRunner.run('ls /tmp');
       expect(ports, hasLength(3));
       expect(ports[0], equals('1234'));
@@ -37,10 +36,10 @@ class MockProcessManager extends Mock implements ProcessManager {
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
-    bool includeParentEnvironment: true,
-    bool runInShell: false,
-    Encoding stdoutEncoding: SYSTEM_ENCODING,
-    Encoding stderrEncoding: SYSTEM_ENCODING,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
   }) async {
     return new ProcessResult(0, 0, '1234\n5678\n5', '');
   }

@@ -24,7 +24,7 @@ void main() {
             throw new Exception('Should not reach this point.');
           },
           child: const SizeChangedLayoutNotifier(
-            child: const SizedBox(
+            child: SizedBox(
               width: 100.0,
               height: 100.0,
             ),
@@ -37,12 +37,12 @@ void main() {
       new Center(
         child: new NotificationListener<LayoutChangedNotification>(
           onNotification: (LayoutChangedNotification notification) {
-            expect(notification, const isInstanceOf<SizeChangedLayoutNotification>());
+            expect(notification, isInstanceOf<SizeChangedLayoutNotification>());
             notified = true;
             return true;
           },
           child: const SizeChangedLayoutNotifier(
-            child: const SizedBox(
+            child: SizedBox(
               width: 200.0,
               height: 100.0,
             ),

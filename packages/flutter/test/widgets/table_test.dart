@@ -19,26 +19,34 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
 }
 
 void main() {
+  testWidgets('Table widget - empty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Table(),
+      ),
+    );
+  });
   testWidgets('Table widget - control test', (WidgetTester tester) async {
     Future<Null> run(TextDirection textDirection) async {
       await tester.pumpWidget(
         new Directionality(
           textDirection: textDirection,
           child: new Table(
-            children: <TableRow>[
-              new TableRow(
+            children: const <TableRow>[
+              TableRow(
                 children: <Widget>[
-                  const Text('AAAAAA'), const Text('B'), const Text('C'),
+                  Text('AAAAAA'), Text('B'), Text('C'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('D'), const Text('EEE'), const Text('F'),
+                  Text('D'), Text('EEE'), Text('F'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('G'), const Text('H'), const Text('III'),
+                  Text('G'), Text('H'), Text('III'),
                 ],
               ),
             ],
@@ -66,25 +74,25 @@ void main() {
         child: new Center(
           child: new Table(
             columnWidths: const <int, TableColumnWidth> {
-              0: const FixedColumnWidth(100.0),
-              1: const FixedColumnWidth(110.0),
-              2: const FixedColumnWidth(125.0),
+              0: FixedColumnWidth(100.0),
+              1: FixedColumnWidth(110.0),
+              2: FixedColumnWidth(125.0),
             },
             defaultColumnWidth: const FixedColumnWidth(333.0),
-            children: <TableRow>[
-              new TableRow(
+            children: const <TableRow>[
+              TableRow(
                 children: <Widget>[
-                  const Text('A1'), const Text('B1'), const Text('C1'),
+                  Text('A1'), Text('B1'), Text('C1'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('A2'), const Text('B2'), const Text('C2'),
+                  Text('A2'), Text('B2'), Text('C2'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('A3'), const Text('B3'), const Text('C3'),
+                  Text('A3'), Text('B3'), Text('C3'),
                 ],
               ),
             ],
@@ -136,25 +144,25 @@ void main() {
         child: new Center(
           child: new Table(
             columnWidths: const <int, TableColumnWidth> {
-              0: const FixedColumnWidth(100.0),
-              1: const FixedColumnWidth(110.0),
-              2: const FixedColumnWidth(125.0),
+              0: FixedColumnWidth(100.0),
+              1: FixedColumnWidth(110.0),
+              2: FixedColumnWidth(125.0),
             },
             defaultColumnWidth: const FixedColumnWidth(333.0),
-            children: <TableRow>[
-              new TableRow(
+            children: const <TableRow>[
+              TableRow(
                 children: <Widget>[
-                  const Text('A1'), const Text('B1'), const Text('C1'),
+                  Text('A1'), Text('B1'), Text('C1'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('A2'), const Text('B2'), const Text('C2'),
+                  Text('A2'), Text('B2'), Text('C2'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('A3'), const Text('B3'), const Text('C3'),
+                  Text('A3'), Text('B3'), Text('C3'),
                 ],
               ),
             ],
@@ -206,20 +214,20 @@ void main() {
           textDirection: textDirection,
           child: new Table(
             border: new TableBorder.all(),
-            children: <TableRow>[
-              new TableRow(
+            children: const <TableRow>[
+              TableRow(
                 children: <Widget>[
-                  const Text('AAAAAA'), const Text('B'), const Text('C'),
+                  Text('AAAAAA'), Text('B'), Text('C'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('D'), const Text('EEE'), const Text('F'),
+                  Text('D'), Text('EEE'), Text('F'),
                 ],
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  const Text('G'), const Text('H'), const Text('III'),
+                  Text('G'), Text('H'), Text('III'),
                 ],
               ),
             ],
@@ -238,20 +246,20 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('A'), const Text('B'), const Text('C'),
+                Text('A'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('E'), const Text('F'),
+                Text('D'), Text('E'), Text('F'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('I'),
+                Text('G'), Text('H'), Text('I'),
               ],
             ),
           ],
@@ -266,15 +274,15 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('a'), const Text('b'), const Text('c'), const Text('d'),
+                Text('a'), Text('b'), Text('c'), Text('d'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('e'), const Text('f'), const Text('g'), const Text('h'),
+                Text('e'), Text('f'), Text('g'), Text('h'),
               ],
             ),
           ],
@@ -294,20 +302,20 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('AAAAAA'), const Text('B'), const Text('C'),
+                Text('AAAAAA'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('EEE'), const Text('F'),
+                Text('D'), Text('EEE'), Text('F'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -318,20 +326,20 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('AAA'), const Text('B'), const Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('E'), const Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -353,20 +361,20 @@ void main() {
       textDirection: TextDirection.ltr,
         child: new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('AAA'), const Text('B'), const Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('E'), const Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -389,20 +397,20 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('AAAAAA'), const Text('B'), const Text('C'),
+                Text('AAAAAA'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('EEE'), const Text('F'),
+                Text('D'), Text('EEE'), Text('F'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -414,20 +422,20 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('A'), const Text('B'), const Text('C'),
+                Text('A'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('EEE'), const Text('F'),
+                Text('D'), Text('EEE'), Text('F'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -449,20 +457,20 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('AAA'), const Text('B'), const Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('E'), const Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -474,20 +482,20 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Table(
           defaultColumnWidth: const IntrinsicColumnWidth(),
-          children: <TableRow>[
-            new TableRow(
+          children: const <TableRow>[
+            TableRow(
               children: <Widget>[
-                const Text('AAA'), const Text('B'), const Text('C'),
+                Text('AAA'), Text('B'), Text('C'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('D'), const Text('E'), const Text('FFFFFF'),
+                Text('D'), Text('E'), Text('FFFFFF'),
               ],
             ),
-            new TableRow(
+            TableRow(
               children: <Widget>[
-                const Text('G'), const Text('H'), const Text('III'),
+                Text('G'), Text('H'), Text('III'),
               ],
             ),
           ],
@@ -522,9 +530,9 @@ void main() {
                 ),
               ],
             ),
-            new TableRow(
+            const TableRow(
               children: <Widget>[
-                const Text('b'),
+                Text('b'),
               ],
             ),
           ],
@@ -536,9 +544,9 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Table(
           children: <TableRow>[
-            new TableRow(
+            const TableRow(
               children: <Widget>[
-                const Text('b'),
+                Text('b'),
               ],
             ),
             new TableRow(
@@ -565,19 +573,19 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
-              key: const ValueKey<int>(1),
+          children: const <TableRow>[
+            TableRow(
+              key: ValueKey<int>(1),
               children: <Widget>[
-                const TestStatefulWidget(key: const ValueKey<int>(11)),
-                const TestStatefulWidget(key: const ValueKey<int>(12)),
+                TestStatefulWidget(key: ValueKey<int>(11)),
+                TestStatefulWidget(key: ValueKey<int>(12)),
               ],
             ),
-            new TableRow(
-              key: const ValueKey<int>(2),
+            TableRow(
+              key: ValueKey<int>(2),
               children: <Widget>[
-                const TestStatefulWidget(key: const ValueKey<int>(21)),
-                const TestStatefulWidget(key: const ValueKey<int>(22)),
+                TestStatefulWidget(key: ValueKey<int>(21)),
+                TestStatefulWidget(key: ValueKey<int>(22)),
               ],
             ),
           ],
@@ -599,12 +607,12 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Table(
-          children: <TableRow>[
-            new TableRow(
-              key: const ValueKey<int>(2),
+          children: const <TableRow>[
+            TableRow(
+              key: ValueKey<int>(2),
               children: <Widget>[
-                const TestStatefulWidget(key: const ValueKey<int>(21)),
-                const TestStatefulWidget(key: const ValueKey<int>(22)),
+                TestStatefulWidget(key: ValueKey<int>(21)),
+                TestStatefulWidget(key: ValueKey<int>(22)),
               ],
             ),
           ],
@@ -738,20 +746,20 @@ void main() {
       child: new Table(
         key: key0 = new GlobalKey(),
         defaultColumnWidth: const IntrinsicColumnWidth(),
-        children: <TableRow>[
-          new TableRow(
+        children: const <TableRow>[
+          TableRow(
             children: <Widget>[
-              const Text('A'), const Text('B'), const Text('C'),
+              Text('A'), Text('B'), Text('C'),
             ],
           ),
-          new TableRow(
+          TableRow(
             children: <Widget>[
-              const Text('D'), const Text('EEE'), const Text('F'),
+              Text('D'), Text('EEE'), Text('F'),
             ],
           ),
-          new TableRow(
+          TableRow(
             children: <Widget>[
-              const Text('G'), const Text('H'), const Text('III'),
+              Text('G'), Text('H'), Text('III'),
             ],
           ),
         ],

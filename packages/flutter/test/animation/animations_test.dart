@@ -153,6 +153,76 @@ void main() {
     expect(log, isEmpty);
   });
 
+  test('AnimationMax control test', () {
+    final AnimationController first = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    );
+    final AnimationController second = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final AnimationMax<double> max = new AnimationMax<double>(first, second);
+
+    expect(max, hasOneLineDescription);
+    expect(max.value, equals(0.5));
+
+    final List<double> log = <double>[];
+    void logValue() {
+      log.add(max.value);
+    }
+
+    max.addListener(logValue);
+
+    second.value = 1.0;
+
+    expect(max.value, equals(1.0));
+    expect(log, equals(<double>[1.0]));
+    log.clear();
+
+    max.removeListener(logValue);
+
+    first.value = 0.0;
+
+    expect(max.value, equals(1.0));
+    expect(log, isEmpty);
+  });
+
+  test('AnimationMin control test', () {
+    final AnimationController first = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    );
+    final AnimationController second = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final AnimationMin<double> min = new AnimationMin<double>(first, second);
+
+    expect(min, hasOneLineDescription);
+    expect(min.value, equals(0.0));
+
+    final List<double> log = <double>[];
+    void logValue() {
+      log.add(min.value);
+    }
+
+    min.addListener(logValue);
+
+    second.value = 1.0;
+
+    expect(min.value, equals(0.5));
+    expect(log, equals(<double>[0.5]));
+    log.clear();
+
+    min.removeListener(logValue);
+
+    first.value = 0.25;
+
+    expect(min.value, equals(0.25));
+    expect(log, isEmpty);
+  });
+
   test('CurvedAnimation with bogus curve', () {
     final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
@@ -161,4 +231,111 @@ void main() {
 
     expect(() { curved.value; }, throwsFlutterError);
   });
+
+  test('TweenSequence', () {
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final Animation<double> animation = new TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        new TweenSequenceItem<double>(
+          tween: new Tween<double>(begin: 5.0, end: 10.0),
+          weight: 4.0,
+        ),
+        new TweenSequenceItem<double>(
+          tween: new ConstantTween<double>(10.0),
+          weight: 2.0,
+        ),
+        new TweenSequenceItem<double>(
+          tween: new Tween<double>(begin: 10.0, end: 5.0),
+          weight: 4.0,
+        ),
+      ],
+    ).animate(controller);
+
+    expect(animation.value, 5.0);
+
+    controller.value = 0.2;
+    expect(animation.value, 7.5);
+
+    controller.value = 0.4;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.6;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.8;
+    expect(animation.value, 7.5);
+
+    controller.value = 1.0;
+    expect(animation.value, 5.0);
+  });
+
+  test('TweenSequence with curves', () {
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final Animation<double> animation = new TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        new TweenSequenceItem<double>(
+          tween: new Tween<double>(begin: 5.0, end: 10.0)
+            .chain(new CurveTween(curve: const Interval(0.5, 1.0))),
+          weight: 4.0,
+        ),
+        new TweenSequenceItem<double>(
+          tween: new ConstantTween<double>(10.0)
+            .chain(new CurveTween(curve: Curves.linear)), // linear is a no-op
+          weight: 2.0,
+        ),
+        new TweenSequenceItem<double>(
+          tween: new Tween<double>(begin: 10.0, end: 5.0)
+            .chain(new CurveTween(curve: const Interval(0.0, 0.5))),
+          weight: 4.0,
+        ),
+      ],
+    ).animate(controller);
+
+    expect(animation.value, 5.0);
+
+    controller.value = 0.2;
+    expect(animation.value, 5.0);
+
+    controller.value = 0.4;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.6;
+    expect(animation.value, 10.0);
+
+    controller.value = 0.8;
+    expect(animation.value, 5.0);
+
+    controller.value = 1.0;
+    expect(animation.value, 5.0);
+  });
+
+  test('TweenSequence, one tween', () {
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final Animation<double> animation = new TweenSequence<double>(
+      <TweenSequenceItem<double>>[
+        new TweenSequenceItem<double>(
+          tween: new Tween<double>(begin: 5.0, end: 10.0),
+          weight: 1.0,
+        ),
+      ],
+    ).animate(controller);
+
+    expect(animation.value, 5.0);
+
+    controller.value = 0.5;
+    expect(animation.value, 7.5);
+
+    controller.value = 1.0;
+    expect(animation.value, 10.0);
+  });
+
 }

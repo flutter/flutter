@@ -3,15 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -37,10 +39,26 @@ class Dialog extends StatelessWidget {
   const Dialog({
     Key key,
     this.child,
+    this.insetAnimationDuration = const Duration(milliseconds: 100),
+    this.insetAnimationCurve = Curves.decelerate,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
+
+  /// The duration of the animation to show when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to 100 milliseconds.
+  final Duration insetAnimationDuration;
+
+  /// The curve to use for the animation shown when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to [Curves.fastOutSlowIn].
+  final Curve insetAnimationCurve;
 
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
@@ -48,19 +66,28 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Center(
-      child: new Container(
-        margin: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Material(
-            elevation: 24.0,
-            color: _getColor(context),
-            type: MaterialType.card,
-            child: child
-          )
-        )
-      )
+    return new AnimatedPadding(
+      padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+      duration: insetAnimationDuration,
+      curve: insetAnimationCurve,
+      child: new MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: new Center(
+          child: new ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 280.0),
+            child: new Material(
+              elevation: 24.0,
+              color: _getColor(context),
+              type: MaterialType.card,
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -93,25 +120,27 @@ class Dialog extends StatelessWidget {
 ///   return showDialog<Null>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
-///     child: new AlertDialog(
-///       title: new Text('Rewind and remember'),
-///       content: new SingleChildScrollView(
-///         child: new ListBody(
-///           children: <Widget>[
-///             new Text('You will never be satisfied.'),
-///             new Text('You\’re like me. I’m never satisfied.'),
-///           ],
+///     builder: (BuildContext context) {
+///       return new AlertDialog(
+///         title: new Text('Rewind and remember'),
+///         content: new SingleChildScrollView(
+///           child: new ListBody(
+///             children: <Widget>[
+///               new Text('You will never be satisfied.'),
+///               new Text('You\’re like me. I’m never satisfied.'),
+///             ],
+///           ),
 ///         ),
-///       ),
-///       actions: <Widget>[
-///         new FlatButton(
-///           child: new Text('Regret'),
-///           onPressed: () {
-///             Navigator.of(context).pop();
-///           },
-///         ),
-///       ],
-///     ),
+///         actions: <Widget>[
+///           new FlatButton(
+///             child: new Text('Regret'),
+///             onPressed: () {
+///               Navigator.of(context).pop();
+///             },
+///           ),
+///         ],
+///       );
+///     },
 ///   );
 /// }
 /// ```
@@ -126,14 +155,20 @@ class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
   ///
   /// Typically used in conjunction with [showDialog].
+  ///
+  /// The [contentPadding] must not be null. The [titlePadding] defaults to
+  /// null, which implies a default that depends on the values of the other
+  /// properties. See the documentation of [titlePadding] for details.
   const AlertDialog({
     Key key,
     this.title,
     this.titlePadding,
     this.content,
-    this.contentPadding,
-    this.actions
-  }) : super(key: key);
+    this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.actions,
+    this.semanticLabel,
+  }) : assert(contentPadding != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -143,8 +178,14 @@ class AlertDialog extends StatelessWidget {
 
   /// Padding around the title.
   ///
-  /// Uses material design default if none is supplied. If there is no title, no
-  /// padding will be provided.
+  /// If there is no title, no padding will be provided. Otherwise, this padding
+  /// is used.
+  ///
+  /// This property defaults to providing 24 pixels on the top, left, and right
+  /// of the title. If the [content] is not null, then no bottom padding is
+  /// provided (but see [contentPadding]). If it _is_ null, then an extra 20
+  /// pixels of bottom padding is added to separate the [title] from the
+  /// [actions].
   final EdgeInsetsGeometry titlePadding;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -157,7 +198,10 @@ class AlertDialog extends StatelessWidget {
 
   /// Padding around the content.
   ///
-  /// Uses material design default if none is supplied.
+  /// If there is no content, no padding will be provided. Otherwise, padding of
+  /// 20 pixels is provided above the content to separate the content from the
+  /// title, and padding of 24 pixels is provided on the left, right, and bottom
+  /// to separate the content from the other edges of the dialog.
   final EdgeInsetsGeometry contentPadding;
 
   /// The (optional) set of actions that are displayed at the bottom of the
@@ -165,27 +209,55 @@ class AlertDialog extends StatelessWidget {
   ///
   /// Typically this is a list of [FlatButton] widgets.
   ///
-  /// These widgets will be wrapped in a [ButtonBar].
+  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
+  /// of padding on each side.
+  ///
+  /// If the [title] is not null but the [content] _is_ null, then an extra 20
+  /// pixels of padding is added above the [ButtonBar] to separate the [title]
+  /// from the [actions].
   final List<Widget> actions;
+
+  /// The semantic label of the dialog used by accessibility frameworks to
+  /// announce screen transitions when the dialog is opened and closed.
+  ///
+  /// If this label is not provided, a semantic label will be infered from the
+  /// [title] if it is not null.  If there is no title, the label will be taken
+  /// from [MaterialLocalizations.alertDialogLabel].
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
+    String label = semanticLabel;
 
     if (title != null) {
       children.add(new Padding(
-        padding: titlePadding ?? new EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+        padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title,
+          child: new Semantics(child: title, namesRoute: true),
         ),
       ));
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
+      }
     }
 
     if (content != null) {
       children.add(new Flexible(
         child: new Padding(
-          padding: contentPadding ?? const EdgeInsetsDirectional.fromSTEB(24.0, 20.0, 24.0, 24.0),
+          padding: contentPadding,
           child: new DefaultTextStyle(
             style: Theme.of(context).textTheme.subhead,
             child: content,
@@ -202,15 +274,22 @@ class AlertDialog extends StatelessWidget {
       ));
     }
 
-    return new Dialog(
-      child: new IntrinsicWidth(
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
-        ),
+    Widget dialogChild = new IntrinsicWidth(
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     );
+
+    if (label != null)
+      dialogChild = new Semantics(
+        namesRoute: true,
+        label: label,
+        child: dialogChild
+      );
+
+    return new Dialog(child: dialogChild);
   }
 }
 
@@ -220,6 +299,12 @@ class AlertDialog extends StatelessWidget {
 /// widget is commonly used to represent each of the options. If the user
 /// selects this option, the widget will call the [onPressed] callback, which
 /// typically uses [Navigator.pop] to close the dialog.
+///
+/// The padding on a [SimpleDialogOption] is configured to combine with the
+/// default [SimpleDialog.contentPadding] so that each option ends up 8 pixels
+/// from the other vertically, with 20 pixels of spacing between the dialog's
+/// title and the first option, and 24 pixels of spacing between the last option
+/// and the bottom of the dialog.
 ///
 /// ## Sample code
 ///
@@ -275,6 +360,10 @@ class SimpleDialogOption extends StatelessWidget {
 /// A simple dialog offers the user a choice between several options. A simple
 /// dialog has an optional title that is displayed above the choices.
 ///
+/// Choices are normally represented using [SimpleDialogOption] widgets. If
+/// other widgets are used, see [contentPadding] for notes regarding the
+/// conventions for obtaining the spacing expected by Material Design.
+///
 /// For dialogs that inform the user about a situation, consider using an
 /// [AlertDialog].
 ///
@@ -298,19 +387,21 @@ class SimpleDialogOption extends StatelessWidget {
 /// Future<Null> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
-///     child: new SimpleDialog(
-///       title: const Text('Select assignment'),
-///       children: <Widget>[
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.treasury); },
-///           child: const Text('Treasury department'),
-///         ),
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.state); },
-///           child: const Text('State department'),
-///         ),
-///       ],
-///     ),
+///     builder: (BuildContext context) {
+///       return new SimpleDialog(
+///         title: const Text('Select assignment'),
+///         children: <Widget>[
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.treasury); },
+///             child: const Text('Treasury department'),
+///           ),
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.state); },
+///             child: const Text('State department'),
+///           ),
+///         ],
+///       );
+///     }
 ///   )) {
 ///     case Department.treasury:
 ///       // Let's go.
@@ -334,13 +425,18 @@ class SimpleDialog extends StatelessWidget {
   /// Creates a simple dialog.
   ///
   /// Typically used in conjunction with [showDialog].
+  ///
+  /// The [titlePadding] and [contentPadding] arguments must not be null.
   const SimpleDialog({
     Key key,
     this.title,
-    this.titlePadding,
+    this.titlePadding = const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
-    this.contentPadding,
-  }) : super(key: key);
+    this.contentPadding = const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.semanticLabel,
+  }) : assert(titlePadding != null),
+       assert(contentPadding != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -350,8 +446,13 @@ class SimpleDialog extends StatelessWidget {
 
   /// Padding around the title.
   ///
-  /// Uses material design default if none is supplied. If there is no title, no
-  /// padding will be provided.
+  /// If there is no title, no padding will be provided.
+  ///
+  /// By default, this provides the recommend Material Design padding of 24
+  /// pixels around the left, top, and right edges of the title.
+  ///
+  /// See [contentPadding] for the conventions regarding padding between the
+  /// [title] and the [children].
   final EdgeInsetsGeometry titlePadding;
 
   /// The (optional) content of the dialog is displayed in a
@@ -362,108 +463,158 @@ class SimpleDialog extends StatelessWidget {
 
   /// Padding around the content.
   ///
-  /// Uses material design default if none is supplied.
+  /// By default, this is 12 pixels on the top and 16 pixels on the bottom. This
+  /// is intended to be combined with children that have 24 pixels of padding on
+  /// the left and right, and 8 pixels of padding on the top and bottom, so that
+  /// the content ends up being indented 20 pixels from the title, 24 pixels
+  /// from the bottom, and 24 pixels from the sides.
+  ///
+  /// The [SimpleDialogOption] widget uses such padding.
+  ///
+  /// If there is no [title], the [contentPadding] should be adjusted so that
+  /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
+
+  /// The semantic label of the dialog used by accessibility frameworks to
+  /// announce screen transitions when the dialog is opened and closed.
+  ///
+  /// If this label is not provided, a semantic label will be infered from the
+  /// [title] if it is not null.  If there is no title, the label will be taken
+  /// from [MaterialLocalizations.dialogLabel].
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> body = <Widget>[];
+    String label = semanticLabel;
 
     if (title != null) {
       body.add(new Padding(
-        padding: titlePadding ?? const EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 0.0),
+        padding: titlePadding,
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title
+          child: new Semantics(namesRoute: true, child: title),
         )
       ));
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
+      }
     }
 
     if (children != null) {
       body.add(new Flexible(
         child: new SingleChildScrollView(
-          padding: contentPadding ?? const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 16.0),
+          padding: contentPadding,
           child: new ListBody(children: children),
         )
       ));
     }
 
-    return new Dialog(
-      child: new IntrinsicWidth(
-        stepWidth: 56.0,
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: body,
-          )
-        )
-      )
-    );
-  }
-}
-
-class _DialogRoute<T> extends PopupRoute<T> {
-  _DialogRoute({
-    @required this.theme,
-    bool barrierDismissible: true,
-    @required this.child,
-  }) : assert(barrierDismissible != null),
-       _barrierDismissible = barrierDismissible;
-
-  final Widget child;
-  final ThemeData theme;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
-
-  @override
-  bool get barrierDismissible => _barrierDismissible;
-  final bool _barrierDismissible;
-
-  @override
-  Color get barrierColor => Colors.black54;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return theme != null ? new Theme(data: theme, child: child) : child;
-  }
-
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    return new FadeTransition(
-      opacity: new CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOut
+    Widget dialogChild = new IntrinsicWidth(
+      stepWidth: 56.0,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 280.0),
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: body,
+        ),
       ),
-      child: child
     );
+
+    if (label != null)
+      dialogChild = new Semantics(
+        namesRoute: true,
+        label: label,
+        child: dialogChild,
+      );
+    return new Dialog(child: dialogChild);
   }
 }
 
-/// Displays a dialog above the current contents of the app.
+Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  return new FadeTransition(
+    opacity: new CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOut,
+    ),
+    child: child,
+  );
+}
+
+/// Displays a Material dialog above the current contents of the app, with
+/// Material entrance and exit animations, modal barrier color, and modal
+/// barrier behavior (dialog is dismissible with a tap on the barrier).
 ///
-/// This function typically receives a [Dialog] widget as its child argument.
-/// Content below the dialog is dimmed with a [ModalBarrier].
+/// This function takes a `builder` which typically builds a [Dialog] widget.
+/// Content below the dialog is dimmed with a [ModalBarrier]. The widget
+/// returned by the `builder` does not share a context with the location that
+/// `showDialog` is originally called from. Use a [StatefulBuilder] or a
+/// custom [StatefulWidget] if the dialog needs to update dynamically.
+///
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the dialog. It is only used when the method is called. Its corresponding
+/// widget can be safely removed from the tree before the dialog is closed.
+///
+/// The `child` argument is deprecated, and should be replaced with `builder`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
+///
+/// The dialog route created by this method is pushed to the root navigator.
+/// If the application has multiple [Navigator] objects, it may be necessary to
+/// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
+/// dialog rather than just `Navigator.pop(context, result)`.
 ///
 /// See also:
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
 ///  * [SimpleDialog], which handles the scrolling of the contents and does
 ///    not show buttons below its body.
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+///  * [showGeneralDialog], which allows for customization of the dialog popup.
 ///  * <https://material.google.com/components/dialogs.html>
 Future<T> showDialog<T>({
   @required BuildContext context,
-  bool barrierDismissible: true,
-  @required Widget child,
+  bool barrierDismissible = true,
+  @Deprecated(
+    'Instead of using the "child" argument, return the child from a closure '
+    'provided to the "builder" argument. This will ensure that the BuildContext '
+    'is appropriate for widgets built in the dialog.'
+  ) Widget child,
+  WidgetBuilder builder,
 }) {
-  return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child,
-    theme: Theme.of(context, shadowThemeOnly: true),
+  assert(child == null || builder == null);
+  return showGeneralDialog(
+    context: context,
+    pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+      final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
+      final Widget pageChild =  child ?? new Builder(builder: builder);
+      return new SafeArea(
+        child: new Builder(
+          builder: (BuildContext context) {
+            return theme != null
+                ? new Theme(data: theme, child: pageChild)
+                : pageChild;
+          }
+        ),
+      );
+    },
     barrierDismissible: barrierDismissible,
-  ));
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 150),
+    transitionBuilder: _buildMaterialDialogTransitions,
+  );
 }

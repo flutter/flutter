@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/process.dart';
-import 'package:test/test.dart';
+
+import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   group('shutdownHooks', () {
-    test('runInExpectedOrder', () async {
+    testUsingContext('runInExpectedOrder', () async {
       int i = 1;
       int serializeRecording1;
       int serializeRecording2;

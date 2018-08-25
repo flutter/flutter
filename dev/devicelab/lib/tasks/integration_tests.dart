@@ -31,10 +31,24 @@ TaskFunction createFlavorsTest() {
   );
 }
 
+TaskFunction createExternalUiIntegrationTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/external_ui',
+    'lib/main.dart',
+  );
+}
+
 TaskFunction createPlatformChannelSampleTest() {
   return new DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',
     'test_driver/button_tap.dart',
+  );
+}
+
+TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_views',
+    'lib/main.dart',
   );
 }
 

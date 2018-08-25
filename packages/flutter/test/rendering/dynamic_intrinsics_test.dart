@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -50,8 +50,8 @@ class RenderIntrinsicSize extends RenderProxyBox {
   void performLayout() {
     child.layout(constraints);
     size = new Size(
-      child.getMinIntrinsicWidth(double.INFINITY),
-      child.getMinIntrinsicHeight(double.INFINITY)
+      child.getMinIntrinsicWidth(double.infinity),
+      child.getMinIntrinsicHeight(double.infinity)
     );
   }
 }

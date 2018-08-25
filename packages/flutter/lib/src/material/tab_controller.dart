@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -17,8 +16,8 @@ import 'constants.dart';
 /// a [TabController] and share it directly.
 ///
 /// When the [TabBar] and [TabBarView] don't have a convenient stateful
-/// ancestor, a [TabController] can be shared with the [DefaultTabController]
-/// inherited widget.
+/// ancestor, a [TabController] can be shared by providing a
+/// [DefaultTabController] inherited widget.
 ///
 /// ## Sample code
 ///
@@ -78,7 +77,7 @@ class TabController extends ChangeNotifier {
   ///
   /// The `initialIndex` must be valid given [length] and must not be null. If [length] is
   /// zero, then `initialIndex` must be 0 (the default).
-  TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
+  TabController({ int initialIndex = 0, @required this.length, @required TickerProvider vsync })
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
@@ -159,7 +158,7 @@ class TabController extends ChangeNotifier {
   ///
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
-  void animateTo(int value, { Duration duration: kTabScrollDuration, Curve curve: Curves.ease }) {
+  void animateTo(int value, { Duration duration = kTabScrollDuration, Curve curve = Curves.ease }) {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
@@ -205,13 +204,14 @@ class _TabControllerScope extends InheritedWidget {
   }
 }
 
-/// The [TabController] for descendant widgets that don't specify one explicitly.
+/// The [TabController] for descendant widgets that don't specify one
+/// explicitly.
 ///
-/// DefaultTabController is an inherited widget that is used to share a
-/// TabController with a [TabBar] or a [TabBarView]. It's used when
-/// sharing an explicitly created TabController isn't convenient because
-/// the tab bar widgets are created by a stateless parent widget or by
-/// different parent widgets.
+/// [DefaultTabController] is an inherited widget that is used to share a
+/// [TabController] with a [TabBar] or a [TabBarView]. It's used when sharing an
+/// explicitly created [TabController] isn't convenient because the tab bar
+/// widgets are created by a stateless parent widget or by different parent
+/// widgets.
 ///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
@@ -249,7 +249,7 @@ class DefaultTabController extends StatefulWidget {
   const DefaultTabController({
     Key key,
     @required this.length,
-    this.initialIndex: 0,
+    this.initialIndex = 0,
     @required this.child,
   }) : assert(initialIndex != null),
        super(key: key);
@@ -262,7 +262,11 @@ class DefaultTabController extends StatefulWidget {
   /// Defaults to zero.
   final int initialIndex;
 
-  /// This widget's child. Often a [Scaffold] whose [AppBar] includes a [TabBar].
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Scaffold] whose [AppBar] includes a [TabBar].
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The closest instance of this class that encloses the given context.

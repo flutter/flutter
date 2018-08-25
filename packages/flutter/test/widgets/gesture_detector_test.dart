@@ -33,14 +33,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    final Offset firstLocation = const Offset(10.0, 10.0);
+    const Offset firstLocation = Offset(10.0, 10.0);
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    final Offset secondLocation = const Offset(10.0, 9.0);
+    const Offset secondLocation = Offset(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -60,8 +60,8 @@ void main() {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
-    final Offset downLocation = const Offset(10.0, 10.0);
-    final Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
+    const Offset downLocation = Offset(10.0, 10.0);
+    const Offset upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = new GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
@@ -250,5 +250,68 @@ void main() {
 
     expect(renderObj1, same(renderObj2));
     expect(actualCallback1, same(actualCallback2)); // Should be cached.
+  });
+
+  testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
+    int tapDown = 0;
+    int tap = 0;
+    int tapCancel = 0;
+    int longPress = 0;
+
+    await tester.pumpWidget(
+      new Container(
+        alignment: Alignment.topLeft,
+        child: new Container(
+          alignment: Alignment.center,
+          height: 100.0,
+          color: const Color(0xFF00FF00),
+          child: new GestureDetector(
+            onTapDown: (TapDownDetails details) {
+              tapDown += 1;
+            },
+            onTap: () {
+              tap += 1;
+            },
+            onTapCancel: () {
+              tapCancel += 1;
+            },
+            onLongPress: () {
+              longPress += 1;
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Pointer is dragged from the center of the 800x100 gesture detector
+    // to a point (400,300) below it. This always causes onTapCancel to be
+    // called; onTap should never be called.
+    Future<Null> dragOut(Duration timeout) async {
+      final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
+      // If the timeout is less than kPressTimeout the recognizer will just trigger
+      // the onTapCancel callback. If the timeout is greater than kLongPressTimeout
+      // then onTapDown, onLongPress, and onCancel will be called.
+      await tester.pump(timeout);
+      await gesture.moveTo(const Offset(400.0, 300.0));
+      await gesture.up();
+    }
+
+    await dragOut(kPressTimeout * 0.5); // generates tapCancel
+    expect(tapDown, 0);
+    expect(tapCancel, 1);
+    expect(tap, 0);
+    expect(longPress, 0);
+
+    await dragOut(kPressTimeout); // generates tapDown, tapCancel
+    expect(tapDown, 1);
+    expect(tapCancel, 2);
+    expect(tap, 0);
+    expect(longPress, 0);
+
+    await dragOut(kLongPressTimeout); // generates tapDown, longPress, tapCancel
+    expect(tapDown, 2);
+    expect(tapCancel, 3);
+    expect(tap, 0);
+    expect(longPress, 1);
   });
 }

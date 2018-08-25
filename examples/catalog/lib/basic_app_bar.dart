@@ -62,13 +62,13 @@ class Choice {
   final IconData icon;
 }
 
-const List<Choice> choices = const <Choice>[
-  const Choice(title: 'Car', icon: Icons.directions_car),
-  const Choice(title: 'Bicycle', icon: Icons.directions_bike),
-  const Choice(title: 'Boat', icon: Icons.directions_boat),
-  const Choice(title: 'Bus', icon: Icons.directions_bus),
-  const Choice(title: 'Train', icon: Icons.directions_railway),
-  const Choice(title: 'Walk', icon: Icons.directions_walk),
+const List<Choice> choices = <Choice>[
+  Choice(title: 'Car', icon: Icons.directions_car),
+  Choice(title: 'Bicycle', icon: Icons.directions_bike),
+  Choice(title: 'Boat', icon: Icons.directions_boat),
+  Choice(title: 'Bus', icon: Icons.directions_bus),
+  Choice(title: 'Train', icon: Icons.directions_railway),
+  Choice(title: 'Walk', icon: Icons.directions_walk),
 ];
 
 class ChoiceCard extends StatelessWidget {
@@ -109,7 +109,7 @@ Summary: A basic AppBar with a title, actions, and an overflow dropdown menu.
 Description:
 An app that displays one of a half dozen choices with an icon and a title.
 The two most common choices are available as action buttons and the remaining
-choices are included in the overflow dropdow menu.
+choices are included in the overflow dropdown menu.
 
 Classes: AppBar, IconButton, PopupMenuButton, Scaffold
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,10 +21,10 @@ void main() {
             child: new Stack(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(
+                new Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 )
@@ -42,7 +40,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'label',
             textDirection: TextDirection.ltr,
             rect: TestSemantics.fullScreen,
@@ -61,11 +59,11 @@ void main() {
             child: new Stack(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 ),
-                const Semantics(
+                new Semantics(
                   checked: true
                 )
               ]
@@ -80,7 +78,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'label',
             textDirection: TextDirection.ltr,
             rect: TestSemantics.fullScreen,

@@ -59,9 +59,9 @@ class _MarkerPainter extends CustomPainter {
 class Marker extends StatelessWidget {
   const Marker({
     Key key,
-    this.type: MarkerType.touch,
+    this.type = MarkerType.touch,
     this.position,
-    this.size: 40.0,
+    this.size = 40.0,
   }) : super(key: key);
 
   final Offset position;
@@ -101,7 +101,7 @@ class CardBuilder extends SliverChildDelegate {
   final CardTapCallback onTapUp;
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
   Widget build(BuildContext context, int index) {
@@ -152,7 +152,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   }
 
   bool handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && notification.depth == 1) {
+    if (notification is ScrollUpdateNotification && notification.depth == 0) {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;

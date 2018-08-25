@@ -1,10 +1,6 @@
 Dart SDK dependency
 ===================
 
-The Dart SDK is downloaded from one of [the supported channels](https://www.dartlang.org/install/archive),
-cached in `bin/cache/dart-sdk` and is used to run Flutter Dart code.
-
-The file `bin/internal/dart-sdk.version` determines the version of Dart SDK
-that will be downloaded. Normally it points to the `dev` channel (for example,
-`1.24.0-dev.6.7`), but it can also point to particular bleeding edge build
-of Dart (for example, `hash/c0617d20158955d99d6447036237fe2639ba088c`).
+The `bin/internal/engine.version` file controls which version of the Flutter engine to use.
+The file contains the commit hash of a commit in the <https://github.com/flutter/engine> repository.
+That hash must have successfully been compiled on <https://build.chromium.org/p/client.flutter/> and had its artifacts (the binaries that run on Android and iOS, the compiler, etc) successfully uploaded to Google Cloud Storage.

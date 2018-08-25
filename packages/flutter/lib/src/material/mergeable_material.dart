@@ -4,10 +4,10 @@
 
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'divider.dart';
 import 'material.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -45,6 +45,8 @@ class MaterialSlice extends MergeableMaterialItem {
        super(key);
 
   /// The contents of this slice.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -60,7 +62,7 @@ class MaterialGap extends MergeableMaterialItem {
   /// Creates a Material gap with a given size.
   const MaterialGap({
     @required LocalKey key,
-    this.size: 16.0
+    this.size = 16.0
   }) : assert(key != null),
        super(key);
 
@@ -99,10 +101,10 @@ class MergeableMaterial extends StatefulWidget {
   /// Creates a mergeable Material list of items.
   const MergeableMaterial({
     Key key,
-    this.mainAxis: Axis.vertical,
-    this.elevation: 2,
-    this.hasDividers: false,
-    this.children: const <MergeableMaterialItem>[]
+    this.mainAxis = Axis.vertical,
+    this.elevation = 2,
+    this.hasDividers = false,
+    this.children = const <MergeableMaterialItem>[]
   }) : super(key: key);
 
   /// The children of the [MergeableMaterial].
@@ -138,7 +140,7 @@ class _AnimationTuple {
     this.startAnimation,
     this.endAnimation,
     this.gapAnimation,
-    this.gapStart: 0.0
+    this.gapStart = 0.0
   });
 
   final AnimationController controller;
@@ -456,6 +458,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   BorderRadius _borderRadius(int index, bool start, bool end) {
+    assert(kMaterialEdges[MaterialType.card].topLeft == kMaterialEdges[MaterialType.card].topRight);
+    assert(kMaterialEdges[MaterialType.card].topLeft == kMaterialEdges[MaterialType.card].bottomLeft);
+    assert(kMaterialEdges[MaterialType.card].topLeft == kMaterialEdges[MaterialType.card].bottomRight);
     final Radius cardRadius = kMaterialEdges[MaterialType.card].topLeft;
 
     Radius startRadius = Radius.zero;
@@ -548,9 +553,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           final bool hasBottomDivider = _willNeedDivider(i + 1);
 
           Border border;
-          final BorderSide divider = new BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 0.5
+          final BorderSide divider = Divider.createBorderSide(
+            context,
+            width: 0.5, // TODO(ianh): This probably looks terrible when the dpr isn't a power of two.
           );
 
           if (i == 0) {
@@ -641,7 +646,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
 class _MergeableMaterialListBody extends ListBody {
   _MergeableMaterialListBody({
     List<Widget> children,
-    Axis mainAxis: Axis.vertical,
+    Axis mainAxis = Axis.vertical,
     this.items,
     this.boxShadows
   }) : super(children: children, mainAxis: mainAxis);
@@ -673,7 +678,7 @@ class _MergeableMaterialListBody extends ListBody {
 class _RenderMergeableMaterialListBody extends RenderListBody {
   _RenderMergeableMaterialListBody({
     List<RenderBox> children,
-    AxisDirection axisDirection: AxisDirection.down,
+    AxisDirection axisDirection = AxisDirection.down,
     this.boxShadows
   }) : super(children: children, axisDirection: axisDirection);
 
@@ -681,9 +686,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
 
   void _paintShadows(Canvas canvas, Rect rect) {
     for (BoxShadow boxShadow in boxShadows) {
-      final Paint paint = new Paint()
-        ..color = boxShadow.color
-        ..maskFilter = new MaskFilter.blur(BlurStyle.normal, boxShadow.blurSigma);
+      final Paint paint = boxShadow.toPaint();
       // TODO(dragostis): Right now, we are only interpolating the border radii
       // of the visible Material slices, not the shadows; they are not getting
       // interpolated and always have the same rounded radii. Once shadow

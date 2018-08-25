@@ -10,12 +10,22 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor,
-      {this.previewDart2,
-      this.extraFrontEndOptions,
-      this.extraGenSnapshotOptions});
+  const BuildInfo(this.mode, this.flavor, {
+    this.previewDart2 = false,
+    this.trackWidgetCreation = false,
+    this.compilationTraceFilePath,
+    this.extraFrontEndOptions,
+    this.extraGenSnapshotOptions,
+    this.buildSharedLibrary,
+    this.targetPlatform,
+    this.fileSystemRoots,
+    this.fileSystemScheme,
+    this.buildNumber,
+    this.buildName,
+  });
 
   final BuildMode mode;
+
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
   ///
@@ -24,8 +34,17 @@ class BuildInfo {
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
 
-  // Whether build should be done using Dart2 Frontend parser.
+  /// Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
+
+  final List<String> fileSystemRoots;
+  final String fileSystemScheme;
+
+  /// Whether the build should track widget creation locations.
+  final bool trackWidgetCreation;
+
+  /// Dart compilation trace file to use for JIT VM snapshot.
+  final String compilationTraceFilePath;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -33,9 +52,30 @@ class BuildInfo {
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
 
-  static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
-  static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
-  static const BuildInfo release = const BuildInfo(BuildMode.release, null);
+  /// Whether to prefer AOT compiling to a *so file.
+  final bool buildSharedLibrary;
+
+  /// Target platform for the build (e.g. android_arm versus android_arm64).
+  final TargetPlatform targetPlatform;
+
+  /// Internal version number (not displayed to users).
+  /// Each build must have a unique number to differentiate it from previous builds.
+  /// It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
+  /// On Android it is used as versionCode.
+  /// On Xcode builds it is used as CFBundleVersion.
+  final int buildNumber;
+
+  /// A "x.y.z" string used as the version number shown to users.
+  /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
+  /// On Android it is used as versionName.
+  /// On Xcode builds it is used as CFBundleShortVersionString,
+  final String buildName;
+
+  static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
+  static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
+  static const BuildInfo release = BuildInfo(BuildMode.release, null);
+  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
+  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -45,37 +85,39 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile;
+  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release;
+  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
+
+  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
+      new BuildInfo(mode, flavor,
+          previewDart2: previewDart2,
+          trackWidgetCreation: trackWidgetCreation,
+          compilationTraceFilePath: compilationTraceFilePath,
+          extraFrontEndOptions: extraFrontEndOptions,
+          extraGenSnapshotOptions: extraGenSnapshotOptions,
+          buildSharedLibrary: buildSharedLibrary,
+          targetPlatform: targetPlatform);
 }
 
-/// The type of build - `debug`, `profile`, or `release`.
+/// The type of build.
 enum BuildMode {
   debug,
   profile,
-  release
+  release,
+  dynamicProfile,
+  dynamicRelease
 }
 
 String getModeName(BuildMode mode) => getEnumName(mode);
-
-BuildMode getBuildModeForName(String mode) {
-  if (mode == 'debug')
-    return BuildMode.debug;
-  if (mode == 'profile')
-    return BuildMode.profile;
-  if (mode == 'release')
-    return BuildMode.release;
-  return null;
-}
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {
@@ -106,6 +148,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 
 enum TargetPlatform {
   android_arm,
+  android_arm64,
   android_x64,
   android_x86,
   ios,
@@ -113,12 +156,50 @@ enum TargetPlatform {
   linux_x64,
   windows_x64,
   fuchsia,
+  tester,
+}
+
+/// iOS target device architecture.
+//
+// TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
+enum IOSArch {
+  armv7,
+  arm64,
+}
+
+/// The default set of iOS device architectures to build for.
+const List<IOSArch> defaultIOSArchs = <IOSArch>[
+  IOSArch.arm64,
+];
+
+String getNameForIOSArch(IOSArch arch) {
+  switch (arch) {
+    case IOSArch.armv7:
+      return 'armv7';
+    case IOSArch.arm64:
+      return 'arm64';
+  }
+  assert(false);
+  return null;
+}
+
+IOSArch getIOSArchForName(String arch) {
+  switch (arch) {
+    case 'armv7':
+      return IOSArch.armv7;
+    case 'arm64':
+      return IOSArch.arm64;
+  }
+  assert(false);
+  return null;
 }
 
 String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
+    case TargetPlatform.android_arm64:
+      return 'android-arm64';
     case TargetPlatform.android_x64:
       return 'android-x64';
     case TargetPlatform.android_x86:
@@ -133,6 +214,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'windows-x64';
     case TargetPlatform.fuchsia:
       return 'fuchsia';
+    case TargetPlatform.tester:
+      return 'flutter-tester';
   }
   assert(false);
   return null;
@@ -142,6 +225,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
     case 'android-arm':
       return TargetPlatform.android_arm;
+    case 'android-arm64':
+      return TargetPlatform.android_arm64;
     case 'android-x64':
       return TargetPlatform.android_x64;
     case 'android-x86':
@@ -187,7 +272,7 @@ String getBuildDirectory() {
 
 /// Returns the Android build output directory.
 String getAndroidBuildDirectory() {
-  // TODO(cbracken) move to android subdir.
+  // TODO(cbracken): move to android subdir.
   return getBuildDirectory();
 }
 
@@ -198,10 +283,16 @@ String getAotBuildDirectory() {
 
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'flx');
+  return fs.path.join(getBuildDirectory(), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
+}
+
+/// Returns directory used by incremental compiler (IKG - incremental kernel
+/// generator) to store cached intermediate state.
+String getIncrementalCompilerByteStoreDirectory() {
+  return fs.path.join(getBuildDirectory(), 'ikg_byte_store');
 }

@@ -28,7 +28,7 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    const PopupMenuItem<String>(child: const Text('menuItem'))
+                    const PopupMenuItem<String>(child: Text('menuItem'))
                   ];
                 }
               ),
@@ -97,7 +97,7 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      const PopupMenuItem<String>(child: const Text('menuItem'))
+                      const PopupMenuItem<String>(child: Text('menuItem'))
                     ];
                   }
                 ),
@@ -128,10 +128,10 @@ void main() {
                   key: dropdownMenuButtonKey,
                   onChanged: (String newValue) { },
                   value: 'menuItem',
-                  items: <DropdownMenuItem<String>>[
-                    const DropdownMenuItem<String>(
+                  items: const <DropdownMenuItem<String>>[
+                    DropdownMenuItem<String>(
                       value: 'menuItem',
-                      child: const Text('menuItem'),
+                      child: Text('menuItem'),
                     ),
                   ],
                 )
@@ -161,7 +161,7 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showModalBottomSheet<Null>(
+                      showModalBottomSheet<void>(
                         context: context,
                         builder: (BuildContext context) => const Text('bottomSheet'),
                       );
@@ -198,9 +198,9 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showDialog<Null>(
+                      showDialog<void>(
                         context: context,
-                        child: const Text('dialog'),
+                        builder: (BuildContext context) => const Text('dialog'),
                       );
                     },
                     child: const Text('SHOW'),
@@ -219,7 +219,7 @@ void main() {
   });
 
   testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
-    const Color green = const Color(0xFF00FF00);
+    const Color green = Color(0xFF00FF00);
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -230,14 +230,16 @@ void main() {
               builder: (BuildContext context) {
                 return new GestureDetector(
                   onTap: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
-                      child: const Scaffold(
-                        body: const SizedBox(
-                          width: 200.0,
-                          height: 200.0,
-                        ),
-                      )
+                      builder: (BuildContext context) {
+                        return const Scaffold(
+                          body: SizedBox(
+                            width: 200.0,
+                            height: 200.0,
+                          ),
+                        );
+                      },
                     );
                   },
                   child: const Text('SHOW'),
@@ -252,7 +254,7 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
 
-    final List<Material> materials = tester.widgetList(find.byType(Material)).toList();
+    final List<Material> materials = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold
@@ -297,43 +299,30 @@ void main() {
       testBuildCalled = 0;
       ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
 
-      await tester.pumpWidget(
-        new Theme(
+      Widget buildTheme() {
+        return new Theme(
           data: themeData,
           child: const Test(),
-        ),
-      );
+        );
+      }
+
+      await tester.pumpWidget(buildTheme());
       expect(testBuildCalled, 1);
 
       // Pump the same widgets again.
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // No repeated build calls to the child since it's the same theme data.
       expect(testBuildCalled, 1);
 
       // New instance of theme data but still the same content.
       themeData = new ThemeData(primaryColor: const Color(0xFF000000));
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // Still no repeated calls.
       expect(testBuildCalled, 1);
 
       // Different now.
       themeData = new ThemeData(primaryColor: const Color(0xFF222222));
-      await tester.pumpWidget(
-        new Theme(
-          data: themeData,
-          child: const Test(),
-        ),
-      );
+      await tester.pumpWidget(buildTheme());
       // Should call build again.
       expect(testBuildCalled, 2);
     },
@@ -414,10 +403,12 @@ void main() {
         expect(style.decorationColor, null);
         expect(style.decorationStyle, null);
         expect(style.debugLabel, isNotNull);
+        expect(style.locale, null);
+        expect(style.background, null);
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, 'blackMountainView display4 < englishLike display4');
+    expect(theme.textTheme.display4.debugLabel, '(englishLike display4).merge(blackMountainView display4)');
   });
 }
 
@@ -460,6 +451,9 @@ class _TextStyleProxy implements TextStyle {
   @override FontStyle get fontStyle => _delegate.fontStyle;
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
+  @override Locale get locale => _delegate.locale;
+  @override ui.Paint get foreground => _delegate.foreground;
+  @override ui.Paint get background => _delegate.background;
   @override bool get inherit => _delegate.inherit;
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
@@ -476,7 +470,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor: 1.0, double fontSizeDelta: 0.0, int fontWeightDelta: 0, double letterSpacingFactor: 1.0, double letterSpacingDelta: 0.0, double wordSpacingFactor: 1.0, double wordSpacingDelta: 0.0, double heightFactor: 1.0, double heightDelta: 0.0}) {
+  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor = 1.0, double fontSizeDelta = 0.0, int fontWeightDelta = 0, double letterSpacingFactor = 1.0, double letterSpacingDelta = 0.0, double wordSpacingFactor = 1.0, double wordSpacingDelta = 0.0, double heightFactor = 1.0, double heightDelta = 0.0}) {
     throw new UnimplementedError();
   }
 
@@ -486,22 +480,22 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw new UnimplementedError();
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix: ''}) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines}) {
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor = 1.0, String ellipsis, int maxLines, Locale locale}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.TextStyle getTextStyle({double textScaleFactor: 1.0}) {
+  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) {
     throw new UnimplementedError();
   }
 

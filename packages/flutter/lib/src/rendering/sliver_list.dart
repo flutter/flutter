@@ -47,11 +47,11 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
-    final double scrollOffset = constraints.scrollOffset;
+    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
-    final double remainingPaintExtent = constraints.remainingPaintExtent;
-    assert(remainingPaintExtent >= 0.0);
-    final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
+    final double remainingExtent = constraints.remainingCacheExtent;
+    assert(remainingExtent >= 0.0);
+    final double targetEndScrollOffset = scrollOffset + remainingExtent;
     final BoxConstraints childConstraints = constraints.asBoxConstraints();
     int leadingGarbage = 0;
     int trailingGarbage = 0;
@@ -269,12 +269,19 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       from: childScrollOffset(firstChild),
       to: endScrollOffset,
     );
+    final double cacheExtent = calculateCacheOffset(
+      constraints,
+      from: childScrollOffset(firstChild),
+      to: endScrollOffset,
+    );
+    final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
     geometry = new SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintExtent,
+      cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
-      hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
+      hasVisualOverflow: endScrollOffset > targetEndScrollOffsetForPaint || constraints.scrollOffset > 0.0,
     );
 
     // We may have started the layout while scrolled to the end, which would not

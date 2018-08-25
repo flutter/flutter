@@ -6,9 +6,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart' as intl;
 
-class FooMaterialLocalizations extends GlobalMaterialLocalizations {
-  FooMaterialLocalizations(Locale locale, this.backButtonTooltip) : super(locale);
+class FooMaterialLocalizations extends MaterialLocalizationEn {
+  FooMaterialLocalizations(
+    Locale localeName,
+    this.backButtonTooltip,
+  ) : super(
+    localeName: localeName.toString(),
+    fullYearFormat: new intl.DateFormat.y(),
+    mediumDateFormat: new intl.DateFormat('E, MMM\u00a0d'),
+    longDateFormat: new intl.DateFormat.yMMMMEEEEd(),
+    yearMonthFormat: new intl.DateFormat.yMMMM(),
+    decimalFormat: new intl.NumberFormat.decimalPattern(),
+    twoDigitZeroPaddedFormat: new intl.NumberFormat('00'),
+  );
 
   @override
   final String backButtonTooltip;
@@ -16,8 +28,8 @@ class FooMaterialLocalizations extends GlobalMaterialLocalizations {
 
 class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const FooMaterialLocalizationsDelegate({
-    this.supportedLanguage: 'en',
-    this.backButtonTooltip: 'foo'
+    this.supportedLanguage = 'en',
+    this.backButtonTooltip = 'foo'
   });
 
   final String supportedLanguage;
@@ -39,12 +51,12 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
 Widget buildFrame({
   Locale locale,
-  Iterable<LocalizationsDelegate<dynamic>> delegates: GlobalMaterialLocalizations.delegates,
+  Iterable<LocalizationsDelegate<dynamic>> delegates = GlobalMaterialLocalizations.delegates,
   WidgetBuilder buildContent,
   LocaleResolutionCallback localeResolutionCallback,
-  Iterable<Locale> supportedLocales: const <Locale>[
-    const Locale('en', 'US'),
-    const Locale('es', 'es'),
+  Iterable<Locale> supportedLocales = const <Locale>[
+    Locale('en', 'US'),
+    Locale('es', 'ES'),
   ],
 }) {
   return new MaterialApp(
@@ -54,7 +66,7 @@ Widget buildFrame({
     localizationsDelegates: delegates,
     localeResolutionCallback: localeResolutionCallback,
     onGenerateRoute: (RouteSettings settings) {
-      return new MaterialPageRoute<Null>(
+      return new MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return buildContent(context);
         }
@@ -81,14 +93,14 @@ void main() {
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'Back');
 
     // Unrecognized locale falls back to 'en'
-    await tester.binding.setLocale('foo', 'bar');
+    await tester.binding.setLocale('foo', 'BAR');
     await tester.pump();
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'Back');
 
     // Spanish Bolivia locale, falls back to just 'es'
-    await tester.binding.setLocale('es', 'bo');
+    await tester.binding.setLocale('es', 'BO');
     await tester.pump();
-    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Espalda');
+    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Atrás');
   });
 
   testWidgets('Localizations.override widget tracks parent\'s locale', (WidgetTester tester) async {
@@ -164,12 +176,11 @@ void main() {
           const FooMaterialLocalizationsDelegate(supportedLanguage: 'de', backButtonTooltip: 'DE'),
         ],
         supportedLocales: const <Locale>[
-          const Locale('en', ''),
-          const Locale('fr', ''),
-          const Locale('de', ''),
+          Locale('en', ''),
+          Locale('fr', ''),
+          Locale('de', ''),
         ],
         buildContent: (BuildContext context) {
-          // Should always be 'foo', no matter what the locale is
           return new Text(
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,

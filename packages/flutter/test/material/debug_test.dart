@@ -7,10 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
-    await tester.pumpWidget(const FlatButton(
-      onPressed: null,
-      child: const Text('Go'),
-    ));
-    expect(tester.takeException(), isFlutterError);
+    await tester.pumpWidget(const ListTile());
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), startsWith('No Material widget found.'));
+    expect(exception.toString(), endsWith(':\n  ListTile\nThe ancestors of this widget were:\n  [root]'));
   });
 }

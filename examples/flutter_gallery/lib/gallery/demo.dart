@@ -35,11 +35,13 @@ class ComponentDemoTabData {
 class TabbedComponentDemoScaffold extends StatelessWidget {
   const TabbedComponentDemoScaffold({
     this.title,
-    this.demos
+    this.demos,
+    this.actions,
   });
 
   final List<ComponentDemoTabData> demos;
   final String title;
+  final List<Widget> actions;
 
   void _showExampleCode(BuildContext context) {
     final String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
@@ -57,19 +59,21 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text(title),
-          actions: <Widget>[
-            new Builder(
-              builder: (BuildContext context) {
-                return new IconButton(
-                  icon: const Icon(Icons.description),
-                  tooltip: 'Show example code',
-                  onPressed: () {
-                    _showExampleCode(context);
-                  },
-                );
-              },
-            ),
-          ],
+          actions: (actions ?? <Widget>[])..addAll(
+            <Widget>[
+              new Builder(
+                builder: (BuildContext context) {
+                  return new IconButton(
+                    icon: const Icon(Icons.code),
+                    tooltip: 'Show example code',
+                    onPressed: () {
+                      _showExampleCode(context);
+                    },
+                  );
+                },
+              )
+            ],
+          ),
           bottom: new TabBar(
             isScrollable: true,
             tabs: demos.map((ComponentDemoTabData data) => new Tab(text: data.tabName)).toList(),
@@ -77,16 +81,20 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
         ),
         body: new TabBarView(
           children: demos.map((ComponentDemoTabData demo) {
-            return new Column(
-              children: <Widget>[
-                new Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: new Text(demo.description,
-                    style: Theme.of(context).textTheme.subhead
-                  )
-                ),
-                new Expanded(child: demo.demoWidget)
-              ],
+            return new SafeArea(
+              top: false,
+              bottom: false,
+              child: new Column(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new Text(demo.description,
+                      style: Theme.of(context).textTheme.subhead
+                    )
+                  ),
+                  new Expanded(child: demo.demoWidget)
+                ],
+              ),
             );
           }).toList(),
         ),
@@ -113,7 +121,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
-          _exampleCode = code;
+          _exampleCode = code ?? 'Example code not found';
         });
       }
     });
@@ -129,7 +137,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     Widget body;
     if (_exampleCode == null) {
       body = const Center(
-        child: const CircularProgressIndicator()
+        child: CircularProgressIndicator()
       );
     } else {
       body = new SingleChildScrollView(
@@ -150,7 +158,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: const Icon(Icons.clear),
+          icon: const Icon(
+            Icons.clear,
+            semanticLabel: 'Close',
+          ),
           onPressed: () { Navigator.pop(context); }
         ),
         title: const Text('Example code')

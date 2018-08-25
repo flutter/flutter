@@ -101,9 +101,21 @@ class Ticker {
   /// A ticker that is [muted] can be active (see [isActive]) yet not be
   /// ticking. In that case, the ticker will not call its callback, and
   /// [isTicking] will be false, but time will still be progressing.
-  // TODO(ianh): we should teach the scheduler binding about the lifecycle events
-  // and then this could return an accurate view of the actual scheduler.
-  bool get isTicking => _future != null && !muted;
+  ///
+  /// This will return false if the [Scheduler.lifecycleState] is one that
+  /// indicates the application is not currently visible (e.g. if the device's
+  /// screen is turned off).
+  bool get isTicking {
+    if (_future == null)
+      return false;
+    if (muted)
+      return false;
+    if (SchedulerBinding.instance.framesEnabled)
+      return true;
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle)
+      return true; // for example, we might be in a warm-up frame or forced frame
+    return false;
+  }
 
   /// Whether time is elapsing for this [Ticker]. Becomes true when [start] is
   /// called and false when [stop] is called.
@@ -143,8 +155,9 @@ class Ticker {
     }());
     assert(_startTime == null);
     _future = new TickerFuture._();
-    if (shouldScheduleTick)
+    if (shouldScheduleTick) {
       scheduleTick();
+    }
     if (SchedulerBinding.instance.schedulerPhase.index > SchedulerPhase.idle.index &&
         SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.postFrameCallbacks.index)
       _startTime = SchedulerBinding.instance.currentFrameTimeStamp;
@@ -165,7 +178,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
-  void stop({ bool canceled: false }) {
+  void stop({ bool canceled = false }) {
     if (!isActive)
       return;
 
@@ -204,7 +217,7 @@ class Ticker {
   /// * The ticker is not active ([start] has not been called).
   /// * The ticker is not ticking, e.g. because it is [muted] (see [isTicking]).
   @protected
-  bool get shouldScheduleTick => isTicking && !scheduled;
+  bool get shouldScheduleTick => !muted && isActive && !scheduled;
 
   void _tick(Duration timeStamp) {
     assert(isTicking);
@@ -212,7 +225,6 @@ class Ticker {
     _animationId = null;
 
     _startTime ??= timeStamp;
-
     _onTick(timeStamp - _startTime);
 
     // The onTick callback may have scheduled another tick already, for
@@ -225,8 +237,7 @@ class Ticker {
   ///
   /// This should only be called if [shouldScheduleTick] is true.
   @protected
-  void scheduleTick({ bool rescheduling: false }) {
-    assert(isTicking);
+  void scheduleTick({ bool rescheduling = false }) {
     assert(!scheduled);
     assert(shouldScheduleTick);
     _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
@@ -300,7 +311,7 @@ class Ticker {
   StackTrace _debugCreationStack;
 
   @override
-  String toString({ bool debugIncludeStack: false }) {
+  String toString({ bool debugIncludeStack = false }) {
     final StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType(');
     assert(() {
@@ -334,7 +345,7 @@ class Ticker {
 /// if the [Ticker] that returned the [TickerFuture] was stopped with `canceled`
 /// set to true, or if it was disposed without being stopped.
 ///
-/// To run a callback when either this future resolves or when the tricker is
+/// To run a callback when either this future resolves or when the ticker is
 /// canceled, use [whenCompleteOrCancel].
 class TickerFuture implements Future<Null> {
   TickerFuture._();
@@ -369,6 +380,10 @@ class TickerFuture implements Future<Null> {
 
   /// Calls `callback` either when this future resolves or when the ticker is
   /// canceled.
+  ///
+  /// Calling this method registers an exception handler for the [orCancel]
+  /// future, so even if the [orCancel] property is accessed, canceling the
+  /// ticker will not cause an uncaught exception in the current zone.
   void whenCompleteOrCancel(VoidCallback callback) {
     Null thunk(dynamic value) {
       callback();
@@ -379,6 +394,12 @@ class TickerFuture implements Future<Null> {
 
   /// A future that resolves when this future resolves or throws when the ticker
   /// is canceled.
+  ///
+  /// If this property is never accessed, then canceling the ticker does not
+  /// throw any exceptions. Once this property is accessed, though, if the
+  /// corresponding ticker is canceled, then the [Future] returned by this
+  /// getter will complete with an error, and if that error is not caught, there
+  /// will be an uncaught exception in the current zone.
   Future<Null> get orCancel {
     if (_secondaryCompleter == null) {
       _secondaryCompleter = new Completer<Null>();
@@ -431,7 +452,7 @@ class TickerCanceled implements Exception {
   /// Reference to the [Ticker] object that was canceled.
   ///
   /// This may be null in the case that the [Future] created for
-  /// [TickerFuture.orCancel] was created after the future was canceled.
+  /// [TickerFuture.orCancel] was created after the ticker was canceled.
   final Ticker ticker;
 
   @override

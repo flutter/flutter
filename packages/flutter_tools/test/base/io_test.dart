@@ -7,8 +7,8 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -19,14 +19,14 @@ void main() {
       final ProcessSignal signalUnderTest = new ProcessSignal(mockSignal);
       final StreamController<io.ProcessSignal> controller = new StreamController<io.ProcessSignal>();
 
-      when(mockSignal.watch()).thenReturn(controller.stream);
+      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
       controller.add(mockSignal);
 
       expect(signalUnderTest, await signalUnderTest.watch().first);
     });
 
     testUsingContext('toString() works', () async {
-      expect(io.ProcessSignal.SIGINT.toString(), ProcessSignal.SIGINT.toString());
+      expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
     });
   });
 }

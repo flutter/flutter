@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,9 +11,10 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,31 +24,33 @@ const String frameworkChannel = 'omega';
 
 void main() {
   group('create', () {
-    Directory temp;
+    Directory tempDir;
     Directory projectDir;
     FlutterVersion mockFlutterVersion;
+    LoggingProcessManager loggingProcessManager;
 
     setUpAll(() {
       Cache.disableLocking();
     });
 
     setUp(() {
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
-      projectDir = temp.childDirectory('flutter_project');
+      loggingProcessManager = new LoggingProcessManager();
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+      projectDir = tempDir.childDirectory('flutter_project');
       mockFlutterVersion = new MockFlutterVersion();
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     // Verify that we create a project that is well-formed.
     testUsingContext('project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>[],
         <String>[
-          'android/app/src/main/java/com/yourcompany/flutterproject/MainActivity.java',
+          'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
           'ios/Runner/AppDelegate.h',
           'ios/Runner/AppDelegate.m',
           'ios/Runner/main.m',
@@ -57,29 +59,30 @@ void main() {
           'flutter_project.iml',
         ],
       );
-    }, timeout: const Timeout.factor(2.0));
+      return _runFlutterTest(projectDir);
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift project', () async {
       return _createProject(
         projectDir,
         <String>['--no-pub', '--android-language', 'kotlin', '-i', 'swift'],
         <String>[
-          'android/app/src/main/kotlin/com/yourcompany/flutterproject/MainActivity.kt',
+          'android/app/src/main/kotlin/com/example/flutterproject/MainActivity.kt',
           'ios/Runner/AppDelegate.swift',
           'ios/Runner/Runner-Bridging-Header.h',
           'lib/main.dart',
         ],
         unexpectedPaths: <String>[
-          'android/app/src/main/java/com/yourcompany/flutterproject/MainActivity.java',
+          'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
           'ios/Runner/AppDelegate.h',
           'ios/Runner/AppDelegate.m',
           'ios/Runner/main.m',
         ],
       );
-    });
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('package project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=package'],
         <String>[
@@ -87,15 +90,15 @@ void main() {
           'test/flutter_project_test.dart',
         ],
         unexpectedPaths: <String>[
-          'android/app/src/main/java/com/yourcompany/flutterproject/MainActivity.java',
-          'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
+          'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+          'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
           'ios/Runner/AppDelegate.h',
           'ios/Runner/AppDelegate.m',
           'ios/Runner/main.m',
           'lib/main.dart',
-          'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
+          'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
           'example/ios/Runner/AppDelegate.h',
           'example/ios/Runner/AppDelegate.m',
           'example/ios/Runner/main.m',
@@ -103,18 +106,19 @@ void main() {
           'test/widget_test.dart',
         ],
       );
-    }, timeout: const Timeout.factor(2.0));
+      return _runFlutterTest(projectDir);
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('plugin project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=plugin'],
         <String>[
-          'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
+          'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
           'lib/flutter_project.dart',
-          'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
+          'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
           'example/ios/Runner/AppDelegate.h',
           'example/ios/Runner/AppDelegate.m',
           'example/ios/Runner/main.m',
@@ -123,49 +127,50 @@ void main() {
         ],
         plugin: true,
       );
-    }, timeout: const Timeout.factor(2.0));
+      return _runFlutterTest(projectDir.childDirectory('example'));
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift plugin project', () async {
       return _createProject(
         projectDir,
         <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
         <String>[
-          'android/src/main/kotlin/com/yourcompany/flutterproject/FlutterProjectPlugin.kt',
+          'android/src/main/kotlin/com/example/flutterproject/FlutterProjectPlugin.kt',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
           'ios/Classes/SwiftFlutterProjectPlugin.swift',
           'lib/flutter_project.dart',
-          'example/android/app/src/main/kotlin/com/yourcompany/flutterprojectexample/MainActivity.kt',
+          'example/android/app/src/main/kotlin/com/example/flutterprojectexample/MainActivity.kt',
           'example/ios/Runner/AppDelegate.swift',
           'example/ios/Runner/Runner-Bridging-Header.h',
           'example/lib/main.dart',
         ],
         unexpectedPaths: <String>[
-          'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
-          'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
+          'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
+          'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
           'example/ios/Runner/AppDelegate.h',
           'example/ios/Runner/AppDelegate.m',
           'example/ios/Runner/main.m',
         ],
         plugin: true,
       );
-    });
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('plugin project with custom org', () async {
       return _createProject(
-          projectDir,
-          <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo'],
-          <String>[
-            'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
-            'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
-          ],
-          unexpectedPaths: <String>[
-            'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
-            'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
-          ],
-          plugin: true,
+        projectDir,
+        <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo'],
+        <String>[
+          'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
+          'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
+        ],
+        unexpectedPaths: <String>[
+          'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
+          'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+        ],
+        plugin: true,
       );
-    });
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(
@@ -173,7 +178,60 @@ void main() {
         <String>['--with-driver-test'],
         <String>['lib/main.dart'],
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: allowForRemotePubInvocation);
+
+    testUsingContext('module', () async {
+      return _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=module'],
+        <String>[
+          '.gitignore',
+          '.metadata',
+          'lib/main.dart',
+          'pubspec.yaml',
+          'README.md',
+        ],
+        unexpectedPaths: <String>[
+          '.android/',
+          'android/',
+          'ios/',
+        ]
+      );
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('module with pub', () async {
+      return _createProject(
+          projectDir,
+          <String>['-t', 'module'],
+          <String>[
+            '.gitignore',
+            '.metadata',
+            'lib/main.dart',
+            'pubspec.lock',
+            'pubspec.yaml',
+            'README.md',
+            '.packages',
+            '.android/build.gradle',
+            '.android/Flutter/build.gradle',
+            '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
+            '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
+            '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+            '.android/Flutter/src/main/AndroidManifest.xml',
+            '.android/gradle.properties',
+            '.android/gradle/wrapper/gradle-wrapper.jar',
+            '.android/gradle/wrapper/gradle-wrapper.properties',
+            '.android/gradlew',
+            '.android/gradlew.bat',
+            '.android/local.properties',
+            '.android/include_flutter.groovy',
+            '.android/settings.gradle',
+          ],
+          unexpectedPaths: <String>[
+            'android/',
+            'ios/',
+          ]
+      );
+    }, timeout: allowForRemotePubInvocation);
 
     // Verify content and formatting
     testUsingContext('content', () async {
@@ -191,6 +249,7 @@ void main() {
       }
 
       expectExists('lib/main.dart');
+
       for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
           final String original = file.readAsStringSync();
@@ -200,29 +259,13 @@ void main() {
             <String>[file.path],
             workingDirectory: projectDir.path,
           );
-          final String formatted = await process.stdout.transform(UTF8.decoder).join();
+          final String formatted = await process.stdout.transform(utf8.decoder).join();
 
           expect(original, formatted, reason: file.path);
         }
       }
 
-      // TODO(pq): enable when sky_shell is available
-      if (!io.Platform.isWindows) {
-        // Verify that the sample widget test runs cleanly.
-        final List<String> args = <String>[
-          fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-          'test',
-          '--no-color',
-          fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
-        ];
-
-        final ProcessResult result = await Process.run(
-          fs.path.join(dartSdkPath, 'bin', 'dart'),
-          args,
-          workingDirectory: projectDir.path,
-        );
-        expect(result.exitCode, 0);
-      }
+      await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
       // Generated Xcode settings
       final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
@@ -245,10 +288,16 @@ void main() {
       expect(version, contains('version:'));
       expect(version, contains('revision: 12345678'));
       expect(version, contains('channel: omega'));
-    },
-    overrides: <Type, Generator>{
+
+      // IntelliJ metadata
+      final String intelliJSdkMetadataPath = fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
+      expectExists(intelliJSdkMetadataPath);
+      final String sdkMetaContents = fs.file(fs.path.join(projectDir.path, intelliJSdkMetadataPath)).readAsStringSync();
+      expect(sdkMetaContents, contains('<root url="file:/'));
+      expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
+    }, overrides: <Type, Generator>{
       FlutterVersion: () => mockFlutterVersion,
-    });
+    }, timeout: allowForCreateFlutterProject);
 
     // Verify that we can regenerate over an existing project.
     testUsingContext('can re-gen over existing project', () async {
@@ -260,7 +309,86 @@ void main() {
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
-    });
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('can re-gen android/ folder, reusing custom org', () async {
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--org', 'com.bar.foo'],
+        <String>[],
+      );
+      projectDir.childDirectory('android').deleteSync(recursive: true);
+      return _createProject(
+        projectDir,
+        <String>['--no-pub'],
+        <String>[
+          'android/app/src/main/java/com/bar/foo/flutterproject/MainActivity.java',
+        ],
+        unexpectedPaths: <String>[
+          'android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+        ],
+      );
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('can re-gen ios/ folder, reusing custom org', () async {
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--org', 'com.bar.foo'],
+        <String>[],
+      );
+      projectDir.childDirectory('ios').deleteSync(recursive: true);
+      await _createProject(projectDir, <String>['--no-pub'], <String>[]);
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+      expect(
+        await project.ios.productBundleIdentifier(),
+        'com.bar.foo.flutterProject',
+      );
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('can re-gen plugin ios/ and example/ folders, reusing custom org', () async {
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '-t', 'plugin', '--org', 'com.bar.foo'],
+        <String>[],
+      );
+      projectDir.childDirectory('example').deleteSync(recursive: true);
+      projectDir.childDirectory('ios').deleteSync(recursive: true);
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '-t', 'plugin'],
+        <String>[
+          'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
+          'ios/Classes/FlutterProjectPlugin.h',
+        ],
+        unexpectedPaths: <String>[
+          'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
+          'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
+        ],
+      );
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+      expect(
+        await project.example.ios.productBundleIdentifier(),
+        'com.bar.foo.flutterProjectExample',
+      );
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--org', 'com.bar.foo'],
+        <String>[],
+      );
+      fs.directory(fs.path.join(projectDir.path, 'ios')).deleteSync(recursive: true);
+      await _createProject(
+        projectDir,
+        <String>['--no-pub', '--org', 'com.bar.baz'],
+        <String>[],
+      );
+      expect(
+        () => _createProject(projectDir, <String>[], <String>[]),
+        throwsToolExit(message: 'Ambiguous organization'),
+      );
+    }, timeout: allowForCreateFlutterProject);
 
     // Verify that we help the user correct an option ordering issue
     testUsingContext('produces sensible error message', () async {
@@ -298,6 +426,38 @@ void main() {
         throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
       );
     });
+
+    testUsingContext('invokes pub offline when requested', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains('--offline'));
+    },
+      timeout: allowForCreateFlutterProject,
+      overrides: <Type, Generator>{
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
+
+    testUsingContext('invokes pub online when offline not requested', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--pub', projectDir.path]);
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
+    },
+      timeout: allowForCreateFlutterProject,
+      overrides: <Type, Generator>{
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
   });
 }
 
@@ -312,11 +472,16 @@ Future<Null> _createProject(
   args.add(dir.path);
   await runner.run(args);
 
+  bool pathExists(String path) {
+    final String fullPath = fs.path.join(dir.path, path);
+    return fs.typeSync(fullPath) != FileSystemEntityType.notFound;
+  }
+
   for (String path in expectedPaths) {
-    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), true, reason: '$path does not exist');
+    expect(pathExists(path), true, reason: '$path does not exist');
   }
   for (String path in unexpectedPaths) {
-    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
+    expect(pathExists(path), false, reason: '$path exists');
   }
 }
 
@@ -325,22 +490,22 @@ Future<Null> _createAndAnalyzeProject(
     { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths, plugin: plugin);
   if (plugin) {
-    await _analyzeProject(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
-    await _analyzeProject(fs.path.join(dir.path, 'example'));
+    await _analyzeProject(dir.path);
   } else {
     await _analyzeProject(dir.path);
   }
 }
 
-Future<Null> _analyzeProject(String workingDir, {String target}) async {
+Future<Null> _analyzeProject(String workingDir) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
   ));
 
-  final List<String> args = <String>[flutterToolsPath, 'analyze'];
-  if (target != null)
-    args.add(target);
+  final List<String> args = <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..add('analyze');
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -354,4 +519,56 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
   expect(exec.exitCode, 0);
 }
 
+Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
+  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+    'bin',
+    'flutter_tools.dart',
+  ));
+
+  final List<String> args = <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..add('test')
+    ..add('--no-color');
+  if (target != null)
+    args.add(target);
+
+  final ProcessResult exec = await Process.run(
+    '$dartSdkPath/bin/dart',
+    args,
+    workingDirectory: workingDir.path,
+  );
+  if (exec.exitCode != 0) {
+    print(exec.stdout);
+    print(exec.stderr);
+  }
+  expect(exec.exitCode, 0);
+}
+
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+
+/// A ProcessManager that invokes a real process manager, but keeps
+/// track of all commands sent to it.
+class LoggingProcessManager extends LocalProcessManager {
+  List<List<String>> commands = <List<String>>[];
+
+  @override
+  Future<Process> start(
+    List<dynamic> command, {
+      String workingDirectory,
+      Map<String, String> environment,
+      bool includeParentEnvironment = true,
+      bool runInShell = false,
+      ProcessStartMode mode = ProcessStartMode.normal,
+    }) {
+    commands.add(command);
+    return super.start(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+  }
+}

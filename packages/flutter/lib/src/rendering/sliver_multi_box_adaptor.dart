@@ -43,6 +43,10 @@ abstract class RenderSliverBoxChildManager {
   /// the [RenderSliverMultiBoxAdaptor] object if they were not created during
   /// this frame and have not yet been updated during this frame. It is not
   /// valid to add any other children to this render object.
+  ///
+  /// If this method does not create a child for a given `index` greater than or
+  /// equal to zero, then [computeMaxScrollOffset] must be able to return a
+  /// precise value.
   void createChild(int index, { @required RenderBox after });
 
   /// Remove the given child from the child list.
@@ -67,6 +71,18 @@ abstract class RenderSliverBoxChildManager {
     double leadingScrollOffset,
     double trailingScrollOffset,
   });
+
+  /// Called to obtain a precise measure of the total number of children.
+  ///
+  /// Must return the number that is one greater than the greatest `index` for
+  /// which `createChild` will actually create a child.
+  ///
+  /// This is used when [createChild] cannot add a child for a positive `index`,
+  /// to determine the precise dimensions of the sliver. It must return an
+  /// accurate and precise non-null value. It will not be called if
+  /// [createChild] is always able to create a child (e.g. for an infinite
+  /// list).
+  int get childCount;
 
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild].
   ///
@@ -136,7 +152,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 /// * Children can be removed except during a layout pass if they have already
 ///   been laid out during that layout pass.
 /// * Children cannot be added except during a call to [childManager], and
-///   then only if there is no child correspending to that index (or the child
+///   then only if there is no child corresponding to that index (or the child
 ///   child corresponding to that index was first removed).
 ///
 /// See also:
@@ -282,36 +298,6 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     _keepAliveBucket.values.forEach(visitor);
   }
 
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    switch (constraints.normalizedGrowthDirection) {
-      case GrowthDirection.forward:
-        super.visitChildrenForSemantics((RenderObject child) {
-          // The sliver is overlapped at the leading edge; check if trailing edge is visible.
-          final Offset bottomRightInViewport = MatrixUtils.transformPoint(
-              child.getTransformTo(parent), child.semanticBounds.bottomRight
-          );
-          final double endOverlap = constraints.overlap;
-          if ((constraints.axis == Axis.vertical && bottomRightInViewport.dy > endOverlap) ||
-              (constraints.axis == Axis.horizontal && bottomRightInViewport.dx > endOverlap))
-            visitor(child);
-        });
-        break;
-      case GrowthDirection.reverse:
-        super.visitChildrenForSemantics((RenderObject child) {
-          // The sliver is overlapped at the trailing edge; check if leading edge is visible.
-          final Offset topLeftInViewport = MatrixUtils.transformPoint(
-              child.getTransformTo(parent), child.semanticBounds.topLeft
-          );
-          final double startOverlap = constraints.remainingPaintExtent - constraints.overlap;
-          if ((constraints.axis == Axis.vertical && topLeftInViewport.dy < startOverlap) ||
-              (constraints.axis == Axis.horizontal && topLeftInViewport.dx < startOverlap))
-            visitor(child);
-        });
-        break;
-    }
-  }
-
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
@@ -329,7 +315,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// that call either, except for the one that is created and returned by
   /// `createChild`.
   @protected
-  bool addInitialChild({ int index: 0, double layoutOffset: 0.0 }) {
+  bool addInitialChild({ int index = 0, double layoutOffset = 0.0 }) {
     assert(_debugAssertChildListLocked());
     assert(firstChild == null);
     _createOrObtainChild(index, after: null);
@@ -359,7 +345,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// for the one that is created and returned by `createChild`.
   @protected
   RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
-    bool parentUsesSize: false,
+    bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
     final int index = indexOf(firstChild) - 1;
@@ -387,7 +373,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @protected
   RenderBox insertAndLayoutChild(BoxConstraints childConstraints, {
     @required RenderBox after,
-    bool parentUsesSize: false,
+    bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
     assert(after != null);
@@ -538,15 +524,20 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       );
       if (addExtent)
         childOffset += mainAxisUnit * paintExtentOf(child);
-      context.paintChild(child, childOffset);
+
+      // If the child's visible interval (mainAxisDelta, mainAxisDelta + paintExtentOf(child))
+      // does not intersect the paint extent interval (0, constraints.remainingPaintExtent), it's hidden.
+      if (mainAxisDelta < constraints.remainingPaintExtent && mainAxisDelta + paintExtentOf(child) > 0)
+        context.paintChild(child, childOffset);
+
       child = childAfter(child);
     }
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsNode.message(firstChild != null ? 'currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}' : 'no children current live'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsNode.message(firstChild != null ? 'currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}' : 'no children current live'));
   }
 
   /// Asserts that the reified child list is not empty and has a contiguous

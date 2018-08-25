@@ -21,6 +21,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
+      animationBehavior: AnimationBehavior.preserve,
     )..forward();
 
     _animation = new CurvedAnimation(
@@ -65,7 +66,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
-        child: const LinearProgressIndicator()
+        child: LinearProgressIndicator()
       ),
       const LinearProgressIndicator(),
       const LinearProgressIndicator(),
@@ -107,17 +108,21 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
             child: new GestureDetector(
               onTap: _handleTap,
               behavior: HitTestBehavior.opaque,
-              child: new Container(
-                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-                child: new AnimatedBuilder(
-                  animation: _animation,
-                  builder: _buildIndicators
-                )
-              )
-            )
-          )
-        )
-      )
+              child: new SafeArea(
+                top: false,
+                bottom: false,
+                child: new Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                  child: new AnimatedBuilder(
+                    animation: _animation,
+                    builder: _buildIndicators
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

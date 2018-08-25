@@ -12,6 +12,9 @@ import 'framework.dart';
 import 'image.dart';
 import 'ticker_provider.dart';
 
+// Examples can assume:
+// Uint8List bytes;
+
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
 ///
@@ -46,14 +49,14 @@ import 'ticker_provider.dart';
 /// different image. This is known as "gapless playback" (see also
 /// [Image.gaplessPlayback]).
 ///
-/// ## Sample code:
+/// ## Sample code
 ///
 /// ```dart
-/// return new FadeInImage(
+/// new FadeInImage(
 ///   // here `bytes` is a Uint8List containing the bytes for the in-memory image
 ///   placeholder: new MemoryImage(bytes),
 ///   image: new NetworkImage('https://backend.example.com/image.png'),
-/// );
+/// )
 /// ```
 class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading
@@ -66,16 +69,16 @@ class FadeInImage extends StatefulWidget {
     Key key,
     @required this.placeholder,
     @required this.image,
-    this.fadeOutDuration: const Duration(milliseconds: 300),
-    this.fadeOutCurve: Curves.easeOut,
-    this.fadeInDuration: const Duration(milliseconds: 700),
-    this.fadeInCurve: Curves.easeIn,
+    this.fadeOutDuration = const Duration(milliseconds: 300),
+    this.fadeOutCurve = Curves.easeOut,
+    this.fadeInDuration = const Duration(milliseconds: 700),
+    this.fadeInCurve = Curves.easeIn,
     this.width,
     this.height,
     this.fit,
-    this.alignment: Alignment.center,
-    this.repeat: ImageRepeat.noRepeat,
-    this.matchTextDirection: false,
+    this.alignment = Alignment.center,
+    this.repeat = ImageRepeat.noRepeat,
+    this.matchTextDirection = false,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(fadeOutDuration != null),
@@ -112,18 +115,18 @@ class FadeInImage extends StatefulWidget {
     Key key,
     @required Uint8List placeholder,
     @required String image,
-    double placeholderScale: 1.0,
-    double imageScale: 1.0,
-    this.fadeOutDuration: const Duration(milliseconds: 300),
-    this.fadeOutCurve: Curves.easeOut,
-    this.fadeInDuration: const Duration(milliseconds: 700),
-    this.fadeInCurve: Curves.easeIn,
+    double placeholderScale = 1.0,
+    double imageScale = 1.0,
+    this.fadeOutDuration = const Duration(milliseconds: 300),
+    this.fadeOutCurve = Curves.easeOut,
+    this.fadeInDuration = const Duration(milliseconds: 700),
+    this.fadeInCurve = Curves.easeIn,
     this.width,
     this.height,
     this.fit,
-    this.alignment: Alignment.center,
-    this.repeat: ImageRepeat.noRepeat,
-    this.matchTextDirection: false,
+    this.alignment = Alignment.center,
+    this.repeat = ImageRepeat.noRepeat,
+    this.matchTextDirection = false,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(placeholderScale != null),
@@ -169,17 +172,17 @@ class FadeInImage extends StatefulWidget {
     @required String image,
     AssetBundle bundle,
     double placeholderScale,
-    double imageScale: 1.0,
-    this.fadeOutDuration: const Duration(milliseconds: 300),
-    this.fadeOutCurve: Curves.easeOut,
-    this.fadeInDuration: const Duration(milliseconds: 700),
-    this.fadeInCurve: Curves.easeIn,
+    double imageScale = 1.0,
+    this.fadeOutDuration = const Duration(milliseconds: 300),
+    this.fadeOutCurve = Curves.easeOut,
+    this.fadeInDuration = const Duration(milliseconds: 700),
+    this.fadeInCurve = Curves.easeIn,
     this.width,
     this.height,
     this.fit,
-    this.alignment: Alignment.center,
-    this.repeat: ImageRepeat.noRepeat,
-    this.matchTextDirection: false,
+    this.alignment = Alignment.center,
+    this.repeat = ImageRepeat.noRepeat,
+    this.matchTextDirection = false,
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
@@ -239,8 +242,8 @@ class FadeInImage extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while an
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
   /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
@@ -251,6 +254,13 @@ class FadeInImage extends StatefulWidget {
   /// must be in scope.
   ///
   /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
@@ -383,7 +393,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   @override
   void didUpdateWidget(FadeInImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.image != oldWidget.image || widget.placeholder != widget.placeholder)
+    if (widget.image != oldWidget.image || widget.placeholder != oldWidget.placeholder)
       _resolveImage();
   }
 

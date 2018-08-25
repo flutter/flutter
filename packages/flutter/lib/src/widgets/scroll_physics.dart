@@ -67,9 +67,10 @@ class ScrollPhysics {
     return new ScrollPhysics(parent: buildParent(ancestor));
   }
 
-  /// Used by [DragScrollActivity] and other user-driven activities to
-  /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
-  /// into a delta to apply using [ScrollActivityDelegate.setPixels].
+  /// Used by [DragScrollActivity] and other user-driven activities to convert
+  /// an offset in logical pixels as provided by the [DragUpdateDetails] into a
+  /// delta to apply (subtract from the current position) using
+  /// [ScrollActivityDelegate.setPixels].
   ///
   /// This is used by some [ScrollPosition] subclasses to apply friction during
   /// overscroll situations.
@@ -124,13 +125,24 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
+  ///
+  /// ## Examples
+  ///
+  /// [BouncingScrollPhysics] returns zero. In other words, it allows scrolling
+  /// past the boundary unhindered.
+  ///
+  /// [ClampingScrollPhysics] returns the amount by which the value is beyond
+  /// the position or the boundary, whichever is furthest from the content. In
+  /// other words, it disallows scrolling past the boundary, but allows
+  /// scrolling back from being overscrolled, if for some reason the position
+  /// ends up overscrolled.
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     if (parent == null)
       return 0.0;
     return parent.applyBoundaryConditions(position, value);
   }
 
-  /// Returns a simulation for ballisitic scrolling starting from the given
+  /// Returns a simulation for ballistic scrolling starting from the given
   /// position with the given velocity.
   ///
   /// This is used by [ScrollPositionWithSingleContext] in the
@@ -207,6 +219,21 @@ class ScrollPhysics {
     return parent.carriedMomentum(existingVelocity);
   }
 
+  /// The minimum amount of pixel distance drags must move by to start motion
+  /// the first time or after each time the drag motion stopped.
+  ///
+  /// If null, no minimum threshold is enforced.
+  double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
+
+  /// Whether a viewport is allowed to change its scroll position implicitly in
+  /// responds to a call to [RenderObject.showOnScreen].
+  ///
+  /// [RenderObject.showOnScreen] is for example used to bring a text field
+  /// fully on screen after it has received focus. This property controls
+  /// whether the viewport associated with this object is allowed to change the
+  /// scroll position to fulfill such a request.
+  bool get allowImplicitScrolling => true;
+
   @override
   String toString() {
     if (parent == null)
@@ -223,7 +250,7 @@ class ScrollPhysics {
 ///
 /// See also:
 ///
-///  * [ScrollConfiguration], which uses this to provide the the default
+///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on iOS.
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
@@ -326,6 +353,11 @@ class BouncingScrollPhysics extends ScrollPhysics {
     return existingVelocity.sign *
         math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
   }
+
+  // Eyeballed from observation to counter the effect of an unintended scroll
+  // from the natural motion of lifting the finger after a scroll.
+  @override
+  double get dragStartDistanceMotionThreshold => 3.5;
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching
@@ -335,13 +367,14 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-///  * [ScrollConfiguration], which uses this to provide the the default
+///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on Android.
 ///  * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
 ///    behavior.
 ///  * [GlowingOverscrollIndicator], which is used by [ScrollConfiguration] to
 ///    provide the glowing effect that is usually found with this clamping effect
-///    on Android.
+///    on Android. When using a [MaterialApp], the [GlowingOverscrollIndicator]'s
+///    glow color is specified to use [ThemeData.accentColor].
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content..
@@ -461,4 +494,7 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) => false;
+
+  @override
+  bool get allowImplicitScrolling => false;
 }

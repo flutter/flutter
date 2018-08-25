@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -22,9 +23,8 @@ class ViewConfiguration {
   ///
   /// By default, the view has zero [size] and a [devicePixelRatio] of 1.0.
   const ViewConfiguration({
-    this.size: Size.zero,
-    this.devicePixelRatio: 1.0,
-    this.orientation
+    this.size = Size.zero,
+    this.devicePixelRatio = 1.0,
   });
 
   /// The size of the output surface.
@@ -32,9 +32,6 @@ class ViewConfiguration {
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
-
-  /// The orientation of the output surface (aspirational).
-  final int orientation;
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
   Matrix4 toMatrix() {
@@ -58,23 +55,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The [configuration] must not be null.
   RenderView({
     RenderBox child,
-    this.timeForRotation: const Duration(microseconds: 83333),
     @required ViewConfiguration configuration,
   }) : assert(configuration != null),
        _configuration = configuration {
     this.child = child;
   }
 
-  /// The amount of time the screen rotation animation should last (aspirational).
-  Duration timeForRotation;
-
   /// The current layout size of the view.
   Size get size => _size;
   Size _size = Size.zero;
-
-  /// The current orientation of the view (aspirational).
-  int get orientation => _orientation;
-  int _orientation; // 0..3
 
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
@@ -92,6 +81,27 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
     markNeedsLayout();
   }
+
+  /// Whether Flutter should automatically compute the desired system UI.
+  ///
+  /// When this setting is enabled, Flutter will hit-test the layer tree at the
+  /// top and bottom of the screen on each frame looking for an
+  /// [AnnotatedRegionLayer] with an instance of a [SystemUiOverlayStyle]. The
+  /// hit-test result from the top of the screen provides the status bar settings
+  /// and the hit-test result from the bottom of the screen provides the system
+  /// nav bar settings.
+  ///
+  /// Setting this to false does not cause previous automatic adjustments to be
+  /// reset, nor does setting it to true cause the app to update immediately.
+  ///
+  /// If you want to imperatively set the system ui style instead, it is
+  /// recommended that [automaticSystemUiAdjustment] is set to false.
+  ///
+  /// See also:
+  ///
+  ///   * [AnnotatedRegion], for placing [SystemUiOverlayStyle] in the layer tree.
+  ///   * [SystemChrome.setSystemUIOverlayStyle], for imperatively setting the system ui style.
+  bool automaticSystemUiAdjustment = true;
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
   ///
@@ -130,11 +140,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    if (configuration.orientation != _orientation) {
-      if (_orientation != null && child != null)
-        child.rotate(oldAngle: _orientation, newAngle: configuration.orientation, time: timeForRotation);
-      _orientation = configuration.orientation;
-    }
     _size = configuration.size;
     assert(_size.isFinite);
 
@@ -189,11 +194,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       final ui.SceneBuilder builder = new ui.SceneBuilder();
       layer.addToScene(builder, Offset.zero);
       final ui.Scene scene = builder.build();
+      if (automaticSystemUiAdjustment)
+        _updateSystemChrome();
       ui.window.render(scene);
       scene.dispose();
       assert(() {
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
-          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(debugCurrentRepaintColor.hue + 2.0);
+          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
         return true;
       }());
     } finally {
@@ -201,8 +208,37 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     }
   }
 
+  void _updateSystemChrome() {
+    final Rect bounds = paintBounds;
+    final Offset top = new Offset(bounds.center.dx, ui.window.padding.top / ui.window.devicePixelRatio);
+    final Offset bottom = new Offset(bounds.center.dx, bounds.center.dy - ui.window.padding.bottom / ui.window.devicePixelRatio);
+    final SystemUiOverlayStyle upperOverlayStyle = layer.find<SystemUiOverlayStyle>(top);
+    // Only android has a customizable system navigation bar.
+    SystemUiOverlayStyle lowerOverlayStyle;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
+        break;
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
+        break;
+    }
+    // If there are no overlay styles in the UI don't bother updating.
+    if (upperOverlayStyle != null || lowerOverlayStyle != null) {
+      final SystemUiOverlayStyle overlayStyle = new SystemUiOverlayStyle(
+        statusBarBrightness: upperOverlayStyle?.statusBarBrightness,
+        statusBarIconBrightness: upperOverlayStyle?.statusBarIconBrightness,
+        statusBarColor: upperOverlayStyle?.statusBarColor,
+        systemNavigationBarColor: lowerOverlayStyle?.systemNavigationBarColor,
+        systemNavigationBarDividerColor: lowerOverlayStyle?.systemNavigationBarDividerColor,
+        systemNavigationBarIconBrightness: lowerOverlayStyle?.systemNavigationBarIconBrightness,
+      );
+      SystemChrome.setSystemUIOverlayStyle(overlayStyle);
+    }
+  }
+
   @override
-  Rect get paintBounds => Offset.zero & size;
+  Rect get paintBounds => Offset.zero & (size * configuration.devicePixelRatio);
 
   @override
   Rect get semanticBounds {
@@ -211,18 +247,18 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      description.add(new DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
+      properties.add(new DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
     }());
-    description.add(new DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
-    description.add(new DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    description.add(new DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(new DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(new DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(new DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
     if (ui.window.semanticsEnabled)
-      description.add(new DiagnosticsNode.message('semantics enabled'));
+      properties.add(new DiagnosticsNode.message('semantics enabled'));
   }
 }

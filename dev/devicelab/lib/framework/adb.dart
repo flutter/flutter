@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -44,7 +45,7 @@ abstract class DeviceDiscovery {
   ///
   /// Returns the same device when called repeatedly (unlike
   /// [chooseWorkingDevice]). This is useful when you need to perform multiple
-  /// perations on one.
+  /// operations on one.
   Future<Device> get workingDevice;
 
   /// Lists all available devices' IDs.
@@ -82,8 +83,17 @@ abstract class Device {
   /// Assumes the device doesn't have a secure unlock pattern.
   Future<Null> unlock();
 
+  /// Emulate a tap on the touch screen.
+  Future<Null> tap(int x, int y);
+
   /// Read memory statistics for a process.
   Future<Map<String, dynamic>> getMemoryStats(String packageName);
+
+  /// Stream the system log from the device.
+  ///
+  /// Flutter applications' `print` statements end up in this log
+  /// with some prefix.
+  Stream<String> get logcat;
 
   /// Stop a process.
   Future<Null> stop(String packageName);
@@ -169,7 +179,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
         results['android-device-$deviceId'] = new HealthCheckResult.success();
-      } catch(e, s) {
+      } catch (e, s) {
         results['android-device-$deviceId'] = new HealthCheckResult.error(e, s);
       }
     }
@@ -236,6 +246,11 @@ class AndroidDevice implements Device {
     await shellExec('input', const <String>['keyevent', '82']);
   }
 
+  @override
+  Future<Null> tap(int x, int y) async {
+    await shellExec('input', <String>['tap', '$x', '$y']);
+  }
+
   /// Retrieves device's wakefulness state.
   ///
   /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
@@ -247,12 +262,17 @@ class AndroidDevice implements Device {
 
   /// Executes [command] on `adb shell` and returns its exit code.
   Future<Null> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
-    await exec(adbPath, <String>['shell', command]..addAll(arguments), environment: environment, canFail: false);
+    await adb(<String>['shell', command]..addAll(arguments), environment: environment);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
   Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) {
-    return eval(adbPath, <String>['shell', command]..addAll(arguments), environment: environment, canFail: false);
+    return adb(<String>['shell', command]..addAll(arguments), environment: environment);
+  }
+
+  /// Runs `adb` with the given [arguments], selecting this device.
+  Future<String> adb(List<String> arguments, { Map<String, String> environment }) {
+    return eval(adbPath, <String>['-s', deviceId]..addAll(arguments), environment: environment, canFail: false);
   }
 
   @override
@@ -263,6 +283,63 @@ class AndroidDevice implements Device {
     return <String, dynamic>{
       'total_kb': int.parse(match.group(1)),
     };
+  }
+
+  @override
+  Stream<String> get logcat {
+    final Completer<void> stdoutDone = new Completer<void>();
+    final Completer<void> stderrDone = new Completer<void>();
+    final Completer<void> processDone = new Completer<void>();
+    final Completer<void> abort = new Completer<void>();
+    bool aborted = false;
+    StreamController<String> stream;
+    stream = new StreamController<String>(
+      onListen: () async {
+        await adb(<String>['logcat', '--clear']);
+        final Process process = await startProcess(adbPath, <String>['-s', deviceId, 'logcat']);
+        process.stdout
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            print('adb logcat: $line');
+            stream.sink.add(line);
+          }, onDone: () { stdoutDone.complete(); });
+        process.stderr
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .listen((String line) {
+            print('adb logcat stderr: $line');
+          }, onDone: () { stderrDone.complete(); });
+        process.exitCode.then((int exitCode) {
+          print('adb logcat process terminated with exit code $exitCode');
+          if (!aborted) {
+            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.'));
+            processDone.complete();
+          }
+        });
+        await Future.any<dynamic>(<Future<dynamic>>[
+          Future.wait<void>(<Future<void>>[
+            stdoutDone.future,
+            stderrDone.future,
+            processDone.future,
+          ]),
+          abort.future,
+        ]);
+        aborted = true;
+        print('terminating adb logcat');
+        process.kill();
+        print('closing logcat stream');
+        await stream.close();
+      },
+      onCancel: () {
+        if (!aborted) {
+          print('adb logcat aborted');
+          aborted = true;
+          abort.complete();
+        }
+      },
+    );
+    return stream.stream;
   }
 
   @override
@@ -307,30 +384,14 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[new math.Random().nextInt(allDevices.length)];
   }
 
-  // Physical device line format to be matched:
-  // My iPhone (10.3.2) [75b90e947c5f429fa67f3e9169fda0d89f0492f1]
-  //
-  // Other formats in output (desktop, simulator) to be ignored:
-  // my-mac-pro [2C10513E-4dA5-405C-8EF5-C44353DB3ADD]
-  // iPhone 6s (9.3) [F6CEE7CF-81EB-4448-81B4-1755288C7C11] (Simulator)
-  static final RegExp _deviceRegex = new RegExp(r'^.* +\(.*\) +\[(.*)\]$');
-
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> iosDeviceIDs = <String>[];
-    final Iterable<String> deviceLines = (await eval('instruments', <String>['-s', 'devices']))
-        .split('\n')
-        .map((String line) => line.trim());
-    for (String line in deviceLines) {
-      final Match match = _deviceRegex.firstMatch(line);
-      if (match != null) {
-        final String deviceID = match.group(1);
-        iosDeviceIDs.add(deviceID);
-      }
-    }
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty)
+      .toList();
     if (iosDeviceIDs.isEmpty)
       throw 'No connected iOS devices found.';
-
     return iosDeviceIDs;
   }
 
@@ -338,7 +399,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (String deviceId in await discoverDevices()) {
-      // TODO: do a more meaningful connectivity check than just recording the ID
+      // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = new HealthCheckResult.success();
     }
     return results;
@@ -382,7 +443,17 @@ class IosDevice implements Device {
   Future<Null> unlock() async {}
 
   @override
+  Future<Null> tap(int x, int y) async {
+    throw 'Not implemented';
+  }
+
+  @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw 'Not implemented';
+  }
+
+  @override
+  Stream<String> get logcat {
     throw 'Not implemented';
   }
 

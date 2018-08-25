@@ -8,18 +8,21 @@ export 'dart:ui' show
   BlendMode,
   BlurStyle,
   Canvas,
+  Clip,
   Color,
   ColorFilter,
   FilterQuality,
   FontStyle,
   FontWeight,
   ImageShader,
+  Locale,
   MaskFilter,
   Offset,
   Paint,
   PaintingStyle,
   Path,
   PathFillType,
+  PathOperation,
   Radius,
   RRect,
   RSTransform,
@@ -43,7 +46,7 @@ export 'dart:ui' show
   hashList;
 
 // Intentionally not exported:
-//  - Image, decodeImageFromDataPipe, decodeImageFromList:
+//  - Image, instantiateImageCodec, decodeImageFromList:
 //      We use ui.* to make it very explicit that these are low-level image APIs.
 //      Generally, higher layers provide more reasonable APIs around images.
 //  - lerpDouble:
@@ -254,7 +257,7 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
 /// along that axis in numerically decreasing order.
 ///
 /// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
-/// and false for [AxisDirection.down] for [AxisDirection.right].
+/// and false for [AxisDirection.down] and [AxisDirection.right].
 bool axisDirectionIsReversed(AxisDirection axisDirection) {
   assert(axisDirection != null);
   switch (axisDirection) {

@@ -81,7 +81,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 
 };
 
-class ThreeRoute extends MaterialPageRoute<Null> {
+class ThreeRoute extends MaterialPageRoute<void> {
   ThreeRoute() : super(builder: (BuildContext context) {
     return new Material(
       key: routeThreeKey,
@@ -96,7 +96,7 @@ class ThreeRoute extends MaterialPageRoute<Null> {
   });
 }
 
-class MutatingRoute extends MaterialPageRoute<Null> {
+class MutatingRoute extends MaterialPageRoute<void> {
   MutatingRoute() : super(builder: (BuildContext context) {
     return new Hero(tag: 'a', child: const Text('MutatingRoute'), key: new UniqueKey());
   });
@@ -109,7 +109,7 @@ class MutatingRoute extends MaterialPageRoute<Null> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
+  const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
   final String value;
   @override
   MyStatefulWidgetState createState() => new MyStatefulWidgetState();
@@ -232,7 +232,7 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            const Hero(tag: 'a', child: const Text('foo')),
+            const Hero(tag: 'a', child: Text('foo')),
             new Builder(builder: (BuildContext context) {
               return new FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             })
@@ -258,12 +258,12 @@ void main() {
     // Expect the height of the secondKey Hero to vary from 100 to 150
     // over duration and according to curve.
 
-    final Duration duration = const Duration(milliseconds: 300);
-    final Curve curve = Curves.fastOutSlowIn;
+    const Duration duration = Duration(milliseconds: 300);
+    const Curve curve = Curves.fastOutSlowIn;
     final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
     final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
     final double deltaHeight = finalHeight - initialHeight;
-    final double epsilon = 0.001;
+    const double epsilon = 0.001;
 
     await tester.pump(duration * 0.25);
     expect(
@@ -363,7 +363,7 @@ void main() {
   testWidgets('Popping on first frame does not cause hero observer to crash', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return new MaterialPageRoute<Null>(
+        return new MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) => new Hero(tag: 'test', child: new Container()),
         );
@@ -389,7 +389,7 @@ void main() {
   testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return new MaterialPageRoute<Null>(
+        return new MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) => new Hero(tag: 'test', child: new Container()),
         );
@@ -425,14 +425,14 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            const Hero(tag: 'a', child: const Text('a')),
-            const Hero(tag: 'a', child: const Text('a too')),
+            const Hero(tag: 'a', child: Text('a')),
+            const Hero(tag: 'a', child: Text('a too')),
             new Builder(
               builder: (BuildContext context) {
                 return new FlatButton(
                   child: const Text('push'),
                   onPressed: () {
-                    Navigator.push(context, new PageRouteBuilder<Null>(
+                    Navigator.push(context, new PageRouteBuilder<void>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
                         return const Text('fail');
                       },
@@ -505,7 +505,7 @@ void main() {
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
     // 150ms so we should be just about back to where Hero 'a' started.
-    final double epsilon = 0.001;
+    const double epsilon = 0.001;
     await tester.pump(const Duration(milliseconds: 99));
     closeTo(tester.getSize(find.byKey(secondKey)).height - initialHeight, epsilon);
 
@@ -569,13 +569,13 @@ void main() {
     // After flying in the opposite direction for 50ms Hero 'a' will
     // be smaller than it was, but bigger than its initial size.
     await tester.pump(const Duration(milliseconds: 50));
-    final double height100ms = tester.getSize(find.byKey(firstKey)).height;
-    expect(height100ms, greaterThan(height150ms));
-    expect(finalHeight, lessThan(height100ms));
+    final double height200ms = tester.getSize(find.byKey(firstKey)).height;
+    expect(height200ms, greaterThan(height150ms));
+    expect(finalHeight, lessThan(height200ms));
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
     // 150ms so we should be just about back to where Hero 'a' started.
-    final double epsilon = 0.001;
+    const double epsilon = 0.001;
     await tester.pump(const Duration(milliseconds: 99));
     closeTo(tester.getSize(find.byKey(firstKey)).height - initialHeight, epsilon);
 
@@ -587,13 +587,13 @@ void main() {
   });
 
   testWidgets('Destination hero disappears mid-flight', (WidgetTester tester) async {
-    final Key homeHeroKey = const Key('home hero');
-    final Key routeHeroKey = const Key('route hero');
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
     bool routeIncludesHero = true;
     StateSetter heroCardSetState;
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -677,7 +677,7 @@ void main() {
     expect(midflightHeight, lessThan(finalHeight));
     expect(midflightHeight, greaterThan(100.0));
 
-    // Remove the destination hero midlfight
+    // Remove the destination hero midflight
     heroCardSetState(() {
       routeIncludesHero = false;
     });
@@ -690,12 +690,12 @@ void main() {
   });
 
   testWidgets('Destination hero scrolls mid-flight', (WidgetTester tester) async {
-    final Key homeHeroKey = const Key('home hero');
-    final Key routeHeroKey = const Key('route hero');
-    final Key routeContainerKey = const Key('route hero container');
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
+    const Key routeContainerKey = Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -758,7 +758,7 @@ void main() {
 
     // Scroll the target upwards by 25 pixels. The Hero flight's Y coordinate
     // will be redirected from 100 to 75.
-    await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
+    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
@@ -772,15 +772,16 @@ void main() {
   });
 
   testWidgets('Destination hero scrolls out of view mid-flight', (WidgetTester tester) async {
-    final Key homeHeroKey = const Key('home hero');
-    final Key routeHeroKey = const Key('route hero');
-    final Key routeContainerKey = const Key('route hero container');
+    const Key homeHeroKey = Key('home hero');
+    const Key routeHeroKey = Key('route hero');
+    const Key routeContainerKey = Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
+            cacheExtent: 0.0,
             children: <Widget>[
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
@@ -833,7 +834,7 @@ void main() {
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
-    await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0)));
+    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.byKey(routeContainerKey), findsNothing); // Scrolled off the top
@@ -851,11 +852,11 @@ void main() {
 
   testWidgets('Aborted flight', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/5798
-    final Key heroABKey = const Key('AB hero');
-    final Key heroBCKey = const Key('BC hero');
+    const Key heroABKey = Key('AB hero');
+    const Key heroBCKey = Key('BC hero');
 
     // Show a 150x150 Hero tagged 'BC'
-    final MaterialPageRoute<Null> routeC = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> routeC = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -872,7 +873,7 @@ void main() {
     );
 
     // Show a height=200 Hero tagged 'AB' and a height=50 Hero tagged 'BC'
-    final MaterialPageRoute<Null> routeB = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> routeB = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -956,17 +957,17 @@ void main() {
   });
 
   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
             children: <Widget>[
               const Card(
-                child: const Hero(
+                child: Hero(
                   tag: 'H',
-                  child: const SizedBox(
+                  child: SizedBox(
                     height: 200.0,
-                    child: const MyStatefulWidget(value: '456'),
+                    child: MyStatefulWidget(value: '456'),
                   ),
                 ),
               ),
@@ -988,11 +989,11 @@ void main() {
               return new ListView(
                 children: <Widget> [
                   const Card(
-                    child: const Hero(
+                    child: Hero(
                       tag: 'H',
-                      child: const SizedBox(
+                      child: SizedBox(
                         height: 100.0,
-                        child: const MyStatefulWidget(value: '456'),
+                        child: MyStatefulWidget(value: '456'),
                       ),
                     ),
                   ),
@@ -1084,9 +1085,9 @@ void main() {
     await tester.pumpWidget(new MaterialApp(routes: createRectTweenHeroRoutes));
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
 
-    final double epsilon = 0.001;
-    final Duration duration = const Duration(milliseconds: 300);
-    final Curve curve = Curves.fastOutSlowIn;
+    const double epsilon = 0.001;
+    const Duration duration = Duration(milliseconds: 300);
+    const Curve curve = Curves.fastOutSlowIn;
     final MaterialPointArcTween pushCenterTween = new MaterialPointArcTween(
       begin: const Offset(50.0, 50.0),
       end: const Offset(400.0, 300.0),
@@ -1104,17 +1105,17 @@ void main() {
     await tester.pump(duration * 0.25);
     Offset actualHeroCenter = tester.getCenter(find.byKey(secondKey));
     Offset predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.25));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(secondKey));
     predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.5));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(secondKey));
     predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.75));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pumpAndSettle();
     expect(tester.getCenter(find.byKey(secondKey)), const Offset(400.0, 300.0));
@@ -1135,17 +1136,17 @@ void main() {
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
     predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.25));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
     predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.5));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
     predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.75));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pumpAndSettle();
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
@@ -1156,8 +1157,8 @@ void main() {
     await tester.tap(find.text('twoInset'));
     await tester.pump(); // begin navigation from / to /twoInset.
 
-    final double epsilon = 0.001;
-    final Duration duration = const Duration(milliseconds: 300);
+    const double epsilon = 0.001;
+    const Duration duration = Duration(milliseconds: 300);
 
     await tester.pump();
     final double x0 = tester.getTopLeft(find.byKey(secondKey)).dx;

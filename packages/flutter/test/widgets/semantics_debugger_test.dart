@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -16,11 +18,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           children: <Widget>[
-            const Semantics(),
-            const Semantics(
+            new Semantics(),
+            new Semantics(
               container: true,
             ),
-            const Semantics(
+            new Semantics(
               label: 'label',
               textDirection: TextDirection.ltr,
             ),
@@ -35,11 +37,11 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(),
-              const Semantics(
+              new Semantics(),
+              new Semantics(
                 container: true,
               ),
-              const Semantics(
+              new Semantics(
                 label: 'label',
                 textDirection: TextDirection.ltr,
               ),
@@ -62,14 +64,14 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
               new Positioned(
                 key: key,
                 left: 0.0,
                 top: 0.0,
                 width: 100.0,
                 height: 100.0,
-                child: const Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                child: new Semantics(label: 'label2', textDirection: TextDirection.ltr),
               ),
             ],
           ),
@@ -83,7 +85,7 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
               new Semantics(
                 container: true,
                 child: new Stack(
@@ -94,9 +96,9 @@ void main() {
                       top: 0.0,
                       width: 100.0,
                       height: 100.0,
-                      child: const Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                      child: new Semantics(label: 'label2', textDirection: TextDirection.ltr),
                     ),
-                    const Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    new Semantics(label: 'label3', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -112,7 +114,7 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
               new Semantics(
                 container: true,
                 child: new Stack(
@@ -123,9 +125,9 @@ void main() {
                         top: 0.0,
                         width: 100.0,
                         height: 100.0,
-                        child: const Semantics(label: 'label2', textDirection: TextDirection.ltr)),
-                    const Semantics(label: 'label3', textDirection: TextDirection.ltr),
-                    const Semantics(label: 'label4', textDirection: TextDirection.ltr),
+                        child: new Semantics(label: 'label2', textDirection: TextDirection.ltr)),
+                    new Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    new Semantics(label: 'label4', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -292,13 +294,16 @@ void main() {
         child: new SemanticsDebugger(
           child: new Directionality(
             textDirection: TextDirection.ltr,
-            child: new Material(
-              child: new Center(
-                child: new Slider(
-                  value: value,
-                  onChanged: (double newValue) {
-                    value = newValue;
-                  },
+            child: new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new Slider(
+                    value: value,
+                    onChanged: (double newValue) {
+                      value = newValue;
+                    },
+                  ),
                 ),
               ),
             ),
@@ -313,7 +318,7 @@ void main() {
     // interpreted as a gesture by the semantics debugger and sent to the widget
     // as a semantic action that always moves by 10% of the complete track.
     await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0);
-    expect(value, equals(0.65));
+    expect(value, equals(0.70));
   });
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
@@ -321,7 +326,7 @@ void main() {
     final Key keyBottom = new UniqueKey();
 
     bool valueTop = false;
-    final bool valueBottom = true;
+    const bool valueBottom = true;
 
     await tester.pumpWidget(
       new Directionality(

@@ -27,8 +27,8 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          slivers: const <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
           ],
         ),
       ),
@@ -57,7 +57,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
-  
+
   testWidgets('Nested scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
@@ -71,8 +71,8 @@ void main() {
             child: new Container(
                 width: 600.0,
                 child: new CustomScrollView(
-                  slivers: <Widget>[
-                      const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+                  slivers: const <Widget>[
+                      SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
                   ],
                 ),
               ),
@@ -80,22 +80,22 @@ void main() {
           ),
         ),
       );
-    
+
     final RenderObject outerPainter = tester.renderObject(find.byType(CustomPaint).first);
     final RenderObject innerPainter = tester.renderObject(find.byType(CustomPaint).last);
-    
+
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
     expect(outerPainter, paints..circle());
     expect(innerPainter, paints..circle());
   });
-  
+
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          slivers: const <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
           ],
         ),
       ),
@@ -132,8 +132,8 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          slivers: const <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
           ],
         ),
       ),
@@ -169,8 +169,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            slivers: <Widget>[
-              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            slivers: const <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
         ),
@@ -190,8 +190,8 @@ void main() {
           child: new CustomScrollView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
-            slivers: <Widget>[
-              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            slivers: const <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
         ),
@@ -211,8 +211,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          slivers: const <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 20.0)),
           ],
         ),
       ),
@@ -235,19 +235,19 @@ void main() {
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
           physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          slivers: const <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 20.0)),
           ],
         ),
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
+    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(-5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()
-                          ..rotate(angle: math.PI / 2.0)..circle());
+    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle()
+                          ..rotate(angle: math.pi / 2.0)..circle());
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -287,8 +287,8 @@ void main() {
             scrollDirection: Axis.horizontal,
             physics: const AlwaysScrollableScrollPhysics(),
             reverse: true,
-            slivers: <Widget>[
-              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            slivers: const <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
         ),
@@ -296,7 +296,7 @@ void main() {
     );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
+    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -308,8 +308,8 @@ void main() {
           child: new CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: const AlwaysScrollableScrollPhysics(),
-            slivers: <Widget>[
-              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            slivers: const <Widget>[
+              SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             ],
           ),
         ),
@@ -317,7 +317,7 @@ void main() {
     );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
+    expect(painter, paints..rotate(angle: math.pi / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
   });
 }

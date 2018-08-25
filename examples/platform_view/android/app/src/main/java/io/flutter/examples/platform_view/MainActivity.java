@@ -32,7 +32,7 @@ public class MainActivity extends FlutterActivity {
                 MainActivity.this.result = result;
                 int count = methodCall.arguments();
                 if (methodCall.method.equals(METHOD_SWITCH_VIEW)) {
-                  onlaunchFullScreen(count);
+                  onLaunchFullScreen(count);
                 } else {
                   result.notImplemented();
                 }
@@ -41,7 +41,7 @@ public class MainActivity extends FlutterActivity {
     );
   }
 
-  private void onlaunchFullScreen(int count) {
+  private void onLaunchFullScreen(int count) {
     Intent fullScreenIntent = new Intent(this, CountActivity.class);
     fullScreenIntent.putExtra(CountActivity.EXTRA_COUNTER, count);
     startActivityForResult(fullScreenIntent, COUNT_REQUEST);

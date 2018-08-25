@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../rendering/src/solid_color_box.dart';
 
 // Solid colour, RenderObject version
-void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex: 0 }) {
+void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
   final RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
   parent.add(child);
   final FlexParentData childParentData = child.parentData;
@@ -43,7 +43,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
         height: 300.0,
         child: new Column(
           children: <Widget>[
-            const Rectangle(const Color(0xFF00FFFF)),
+            const Rectangle(Color(0xFF00FFFF)),
             new Material(
               child: new Container(
                 padding: const EdgeInsets.all(10.0),
@@ -68,7 +68,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                 ),
               ),
             ),
-            const Rectangle(const Color(0xFFFFFF00)),
+            const Rectangle(Color(0xFFFFFF00)),
           ],
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
         ),
@@ -82,7 +82,7 @@ RenderTransform transformBox;
 
 void rotate(Duration timeStamp) {
   timeBase ??= timeStamp;
-  final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
+  final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.microsecondsPerSecond; // radians
 
   transformBox.setIdentity();
   transformBox.rotateZ(delta);

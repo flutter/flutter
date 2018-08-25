@@ -7,8 +7,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -18,18 +18,22 @@ void main() {
     CachedArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_cached.');
       artifacts = new CachedArtifacts();
     });
 
     tearDown(() {
-      tempDir.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('getArtifactPath', () {
       expect(
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
+      );
+      expect(
+          artifacts.getArtifactPath(Artifact.entryPointsExtraJson, TargetPlatform.android_arm64, BuildMode.release),
+          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'android-arm64-release', 'entry_points_extra.json')
       );
       expect(
           artifacts.getArtifactPath(Artifact.flutterTester),
@@ -65,7 +69,7 @@ void main() {
     LocalEngineArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_local.');
       artifacts = new LocalEngineArtifacts(tempDir.path,
         fs.path.join(tempDir.path, 'out', 'android_debug_unopt'),
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt'),
@@ -73,13 +77,17 @@ void main() {
     });
 
     tearDown(() {
-      tempDir.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('getArtifactPath', () {
       expect(
           artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, TargetPlatform.android_arm, BuildMode.debug),
           fs.path.join(tempDir.path, 'third_party', 'dart', 'runtime', 'bin', 'dart_io_entries.txt')
+      );
+      expect(
+          artifacts.getArtifactPath(Artifact.entryPointsJson, TargetPlatform.android_arm, BuildMode.profile),
+          fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'dart_entry_points', 'entry_points.json')
       );
       expect(
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),

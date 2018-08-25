@@ -26,7 +26,8 @@ import 'scroll_position_with_single_context.dart';
 ///
 /// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
 /// any of the attached [ScrollPosition]s notify _their_ listeners (i.e.
-/// whenever any of them scroll).
+/// whenever any of them scroll). It does not notify its listeners when the list
+/// of attached [ScrollPosition]s changes.
 ///
 /// Typically used with [ListView], [GridView], [CustomScrollView].
 ///
@@ -47,8 +48,8 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
-    double initialScrollOffset: 0.0,
-    this.keepScrollOffset: true,
+    double initialScrollOffset = 0.0,
+    this.keepScrollOffset = true,
     this.debugLabel,
   }) : assert(initialScrollOffset != null),
        assert(keepScrollOffset != null),
@@ -77,7 +78,7 @@ class ScrollController extends ChangeNotifier {
   /// See also:
   ///
   ///  * [PageStorageKey], which should be used when more than one
-  ////   scrollable appears in the same route, to distinguish the [PageStorage]
+  ///   scrollable appears in the same route, to distinguish the [PageStorage]
   ///    locations used to save scroll offsets.
   final bool keepScrollOffset;
 
@@ -314,8 +315,8 @@ class TrackingScrollController extends ScrollController {
   /// Creates a scroll controller that continually updates its
   /// [initialScrollOffset] to match the last scroll notification it received.
   TrackingScrollController({
-    double initialScrollOffset: 0.0,
-    bool keepScrollOffset: true,
+    double initialScrollOffset = 0.0,
+    bool keepScrollOffset = true,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset,
              keepScrollOffset: keepScrollOffset,

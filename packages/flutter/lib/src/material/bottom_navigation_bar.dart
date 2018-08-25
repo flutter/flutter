@@ -5,7 +5,6 @@
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
@@ -13,11 +12,10 @@ import 'colors.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-const double _kActiveMaxWidth = 168.0;
-const double _kInactiveMaxWidth = 96.0;
 const double _kActiveFontSize = 14.0;
 const double _kInactiveFontSize = 12.0;
 const double _kTopMargin = 6.0;
@@ -42,7 +40,7 @@ enum BottomNavigationBarType {
 }
 
 /// A material widget displayed at the bottom of an app for selecting among a
-/// small number of views.
+/// small number of views, typically between three and five.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
@@ -51,6 +49,23 @@ enum BottomNavigationBarType {
 ///
 /// A bottom navigation bar is usually used in conjunction with a [Scaffold],
 /// where it is provided as the [Scaffold.bottomNavigationBar] argument.
+///
+/// The bottom navigation bar's [type] changes how its [items] are displayed.
+/// If not specified it's automatically set to [BottomNavigationBarType.fixed]
+/// when there are less than four items, [BottomNavigationBarType.shifting]
+/// otherwise.
+///
+///  * [BottomNavigationBarType.fixed], the default when there are less than
+///    four [items]. The selected item is rendered with [fixedColor] if it's
+///    non-null, otherwise the theme's [ThemeData.primaryColor] is used. The
+///    navigation bar's background color is the default [Material] background
+///    color, [ThemeData.canvasColor] (essentially opaque white).
+///  * [BottomNavigationBarType.shifting], the default when there are four
+///    or more [items]. All items are rendered in white and the navigation bar's
+///    background color is the same as the
+///    [BottomNavigationBarItem.backgroundColor] of the selected item. In this
+///    case it's assumed that each item will have a different background color
+///    and that background color will contrast well with white.
 ///
 /// See also:
 ///
@@ -61,24 +76,22 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The argument [items] should not be null.
+  /// The length of [items] must be at least two.
   ///
-  /// The number of items passed should be equal to, or greater than, two. If
-  /// three or fewer items are passed, then the default [type] (if [type] is
-  /// null or not given) will be [BottomNavigationBarType.fixed], and if more
-  /// than three items are passed, will be [BottomNavigationBarType.shifting].
+  /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
+  /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
-  /// Passing a null [fixedColor] will cause a fallback to the theme's primary
-  /// color. The [fixedColor] field will be ignored if the [BottomNavigationBar.type] is
-  /// not [BottomNavigationBarType.fixed].
+  /// If [fixedColor] is null then the theme's primary color,
+  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
+  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   BottomNavigationBar({
     Key key,
     @required this.items,
     this.onTap,
-    this.currentIndex: 0,
+    this.currentIndex = 0,
     BottomNavigationBarType type,
     this.fixedColor,
-    this.iconSize: 24.0,
+    this.iconSize = 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
@@ -108,8 +121,9 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the selected item when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
   ///
-  /// If [fixedColor] is null, it will use the theme's primary color. The [fixedColor]
-  /// field will be ignored if the [type] is not [BottomNavigationBarType.fixed].
+  /// If [fixedColor] is null then the theme's primary color,
+  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
+  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   final Color fixedColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
@@ -131,9 +145,11 @@ class _BottomNavigationTile extends StatelessWidget {
     this.iconSize, {
     this.onTap,
     this.colorTween,
-    this.flex
+    this.flex,
+    this.selected = false,
+    this.indexLabel,
     }
-  );
+  ): assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -142,6 +158,8 @@ class _BottomNavigationTile extends StatelessWidget {
   final VoidCallback onTap;
   final ColorTween colorTween;
   final double flex;
+  final bool selected;
+  final String indexLabel;
 
   Widget _buildIcon() {
     double tweenStart;
@@ -171,7 +189,7 @@ class _BottomNavigationTile extends StatelessWidget {
             color: iconColor,
             size: iconSize,
           ),
-          child: item.icon,
+          child: selected ? item.activeIcon : item.icon,
         ),
       ),
     );
@@ -209,7 +227,7 @@ class _BottomNavigationTile extends StatelessWidget {
   }
 
   Widget _buildShiftingLabel() {
-    return  new Align(
+    return new Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
       child: new Container(
@@ -224,13 +242,14 @@ class _BottomNavigationTile extends StatelessWidget {
           ).evaluate(animation),
         ),
         child: new FadeTransition(
+          alwaysIncludeSemantics: true,
           opacity: animation,
           child: DefaultTextStyle.merge(
-              style: const TextStyle(
-                fontSize: _kActiveFontSize,
-                color: Colors.white,
-              ),
-              child: item.title,
+            style: const TextStyle(
+              fontSize: _kActiveFontSize,
+              color: Colors.white,
+            ),
+            child: item.title,
           ),
         ),
       ),
@@ -257,15 +276,27 @@ class _BottomNavigationTile extends StatelessWidget {
     }
     return new Expanded(
       flex: size,
-      child: new InkResponse(
-        onTap: onTap,
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
+      child: new Semantics(
+        container: true,
+        header: true,
+        selected: selected,
+        child: new Stack(
           children: <Widget>[
-            _buildIcon(),
-            label,
+            new InkResponse(
+              onTap: onTap,
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildIcon(),
+                  label,
+                ],
+              ),
+            ),
+            new Semantics(
+              label: indexLabel,
+            )
           ],
         ),
       ),
@@ -274,7 +305,7 @@ class _BottomNavigationTile extends StatelessWidget {
 }
 
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
-  List<AnimationController> _controllers;
+  List<AnimationController> _controllers = <AnimationController>[];
   List<CurvedAnimation> _animations;
 
   // A queue of color splashes currently being animated.
@@ -286,9 +317,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   static final Tween<double> _flexTween = new Tween<double>(begin: 1.0, end: 1.5);
 
-  @override
-  void initState() {
-    super.initState();
+  void _resetState() {
+    for (AnimationController controller in _controllers)
+      controller.dispose();
+    for (_Circle circle in _circles)
+      circle.dispose();
+    _circles.clear();
+
     _controllers = new List<AnimationController>.generate(widget.items.length, (int index) {
       return new AnimationController(
         duration: kThemeAnimationDuration,
@@ -304,6 +339,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     });
     _controllers[widget.currentIndex].value = 1.0;
     _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _resetState();
   }
 
   void _rebuild() {
@@ -356,6 +397,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   void didUpdateWidget(BottomNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // No animated segue if the length of the items list changes.
+    if (widget.items.length != oldWidget.items.length) {
+      _resetState();
+      return;
+    }
+
     if (widget.currentIndex != oldWidget.currentIndex) {
       switch (widget.type) {
         case BottomNavigationBarType.fixed:
@@ -367,9 +415,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     }
+
+    if (_backgroundColor != widget.items[widget.currentIndex].backgroundColor)
+      _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
 
   List<Widget> _createTiles() {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    assert(localizations != null);
     final List<Widget> children = <Widget>[];
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
@@ -399,7 +452,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 if (widget.onTap != null)
                   widget.onTap(i);
               },
-              colorTween: colorTween),
+              colorTween: colorTween,
+              selected: i == widget.currentIndex,
+              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+            ),
           );
         }
         break;
@@ -415,7 +471,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 if (widget.onTap != null)
                   widget.onTap(i);
               },
-              flex: _evaluateFlex(_animations[i])),
+              flex: _evaluateFlex(_animations[i]),
+              selected: i == widget.currentIndex,
+              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+            )
           );
         }
         break;
@@ -435,6 +494,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+
+    // Labels apply up to _bottomMargin padding. Remainder is media padding.
+    final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
     Color backgroundColor;
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
@@ -443,33 +506,45 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         backgroundColor = _backgroundColor;
         break;
     }
-    return new Stack(
-      children: <Widget>[
-        new Positioned.fill(
-          child: new Material( // Casts shadow.
-            elevation: 8.0,
-            color: backgroundColor,
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new Stack(
+        children: <Widget>[
+          new Positioned.fill(
+            child: new Material( // Casts shadow.
+              elevation: 8.0,
+              color: backgroundColor,
+            ),
           ),
-        ),
-        new ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: kBottomNavigationBarHeight),
-          child: new Stack(
-            children: <Widget>[
-              new Positioned.fill(
-                child: new CustomPaint(
-                  painter: new _RadialPainter(
-                    circles: _circles.toList(),
+          new ConstrainedBox(
+            constraints: new BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
+            child: new Stack(
+              children: <Widget>[
+                new Positioned.fill(
+                  child: new CustomPaint(
+                    painter: new _RadialPainter(
+                      circles: _circles.toList(),
+                      textDirection: Directionality.of(context),
+                    ),
                   ),
                 ),
-              ),
-              new Material( // Splashes.
-                type: MaterialType.transparency,
-                child: _createContainer(_createTiles()),
-              ),
-            ],
+                new Material( // Splashes.
+                  type: MaterialType.transparency,
+                  child: new Padding(
+                    padding: new EdgeInsets.only(bottom: additionalBottomPadding),
+                    child: new MediaQuery.removePadding(
+                      context: context,
+                      removeBottom: true,
+                      child: _createContainer(_createTiles()),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -501,7 +576,7 @@ class _Circle {
   AnimationController controller;
   CurvedAnimation animation;
 
-  double get horizontalOffset {
+  double get horizontalLeadingOffset {
     double weightSum(Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
@@ -509,11 +584,11 @@ class _Circle {
     }
 
     final double allWeights = weightSum(state._animations);
-    // These weights sum to the left edge of the indexed item.
-    final double leftWeights = weightSum(state._animations.sublist(0, index));
+    // These weights sum to the start edge of the indexed item.
+    final double leadingWeights = weightSum(state._animations.sublist(0, index));
 
     // Add half of its flex value in order to get to the center.
-    return (leftWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
+    return (leadingWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
   }
 
   void dispose() {
@@ -524,10 +599,13 @@ class _Circle {
 // Paints the animating color splash circles.
 class _RadialPainter extends CustomPainter {
   _RadialPainter({
-    this.circles,
-  });
+    @required this.circles,
+    @required this.textDirection,
+  }) : assert(circles != null),
+       assert(textDirection != null);
 
   final List<_Circle> circles;
+  final TextDirection textDirection;
 
   // Computes the maximum radius attainable such that at least one of the
   // bounding rectangle's corners touches the edge of the circle. Drawing a
@@ -541,6 +619,8 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
+    if (textDirection != oldPainter.textDirection)
+      return true;
     if (circles == oldPainter.circles)
       return false;
     if (circles.length != oldPainter.circles.length)
@@ -557,10 +637,16 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = new Paint()..color = circle.color;
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final Offset center = new Offset(
-        circle.horizontalOffset * size.width,
-        size.height / 2.0,
-      );
+      double leftFraction;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          leftFraction = 1.0 - circle.horizontalLeadingOffset;
+          break;
+        case TextDirection.ltr:
+          leftFraction = circle.horizontalLeadingOffset;
+          break;
+      }
+      final Offset center = new Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = new Tween<double>(
         begin: 0.0,
         end: _maxRadius(center, size),

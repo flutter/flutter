@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -36,7 +35,7 @@ Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>
   MaterialListType.threeLine: 88.0,
 };
 
-const Duration _kExpand = const Duration(milliseconds: 200);
+const Duration _kExpand = Duration(milliseconds: 200);
 
 /// This class is deprecated. Please use [ListTile] instead.
 @deprecated
@@ -47,7 +46,7 @@ class TwoLevelListItem extends StatelessWidget {
     this.leading,
     @required this.title,
     this.trailing,
-    this.enabled: true,
+    this.enabled = true,
     this.onTap,
     this.onLongPress
   }) : assert(title != null),
@@ -107,14 +106,14 @@ class TwoLevelListItem extends StatelessWidget {
 /// This class is deprecated. Please use [ExpansionTile] instead.
 @deprecated
 class TwoLevelSublist extends StatefulWidget {
-  /// Creates an item in a two-level list that can expland and collapse.
+  /// Creates an item in a two-level list that can expand and collapse.
   const TwoLevelSublist({
     Key key,
     this.leading,
     @required this.title,
     this.backgroundColor,
     this.onOpenChanged,
-    this.children: const <Widget>[],
+    this.children = const <Widget>[],
   }) : super(key: key);
 
   /// A widget to display before the title.
@@ -261,8 +260,8 @@ class TwoLevelList extends StatelessWidget {
   /// The [type] argument must not be null.
   const TwoLevelList({
     Key key,
-    this.children: const <Widget>[],
-    this.type: MaterialListType.twoLine,
+    this.children = const <Widget>[],
+    this.type = MaterialListType.twoLine,
     this.padding,
   }) : assert(type != null),
        super(key: key);

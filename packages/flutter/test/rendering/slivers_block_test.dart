@@ -4,7 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -53,6 +53,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
+  int get childCount => children.length;
+
+  @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
@@ -80,6 +83,7 @@ void main() {
       axisDirection: AxisDirection.down,
       crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
+      cacheExtent: 0.0,
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
       ],
@@ -158,6 +162,7 @@ void main() {
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
       ],
+      cacheExtent: 0.0,
     );
     layout(root);
 

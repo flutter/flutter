@@ -37,7 +37,7 @@ void main() {
   });
 
   testWidgets('Can change position data', (WidgetTester tester) async {
-    final Key key = const Key('container');
+    const Key key = Key('container');
 
     await tester.pumpWidget(
       new Stack(
@@ -94,7 +94,7 @@ void main() {
   });
 
   testWidgets('Can remove parent data', (WidgetTester tester) async {
-    final Key key = const Key('container');
+    const Key key = Key('container');
     final Container container = new Container(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(
@@ -132,8 +132,8 @@ void main() {
   });
 
   testWidgets('Can align non-positioned children (LTR)', (WidgetTester tester) async {
-    final Key child0Key = const Key('child0');
-    final Key child1Key = const Key('child1');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     await tester.pumpWidget(
       new Directionality(
@@ -178,8 +178,8 @@ void main() {
   });
 
   testWidgets('Can align non-positioned children (RTL)', (WidgetTester tester) async {
-    final Key child0Key = const Key('child0');
-    final Key child1Key = const Key('child1');
+    const Key child0Key = Key('child0');
+    const Key child1Key = Key('child1');
 
     await tester.pumpWidget(
       new Directionality(
@@ -242,7 +242,7 @@ void main() {
   });
 
   testWidgets('Can construct an IndexedStack', (WidgetTester tester) async {
-    final int itemCount = 3;
+    const int itemCount = 3;
     List<int> itemsPainted;
 
     Widget buildFrame(int index) {
@@ -278,8 +278,8 @@ void main() {
   });
 
   testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
-    final Key key = const Key('indexedStack');
-    final int itemCount = 3;
+    const Key key = Key('indexedStack');
+    const int itemCount = 3;
     List<int> itemsTapped;
 
     Widget buildFrame(int index) {
@@ -309,21 +309,21 @@ void main() {
   });
 
   testWidgets('Can set width and height', (WidgetTester tester) async {
-    final Key key = const Key('container');
+    const Key key = Key('container');
 
-    final BoxDecoration kBoxDecoration = const BoxDecoration(
-      color: const Color(0xFF00FF00),
+    const BoxDecoration kBoxDecoration = BoxDecoration(
+      color: Color(0xFF00FF00),
     );
 
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          new Positioned(
+        children: const <Widget>[
+          Positioned(
             left: 10.0,
             width: 11.0,
             height: 12.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecoration),
+            child: DecoratedBox(key: key, decoration: kBoxDecoration),
           ),
         ],
       ),
@@ -350,12 +350,12 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          new Positioned(
+        children: const <Widget>[
+          Positioned(
             right: 10.0,
             width: 11.0,
             height: 12.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecoration),
+            child: DecoratedBox(key: key, decoration: kBoxDecoration),
           ),
         ],
       ),
@@ -581,7 +581,7 @@ void main() {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.rtl,
-        child:  new Stack(
+        child: new Stack(
           children: <Widget>[
             new PositionedDirectional(
               start: 50.0,
@@ -597,7 +597,7 @@ void main() {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
-        child:  new Stack(
+        child: new Stack(
           children: <Widget>[
             new PositionedDirectional(
               start: 50.0,
@@ -636,16 +636,16 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new Stack(
           alignment: Alignment.center,
-          children: <Widget>[
-            const SizedBox(width: 100.0, height: 100.0),
-            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+            Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(start: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
@@ -665,16 +665,16 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           alignment: Alignment.center,
-          children: <Widget>[
-            const SizedBox(width: 100.0, height: 100.0),
-            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+            Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(start: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
@@ -694,16 +694,16 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           alignment: Alignment.bottomRight,
-          children: <Widget>[
-            const SizedBox(width: 100.0, height: 100.0),
-            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+            Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(start: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),
@@ -723,16 +723,16 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           alignment: Alignment.topLeft,
-          children: <Widget>[
-            const SizedBox(width: 100.0, height: 100.0),
-            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
-            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0),
+            Positioned(left: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(right: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            Positioned(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(start: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(end: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(top: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
+            PositionedDirectional(bottom: 0.0, child: SizedBox(width: 100.0, height: 100.0)),
           ],
         ),
       ),

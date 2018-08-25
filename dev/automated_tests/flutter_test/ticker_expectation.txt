@@ -1,0 +1,16 @@
+<<skip until matching line>>
+══╡ EXCEPTION CAUGHT BY SCHEDULER LIBRARY ╞═════════════════════════════════════════════════════════
+The following message was thrown:
+An animation is still running even after the widget tree was disposed.
+
+There was one transient callback left. The stack trace for when it was registered is as follows:
+── callback 2 ──
+<<skip until matching line>>
+#[0-9]+      main.+ \(.+/dev/automated_tests/flutter_test/ticker_test\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
+════════════════════════════════════════════════════════════════════════════════════════════════════
+.*..:.. \+0 -1: Does flutter_test catch leaking tickers\? \[E\]
+  Test failed\. See exception logs above\.
+  The test description was: Does flutter_test catch leaking tickers\?
+ *
+.*..:.. \+0 -1: Some tests failed\. *

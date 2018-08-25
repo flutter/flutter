@@ -1,19 +1,24 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
 /// 180 deg when pressed, then reverts the animation on a second press.
 /// The underlying icon is [Icons.expand_more].
+///
+/// The expand icon does not include a semantic label for accessibility. In
+/// order to be accessible it should be combined with a label using
+/// [MergeSemantics]. This is done automatically by the [ExpansionPanel] widget.
 ///
 /// See [IconButton] for a more general implementation of a pressable button
 /// with an icon.
@@ -22,10 +27,10 @@ class ExpandIcon extends StatefulWidget {
   /// triggered when the icon is pressed.
   const ExpandIcon({
     Key key,
-    this.isExpanded: false,
-    this.size: 24.0,
+    this.isExpanded = false,
+    this.size = 24.0,
     @required this.onPressed,
-    this.padding: const EdgeInsets.all(8.0)
+    this.padding = const EdgeInsets.all(8.0)
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -48,7 +53,7 @@ class ExpandIcon extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final ValueChanged<bool> onPressed;
 
-  /// The padding around the icon. The entire padded icon will reactb to input
+  /// The padding around the icon. The entire padded icon will react to input
   /// gestures.
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
@@ -72,6 +77,10 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         curve: Curves.fastOutSlowIn
       )
     );
+    // If the widget is initially expanded, rotate the icon without animating it.
+    if (widget.isExpanded) {
+      _controller.value = math.pi;
+    }
   }
 
   @override
@@ -100,14 +109,20 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new IconButton(
-      padding: widget.padding,
-      color: Colors.black38,
-      onPressed: widget.onPressed == null ? null : _handlePressed,
-      icon: new RotationTransition(
-        turns: _iconTurns,
-        child: const Icon(Icons.expand_more)
-      )
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
+
+    return new Semantics(
+      onTapHint: widget.onPressed == null ? null : onTapHint,
+      child: new IconButton(
+        padding: widget.padding,
+        color: Colors.black38,
+        onPressed: widget.onPressed == null ? null : _handlePressed,
+        icon: new RotationTransition(
+          turns: _iconTurns,
+          child: const Icon(Icons.expand_more)
+        ),
+      ),
     );
   }
 }

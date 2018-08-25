@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 
 /// Unit tests error.dart's usage via ErrorWidget.
 void main() {
-  final String errorMessage = 'Some error message';
+  const String errorMessage = 'Some error message';
 
   testWidgets('test draw error paragraph', (WidgetTester tester) async {
     await tester.pumpWidget(new ErrorWidget(new Exception(errorMessage)));

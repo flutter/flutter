@@ -15,11 +15,11 @@ class ModalBottomSheetDemo extends StatelessWidget {
         child: new RaisedButton(
           child: const Text('SHOW BOTTOM SHEET'),
           onPressed: () {
-            showModalBottomSheet<Null>(context: context, builder: (BuildContext context) {
+            showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
               return new Container(
                 child: new Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: new Text('This is the modal bottom sheet. Click anywhere to dismiss.',
+                  child: new Text('This is the modal bottom sheet. Tap anywhere to dismiss.',
                     textAlign: TextAlign.center,
                     style: new TextStyle(
                       color: Theme.of(context).accentColor,

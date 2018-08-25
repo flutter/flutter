@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -20,6 +18,7 @@ void main() {
         child: new Material(
           child: new Center(
             child: new Card(
+              semanticContainer: false,
               child: new Column(
                 children: <Widget>[
                   const Text('I am text!'),
@@ -39,18 +38,27 @@ void main() {
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 1,
-            label: 'I am text!\nMoar text!!1',
+            label: 'I am text!',
             textDirection: TextDirection.ltr,
-            children: <TestSemantics>[
-              new TestSemantics(
-                id: 2,
-                label: 'Button',
-                textDirection: TextDirection.ltr,
-                actions: SemanticsAction.tap.index,
-                flags: SemanticsFlags.isButton.index,
-              ),
+          ),
+          new TestSemantics(
+            id: 2,
+            label: 'Moar text!!1',
+             textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            id: 3,
+            label: 'Button',
+            textDirection: TextDirection.ltr,
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
             ],
           ),
         ],
@@ -60,6 +68,93 @@ void main() {
     ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    debugResetSemanticsIdCounter();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Card(
+              semanticContainer: true,
+              child: new Column(
+                children: const <Widget>[
+                  Text('First child'),
+                  Text('Second child')
+                ],
+              )
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 1,
+            label: 'First child\nSecond child',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Card margin', (WidgetTester tester) async {
+    const Key contentsKey = ValueKey<String>('contents');
+
+    await tester.pumpWidget(
+      new Container(
+        alignment: Alignment.topLeft,
+        child: new Card(
+          child: new Container(
+            key: contentsKey,
+            color: const Color(0xFF00FF00),
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+
+    // Default margin is 4
+    expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
+    expect(tester.getSize(find.byType(Card)), const Size(108.0, 108.0));
+
+    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(4.0, 4.0));
+    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
+
+    await tester.pumpWidget(
+      new Container(
+        alignment: Alignment.topLeft,
+        child: new Card(
+          margin: EdgeInsets.zero,
+          child: new Container(
+            key: contentsKey,
+            color: const Color(0xFF00FF00),
+            width: 100.0,
+            height: 100.0,
+          ),
+        ),
+      ),
+    );
+
+    // Specified margin is zero
+    expect(tester.getTopLeft(find.byType(Card)), const Offset(0.0, 0.0));
+    expect(tester.getSize(find.byType(Card)), const Size(100.0, 100.0));
+
+    expect(tester.getTopLeft(find.byKey(contentsKey)), const Offset(0.0, 0.0));
+    expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
   });
 
 }

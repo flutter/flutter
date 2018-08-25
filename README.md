@@ -1,6 +1,8 @@
-# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status - Travis](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter) [![Build Status - AppVeyor](https://ci.appveyor.com/api/projects/status/meyi9evcny64a2mg/branch/master?svg=true)](https://ci.appveyor.com/project/flutter/flutter/branch/master) [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
+# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status - Cirrus](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.com/github/flutter/flutter/master)
+[![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
-A new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an alpha, open-source project.
+Flutter is Google’s mobile app SDK for crafting high-quality native interfaces on iOS and Android in record time. Flutter works with existing code, is used by developers and organizations around the world, and is free and open source.
 
 ### Documentation
 
@@ -10,17 +12,16 @@ A new mobile app SDK to help developers and designers build modern mobile apps f
 * [Changelog](https://github.com/flutter/flutter/wiki/Changelog)
 * [Contribute](CONTRIBUTING.md)
 
-
 ## Fast development
 
 Flutter's <em>hot reload</em> helps you quickly
 and easily experiment, build UIs, add features, and fix
-bugs faster. Experience sub-second reload times,
+bugs. Experience sub-second reload times,
 without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app is changed instantly.">
+<img src="https://user-images.githubusercontent.com/919717/28131204-0f8c3cda-66ee-11e7-9428-6a0513eac75d.gif" alt="Make a change in your code, and your app changes instantly.">
 
 ## Expressive, beautiful UIs
 
@@ -29,11 +30,11 @@ beautiful Material Design and
 Cupertino (iOS-flavor) widgets, rich motion APIs,
 smooth natural scrolling, and platform awareness.
 
-<img src="https://flutter.io/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">
-<img src="https://flutter.io/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
+[<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">](https://github.com/flutter/flutter/tree/master/examples/flutter_gallery/lib/demo/animation)
+[<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">](https://github.com/flutter/posse_gallery)
 
-<img src="https://flutter.io/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">
-<img src="https://flutter.io/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">
+[<img src="https://github.com/flutter/website/blob/master/src/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">](https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart)
+[<img src="https://github.com/flutter/website/blob/master/src/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">](https://codelabs.developers.google.com/codelabs/flutter/)
 
 Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
 
@@ -86,8 +87,8 @@ and learn more about the
 Make your app come to life
 with platform APIs, 3rd party SDKs,
 and native code.
-Flutter lets you reuse your existing Java, Swift, and ObjC code,
-and access native features and SDKs on iOS and Android.
+Flutter lets you reuse your existing Java/Kotlin and ObjC/Swift code,
+and access native features and SDKs on Android and iOS.
 
 Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
 
@@ -118,49 +119,49 @@ If you don't have any mobile development experience, Flutter
 is an easy and fast way to build beautiful mobile apps.
 If you are an experienced iOS or Android developer,
 you can use Flutter for your views and leverage much of your
-existing Java/ObjC/Swift investment.
+existing Java/Kotlin/ObjC/Swift investment.
 
 ### Build
 
 * **Beautiful app UIs**
-  * Rich 2D GPU-accelerated APIs
-  * Reactive framework
-  * Animation/motion APIs
-  * Material Design and iOS widgets
+    * Rich 2D GPU-accelerated APIs
+    * Reactive framework
+    * Animation/motion APIs
+    * Material Design and iOS widgets
 * **Fluid coding experience**
-  * Sub-second, stateful hot reload
-  * IntelliJ: refactor, code completion, etc
-  * Dart language and core libs
-  * Package manager
+    * Sub-second, stateful hot reload
+    * IntelliJ: refactor, code completion, etc
+    * Dart language and core libs
+    * Package manager
 * **Full-featured apps**
-  * Interop with mobile OS APIs & SDKs
-  * Maven/Java
-  * Cocoapods/ObjC/Swift
+    * Interop with mobile OS APIs & SDKs
+    * Gradle/Java/Kotlin
+    * Cocoapods/ObjC/Swift
 
 ### Optimize
 
 * **Test**
-  * Unit testing
-  * Integration testing
-  * On-device testing
+    * Unit testing
+    * Integration testing
+    * On-device testing
 * **Debug**
-  * IDE debugger
-  * Web-based debugger
-  * async/await aware
-  * Expression evaluator
+    * IDE debugger
+    * Web-based debugger
+    * async/await aware
+    * Expression evaluator
 * **Profile**
-  * Timeline
-  * CPU and memory
-  * In-app perf charts
+    * Timeline
+    * CPU and memory
+    * In-app perf charts
 
 ### Deploy
 
 * **Compile**
-  * Native ARM code
-  * Dead code elimination
+    * Native ARM code
+    * Dead code elimination
 * **Distribution**
-  * App Store
-  * Play Store
+    * App Store
+    * Play Store
 
 Learn more about what makes Flutter special in the
 <a href="https://flutter.io/technical-overview/">technical overview</a>.

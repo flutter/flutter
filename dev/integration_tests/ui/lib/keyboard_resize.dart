@@ -9,7 +9,7 @@ import 'keys.dart' as keys;
 
 void main() {
   enableFlutterDriverExtension(handler: (String message) async {
-    // TODO(cbernaschina) remove when test flakiness is resolved
+    // TODO(cbernaschina): remove when test flakiness is resolved
     return 'keyboard_resize';
   });
   runApp(new MyApp());

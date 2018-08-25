@@ -11,7 +11,7 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
+OperatingSystemUtils get os => context[OperatingSystemUtils];
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
@@ -47,13 +47,19 @@ abstract class OperatingSystemUtils {
 
   void unzip(File file, Directory targetDirectory);
 
+  /// Returns true if the ZIP is not corrupt.
+  bool verifyZip(File file);
+
   void unpack(File gzippedTarFile, Directory targetDirectory);
+
+  /// Returns true if the gzip is not corrupt (does not check tar).
+  bool verifyGzip(File gzippedFile);
 
   /// Returns a pretty name string for the current operating system.
   ///
   /// If available, the detailed version of the OS is included.
   String get name {
-    const Map<String, String> osNames = const <String, String>{
+    const Map<String, String> osNames = <String, String>{
       'macos': 'Mac OS',
       'linux': 'Linux',
       'windows': 'Windows'
@@ -62,7 +68,7 @@ abstract class OperatingSystemUtils {
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
-  List<File> _which(String execName, {bool all: false});
+  List<File> _which(String execName, {bool all = false});
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
@@ -77,7 +83,7 @@ class _PosixUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all: false}) {
+  List<File> _which(String execName, {bool all = false}) {
     final List<String> command = <String>['which'];
     if (all)
       command.add('-a');
@@ -85,7 +91,8 @@ class _PosixUtils extends OperatingSystemUtils {
     final ProcessResult result = processManager.runSync(command);
     if (result.exitCode != 0)
       return const <File>[];
-    return result.stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    final String stdout = result.stdout;
+    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
   }
 
   @override
@@ -99,11 +106,17 @@ class _PosixUtils extends OperatingSystemUtils {
     runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
   }
 
+  @override
+  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
+
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
   }
+
+  @override
+  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
@@ -146,7 +159,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  List<File> _which(String execName, {bool all: false}) {
+  List<File> _which(String execName, {bool all = false}) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
@@ -154,7 +167,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
       return lines.map((String path) => fs.file(path.trim())).toList();
-    return  <File>[fs.file(lines.first.trim())];
+    return <File>[fs.file(lines.first.trim())];
   }
 
   @override
@@ -179,11 +192,35 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
+  bool verifyZip(File zipFile) {
+    try {
+      new ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
+    } on FileSystemException catch (_) {
+      return false;
+    } on ArchiveException catch (_) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     final Archive archive = new TarDecoder().decodeBytes(
       new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
+  }
+
+  @override
+  bool verifyGzip(File gzipFile) {
+    try {
+      new GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
+    } on FileSystemException catch (_) {
+      return false;
+    } on ArchiveException catch (_) {
+      return false;
+    }
+    return true;
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {

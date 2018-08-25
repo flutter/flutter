@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'progress_indicator.dart';
@@ -20,12 +19,12 @@ const double _kDragContainerExtentPercentage = 0.25;
 const double _kDragSizeFactorLimit = 1.5;
 
 // When the scroll ends, the duration of the refresh indicator's animation
-// to the RefreshIndicator's displacment.
-const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
+// to the RefreshIndicator's displacement.
+const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
 
 // The duration of the ScaleTransition that starts when the refresh action
 // has completed.
-const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
+const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 
 /// The signature for a function that's called when the user has dragged a
 /// [RefreshIndicator] far enough to demonstrate that they want the app to
@@ -33,7 +32,7 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef Future<Null> RefreshCallback();
+typedef Future<void> RefreshCallback();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
@@ -73,8 +72,13 @@ enum _RefreshIndicatorMode {
 /// See also:
 ///
 ///  * <https://material.google.com/patterns/swipe-to-refresh.html>
-///  * [RefreshIndicatorState], can be used to programatically show the refresh indicator.
-///  * [RefreshProgressIndicator].
+///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
+///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
+///    the inner circular progress spinner during refreshes.
+///  * [CupertinoSliverRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
+///    Must be used as a sliver inside a [CustomScrollView] instead of wrapping
+///    around a [ScrollView] because it's a part of the scrollable instead of
+///    being overlaid on top of it.
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
@@ -84,18 +88,22 @@ class RefreshIndicator extends StatefulWidget {
   const RefreshIndicator({
     Key key,
     @required this.child,
-    this.displacement: 40.0,
+    this.displacement = 40.0,
     @required this.onRefresh,
     this.color,
     this.backgroundColor,
-    this.notificationPredicate: defaultScrollNotificationPredicate,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
        super(key: key);
 
+  /// The widget below this widget in the tree.
+  ///
   /// The refresh indicator will be stacked on top of this child. The indicator
   /// will appear when child's Scrollable descendant is over-scrolled.
+  ///
+  /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
   /// The distance from the child's top or bottom edge to where the refresh
@@ -115,7 +123,7 @@ class RefreshIndicator extends StatefulWidget {
   /// The progress indicator's background color. The current theme's
   /// [ThemeData.canvasColor] by default.
   final Color backgroundColor;
-  
+
   /// A check that specifies whether a [ScrollNotification] should be
   /// handled by this widget.
   ///
@@ -138,14 +146,13 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   Animation<Color> _valueColor;
 
   _RefreshIndicatorMode _mode;
-  Future<Null> _pendingRefreshFuture;
+  Future<void> _pendingRefreshFuture;
   bool _isIndicatorAtTop;
   double _dragOffset;
 
   @override
   void initState() {
     super.initState();
-
     _positionController = new AnimationController(vsync: this);
     _positionFactor = new Tween<double>(
       begin: 0.0,
@@ -218,6 +225,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           _checkDragOffset(notification.metrics.viewportDimension);
         }
       }
+      if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails == null) {
+        // On iOS start the refresh when the Scrollable bounces back from the
+        // overscroll (ScrollNotification indicating this don't have dragDetails
+        // because the scroll activity is not directly triggered by a drag).
+        _show();
+      }
     } else if (notification is OverscrollNotification) {
       if (_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed) {
         _dragOffset -= notification.overscroll / 2.0;
@@ -283,7 +296,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   // Stop showing the refresh indicator.
-  Future<Null> _dismiss(_RefreshIndicatorMode newMode) async {
+  Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
+    await new Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
@@ -313,12 +327,12 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _show() {
     assert(_mode != _RefreshIndicatorMode.refresh);
     assert(_mode != _RefreshIndicatorMode.snap);
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<void> completer = new Completer<void>();
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
     _positionController
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-      .then<Null>((Null value) {
+      .then<void>((Null value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
           assert(widget.onRefresh != null);
           setState(() {
@@ -326,7 +340,22 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             _mode = _RefreshIndicatorMode.refresh;
           });
 
-          widget.onRefresh().whenComplete(() {
+          final Future<void> refreshResult = widget.onRefresh();
+          assert(() {
+            if (refreshResult == null)
+              FlutterError.reportError(new FlutterErrorDetails(
+                exception: new FlutterError(
+                  'The onRefresh callback returned null.\n'
+                  'The RefreshIndicator onRefresh callback must return a Future.'
+                ),
+                context: 'when calling onRefresh',
+                library: 'material library',
+              ));
+            return true;
+          }());
+          if (refreshResult == null)
+            return;
+          refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
               completer.complete();
               _dismiss(_RefreshIndicatorMode.done);
@@ -352,7 +381,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<Null> show({ bool atTop: true }) {
+  Future<void> show({ bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
       if (_mode == null)

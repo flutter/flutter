@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,7 +35,7 @@ void main() {
               child: new Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  const Semantics(
+                  new Semantics(
                     checked: true,
                   ),
                   new Semantics(
@@ -56,14 +54,14 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
           ),
           // IDs 2 and 3 are used up by the nodes that get merged in
           new TestSemantics.rootChild(
             id: 4,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
           ),
@@ -93,7 +91,7 @@ void main() {
               child: new Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  const Semantics(
+                  new Semantics(
                     checked: true,
                   ),
                   new Semantics(
@@ -112,14 +110,14 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
           ),
           // IDs 2 and 3 are used up by the nodes that get merged in
           new TestSemantics.rootChild(
             id: 4,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
           ),

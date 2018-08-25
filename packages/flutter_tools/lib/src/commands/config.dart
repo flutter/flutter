@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 import '../usage.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({ bool verboseHelp: false }) {
+  ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
       negatable: true,
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
@@ -25,7 +25,7 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('machine',
       negatable: false,
       hide: !verboseHelp,
-      help: 'Pring config values as json.');
+      help: 'Print config values as json.');
   }
 
   @override
@@ -57,7 +57,7 @@ class ConfigCommand extends FlutterCommand {
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
-  /// Return null to disable tracking of the `config` command.
+  /// Return null to disable analytics recording of the `config` command.
   @override
   Future<String> get usagePath => null;
 

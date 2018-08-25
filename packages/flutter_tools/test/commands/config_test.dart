@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -30,14 +30,14 @@ void main() {
       await command.handleMachine();
 
       expect(logger.statusText, isNotEmpty);
-      final dynamic json = JSON.decode(logger.statusText);
-      expect(json, isMap);
+      final dynamic jsonObject = json.decode(logger.statusText);
+      expect(jsonObject, isMap);
 
-      expect(json.containsKey('android-studio-dir'), true);
-      expect(json['android-studio-dir'], isNotNull);
+      expect(jsonObject.containsKey('android-studio-dir'), true);
+      expect(jsonObject['android-studio-dir'], isNotNull);
 
-      expect(json.containsKey('android-sdk'), true);
-      expect(json['android-sdk'], isNotNull);
+      expect(jsonObject.containsKey('android-sdk'), true);
+      expect(jsonObject['android-sdk'], isNotNull);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,
       AndroidSdk: () => mockAndroidSdk,

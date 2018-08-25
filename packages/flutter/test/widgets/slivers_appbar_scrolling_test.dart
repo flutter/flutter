@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   final RenderObject target = key.currentContext.findRenderObject();
-  expect(target.parent, const isInstanceOf<RenderViewport>());
+  expect(target.parent, isInstanceOf<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
@@ -82,11 +82,11 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             new SliverPersistentHeader(delegate: new TestDelegate()),
-            new SliverList(
-              delegate: new SliverChildListDelegate(<Widget>[
-                const SizedBox(
+            const SliverList(
+              delegate: SliverChildListDelegate(<Widget>[
+                SizedBox(
                   height: 300.0,
-                  child: const Text('X'),
+                  child: Text('X'),
                 ),
               ]),
             ),

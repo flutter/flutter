@@ -27,7 +27,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet')
-    ).then<Null>((Null result) {
+    ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -37,7 +37,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the the bottom sheet itself to dismiss it
+    // Tap on the bottom sheet itself to dismiss it
     await tester.tap(find.text('BottomSheet'));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
@@ -49,7 +49,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<Null>((Null result) {
+    ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -58,7 +58,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap above the the bottom sheet to dismiss it
+    // Tap above the bottom sheet to dismiss it
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
@@ -74,7 +74,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
+        body: const Center(child: Text('body'))
       )
     ));
 
@@ -131,7 +131,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: const Center(child: const Text('body'))
+        body: const Center(child: Text('body'))
       )
     ));
 
@@ -152,5 +152,55 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // animation done
 
     expect(find.text('BottomSheet'), findsNothing);
+  });
+
+  testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
+    BuildContext outerContext;
+    BuildContext innerContext;
+
+    await tester.pumpWidget(new Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(50.0),
+          ),
+          child: new Navigator(
+            onGenerateRoute: (_) {
+              return new PageRouteBuilder<void>(
+                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                  outerContext = context;
+                  return new Container();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    showModalBottomSheet<void>(
+      context: outerContext,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return new Container();
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      MediaQuery.of(outerContext).padding,
+      const EdgeInsets.all(50.0),
+    );
+    expect(
+      MediaQuery.of(innerContext).padding,
+      const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
+    );
   });
 }

@@ -3,18 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
+import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
-const PointerDownEvent down = const PointerDownEvent(
+const PointerDownEvent down = PointerDownEvent(
   pointer: 5,
-  position: const Offset(10.0, 10.0)
+  position: Offset(10.0, 10.0)
 );
 
-const PointerUpEvent up = const PointerUpEvent(
+const PointerUpEvent up = PointerUpEvent(
   pointer: 5,
-  position: const Offset(11.0, 9.0)
+  position: Offset(11.0, 9.0)
 );
 
 void main() {

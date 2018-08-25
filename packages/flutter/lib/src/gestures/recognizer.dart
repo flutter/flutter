@@ -117,9 +117,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
   }
 }
 
@@ -364,8 +364,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<GestureRecognizerState>('state', state));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<GestureRecognizerState>('state', state));
   }
 }

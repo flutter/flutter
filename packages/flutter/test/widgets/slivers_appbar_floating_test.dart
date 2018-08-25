@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext.findRenderObject();
-  expect(target.parent, const isInstanceOf<RenderViewport>());
+  expect(target.parent, isInstanceOf<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
@@ -70,8 +70,8 @@ void main() {
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
-    verifyPaintPosition(key2, const Offset(0.0, 600.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
+    verifyPaintPosition(key3, const Offset(0.0, 1200.0), false);
 
     position.animateTo(bigHeight - 600.0 + delegate.maxExtent, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
@@ -142,8 +142,8 @@ void main() {
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
-    verifyPaintPosition(key2, const Offset(0.0, 600.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
+    verifyPaintPosition(key3, const Offset(0.0, 1200.0), false);
 
     position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
@@ -177,8 +177,8 @@ void main() {
     final ScrollPositionWithSingleContext position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
-    verifyPaintPosition(key2, const Offset(0.0, 600.0), false);
-    verifyPaintPosition(key3, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
+    verifyPaintPosition(key3, const Offset(0.0, 1200.0), false);
 
     position.animateTo(bigHeight + delegate.maxExtent * 2.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
@@ -187,7 +187,7 @@ void main() {
     verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
-    position.updateUserScrollDirection(ScrollDirection.forward);
+    position.updateUserScrollDirection(ScrollDirection.forward); // ignore: invalid_use_of_protected_member
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
@@ -203,11 +203,11 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
-            new SliverList(
-              delegate: new SliverChildListDelegate(<Widget>[
-                const SizedBox(
+            const SliverList(
+              delegate: SliverChildListDelegate(<Widget>[
+                SizedBox(
                   height: 300.0,
-                  child: const Text('X'),
+                  child: Text('X'),
                 ),
               ]),
             ),

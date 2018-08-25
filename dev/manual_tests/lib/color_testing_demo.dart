@@ -14,8 +14,6 @@ class ColorTestingDemo extends StatelessWidget {
   Widget build(BuildContext context) => new ColorDemoHome();
 }
 
-const double _kPageMaxWidth = 500.0;
-
 class ColorDemoHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -24,28 +22,28 @@ class ColorDemoHome extends StatelessWidget {
       body: new ListView(
         padding: const EdgeInsets.all(5.0),
         children: <Widget>[
-          new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/gbr.png'),
-          new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/tf.png'),
-          new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/wide-gamut.png'),
-          const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF00FF00)),
-          const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFFFFFF00)),
-          const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF0000FF)),
-          const GradientRow(leftColor: const Color(0xFF00FF00), rightColor: const Color(0xFFFFFF00)),
-          const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFF00FF00)),
-          const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFFFFFF00)),
+          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/gbr.png'),
+          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/tf.png'),
+          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/wide-gamut.png'),
+          const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFF00FF00)),
+          const GradientRow(leftColor: Color(0xFF0000FF), rightColor: Color(0xFFFFFF00)),
+          const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFF0000FF)),
+          const GradientRow(leftColor: Color(0xFF00FF00), rightColor: Color(0xFFFFFF00)),
+          const GradientRow(leftColor: Color(0xFF0000FF), rightColor: Color(0xFF00FF00)),
+          const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFFFFFF00)),
 
           // For the following pairs, the blend result should match the opaque color.
-          const ColorRow(color: const Color(0xFFBCBCBC)),
-          const ColorRow(color: const Color(0x80000000)),
+          const ColorRow(color: Color(0xFFBCBCBC)),
+          const ColorRow(color: Color(0x80000000)),
 
-          const ColorRow(color: const Color(0xFFFFBCBC)),
-          const ColorRow(color: const Color(0x80FF0000)),
+          const ColorRow(color: Color(0xFFFFBCBC)),
+          const ColorRow(color: Color(0x80FF0000)),
 
-          const ColorRow(color: const Color(0xFFBCFFBC)),
-          const ColorRow(color: const Color(0x8000FF00)),
+          const ColorRow(color: Color(0xFFBCFFBC)),
+          const ColorRow(color: Color(0x8000FF00)),
 
-          const ColorRow(color: const Color(0xFFBCBCFF)),
-          const ColorRow(color: const Color(0x800000FF)),
+          const ColorRow(color: Color(0xFFBCBCFF)),
+          const ColorRow(color: Color(0x800000FF)),
         ],
       ),
     );

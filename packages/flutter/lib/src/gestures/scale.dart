@@ -32,7 +32,7 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint: Offset.zero })
+  ScaleStartDetails({ this.focalPoint = Offset.zero })
     : assert(focalPoint != null);
 
   /// The initial focal point of the pointers in contact with the screen.
@@ -50,8 +50,8 @@ class ScaleUpdateDetails {
   /// The [focalPoint] and [scale] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
-    this.focalPoint: Offset.zero,
-    this.scale: 1.0,
+    this.focalPoint = Offset.zero,
+    this.scale = 1.0,
   }) : assert(focalPoint != null),
        assert(scale != null && scale >= 0.0);
 
@@ -72,7 +72,7 @@ class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity: Velocity.zero })
+  ScaleEndDetails({ this.velocity = Velocity.zero })
     : assert(velocity != null);
 
   /// The velocity of the last pointer to be lifted off of the screen.
@@ -102,7 +102,7 @@ bool _isFlingGesture(Velocity velocity) {
 /// Recognizes a scale gesture.
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
-/// calculates their focal point and indiciated scale. When a focal pointer is
+/// calculates their focal point and indicated scale. When a focal pointer is
 /// established, the recognizer calls [onStart]. As the focal point and scale
 /// change, the recognizer calls [onUpdate]. When the pointers are no longer in
 /// contact with the screen, the recognizer calls [onEnd].
@@ -200,9 +200,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
             velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-          invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          invokeCallback<void>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity)));
         } else {
-          invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          invokeCallback<void>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero)));
         }
       }
       _state = _ScaleState.accepted;
@@ -230,13 +230,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<Null>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<void>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint)));
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
     assert(_state == _ScaleState.started);
     if (onStart != null)
-      invokeCallback<Null>('onStart', () => onStart(new ScaleStartDetails(focalPoint: _currentFocalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<void>('onStart', () => onStart(new ScaleStartDetails(focalPoint: _currentFocalPoint)));
   }
 
   @override
@@ -259,12 +259,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         resolve(GestureDisposition.rejected);
         break;
       case _ScaleState.ready:
-        assert(false);  // We should have not seen a pointer yet
+        assert(false); // We should have not seen a pointer yet
         break;
       case _ScaleState.accepted:
         break;
       case _ScaleState.started:
-        assert(false);  // We should be in the accepted state when user is done
+        assert(false); // We should be in the accepted state when user is done
         break;
     }
     _state = _ScaleState.ready;

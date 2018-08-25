@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 dynamic getAssertionErrorWithMessage() {
   try {
@@ -62,7 +62,7 @@ Future<Null> main() async {
         information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
       },
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
       'Message goes here\\.\n'
@@ -84,7 +84,7 @@ Future<Null> main() async {
       'line 1 of extra information\n'
       'line 2 of extra information\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
-    )));
+    ));
     console.clear();
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: getAssertionErrorWithMessage(),
@@ -99,7 +99,7 @@ Future<Null> main() async {
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: getAssertionErrorWithLongMessage(),
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following assertion was thrown:\n'
       'word word word word word word word word word word word word word word word word word word word word '
@@ -114,7 +114,7 @@ Future<Null> main() async {
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
-    )));
+    ));
     console.clear();
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: getAssertionErrorWithLongMessage(),
@@ -144,7 +144,7 @@ Future<Null> main() async {
         information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
       },
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.\n'
@@ -165,7 +165,7 @@ Future<Null> main() async {
       'line 1 of extra information\n'
       'line 2 of extra information\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
-    )));
+    ));
     console.clear();
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: getAssertionErrorWithoutMessage(),
@@ -177,17 +177,17 @@ Future<Null> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    final dynamic exception = new NoSuchMethodError(5, #foo, <dynamic>[2, 4], null);
+    final dynamic exception = new NoSuchMethodError(5, #foo, <dynamic>[2, 4], null); // ignore: deprecated_member_use
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: exception,
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following NoSuchMethodError was thrown:\n'
       'Receiver: 5\n'
       'Tried calling: foo = 2, 4\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
-    )));
+    ));
     console.clear();
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: exception,
@@ -202,12 +202,12 @@ Future<Null> main() async {
     FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
       exception: 'hello',
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following message was thrown:\n'
       'hello\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
-    )));
+    ));
     console.clear();
     FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
       exception: 'hello again',

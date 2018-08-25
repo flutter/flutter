@@ -5,13 +5,15 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'thumb_painter.dart';
+
+// Examples can assume:
+// int _cupertinoSliderValue = 1;
 
 /// An iOS-style slider.
 ///
@@ -31,7 +33,7 @@ import 'thumb_painter.dart';
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/sliders/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/sliders/>
 class CupertinoSlider extends StatefulWidget {
   /// Creates an iOS-style slider.
   ///
@@ -42,14 +44,20 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
+  /// * [onChangeStart] is called when the user starts to select a new value for
+  ///   the slider.
+  /// * [onChangeEnd] is called when the user is done selecting a new value for
+  ///   the slider.
   const CupertinoSlider({
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.min: 0.0,
-    this.max: 1.0,
+    this.onChangeStart,
+    this.onChangeEnd,
+    this.min = 0.0,
+    this.max = 1.0,
     this.divisions,
-    this.activeColor: CupertinoColors.activeBlue,
+    this.activeColor,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -76,18 +84,90 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// ```dart
   /// new CupertinoSlider(
-  ///   value: _duelCommandment.toDouble(),
+  ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
   ///   divisions: 10,
   ///   onChanged: (double newValue) {
   ///     setState(() {
-  ///       _duelCommandment = newValue.round();
+  ///       _cupertinoSliderValue = newValue.round();
   ///     });
   ///   },
   /// )
   /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when the user starts
+  ///    changing the value.
+  ///  * [onChangeEnd] for a callback that is called when the user stops
+  ///    changing the value.
   final ValueChanged<double> onChanged;
+
+  /// Called when the user starts selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to be notified when the user has started
+  /// selecting a new value by starting a drag.
+  ///
+  /// The value passed will be the last [value] that the slider had before the
+  /// change began.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new CupertinoSlider(
+  ///   value: _cupertinoSliderValue.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _cupertinoSliderValue = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeStart: (double startValue) {
+  ///     print('Started change at $startValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeEnd] for a callback that is called when the value change is
+  ///    complete.
+  final ValueChanged<double> onChangeStart;
+
+  /// Called when the user is done selecting a new value for the slider.
+  ///
+  /// This callback shouldn't be used to update the slider [value] (use
+  /// [onChanged] for that), but rather to know when the user has completed
+  /// selecting a new [value] by ending a drag.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// new CupertinoSlider(
+  ///   value: _cupertinoSliderValue.toDouble(),
+  ///   min: 1.0,
+  ///   max: 10.0,
+  ///   divisions: 10,
+  ///   onChanged: (double newValue) {
+  ///     setState(() {
+  ///       _cupertinoSliderValue = newValue.round();
+  ///     });
+  ///   },
+  ///   onChangeEnd: (double newValue) {
+  ///     print('Ended change on $newValue');
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [onChangeStart] for a callback that is called when a value change
+  ///    begins.
+  final ValueChanged<double> onChangeEnd;
 
   /// The minimum value the user can select.
   ///
@@ -105,24 +185,39 @@ class CupertinoSlider extends StatefulWidget {
   final int divisions;
 
   /// The color to use for the portion of the slider that has been selected.
+  ///
+  /// Defaults to [CupertinoColors.activeBlue].
   final Color activeColor;
 
   @override
   _CupertinoSliderState createState() => new _CupertinoSliderState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('value', value));
-    description.add(new DoubleProperty('min', min));
-    description.add(new DoubleProperty('max', max));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('value', value));
+    properties.add(new DoubleProperty('min', min));
+    properties.add(new DoubleProperty('max', max));
   }
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    widget.onChanged(value * (widget.max - widget.min) + widget.min);
+    final double lerpValue = lerpDouble(widget.min, widget.max, value);
+    if (lerpValue != widget.value) {
+      widget.onChanged(lerpValue);
+    }
+  }
+
+  void _handleDragStart(double value) {
+    assert(widget.onChangeStart != null);
+    widget.onChangeStart(lerpDouble(widget.min, widget.max, value));
+  }
+
+  void _handleDragEnd(double value) {
+    assert(widget.onChangeEnd != null);
+    widget.onChangeEnd(lerpDouble(widget.min, widget.max, value));
   }
 
   @override
@@ -130,8 +225,10 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     return new _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
-      activeColor: widget.activeColor,
+      activeColor: widget.activeColor ?? CupertinoColors.activeBlue,
       onChanged: widget.onChanged != null ? _handleChanged : null,
+      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       vsync: this,
     );
   }
@@ -144,6 +241,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.activeColor,
     this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     this.vsync,
   }) : super(key: key);
 
@@ -151,6 +250,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final Color activeColor;
   final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChangeEnd;
   final TickerProvider vsync;
 
   @override
@@ -160,6 +261,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       activeColor: activeColor,
       onChanged: onChanged,
+      onChangeStart: onChangeStart,
+      onChangeEnd: onChangeEnd,
       vsync: vsync,
       textDirection: Directionality.of(context),
     );
@@ -172,6 +275,8 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..divisions = divisions
       ..activeColor = activeColor
       ..onChanged = onChanged
+      ..onChangeStart = onChangeStart
+      ..onChangeEnd = onChangeEnd
       ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
     // the _SliderRenderObjectWidget object and the _SliderState object.
@@ -179,11 +284,10 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const double _kTrackHeight = 2.0;
-const Color _kTrackColor = const Color(0xFFB5B5B5);
+const Color _kTrackColor = Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
-final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
+const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
 
 const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
@@ -193,6 +297,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     int divisions,
     Color activeColor,
     ValueChanged<double> onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
     TickerProvider vsync,
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
@@ -225,6 +331,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _position.animateTo(newValue, curve: Curves.fastOutSlowIn);
     else
       _position.value = newValue;
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
@@ -255,6 +362,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     if (wasInteractive != isInteractive)
       markNeedsSemanticsUpdate();
   }
+
+  ValueChanged<double> onChangeStart;
+  ValueChanged<double> onChangeEnd;
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
@@ -295,12 +405,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   bool get isInteractive => onChanged != null;
 
-  void _handleDragStart(DragStartDetails details) {
-    if (isInteractive) {
-      _currentDragValue = _value;
-      onChanged(_discretizedCurrentDragValue);
-    }
-  }
+  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
@@ -318,7 +423,22 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     }
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(DragEndDetails details) => _endInteraction();
+
+  void _startInteraction(Offset globalPosition) {
+    if (isInteractive) {
+      if (onChangeStart != null) {
+        onChangeStart(_discretizedCurrentDragValue);
+      }
+      _currentDragValue = _value;
+      onChanged(_discretizedCurrentDragValue);
+    }
+  }
+
+  void _endInteraction() {
+    if (onChangeEnd != null) {
+      onChangeEnd(_discretizedCurrentDragValue);
+    }
     _currentDragValue = 0.0;
   }
 
@@ -344,13 +464,13 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
-        leftColor = _kTrackColor;
-        rightColor = _activeColor;
+        leftColor = _activeColor;
+        rightColor = _kTrackColor;
         break;
       case TextDirection.ltr:
         visualPosition = _position.value;
-        leftColor = _activeColor;
-        rightColor = _kTrackColor;
+        leftColor = _kTrackColor;
+        rightColor = _activeColor;
         break;
     }
 
@@ -384,8 +504,12 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
-      config.addAction(SemanticsAction.increase, _increaseAction);
-      config.addAction(SemanticsAction.decrease, _decreaseAction);
+      config.textDirection = textDirection;
+      config.onIncrease = _increaseAction;
+      config.onDecrease = _decreaseAction;
+      config.value = '${(value * 100).round()}%';
+      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
     }
   }
 

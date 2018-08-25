@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -18,8 +17,8 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   const AnimatedSize({
     Key key,
     Widget child,
-    this.alignment: Alignment.center,
-    this.curve: Curves.linear,
+    this.alignment = Alignment.center,
+    this.curve = Curves.linear,
     @required this.duration,
     @required this.vsync,
   }) : super(key: key, child: child);
@@ -34,6 +33,15 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The animation curve when transitioning this widget's size to match the

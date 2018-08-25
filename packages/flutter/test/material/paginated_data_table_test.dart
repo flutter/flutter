@@ -52,7 +52,7 @@ void main() {
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
-        availableRowsPerPage: <int>[
+        availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
         onRowsPerPageChanged: (int rowsPerPage) {
@@ -61,10 +61,10 @@ void main() {
         onPageChanged: (int rowIndex) {
           log.add('page-changed: $rowIndex');
         },
-        columns: <DataColumn>[
-          const DataColumn(label: const Text('Name')),
-          const DataColumn(label: const Text('Calories'), numeric: true),
-          const DataColumn(label: const Text('Generation')),
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
         ],
       )
     ));
@@ -80,7 +80,7 @@ void main() {
     expect(find.text('Eclair (0)'), findsOneWidget);
     expect(find.text('Gingerbread (0)'), findsNothing);
 
-    await tester.tap(find.icon(Icons.chevron_left));
+    await tester.tap(find.byIcon(Icons.chevron_left));
 
     expect(log, <String>['page-changed: 0']);
     log.clear();
@@ -91,7 +91,7 @@ void main() {
     expect(find.text('Eclair (0)'), findsNothing);
     expect(find.text('Gingerbread (0)'), findsNothing);
 
-    await tester.tap(find.icon(Icons.chevron_left));
+    await tester.tap(find.byIcon(Icons.chevron_left));
 
     expect(log, isEmpty);
 
@@ -120,7 +120,7 @@ void main() {
         },
         columns: <DataColumn>[
           const DataColumn(
-            label: const Text('Name'),
+            label: Text('Name'),
             tooltip: 'Name',
           ),
           new DataColumn(
@@ -132,7 +132,7 @@ void main() {
             }
           ),
           const DataColumn(
-            label: const Text('Generation'),
+            label: Text('Generation'),
             tooltip: 'Generation',
           ),
         ],
@@ -152,7 +152,7 @@ void main() {
     ));
 
     // the column overflows because we're forcing it to 600 pixels high
-    expect(tester.takeException(), contains('A vertical RenderFlex overflowed by'));
+    expect(tester.takeException(), contains('A RenderFlex overflowed by'));
 
     expect(find.text('Gingerbread (0)'), findsOneWidget);
     expect(find.text('Gingerbread (1)'), findsNothing);
@@ -188,8 +188,94 @@ void main() {
     expect(find.text('Gingerbread (1)'), findsNothing);
     expect(find.text('Gingerbread (2)'), findsOneWidget);
 
-    await tester.tap(find.icon(Icons.adjust));
+    await tester.tap(find.byIcon(Icons.adjust));
     expect(log, <String>['action: adjust']);
     log.clear();
+  });
+
+  testWidgets('PaginatedDataTable text alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new PaginatedDataTable(
+        header: const Text('HEADER'),
+        source: new TestDataSource(),
+        rowsPerPage: 8,
+        availableRowsPerPage: const <int>[
+          8, 9,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) { },
+        columns: const <DataColumn>[
+          DataColumn(label: Text('COL1')),
+          DataColumn(label: Text('COL2')),
+          DataColumn(label: Text('COL3')),
+        ],
+      ),
+    ));
+    expect(find.text('Rows per page:'), findsOneWidget);
+    expect(find.text('8'), findsOneWidget);
+    expect(tester.getTopRight(find.text('8')).dx, tester.getTopRight(find.text('Rows per page:')).dx + 40.0); // per spec
+  });
+
+  testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
+    final TestDataSource source = new TestDataSource();
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          textScaleFactor: 20.0,
+        ),
+        child: new PaginatedDataTable(
+          header: const Text('HEADER'),
+          source: source,
+          rowsPerPage: 501,
+          availableRowsPerPage: const <int>[ 501 ],
+          onRowsPerPageChanged: (int rowsPerPage) { },
+          columns: const <DataColumn>[
+            DataColumn(label: Text('COL1')),
+            DataColumn(label: Text('COL2')),
+            DataColumn(label: Text('COL3')),
+          ],
+        ),
+      ),
+    ));
+    // the column overflows because we're forcing it to 600 pixels high
+    expect(tester.takeException(), contains('A RenderFlex overflowed by'));
+    expect(find.text('Rows per page:'), findsOneWidget);
+    // Test that we will show some options in the drop down even if the lowest option is bigger than the source:
+    assert(501 > source.rowCount);
+    expect(find.text('501'), findsOneWidget);
+    // Test that it fits:
+    expect(tester.getTopRight(find.text('501')).dx, greaterThanOrEqualTo(tester.getTopRight(find.text('Rows per page:')).dx + 40.0));
+  });
+
+  testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
+    final TestDataSource source = new TestDataSource();
+    await tester.pumpWidget(new MaterialApp(
+      home: new Align(
+        alignment: Alignment.topLeft,
+        child: new SizedBox(
+          width: 100.0,
+          child: new PaginatedDataTable(
+            header: const Text('HEADER'),
+            source: source,
+            rowsPerPage: 5,
+            availableRowsPerPage: const <int>[ 5 ],
+            onRowsPerPageChanged: (int rowsPerPage) { },
+            columns: const <DataColumn>[
+              DataColumn(label: Text('COL1')),
+              DataColumn(label: Text('COL2')),
+              DataColumn(label: Text('COL3')),
+            ],
+          ),
+        ),
+      ),
+    ));
+    expect(find.text('Rows per page:'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Rows per page:')).dx, lessThan(0.0)); // off screen
+    await tester.dragFrom(
+      new Offset(50.0, tester.getTopLeft(find.text('Rows per page:')).dy),
+      const Offset(1000.0, 0.0),
+    );
+    await tester.pump();
+    expect(find.text('Rows per page:'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Rows per page:')).dx, 18.0); // 14 padding in the footer row, 4 padding from the card
   });
 }

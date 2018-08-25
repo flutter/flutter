@@ -95,13 +95,13 @@ class Table extends RenderObjectWidget {
   /// arguments must not be null.
   Table({
     Key key,
-    this.children: const <TableRow>[],
+    this.children = const <TableRow>[],
     this.columnWidths,
-    this.defaultColumnWidth: const FlexColumnWidth(1.0),
+    this.defaultColumnWidth = const FlexColumnWidth(1.0),
     this.textDirection,
     this.border,
-    this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
-    this.textBaseline
+    this.defaultVerticalAlignment = TableCellVerticalAlignment.top,
+    this.textBaseline,
   }) : assert(children != null),
        assert(defaultColumnWidth != null),
        assert(defaultVerticalAlignment != null),
@@ -213,7 +213,7 @@ class Table extends RenderObjectWidget {
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
       defaultVerticalAlignment: defaultVerticalAlignment,
-      textBaseline: textBaseline
+      textBaseline: textBaseline,
     );
   }
 
@@ -300,11 +300,12 @@ class _TableElement extends RenderObjectElement {
   void update(Table newWidget) {
     assert(!_debugWillReattachChildren);
     assert(() { _debugWillReattachChildren = true; return true; }());
-    final Map<LocalKey, List<Element>> oldKeyedRows = new Map<LocalKey, List<Element>>.fromIterable(
-      _children.where((_TableElementRow row) => row.key != null),
-      key:   (_TableElementRow row) => row.key,
-      value: (_TableElementRow row) => row.children
-    );
+    final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
+    for (_TableElementRow row in _children) {
+      if (row.key != null) {
+        oldKeyedRows[row.key] = row.children;
+      }
+    }
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = new Set<List<Element>>();
@@ -339,7 +340,12 @@ class _TableElement extends RenderObjectElement {
     assert(renderObject != null);
     renderObject.setFlatChildren(
       _children.isNotEmpty ? _children[0].children.length : 0,
-      _children.expand((_TableElementRow row) => row.children.map((Element child) => child.renderObject)).toList()
+      _children.expand<RenderBox>((_TableElementRow row) {
+        return row.children.map<RenderBox>((Element child) {
+          final RenderBox box = child.renderObject;
+          return box;
+        });
+      }).toList()
     );
   }
 
@@ -387,8 +393,8 @@ class TableCell extends ParentDataWidget<Table> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
   }
 }

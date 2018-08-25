@@ -28,11 +28,11 @@ class FlutterErrorDetails {
   const FlutterErrorDetails({
     this.exception,
     this.stack,
-    this.library: 'Flutter framework',
+    this.library = 'Flutter framework',
     this.context,
     this.stackFilter,
     this.informationCollector,
-    this.silent: false
+    this.silent = false
   });
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
@@ -140,6 +140,38 @@ class FlutterErrorDetails {
       longMessage = '  <no message available>';
     return longMessage;
   }
+
+  @override
+  String toString() {
+    final StringBuffer buffer = new StringBuffer();
+    if ((library != null && library != '') || (context != null && context != '')) {
+      if (library != null && library != '') {
+        buffer.write('Error caught by $library');
+        if (context != null && context != '')
+          buffer.write(', ');
+      } else {
+        buffer.writeln('Exception ');
+      }
+      if (context != null && context != '')
+        buffer.write('thrown $context');
+      buffer.writeln('.');
+    } else {
+      buffer.write('An error was caught.');
+    }
+    buffer.writeln(exceptionAsString());
+    if (informationCollector != null)
+      informationCollector(buffer);
+    if (stack != null) {
+      Iterable<String> stackLines = stack.toString().trimRight().split('\n');
+      if (stackFilter != null) {
+        stackLines = stackFilter(stackLines);
+      } else {
+        stackLines = FlutterError.defaultStackFilter(stackLines);
+      }
+      buffer.writeAll(stackLines, '\n');
+    }
+    return buffer.toString().trimRight();
+  }
 }
 
 /// Error class used to report Flutter-specific assertion failures and
@@ -218,7 +250,7 @@ class FlutterError extends AssertionError {
   /// had not been called before (so the next message is verbose again).
   ///
   /// The default behavior for the [onError] handler is to call this function.
-  static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport: false }) {
+  static void dumpErrorToConsole(FlutterErrorDetails details, { bool forceReport = false }) {
     assert(details != null);
     assert(details.exception != null);
     bool reportError = details.silent != true; // could be null
@@ -319,17 +351,17 @@ class FlutterError extends AssertionError {
   /// format but the frame numbers will not be consecutive (frames are elided)
   /// and the final line may be prose rather than a stack frame.
   static Iterable<String> defaultStackFilter(Iterable<String> frames) {
-    const List<String> filteredPackages = const <String>[
+    const List<String> filteredPackages = <String>[
       'dart:async-patch',
       'dart:async',
       'package:stack_trace',
     ];
-    const List<String> filteredClasses = const <String>[
+    const List<String> filteredClasses = <String>[
       '_AssertionError',
       '_FakeAsync',
       '_FrameCallbackEntry',
     ];
-    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/.+:[0-9]+(?::[0-9]+)?\)$');
+    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
     final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];

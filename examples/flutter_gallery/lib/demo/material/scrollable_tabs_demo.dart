@@ -11,18 +11,26 @@ enum TabsDemoStyle {
 }
 
 class _Page {
-  _Page({ this.icon, this.text });
+  const _Page({ this.icon, this.text });
   final IconData icon;
   final String text;
 }
 
-final List<_Page> _allPages = <_Page>[
-  new _Page(icon: Icons.event, text: 'EVENT'),
-  new _Page(icon: Icons.home, text: 'HOME'),
-  new _Page(icon: Icons.android, text: 'ANDROID'),
-  new _Page(icon: Icons.alarm, text: 'ALARM'),
-  new _Page(icon: Icons.face, text: 'FACE'),
-  new _Page(icon: Icons.language, text: 'LANGUAGE'),
+const List<_Page> _allPages = <_Page>[
+  _Page(icon: Icons.grade, text: 'TRIUMPH'),
+  _Page(icon: Icons.playlist_add, text: 'NOTE'),
+  _Page(icon: Icons.check_circle, text: 'SUCCESS'),
+  _Page(icon: Icons.question_answer, text: 'OVERSTATE'),
+  _Page(icon: Icons.sentiment_very_satisfied, text: 'SATISFACTION'),
+  _Page(icon: Icons.camera, text: 'APERTURE'),
+  _Page(icon: Icons.assignment_late, text: 'WE MUST'),
+  _Page(icon: Icons.assignment_turned_in, text: 'WE CAN'),
+  _Page(icon: Icons.group, text: 'ALL'),
+  _Page(icon: Icons.block, text: 'EXCEPT'),
+  _Page(icon: Icons.sentiment_very_dissatisfied, text: 'CRYING'),
+  _Page(icon: Icons.error, text: 'MISTAKE'),
+  _Page(icon: Icons.loop, text: 'TRYING'),
+  _Page(icon: Icons.cake, text: 'CAKE'),
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
@@ -35,6 +43,7 @@ class ScrollableTabsDemo extends StatefulWidget {
 class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
   TabController _controller;
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
+  bool _customIndicator = false;
 
   @override
   void initState() {
@@ -54,6 +63,61 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     });
   }
 
+  Decoration getIndicator() {
+    if (!_customIndicator)
+      return const UnderlineTabIndicator();
+
+    switch(_demoStyle) {
+      case TabsDemoStyle.iconsAndText:
+        return new ShapeDecoration(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            side: BorderSide(
+              color: Colors.white24,
+              width: 2.0,
+            ),
+          ) + const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            side: BorderSide(
+              color: Colors.transparent,
+              width: 4.0,
+            ),
+          ),
+        );
+
+      case TabsDemoStyle.iconsOnly:
+        return new ShapeDecoration(
+          shape: const CircleBorder(
+            side: BorderSide(
+              color: Colors.white24,
+              width: 4.0,
+            ),
+          ) + const CircleBorder(
+            side: BorderSide(
+              color: Colors.transparent,
+              width: 4.0,
+            ),
+          ),
+        );
+
+      case TabsDemoStyle.textOnly:
+        return new ShapeDecoration(
+          shape: const StadiumBorder(
+            side: BorderSide(
+              color: Colors.white24,
+              width: 2.0,
+            ),
+          ) + const StadiumBorder(
+            side: BorderSide(
+              color: Colors.transparent,
+              width: 4.0,
+            ),
+          ),
+        );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
@@ -61,20 +125,28 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       appBar: new AppBar(
         title: const Text('Scrollable tabs'),
         actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() {
+                _customIndicator = !_customIndicator;
+              });
+            },
+          ),
           new PopupMenuButton<TabsDemoStyle>(
             onSelected: changeDemoStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsAndText,
-                child: const Text('Icons and text')
+                child: Text('Icons and text')
               ),
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsOnly,
-                child: const Text('Icons only')
+                child: Text('Icons only')
               ),
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.textOnly,
-                child: const Text('Text only')
+                child: Text('Text only')
               ),
             ],
           ),
@@ -82,6 +154,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
         bottom: new TabBar(
           controller: _controller,
           isScrollable: true,
+          indicator: getIndicator(),
           tabs: _allPages.map((_Page page) {
             switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:
@@ -97,15 +170,20 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       body: new TabBarView(
         controller: _controller,
         children: _allPages.map((_Page page) {
-          return new Container(
-            key: new ObjectKey(page.icon),
-            padding: const EdgeInsets.all(12.0),
-            child:new Card(
-              child: new Center(
-                child: new Icon(
-                  page.icon,
-                  color: iconColor,
-                  size: 128.0,
+          return new SafeArea(
+            top: false,
+            bottom: false,
+            child: new Container(
+              key: new ObjectKey(page.icon),
+              padding: const EdgeInsets.all(12.0),
+              child: new Card(
+                child: new Center(
+                  child: new Icon(
+                    page.icon,
+                    color: iconColor,
+                    size: 128.0,
+                    semanticLabel: 'Placeholder for ${page.text} tab',
+                  ),
                 ),
               ),
             ),

@@ -15,8 +15,12 @@ import 'test_pointer.dart';
 
 /// Class that programmatically interacts with widgets.
 ///
-/// For a variant of this class suited specifically for unit tests, see [WidgetTester].
-class WidgetController {
+/// For a variant of this class suited specifically for unit tests, see
+/// [WidgetTester]. For one suitable for live tests on a device, consider
+/// [LiveWidgetController].
+///
+/// Concrete subclasses must implement the [pump] method.
+abstract class WidgetController {
   /// Creates a widget controller that uses the given binding.
   WidgetController(this.binding);
 
@@ -132,8 +136,8 @@ class WidgetController {
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
     return allElements
-           .where((Element element) => element is StatefulElement)
-           .map((StatefulElement element) => element.state); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27827
+           .whereType<StatefulElement>()
+           .map((StatefulElement element) => element.state);
   }
 
   /// The matching state in the widget tree.
@@ -143,7 +147,7 @@ class WidgetController {
   ///
   /// * Use [firstState] if you expect to match several states but only want the first.
   /// * Use [stateList] if you expect to match several states and want all of them.
-  T state<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T state<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().single, finder);
   }
@@ -155,7 +159,7 @@ class WidgetController {
   /// matching widget has no state.
   ///
   /// * Use [state] if you only expect to match one state.
-  T firstState<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T firstState<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().first, finder);
   }
@@ -167,12 +171,12 @@ class WidgetController {
   ///
   /// * Use [state] if you only expect to match one state.
   /// * Use [firstState] if you expect to match several but only want the first.
-  Iterable<T> stateList<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  Iterable<T> stateList<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map((Element element) => _stateOf<T>(element, finder));
   }
 
-  T _stateOf<T extends State<StatefulWidget>>(Element element, Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
     if (element is StatefulElement)
       return element.state;
@@ -265,6 +269,17 @@ class WidgetController {
     });
   }
 
+  /// Dispatch a pointer down at the center of the given widget, assuming it is
+  /// exposed.
+  ///
+  /// If the center of the widget is not exposed, this might send events to
+  /// another object.
+  Future<TestGesture> press(Finder finder, { int pointer }) {
+    return TestAsyncUtils.guard<TestGesture>(() {
+      return startGesture(getCenter(finder), pointer: pointer);
+    });
+  }
+
   /// Dispatch a pointer down / pointer up sequence (with a delay of
   /// [kLongPressTimeout] + [kPressTimeout] between the two events) at the
   /// center of the given widget, assuming it is exposed.
@@ -299,11 +314,28 @@ class WidgetController {
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [drag].
+  ///
+  /// The `initialOffset` argument, if non-zero, causes the pointer to first
+  /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
+  /// used to simulate a drag followed by a fling, including dragging in the
+  /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
+  /// then fling to the left over 200 pixels, ending at the exact point that the
+  /// drag started).
   Future<Null> fling(Finder finder, Offset offset, double speed, {
     int pointer,
-    Duration frameInterval: const Duration(milliseconds: 16),
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
   }) {
-    return flingFrom(getCenter(finder), offset, speed, pointer: pointer, frameInterval: frameInterval);
+    return flingFrom(
+      getCenter(finder),
+      offset,
+      speed,
+      pointer: pointer,
+      frameInterval: frameInterval,
+      initialOffset: initialOffset,
+      initialOffsetDelay: initialOffsetDelay,
+    );
   }
 
   /// Attempts a fling gesture starting from the given location, moving the
@@ -320,11 +352,23 @@ class WidgetController {
   /// To make tests more realistic, frames may be pumped during this time (using
   /// calls to [pump]). If the total duration is longer than `frameInterval`,
   /// then one frame is pumped each time that amount of time elapses while
-  /// sending events, or each time an event is synthesised, whichever is rarer.
+  /// sending events, or each time an event is synthesized, whichever is rarer.
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
-  Future<Null> flingFrom(Offset startLocation, Offset offset, double speed, { int pointer, Duration frameInterval: const Duration(milliseconds: 16) }) {
+  ///
+  /// The `initialOffset` argument, if non-zero, causes the pointer to first
+  /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
+  /// used to simulate a drag followed by a fling, including dragging in the
+  /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
+  /// then fling to the left over 200 pixels, ending at the exact point that the
+  /// drag started).
+  Future<Null> flingFrom(Offset startLocation, Offset offset, double speed, {
+    int pointer,
+    Duration frameInterval = const Duration(milliseconds: 16),
+    Offset initialOffset = Offset.zero,
+    Duration initialOffsetDelay = const Duration(seconds: 1),
+  }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard(() async {
@@ -335,8 +379,13 @@ class WidgetController {
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
       await sendEventToBinding(testPointer.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      if (initialOffset.distance > 0.0) {
+        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        timeStamp += initialOffsetDelay.inMilliseconds;
+        await pump(initialOffsetDelay);
+      }
       for (int i = 0; i <= kMoveCount; i += 1) {
-        final Offset location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
+        final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
         await sendEventToBinding(testPointer.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
@@ -354,10 +403,11 @@ class WidgetController {
   /// This is invoked by [flingFrom], for instance, so that the sequence of
   /// pointer events occurs over time.
   ///
-  /// The default implementation does nothing.
-  ///
   /// The [WidgetTester] subclass implements this by deferring to the [binding].
-  Future<Null> pump(Duration duration) => new Future<Null>.value(null);
+  ///
+  /// See also [SchedulerBinding.endOfFrame], which returns a future that could
+  /// be appropriate to return in the implementation of this method.
+  Future<Null> pump(Duration duration);
 
   /// Attempts to drag the given widget by the given offset, by
   /// starting a drag in the middle of the widget.
@@ -477,4 +527,21 @@ class WidgetController {
   /// Returns the rect of the given widget. This is only valid once
   /// the widget's render object has been laid out at least once.
   Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
+}
+
+/// Variant of [WidgetController] that can be used in tests running
+/// on a device.
+///
+/// This is used, for instance, by [FlutterDriver].
+class LiveWidgetController extends WidgetController {
+  /// Creates a widget controller that uses the given binding.
+  LiveWidgetController(WidgetsBinding binding) : super(binding);
+
+  @override
+  Future<Null> pump(Duration duration) async {
+    if (duration != null)
+      await new Future<void>.delayed(duration);
+    binding.scheduleFrame();
+    await binding.endOfFrame;
+  }
 }

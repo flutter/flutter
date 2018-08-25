@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
@@ -22,19 +22,13 @@ void main() {
     expect(onNeedVisualUpdateCallCount, 2);
   });
 
-  test('ensure frame is scheduled for markNeedsSemanticsUpdate with onlyChanges: true', () {
+  test('detached RenderObject does not do semantics', () {
     final TestRenderObject renderObject = new TestRenderObject();
-    int onNeedVisualUpdateCallCount = 0;
-    final PipelineOwner owner = new PipelineOwner(onNeedVisualUpdate: () {
-      onNeedVisualUpdateCallCount +=1;
-    });
-    owner.ensureSemantics();
-    renderObject.attach(owner);
-    owner.flushSemantics();
+    expect(renderObject.attached, isFalse);
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
 
-    expect(onNeedVisualUpdateCallCount, 1);
-    renderObject.markNeedsSemanticsUpdate(onlyLocalUpdates: true);
-    expect(onNeedVisualUpdateCallCount, 2);
+    renderObject.markNeedsSemanticsUpdate();
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
   });
 }
 
@@ -54,10 +48,13 @@ class TestRenderObject extends RenderObject {
   @override
   Rect get semanticBounds => new Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 
+  int describeSemanticsConfigurationCallCount = 0;
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
+    describeSemanticsConfigurationCallCount++;
   }
 }
 

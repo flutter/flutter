@@ -2,29 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
+import 'ios/cocoapods.dart';
+import 'project.dart';
+
+void _renderTemplateToFile(String template, dynamic context, String filePath) {
+  final String renderedTemplate =
+     new mustache.Template(template).renderString(context);
+  final File file = fs.file(filePath);
+  file.createSync(recursive: true);
+  file.writeAsStringSync(renderedTemplate);
+}
 
 class Plugin {
   final String name;
   final String path;
-  final String pluginClass;
   final String androidPackage;
+  final String iosPrefix;
+  final String pluginClass;
 
-  Plugin(this.name, this.path, this.pluginClass, this.androidPackage);
+  Plugin({
+    this.name,
+    this.path,
+    this.androidPackage,
+    this.iosPrefix,
+    this.pluginClass,
+  });
 
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     String androidPackage;
+    String iosPrefix;
     String pluginClass;
     if (pluginYaml != null) {
       androidPackage = pluginYaml['androidPackage'];
+      iosPrefix = pluginYaml['iosPrefix'] ?? '';
       pluginClass = pluginYaml['pluginClass'];
     }
-    return new Plugin(name, path, pluginClass, androidPackage);
+    return new Plugin(
+      name: name,
+      path: path,
+      androidPackage: androidPackage,
+      iosPrefix: iosPrefix,
+      pluginClass: pluginClass,
+    );
   }
 }
 
@@ -43,13 +70,13 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   return new Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
 }
 
-List<Plugin> _findPlugins(String directory) {
+List<Plugin> findPlugins(FlutterProject project) {
   final List<Plugin> plugins = <Plugin>[];
   Map<String, Uri> packages;
   try {
-    final String packagesFile = fs.path.join(directory, PackageMap.globalPackagesPath);
+    final String packagesFile = fs.path.join(project.directory.path, PackageMap.globalPackagesPath);
     packages = new PackageMap(packagesFile).map;
-  } on FormatException catch(e) {
+  } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
     return plugins;
   }
@@ -62,17 +89,28 @@ List<Plugin> _findPlugins(String directory) {
   return plugins;
 }
 
-void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
-  final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
+/// Returns true if .flutter-plugins has changed, otherwise returns false.
+bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
+  final File pluginsFile = project.flutterPluginsFile;
+  final String oldContents = _readFlutterPluginsList(project);
   final String pluginManifest =
-    plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
+      plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
-    pluginsProperties.writeAsStringSync('$pluginManifest\n');
+    pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
-    if (pluginsProperties.existsSync()) {
-      pluginsProperties.deleteSync();
-    }
+    if (pluginsFile.existsSync())
+      pluginsFile.deleteSync();
   }
+  final String newContents = _readFlutterPluginsList(project);
+  return oldContents != newContents;
+}
+
+/// Returns the contents of the `.flutter-plugins` file in [project], or
+/// null if that file does not exist.
+String _readFlutterPluginsList(FlutterProject project) {
+  return project.flutterPluginsFile.existsSync()
+      ? project.flutterPluginsFile.readAsStringSync()
+      : null;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -87,14 +125,26 @@ import {{package}}.{{class}};
  */
 public final class GeneratedPluginRegistrant {
   public static void registerWith(PluginRegistry registry) {
+    if (alreadyRegisteredWith(registry)) {
+      return;
+    }
 {{#plugins}}
     {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
 {{/plugins}}
   }
+
+  private static boolean alreadyRegisteredWith(PluginRegistry registry) {
+    final String key = GeneratedPluginRegistrant.class.getCanonicalName();
+    if (registry.hasPlugin(key)) {
+      return true;
+    }
+    registry.registrarFor(key);
+    return false;
+  }
 }
 ''';
 
-void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
+Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins = plugins
       .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
@@ -107,14 +157,20 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
     'plugins': androidPlugins,
   };
 
-  final String pluginRegistry =
-      new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
-  final String javaSourcePath = fs.path.join(directory, 'android', 'app', 'src', 'main', 'java');
-  final Directory registryDirectory =
-      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
-  registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
-  registryFile.writeAsStringSync(pluginRegistry);
+  final String javaSourcePath = fs.path.join(
+    project.android.pluginRegistrantHost.path,
+    'src',
+    'main',
+    'java',
+  );
+  final String registryPath = fs.path.join(
+    javaSourcePath,
+    'io',
+    'flutter',
+    'plugins',
+    'GeneratedPluginRegistrant.java',
+  );
+  _renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
 }
 
 const String _iosPluginRegistryHeaderTemplate = '''//
@@ -146,18 +202,44 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
 {{#plugins}}
-  [{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{class}}"]];
+  [{{prefix}}{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{prefix}}{{class}}"]];
 {{/plugins}}
 }
 
 @end
 ''';
 
-void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
+const String _iosPluginRegistrantPodspecTemplate = '''
+#
+# Generated file, do not edit.
+#
+
+Pod::Spec.new do |s|
+  s.name             = 'FlutterPluginRegistrant'
+  s.version          = '0.0.1'
+  s.summary          = 'Registers plugins with your flutter app'
+  s.description      = <<-DESC
+Depends on all your plugins, and provides a function to register them.
+                       DESC
+  s.homepage         = 'https://flutter.io'
+  s.license          = { :type => 'BSD' }
+  s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.ios.deployment_target = '7.0'
+  s.source_files =  "Classes", "Classes/**/*.{h,m}"
+  s.source           = { :path => '.' }
+  s.public_header_files = './Classes/**/*.h'
+  {{#plugins}}
+  s.dependency '{{name}}'
+  {{/plugins}}
+end
+''';
+
+Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
     'name': p.name,
+    'prefix': p.iosPrefix,
     'class': p.pluginClass,
   }).
   toList();
@@ -165,30 +247,55 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
     'plugins': iosPlugins,
   };
 
-  final String pluginRegistryHeader =
-      new mustache.Template(_iosPluginRegistryHeaderTemplate).renderString(context);
-  final String pluginRegistryImplementation =
-      new mustache.Template(_iosPluginRegistryImplementationTemplate).renderString(context);
-  final Directory registryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Runner'));
-  registryDirectory.createSync(recursive: true);
-  final File registryHeaderFile = registryDirectory.childFile('GeneratedPluginRegistrant.h');
-  registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
-  final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
-  registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
-
+  final String registryDirectory = project.ios.pluginRegistrantHost.path;
+  if (project.isModule) {
+    final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
+    _renderTemplateToFile(
+      _iosPluginRegistrantPodspecTemplate,
+      context,
+      fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
+    );
+    _renderTemplateToFile(
+      _iosPluginRegistryHeaderTemplate,
+      context,
+      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
+    );
+    _renderTemplateToFile(
+      _iosPluginRegistryImplementationTemplate,
+      context,
+      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
+    );
+  } else {
+    _renderTemplateToFile(
+      _iosPluginRegistryHeaderTemplate,
+      context,
+      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
+    );
+    _renderTemplateToFile(
+      _iosPluginRegistryImplementationTemplate,
+      context,
+      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
+    );
+  }
 }
 
-/// Finds Flutter plugins in the pubspec.yaml, creates platform injection
-/// registries classes and add them to the build dependencies.
-///
-/// Returns whether any Flutter plugins are added.
-bool injectPlugins({String directory}) {
-  directory ??= fs.currentDirectory.path;
-  final List<Plugin> plugins = _findPlugins(directory);
-  _writeFlutterPluginsList(directory, plugins);
-  if (fs.isDirectorySync(fs.path.join(directory, 'android')))
-    _writeAndroidPluginRegistry(directory, plugins);
-  if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
-    _writeIOSPluginRegistry(directory, plugins);
-  return plugins.isNotEmpty;
+/// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
+Future<void> injectPlugins(FlutterProject project) async {
+  final List<Plugin> plugins = findPlugins(project);
+  final bool changed = _writeFlutterPluginsList(project, plugins);
+  await _writeAndroidPluginRegistrant(project, plugins);
+  await _writeIOSPluginRegistrant(project, plugins);
+
+  if (project.ios.directory.existsSync()) {
+    final CocoaPods cocoaPods = new CocoaPods();
+    if (plugins.isNotEmpty)
+      cocoaPods.setupPodfile(project.ios);
+    if (changed)
+      cocoaPods.invalidatePodInstallOutput(project.ios);
+  }
+}
+
+/// Returns whether the specified Flutter [project] has any plugin dependencies.
+bool hasPlugins(FlutterProject project) {
+  return _readFlutterPluginsList(project) != null;
 }

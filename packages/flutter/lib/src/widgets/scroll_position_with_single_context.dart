@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -30,7 +29,7 @@ import 'scroll_position.dart';
 /// See also:
 ///
 ///  * [ScrollPosition], which defines the underlying model for a position
-///    within a [Scrollable] but is agnositic as to how that position is
+///    within a [Scrollable] but is agnostic as to how that position is
 ///    changed.
 ///  * [ScrollView] and its subclasses such as [ListView], which use
 ///    [ScrollPositionWithSingleContext] to manage their scroll position.
@@ -52,8 +51,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollPositionWithSingleContext({
     @required ScrollPhysics physics,
     @required ScrollContext context,
-    double initialPixels: 0.0,
-    bool keepScrollOffset: true,
+    double initialPixels = 0.0,
+    bool keepScrollOffset = true,
     ScrollPosition oldPosition,
     String debugLabel,
   }) : super(
@@ -83,11 +82,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   double setPixels(double newPixels) {
     assert(activity.isScrolling);
     return super.setPixels(newPixels);
-  }
-
-  @override
-  void correctBy(double correction) {
-    correctPixels(pixels + correction);
   }
 
   @override
@@ -165,7 +159,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// Set [userScrollDirection] to the given value.
   ///
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
-  @visibleForTesting
+  @protected
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
     if (userScrollDirection == value)
@@ -240,12 +234,13 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollDragController _currentDrag;
 
   @override
-  Drag drag(DragStartDetails details, VoidCallback onDragCanceled) {
+  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     final ScrollDragController drag = new ScrollDragController(
       delegate: this,
       details: details,
-      onDragCanceled: onDragCanceled,
+      onDragCanceled: dragCancelCallback,
       carriedVelocity: physics.carriedMomentum(_heldPreviousVelocity),
+      motionStartDistanceThreshold: physics.dragStartDistanceMotionThreshold,
     );
     beginActivity(new DragScrollActivity(this, drag));
     assert(_currentDrag == null);

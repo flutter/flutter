@@ -14,9 +14,9 @@ void main() {
   DateTime initialDate;
 
   setUp(() {
-    firstDate = new DateTime(2001, DateTime.JANUARY, 1);
-    lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
-    initialDate = new DateTime(2016, DateTime.JANUARY, 15);
+    firstDate = new DateTime(2001, DateTime.january, 1);
+    lastDate = new DateTime(2031, DateTime.december, 31);
+    initialDate = new DateTime(2016, DateTime.january, 15);
   });
 
   group(DayPicker, () {
@@ -35,6 +35,12 @@ void main() {
         'expectedDaysOfWeek': <String>['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс'],
         'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
         'expectedMonthYearHeader': 'сентябрь 2017 г.',
+      },
+      const Locale('ro', 'RO'): <String, dynamic>{
+        'textDirection': TextDirection.ltr,
+        'expectedDaysOfWeek': <String>['D', 'L', 'M', 'M', 'J', 'V', 'S'],
+        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
+        'expectedMonthYearHeader': 'septembrie 2017',
       },
       // Tests RTL.
       const Locale('ar', 'AR'): <String, dynamic>{
@@ -93,8 +99,8 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('fr', 'CA'),
+        Locale('en', 'US'),
+        Locale('fr', 'CA'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(
@@ -138,7 +144,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
+        Locale('en', 'US'),
       ],
       home: new Material(
         child: new Builder(
@@ -172,12 +178,12 @@ void main() {
     await tester.tap(find.text('CANCEL'));
   });
 
-  testWidgets('textDirection parameter takes precendence over locale parameter', (WidgetTester tester) async {
+  testWidgets('textDirection parameter takes precedence over locale parameter', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[
-        const Locale('en', 'US'),
-        const Locale('fr', 'CA'),
+        Locale('en', 'US'),
+        Locale('fr', 'CA'),
       ],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(
@@ -223,7 +229,7 @@ Future<Null> _pumpBoilerplate(
   WidgetTester tester,
   Widget child, {
   Locale locale = const Locale('en', 'US'),
-  TextDirection textDirection: TextDirection.ltr
+  TextDirection textDirection = TextDirection.ltr
 }) async {
   await tester.pumpWidget(new Directionality(
     textDirection: TextDirection.ltr,

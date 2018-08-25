@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter_test/flutter_test.dart';
 
 class Foo extends StatefulWidget {
   @override
@@ -28,39 +28,39 @@ class FooState extends State<Foo> {
                   scrollController.animateTo(200.0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                 },
                 child: const DecoratedBox(
-                  decoration: const BoxDecoration(color: const Color(0)),
-                  child: const SizedBox(
+                  decoration: BoxDecoration(color: Color(0)),
+                  child: SizedBox(
                     height: 200.0,
                   ),
                 )
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),
               const DecoratedBox(
-                decoration: const BoxDecoration(color: const Color(0)),
-                child: const SizedBox(
+                decoration: BoxDecoration(color: Color(0)),
+                child: SizedBox(
                   height: 200.0,
                 ),
               ),

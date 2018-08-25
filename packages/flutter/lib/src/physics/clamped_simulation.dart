@@ -8,7 +8,7 @@ import 'simulation.dart';
 ///
 /// The limits are only applied to the other simulation's outputs. For example,
 /// if a maximum position was applied to a gravity simulation with the
-/// particle's initial velocity being up, and the accerelation being down, and
+/// particle's initial velocity being up, and the acceleration being down, and
 /// the maximum position being between the initial position and the curve's
 /// apogee, then the particle would return to its initial position in the same
 /// amount of time as it would have if the maximum had not been applied; the
@@ -22,10 +22,10 @@ class ClampedSimulation extends Simulation {
   /// The named arguments specify the ranges for the clamping behavior, as
   /// applied to [x] and [dx].
   ClampedSimulation(this.simulation, {
-    this.xMin: double.NEGATIVE_INFINITY,
-    this.xMax: double.INFINITY,
-    this.dxMin: double.NEGATIVE_INFINITY,
-    this.dxMax: double.INFINITY
+    this.xMin = double.negativeInfinity,
+    this.xMax = double.infinity,
+    this.dxMin = double.negativeInfinity,
+    this.dxMax = double.infinity
   }) : assert(simulation != null),
        assert(xMax >= xMin),
        assert(dxMax >= dxMin);

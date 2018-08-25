@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/flags.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -32,11 +31,6 @@ void main() {
   });
 
   group('flags', () {
-    test('returns no-op flags when not inside Flutter runner', () {
-      expect(flags, isNotNull);
-      expect(flags['foo'], isNull);
-    });
-
     testUsingContext('returns null for undefined flags', () async {
       await runCommand(<String>[], () {
         expect(flags['undefined-flag'], isNull);

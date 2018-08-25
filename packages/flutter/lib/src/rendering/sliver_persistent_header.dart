@@ -14,8 +14,8 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
-import 'proxy_box.dart';
 import 'sliver.dart';
+import 'viewport.dart';
 import 'viewport_offset.dart';
 
 /// A base class for slivers that have a [RenderBox] child which scrolls
@@ -117,7 +117,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// The `overlapsContent` argument is passed to [updateChild].
   @protected
-  void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent: false }) {
+  void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
     assert(maxExtent != null);
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
@@ -225,14 +225,14 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     super.describeSemanticsConfiguration(config);
 
     if (_excludeFromSemanticsScrolling)
-      config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
+      config.addTagForChildren(RenderViewport.excludeFromScrolling);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty.lazy('maxExtent', () => maxExtent));
-    description.add(new DoubleProperty.lazy('child position', () => childMainAxisPosition(child)));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty.lazy('maxExtent', () => maxExtent));
+    properties.add(new DoubleProperty.lazy('child position', () => childMainAxisPosition(child)));
   }
 }
 
@@ -292,13 +292,15 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     final bool overlapsContent = constraints.overlap > 0.0;
     excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
+    final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
       paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
-      layoutExtent: (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent),
+      layoutExtent: layoutExtent,
       maxPaintExtent: maxExtent,
       maxScrollObstructionExtent: minExtent,
+      cacheExtent: layoutExtent > 0.0 ? -constraints.cacheOrigin + layoutExtent : layoutExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
@@ -322,8 +324,8 @@ class FloatingHeaderSnapConfiguration {
   /// (animated) into or out of view.
   FloatingHeaderSnapConfiguration({
     @required this.vsync,
-    this.curve: Curves.ease,
-    this.duration: const Duration(milliseconds: 300),
+    this.curve = Curves.ease,
+    this.duration = const Duration(milliseconds: 300),
   }) : assert(vsync != null),
        assert(curve != null),
        assert(duration != null);
@@ -488,9 +490,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('effective scroll offset', _effectiveScrollOffset));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('effective scroll offset', _effectiveScrollOffset));
   }
 }
 
@@ -515,8 +517,8 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   double updateGeometry() {
     final double minExtent = this.minExtent;
     final double maxExtent = this.maxExtent;
-    final double paintExtent = (maxExtent - _effectiveScrollOffset);
-    final double layoutExtent = (maxExtent - constraints.scrollOffset);
+    final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
       paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),

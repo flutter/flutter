@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'list_tile.dart';
 import 'switch.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
@@ -78,10 +78,10 @@ class SwitchListTile extends StatelessWidget {
     this.inactiveThumbImage,
     this.title,
     this.subtitle,
-    this.isThreeLine: false,
+    this.isThreeLine = false,
     this.dense,
     this.secondary,
-    this.selected: false,
+    this.selected = false,
   }) : assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
@@ -172,6 +172,7 @@ class SwitchListTile extends StatelessWidget {
       activeColor: activeColor,
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     return new MergeSemantics(
       child: ListTileTheme.merge(

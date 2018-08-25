@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/commands/analyze_continuously.dart';
+import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -20,11 +20,11 @@ void main() {
 
   setUp(() {
     FlutterCommandRunner.initFlutterRoot();
-    tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
   tearDown(() {
-    tempDir?.deleteSync(recursive: true);
+    tryToDelete(tempDir);
     return server?.dispose();
   });
 
@@ -32,7 +32,7 @@ void main() {
     testUsingContext('AnalysisServer success', () async {
       _createSampleProject(tempDir);
 
-      await pubGet(directory: tempDir.path);
+      await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
       server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -52,7 +52,7 @@ void main() {
   testUsingContext('AnalysisServer errors', () async {
     _createSampleProject(tempDir, brokenCode: true);
 
-    await pubGet(directory: tempDir.path);
+    await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
     server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
@@ -69,9 +69,25 @@ void main() {
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os
   });
+
+  testUsingContext('analyze', () async {
+    const String contents = "StringBuffer bar = StringBuffer('baz');";
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+    int errorCount = 0;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
+      errorCount += errors.errors.length;
+    });
+    await server.start();
+    await onDone;
+    expect(errorCount, 0);
+  }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => os
+  });
 }
 
-void _createSampleProject(Directory directory, { bool brokenCode: false }) {
+void _createSampleProject(Directory directory, { bool brokenCode = false }) {
   final File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project

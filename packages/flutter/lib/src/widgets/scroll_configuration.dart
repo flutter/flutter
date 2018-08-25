@@ -9,7 +9,7 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 
-const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
+const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
 
 /// Describes how [Scrollable] widgets should behave.
 ///
@@ -81,7 +81,7 @@ class ScrollBehavior {
 /// Controls how [Scrollable] widgets behave in a subtree.
 ///
 /// The scroll configuration determines the [ScrollPhysics] and viewport
-/// decorations used by decendants of [child].
+/// decorations used by descendants of [child].
 class ScrollConfiguration extends InheritedWidget {
   /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
   ///
@@ -92,7 +92,7 @@ class ScrollConfiguration extends InheritedWidget {
     @required Widget child,
   }) : super(key: key, child: child);
 
-  /// How [Scrollable] widgets that are decendants of [child] should behave.
+  /// How [Scrollable] widgets that are descendants of [child] should behave.
   final ScrollBehavior behavior;
 
   /// The [ScrollBehavior] for [Scrollable] widgets in the given [BuildContext].
@@ -112,8 +112,8 @@ class ScrollConfiguration extends InheritedWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
   }
 }

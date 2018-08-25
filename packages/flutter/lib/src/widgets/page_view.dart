@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
@@ -41,9 +40,9 @@ class PageController extends ScrollController {
   ///
   /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
   PageController({
-    this.initialPage: 0,
-    this.keepPage: true,
-    this.viewportFraction: 1.0,
+    this.initialPage = 0,
+    this.keepPage = true,
+    this.viewportFraction = 1.0,
   }) : assert(initialPage != null),
        assert(keepPage != null),
        assert(viewportFraction != null),
@@ -76,7 +75,32 @@ class PageController extends ScrollController {
   final double viewportFraction;
 
   /// The current page displayed in the controlled [PageView].
+  ///
+  /// There are circumstances that this [PageController] can't know the current
+  /// page. Reading [page] will throw an [AssertionError] in the following cases:
+  ///
+  /// 1. No [PageView] is currently using this [PageController]. Once a
+  /// [PageView] starts using this [PageController], the new [page]
+  /// position will be derived:
+  ///
+  ///   * First, based on the attached [PageView]'s [BuildContext] and the
+  ///     position saved at that context's [PageStorage] if [keepPage] is true.
+  ///   * Second, from the [PageController]'s [initialPage].
+  ///
+  /// 2. More than one [PageView] using the same [PageController].
+  ///
+  /// The [hasClients] property can be used to check if a [PageView] is attached
+  /// prior to accessing [page].
   double get page {
+    assert(
+      positions.isNotEmpty,
+      'PageController.page cannot be accessed before a PageView is built with it.',
+    );
+    assert(
+      positions.length == 1,
+      'The page property cannot be read when multiple PageViews are attached to '
+      'the same PageController.',
+    );
     final _PagePosition position = this.position;
     return position.page;
   }
@@ -153,24 +177,60 @@ class PageController extends ScrollController {
 /// The metrics are available on [ScrollNotification]s generated from
 /// [PageView]s.
 class PageMetrics extends FixedScrollMetrics {
-  /// Creates page metrics that add the given information to the `parent`
-  /// metrics.
+  /// Creates an immutable snapshot of values associated with a [PageView].
   PageMetrics({
-    ScrollMetrics parent,
-    this.page,
-  }) : super.clone(parent);
+    @required double minScrollExtent,
+    @required double maxScrollExtent,
+    @required double pixels,
+    @required double viewportDimension,
+    @required AxisDirection axisDirection,
+    @required this.viewportFraction,
+  }) : super(
+         minScrollExtent: minScrollExtent,
+         maxScrollExtent: maxScrollExtent,
+         pixels: pixels,
+         viewportDimension: viewportDimension,
+         axisDirection: axisDirection,
+       );
+
+  @override
+  PageMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+    double viewportFraction,
+  }) {
+    return new PageMetrics(
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+      viewportFraction: viewportFraction ?? this.viewportFraction,
+    );
+  }
 
   /// The current page displayed in the [PageView].
-  final double page;
+  double get page {
+    return math.max(0.0, pixels.clamp(minScrollExtent, maxScrollExtent)) /
+           math.max(1.0, viewportDimension * viewportFraction);
+  }
+
+  /// The fraction of the viewport that each page occupies.
+  ///
+  /// Used to compute [page] from the current [pixels].
+  final double viewportFraction;
 }
 
-class _PagePosition extends ScrollPositionWithSingleContext {
+class _PagePosition extends ScrollPositionWithSingleContext implements PageMetrics {
   _PagePosition({
     ScrollPhysics physics,
     ScrollContext context,
-    this.initialPage: 0,
-    bool keepPage: true,
-    double viewportFraction: 1.0,
+    this.initialPage = 0,
+    bool keepPage = true,
+    double viewportFraction = 1.0,
     ScrollPosition oldPosition,
   }) : assert(initialPage != null),
        assert(keepPage != null),
@@ -189,6 +249,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   final int initialPage;
   double _pageToUseOnStartup;
 
+  @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
@@ -208,6 +269,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     return page * viewportDimension * viewportFraction;
   }
 
+  @override
   double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
 
   @override
@@ -239,10 +301,21 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   }
 
   @override
-  PageMetrics cloneMetrics() {
+  PageMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+    double viewportFraction,
+  }) {
     return new PageMetrics(
-      parent: this,
-      page: page,
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+      viewportFraction: viewportFraction ?? this.viewportFraction,
     );
   }
 }
@@ -299,6 +372,9 @@ class PageScrollPhysics extends ScrollPhysics {
       return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
     return null;
   }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }
 
 // Having this global (mutable) page controller is a bit of a hack. We need it
@@ -306,7 +382,7 @@ class PageScrollPhysics extends ScrollPhysics {
 // a large list of scroll positions. As long as you don't try to actually
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = new PageController();
-const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
+const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///
@@ -340,13 +416,13 @@ class PageView extends StatefulWidget {
   /// those children that are actually visible.
   PageView({
     Key key,
-    this.scrollDirection: Axis.horizontal,
-    this.reverse: false,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     PageController controller,
     this.physics,
-    this.pageSnapping: true,
+    this.pageSnapping = true,
     this.onPageChanged,
-    List<Widget> children: const <Widget>[],
+    List<Widget> children = const <Widget>[],
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = new SliverChildListDelegate(children),
        super(key: key);
@@ -365,11 +441,11 @@ class PageView extends StatefulWidget {
   /// zero and less than [itemCount].
   PageView.builder({
     Key key,
-    this.scrollDirection: Axis.horizontal,
-    this.reverse: false,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     PageController controller,
     this.physics,
-    this.pageSnapping: true,
+    this.pageSnapping = true,
     this.onPageChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
@@ -381,11 +457,11 @@ class PageView extends StatefulWidget {
   /// model.
   PageView.custom({
     Key key,
-    this.scrollDirection: Axis.horizontal,
-    this.reverse: false,
+    this.scrollDirection = Axis.horizontal,
+    this.reverse = false,
     PageController controller,
     this.physics,
-    this.pageSnapping: true,
+    this.pageSnapping = true,
     this.onPageChanged,
     @required this.childrenDelegate,
   }) : assert(childrenDelegate != null),
@@ -491,6 +567,7 @@ class _PageViewState extends State<PageView> {
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return new Viewport(
+            cacheExtent: 0.0,
             axisDirection: axisDirection,
             offset: position,
             slivers: <Widget>[

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Class that makes it easy to mock common toStringDeep behavior.
@@ -26,7 +31,7 @@ class _MockToStringDeep {
   /// line break.
   List<String> _lines;
 
-  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines: '' }) {
+  String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
     final StringBuffer sb = new StringBuffer();
     if (_lines.isNotEmpty)
       sb.write('$prefixLineOne${_lines.first}');
@@ -179,4 +184,411 @@ void main() {
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
   });
+
+  test('within', () {
+    expect(0.0, within<double>(distance: 0.1, from: 0.05));
+    expect(0.0, isNot(within<double>(distance: 0.1, from: 0.2)));
+
+    expect(0, within<int>(distance: 1, from: 1));
+    expect(0, isNot(within<int>(distance: 1, from: 2)));
+
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x01000000)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x00010000)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x00000100)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x00000001)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x01010101)));
+    expect(const Color(0x00000000), isNot(within<Color>(distance: 1, from: const Color(0x02000000))));
+
+    expect(const Offset(1.0, 0.0), within(distance: 1.0, from: const Offset(0.0, 0.0)));
+    expect(const Offset(1.0, 0.0), isNot(within(distance: 1.0, from: const Offset(-1.0, 0.0))));
+
+    expect(new Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
+    expect(new Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), isNot(within<Rect>(distance: 3.9, from: new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0))));
+
+    expect(const Size(1.0, 1.0), within<Size>(distance: 1.415, from: const Size(2.0, 2.0)));
+    expect(const Size(1.0, 1.0), isNot(within<Size>(distance: 1.414, from: const Size(2.0, 2.0))));
+
+    expect(
+      () => within<bool>(distance: 1, from: false),
+      throwsArgumentError,
+    );
+
+    expect(
+      () => within<int>(distance: 1, from: 2, distanceFunction: (int a, int b) => -1).matches(1, <dynamic, dynamic>{}),
+      throwsArgumentError,
+    );
+  });
+
+  group('coversSameAreaAs', () {
+    test('empty Paths', () {
+      expect(
+        new Path(),
+        coversSameAreaAs(
+          new Path(),
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ),
+      );
+    });
+
+    test('mismatch', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      expect(
+        new Path(),
+        isNot(coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        )),
+      );
+    });
+
+    test('mismatch out of examined area', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      rectPath.addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      expect(
+        new Path(),
+        coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
+        ),
+      );
+    });
+
+    test('differently constructed rects match', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath = new Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.0)
+        ..close();
+      expect(
+        linePath,
+        coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ),
+      );
+    });
+
+     test('partially overlapping paths', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath = new Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.5)
+        ..close();
+      expect(
+        linePath,
+        isNot(coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        )),
+      );
+    });
+  });
+
+  group('matchesGoldenFile', () {
+    _FakeComparator comparator;
+
+    Widget boilerplate(Widget child) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      );
+    }
+
+    setUp(() {
+      comparator = new _FakeComparator();
+      goldenFileComparator = comparator;
+    });
+
+    group('matches', () {
+      testWidgets('if comparator succeeds', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        await expectLater(finder, matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, hasLength(greaterThan(0)));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+    });
+
+    group('does not match', () {
+      testWidgets('if comparator returns false', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.returnFalse;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('does not match'));
+        }
+      });
+
+      testWidgets('if comparator throws', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.throwTestFailure;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('fake message'));
+        }
+      });
+
+      testWidgets('if finder finds no widgets', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(new Container()));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, isNull);
+          expect(error.message, contains('no widget was found'));
+        }
+      });
+
+      testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(new Column(
+          children: const <Widget>[Text('hello'), Text('world')],
+        )));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, isNull);
+          expect(error.message, contains('too many widgets'));
+        }
+      });
+    });
+
+    testWidgets('calls update on comparator if autoUpdateGoldenFiles is true', (WidgetTester tester) async {
+      autoUpdateGoldenFiles = true;
+      await tester.pumpWidget(boilerplate(const Text('hello')));
+      final Finder finder = find.byType(Text);
+      await expectLater(finder, matchesGoldenFile('foo.png'));
+      expect(comparator.invocation, _ComparatorInvocation.update);
+      expect(comparator.imageBytes, hasLength(greaterThan(0)));
+      expect(comparator.golden, Uri.parse('foo.png'));
+      autoUpdateGoldenFiles = false;
+    });
+  });
+
+  group('matchesSemanticsData', () {
+    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('semantics');
+      await tester.pumpWidget(new Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        onTap: () {},
+        onLongPress: () {},
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () {},
+          const CustomSemanticsAction(label: 'bar'): () {},
+        },
+      ));
+
+      expect(tester.getSemanticsData(find.byKey(key)),
+        matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
+        ),
+      );
+
+      // Doesn't match custom actions
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'barz')
+          ],
+        )),
+      );
+
+      // Doesn't match wrong hints
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scans',
+          onLongPressHint: 'fills',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
+        )),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
+      int actions = 0;
+      int flags = 0;
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      for (int index in SemanticsAction.values.keys)
+        actions |= index;
+      for (int index in SemanticsFlag.values.keys)
+        flags |= index;
+      final SemanticsData data = new SemanticsData(
+        flags: flags,
+        actions: actions,
+        label: 'a',
+        increasedValue: 'b',
+        value: 'c',
+        decreasedValue: 'd',
+        hint: 'e',
+        textDirection: TextDirection.ltr,
+        rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        textSelection: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+      );
+
+      expect(data, matchesSemanticsData(
+         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+         size: const Size(10.0, 10.0),
+         /* Flags */
+         hasCheckedState: true,
+         isChecked: true,
+         isSelected: true,
+         isButton: true,
+         isTextField: true,
+         hasEnabledState: true,
+         isFocused: true,
+         isEnabled: true,
+         isInMutuallyExclusiveGroup: true,
+         isHeader: true,
+         isObscured: true,
+         namesRoute: true,
+         scopesRoute: true,
+         isHidden: true,
+         isImage: true,
+         isLiveRegion: true,
+         hasToggledState: true,
+         isToggled: true,
+         hasImplicitScrolling: true,
+         /* Actions */
+         hasTapAction: true,
+         hasLongPressAction: true,
+         hasScrollLeftAction: true,
+         hasScrollRightAction: true,
+         hasScrollUpAction: true,
+         hasScrollDownAction: true,
+         hasIncreaseAction: true,
+         hasDecreaseAction: true,
+         hasShowOnScreenAction: true,
+         hasMoveCursorForwardByCharacterAction: true,
+         hasMoveCursorBackwardByCharacterAction: true,
+         hasMoveCursorForwardByWordAction: true,
+         hasMoveCursorBackwardByWordAction: true,
+         hasSetSelectionAction: true,
+         hasCopyAction: true,
+         hasCutAction: true,
+         hasPasteAction: true,
+         hasDidGainAccessibilityFocusAction: true,
+         hasDidLoseAccessibilityFocusAction: true,
+         hasDismissAction: true,
+         customActions: <CustomSemanticsAction>[action],
+      ));
+    });
+  });
+}
+
+enum _ComparatorBehavior {
+  returnTrue,
+  returnFalse,
+  throwTestFailure,
+}
+
+enum _ComparatorInvocation {
+  compare,
+  update,
+}
+
+class _FakeComparator implements GoldenFileComparator {
+  _ComparatorBehavior behavior = _ComparatorBehavior.returnTrue;
+  _ComparatorInvocation invocation;
+  Uint8List imageBytes;
+  Uri golden;
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+    invocation = _ComparatorInvocation.compare;
+    this.imageBytes = imageBytes;
+    this.golden = golden;
+    switch (behavior) {
+      case _ComparatorBehavior.returnTrue:
+        return new Future<bool>.value(true);
+      case _ComparatorBehavior.returnFalse:
+        return new Future<bool>.value(false);
+      case _ComparatorBehavior.throwTestFailure:
+        throw new TestFailure('fake message');
+    }
+    return new Future<bool>.value(false);
+  }
+
+  @override
+  Future<void> update(Uri golden, Uint8List imageBytes) {
+    invocation = _ComparatorInvocation.update;
+    this.golden = golden;
+    this.imageBytes = imageBytes;
+    return new Future<void>.value();
+  }
 }

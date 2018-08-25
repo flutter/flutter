@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class ShrineStyle extends TextStyle {
@@ -51,5 +50,5 @@ class ShrineTheme extends InheritedWidget {
   static ShrineTheme of(BuildContext context) => context.inheritFromWidgetOfExactType(ShrineTheme);
 
   @override
-  bool updateShouldNotify(ShrineTheme old) => false;
+  bool updateShouldNotify(ShrineTheme oldWidget) => false;
 }

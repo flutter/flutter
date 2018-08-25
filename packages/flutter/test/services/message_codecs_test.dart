@@ -5,11 +5,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('Binary codec', () {
-    const MessageCodec<ByteData> binary = const BinaryCodec();
+    const MessageCodec<ByteData> binary = BinaryCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<ByteData>(binary, null);
       _checkEncodeDecode<ByteData>(binary, new ByteData(0));
@@ -17,16 +17,29 @@ void main() {
     });
   });
   group('String codec', () {
-    const MessageCodec<String> string = const StringCodec();
+    const MessageCodec<String> string = StringCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<String>(string, null);
       _checkEncodeDecode<String>(string, '');
       _checkEncodeDecode<String>(string, 'hello');
       _checkEncodeDecode<String>(string, 'special chars >\u263A\u{1F602}<');
     });
+    test('ByteData with offset', () {
+      const MessageCodec<String> string = StringCodec();
+      final ByteData helloWorldByteData = string.encodeMessage('hello world');
+      final ByteData helloByteData = string.encodeMessage('hello');
+
+      final ByteData offsetByteData = new ByteData.view(
+          helloWorldByteData.buffer,
+          helloByteData.lengthInBytes,
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes
+      );
+
+      expect(string.decodeMessage(offsetByteData), ' world');
+    });
   });
   group('JSON message codec', () {
-    const MessageCodec<dynamic> json = const JSONMessageCodec();
+    const MessageCodec<dynamic> json = JSONMessageCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<dynamic>(json, null);
       _checkEncodeDecode<dynamic>(json, true);
@@ -35,8 +48,8 @@ void main() {
       _checkEncodeDecode<dynamic>(json, -7);
       _checkEncodeDecode<dynamic>(json, 98742923489);
       _checkEncodeDecode<dynamic>(json, -98742923489);
-      _checkEncodeDecode<dynamic>(json, 98740023429234899324932473298438);
-      _checkEncodeDecode<dynamic>(json, -98740023429234899324932473298438);
+      _checkEncodeDecode<dynamic>(json, 9223372036854775807);
+      _checkEncodeDecode<dynamic>(json, -9223372036854775807);
       _checkEncodeDecode<dynamic>(json, 3.14);
       _checkEncodeDecode<dynamic>(json, '');
       _checkEncodeDecode<dynamic>(json, 'hello');
@@ -49,7 +62,7 @@ void main() {
         false,
         -707,
         -7000000007,
-        -70000000000000000000000000000000000000000000000007,
+        -7000000000000000007,
         -3.14,
         '',
         'hello',
@@ -61,7 +74,7 @@ void main() {
     });
   });
   group('Standard message codec', () {
-    const MessageCodec<dynamic> standard = const StandardMessageCodec();
+    const MessageCodec<dynamic> standard = StandardMessageCodec();
     test('should encode integers correctly at boundary cases', () {
       _checkEncoding<dynamic>(
         standard,
@@ -91,7 +104,7 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         -0x7fffffffffffffff - 2,
-        <int>[5, 17]..addAll('-8000000000000001'.codeUnits),
+        <int>[4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f],
       );
       _checkEncoding<dynamic>(
         standard,
@@ -101,7 +114,7 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         0x7fffffffffffffff + 1,
-        <int>[5, 16]..addAll('8000000000000000'.codeUnits),
+        <int>[4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80],
       );
     });
     test('should encode sizes correctly at boundary cases', () {
@@ -134,11 +147,11 @@ void main() {
       _checkEncodeDecode<dynamic>(standard, -7);
       _checkEncodeDecode<dynamic>(standard, 98742923489);
       _checkEncodeDecode<dynamic>(standard, -98742923489);
-      _checkEncodeDecode<dynamic>(standard, 98740023429234899324932473298438);
-      _checkEncodeDecode<dynamic>(standard, -98740023429234899324932473298438);
+      _checkEncodeDecode<dynamic>(standard, 9223372036854775807);
+      _checkEncodeDecode<dynamic>(standard, -9223372036854775807);
       _checkEncodeDecode<dynamic>(standard, 3.14);
-      _checkEncodeDecode<dynamic>(standard, double.INFINITY);
-      _checkEncodeDecode<dynamic>(standard, double.NAN);
+      _checkEncodeDecode<dynamic>(standard, double.infinity);
+      _checkEncodeDecode<dynamic>(standard, double.nan);
       _checkEncodeDecode<dynamic>(standard, '');
       _checkEncodeDecode<dynamic>(standard, 'hello');
       _checkEncodeDecode<dynamic>(standard, 'special chars >\u263A\u{1F602}<');
@@ -150,7 +163,7 @@ void main() {
         false,
         -707,
         -7000000007,
-        -70000000000000000000000000000000000000000000000007,
+        -7000000000000000007,
         -3.14,
         '',
         'hello',
@@ -161,15 +174,15 @@ void main() {
             <int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
         null, // ensures the offset of the following list is unaligned.
         new Float64List.fromList(<double>[
-          double.NEGATIVE_INFINITY,
-          -double.MAX_FINITE,
-          -double.MIN_POSITIVE,
+          double.negativeInfinity,
+          -double.maxFinite,
+          -double.minPositive,
           -0.0,
           0.0,
-          double.MIN_POSITIVE,
-          double.MAX_FINITE,
-          double.INFINITY,
-          double.NAN
+          double.minPositive,
+          double.maxFinite,
+          double.infinity,
+          double.nan
         ]),
         <dynamic>['nested', <dynamic>[]],
         <dynamic, dynamic>{ 'a': 'nested', null: <dynamic, dynamic>{} },

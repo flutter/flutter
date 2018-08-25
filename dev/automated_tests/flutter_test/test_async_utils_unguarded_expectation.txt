@@ -1,4 +1,5 @@
 [^═]*(this line contains the test framework's output with the clock and so forth)?
+<<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
 The following assertion was thrown running a test:
 Guarded function conflict\. You must use "await" with all Future-returning test APIs\.
@@ -17,7 +18,7 @@ When the exception was thrown, this was the stack:
 The test description was:
 TestAsyncUtils - handling unguarded async helper functions
 ════════════════════════════════════════════════════════════════════════════════════════════════════
-.*..:.. \+0 -1: - TestAsyncUtils - handling unguarded async helper functions *
+.*..:.. \+0 -1: TestAsyncUtils - handling unguarded async helper functions *
   Test failed\. See exception logs above\.
   The test description was: TestAsyncUtils - handling unguarded async helper functions
  *

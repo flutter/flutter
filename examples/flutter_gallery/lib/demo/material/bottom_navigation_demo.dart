@@ -7,14 +7,17 @@ import 'package:flutter/material.dart';
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
-    Widget title,
+    Widget activeIcon,
+    String title,
     Color color,
     TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
+       _title = title,
        item = new BottomNavigationBarItem(
          icon: icon,
-         title: title,
+         activeIcon: activeIcon,
+         title: new Text(title),
          backgroundColor: color,
        ),
        controller = new AnimationController(
@@ -29,6 +32,7 @@ class NavigationIconView {
 
   final Widget _icon;
   final Color _color;
+  final String _title;
   final BottomNavigationBarItem item;
   final AnimationController controller;
   CurvedAnimation _animation;
@@ -56,7 +60,10 @@ class NavigationIconView {
             color: iconColor,
             size: 120.0,
           ),
-          child: _icon,
+          child: new Semantics(
+            label: 'Placeholder for $_title tab',
+            child: _icon,
+          ),
         ),
       ),
     );
@@ -72,6 +79,21 @@ class CustomIcon extends StatelessWidget {
       width: iconTheme.size - 8.0,
       height: iconTheme.size - 8.0,
       color: iconTheme.color,
+    );
+  }
+}
+
+class CustomInactiveIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final IconThemeData iconTheme = IconTheme.of(context);
+    return new Container(
+      margin: const EdgeInsets.all(4.0),
+      width: iconTheme.size - 8.0,
+      height: iconTheme.size - 8.0,
+      decoration: new BoxDecoration(
+        border: new Border.all(color: iconTheme.color, width: 2.0),
+      )
     );
   }
 }
@@ -95,31 +117,34 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     _navigationViews = <NavigationIconView>[
       new NavigationIconView(
         icon: const Icon(Icons.access_alarm),
-        title: const Text('Alarm'),
+        title: 'Alarm',
         color: Colors.deepPurple,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new CustomIcon(),
-        title: const Text('Box'),
+        activeIcon: new CustomIcon(),
+        icon: new CustomInactiveIcon(),
+        title: 'Box',
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.cloud),
-        title: const Text('Cloud'),
+        activeIcon: const Icon(Icons.cloud),
+        icon: const Icon(Icons.cloud_queue),
+        title: 'Cloud',
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: const Icon(Icons.favorite),
-        title: const Text('Favorites'),
+        activeIcon: const Icon(Icons.favorite),
+        icon: const Icon(Icons.favorite_border),
+        title: 'Favorites',
         color: Colors.indigo,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.event_available),
-        title: const Text('Event'),
+        title: 'Event',
         color: Colors.pink,
         vsync: this,
       )
@@ -152,8 +177,8 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
     // We want to have the newly animating (fading in) views on top.
     transitions.sort((FadeTransition a, FadeTransition b) {
-      final Animation<double> aAnimation = a.listenable;
-      final Animation<double> bAnimation = b.listenable;
+      final Animation<double> aAnimation = a.opacity;
+      final Animation<double> bAnimation = b.opacity;
       final double aValue = aAnimation.value;
       final double bValue = bAnimation.value;
       return aValue.compareTo(bValue);
@@ -192,11 +217,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
-                child: const Text('Fixed'),
+                child: Text('Fixed'),
               ),
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
-                child: const Text('Shifting'),
+                child: Text('Shifting'),
               )
             ],
           )

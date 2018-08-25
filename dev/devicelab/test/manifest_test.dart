@@ -4,9 +4,9 @@
 
 import 'dart:io';
 
-import 'package:test/test.dart';
-
 import 'package:flutter_devicelab/framework/manifest.dart';
+
+import 'common.dart';
 
 void main() {
   group('production manifest', () {
@@ -36,7 +36,7 @@ void main() {
       test(testDescription, () {
         try {
           loadTaskManifest(yaml);
-        } on ManifestError catch(error) {
+        } on ManifestError catch (error) {
           expect(error.message, errorMessage);
         }
       });

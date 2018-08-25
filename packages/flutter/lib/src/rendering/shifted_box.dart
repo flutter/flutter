@@ -8,12 +8,14 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'debug.dart';
+import 'debug_overflow_indicator.dart';
 import 'object.dart';
+import 'stack.dart' show RelativeRect;
 
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.
 abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  /// Initializes the [child] property for sublasses.
+  /// Initializes the [child] property for subclasses.
   RenderShiftedBox(RenderBox child) {
     this.child = child;
   }
@@ -147,7 +149,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
@@ -157,7 +159,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
@@ -167,7 +169,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
@@ -177,7 +179,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
@@ -214,10 +216,10 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -228,13 +230,19 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   ///
   /// The [alignment] argument must not be null.
   RenderAligningShiftedBox({
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     @required TextDirection textDirection,
     RenderBox child,
   }) : assert(alignment != null),
        _alignment = alignment,
        _textDirection = textDirection,
        super(child);
+
+  /// A constructor to be used only when the extending class also has a mixin.
+  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/31543 is fixed.
+  @protected
+  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment,TextDirection textDirection, RenderBox child)
+    : this(alignment: alignment, textDirection: textDirection, child: child);
 
   Alignment _resolvedAlignment;
 
@@ -259,7 +267,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
   ///
-  /// If this is set to a [AlignmentDirectional] object, then
+  /// If this is set to an [AlignmentDirectional] object, then
   /// [textDirection] must not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -307,14 +315,14 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
-/// Positions its child using a [AlignmentGeometry].
+/// Positions its child using an [AlignmentGeometry].
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
@@ -330,7 +338,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -338,7 +346,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
        _heightFactor = heightFactor,
        super(child: child, alignment: alignment, textDirection: textDirection);
 
-  /// If non-null, sets its width to the child's width multipled by this factor.
+  /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   double get widthFactor => _widthFactor;
@@ -351,7 +359,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     markNeedsLayout();
   }
 
-  /// If non-null, sets its height to the child's height multipled by this factor.
+  /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   double get heightFactor => _heightFactor;
@@ -366,17 +374,17 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
-    final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.INFINITY;
-    final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.INFINITY;
+    final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
+    final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
 
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.INFINITY,
-                                            shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.INFINITY));
+      size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.infinity,
+                                            shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.infinity));
       alignChild();
     } else {
-      size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.INFINITY,
-                                            shrinkWrapHeight ? 0.0 : double.INFINITY));
+      size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.infinity,
+                                            shrinkWrapHeight ? 0.0 : double.infinity));
     }
   }
 
@@ -439,10 +447,10 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('widthFactor', _widthFactor, ifNull: 'expand'));
-    description.add(new DoubleProperty('heightFactor', _heightFactor, ifNull: 'expand'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('widthFactor', _widthFactor, ifNull: 'expand'));
+    properties.add(new DoubleProperty('heightFactor', _heightFactor, ifNull: 'expand'));
   }
 }
 
@@ -467,6 +475,15 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 /// The child is positioned according to [alignment]. To position a smaller
 /// child inside a larger parent, use [RenderPositionedBox] and
 /// [RenderConstrainedBox] rather than RenderConstrainedOverflowBox.
+///
+/// See also:
+///
+///  * [RenderUnconstrainedBox] for a render object that allows its children
+///    to render themselves unconstrained, expands to fit them, and considers
+///    overflow to be an error.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
 class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({
@@ -475,7 +492,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double maxWidth,
     double minHeight,
     double maxHeight,
-    AlignmentGeometry alignment: Alignment.center,
+    AlignmentGeometry alignment = Alignment.center,
     TextDirection textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
@@ -553,17 +570,150 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('minWidth', minWidth, ifNull: 'use parent minWidth constraint'));
-    description.add(new DoubleProperty('maxWidth', maxWidth, ifNull: 'use parent maxWidth constraint'));
-    description.add(new DoubleProperty('minHeight', minHeight, ifNull: 'use parent minHeight constraint'));
-    description.add(new DoubleProperty('maxHeight', maxHeight, ifNull: 'use parent maxHeight constraint'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('minWidth', minWidth, ifNull: 'use parent minWidth constraint'));
+    properties.add(new DoubleProperty('maxWidth', maxWidth, ifNull: 'use parent maxWidth constraint'));
+    properties.add(new DoubleProperty('minHeight', minHeight, ifNull: 'use parent minHeight constraint'));
+    properties.add(new DoubleProperty('maxHeight', maxHeight, ifNull: 'use parent maxHeight constraint'));
   }
 }
 
-/// A render box that is a specific size but passes its original constraints
-/// through to its child, which will probably overflow.
+/// Renders a box, imposing no constraints on its child, allowing the child to
+/// render at its "natural" size.
+///
+/// This allows a child to render at the size it would render if it were alone
+/// on an infinite canvas with no constraints. This box will then attempt to
+/// adopt the same size, within the limits of its own constraints. If it ends
+/// up with a different size, it will align the child based on [alignment].
+/// If the box cannot expand enough to accommodate the entire child, the
+/// child will be clipped.
+///
+/// In debug mode, if the child overflows the box, a warning will be printed on
+/// the console, and black and yellow striped areas will appear where the
+/// overflow occurs.
+///
+/// See also:
+///
+///  * [RenderConstrainedBox], which renders a box which imposes constraints
+///    on its child.
+///  * [RenderConstrainedOverflowBox], which renders a box that imposes different
+///    constraints on its child than it gets from its parent, possibly allowing
+///    the child to overflow the parent.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
+class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+  /// Create a render object that sizes itself to the child but does not
+  /// pass the [constraints] down to that child.
+  ///
+  /// The [alignment] must not be null.
+  RenderUnconstrainedBox({
+    @required AlignmentGeometry alignment,
+    @required TextDirection textDirection,
+    Axis constrainedAxis,
+    RenderBox child,
+  }) : assert(alignment != null),
+       _constrainedAxis = constrainedAxis,
+       super.mixin(alignment, textDirection, child);
+
+  /// The axis to retain constraints on, if any.
+  ///
+  /// If not set, or set to null (the default), neither axis will retain its
+  /// constraints. If set to [Axis.vertical], then vertical constraints will
+  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
+  /// will be retained.
+  Axis get constrainedAxis => _constrainedAxis;
+  Axis _constrainedAxis;
+  set constrainedAxis(Axis value) {
+    if (_constrainedAxis == value)
+      return;
+    _constrainedAxis = value;
+    markNeedsLayout();
+  }
+
+  Rect _overflowContainerRect = Rect.zero;
+  Rect _overflowChildRect = Rect.zero;
+  bool _isOverflowing = false;
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      // Let the child lay itself out at it's "natural" size, but if
+      // constrainedAxis is non-null, keep any constraints on that axis.
+      BoxConstraints childConstraints;
+      if (constrainedAxis != null) {
+        switch (constrainedAxis) {
+          case Axis.horizontal:
+            childConstraints = new BoxConstraints(maxWidth: constraints.maxWidth, minWidth: constraints.minWidth);
+            break;
+          case Axis.vertical:
+            childConstraints = new BoxConstraints(maxHeight: constraints.maxHeight, minHeight: constraints.minHeight);
+            break;
+        }
+      } else {
+        childConstraints = const BoxConstraints();
+      }
+      child.layout(childConstraints, parentUsesSize: true);
+      size = constraints.constrain(child.size);
+      alignChild();
+      final BoxParentData childParentData = child.parentData;
+      _overflowContainerRect = Offset.zero & size;
+      _overflowChildRect = childParentData.offset & child.size;
+    } else {
+      size = constraints.smallest;
+      _overflowContainerRect = Rect.zero;
+      _overflowChildRect = Rect.zero;
+    }
+    _isOverflowing = new RelativeRect.fromRect(_overflowContainerRect, _overflowChildRect).hasInsets;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    // There's no point in drawing the child if we're empty, or there is no
+    // child.
+    if (child == null || size.isEmpty)
+      return;
+
+    if (!_isOverflowing) {
+      super.paint(context, offset);
+      return;
+    }
+
+    // We have overflow. Clip it.
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint);
+
+    // Display the overflow indicator.
+    assert(() {
+      paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
+      return true;
+    }());
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) {
+    return _isOverflowing ? Offset.zero & size : null;
+  }
+
+  @override
+  String toStringShort() {
+    String header = super.toStringShort();
+    if (_isOverflowing)
+      header += ' OVERFLOWING';
+    return header;
+  }
+}
+
+/// A render object that is a specific size but passes its original constraints
+/// through to its child, which it allows to overflow.
+///
+/// See also:
+///  * [RenderUnconstrainedBox] for a render object that allows its children
+///    to render themselves unconstrained, expands to fit them, and considers
+///    overflow to be an error.
+///  * [RenderConstrainedOverflowBox] for a render object that imposes
+///    different constraints on its child than it gets from its parent,
+///    possibly allowing the child to overflow the parent.
 class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render box of a given size that lets its child overflow.
   ///
@@ -571,7 +721,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   RenderSizedOverflowBox({
     RenderBox child,
     @required Size requestedSize,
-    Alignment alignment: Alignment.center,
+    Alignment alignment = Alignment.center,
     TextDirection textDirection,
   }) : assert(requestedSize != null),
        _requestedSize = requestedSize,
@@ -643,7 +793,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    Alignment alignment: Alignment.center,
+    Alignment alignment = Alignment.center,
     TextDirection textDirection,
   }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,
@@ -655,7 +805,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming width to use.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor. If null, the child is
   /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
@@ -670,7 +820,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming height to use.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor. If null, the child is
   /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;
@@ -710,7 +860,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMinIntrinsicWidth(height);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMinIntrinsicWidth(height * (_heightFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -722,7 +872,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMaxIntrinsicWidth(height);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMaxIntrinsicWidth(height * (_heightFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -734,7 +884,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMinIntrinsicHeight(width);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMinIntrinsicHeight(width * (_widthFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -746,7 +896,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMaxIntrinsicHeight(width);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMaxIntrinsicHeight(width * (_widthFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -765,10 +915,10 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('widthFactor', _widthFactor, ifNull: 'pass-through'));
-    description.add(new DoubleProperty('heightFactor', _heightFactor, ifNull: 'pass-through'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('widthFactor', _widthFactor, ifNull: 'pass-through'));
+    properties.add(new DoubleProperty('heightFactor', _heightFactor, ifNull: 'pass-through'));
   }
 }
 
@@ -807,7 +957,7 @@ abstract class SingleChildLayoutDelegate {
 
   /// The size of this object given the incoming constraints.
   ///
-  /// Defaults to the biggest size that satifies the given constraints.
+  /// Defaults to the biggest size that satisfies the given constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
   /// The constraints for the child given the incoming constraints.
@@ -859,7 +1009,7 @@ abstract class SingleChildLayoutDelegate {
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
 class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
-  /// Creates a render box that defers its layout to a delgate.
+  /// Creates a render box that defers its layout to a delegate.
   ///
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
@@ -958,7 +1108,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 ///
 /// If [baseline] is less than the distance from the top of the child
 /// to the baseline of the child, then the child will overflow the top
-/// of the box. This is typically not desireable, in particular, that
+/// of the box. This is typically not desirable, in particular, that
 /// part of the child will not be found when doing hit tests, so the
 /// user cannot interact with that part of the child.
 ///
@@ -974,7 +1124,7 @@ class RenderBaseline extends RenderShiftedBox {
   RenderBaseline({
     RenderBox child,
     @required double baseline,
-    @required TextBaseline baselineType
+    @required TextBaseline baselineType,
   }) : assert(baseline != null),
        assert(baselineType != null),
        _baseline = baseline,
@@ -1021,9 +1171,9 @@ class RenderBaseline extends RenderShiftedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('baseline', baseline));
-    description.add(new EnumProperty<TextBaseline>('baselineType', baselineType));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('baseline', baseline));
+    properties.add(new EnumProperty<TextBaseline>('baselineType', baselineType));
   }
 }

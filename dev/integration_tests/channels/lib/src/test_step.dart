@@ -7,6 +7,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'pair.dart';
+
 enum TestStatus { ok, pending, failed, complete }
 
 typedef Future<TestStepResult> TestStep();
@@ -23,8 +25,8 @@ const String nothing = '-';
 /// - The Flutter app records the incoming reply echo.
 /// - The platform finally replies to the original message with another echo.
 class TestStepResult {
-  static const TextStyle bold = const TextStyle(fontWeight: FontWeight.bold);
-  static const TestStepResult complete = const TestStepResult(
+  static const TextStyle bold = TextStyle(fontWeight: FontWeight.bold);
+  static const TestStepResult complete = TestStepResult(
     'Test complete',
     nothing,
     TestStatus.complete,
@@ -147,6 +149,8 @@ bool _deepEquals(dynamic a, dynamic b) {
     return b is List && _deepEqualsList(a, b);
   if (a is Map)
     return b is Map && _deepEqualsMap(a, b);
+  if (a is Pair)
+    return b is Pair && _deepEqualsPair(a, b);
   return false;
 }
 
@@ -175,4 +179,8 @@ bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
       return false;
   }
   return true;
+}
+
+bool _deepEqualsPair(Pair a, Pair b) {
+  return _deepEquals(a.left, b.left) && _deepEquals(a.right, b.right);
 }

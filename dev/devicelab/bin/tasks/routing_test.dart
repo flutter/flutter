@@ -37,20 +37,22 @@ void main() {
         <String>['run', '--verbose', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],
       );
       run.stdout
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
-          if (lineContainsServicePort(line)) {
+          if (vmServicePort == null) {
             vmServicePort = parseServicePort(line);
-            print('service protocol connection available at port $vmServicePort');
-            print('run: ready!');
-            ready.complete();
-            ok ??= true;
+            if (vmServicePort != null) {
+              print('service protocol connection available at port $vmServicePort');
+              print('run: ready!');
+              ready.complete();
+              ok ??= true;
+            }
           }
         });
       run.stderr
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
@@ -65,13 +67,13 @@ void main() {
         <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--no-keep-app-running', 'lib/route.dart'],
       );
       drive.stdout
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           print('drive:stdout: $line');
         });
       drive.stderr
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           stderr.writeln('drive:stderr: $line');

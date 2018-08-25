@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -26,7 +24,7 @@ void main() {
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(
+          new Semantics(
             container: true,
             label: 'L1',
           ),
@@ -36,10 +34,10 @@ void main() {
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(
+                new Semantics(
                   checked: false,
                 ),
               ],
@@ -64,12 +62,12 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 3,
-                flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+                flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
                 rect: TestSemantics.fullScreen,
               ),
               new TestSemantics(
                 id: 4,
-                flags: SemanticsFlags.hasCheckedState.index,
+                flags: SemanticsFlag.hasCheckedState.index,
                 rect: TestSemantics.fullScreen,
               ),
             ]
@@ -88,7 +86,7 @@ void main() {
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(
+          new Semantics(
             label: 'L1',
             container: true,
           ),
@@ -98,10 +96,10 @@ void main() {
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(),
+                new Semantics(),
               ],
             ),
           ),
@@ -120,7 +118,7 @@ void main() {
           new TestSemantics.rootChild(
             id: 2,
             label: 'L2',
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             rect: TestSemantics.fullScreen,
           ),
         ],
@@ -136,17 +134,17 @@ void main() {
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(),
+          new Semantics(),
           new Semantics(
             label: 'L2',
             container: true,
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(),
+                new Semantics(),
               ],
             ),
           ),
@@ -160,7 +158,7 @@ void main() {
           new TestSemantics.rootChild(
             id: 2,
             label: 'L2',
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             rect: TestSemantics.fullScreen,
           ),
         ],

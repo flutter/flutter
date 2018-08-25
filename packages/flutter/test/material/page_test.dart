@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -13,10 +13,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Material(child: const Text('Page 2'));
+            return const Material(child: Text('Page 2'));
           },
         },
       )
@@ -28,6 +28,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
+    FadeTransition widget2Opacity =
+        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -35,8 +37,10 @@ void main() {
     expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
     // Page 1 is above page 2 mid-transition.
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Animation begins from the top of the page.
-    expect(widget2TopLeft.dy < widget2Size.height, true);
+    // Animation begins 3/4 of the way up the page.
+    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
+    // Animation starts with page 2 being near transparent.
+    expect(widget2Opacity.opacity.value < 0.01, MaterialPageRoute.debugEnableFadingRoutes); // ignore: deprecated_member_use
 
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -48,10 +52,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
+    widget2Opacity =
+        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    // Page 2 starts to lose opacity.
+    expect(widget2Opacity.opacity.value < 1.0, MaterialPageRoute.debugEnableFadingRoutes); // ignore: deprecated_member_use
 
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -64,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return new Material(
@@ -142,15 +150,15 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
       )
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
       builder: (BuildContext context) {
-        return const Material(child: const Text('Page 2'));
+        return const Material(child: Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -203,10 +211,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: const Scaffold(body: const Text('Page 1')),
+        home: const Scaffold(body: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Scaffold(body: const Text('Page 2'));
+            return const Scaffold(body: Text('Page 2'));
           },
         },
       )
@@ -234,10 +242,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Scaffold(body: const Text('Page 1')),
+        home: const Scaffold(body: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Scaffold(body: const Text('Page 2'));
+            return const Scaffold(body: Text('Page 2'));
           },
         },
       )
@@ -343,13 +351,13 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Scaffold(body: const Text('Page 1')),
+        home: const Scaffold(body: Text('Page 1')),
       )
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
       builder: (BuildContext context) {
-        return const Scaffold(body: const Text('Page 2'));
+        return const Scaffold(body: Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -374,10 +382,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Material(child: const Text('Page 2'));
+            return const Material(child: Text('Page 2'));
           },
         },
       )
@@ -409,10 +417,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: const Material(child: const Text('Page 1')),
+        home: const Material(child: Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return const Material(child: const Text('Page 2'));
+            return const Material(child: Text('Page 2'));
           },
         },
       )

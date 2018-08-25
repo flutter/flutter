@@ -5,7 +5,6 @@
 import 'package:collection/collection.dart' show binarySearch;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -21,7 +20,7 @@ typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animatio
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
-const Duration _kDuration = const Duration(milliseconds: 300);
+const Duration _kDuration = Duration(milliseconds: 300);
 
 // Incoming and outgoing AnimatedList items.
 class _ActiveItem implements Comparable<_ActiveItem> {
@@ -39,7 +38,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 
 /// A scrolling container that animates items when they are inserted or removed.
 ///
-/// This widget's [AnimatedListState] can be used to dynmically insert or remove
+/// This widget's [AnimatedListState] can be used to dynamically insert or remove
 /// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
 /// use the static [of] method from an item's input callback.
 ///
@@ -49,13 +48,13 @@ class AnimatedList extends StatefulWidget {
   const AnimatedList({
     Key key,
     @required this.itemBuilder,
-    this.initialItemCount: 0,
-    this.scrollDirection: Axis.vertical,
-    this.reverse: false,
+    this.initialItemCount = 0,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
     this.controller,
     this.primary,
     this.physics,
-    this.shrinkWrap: false,
+    this.shrinkWrap = false,
     this.padding,
   }) : assert(itemBuilder != null),
        assert(initialItemCount != null && initialItemCount >= 0),
@@ -66,7 +65,7 @@ class AnimatedList extends StatefulWidget {
   /// List items are only built when they're scrolled into view.
   ///
   /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// posiition in the list. The value of the index parameter will be between 0
+  /// position in the list. The value of the index parameter will be between 0
   /// and [initialItemCount] plus the total number of items that have been
   /// inserted with [AnimatedListState.insertItem] and less the total number of
   /// items that have been removed with [AnimatedListState.removeItem].
@@ -77,8 +76,8 @@ class AnimatedList extends StatefulWidget {
 
   /// The number of items the list will start with.
   ///
-  /// The appareance of the initial items is not animated. They
-  /// are created, as needed, by [itemBuilder] with an animation paramter
+  /// The appearance of the initial items is not animated. They
+  /// are created, as needed, by [itemBuilder] with an animation parameter
   /// of [kAlwaysCompleteAnimation].
   final int initialItemCount;
 
@@ -160,19 +159,19 @@ class AnimatedList extends StatefulWidget {
   /// ```dart
   /// AnimatedListState animatedList = AnimatedList.of(context);
   /// ```
-  static AnimatedListState of(BuildContext context, { bool nullOk: false }) {
+  static AnimatedListState of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
     final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
     if (nullOk || result != null)
       return result;
     throw new FlutterError(
-      'AnimatedList.of() called with a context that does not contain a AnimatedList.\n'
+      'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
       'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
       'This can happen when the context provided is from the same StatefulWidget that '
       'built the AnimatedList. Please see the AnimatedList documentation for examples '
       'of how to refer to an AnimatedListState object: '
-      '  https://docs.flutter.io/flutter/widgets/AnimatedState-class.html\n'
+      '  https://docs.flutter.io/flutter/widgets/AnimatedListState-class.html \n'
       'The context used was:\n'
       '  $context'
     );
@@ -190,7 +189,7 @@ class AnimatedList extends StatefulWidget {
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
-/// The removed item's animation  is passed to the [removeItem] builder
+/// The removed item's animation is passed to the [removeItem] builder
 /// parameter.
 ///
 /// An app that needs to insert or remove items in response to an event
@@ -271,7 +270,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
   /// after [index] towards the end of the list.
-  void insertItem(int index, { Duration duration: _kDuration }) {
+  void insertItem(int index, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -298,7 +297,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       _itemsCount += 1;
     });
 
-    controller.forward().then<Null>((Null value) {
+    controller.forward().then<void>((Null value) {
       _removeActiveItemAt(_incomingItems, incomingItem.itemIndex).controller.dispose();
     });
   }
@@ -314,7 +313,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration: _kDuration }) {
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(builder != null);
     assert(duration != null);
@@ -333,7 +332,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         ..sort();
     });
 
-    controller.reverse().then<Null>((Null value) {
+    controller.reverse().then<void>((Null value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
       // Decrement the incoming and outgoing item indices to account

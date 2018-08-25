@@ -8,20 +8,22 @@ import 'dart:collection';
 ///
 /// Consider using an [ObserverList] instead of a [List] when the number of
 /// [contains] calls dominates the number of [add] and [remove] calls.
+// TODO(ianh): Use DelegatingIterable, possibly moving it from the collection
+// package to foundation, or to dart:collection.
 class ObserverList<T> extends Iterable<T> {
   final List<T> _list = <T>[];
   bool _isDirty = false;
   HashSet<T> _set;
 
   /// Adds an item to the end of this list.
-  ///
-  /// The given item must not already be in the list.
   void add(T item) {
     _isDirty = true;
     _list.add(item);
   }
 
   /// Removes an item from the list.
+  ///
+  /// This is O(N) in the number of items in the list.
   ///
   /// Returns whether the item was present in the list.
   bool remove(T item) {
@@ -30,9 +32,9 @@ class ObserverList<T> extends Iterable<T> {
   }
 
   @override
-  bool contains(Object item) {
+  bool contains(Object element) {
     if (_list.length < 3)
-      return _list.contains(item);
+      return _list.contains(element);
 
     if (_isDirty) {
       if (_set == null) {
@@ -44,9 +46,15 @@ class ObserverList<T> extends Iterable<T> {
       _isDirty = false;
     }
 
-    return _set.contains(item);
+    return _set.contains(element);
   }
 
   @override
   Iterator<T> get iterator => _list.iterator;
+
+  @override
+  bool get isEmpty => _list.isEmpty;
+
+  @override
+  bool get isNotEmpty => _list.isNotEmpty;
 }

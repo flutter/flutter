@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-/// An event that can be send by the application to notify interested listeners
-/// that something happened to the user interface (e.g. a view scrolled).
+/// An event sent by the application to notify interested listeners that
+/// something happened to the user interface (e.g. a view scrolled).
 ///
 /// These events are usually interpreted by assistive technologies to give the
 /// user additional clues about the current state of the UI.
@@ -14,7 +13,7 @@ abstract class SemanticsEvent {
   /// Initializes internal fields.
   ///
   /// [type] is a string that identifies this class of [SemanticsEvent]s.
-  SemanticsEvent(this.type);
+  const SemanticsEvent(this.type);
 
   /// The type of this event.
   ///
@@ -53,71 +52,102 @@ abstract class SemanticsEvent {
   }
 }
 
-/// Notifies that a scroll action has been completed.
+/// An event for a semantic announcement.
 ///
-/// This event translates into a `AccessibilityEvent.TYPE_VIEW_SCROLLED` on
-/// Android and a `UIAccessibilityPageScrolledNotification` on iOS. It is
-/// processed by the accessibility systems of the operating system to provide
-/// additional feedback to the user about the state of a scrollable view (e.g.
-/// on Android, a ping sound is played to indicate that a scroll action was
-/// successful).
-class ScrollCompletedSemanticsEvent extends SemanticsEvent {
-  /// Creates a [ScrollCompletedSemanticsEvent].
-  ///
-  /// This event should be sent after a scroll action is completed. It is
-  /// interpreted by assistive technologies to provide additional feedback about
-  /// the just completed scroll action to the user.
-  ///
-  /// The parameters [axis], [pixels], [minScrollExtent], and [maxScrollExtent] are
-  /// required and may not be null.
-  ScrollCompletedSemanticsEvent({
-    @required this.axis,
-    @required this.pixels,
-    @required this.maxScrollExtent,
-    @required this.minScrollExtent
-  }) : assert(axis != null),
-       assert(pixels != null),
-       assert(maxScrollExtent != null),
-       assert(minScrollExtent != null),
-       super('scroll');
+/// This should be used for announcement that are not seamlessly announced by
+/// the system as a result of a UI state change.
+///
+/// For example a camera application can use this method to make accessibility
+/// announcements regarding objects in the viewfinder.
+///
+/// When possible, prefer using mechanisms like [Semantics] to implicitly
+/// trigger announcements over using this event.
+class AnnounceSemanticsEvent extends SemanticsEvent {
 
-  /// The axis in which the scroll view was scrolled.
-  ///
-  /// See also [ScrollPosition.axis].
-  final Axis axis;
+  /// Constructs an event that triggers an announcement by the platform.
+  const AnnounceSemanticsEvent(this.message, this.textDirection) :
+    assert(message != null),
+    assert(textDirection != null),
+    super('announce');
 
-  /// The current scroll position, in logical pixels.
+  /// The message to announce.
   ///
-  /// See also [ScrollPosition.pixels].
-  final double pixels;
+  /// This property must not be null.
+  final String message;
 
-  /// The minimum in-range value for [pixels].
+  /// Text direction for [message].
   ///
-  /// See also [ScrollPosition.minScrollExtent].
-  final double minScrollExtent;
-
-  /// The maximum in-range value for [pixels].
-  ///
-  /// See also [ScrollPosition.maxScrollExtent].
-  final double maxScrollExtent;
+  /// This property must not be null.
+  final TextDirection textDirection;
 
   @override
   Map<String, dynamic> getDataMap() {
-    final Map<String, dynamic> map = <String, dynamic>{
-      'pixels': pixels.clamp(minScrollExtent, maxScrollExtent),
-      'minScrollExtent': minScrollExtent,
-      'maxScrollExtent': maxScrollExtent,
+    return <String, dynamic>{
+      'message': message,
+      'textDirection': textDirection.index,
     };
-
-    switch (axis) {
-      case Axis.horizontal:
-        map['axis'] = 'h';
-        break;
-      case Axis.vertical:
-        map['axis'] = 'v';
-        break;
-    }
-
-    return map;
   }
+}
+
+/// An event for a semantic announcement of a tooltip.
+///
+/// This is only used by Android to announce tooltip values.
+class TooltipSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a tooltip announcement by the platform.
+  const TooltipSemanticsEvent(this.message) : super('tooltip');
+
+  /// The text content of the tooltip.
+  final String message;
+
+  @override
+  Map<String, dynamic> getDataMap() {
+    return <String, dynamic>{
+      'message': message,
+    };
+  }
+}
+
+/// An event which triggers long press semantic feedback.
+///
+/// Currently only honored on Android. Triggers a long-press specific sound
+/// when TalkBack is enabled.
+class LongPressSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a long-press semantic feedback by the platform.
+  const LongPressSemanticsEvent() : super('longPress');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
+
+/// An event which triggers tap semantic feedback.
+///
+/// Currently only honored on Android. Triggers a tap specific sound when
+/// TalkBack is enabled.
+class TapSemanticEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a long-press semantic feedback by the platform.
+  const TapSemanticEvent() : super('tap');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
+
+/// An event which triggers a polite announcement of a live region.
+///
+/// This requires that the semantics node has already been marked as a live
+/// region. On Android, TalkBack will make a verbal announcement, as long as
+/// the label of the semantics node has changed since the last live region
+/// update. iOS does not currently support this event.
+///
+/// See also:
+///
+///  * [SemanticsFlag.liveRegion], for a description of live regions.
+class UpdateLiveRegionEvent extends SemanticsEvent {
+  /// Creates a new [UpdateLiveRegionEvent].
+  const UpdateLiveRegionEvent() : super('updateLiveRegion');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
 }

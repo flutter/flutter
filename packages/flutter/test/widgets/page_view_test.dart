@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'semantics_tester.dart';
 import 'states.dart';
 
-const Duration _frameDuration = const Duration(milliseconds: 100);
+const Duration _frameDuration = Duration(milliseconds: 100);
 
 void main() {
   testWidgets('PageView control test', (WidgetTester tester) async {
@@ -257,7 +257,7 @@ void main() {
       ),
     ));
 
-    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alabama', skipOffstage: false), findsOneWidget);
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -323,6 +323,60 @@ void main() {
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
+  });
+
+  testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+    final PageController controller = new PageController(viewportFraction: 0.9);
+
+    Widget build(PageController controller, {Size size}) {
+      final Widget pageView = new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          controller: controller,
+          onPageChanged: log.add,
+          physics: const BouncingScrollPhysics(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      );
+
+      if (size != null) {
+        return new OverflowBox(
+          child: pageView,
+          minWidth: size.width,
+          minHeight: size.height,
+          maxWidth: size.width,
+          maxHeight: size.height,
+        );
+      } else {
+        return pageView;
+      }
+    }
+
+    await tester.pumpWidget(build(controller));
+    expect(log, isEmpty);
+
+    // Fling right to move to a non-existent page at the beginning of the
+    // PageView, and confirm that the PageView settles back on the first page.
+    await tester.fling(find.byType(PageView), const Offset(100.0, 0.0), 800.0);
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsNothing);
+
+    // Try again with a Cupertino "Plus" device size.
+    await tester.pumpWidget(build(controller, size: const Size(414.0, 736.0)));
+    expect(log, isEmpty);
+
+    await tester.fling(find.byType(PageView), const Offset(100.0, 0.0), 800.0);
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsNothing);
   });
 
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
@@ -540,6 +594,15 @@ void main() {
   testWidgets('PageView can restore page',
       (WidgetTester tester) async {
     final PageController controller = new PageController();
+    try {
+      controller.page;
+      fail('Accessing page before attaching should fail.');
+    } on AssertionError catch (e) {
+      expect(
+        e.message,
+        'PageController.page cannot be accessed before a PageView is built with it.',
+      );
+    }
     final PageStorageBucket bucket = new PageStorageBucket();
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -548,10 +611,10 @@ void main() {
         child: new PageView(
           key: const PageStorageKey<String>('PageView'),
           controller: controller,
-          children: <Widget>[
-            const Placeholder(),
-            const Placeholder(),
-            const Placeholder(),
+          children: const <Widget>[
+            Placeholder(),
+            Placeholder(),
+            Placeholder(),
           ],
         ),
       ),
@@ -566,7 +629,15 @@ void main() {
         child: new Container(),
       ),
     );
-    expect(() => controller.page, throwsAssertionError);
+    try {
+      controller.page;
+      fail('Accessing page after detaching all PageViews should fail.');
+    } on AssertionError catch (e) {
+      expect(
+        e.message,
+        'PageController.page cannot be accessed before a PageView is built with it.',
+      );
+    }
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new PageStorage(
@@ -574,10 +645,10 @@ void main() {
         child: new PageView(
           key: const PageStorageKey<String>('PageView'),
           controller: controller,
-          children: <Widget>[
-            const Placeholder(),
-            const Placeholder(),
-            const Placeholder(),
+          children: const <Widget>[
+            Placeholder(),
+            Placeholder(),
+            Placeholder(),
           ],
         ),
       ),
@@ -592,10 +663,10 @@ void main() {
         child: new PageView(
           key: const PageStorageKey<String>('Check it again against your list and see consistency!'),
           controller: controller2,
-          children: <Widget>[
-            const Placeholder(),
-            const Placeholder(),
-            const Placeholder(),
+          children: const <Widget>[
+            Placeholder(),
+            Placeholder(),
+            Placeholder(),
           ],
         ),
       ),
@@ -640,5 +711,21 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Page #2'));
 
     semantics.dispose();
+  });
+
+  testWidgets('PageMetrics', (WidgetTester tester) async {
+    final PageMetrics page = new PageMetrics(
+      minScrollExtent: 100.0,
+      maxScrollExtent: 200.0,
+      pixels: 150.0,
+      viewportDimension: 25.0,
+      axisDirection: AxisDirection.right,
+      viewportFraction: 1.0,
+    );
+    expect(page.page, 6);
+    final PageMetrics page2 = page.copyWith(
+      pixels: page.pixels - 100.0,
+    );
+    expect(page2.page, 4.0);
   });
 }

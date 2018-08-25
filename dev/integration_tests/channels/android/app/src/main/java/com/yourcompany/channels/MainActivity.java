@@ -4,7 +4,9 @@
 
 package com.yourcompany.channels;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.Date;
 
 import android.os.Bundle;
 
@@ -20,9 +22,9 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "binary-msg", BinaryCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "string-msg", StringCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "json-msg", JSONMessageCodec.INSTANCE));
-    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", StandardMessageCodec.INSTANCE));
+    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", ExtendedStandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
-    setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", StandardMethodCodec.INSTANCE));
+    setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", new StandardMethodCodec(ExtendedStandardMessageCodec.INSTANCE)));
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {
@@ -44,7 +46,7 @@ public class MainActivity extends FlutterActivity {
   }
 
   // Outgoing ByteBuffer messages must be direct-allocated and payload placed between
-  // positon 0 and current position.
+  // position 0 and current position.
   @SuppressWarnings("unchecked")
   private <T> T echo(T message) {
     if (message instanceof ByteBuffer) {
@@ -133,5 +135,51 @@ public class MainActivity extends FlutterActivity {
         result.notImplemented();
       }
     });
+  }
+}
+
+final class ExtendedStandardMessageCodec extends StandardMessageCodec {
+  public static final ExtendedStandardMessageCodec INSTANCE = new ExtendedStandardMessageCodec();
+  private static final byte DATE = (byte) 128;
+  private static final byte PAIR = (byte) 129;
+
+  @Override
+  protected void writeValue(ByteArrayOutputStream stream, Object value) {
+    if (value instanceof Date) {
+      stream.write(DATE);
+      writeLong(stream, ((Date) value).getTime());
+    } else if (value instanceof Pair) {
+      stream.write(PAIR);
+      writeValue(stream, ((Pair) value).left);
+      writeValue(stream, ((Pair) value).right);
+    } else {
+      super.writeValue(stream, value);
+    }
+  }
+
+  @Override
+  protected Object readValueOfType(byte type, ByteBuffer buffer) {
+    switch (type) {
+      case DATE:
+        return new Date(buffer.getLong());
+      case PAIR:
+        return new Pair(readValue(buffer), readValue(buffer));
+      default: return super.readValueOfType(type, buffer);
+    }
+  }
+}
+
+final class Pair {
+  public final Object left;
+  public final Object right;
+
+  public Pair(Object left, Object right) {
+    this.left = left;
+    this.right = right;
+  }
+
+  @Override
+  public String toString() {
+    return "Pair[" + left + ", " + right + "]";
   }
 }

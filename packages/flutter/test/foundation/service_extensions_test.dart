@@ -13,12 +13,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
-  with SchedulerBinding,
-       ServicesBinding,
+  with ServicesBinding,
        GestureBinding,
+       SchedulerBinding,
+       PaintingBinding,
+       SemanticsBinding,
        RendererBinding,
        WidgetsBinding {
 
@@ -33,15 +35,17 @@ class TestServiceExtensionsBinding extends BindingBase
     extensions[name] = callback;
   }
 
-  Future<Map<String, String>> testExtension(String name, Map<String, String> arguments) {
+  Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
     return extensions[name](arguments);
   }
 
   int reassembled = 0;
+  bool pendingReassemble = false;
   @override
   Future<Null> performReassemble() {
     reassembled += 1;
+    pendingReassemble = true;
     return super.performReassemble();
   }
 
@@ -53,10 +57,21 @@ class TestServiceExtensionsBinding extends BindingBase
   Future<Null> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame(Duration.ZERO);
+      ui.window.onBeginFrame(Duration.zero);
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
+  }
+
+  @override
+  void scheduleForcedFrame() {
+    expect(true, isFalse);
+  }
+
+  @override
+  void scheduleWarmUpFrame() {
+    expect(pendingReassemble, isTrue);
+    pendingReassemble = false;
   }
 
   Future<Null> flushMicrotasks() {
@@ -68,13 +83,14 @@ class TestServiceExtensionsBinding extends BindingBase
 
 TestServiceExtensionsBinding binding;
 
-Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingResult) async {
+Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   bool completed = false;
   pendingResult.whenComplete(() { completed = true; });
   expect(binding.frameScheduled, isFalse);
   await binding.flushMicrotasks();
   expect(binding.frameScheduled, isTrue);
   expect(completed, isFalse);
+  await binding.flushMicrotasks();
   await binding.doFrame();
   await binding.flushMicrotasks();
   expect(completed, isTrue);
@@ -103,7 +119,7 @@ void main() {
   // must be first and last respectively.
 
   test('Service extensions - debugAllowBanner', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugAllowBannerOverride, true);
@@ -126,7 +142,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpApp', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     result = await binding.testExtension('debugDumpApp', <String, String>{});
     expect(result, <String, String>{});
@@ -135,7 +151,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpRenderTree', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
@@ -155,7 +171,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpLayerTree', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
@@ -179,7 +195,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
@@ -189,7 +205,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
@@ -199,8 +215,8 @@ void main() {
   });
 
   test('Service extensions - debugPaint', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     expect(binding.frameScheduled, isFalse);
@@ -241,8 +257,8 @@ void main() {
   });
 
   test('Service extensions - debugPaintBaselinesEnabled', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     expect(binding.frameScheduled, isFalse);
@@ -283,12 +299,12 @@ void main() {
   });
 
   test('Service extensions - evict', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
     bool completed;
 
     completed = false;
     BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
-      expect(UTF8.decode(message.buffer.asUint8List()), 'test');
+      expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return new ByteData(5); // 0x0000000000
     });
@@ -315,14 +331,14 @@ void main() {
   });
 
   test('Service extensions - frameworkPresent', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     result = await binding.testExtension('frameworkPresent', <String, String>{});
     expect(result, <String, String>{});
   });
 
   test('Service extensions - platformOverride', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.reassembled, 0);
     expect(defaultTargetPlatform, TargetPlatform.android);
@@ -357,8 +373,8 @@ void main() {
   });
 
   test('Service extensions - repaintRainbow', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     expect(binding.frameScheduled, isFalse);
@@ -400,8 +416,8 @@ void main() {
   });
 
   test('Service extensions - reassemble', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     completed = false;
@@ -411,6 +427,7 @@ void main() {
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, false);
+    await binding.flushMicrotasks();
     await binding.doFrame();
     await binding.flushMicrotasks();
     expect(completed, true);
@@ -421,7 +438,7 @@ void main() {
   });
 
   test('Service extensions - showPerformanceOverlay', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
@@ -444,7 +461,7 @@ void main() {
   });
 
   test('Service extensions - debugWidgetInspector', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
@@ -467,7 +484,7 @@ void main() {
   });
 
   test('Service extensions - timeDilation', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(timeDilation, 1.0);
@@ -490,9 +507,12 @@ void main() {
   });
 
   test('Service extensions - posttest', () async {
+    // See widget_inspector_test.dart for tests of the 15 ext.flutter.inspector
+    // service extensions included in this count.
+
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 17);
+    expect(binding.extensions.length, 37);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

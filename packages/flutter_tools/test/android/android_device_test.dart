@@ -8,14 +8,14 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
-      final String deviceId = '1234';
+      const String deviceId = '1234';
       final AndroidDevice device = new AndroidDevice(deviceId);
       expect(device.id, deviceId);
     });
@@ -23,44 +23,50 @@ void main() {
 
   group('getAdbDevices', () {
     testUsingContext('physical devices', () {
-      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = <AndroidDevice>[];
+      parseADBDeviceOutput('''
 List of devices attached
 05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
 
-''');
+''', devices: devices);
       expect(devices, hasLength(1));
       expect(devices.first.name, 'Nexus 7');
     });
 
     testUsingContext('emulators and short listings', () {
-      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = <AndroidDevice>[];
+      parseADBDeviceOutput('''
 List of devices attached
 localhost:36790        device
 0149947A0D01500C       device usb:340787200X
 emulator-5612          host features:shell_2
 
-''');
+''', devices: devices);
       expect(devices, hasLength(3));
       expect(devices.first.name, 'localhost:36790');
     });
 
     testUsingContext('android n', () {
-      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = <AndroidDevice>[];
+      parseADBDeviceOutput('''
 List of devices attached
 ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu features:cmd,shell_v2
-''');
+''', devices: devices);
       expect(devices, hasLength(1));
       expect(devices.first.name, 'Nexus 6');
     });
 
     testUsingContext('adb error message', () {
-      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = <AndroidDevice>[];
+      final List<String> diagnostics = <String>[];
+      parseADBDeviceOutput('''
 It appears you do not have 'Android SDK Platform-tools' installed.
 Use the 'android' tool to install them:
     android update sdk --no-ui --filter 'platform-tools'
-''');
+''', devices: devices, diagnostics: diagnostics);
       expect(devices, hasLength(0));
-      expect(testLogger.errorText, contains('you do not have'));
+      expect(diagnostics, hasLength(1));
+      expect(diagnostics.first, contains('you do not have'));
     });
   });
 
@@ -82,7 +88,9 @@ Use the 'android' tool to install them:
     setUp(() {
       hardware = 'unknown';
       buildCharacteristics = 'unused';
-      when(mockProcessManager.run(argThat(contains('getprop')), stderrEncoding: any, stdoutEncoding: any)).thenAnswer((_) {
+      when(mockProcessManager.run(argThat(contains('getprop')),
+          stderrEncoding: anyNamed('stderrEncoding'),
+          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
         final StringBuffer buf = new StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')
           ..writeln('[ro.build.characteristics]: [$buildCharacteristics]');
@@ -103,6 +111,7 @@ Use the 'android' tool to install them:
       hardware = 'goldfish';
       final AndroidDevice device = new AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
+      expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -119,6 +128,7 @@ Use the 'android' tool to install them:
       buildCharacteristics = 'att,emulator';
       final AndroidDevice device = new AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
+      expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

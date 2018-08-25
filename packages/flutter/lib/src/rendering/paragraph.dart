@@ -38,12 +38,13 @@ class RenderParagraph extends RenderBox {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   RenderParagraph(TextSpan text, {
-    TextAlign textAlign: TextAlign.start,
+    TextAlign textAlign = TextAlign.start,
     @required TextDirection textDirection,
-    bool softWrap: true,
-    TextOverflow overflow: TextOverflow.clip,
-    double textScaleFactor: 1.0,
+    bool softWrap = true,
+    TextOverflow overflow = TextOverflow.clip,
+    double textScaleFactor = 1.0,
     int maxLines,
+    Locale locale,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
        assert(textAlign != null),
@@ -61,6 +62,7 @@ class RenderParagraph extends RenderBox {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         locale: locale,
        );
 
   final TextPainter _textPainter;
@@ -104,7 +106,7 @@ class RenderParagraph extends RenderBox {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// This must not be null.
@@ -174,9 +176,26 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
+  /// Used by this paragraph's internal [TextPainter] to select a locale-specific
+  /// font.
+  ///
+  /// In some cases the same Unicode character may be rendered differently depending
+  /// on the locale. For example the '骨' character is rendered differently in
+  /// the Chinese and Japanese locales. In these cases the [locale] may be used
+  /// to select a locale-specific font.
+  Locale get locale => _textPainter.locale;
+  /// The value may be null.
+  set locale(Locale value) {
+    if (_textPainter.locale == value)
+      return;
+    _textPainter.locale = value;
+    _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
-    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.INFINITY);
+    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {
@@ -275,6 +294,7 @@ class RenderParagraph extends RenderBox {
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
+            locale: locale,
           )..layout();
           if (didOverflowWidth) {
             double fadeEnd, fadeStart;
@@ -431,13 +451,14 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
-    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    description.add(new EnumProperty<TextOverflow>('overflow', overflow));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
-    description.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

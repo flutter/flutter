@@ -64,7 +64,7 @@ class TileScrollLayout extends StatelessWidget {
         itemCount: 200,
         itemBuilder: (BuildContext context, int index) {
           return new Padding(
-            padding:const EdgeInsets.all(5.0),
+            padding: const EdgeInsets.all(5.0),
             child: new Material(
               elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
@@ -133,43 +133,43 @@ class TopBarMenu extends StatelessWidget {
       itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
         const PopupMenuItem<String>(
           value: 'Friends',
-          child: const MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+          child: MenuItemWithIcon(Icons.people, 'Friends', '5 new')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+          child: MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         ),
         const PopupMenuItem<String>(
           value: 'Friends',
-          child: const MenuItemWithIcon(Icons.people, 'Friends', '5')
+          child: MenuItemWithIcon(Icons.people, 'Friends', '5')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.event, 'Events', '12')
+          child: MenuItemWithIcon(Icons.event, 'Events', '12')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
-          child: const MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         )
       ]
     );
@@ -212,8 +212,8 @@ class FancyImageItem extends StatelessWidget {
         new ItemImageBox(),
         new InfoBar(),
         const Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: const Divider()
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Divider()
         ),
         new IconBar(),
         new FatDivider()
@@ -234,8 +234,8 @@ class FancyGalleryItem extends StatelessWidget {
         new ItemGalleryBox(index),
         new InfoBar(),
         const Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: const Divider()
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Divider()
         ),
         new IconBar(),
         new FatDivider()
@@ -267,10 +267,10 @@ class IconBar extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16.0, right: 16.0),
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          const IconWithText(Icons.thumb_up, 'Like'),
-          const IconWithText(Icons.comment, 'Comment'),
-          const IconWithText(Icons.share, 'Share'),
+        children: const <Widget>[
+          IconWithText(Icons.thumb_up, 'Like'),
+          IconWithText(Icons.comment, 'Comment'),
+          IconWithText(Icons.share, 'Share'),
         ]
       )
     );
@@ -350,9 +350,9 @@ class UserHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: const Image(
-              image: const AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
+            padding: EdgeInsets.only(right: 8.0),
+            child: Image(
+              image: AssetImage('packages/flutter_gallery_assets/people/square/ali.png'),
               width: 32.0,
               height: 32.0
             )
@@ -367,7 +367,7 @@ class UserHeader extends StatelessWidget {
                   children: <TextSpan>[
                     new TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const TextSpan(text: ' shared a new '),
-                    const TextSpan(text: 'photo', style: const TextStyle(fontWeight: FontWeight.bold))
+                    const TextSpan(text: 'photo', style: TextStyle(fontWeight: FontWeight.bold))
                   ]
                 )),
                 new Row(
@@ -390,8 +390,8 @@ class ItemDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: const Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
+      padding: EdgeInsets.all(8.0),
+      child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
     );
   }
 }
@@ -409,8 +409,8 @@ class ItemImageBox extends StatelessWidget {
               children: <Widget>[
                 const SizedBox(
                   height: 230.0,
-                  child: const Image(
-                    image: const AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
+                  child: Image(
+                    image: AssetImage('packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png')
                   )
                 ),
                 new Theme(
@@ -438,16 +438,16 @@ class ItemImageBox extends StatelessWidget {
                       borderRadius: new BorderRadius.circular(2.0)
                     ),
                     padding: const EdgeInsets.all(4.0),
-                    child: new RichText(
-                      text: new TextSpan(
-                        style: const TextStyle(color: Colors.white),
+                    child: const RichText(
+                      text: TextSpan(
+                        style: TextStyle(color: Colors.white),
                         children: <TextSpan>[
-                          const TextSpan(
+                          TextSpan(
                             text: 'Photo by '
                           ),
-                          const TextSpan(
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            text: 'Magic Mike'
+                          TextSpan(
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            text: 'Chris Godley'
                           )
                         ]
                       )
@@ -462,9 +462,9 @@ class ItemImageBox extends StatelessWidget {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  new Text('Where can you find that amazing sunset?', style: Theme.of(context).textTheme.body2),
-                  new Text('The sun sets over stinson beach', style: Theme.of(context).textTheme.body1),
-                  new Text('flutter.io/amazingsunsets', style: Theme.of(context).textTheme.caption)
+                  new Text('Artisans of Southern India', style: Theme.of(context).textTheme.body2),
+                  new Text('Silk Spinners', style: Theme.of(context).textTheme.body1),
+                  new Text('Sivaganga, Tamil Nadu', style: Theme.of(context).textTheme.caption)
                 ]
               )
             )
@@ -560,12 +560,12 @@ class BottomBar extends StatelessWidget {
       ),
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          const BottomBarButton(Icons.new_releases, 'News'),
-          const BottomBarButton(Icons.people, 'Requests'),
-          const BottomBarButton(Icons.chat, 'Messenger'),
-          const BottomBarButton(Icons.bookmark, 'Bookmark'),
-          const BottomBarButton(Icons.alarm, 'Alarm'),
+        children: const <Widget>[
+          BottomBarButton(Icons.new_releases, 'News'),
+          BottomBarButton(Icons.people, 'Requests'),
+          BottomBarButton(Icons.chat, 'Messenger'),
+          BottomBarButton(Icons.bookmark, 'Bookmark'),
+          BottomBarButton(Icons.alarm, 'Alarm'),
         ],
       ),
     );
@@ -610,8 +610,12 @@ class GalleryDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return new Drawer(
+      // Note: for real apps, see the Gallery material Drawer demo. More
+      // typically, a drawer would have a fixed header with a scrolling body
+      // below it.
       child: new ListView(
         key: const PageStorageKey<String>('gallery-drawer'),
+        padding: EdgeInsets.zero,
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(
@@ -664,6 +668,10 @@ class FancyDrawerHeader extends StatelessWidget {
     return new Container(
       color: Colors.purple,
       height: 200.0,
+      child: const SafeArea(
+        bottom: false,
+        child: Placeholder(),
+      ),
     );
   }
 }

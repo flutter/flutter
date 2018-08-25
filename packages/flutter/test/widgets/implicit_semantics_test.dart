@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -22,9 +20,9 @@ void main() {
           container: true,
           explicitChildNodes: false,
           child: new Column(
-            children: <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
+            children: const <Widget>[
+              Text('Michael Goderbauer'),
+              Text('goderbauer@google.com'),
             ],
           ),
         ),
@@ -56,9 +54,9 @@ void main() {
           container: true,
           explicitChildNodes: true,
           child: new Column(
-            children: <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
+            children: const <Widget>[
+              Text('Michael Goderbauer'),
+              Text('goderbauer@google.com'),
             ],
           ),
         ),
@@ -103,9 +101,9 @@ void main() {
           child: new Semantics(
             label: 'Signed in as',
             child: new Column(
-              children: <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
+              children: const <Widget>[
+                Text('Michael Goderbauer'),
+                Text('goderbauer@google.com'),
               ],
             ),
           ),
@@ -146,9 +144,9 @@ void main() {
           child: new Semantics(
             label: 'Signed in as',
             child: new Column(
-              children: <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
+              children: const <Widget>[
+                Text('Michael Goderbauer'),
+                Text('goderbauer@google.com'),
               ],
             ),
           ),
@@ -233,17 +231,17 @@ void main() {
               children: <TestSemantics>[
                 new TestSemantics(
                   id: 6,
-                  flags: SemanticsFlags.isSelected.index,
+                  flags: SemanticsFlag.isSelected.index,
                   label: 'node 1',
                 ),
                 new TestSemantics(
                   id: 7,
-                  flags: SemanticsFlags.isSelected.index,
+                  flags: SemanticsFlag.isSelected.index,
                   label: 'node 2',
                 ),
                 new TestSemantics(
                   id: 8,
-                  flags: SemanticsFlags.isSelected.index,
+                  flags: SemanticsFlag.isSelected.index,
                   label: 'node 3',
                 ),
               ],

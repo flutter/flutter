@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'navigator.dart';
@@ -30,7 +31,9 @@ class ModalBarrier extends StatelessWidget {
   const ModalBarrier({
     Key key,
     this.color,
-    this.dismissible: true
+    this.dismissible = true,
+    this.semanticsLabel,
+    this.barrierSemanticsDismissible = true,
   }) : super(key: key);
 
   /// If non-null, fill the barrier with this color.
@@ -49,25 +52,48 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// Whether the modal barrier semantics are included in the semantics tree.
+  ///
+  /// See also:
+  ///  * [ModalRoute.semanticsDismissible], which controls this property for
+  ///    the [ModalBarrier] built by [ModalRoute] pages.
+  final bool barrierSemanticsDismissible;
+
+  /// Semantics label used for the barrier if it is [dismissable].
+  ///
+  /// The semantics label is read out by accessibility tools (e.g. TalkBack
+  /// on Android and VoiceOver on iOS) when the barrier is focused.
+  ///
+  /// See also:
+  ///
+  ///  * [ModalRoute.barrierLabel], which controls this property for the
+  ///    [ModalBarrier] built by [ModalRoute] pages.
+  final String semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
+    assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
+    final bool semanticsDismissible = dismissible && defaultTargetPlatform != TargetPlatform.android;
+    final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
     return new BlockSemantics(
       child: new ExcludeSemantics(
-        // On Android, the back button is used to dismiss a modal.
-        excluding: !dismissible || defaultTargetPlatform == TargetPlatform.android,
-        child: new Semantics(
-          container: true,
-          child: new GestureDetector(
-            onTapDown: (TapDownDetails details) {
-              if (dismissible)
-                Navigator.pop(context);
-            },
-            behavior: HitTestBehavior.opaque,
+        // On Android, the back button is used to dismiss a modal. On iOS, some
+        // modal barriers are not dismissible in accessibility mode.
+        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
+        child: new GestureDetector(
+          onTapDown: (TapDownDetails details) {
+            if (dismissible)
+              Navigator.pop(context);
+          },
+          behavior: HitTestBehavior.opaque,
+          child: new Semantics(
+            label: semanticsDismissible ? semanticsLabel : null,
+            textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
             child: new ConstrainedBox(
               constraints: const BoxConstraints.expand(),
               child: color == null ? null : new DecoratedBox(
                 decoration: new BoxDecoration(
-                  color: color
+                  color: color,
                 )
               )
             )
@@ -99,7 +125,9 @@ class AnimatedModalBarrier extends AnimatedWidget {
   const AnimatedModalBarrier({
     Key key,
     Animation<Color> color,
-    this.dismissible: true
+    this.dismissible = true,
+    this.semanticsLabel,
+    this.barrierSemanticsDismissible,
   }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -118,11 +146,30 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// Semantics label used for the barrier if it is [dismissable].
+  ///
+  /// The semantics label is read out by accessibility tools (e.g. TalkBack
+  /// on Android and VoiceOver on iOS) when the barrier is focused.
+  /// See also:
+  ///
+  ///  * [ModalRoute.barrierLabel], which controls this property for the
+  ///    [ModalBarrier] built by [ModalRoute] pages.
+  final String semanticsLabel;
+
+  /// Whether the modal barrier semantics are included in the semantics tree.
+  ///
+  /// See also:
+  ///  * [ModalRoute.semanticsDismissible], which controls this property for
+  ///    the [ModalBarrier] built by [ModalRoute] pages.
+  final bool barrierSemanticsDismissible;
+
   @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
       color: color?.value,
       dismissible: dismissible,
+      semanticsLabel: semanticsLabel,
+      barrierSemanticsDismissible: barrierSemanticsDismissible,
     );
   }
 }

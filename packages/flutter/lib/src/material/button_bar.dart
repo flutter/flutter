@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
+import 'button_theme.dart';
 import 'dialog.dart';
 import 'flat_button.dart';
 import 'raised_button.dart';
@@ -29,9 +29,9 @@ class ButtonBar extends StatelessWidget {
   /// The alignment argument defaults to [MainAxisAlignment.end].
   const ButtonBar({
     Key key,
-    this.alignment: MainAxisAlignment.end,
-    this.mainAxisSize: MainAxisSize.max,
-    this.children: const <Widget>[],
+    this.alignment = MainAxisAlignment.end,
+    this.mainAxisSize = MainAxisSize.max,
+    this.children = const <Widget>[],
   }) : super(key: key);
 
   /// How the children should be placed along the horizontal axis.

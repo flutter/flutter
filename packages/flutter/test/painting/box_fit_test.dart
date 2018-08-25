@@ -4,7 +4,7 @@
 
 import 'package:flutter/painting.dart';
 
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('applyBoxFit', () {
@@ -38,7 +38,7 @@ void main() {
 
 void _testZeroAndNegativeSizes(BoxFit fit) {
     FittedSizes result;
-    
+
     result = applyBoxFit(fit, const Size(-400.0, 2000.0), const Size(100.0, 1000.0));
     expect(result.source, equals(Size.zero));
     expect(result.destination, equals(Size.zero));

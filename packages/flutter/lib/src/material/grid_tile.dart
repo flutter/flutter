@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// A tile in a material design grid list.
@@ -40,6 +39,8 @@ class GridTile extends StatelessWidget {
   final Widget footer;
 
   /// The widget that fills the tile.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

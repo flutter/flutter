@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,8 +12,8 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kFadeDuration = const Duration(milliseconds: 200);
-const Duration _kShowDuration = const Duration(milliseconds: 1500);
+const Duration _kFadeDuration = Duration(milliseconds: 200);
+const Duration _kShowDuration = Duration(milliseconds: 1500);
 
 /// A material design tooltip.
 ///
@@ -44,16 +43,18 @@ class Tooltip extends StatefulWidget {
   const Tooltip({
     Key key,
     @required this.message,
-    this.height: 32.0,
-    this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    this.verticalOffset: 24.0,
-    this.preferBelow: true,
+    this.height = 32.0,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0),
+    this.verticalOffset = 24.0,
+    this.preferBelow = true,
+    this.excludeFromSemantics = false,
     this.child,
   }) : assert(message != null),
        assert(height != null),
        assert(padding != null),
        assert(verticalOffset != null),
        assert(preferBelow != null),
+       assert(excludeFromSemantics != null),
        super(key: key);
 
   /// The text to display in the tooltip.
@@ -77,18 +78,24 @@ class Tooltip extends StatefulWidget {
   /// direction.
   final bool preferBelow;
 
+  /// Whether the tooltip's [message] should be excluded from the semantics
+  /// tree.
+  final bool excludeFromSemantics;
+
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
   _TooltipState createState() => new _TooltipState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('message', message, showName: false));
-    description.add(new DoubleProperty('vertical offset', verticalOffset));
-    description.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('message', message, showName: false));
+    properties.add(new DoubleProperty('vertical offset', verticalOffset));
+    properties.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
   }
 }
 
@@ -139,6 +146,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    SemanticsService.tooltip(widget.message);
     _controller.forward();
     return true;
   }
@@ -189,7 +197,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
-        label: widget.message,
+        label: widget.excludeFromSemantics ? null : widget.message,
         child: widget.child,
       ),
     );

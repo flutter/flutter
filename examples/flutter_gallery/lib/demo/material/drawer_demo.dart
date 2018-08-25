@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-const String _kAsset0 = 'shrine/vendors/zach.jpg';
-const String _kAsset1 = 'shrine/vendors/16c477b.jpg';
-const String _kAsset2 = 'shrine/vendors/sandra-adams.jpg';
+const String _kAsset0 = 'people/square/trevor.png';
+const String _kAsset1 = 'people/square/stella.png';
+const String _kAsset2 = 'people/square/sandra.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class DrawerDemo extends StatefulWidget {
@@ -19,7 +19,7 @@ class DrawerDemo extends StatefulWidget {
 class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  static const List<String> _drawerContents = const <String>[
+  static const List<String> _drawerContents = <String>[
     'A', 'B', 'C', 'D', 'E',
   ];
 
@@ -67,9 +67,9 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   }
 
   void _showNotImplementedMessage() {
-    Navigator.of(context).pop(); // Dismiss the drawer.
+    Navigator.pop(context); // Dismiss the drawer.
     _scaffoldKey.currentState.showSnackBar(const SnackBar(
-      content: const Text("The drawer's items don't do anything")
+      content: Text("The drawer's items don't do anything")
     ));
   }
 
@@ -89,31 +89,48 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
         title: const Text('Navigation drawer'),
       ),
       drawer: new Drawer(
-        child: new ListView(
+        child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-              accountName: const Text('Zach Widget'),
-              accountEmail: const Text('zach.widget@example.com'),
+              accountName: const Text('Trevor Widget'),
+              accountEmail: const Text('trevor.widget@example.com'),
               currentAccountPicture: const CircleAvatar(
-                backgroundImage: const AssetImage(
+                backgroundImage: AssetImage(
                   _kAsset0,
                   package: _kGalleryAssetsPackage,
                 ),
               ),
-              otherAccountsPictures: const <Widget>[
-                const CircleAvatar(
-                  backgroundImage: const AssetImage(
-                    _kAsset1,
-                    package: _kGalleryAssetsPackage,
+              otherAccountsPictures: <Widget>[
+                new GestureDetector(
+                  onTap: () {
+                    _onOtherAccountsTap(context);
+                  },
+                  child: new Semantics(
+                    label: 'Switch to Account B',
+                    child: const CircleAvatar(
+                      backgroundImage: AssetImage(
+                        _kAsset1,
+                        package: _kGalleryAssetsPackage,
+                      ),
+                    ),
                   ),
                 ),
-                const CircleAvatar(
-                  backgroundImage: const AssetImage(
-                    _kAsset2,
-                    package: _kGalleryAssetsPackage,
+                new GestureDetector(
+                  onTap: () {
+                    _onOtherAccountsTap(context);
+                  },
+                  child: new Semantics(
+                    label: 'Switch to Account C',
+                    child: const CircleAvatar(
+                      backgroundImage: AssetImage(
+                        _kAsset2,
+                        package: _kGalleryAssetsPackage,
+                      ),
+                    ),
                   ),
                 ),
               ],
+              margin: EdgeInsets.zero,
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
                 if (_showDrawerContents)
@@ -122,48 +139,58 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   _controller.forward();
               },
             ),
-            new ClipRect(
-              child: new Stack(
-                children: <Widget>[
-                  // The initial contents of the drawer.
-                  new FadeTransition(
-                    opacity: _drawerContentsOpacity,
-                    child: new Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: _drawerContents.map((String id) {
-                        return new ListTile(
-                          leading: new CircleAvatar(child: new Text(id)),
-                          title: new Text('Drawer item $id'),
-                          onTap: _showNotImplementedMessage,
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  // The drawer's "details" view.
-                  new SlideTransition(
-                    position: _drawerDetailsPosition,
-                    child: new FadeTransition(
-                      opacity: new ReverseAnimation(_drawerContentsOpacity),
-                      child: new Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          new ListTile(
-                            leading: const Icon(Icons.add),
-                            title: const Text('Add account'),
-                            onTap: _showNotImplementedMessage,
+            new MediaQuery.removePadding(
+              context: context,
+              // DrawerHeader consumes top MediaQuery padding.
+              removeTop: true,
+              child: new Expanded(
+                child: new ListView(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  children: <Widget>[
+                    new Stack(
+                      children: <Widget>[
+                        // The initial contents of the drawer.
+                        new FadeTransition(
+                          opacity: _drawerContentsOpacity,
+                          child: new Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: _drawerContents.map((String id) {
+                              return new ListTile(
+                                leading: new CircleAvatar(child: new Text(id)),
+                                title: new Text('Drawer item $id'),
+                                onTap: _showNotImplementedMessage,
+                              );
+                            }).toList(),
                           ),
-                          new ListTile(
-                            leading: const Icon(Icons.settings),
-                            title: const Text('Manage accounts'),
-                            onTap: _showNotImplementedMessage,
+                        ),
+                        // The drawer's "details" view.
+                        new SlideTransition(
+                          position: _drawerDetailsPosition,
+                          child: new FadeTransition(
+                            opacity: new ReverseAnimation(_drawerContentsOpacity),
+                            child: new Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                new ListTile(
+                                  leading: const Icon(Icons.add),
+                                  title: const Text('Add account'),
+                                  onTap: _showNotImplementedMessage,
+                                ),
+                                new ListTile(
+                                  leading: const Icon(Icons.settings),
+                                  title: const Text('Manage accounts'),
+                                  onTap: _showNotImplementedMessage,
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -174,32 +201,56 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           onTap: () {
             _scaffoldKey.currentState.openDrawer();
           },
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new Container(
-                width: 100.0,
-                height: 100.0,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: const DecorationImage(
-                    image: const AssetImage(
-                      _kAsset0,
-                      package: _kGalleryAssetsPackage,
+          child: new Semantics(
+            button: true,
+            label: 'Open drawer',
+            excludeSemantics: true,
+            child: new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  height: 100.0,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: AssetImage(
+                        _kAsset0,
+                        package: _kGalleryAssetsPackage,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              new Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: new Text('Tap here to open the drawer',
-                  style: Theme.of(context).textTheme.subhead,
+                new Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: new Text('Tap here to open the drawer',
+                    style: Theme.of(context).textTheme.subhead,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  void _onOtherAccountsTap(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: const Text('Account switching not implemented.'),
+          actions: <Widget>[
+            new FlatButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

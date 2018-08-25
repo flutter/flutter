@@ -19,13 +19,13 @@ void main() {
           ),
           drawer: new Drawer(
             child: new ListView(
-              children: <Widget>[
-                new AboutListTile(
+              children: const <Widget>[
+                AboutListTile(
                   applicationVersion: '0.1.2',
-                  applicationIcon: const FlutterLogo(),
+                  applicationIcon: FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
-                    const Text('About box'),
+                    Text('About box'),
                   ]
                 ),
               ],
@@ -55,7 +55,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        new LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
+        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
       ]);
     });
 
@@ -69,43 +69,43 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         title: 'flutter_tester',
-        home: const Material(child: const AboutListTile()),
+        home: const Material(child: AboutListTile()),
       ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-
-    Future<Null> licenseFuture;
     LicenseRegistry.addLicense(() {
-      log.add('license1');
-      licenseFuture = tester.pumpWidget(new Container());
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[]);
+      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
+      ]);
     });
 
     LicenseRegistry.addLicense(() {
-      log.add('license2');
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        new LicenseEntryWithLineBreaks(<String>[ 'Another package '], 'Another license')
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
       ]);
     });
 
     await tester.pumpWidget(
       new MaterialApp(
         home: const Center(
-          child: const LicensePage()
+          child: LicensePage(),
         ),
       ),
     );
 
-    expect(licenseFuture, isNotNull);
-    await licenseFuture;
+    expect(find.text('AAA'), findsNothing);
+    expect(find.text('BBB'), findsNothing);
+    expect(find.text('Another package'), findsNothing);
+    expect(find.text('Another license'), findsNothing);
 
-    // We should not hit an exception here.
-    await tester.idle();
+    await tester.pumpAndSettle();
 
-    expect(log, equals(<String>['license1', 'license2']));
+    expect(find.text('AAA'), findsOneWidget);
+    expect(find.text('BBB'), findsOneWidget);
+    expect(find.text('Another package'), findsOneWidget);
+    expect(find.text('Another license'), findsOneWidget);
   });
 }

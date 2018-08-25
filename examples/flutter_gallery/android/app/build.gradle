@@ -11,23 +11,33 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
+def flutterVersion = file("$flutterRoot/version").text
+def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
+// Let the integer version code of xx.yy.zz-pre.nnn be xxyyzznnn.
+int flutterVersionCode = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
+flutterVersionCode += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
+flutterVersionCode += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
+if (flutterVersionComponents.length > 3) {
+    flutterVersionCode += Math.min(flutterVersionComponents[3].toInteger(), 999)
+}
+
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    compileSdkVersion 27
 
     lintOptions {
         disable 'InvalidPackage'
     }
 
     defaultConfig {
-        applicationId "io.flutter.examples.gallery"
+        applicationId "io.flutter.demo.gallery"
         minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 1
-        versionName "0.0.1"
+        targetSdkVersion 27
+        // The Gallery app's version is defined by the Flutter framework's version.
+        versionCode flutterVersionCode
+        versionName "$flutterVersion"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -53,9 +63,8 @@ flutter {
 }
 
 dependencies {
-    androidTestCompile 'com.android.support:support-annotations:25.4.0'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }

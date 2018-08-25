@@ -77,7 +77,7 @@ class DualHeaderWithHint extends StatelessWidget {
 
 class CollapsibleBody extends StatelessWidget {
   const CollapsibleBody({
-    this.margin: EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
     this.child,
     this.onSave,
     this.onCancel
@@ -118,7 +118,7 @@ class CollapsibleBody extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 8.0),
                 child: new FlatButton(
                   onPressed: onCancel,
-                  child: const Text('CANCEL', style: const TextStyle(
+                  child: const Text('CANCEL', style: TextStyle(
                     color: Colors.black54,
                     fontSize: 15.0,
                     fontWeight: FontWeight.w500
@@ -168,16 +168,18 @@ class DemoItem<T> {
       );
     };
   }
+
+  Widget build() => builder(this);
 }
 
-class ExpasionPanelsDemo extends StatefulWidget {
+class ExpansionPanelsDemo extends StatefulWidget {
   static const String routeName = '/material/expansion_panels';
 
   @override
   _ExpansionPanelsDemoState createState() => new _ExpansionPanelsDemoState();
 }
 
-class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
+class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   List<DemoItem<dynamic>> _demoItems;
 
   @override
@@ -252,7 +254,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                               new Radio<_Location>(
                                 value: _Location.Bahamas,
                                 groupValue: field.value,
-                                onChanged: field.onChanged,
+                                onChanged: field.didChange,
                               ),
                               const Text('Bahamas')
                             ]
@@ -263,7 +265,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                               new Radio<_Location>(
                                 value: _Location.Barbados,
                                 groupValue: field.value,
-                                onChanged: field.onChanged,
+                                onChanged: field.didChange,
                               ),
                               const Text('Barbados')
                             ]
@@ -274,7 +276,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                               new Radio<_Location>(
                                 value: _Location.Bermuda,
                                 groupValue: field.value,
-                                onChanged: field.onChanged,
+                                onChanged: field.didChange,
                               ),
                               const Text('Bermuda')
                             ]
@@ -318,7 +320,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                         activeColor: Colors.orange[100 + (field.value * 5.0).round()],
                         label: '${field.value.round()}',
                         value: field.value,
-                        onChanged: field.onChanged,
+                        onChanged: field.didChange,
                       );
                     },
                   ),
@@ -336,24 +338,28 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     return new Scaffold(
       appBar: new AppBar(title: const Text('Expansion panels')),
       body: new SingleChildScrollView(
-        child: new Container(
-          margin: const EdgeInsets.all(24.0),
-          child: new ExpansionPanelList(
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                _demoItems[index].isExpanded = !isExpanded;
-              });
-            },
-            children: _demoItems.map((DemoItem<dynamic> item) {
-              return new ExpansionPanel(
-                isExpanded: item.isExpanded,
-                headerBuilder: item.headerBuilder,
-                body: item.builder(item)
-              );
-            }).toList()
-          )
-        )
-      )
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Container(
+            margin: const EdgeInsets.all(24.0),
+            child: new ExpansionPanelList(
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  _demoItems[index].isExpanded = !isExpanded;
+                });
+              },
+              children: _demoItems.map((DemoItem<dynamic> item) {
+                return new ExpansionPanel(
+                  isExpanded: item.isExpanded,
+                  headerBuilder: item.headerBuilder,
+                  body: item.build()
+                );
+              }).toList()
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

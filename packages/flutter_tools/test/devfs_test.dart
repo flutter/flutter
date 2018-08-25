@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -27,7 +26,7 @@ void main() {
   Directory tempDir;
   String basePath;
   DevFS devFS;
-  final AssetBundle assetBundle = new AssetBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance.createBundle();
 
   setUpAll(() {
     fs = new MemoryFileSystem();
@@ -49,17 +48,17 @@ void main() {
     test('string', () {
       final DevFSStringContent content = new DevFSStringContent('some string');
       expect(content.string, 'some string');
-      expect(content.bytes, orderedEquals(UTF8.encode('some string')));
+      expect(content.bytes, orderedEquals(utf8.encode('some string')));
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
       content.string = 'another string';
       expect(content.string, 'another string');
-      expect(content.bytes, orderedEquals(UTF8.encode('another string')));
+      expect(content.bytes, orderedEquals(utf8.encode('another string')));
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
-      content.bytes = UTF8.encode('foo bar');
+      content.bytes = utf8.encode('foo bar');
       expect(content.string, 'foo bar');
-      expect(content.bytes, orderedEquals(UTF8.encode('foo bar')));
+      expect(content.bytes, orderedEquals(utf8.encode('foo bar')));
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
     });
@@ -97,7 +96,7 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final List<String> packageSpecOnDevice = LineSplitter.split(UTF8.decode(
+      final List<String> packageSpecOnDevice = LineSplitter.split(utf8.decode(
           await devFSOperations.devicePathToContent[fs.path.toUri('.packages')].contentsAsBytes()
       )).toList();
       expect(packageSpecOnDevice,
@@ -123,9 +122,9 @@ void main() {
       FileSystem: () => fs,
     });
 
-    testUsingContext('add new file to local file system and preserve unusal file name casing', () async {
-      final String filePathWithUnusalCasing = fs.path.join('FooBar', 'TEST.txt');
-      final File file = fs.file(fs.path.join(basePath, filePathWithUnusalCasing));
+    testUsingContext('add new file to local file system and preserve unusual file name casing', () async {
+      final String filePathWithUnusualCasing = fs.path.join('FooBar', 'TEST.txt');
+      final File file = fs.file(fs.path.join(basePath, filePathWithUnusualCasing));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
       final int bytes = await devFS.update();
@@ -186,7 +185,7 @@ void main() {
     });
 
     testUsingContext('add new package with double slashes in URI', () async {
-      final String packageName = 'doubleslashpkg';
+      const String packageName = 'doubleslashpkg';
       await _createPackage(fs, packageName, 'somefile.txt', doubleSlash: true);
 
       final Set<String> fileFilter = new Set<String>();
@@ -197,8 +196,8 @@ void main() {
         }
         fileFilter.addAll(fs.directory(pkgUri)
             .listSync(recursive: true)
-            .where((FileSystemEntity file) => file is File)
-            .map((FileSystemEntity file) => canonicalizePath(file.path))
+            .whereType<File>()
+            .map<String>((File file) => canonicalizePath(file.path))
             .toList());
       }
       final int bytes = await devFS.update(fileFilter: fileFilter);
@@ -388,16 +387,16 @@ class MockVMService extends BasicMock implements VMService {
 
   Future<Null> setUp() async {
     try {
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0);
+      _server = await HttpServer.bind(InternetAddress.loopbackIPv6, 0);
       _httpAddress = Uri.parse('http://[::1]:${_server.port}');
     } on SocketException {
       // Fall back to IPv4 if the host doesn't support binding to IPv6 localhost
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
     }
     _server.listen((HttpRequest request) {
       final String fsName = request.headers.value('dev_fs_name');
-      final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_uri_b64')));
+      final String devicePath = utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
       request.drain<List<int>>().then<Null>((List<int> value) {
         request.response
@@ -443,9 +442,9 @@ class MockVM implements VM {
 
   @override
   Future<Map<String, dynamic>> invokeRpcRaw(String method, {
-    Map<String, dynamic> params: const <String, dynamic>{},
+    Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
-    bool timeoutFatal: true,
+    bool timeoutFatal = true,
   }) async {
     _service.messages.add('$method $params');
     return <String, dynamic>{'success': true};
@@ -460,24 +459,23 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('devfs${_tempDirs.length}');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.isNotEmpty) {
-    _tempDirs.removeLast().deleteSync(recursive: true);
-  }
+  while (_tempDirs.isNotEmpty)
+    tryToDelete(_tempDirs.removeLast());
 }
 
-Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash: false }) async {
+Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
   final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {
     // Force two separators into the path.
     final String doubleSlash = fs.path.separator + fs.path.separator;
-    pkgFilePath = pkgTempDir.path + doubleSlash  + fs.path.join(pkgName, 'lib', pkgFileName);
+    pkgFilePath = pkgTempDir.path + doubleSlash + fs.path.join(pkgName, 'lib', pkgFileName);
   }
   final File pkgFile = fs.file(pkgFilePath);
   await pkgFile.parent.create(recursive: true);

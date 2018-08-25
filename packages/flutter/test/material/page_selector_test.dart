@@ -5,10 +5,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-const Color kSelectedColor = const Color(0xFF00FF00);
+const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize: 12.0 }) {
+Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
   return new Directionality(
     textDirection: TextDirection.ltr,
     child: new Theme(
@@ -29,10 +29,10 @@ Widget buildFrame(TabController tabController, { Color color, Color selectedColo
                 new Flexible(
                   child: new TabBarView(
                     controller: tabController,
-                    children: <Widget>[
-                      const Center(child: const Text('0')),
-                      const Center(child: const Text('1')),
-                      const Center(child: const Text('2')),
+                    children: const <Widget>[
+                      Center(child: Text('0')),
+                      Center(child: Text('1')),
+                      Center(child: Text('2')),
                     ],
                   ),
                 ),
@@ -180,8 +180,8 @@ void main() {
   });
 
   testWidgets('PageSelector indicatorColors', (WidgetTester tester) async {
-    const Color kRed = const Color(0xFFFF0000);
-    const Color kBlue = const Color(0xFF0000FF);
+    const Color kRed = Color(0xFFFF0000);
+    const Color kBlue = Color(0xFF0000FF);
 
     final TabController tabController = new TabController(
       vsync: const TestVSync(),

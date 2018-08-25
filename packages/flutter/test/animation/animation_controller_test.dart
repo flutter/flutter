@@ -234,14 +234,14 @@ void main() {
     // edges
     controller.forward();
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
     tick(const Duration(milliseconds: 5));
     expect(controller.velocity, inInclusiveRange(0.9, 1.1));
 
     controller.forward(from: 0.5);
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
     tick(const Duration(milliseconds: 5));
     expect(controller.velocity, inInclusiveRange(0.9, 1.1));
@@ -249,13 +249,13 @@ void main() {
     // stopped
     controller.forward(from: 1.0);
     expect(controller.velocity, 0.0);
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     expect(controller.velocity, 0.0);
     tick(const Duration(milliseconds: 500));
     expect(controller.velocity, 0.0);
 
     controller.forward();
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 1000));
     expect(controller.velocity, 0.0);
 
@@ -289,8 +289,8 @@ void main() {
     final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
-    expect((){ controller.repeat(); }, throwsFlutterError);
-    expect((){ controller.repeat(period: null); }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
+    expect(() { controller.repeat(period: null); }, throwsFlutterError);
   });
 
   test('Do not animate if already at target', () {
@@ -383,7 +383,7 @@ void main() {
     expect(controller.value, currentValue);
   });
 
-  test('animateTo can deal with duration == Duration.ZERO', () {
+  test('animateTo can deal with duration == Duration.zero', () {
     final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -391,9 +391,62 @@ void main() {
 
     controller.forward(from: 0.2);
     expect(controller.value, 0.2);
-    controller.animateTo(1.0, duration: Duration.ZERO);
+    controller.animateTo(1.0, duration: Duration.zero);
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
+  });
+
+  test('resetting animation works at all phases', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    statusLog.clear();
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    expect(controller.status, AnimationStatus.forward);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.dismissed ]));
+
+    controller.value = 1.0;
+    statusLog.clear();
+    controller.reverse();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    expect(controller.status, AnimationStatus.reverse);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
+
+    statusLog.clear();
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.status, AnimationStatus.completed);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
   });
 
   test('setting value directly sets correct status', () {
@@ -524,5 +577,85 @@ void main() {
     expect(controller.value, 0.5);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
+  });
+
+  group('AnimationBehavior', () {
+    test('Default values for constructor', () {
+      final AnimationController controller = new AnimationController(vsync: const TestVSync());
+      expect(controller.animationBehavior, AnimationBehavior.normal);
+
+      final AnimationController repeating = new AnimationController.unbounded(vsync: const TestVSync());
+      expect(repeating.animationBehavior, AnimationBehavior.preserve);
+    });
+
+    testWidgets('AnimationBehavior.preserve runs at normal speed when animatingTo', (WidgetTester tester) async {
+      tester.binding.disableAnimations = true;
+      final AnimationController controller = new AnimationController(
+        vsync: const TestVSync(),
+        animationBehavior: AnimationBehavior.preserve,
+      );
+
+      expect(controller.value, 0.0);
+      expect(controller.status, AnimationStatus.dismissed);
+
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 50));
+
+      expect(controller.value, 0.5);
+      expect(controller.status, AnimationStatus.forward);
+
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 150));
+
+      expect(controller.value, 1.0);
+      expect(controller.status, AnimationStatus.completed);
+      tester.binding.disableAnimations = false;
+    });
+
+    testWidgets('AnimationBehavior.normal runs at 20x speed when animatingTo', (WidgetTester tester) async {
+      tester.binding.disableAnimations = true;
+      final AnimationController controller = new AnimationController(
+        vsync: const TestVSync(),
+        animationBehavior: AnimationBehavior.normal,
+      );
+
+      expect(controller.value, 0.0);
+      expect(controller.status, AnimationStatus.dismissed);
+
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(microseconds: 2500));
+
+      expect(controller.value, 0.5);
+      expect(controller.status, AnimationStatus.forward);
+
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 5, microseconds: 1000));
+
+      expect(controller.value, 1.0);
+      expect(controller.status, AnimationStatus.completed);
+
+      tester.binding.disableAnimations = false;
+    });
+
+    testWidgets('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', (WidgetTester tester) async {
+      tester.binding.disableAnimations = true;
+      final AnimationController controller = new AnimationController(
+        vsync: const TestVSync(),
+      );
+      final AnimationController fastController = new AnimationController(
+        vsync: const TestVSync(),
+      );
+
+      controller.fling(velocity: 1.0, animationBehavior: AnimationBehavior.preserve);
+      fastController.fling(velocity: 1.0, animationBehavior: AnimationBehavior.normal);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 50));
+
+      // We don't assert a specific faction that normal animation.
+      expect(controller.value < fastController.value, true);
+      tester.binding.disableAnimations = false;
+    });
   });
 }

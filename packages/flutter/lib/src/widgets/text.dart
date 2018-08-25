@@ -26,8 +26,8 @@ class DefaultTextStyle extends InheritedWidget {
     Key key,
     @required this.style,
     this.textAlign,
-    this.softWrap: true,
-    this.overflow: TextOverflow.clip,
+    this.softWrap = true,
+    this.overflow = TextOverflow.clip,
     this.maxLines,
     @required Widget child,
   }) : assert(style != null),
@@ -132,18 +132,22 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextStyle old) {
-    return style != old.style ||
-        textAlign != old.textAlign ||
-        softWrap != old.softWrap ||
-        overflow != old.overflow ||
-        maxLines != old.maxLines;
+  bool updateShouldNotify(DefaultTextStyle oldWidget) {
+    return style != oldWidget.style ||
+        textAlign != oldWidget.textAlign ||
+        softWrap != oldWidget.softWrap ||
+        overflow != oldWidget.overflow ||
+        maxLines != oldWidget.maxLines;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    style?.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
 
@@ -155,13 +159,10 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// The [style] argument is optional. When omitted, the text will use the style
 /// from the closest enclosing [DefaultTextStyle]. If the given style's
-/// [TextStyle.inherit] property is true, the given style will be merged with
-/// the closest enclosing [DefaultTextStyle]. This merging behavior is useful,
-/// for example, to make the text bold while using the default font family and
-/// size.
-///
-/// To display text that uses multiple styles (e.g., a paragraph with some bold
-/// words), use [RichText].
+/// [TextStyle.inherit] property is true (the default), the given style will
+/// be merged with the closest enclosing [DefaultTextStyle]. This merging
+/// behavior is useful, for example, to make the text bold while using the
+/// default font family and size.
 ///
 /// ## Sample code
 ///
@@ -171,6 +172,25 @@ class DefaultTextStyle extends InheritedWidget {
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
 ///   style: new TextStyle(fontWeight: FontWeight.bold),
+/// )
+/// ```
+///
+/// Using the [Text.rich] constructor, the [Text] widget can
+/// display a paragraph with differently styled [TextSpan]s. The sample
+/// that follows displays "Hello beautiful world" with different styles
+/// for each word.
+///
+/// ## Sample code
+///
+/// ```dart
+/// const Text.rich(
+///   const TextSpan(
+///     text: 'Hello', // default text style
+///     children: const <TextSpan>[
+///       const TextSpan(text: ' beautiful ', style: const TextStyle(fontStyle: FontStyle.italic)),
+///       const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
+///     ],
+///   ),
 /// )
 /// ```
 ///
@@ -201,15 +221,41 @@ class Text extends StatelessWidget {
     this.style,
     this.textAlign,
     this.textDirection,
+    this.locale,
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
     this.maxLines,
+    this.semanticsLabel,
   }) : assert(data != null),
+       textSpan = null,
        super(key: key);
 
+  /// Creates a text widget with a [TextSpan].
+  const Text.rich(this.textSpan, {
+    Key key,
+    this.style,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.softWrap,
+    this.overflow,
+    this.textScaleFactor,
+    this.maxLines,
+    this.semanticsLabel,
+  }): assert(textSpan != null),
+      data = null,
+      super(key: key);
+
   /// The text to display.
+  ///
+  /// This will be null if a [textSpan] is provided instead.
   final String data;
+
+  /// The text to display as a [TextSpan].
+  ///
+  /// This will be null if [data] is provided instead.
+  final TextSpan textSpan;
 
   /// If non-null, the style to use for this text.
   ///
@@ -230,11 +276,20 @@ class Text extends StatelessWidget {
   /// example, if the [data] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
   final TextDirection textDirection;
+
+  /// Used to select a font when the same Unicode character can
+  /// be rendered differently, depending on the locale.
+  ///
+  /// It's rarely necessary to set this property. By default its value
+  /// is inherited from the enclosing app with `Localizations.localeOf(context)`.
+  ///
+  /// See [RenderParagraph.locale] for more information.
+  final Locale locale;
 
   /// Whether the text should break at soft line breaks.
   ///
@@ -249,7 +304,7 @@ class Text extends StatelessWidget {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// The value given to the constructor as textScaleFactor.  If null, will
+  /// The value given to the constructor as textScaleFactor. If null, will
   /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double textScaleFactor;
@@ -267,36 +322,69 @@ class Text extends StatelessWidget {
   /// widget directly to entirely override the [DefaultTextStyle].
   final int maxLines;
 
+  /// An alternative semantics label for this text.
+  ///
+  /// If present, the semantics of this widget will contain this value instead
+  /// of the actual text.
+  ///
+  /// This is useful for replacing abbreviations or shorthands will the full
+  /// text value:
+  ///
+  /// ```dart
+  /// new Text(r'$$', semanticsLabel: 'Double dollars')
+  ///
+  /// ```
+  final String semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle effectiveTextStyle = style;
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
-    return new RichText(
+    Widget result = new RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
+      locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
-      textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+      textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       text: new TextSpan(
         style: effectiveTextStyle,
         text: data,
-      )
+        children: textSpan != null ? <TextSpan>[textSpan] : null,
+      ),
     );
+    if (semanticsLabel != null) {
+      result = new Semantics(
+        textDirection: textDirection,
+        label: semanticsLabel,
+        child: new ExcludeSemantics(
+          child: result,
+        )
+      );
+    }
+    return result;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('data', data, showName: false));
-    style?.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('data', data, showName: false));
+    if (textSpan != null) {
+      properties.add(textSpan.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
+    }
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+    if (semanticsLabel != null) {
+      properties.add(new StringProperty('semanticsLabel', semanticsLabel));
+    }
   }
 }

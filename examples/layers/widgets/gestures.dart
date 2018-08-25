@@ -27,7 +27,7 @@ class _GesturePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center = (size.center(Offset.zero) * zoom + offset);
+    final Offset center = size.center(Offset.zero) * zoom + offset;
     final double radius = size.width / 2.0 * zoom;
     final Gradient gradient = new RadialGradient(
       colors: forward ? <Color>[swatch.shade50, swatch.shade900]
@@ -69,7 +69,7 @@ class GestureDemoState extends State<GestureDemo> {
   double _previousZoom;
   double _zoom = 1.0;
 
-  static const List<MaterialColor> kSwatches = const <MaterialColor>[
+  static const List<MaterialColor> kSwatches = <MaterialColor>[
     Colors.red,
     Colors.pink,
     Colors.purple,
@@ -109,7 +109,7 @@ class GestureDemoState extends State<GestureDemo> {
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _zoom = (_previousZoom * details.scale);
+      _zoom = _previousZoom * details.scale;
 
       // Ensure that item under the focal point stays in the same place despite zooming
       final Offset normalizedOffset = (_startingFocalPoint - _previousOffset) / _previousZoom;

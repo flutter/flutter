@@ -88,17 +88,14 @@ public class MainActivity extends FlutterActivity {
   }
 
   private int getBatteryLevel() {
-    int batteryLevel = -1;
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
-      batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+      return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
     } else {
       Intent intent = new ContextWrapper(getApplicationContext()).
           registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-      batteryLevel = (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
+      return (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
           intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
     }
-
-    return batteryLevel;
   }
 }

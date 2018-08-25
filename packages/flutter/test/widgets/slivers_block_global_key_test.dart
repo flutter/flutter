@@ -22,12 +22,15 @@ class _GenerationTextState extends State<GenerationText> {
   Widget build(BuildContext context) => new Text('${widget.value}:$generation ', textDirection: TextDirection.ltr);
 }
 
+// Creates a SliverList with `keys.length` children and each child having a key from `keys` and a text of `key:generation`.
+// The generation is increased with every call to this method.
 Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   globalGeneration += 1;
   return tester.pumpWidget(
     new Directionality(
       textDirection: TextDirection.ltr,
       child: new Viewport(
+        cacheExtent: 0.0,
         offset: new ViewportOffset.fixed(offset),
         slivers: <Widget>[
           new SliverList(
@@ -41,6 +44,8 @@ Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   );
 }
 
+// `answerKey`: Expected offsets of visible SliverList children in global coordinate system.
+// `text`: A space-separated list of expected `key:generation` pairs for the visible SliverList children.
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
     (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
@@ -48,8 +53,8 @@ void verify(WidgetTester tester, List<Offset> answerKey, String text) {
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-    .map<String>((Text widget) => widget.data)
-    .reduce((String value, String element) => value + element);
+        .map<String>((Text widget) => widget.data)
+        .reduce((String value, String element) => value + element);
   expect(foundText, equals(text));
 }
 

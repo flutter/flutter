@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'test_widgets.dart';
 
 class TestInherited extends InheritedWidget {
-  const TestInherited({ Key key, Widget child, this.shouldNotify: true })
+  const TestInherited({ Key key, Widget child, this.shouldNotify = true })
     : super(key: key, child: child);
 
   final bool shouldNotify;

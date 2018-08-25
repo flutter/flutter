@@ -71,9 +71,9 @@ class IconButton extends StatelessWidget {
   /// or an [ImageIcon].
   const IconButton({
     Key key,
-    this.iconSize: 24.0,
-    this.padding: const EdgeInsets.all(8.0),
-    this.alignment: Alignment.center,
+    this.iconSize = 24.0,
+    this.padding = const EdgeInsets.all(8.0),
+    this.alignment = Alignment.center,
     @required this.icon,
     this.color,
     this.highlightColor,
@@ -108,12 +108,19 @@ class IconButton extends StatelessWidget {
   /// Defines how the icon is positioned within the IconButton.
   ///
   /// This property must not be null. It defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The icon to display inside the button.
   ///
   /// The [Icon.size] and [Icon.color] of the icon is configured automatically
-  /// based on the [iconSize] nad [color] properties of _this_ widget using an
+  /// based on the [iconSize] and [color] properties of _this_ widget using an
   /// [IconTheme] and therefore should not be explicitly given in the icon
   /// widget.
   ///
@@ -149,7 +156,7 @@ class IconButton extends StatelessWidget {
   final Color splashColor;
 
   /// The secondary color of the button when the button is in the down (pressed)
-  /// state. The higlight color is represented as a solid color that is overlaid over the
+  /// state. The highlight color is represented as a solid color that is overlaid over the
   /// button color (if any). If the highlight color has transparency, the button color
   /// will show through. The highlight fades in quickly as the button is held down.
   ///
@@ -184,21 +191,25 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
-    Widget result = new ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
-      child: new Padding(
-        padding: padding,
-        child: new SizedBox(
-          height: iconSize,
-          width: iconSize,
-          child: new Align(
-            alignment: alignment,
-            child: IconTheme.merge(
-              data: new IconThemeData(
-                size: iconSize,
-                color: currentColor
+    Widget result = new Semantics(
+      button: true,
+      enabled: onPressed != null,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
+        child: new Padding(
+          padding: padding,
+          child: new SizedBox(
+            height: iconSize,
+            width: iconSize,
+            child: new Align(
+              alignment: alignment,
+              child: IconTheme.merge(
+                data: new IconThemeData(
+                  size: iconSize,
+                  color: currentColor
+                ),
+                child: icon
               ),
-              child: icon
             ),
           ),
         ),
@@ -225,10 +236,10 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
   }
 }

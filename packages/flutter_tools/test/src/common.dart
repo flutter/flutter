@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +15,23 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+
+export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+
+/// A matcher that compares the type of the actual value to the type argument T.
+// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
+Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+
+void tryToDelete(Directory directory) {
+  // This should not be necessary, but it turns out that
+  // on Windows it's common for deletions to fail due to
+  // bogus (we think) "access denied" errors.
+  try {
+    directory.deleteSync(recursive: true);
+  } on FileSystemException catch (error) {
+    print('Failed to delete ${directory.path}: $error');
+  }
+}
 
 /// Gets the path to the root of the Flutter repository.
 ///
@@ -32,8 +50,8 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools[^%]+\.dart)%');
-      final Match match = flutterTools.firstMatch(platform.script.path);
+      final RegExp flutterTools = new RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null)
         throw invalidScript();
       scriptUri = Uri.parse(match.group(1));
@@ -76,7 +94,7 @@ Matcher throwsToolExit({int exitCode, String message}) {
 }
 
 /// Matcher for [ToolExit]s.
-const Matcher isToolExit = const isInstanceOf<ToolExit>();
+final Matcher isToolExit = isInstanceOf<ToolExit>();
 
 /// Matcher for functions that throw [ProcessExit].
 Matcher throwsProcessExit([dynamic exitCode]) {
@@ -86,14 +104,23 @@ Matcher throwsProcessExit([dynamic exitCode]) {
 }
 
 /// Matcher for [ProcessExit]s.
-const Matcher isProcessExit = const isInstanceOf<ProcessExit>();
+final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 
-/// Creates a flutter project in the [temp] directory.
+/// Creates a flutter project in the [temp] directory using the
+/// [arguments] list if specified, or `--no-pub` if not.
 /// Returns the path to the flutter project.
-Future<String> createProject(Directory temp) async {
+Future<String> createProject(Directory temp, {List<String> arguments}) async {
+  arguments ??= <String>['--no-pub'];
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create', '--no-pub', projectPath]);
+  await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
   return projectPath;
 }
+
+/// Test case timeout for tests involving remote calls to `pub get` or similar.
+const Timeout allowForRemotePubInvocation = Timeout.factor(10.0);
+
+/// Test case timeout for tests involving creating a Flutter project with
+/// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
+const Timeout allowForCreateFlutterProject = Timeout.factor(3.0);

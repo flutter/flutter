@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
@@ -81,7 +82,7 @@ void main() {
         ' │ parentData: offset=Offset(335.0, 185.0) (can use size)\n'
         ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
         ' │ size: Size(130.0, 230.0)\n'
-        ' │ default column width: IntrinsicColumnWidth\n'
+        ' │ default column width: IntrinsicColumnWidth(flex: null)\n'
         ' │ table size: 5×5\n'
         ' │ column offsets: 0.0, 10.0, 30.0, 130.0, 130.0\n'
         ' │ row offsets: 0.0, 30.0, 30.0, 30.0, 30.0, 230.0\n'
@@ -174,5 +175,33 @@ void main() {
     pumpFrame();
     expect(table.columns, equals(3));
     expect(table.rows, equals(2));
+  });
+
+  test('Table border painting', () {
+    final RenderTable table = new RenderTable(
+      textDirection: TextDirection.rtl,
+      border: new TableBorder.all(),
+    );
+    layout(table);
+    table.setFlatChildren(1, <RenderBox>[ ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path());
+    table.setFlatChildren(1, <RenderBox>[ new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path());
+    table.setFlatChildren(1, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path());
+    table.setFlatChildren(2, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path());
+    table.setFlatChildren(2, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox(),
+                                          new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path()..path());
+    table.setFlatChildren(3, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox(), new RenderPositionedBox(),
+                                          new RenderPositionedBox(), new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path()..path());
   });
 }

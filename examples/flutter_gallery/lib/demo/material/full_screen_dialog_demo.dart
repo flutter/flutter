@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -106,8 +105,12 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   DateTime _toDateTime = new DateTime.now();
   bool _allDayValue = false;
   bool _saveNeeded = false;
+  bool _hasLocation = false;
+  bool _hasName = false;
+  String _eventName;
 
   Future<bool> _onWillPop() async {
+    _saveNeeded = _hasLocation || _hasName || _saveNeeded;
     if (!_saveNeeded)
       return true;
 
@@ -116,26 +119,28 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return await showDialog<bool>(
       context: context,
-      child: new AlertDialog(
-        content: new Text(
-          'Discard new event?',
-          style: dialogTextStyle
-        ),
-        actions: <Widget>[
-          new FlatButton(
-            child: const Text('CANCEL'),
-            onPressed: () {
-              Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
-            }
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          content: new Text(
+            'Discard new event?',
+            style: dialogTextStyle
           ),
-          new FlatButton(
-            child: const Text('DISCARD'),
-            onPressed: () {
-              Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
-            }
-          )
-        ]
-      )
+          actions: <Widget>[
+            new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
+              }
+            ),
+            new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
+              }
+            )
+          ],
+        );
+      },
     ) ?? false;
   }
 
@@ -145,7 +150,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('New event'),
+        title: new Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
           new FlatButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
@@ -162,19 +167,38 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           children: <Widget>[
             new Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: new BoxDecoration(
-                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-              ),
               alignment: Alignment.bottomLeft,
-              child: new Text('Event name', style: theme.textTheme.display2)
+              child: new TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Event name',
+                  filled: true
+                ),
+                style: theme.textTheme.headline,
+                onChanged: (String value) {
+                  setState(() {
+                    _hasName = value.isNotEmpty;
+                    if (_hasName) {
+                      _eventName = value;
+                    }
+                  });
+                }
+              )
             ),
             new Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: new BoxDecoration(
-                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-              ),
               alignment: Alignment.bottomLeft,
-              child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
+              child: new TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                  hintText: 'Where is the event?',
+                  filled: true
+                ),
+                onChanged: (String value) {
+                  setState(() {
+                    _hasLocation = value.isNotEmpty;
+                  });
+                }
+              )
             ),
             new Column(
               crossAxisAlignment: CrossAxisAlignment.start,

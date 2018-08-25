@@ -13,22 +13,36 @@ import '../ios/mac.dart';
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand() {
+  BuildIOSCommand({bool verboseHelp = false}) {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
-    argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app (default mode for iOS simulator builds).');
-    argParser.addFlag('profile',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.');
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a release version of your app (default mode for device builds).');
-    argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
-    argParser.addFlag('codesign', negatable: true, defaultsTo: true,
-        help: 'Codesign the application bundle (only available on device builds).');
+    usesBuildNumberOption();
+    usesBuildNameOption();
+    argParser
+      ..addFlag('debug',
+        negatable: false,
+        help: 'Build a debug version of your app (default mode for iOS simulator builds).',
+      )
+      ..addFlag('profile',
+        negatable: false,
+        help: 'Build a version of your app specialized for performance profiling.',
+      )
+      ..addFlag('release',
+        negatable: false,
+        help: 'Build a release version of your app (default mode for device builds).',
+      )
+      ..addFlag('simulator',
+        help: 'Build for the iOS simulator instead of the device.',
+      )
+      ..addFlag('codesign',
+        defaultsTo: true,
+        help: 'Codesign the application bundle (only available on device builds).',
+      )
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.');
   }
 
   @override
@@ -68,13 +82,13 @@ class BuildIOSCommand extends BuildSubCommand {
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
-      target: targetFile,
+      targetOverride: targetFile,
       buildForDevice: !forSimulator,
-      codesign: shouldCodesign
+      codesign: shouldCodesign,
     );
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, app);
+      await diagnoseXcodeBuildFailure(result);
       throwToolExit('Encountered error while building for $logTarget.');
     }
 

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'animated_size.dart';
@@ -67,8 +66,8 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 /// [firstCurve] and [secondCurve] represent the opacity curves of the two
 /// children. The [firstCurve] is inverted, i.e. it fades out when providing a
 /// growing curve like [Curves.linear]. The [sizeCurve] is the curve used to
-/// animated between the size of the fading out child and the size of the fading
-/// in child.
+/// animate between the size of the fading-out child and the size of the
+/// fading-in child.
 ///
 /// This widget is intended to be used to fade a pair of widgets with the same
 /// width. In the case where the two children have different heights, the
@@ -100,6 +99,8 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 ///
 ///  * [AnimatedSize], the lower-level widget which [AnimatedCrossFade] uses to
 ///    automatically change size.
+///  * [AnimatedSwitcher], which switches out a child for a new one with a
+///    customizable transition.
 class AnimatedCrossFade extends StatefulWidget {
   /// Creates a cross-fade animation widget.
   ///
@@ -112,13 +113,13 @@ class AnimatedCrossFade extends StatefulWidget {
     Key key,
     @required this.firstChild,
     @required this.secondChild,
-    this.firstCurve: Curves.linear,
-    this.secondCurve: Curves.linear,
-    this.sizeCurve: Curves.linear,
-    this.alignment: Alignment.topCenter,
+    this.firstCurve = Curves.linear,
+    this.secondCurve = Curves.linear,
+    this.sizeCurve = Curves.linear,
+    this.alignment = Alignment.topCenter,
     @required this.crossFadeState,
     @required this.duration,
-    this.layoutBuilder: defaultLayoutBuilder,
+    this.layoutBuilder = defaultLayoutBuilder,
   }) : assert(firstChild != null),
        assert(secondChild != null),
        assert(firstCurve != null),
@@ -166,6 +167,13 @@ class AnimatedCrossFade extends StatefulWidget {
   /// How the children should be aligned while the size is animating.
   ///
   /// Defaults to [Alignment.topCenter].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// A builder that positions the [firstChild] and [secondChild] widgets.
@@ -215,10 +223,10 @@ class AnimatedCrossFade extends StatefulWidget {
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
   }
 }
 
@@ -240,13 +248,13 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   Animation<double> _initAnimation(Curve curve, bool inverted) {
     Animation<double> animation = new CurvedAnimation(
       parent: _controller,
-      curve: curve
+      curve: curve,
     );
 
     if (inverted) {
       animation = new Tween<double>(
-          begin: 1.0,
-          end: 0.0
+        begin: 1.0,
+        end: 0.0,
       ).animate(animation);
     }
 
@@ -292,8 +300,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    const Key kFirstChildKey = const ValueKey<CrossFadeState>(CrossFadeState.showFirst);
-    const Key kSecondChildKey = const ValueKey<CrossFadeState>(CrossFadeState.showSecond);
+    const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
+    const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
     final bool transitioningForwards = _controller.status == AnimationStatus.completed || _controller.status == AnimationStatus.forward;
 
     Key topKey;

@@ -4,17 +4,18 @@
 
 import 'dart:async';
 
-import 'package:flutter_driver/src/driver.dart';
-import 'package:flutter_driver/src/error.dart';
-import 'package:flutter_driver/src/health.dart';
-import 'package:flutter_driver/src/timeline.dart';
+import 'package:flutter_driver/src/common/error.dart';
+import 'package:flutter_driver/src/common/health.dart';
+import 'package:flutter_driver/src/driver/driver.dart';
+import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
+import 'common.dart';
+
 /// Magical timeout value that's different from the default.
-const Duration _kTestTimeout = const Duration(milliseconds: 1234);
+const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
 
 void main() {
@@ -37,11 +38,11 @@ void main() {
       mockVM = new MockVM();
       mockIsolate = new MockIsolate();
       mockPeer = new MockPeer();
-      when(mockClient.getVM()).thenReturn(mockVM);
+      when(mockClient.getVM()).thenAnswer((_) => new Future<MockVM>.value(mockVM));
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
-      when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
-      when(mockIsolate.invokeExtension(any, any))
-          .thenReturn(makeMockResponse(<String, dynamic>{'status': 'ok'}));
+      when(mockIsolate.loadRunnable()).thenAnswer((_) => new Future<MockIsolate>.value(mockIsolate));
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
+          (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
         return new Future<VMServiceClientConnection>.value(
           new VMServiceClientConnection(mockClient, mockPeer)
@@ -56,16 +57,16 @@ void main() {
 
     test('connects to isolate paused at start', () async {
       final List<String> connectionLog = <String>[];
-      when(mockPeer.sendRequest('streamListen', any)).thenAnswer((_) {
+      when(mockPeer.sendRequest('streamListen', any)).thenAnswer((Invocation invocation) {
         connectionLog.add('streamListen');
         return null;
       });
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseStartEvent());
-      when(mockIsolate.resume()).thenAnswer((_) {
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         connectionLog.add('resume');
         return new Future<Null>.value();
       });
-      when(mockIsolate.onExtensionAdded).thenAnswer((_) {
+      when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
         connectionLog.add('onExtensionAdded');
         return new Stream<String>.fromIterable(<String>['ext.flutter.driver']);
       });
@@ -78,7 +79,7 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => new Future<Null>.value());
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -91,7 +92,7 @@ void main() {
     // just fine.
     test('connects despite losing the race to resume isolate', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenAnswer((_) {
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         // This needs to be wrapped in a closure to not be considered uncaught
         // by package:test
         return new Future<Null>.error(new rpc.RpcException(101, ''));
@@ -124,21 +125,21 @@ void main() {
     });
 
     test('checks the health of the driver extension', () async {
-      when(mockIsolate.invokeExtension(any, any)).thenReturn(
-          makeMockResponse(<String, dynamic>{'status': 'ok'}));
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
+          (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       final Health result = await driver.checkHealth();
       expect(result.status, HealthStatus.ok);
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenReturn(new Future<Null>.value());
+      when(mockClient.close()).thenAnswer((Invocation invocation) => new Future<Null>.value());
       await driver.close();
     });
 
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsA(const isInstanceOf<DriverError>()));
+            throwsA(isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
@@ -158,7 +159,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the tap command', () async {
@@ -177,7 +178,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.getText(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the getText command', () async {
@@ -200,7 +201,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(const isInstanceOf<DriverError>()));
+        expect(driver.waitFor(null), throwsA(isInstanceOf<DriverError>()));
       });
 
       test('sends the waitFor command', () async {
@@ -230,25 +231,45 @@ void main() {
       });
     });
 
+    group('clearTimeline', () {
+      test('clears timeline', () async {
+        bool clearWasCalled = false;
+        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+            .thenAnswer((Invocation invocation) async {
+          clearWasCalled = true;
+          return null;
+        });
+        await driver.clearTimeline();
+        expect(clearWasCalled, isTrue);
+      });
+    });
+
     group('traceAction', () {
-      test('traces action', () async {
-        bool actionCalled = false;
-        bool startTracingCalled = false;
-        bool stopTracingCalled = false;
+      List<String> log;
+
+      setUp(() async {
+        log = <String>[];
+
+        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+            .thenAnswer((Invocation invocation) async {
+          log.add('clear');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
-          .thenAnswer((_) async {
-            startTracingCalled = true;
-            return null;
-          });
+            .thenAnswer((Invocation invocation) async {
+          log.add('startTracing');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-          .thenAnswer((_) async {
-            stopTracingCalled = true;
-            return null;
-          });
+            .thenAnswer((Invocation invocation) async {
+          log.add('stopTracing');
+          return null;
+        });
 
-        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
+          log.add('download');
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
@@ -257,14 +278,34 @@ void main() {
             ],
           };
         });
+      });
 
+      test('without clearing timeline', () async {
         final Timeline timeline = await driver.traceAction(() {
-          actionCalled = true;
+          log.add('action');
+        }, retainPriorEvents: true);
+
+        expect(log, const <String>[
+          'startTracing',
+          'action',
+          'stopTracing',
+          'download',
+        ]);
+        expect(timeline.events.single.name, 'test event');
+      });
+
+      test('with clearing timeline', () async {
+        final Timeline timeline = await driver.traceAction(() {
+          log.add('action');
         });
 
-        expect(actionCalled, isTrue);
-        expect(startTracingCalled, isTrue);
-        expect(stopTracingCalled, isTrue);
+        expect(log, const <String>[
+          'clear',
+          'startTracing',
+          'action',
+          'stopTracing',
+          'download',
+        ]);
         expect(timeline.events.single.name, 'test event');
       });
     });
@@ -276,18 +317,18 @@ void main() {
         bool stopTracingCalled = false;
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[Dart, GC, Compiler]'}))))
-          .thenAnswer((_) async {
+          .thenAnswer((Invocation invocation) async {
             startTracingCalled = true;
             return null;
           });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-          .thenAnswer((_) async {
+          .thenAnswer((Invocation invocation) async {
             stopTracingCalled = true;
             return null;
           });
 
-        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
@@ -304,7 +345,8 @@ void main() {
           TimelineStream.dart,
           TimelineStream.gc,
           TimelineStream.compiler
-        ]);
+        ],
+        retainPriorEvents: true);
 
         expect(actionCalled, isTrue);
         expect(startTracingCalled, isTrue);
@@ -322,7 +364,7 @@ void main() {
         try {
           await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(milliseconds: 100));
           fail('expected an exception');
-        } catch(error) {
+        } catch (error) {
           expect(error is DriverError, isTrue);
           expect(error.message, 'Failed to fulfill WaitFor: Flutter application not responding');
         }
@@ -337,7 +379,7 @@ void main() {
         try {
           await driver.waitFor(find.byTooltip('foo'));
           fail('expected an exception');
-        } catch(error) {
+        } catch (error) {
           expect(error is DriverError, isTrue);
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }
@@ -347,7 +389,7 @@ void main() {
 }
 
 Future<Map<String, dynamic>> makeMockResponse(
-    Map<String, dynamic> response, {bool isError: false}) {
+    Map<String, dynamic> response, {bool isError = false}) {
   return new Future<Map<String, dynamic>>.value(<String, dynamic>{
     'isError': isError,
     'response': response

@@ -14,7 +14,7 @@ void main() {
       padding: const EdgeInsets.all(7.0),
       // uses color, not decoration:
       color: const Color(0xFF00FF00),
-      foregroundDecoration: const BoxDecoration(color: const Color(0x7F0000FF)),
+      foregroundDecoration: const BoxDecoration(color: Color(0x7F0000FF)),
       width: 53.0,
       height: 76.0,
       constraints: const BoxConstraints(
@@ -27,9 +27,9 @@ void main() {
       child: const SizedBox(
         width: 25.0,
         height: 33.0,
-        child: const DecoratedBox(
+        child: DecoratedBox(
           // uses decoration, not color:
-          decoration: const BoxDecoration(color: const Color(0xFFFFFF00)),
+          decoration: BoxDecoration(color: Color(0xFFFFFF00)),
         ),
       ),
     );
@@ -96,7 +96,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: Alignment.bottomRight\n'
+        '           │ alignment: bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -173,7 +173,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: Alignment.bottomRight\n'
+        '           │ alignment: bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -281,7 +281,7 @@ void main() {
         '           │ layer: null\n'
         '           │ semantics node: null\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: Alignment.bottomRight\n'
+        '           │ alignment: bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
@@ -412,7 +412,7 @@ void main() {
         '           │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
         '           │ isSemanticBoundary: false\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: Alignment.bottomRight\n'
+        '           │ alignment: bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'

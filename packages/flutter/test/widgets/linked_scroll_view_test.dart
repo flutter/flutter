@@ -171,11 +171,15 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     assert(beforeOverscroll == 0.0 || afterOverscroll == 0.0);
 
     final double localOverscroll = setPixels(value.clamp(
-      owner.canLinkWithBefore ? minScrollExtent : -double.INFINITY,
-      owner.canLinkWithAfter ? maxScrollExtent : double.INFINITY,
+      owner.canLinkWithBefore ? minScrollExtent : -double.infinity,
+      owner.canLinkWithAfter ? maxScrollExtent : double.infinity,
     ));
 
     assert(localOverscroll == 0.0 || (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
+  }
+
+  void _userMoved(ScrollDirection direction) {
+    updateUserScrollDirection(direction);
   }
 
   LinkedScrollActivity link(LinkedScrollPosition driver) {
@@ -239,7 +243,7 @@ class LinkedScrollActivity extends ScrollActivity {
       if (driver.userScrollDirection != commonDirection)
         commonDirection = ScrollDirection.idle;
     }
-    delegate.updateUserScrollDirection(commonDirection);
+    delegate._userMoved(commonDirection);
     return delegate.setPixels(delegate.pixels + delta);
   }
 
@@ -297,28 +301,28 @@ class _TestState extends State<Test> {
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello A')),
+                  child: const Center(child: Text('Hello A')),
                 ),
                 new Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello B')),
+                  child: const Center(child: Text('Hello B')),
                 ),
                 new Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello C')),
+                  child: const Center(child: Text('Hello C')),
                 ),
                 new Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello D')),
+                  child: const Center(child: Text('Hello D')),
                 ),
               ],
             ),
@@ -333,28 +337,28 @@ class _TestState extends State<Test> {
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 1')),
+                  child: const Center(child: Text('Hello 1')),
                 ),
                 new Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 2')),
+                  child: const Center(child: Text('Hello 2')),
                 ),
                 new Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 3')),
+                  child: const Center(child: Text('Hello 3')),
                 ),
                 new Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 4')),
+                  child: const Center(child: Text('Hello 4')),
                 ),
               ],
             ),

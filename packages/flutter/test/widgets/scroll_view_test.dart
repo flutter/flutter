@@ -288,7 +288,7 @@ void main() {
   });
 
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
-    const Key innerKey = const Key('inner');
+    const Key innerKey = Key('inner');
     final ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(
       new Directionality(
@@ -319,22 +319,22 @@ void main() {
 
   testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(primary: true);
-    expect(view.physics, const isInstanceOf<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(primary: false);
-    expect(view.physics, isNot(const isInstanceOf<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(scrollDirection: Axis.vertical);
-    expect(view.physics, const isInstanceOf<AlwaysScrollableScrollPhysics>());
+    expect(view.physics, isInstanceOf<AlwaysScrollableScrollPhysics>());
   });
 
   testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
     final ListView view = new ListView(scrollDirection: Axis.horizontal);
-    expect(view.physics, isNot(const isInstanceOf<AlwaysScrollableScrollPhysics>()));
+    expect(view.physics, isNot(isInstanceOf<AlwaysScrollableScrollPhysics>()));
   });
 
   testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
@@ -346,7 +346,7 @@ void main() {
           onNotification: (OverscrollNotification message) { scrolled = true; return false; },
           child: new ListView(
             primary: true,
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -364,7 +364,7 @@ void main() {
           onNotification: (OverscrollNotification message) { scrolled = true; return false; },
           child: new ListView(
             primary: false,
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -383,7 +383,7 @@ void main() {
           child: new ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -402,7 +402,7 @@ void main() {
           child: new ListView(
             primary: true,
             physics: const ScrollPhysics(),
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),

@@ -3,15 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image, ColorFilter;
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image, ImageByteFormat, ColorFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:quiver/testing/async.dart';
+import '../flutter_test_alternative.dart';
 
-import 'package:test/test.dart';
-import '../services/mocks_for_image_cache.dart';
+import '../painting/mocks_for_image_cache.dart';
+import '../rendering/rendering_tester.dart';
 
 class TestCanvas implements Canvas {
   TestCanvas([this.invocations]);
@@ -78,7 +79,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   String toString() => '${describeIdentity(this)}}()';
 }
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   @override
   int get width => 100;
 
@@ -87,12 +88,19 @@ class TestImage extends ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }
 
 void main() {
+  new TestRenderingFlutterBinding(); // initializes the imageCache
+
   test('Decoration.lerp()', () {
-    final BoxDecoration a = const BoxDecoration(color: const Color(0xFFFFFFFF));
-    final BoxDecoration b = const BoxDecoration(color: const Color(0x00000000));
+    const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
+    const BoxDecoration b = BoxDecoration(color: Color(0x00000000));
 
     BoxDecoration c = Decoration.lerp(a, b, 0.0);
     expect(c.color, equals(a.color));
@@ -115,7 +123,7 @@ void main() {
     });
 
     final TestCanvas canvas = new TestCanvas();
-    final ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
+    const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should not be invoked during the call to boxPainter.paint
@@ -134,7 +142,7 @@ void main() {
       });
 
       final TestCanvas canvas = new TestCanvas();
-      final ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
+      const ImageConfiguration imageConfiguration = ImageConfiguration(size: Size.zero);
       boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
       // The onChanged callback should be invoked asynchronously.
@@ -147,7 +155,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () {
-    void testDecoration({ BoxShape shape: BoxShape.rectangle, BorderRadius borderRadius, bool expectClip}) {
+    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius, bool expectClip}) {
       assert(shape != null);
       new FakeAsync().run((FakeAsync async) {
         final DelayedImageProvider imageProvider = new DelayedImageProvider();
@@ -161,8 +169,8 @@ void main() {
 
         final List<Invocation> invocations = <Invocation>[];
         final TestCanvas canvas = new TestCanvas(invocations);
-        final ImageConfiguration imageConfiguration = const ImageConfiguration(
-            size: const Size(100.0, 100.0)
+        const ImageConfiguration imageConfiguration = ImageConfiguration(
+            size: Size(100.0, 100.0)
         );
         bool onChangedCalled = false;
         final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
@@ -180,11 +188,11 @@ void main() {
         expect(onChangedCalled, isTrue);
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
-        // We expect a clip to preceed the drawImageRect call.
+        // We expect a clip to precede the drawImageRect call.
         final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
-        if (expectClip) { // We expect a clip to preceed the drawImageRect call.
+        if (expectClip) { // We expect a clip to precede the drawImageRect call.
           expect(commands.length, 2);
           expect(commands[0].memberName, equals(#clipPath));
           expect(commands[1].memberName, equals(#drawImageRect));
@@ -196,12 +204,12 @@ void main() {
     }
 
     testDecoration(shape: BoxShape.circle, expectClip: true);
-    testDecoration(borderRadius: const BorderRadius.all(const Radius.circular(16.0)), expectClip: true);
+    testDecoration(borderRadius: const BorderRadius.all(Radius.circular(16.0)), expectClip: true);
     testDecoration(expectClip: false);
   });
 
   test('DecorationImage test', () {
-    final ColorFilter colorFilter = const ui.ColorFilter.mode(const Color(0xFF00FF00), BlendMode.src);
+    const ColorFilter colorFilter = ui.ColorFilter.mode(Color(0xFF00FF00), BlendMode.src);
     final DecorationImage backgroundImage = new DecorationImage(
       image: new SynchronousTestImageProvider(),
       colorFilter: colorFilter,
@@ -214,15 +222,15 @@ void main() {
     final BoxDecoration boxDecoration = new BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = new TestCanvas(<Invocation>[]);
-    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(100.0, 100.0)));
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
-    expect(call.positionalArguments[0], const isInstanceOf<TestImage>());
+    expect(call.positionalArguments[0], isInstanceOf<TestImage>());
     expect(call.positionalArguments[1], new Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
     expect(call.positionalArguments[2], new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
-    expect(call.positionalArguments[3], const isInstanceOf<Paint>());
+    expect(call.positionalArguments[3], isInstanceOf<Paint>());
     expect(call.positionalArguments[3].isAntiAlias, false);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
     expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
@@ -282,19 +290,19 @@ void main() {
   });
 
   test('BoxDecoration.lerp - gradients', () {
-    final Gradient gradient = const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xFFFFFFFF) ]);
+    const Gradient gradient = LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xFFFFFFFF) ]);
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         -1.0,
       ),
-      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x00FFFFFF) ]))
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x00FFFFFF) ]))
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         0.0,
       ),
       const BoxDecoration()
@@ -302,41 +310,41 @@ void main() {
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         0.25,
       ),
-      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x40FFFFFF) ]))
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0x40FFFFFF) ]))
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         0.75,
       ),
-      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xBFFFFFFF) ]))
+      const BoxDecoration(gradient: LinearGradient(colors: <Color>[ Color(0x00000000), Color(0xBFFFFFFF) ]))
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         1.0,
       ),
-      new BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: gradient)
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         2.0,
       ),
-      new BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: gradient)
     );
   });
 
   test('Decoration.lerp with unrelated decorations', () {
-    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.0), const isInstanceOf<FlutterLogoDecoration>());
-    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.25), const isInstanceOf<FlutterLogoDecoration>());
-    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.75), const isInstanceOf<BoxDecoration>());
-    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 1.0), const isInstanceOf<BoxDecoration>());
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.0), isInstanceOf<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.25), isInstanceOf<FlutterLogoDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 0.75), isInstanceOf<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
+    expect(Decoration.lerp(const FlutterLogoDecoration(), const BoxDecoration(), 1.0), isInstanceOf<BoxDecoration>()); // ignore: CONST_EVAL_THROWS_EXCEPTION
   });
 }

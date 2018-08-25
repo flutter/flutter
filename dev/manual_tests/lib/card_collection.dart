@@ -26,14 +26,14 @@ class CardCollection extends StatefulWidget {
 class CardCollectionState extends State<CardCollection> {
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   // TODO(hansmuller): need a local image asset
   static const String _sunshineURL = 'http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg';
 
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
-  static const List<double> _cardHeights = const <double>[
+  static const List<double> _cardHeights = <double>[
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -102,7 +102,7 @@ class CardCollectionState extends State<CardCollection> {
         data: const IconThemeData(color: Colors.black),
         child: new ListView(
           children: <Widget>[
-            const DrawerHeader(child: const Center(child: const Text('Options'))),
+            const DrawerHeader(child: Center(child: Text('Options'))),
             buildDrawerCheckbox('Make card labels editable', _editable, _toggleEditable),
             buildDrawerCheckbox('Fixed size cards', _fixedSizeCards, _toggleFixedSizeCards),
             buildDrawerCheckbox('Let the sun shine', _sunshine, _toggleSunshine),
@@ -181,7 +181,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled: true }) {
+  Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled = true }) {
     return new ListTile(
       onTap: enabled ? callback : null,
       title: new Text(label),
@@ -192,7 +192,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled = true }) {
     return new ListTile(
       leading: new Icon(icon),
       title: new Text(label),
@@ -205,7 +205,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled = true }) {
     return new ListTile(
       leading: new Icon(icon),
       title: new Text(label),
@@ -218,7 +218,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled = true }) {
     return new ListTile(
       leading: new Icon(icon),
       title: new Text(label),
@@ -295,12 +295,12 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     // TODO(abarth): This icon is wrong in RTL.
-    Widget leftArrowIcon =  const Icon(Icons.arrow_back, size: 36.0);
+    Widget leftArrowIcon = const Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
       // TODO(abarth): This icon is wrong in RTL.
-    Widget rightArrowIcon =  const Icon(Icons.arrow_forward, size: 36.0);
+    Widget rightArrowIcon = const Icon(Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 
@@ -344,10 +344,10 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Shader _createShader(Rect bounds) {
-    return new LinearGradient(
+    return const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+        colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
         stops: <double>[0.1, 0.35],
     )
     .createShader(bounds);

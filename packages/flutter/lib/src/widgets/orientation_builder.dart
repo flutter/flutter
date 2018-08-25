@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import 'basic.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
@@ -45,7 +43,7 @@ class OrientationBuilder extends StatelessWidget {
   Widget _buildWithConstraints(BuildContext context, BoxConstraints constraints) {
     // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
     // both infinite), we prefer Orientation.portrait because its more common to
-    // scroll vertially than horizontally.
+    // scroll vertically then horizontally.
     final Orientation orientation = constraints.maxWidth > constraints.maxHeight ? Orientation.landscape : Orientation.portrait;
     return builder(context, orientation);
   }

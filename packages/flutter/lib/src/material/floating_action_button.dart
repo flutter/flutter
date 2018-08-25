@@ -2,19 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'dart:math' as math;
+
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-import 'ink_well.dart';
-import 'material.dart';
+import 'button.dart';
+import 'scaffold.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
-// TODO(eseidel): This needs to change based on device size?
-// http://material.google.com/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
-const double _kSize = 56.0;
-const double _kSizeMini = 40.0;
+const BoxConstraints _kSizeConstraints = BoxConstraints.tightFor(
+  width: 56.0,
+  height: 56.0,
+);
+
+const BoxConstraints _kMiniSizeConstraints = BoxConstraints.tightFor(
+  width: 40.0,
+  height: 40.0,
+);
+
+const BoxConstraints _kExtendedSizeConstraints = BoxConstraints(
+  minHeight: 48.0,
+  maxHeight: 48.0,
+);
 
 class _DefaultHeroTag {
   const _DefaultHeroTag();
@@ -42,22 +55,77 @@ class _DefaultHeroTag {
 ///  * [FlatButton]
 ///  * <https://material.google.com/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
-  /// Creates a floating action button.
+  /// Creates a circular floating action button.
   ///
-  /// Most commonly used in the [Scaffold.floatingActionButton] field.
+  /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
+  /// arguments must not be null.
   const FloatingActionButton({
     Key key,
     this.child,
     this.tooltip,
+    this.foregroundColor,
     this.backgroundColor,
-    this.heroTag: const _DefaultHeroTag(),
-    this.elevation: 6.0,
-    this.highlightElevation: 12.0,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation = 6.0,
+    this.highlightElevation = 12.0,
     @required this.onPressed,
-    this.mini: false
-  }) : super(key: key);
+    this.mini = false,
+    this.shape = const CircleBorder(),
+    this.clipBehavior = Clip.none,
+    this.materialTapTargetSize,
+    this.isExtended = false,
+  }) :  assert(elevation != null),
+        assert(highlightElevation != null),
+        assert(mini != null),
+        assert(shape != null),
+        assert(isExtended != null),
+        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+        super(key: key);
+
+  /// Creates a wider [StadiumBorder] shaped floating action button with both
+  /// an [icon] and a [label].
+  ///
+  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior]
+  /// and [shape] arguments must not be null.
+  FloatingActionButton.extended({
+    Key key,
+    this.tooltip,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.heroTag = const _DefaultHeroTag(),
+    this.elevation = 6.0,
+    this.highlightElevation = 12.0,
+    @required this.onPressed,
+    this.shape = const StadiumBorder(),
+    this.isExtended = true,
+    this.materialTapTargetSize,
+    this.clipBehavior = Clip.none,
+    @required Widget icon,
+    @required Widget label,
+  }) :  assert(elevation != null),
+        assert(highlightElevation != null),
+        assert(shape != null),
+        assert(isExtended != null),
+        assert(clipBehavior != null),
+        _sizeConstraints = _kExtendedSizeConstraints,
+        mini = false,
+        child = new _ChildOverflowBox(
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(width: 16.0),
+              icon,
+              const SizedBox(width: 8.0),
+              label,
+              const SizedBox(width: 20.0),
+            ],
+          ),
+        ),
+        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically an [Icon].
   final Widget child;
 
   /// Text that describes the action that will occur when the button is pressed.
@@ -66,9 +134,14 @@ class FloatingActionButton extends StatefulWidget {
   /// used for accessibility.
   final String tooltip;
 
+  /// The default icon and text color.
+  ///
+  /// Defaults to [ThemeData.accentIconTheme.color] for the current theme.
+  final Color foregroundColor;
+
   /// The color to use when filling the button.
   ///
-  /// Defaults to the accent color of the current theme.
+  /// Defaults to [ThemeData.accentColor] for the current theme.
   final Color backgroundColor;
 
   /// The tag to apply to the button's [Hero] widget.
@@ -112,8 +185,41 @@ class FloatingActionButton extends StatefulWidget {
   ///
   /// By default, floating action buttons are non-mini and have a height and
   /// width of 56.0 logical pixels. Mini floating action buttons have a height
-  /// and width of 40.0 logical pixels.
+  /// and width of 40.0 logical pixels with a layout width and height of 48.0
+  /// logical pixels.
   final bool mini;
+
+  /// The shape of the button's [Material].
+  ///
+  /// The button's highlight and splash are clipped to this shape. If the
+  /// button has an elevation, then its drop shadow is defined by this
+  /// shape as well.
+  final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
+  /// True if this is an "extended" floating action button.
+  ///
+  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// and have been created with the [FloatingActionButton.extended]
+  /// constructor.
+  ///
+  /// The [Scaffold] animates the appearance of ordinary floating
+  /// action buttons with scale and rotation transitions. Extended
+  /// floating action buttons are scaled and faded in.
+  final bool isExtended;
+
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
+  final BoxConstraints _sizeConstraints;
 
   @override
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
@@ -130,45 +236,43 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    Color iconColor = Colors.white;
-    Color materialColor = widget.backgroundColor;
-    if (materialColor == null) {
-      final ThemeData themeData = Theme.of(context);
-      materialColor = themeData.accentColor;
-      iconColor = themeData.accentIconTheme.color;
-    }
-
+    final ThemeData theme = Theme.of(context);
+    final Color foregroundColor = widget.foregroundColor ?? theme.accentIconTheme.color;
     Widget result;
 
     if (widget.child != null) {
-      result = new Center(
-        child: IconTheme.merge(
-          data: new IconThemeData(color: iconColor),
-          child: widget.child,
+      result = IconTheme.merge(
+        data: new IconThemeData(
+          color: foregroundColor,
         ),
+        child: widget.child,
       );
     }
 
     if (widget.tooltip != null) {
-      result = new Tooltip(
+      final Widget tooltip = new Tooltip(
         message: widget.tooltip,
         child: result,
       );
+      // The long-pressable area for the tooltip should always be as big as
+      // the tooltip even if there is no child.
+      result = widget.child != null ? tooltip : new SizedBox.expand(child: tooltip);
     }
 
-    result = new Material(
-      color: materialColor,
-      type: MaterialType.circle,
+    result = new RawMaterialButton(
+      onPressed: widget.onPressed,
+      onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
-      child: new Container(
-        width: widget.mini ? _kSizeMini : _kSize,
-        height: widget.mini ? _kSizeMini : _kSize,
-        child: new InkWell(
-          onTap: widget.onPressed,
-          onHighlightChanged: _handleHighlightChanged,
-          child: result,
-        ),
+      constraints: widget._sizeConstraints,
+      materialTapTargetSize: widget.materialTapTargetSize ?? theme.materialTapTargetSize,
+      fillColor: widget.backgroundColor ?? theme.accentColor,
+      textStyle: theme.accentTextTheme.button.copyWith(
+        color: foregroundColor,
+        letterSpacing: 1.2,
       ),
+      shape: widget.shape,
+      clipBehavior: widget.clipBehavior,
+      child: result,
     );
 
     if (widget.heroTag != null) {
@@ -179,5 +283,57 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     return result;
+  }
+}
+
+// This widget's size matches its child's size unless its constraints
+// force it to be larger or smaller. The child is centered.
+//
+// Used to encapsulate extended FABs whose size is fixed, using Row
+// and MainAxisSize.min, to be as wide as their label and icon.
+class _ChildOverflowBox extends SingleChildRenderObjectWidget {
+  const _ChildOverflowBox({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  _RenderChildOverflowBox createRenderObject(BuildContext context) {
+    return new _RenderChildOverflowBox(
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context);
+  }
+}
+
+class _RenderChildOverflowBox extends RenderAligningShiftedBox {
+  _RenderChildOverflowBox({
+    RenderBox child,
+    TextDirection textDirection,
+  }) : super(child: child, alignment: Alignment.center, textDirection: textDirection);
+
+  @override
+  double computeMinIntrinsicWidth(double height) => 0.0;
+
+  @override
+  double computeMinIntrinsicHeight(double width) => 0.0;
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      child.layout(const BoxConstraints(), parentUsesSize: true);
+      size = new Size(
+        math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
+        math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
+      );
+      alignChild();
+    } else {
+      size = constraints.biggest;
+    }
   }
 }

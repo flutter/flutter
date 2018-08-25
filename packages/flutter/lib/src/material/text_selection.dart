@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
 import 'material.dart';
@@ -22,15 +21,11 @@ const double _kToolbarScreenPadding = 8.0;
 class _TextSelectionToolbar extends StatelessWidget {
   const _TextSelectionToolbar({
     Key key,
-    this.delegate,
     this.handleCut,
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
   }) : super(key: key);
-
-  final TextSelectionDelegate delegate;
-  TextEditingValue get value => delegate.textEditingValue;
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
@@ -42,20 +37,14 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
-    if (!value.selection.isCollapsed) {
+    if (handleCut != null)
       items.add(new FlatButton(child: new Text(localizations.cutButtonLabel), onPressed: handleCut));
+    if (handleCopy != null)
       items.add(new FlatButton(child: new Text(localizations.copyButtonLabel), onPressed: handleCopy));
-    }
-    items.add(new FlatButton(
-      child: new Text(localizations.pasteButtonLabel),
-      // TODO(https://github.com/flutter/flutter/issues/11254):
-      // This should probably be grayed-out if there is nothing to paste.
-      onPressed: handlePaste,
-    ));
-    if (value.text.isNotEmpty) {
-      if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
-    }
+    if (handlePaste != null)
+      items.add(new FlatButton(child: new Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
+    if (handleSelectAll != null)
+      items.add(new FlatButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
 
     return new Material(
       elevation: 1.0,
@@ -152,11 +141,10 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           position,
         ),
         child: new _TextSelectionToolbar(
-          delegate: delegate,
-          handleCut: () => handleCut(delegate),
-          handleCopy: () => handleCopy(delegate),
-          handlePaste: () => handlePaste(delegate),
-          handleSelectAll: () => handleSelectAll(delegate),
+          handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+          handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
+          handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
       )
     );
@@ -165,30 +153,33 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final Widget handle = new SizedBox(
-      width: _kHandleSize,
-      height: _kHandleSize,
-      child: new CustomPaint(
-        painter: new _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor
-        )
-      )
+    final Widget handle = new Padding(
+      padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
+      child: new SizedBox(
+        width: _kHandleSize,
+        height: _kHandleSize,
+        child: new CustomPaint(
+          painter: new _TextSelectionHandlePainter(
+            color: Theme.of(context).textSelectionHandleColor
+          ),
+        ),
+      ),
     );
 
     // [handle] is a circle, with a rectangle in the top left quadrant of that
     // circle (an onion pointing to 10:30). We rotate [handle] to point
     // straight up or up-right depending on the handle type.
     switch (type) {
-      case TextSelectionHandleType.left:  // points up-right
+      case TextSelectionHandleType.left: // points up-right
         return new Transform(
-          transform: new Matrix4.rotationZ(math.PI / 2.0),
+          transform: new Matrix4.rotationZ(math.pi / 2.0),
           child: handle
         );
-      case TextSelectionHandleType.right:  // points up-left
+      case TextSelectionHandleType.right: // points up-left
         return handle;
-      case TextSelectionHandleType.collapsed:  // points up
+      case TextSelectionHandleType.collapsed: // points up
         return new Transform(
-          transform: new Matrix4.rotationZ(math.PI / 4.0),
+          transform: new Matrix4.rotationZ(math.pi / 4.0),
           child: handle
         );
     }

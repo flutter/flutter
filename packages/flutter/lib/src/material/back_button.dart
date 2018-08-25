@@ -26,7 +26,7 @@ class BackButtonIcon extends StatelessWidget {
   /// the current platform (as obtained from the [Theme]).
   const BackButtonIcon({ Key key }) : super(key: key);
 
-  /// Returns tha appropriate "back" icon for the given `platform`.
+  /// Returns the appropriate "back" icon for the given `platform`.
   static IconData _getIconData(TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
@@ -86,7 +86,7 @@ class BackButton extends StatelessWidget {
       color: color,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.maybePop(context);
       }
     );
   }
@@ -118,7 +118,7 @@ class CloseButton extends StatelessWidget {
       icon: const Icon(Icons.close),
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.maybePop(context);
       },
     );
   }

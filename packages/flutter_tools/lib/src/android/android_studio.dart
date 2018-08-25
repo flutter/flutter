@@ -10,10 +10,10 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
-import '../ios/plist_utils.dart';
+import '../ios/ios_workflow.dart';
+import '../ios/plist_utils.dart' as plist;
 
-AndroidStudio get androidStudio =>
-    context.putIfAbsent(AndroidStudio, AndroidStudio.latestValid);
+AndroidStudio get androidStudio => context[AndroidStudio];
 
 // Android Studio layout:
 
@@ -39,6 +39,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final Version version;
   final String configured;
 
+  String _pluginsPath;
   String _javaPath;
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
@@ -46,8 +47,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     final String studioPath = fs.path.join(bundlePath, 'Contents');
     final String plistFile = fs.path.join(studioPath, 'Info.plist');
-    final String versionString =
-        getValueFromFile(plistFile, kCFBundleShortVersionStringKey);
+    final String versionString = iosWorkflow.getPlistValueFromFile(
+      plistFile,
+      plist.kCFBundleShortVersionStringKey,
+    );
+
     Version version;
     if (versionString != null)
       version = new Version.parse(versionString);
@@ -81,6 +85,26 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   String get javaPath => _javaPath;
 
   bool get isValid => _isValid;
+
+  String get pluginsPath {
+    if (_pluginsPath == null) {
+      final int major = version.major;
+      final int minor = version.minor;
+      if (platform.isMacOS) {
+        _pluginsPath = fs.path.join(
+            homeDirPath,
+            'Library',
+            'Application Support',
+            'AndroidStudio$major.$minor');
+      } else {
+        _pluginsPath = fs.path.join(homeDirPath,
+            '.AndroidStudio$major.$minor',
+            'config',
+            'plugins');
+      }
+    }
+    return _pluginsPath;
+  }
 
   List<String> get validationMessages => _validationMessages;
 
@@ -126,7 +150,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         final Iterable<Directory> directories = fs
             .directory(path)
             .listSync()
-            .where((FileSystemEntity e) => e is Directory);
+            .whereType<Directory>();
         for (Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
@@ -178,14 +202,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
-    for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
-      if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
-        final AndroidStudio studio = new AndroidStudio.fromHomeDot(entity);
-        if (studio != null &&
-            !_hasStudioAt(studio.directory, newerThan: studio.version)) {
-          studios.removeWhere(
-              (AndroidStudio other) => other.directory == studio.directory);
-          studios.add(studio);
+    if (fs.directory(homeDirPath).existsSync()) {
+      for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
+        if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
+          final AndroidStudio studio = new AndroidStudio.fromHomeDot(entity);
+          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+            studios.add(studio);
+          }
         }
       }
     }

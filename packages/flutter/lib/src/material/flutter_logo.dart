@@ -21,10 +21,10 @@ class FlutterLogo extends StatelessWidget {
     Key key,
     this.size,
     this.colors,
-    this.textColor: const Color(0xFF616161),
-    this.style: FlutterLogoStyle.markOnly,
-    this.duration: const Duration(milliseconds: 750),
-    this.curve: Curves.fastOutSlowIn,
+    this.textColor = const Color(0xFF616161),
+    this.style = FlutterLogoStyle.markOnly,
+    this.duration = const Duration(milliseconds: 750),
+    this.curve = Curves.fastOutSlowIn,
   }) : super(key: key);
 
   /// The size of the logo in logical pixels.

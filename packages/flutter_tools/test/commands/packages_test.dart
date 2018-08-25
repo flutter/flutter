@@ -3,36 +3,61 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io' show IOSink;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
+
+class AlwaysTrueBotDetector implements BotDetector {
+  const AlwaysTrueBotDetector();
+
+  @override
+  bool get isRunningOnBot => true;
+}
+
+
+class AlwaysFalseBotDetector implements BotDetector {
+  const AlwaysFalseBotDetector();
+
+  @override
+  bool get isRunningOnBot => false;
+}
+
 
 void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
-    Directory temp;
+    Directory tempDir;
 
     setUp(() {
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
-    Future<String> runCommand(String verb, { List<String> args }) async {
-      final String projectPath = await createProject(temp);
+    Future<String> createProjectWithPlugin(String plugin) async {
+      final String projectPath = await createProject(tempDir);
+      final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  $plugin:\n',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      return projectPath;
+    }
 
+    Future<Null> runCommandIn(String projectPath, String verb, { List<String> args }) async {
       final PackagesCommand command = new PackagesCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
@@ -42,32 +67,165 @@ void main() {
       commandArgs.add(projectPath);
 
       await runner.run(commandArgs);
-
-      return projectPath;
     }
 
     void expectExists(String projectPath, String relPath) {
-      expect(fs.isFileSync(fs.path.join(projectPath, relPath)), true);
+      expect(
+        fs.isFileSync(fs.path.join(projectPath, relPath)),
+        true,
+        reason: '$projectPath/$relPath should exist, but does not',
+      );
     }
 
-    // Verify that we create a project that is well-formed.
-    testUsingContext('get', () async {
-      final String projectPath = await runCommand('get');
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
-    });
+    void expectContains(String projectPath, String relPath, String substring) {
+      expectExists(projectPath, relPath);
+      expect(
+        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        contains(substring),
+        reason: '$projectPath/$relPath has unexpected content'
+      );
+    }
 
-    testUsingContext('get --offline', () async {
-      final String projectPath = await runCommand('get', args: <String>['--offline']);
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
-    });
+    void expectNotExists(String projectPath, String relPath) {
+      expect(
+        fs.isFileSync(fs.path.join(projectPath, relPath)),
+        false,
+        reason: '$projectPath/$relPath should not exist, but does',
+      );
+    }
 
-    testUsingContext('upgrade', () async {
-      final String projectPath = await runCommand('upgrade');
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
-    });
+    void expectNotContains(String projectPath, String relPath, String substring) {
+      expectExists(projectPath, relPath);
+      expect(
+        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        isNot(contains(substring)),
+        reason: '$projectPath/$relPath has unexpected content',
+      );
+    }
+
+    const List<String> pubOutput = <String>[
+      '.packages',
+      'pubspec.lock',
+    ];
+
+    const List<String> pluginRegistrants = <String>[
+      'ios/Runner/GeneratedPluginRegistrant.h',
+      'ios/Runner/GeneratedPluginRegistrant.m',
+      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+    ];
+
+    const List<String> pluginWitnesses = <String>[
+      '.flutter-plugins',
+      'ios/Podfile',
+    ];
+
+    const Map<String, String> pluginContentWitnesses = <String, String>{
+      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+    };
+
+    void expectDependenciesResolved(String projectPath) {
+      for (String output in pubOutput) {
+        expectExists(projectPath, output);
+      }
+    }
+
+    void expectZeroPluginsInjected(String projectPath) {
+      for (final String registrant in pluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in pluginWitnesses) {
+        expectNotExists(projectPath, witness);
+      }
+      pluginContentWitnesses.forEach((String witness, String content) {
+        expectNotContains(projectPath, witness, content);
+      });
+    }
+
+    void expectPluginInjected(String projectPath) {
+      for (final String registrant in pluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in pluginWitnesses) {
+        expectExists(projectPath, witness);
+      }
+      pluginContentWitnesses.forEach((String witness, String content) {
+        expectContains(projectPath, witness, content);
+      });
+    }
+
+    void removeGeneratedFiles(String projectPath) {
+      final Iterable<String> allFiles = <List<String>>[
+        pubOutput,
+        pluginRegistrants,
+        pluginWitnesses,
+      ].expand((List<String> list) => list);
+      for (String path in allFiles) {
+        final File file = fs.file(fs.path.join(projectPath, path));
+        if (file.existsSync())
+          file.deleteSync();
+      }
+    }
+
+    testUsingContext('get fetches packages', () async {
+      final String projectPath = await createProject(tempDir);
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, timeout: allowForRemotePubInvocation);
+
+    testUsingContext('get --offline fetches packages', () async {
+      final String projectPath = await createProject(tempDir);
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get', args: <String>['--offline']);
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('upgrade fetches packages', () async {
+      final String projectPath = await createProject(tempDir);
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'upgrade');
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, timeout: allowForRemotePubInvocation);
+
+    testUsingContext('get fetches packages and injects plugin', () async {
+      final String projectPath = await createProjectWithPlugin('path_provider');
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+      expectPluginInjected(projectPath);
+      // TODO(mravn): This test fails on the Chrome windows bot only.
+      // Skipping until resolved.
+    }, timeout: allowForRemotePubInvocation, skip: true);
+    testUsingContext('get fetches packages and injects plugin in plugin project', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['-t', 'plugin', '--no-pub'],
+      );
+      final String exampleProjectPath = fs.path.join(projectPath, 'example');
+      removeGeneratedFiles(projectPath);
+      removeGeneratedFiles(exampleProjectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+
+      await runCommandIn(exampleProjectPath, 'get');
+
+      expectDependenciesResolved(exampleProjectPath);
+      expectPluginInjected(exampleProjectPath);
+    }, timeout: allowForRemotePubInvocation);
   });
 
   group('packages test/pub', () {
@@ -79,7 +237,20 @@ void main() {
       mockStdio = new MockStdio();
     });
 
-    testUsingContext('test', () async {
+    testUsingContext('test without bot', () async {
+      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'run');
+      expect(commands[2], 'test');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysFalseBotDetector(),
+    });
+
+    testUsingContext('test with bot', () async {
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
@@ -90,6 +261,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
     });
 
     testUsingContext('run', () async {
@@ -129,181 +301,4 @@ void main() {
       Stdio: () => mockStdio,
     });
   });
-}
-
-/// A strategy for creating Process objects from a list of commands.
-typedef Process ProcessFactory(List<String> command);
-
-/// A ProcessManager that starts Processes by delegating to a ProcessFactory.
-class MockProcessManager implements ProcessManager {
-  ProcessFactory processFactory = (List<String> commands) => new MockProcess();
-  List<String> commands;
-
-  @override
-  Future<Process> start(
-    List<dynamic> command, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment: true,
-    bool runInShell: false,
-    ProcessStartMode mode: ProcessStartMode.NORMAL,
-  }) {
-    commands = command;
-    return new Future<Process>.value(processFactory(command));
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-/// A process that prompts the user to proceed, then asynchronously writes
-/// some lines to stdout before it exits.
-class PromptingProcess implements Process {
-  Future<Null> showPrompt(String prompt, List<String> outputLines) async {
-    _stdoutController.add(UTF8.encode(prompt));
-    final List<int> bytesOnStdin = await _stdin.future;
-    // Echo stdin to stdout.
-    _stdoutController.add(bytesOnStdin);
-    if (bytesOnStdin[0] == UTF8.encode('y')[0]) {
-      for (final String line in outputLines)
-        _stdoutController.add(UTF8.encode('$line\n'));
-    }
-    await _stdoutController.close();
-  }
-
-  final StreamController<List<int>> _stdoutController = new StreamController<List<int>>();
-  final CompleterIOSink _stdin = new CompleterIOSink();
-
-  @override
-  Stream<List<int>> get stdout => _stdoutController.stream;
-
-  @override
-  Stream<List<int>> get stderr => const Stream<List<int>>.empty();
-
-  @override
-  IOSink get stdin => _stdin;
-
-  @override
-  Future<int> get exitCode async {
-    await _stdoutController.done;
-    return 0;
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-/// An inactive process that collects stdin and produces no output.
-class MockProcess implements Process {
-  final IOSink _stdin = new MemoryIOSink();
-
-  @override
-  Stream<List<int>> get stdout => const Stream<List<int>>.empty();
-
-  @override
-  Stream<List<int>> get stderr => const Stream<List<int>>.empty();
-
-  @override
-  IOSink get stdin => _stdin;
-
-  @override
-  Future<int> get exitCode => new Future<int>.value(0);
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-/// An IOSink that completes a future with the first line written to it.
-class CompleterIOSink extends MemoryIOSink {
-  final Completer<List<int>> _completer = new Completer<List<int>>();
-
-  Future<List<int>> get future => _completer.future;
-
-  @override
-  void add(List<int> data) {
-    if (!_completer.isCompleted)
-      _completer.complete(data);
-    super.add(data);
-  }
-}
-
-/// A Stdio that collects stdout and supports simulated stdin.
-class MockStdio extends Stdio {
-  final MemoryIOSink _stdout = new MemoryIOSink();
-  final StreamController<List<int>> _stdin = new StreamController<List<int>>();
-
-  @override
-  IOSink get stdout => _stdout;
-
-  @override
-  Stream<List<int>> get stdin => _stdin.stream;
-
-  void simulateStdin(String line) {
-    _stdin.add(UTF8.encode('$line\n'));
-  }
-
-  List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();
-}
-
-/// An IOSink that collects whatever is written to it.
-class MemoryIOSink implements IOSink {
-  @override
-  Encoding encoding = UTF8;
-
-  final List<List<int>> writes = <List<int>>[];
-
-  @override
-  void add(List<int> data) {
-    writes.add(data);
-  }
-
-  @override
-  Future<Null> addStream(Stream<List<int>> stream) {
-    final Completer<Null> completer = new Completer<Null>();
-    stream.listen((List<int> data) {
-      add(data);
-    }).onDone(() => completer.complete(null));
-    return completer.future;
-  }
-
-  @override
-  void writeCharCode(int charCode) {
-    add(<int>[charCode]);
-  }
-
-  @override
-  void write(Object obj) {
-    add(encoding.encode('$obj'));
-  }
-
-  @override
-  void writeln([Object obj = '']) {
-    add(encoding.encode('$obj\n'));
-  }
-
-  @override
-  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
-    bool addSeparator = false;
-    for (dynamic object in objects) {
-      if (addSeparator) {
-        write(separator);
-      }
-      write(object);
-      addSeparator = true;
-    }
-  }
-
-  @override
-  void addError(dynamic error, [StackTrace stackTrace]) {
-    throw new UnimplementedError();
-  }
-
-  @override
-  Future<Null> get done => close();
-
-  @override
-  Future<Null> close() async => null;
-
-  @override
-  Future<Null> flush() async => null;
 }

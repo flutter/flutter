@@ -5,28 +5,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../services/mocks_for_image_cache.dart';
+import '../painting/mocks_for_image_cache.dart';
 
 /// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
   testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const CupertinoPageScaffold(
-                // Default nav bar is translucent.
-                navigationBar: const CupertinoNavigationBar(
-                  middle: const Text('Title'),
-                ),
-                child: const Center(),
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: const CupertinoPageScaffold(
+          // Default nav bar is translucent.
+          navigationBar: CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          child: Center(),
+        ),
       ),
     );
 
@@ -34,116 +26,154 @@ void main() {
   });
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    final Center page1Center = const Center();
+    const Center page1Center = Center();
 
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoTabScaffold(
-                tabBar: new CupertinoTabBar(
-                  backgroundColor: CupertinoColors.white,
-                  items: <BottomNavigationBarItem>[
-                    const BottomNavigationBarItem(
-                      icon: const ImageIcon(const TestImageProvider(24, 24)),
-                      title: const Text('Tab 1'),
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: const ImageIcon(const TestImageProvider(24, 24)),
-                      title: const Text('Tab 2'),
-                    ),
-                  ],
-                ),
-                tabBuilder: (BuildContext context, int index) {
-                  return index == 0
-                      ? new CupertinoPageScaffold(
-                        navigationBar: const CupertinoNavigationBar(
-                          backgroundColor: CupertinoColors.white,
-                          middle: const Text('Title'),
-                        ),
-                        child: page1Center,
-                      )
-                      : new Stack();
-                }
-              );
-            },
-          );
-        },
+      new CupertinoApp(
+        home: new CupertinoTabScaffold(
+          tabBar: new CupertinoTabBar(
+            backgroundColor: CupertinoColors.white,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 2'),
+              ),
+            ],
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            return index == 0
+                ? const CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(
+                    backgroundColor: CupertinoColors.white,
+                    middle: Text('Title'),
+                  ),
+                  child: page1Center,
+                )
+                : new Stack();
+          },
+        ),
       ),
     );
 
     expect(tester.getSize(find.byWidget(page1Center)).height, 600.0 - 44.0 - 50.0);
   });
 
+  testWidgets('Contents have automatic sliver padding between translucent bars', (WidgetTester tester) async {
+    final Container content = new Container(height: 600.0, width: 600.0);
+
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.symmetric(vertical: 20.0),
+          ),
+          child: new CupertinoTabScaffold(
+            tabBar: new CupertinoTabBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: ImageIcon(TestImageProvider(24, 24)),
+                  title: Text('Tab 1'),
+                ),
+                BottomNavigationBarItem(
+                  icon: ImageIcon(TestImageProvider(24, 24)),
+                  title: Text('Tab 2'),
+                ),
+              ],
+            ),
+            tabBuilder: (BuildContext context, int index) {
+              return index == 0
+                  ? new CupertinoPageScaffold(
+                    navigationBar: const CupertinoNavigationBar(
+                      middle: Text('Title'),
+                    ),
+                    child: new ListView(
+                      children: <Widget>[
+                        content,
+                      ],
+                    ),
+                  )
+                  : new Stack();
+            }
+          ),
+        ),
+      ),
+    );
+
+    // List content automatically padded by nav bar and top media query padding.
+    expect(tester.getTopLeft(find.byWidget(content)).dy, 20.0 + 44.0);
+
+    // Overscroll to the bottom.
+    await tester.drag(find.byWidget(content), const Offset(0.0, -400.0));
+    // Let it bounce back.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // List content automatically padded by tab bar and bottom media query padding.
+    expect(tester.getBottomLeft(find.byWidget(content)).dy, 600 - 20.0 - 50.0);
+  });
+
   testWidgets('iOS independent tab navigation', (WidgetTester tester) async {
     // A full on iOS information architecture app with 2 tabs, and 2 pages
     // in each with independent navigation states.
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new CupertinoTabScaffold(
-                tabBar: new CupertinoTabBar(
-                  items: <BottomNavigationBarItem>[
-                    const BottomNavigationBarItem(
-                      icon: const ImageIcon(const TestImageProvider(24, 24)),
-                      title: const Text('Tab 1'),
-                    ),
-                    const BottomNavigationBarItem(
-                      icon: const ImageIcon(const TestImageProvider(24, 24)),
-                      title: const Text('Tab 2'),
-                    ),
-                  ],
-                ),
-                tabBuilder: (BuildContext context, int index) {
-                  // For 1-indexed readability.
-                  ++index;
-                  return new CupertinoTabView(
-                    builder: (BuildContext context) {
-                      return new CupertinoPageScaffold(
-                        navigationBar: new CupertinoNavigationBar(
-                          middle: new Text('Page 1 of tab $index'),
-                        ),
-                        child: new Center(
-                          child: new CupertinoButton(
-                            child: const Text('Next'),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                new CupertinoPageRoute<Null>(
-                                  builder: (BuildContext context) {
-                                    return new CupertinoPageScaffold(
-                                      navigationBar: new CupertinoNavigationBar(
-                                        middle: new Text('Page 2 of tab $index'),
-                                      ),
-                                      child: new Center(
-                                        child: new CupertinoButton(
-                                          child: const Text('Back'),
-                                          onPressed: (){
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  },
+      new CupertinoApp(
+        home: new CupertinoTabScaffold(
+          tabBar: new CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 1'),
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(TestImageProvider(24, 24)),
+                title: Text('Tab 2'),
+              ),
+            ],
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            // For 1-indexed readability.
+            ++index;
+            return new CupertinoTabView(
+              builder: (BuildContext context) {
+                return new CupertinoPageScaffold(
+                  navigationBar: new CupertinoNavigationBar(
+                    middle: new Text('Page 1 of tab $index'),
+                  ),
+                  child: new Center(
+                    child: new CupertinoButton(
+                      child: const Text('Next'),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          new CupertinoPageRoute<void>(
+                            builder: (BuildContext context) {
+                              return new CupertinoPageScaffold(
+                                navigationBar: new CupertinoNavigationBar(
+                                  middle: new Text('Page 2 of tab $index'),
+                                ),
+                                child: new Center(
+                                  child: new CupertinoButton(
+                                    child: const Text('Back'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
                                 ),
                               );
                             },
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          );
-        },
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
 
@@ -193,5 +223,38 @@ void main() {
 
     expect(find.text('Page 1 of tab 2'), isOnstage);
     expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
+  });
+
+  testWidgets('Decorated with white background by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const CupertinoPageScaffold(
+          child: Center(),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.color, CupertinoColors.white);
+  });
+
+  testWidgets('Overrides background color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const CupertinoPageScaffold(
+          child: Center(),
+          backgroundColor: Color(0xFF010203),
+        ),
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.color, const Color(0xFF010203));
   });
 }

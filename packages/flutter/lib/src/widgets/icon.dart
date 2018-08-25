@@ -11,7 +11,6 @@ import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
-
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
 ///
@@ -37,6 +36,7 @@ class Icon extends StatelessWidget {
     this.size,
     this.color,
     this.semanticLabel,
+    this.textDirection,
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
@@ -66,11 +66,13 @@ class Icon extends StatelessWidget {
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
   ///
-  /// If no [IconTheme]s are specified, icons will default to black.
   ///
   /// In material apps, if there is a [Theme] without any [IconTheme]s
   /// specified, icon colors default to white if the theme is dark
   /// and black if the theme is light.
+  ///
+  /// If no [IconTheme] and no [Theme] is specified, icons will default to black.
+  ///
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
@@ -86,19 +88,34 @@ class Icon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   /// See also:
   ///
-  ///  * [Semantics.label] which is set with [semanticLabel] in the underlying
+  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
   ///    [Semantics] widget.
   final String semanticLabel;
 
+  /// The text direction to use for rendering the icon.
+  ///
+  /// If this is null, the ambient [Directionality] is used instead.
+  ///
+  /// Some icons follow the reading direction. For example, "back" buttons point
+  /// left in left-to-right environments and right in right-to-left
+  /// environments. Such icons have their [IconData.matchTextDirection] field
+  /// set to true, and the [Icon] widget uses the [textDirection] to determine
+  /// the orientation in which to draw the icon.
+  ///
+  /// This property has no effect if the [icon]'s [IconData.matchTextDirection]
+  /// field is false, but for consistency a text direction value must always be
+  /// specified, either directly using this property or using [Directionality].
+  final TextDirection textDirection;
+
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context);
+    assert(this.textDirection != null || debugCheckHasDirectionality(context));
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
@@ -116,6 +133,35 @@ class Icon extends StatelessWidget {
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
+    Widget iconWidget = new RichText(
+      textDirection: textDirection, // Since we already fetched it for the assert...
+      text: new TextSpan(
+        text: new String.fromCharCode(icon.codePoint),
+        style: new TextStyle(
+          inherit: false,
+          color: iconColor,
+          fontSize: iconSize,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+        ),
+      ),
+    );
+
+    if (icon.matchTextDirection) {
+      switch (textDirection) {
+        case TextDirection.rtl:
+          iconWidget = new Transform(
+            transform: new Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+            alignment: Alignment.center,
+            transformHitTests: false,
+            child: iconWidget,
+          );
+          break;
+        case TextDirection.ltr:
+          break;
+      }
+    }
+
     return new Semantics(
       label: semanticLabel,
       child: new ExcludeSemantics(
@@ -123,19 +169,7 @@ class Icon extends StatelessWidget {
           width: iconSize,
           height: iconSize,
           child: new Center(
-            child: new RichText(
-              textDirection: textDirection, // Since we already fetched it for the assert...
-              text: new TextSpan(
-                text: new String.fromCharCode(icon.codePoint),
-                style: new TextStyle(
-                  inherit: false,
-                  color: iconColor,
-                  fontSize: iconSize,
-                  fontFamily: icon.fontFamily,
-                  package: icon.fontPackage,
-                ),
-              ),
-            ),
+            child: iconWidget,
           ),
         ),
       ),
@@ -143,10 +177,10 @@ class Icon extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
-    description.add(new DoubleProperty('size', size, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
+    properties.add(new DoubleProperty('size', size, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

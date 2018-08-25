@@ -93,9 +93,9 @@ class StockHomeState extends State<StockHome> {
         });
         break;
       case _StockMenuItem.refresh:
-        showDialog<Null>(
+        showDialog<void>(
           context: context,
-          child: new _NotImplementedDialog()
+          builder: (BuildContext context) => new _NotImplementedDialog(),
         );
         break;
       case _StockMenuItem.speedUp:
@@ -111,15 +111,15 @@ class StockHomeState extends State<StockHome> {
     return new Drawer(
       child: new ListView(
         children: <Widget>[
-          const DrawerHeader(child: const Center(child: const Text('Stocks'))),
+          const DrawerHeader(child: Center(child: Text('Stocks'))),
           const ListTile(
-            leading: const Icon(Icons.assessment),
-            title: const Text('Stock List'),
+            leading: Icon(Icons.assessment),
+            title: Text('Stock List'),
             selected: true,
           ),
           const ListTile(
-            leading: const Icon(Icons.account_balance),
-            title: const Text('Account Balance'),
+            leading: Icon(Icons.account_balance),
+            title: Text('Account Balance'),
             enabled: false,
           ),
           new ListTile(
@@ -130,7 +130,7 @@ class StockHomeState extends State<StockHome> {
                 debugDumpApp();
                 debugDumpRenderTree();
                 debugDumpLayerTree();
-                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversal);
+                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
               } catch (e, stack) {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }
@@ -205,15 +205,15 @@ class StockHomeState extends State<StockHome> {
             ),
             const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.refresh,
-              child: const Text('Refresh'),
+              child: Text('Refresh'),
             ),
             const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedUp,
-              child: const Text('Increase animation speed'),
+              child: Text('Increase animation speed'),
             ),
             const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedDown,
-              child: const Text('Decrease animation speed'),
+              child: Text('Decrease animation speed'),
             ),
           ],
         ),
@@ -278,7 +278,7 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  static const List<String> portfolioSymbols = const <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
+  static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
   Widget buildSearchBar() {
     return new AppBar(
@@ -297,7 +297,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) => new _CreateCompanySheet(),
     );
@@ -307,7 +307,7 @@ class StockHomeState extends State<StockHome> {
     return new FloatingActionButton(
       tooltip: 'Create company',
       child: const Icon(Icons.add),
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Theme.of(context).accentColor,
       onPressed: _handleCreateCompany,
     );
   }
@@ -336,14 +336,14 @@ class _CreateCompanySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Column(
-      children: <Widget>[
-        const TextField(
+      children: const <Widget>[
+        TextField(
           autofocus: true,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Company Name',
           ),
         ),
-        const Text('(This demo is not yet complete.)'),
+        Text('(This demo is not yet complete.)'),
         // For example, we could add a button that actually updates the list
         // and then contacts the server, etc.
       ],

@@ -44,6 +44,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
 
   TabController _controller;
   _Page _selectedPage;
+  bool _extendedButtons = false;
 
   @override
   void initState() {
@@ -101,6 +102,30 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     );
   }
 
+  Widget buildFloatingActionButton(_Page page) {
+    if (!page.fabDefined)
+      return null;
+
+    if (_extendedButtons) {
+      return new FloatingActionButton.extended(
+        key: new ValueKey<Key>(page.fabKey),
+        tooltip: 'Show explanation',
+        backgroundColor: page.fabColor,
+        icon: page.fabIcon,
+        label: new Text(page.label.toUpperCase()),
+        onPressed: _showExplanatoryText
+      );
+    }
+
+    return new FloatingActionButton(
+      key: page.fabKey,
+      tooltip: 'Show explanation',
+      backgroundColor: page.fabColor,
+      child: page.fabIcon,
+      onPressed: _showExplanatoryText
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -110,15 +135,19 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         bottom: new TabBar(
           controller: _controller,
           tabs: _allPages.map((_Page page) => new Tab(text: page.label.toUpperCase())).toList(),
-        )
+        ),
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() {
+                _extendedButtons = !_extendedButtons;
+              });
+            },
+          ),
+        ],
       ),
-      floatingActionButton: !_selectedPage.fabDefined ? null : new FloatingActionButton(
-        key: _selectedPage.fabKey,
-        tooltip: 'Show explanation',
-        backgroundColor: _selectedPage.fabColor,
-        child: _selectedPage.fabIcon,
-        onPressed: _showExplanatoryText
-      ),
+      floatingActionButton: buildFloatingActionButton(_selectedPage),
       body: new TabBarView(
         controller: _controller,
         children: _allPages.map(buildTabView).toList()

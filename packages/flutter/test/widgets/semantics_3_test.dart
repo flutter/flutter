@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +21,7 @@ void main() {
             label: 'test',
             textDirection: TextDirection.ltr,
             child: new Container(
-              child: const Semantics(
+              child: new Semantics(
                 checked: true
               ),
             ),
@@ -37,7 +35,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'test',
             rect: TestSemantics.fullScreen,
           )
@@ -50,7 +48,7 @@ void main() {
       new Semantics(
         container: true,
         child: new Container(
-          child: const Semantics(
+          child: new Semantics(
              checked: true,
           ),
         ),
@@ -62,7 +60,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             rect: TestSemantics.fullScreen,
           ),
         ]
@@ -74,7 +72,7 @@ void main() {
       new Semantics(
         container: true,
         child: new Container(
-          child: const Semantics(
+          child: new Semantics(
             label: 'test',
             textDirection: TextDirection.ltr,
           ),
@@ -100,9 +98,9 @@ void main() {
       new Semantics(
         container: true,
         child: new Container(
-          child: const Semantics(
+          child: new Semantics(
             checked: true,
-            child: const Semantics(
+            child: new Semantics(
               label: 'test',
               textDirection: TextDirection.ltr,
             ),
@@ -116,7 +114,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: 'test',
             rect: TestSemantics.fullScreen,
           )
@@ -134,9 +132,9 @@ void main() {
       new Semantics(
         container: true,
         child: new Container(
-          child: const Semantics(
+          child: new Semantics(
             checked: true,
-            child: const Semantics(
+            child: new Semantics(
               label: 'test',
               textDirection: TextDirection.ltr,
             ),

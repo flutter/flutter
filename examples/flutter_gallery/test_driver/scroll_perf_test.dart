@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {
@@ -22,25 +22,21 @@ void main() {
 
     test('measure', () async {
       final Timeline timeline = await driver.traceAction(() async {
-        // Find the scrollable stock list
-        final SerializableFinder stockList = find.byValueKey('Gallery List');
-        expect(stockList, isNotNull);
+        await driver.tap(find.text('Material'));
 
-        await driver.tap(find.text('Demos'));
-        await driver.tap(find.text('Components'));
-        await driver.tap(find.text('Style'));
+        final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
 
-        // TODO(eseidel): These are very artifical scrolls, we should use better
+        // TODO(eseidel): These are very artificial scrolls, we should use better
         // https://github.com/flutter/flutter/issues/3316
         // Scroll down
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(stockList, 0.0, -300.0, const Duration(milliseconds: 300));
+          await driver.scroll(demoList, 0.0, -300.0, const Duration(milliseconds: 300));
           await new Future<Null>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(stockList, 0.0, 300.0, const Duration(milliseconds: 300));
+          await driver.scroll(demoList, 0.0, 300.0, const Duration(milliseconds: 300));
           await new Future<Null>.delayed(const Duration(milliseconds: 500));
         }
       });

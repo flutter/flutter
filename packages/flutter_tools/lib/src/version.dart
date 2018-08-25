@@ -10,24 +10,19 @@ import 'package:quiver/time.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'cache.dart';
 import 'globals.dart';
 
-final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
-  'master',
-  'alpha',
-  'hackathon',
-  'codelab',
-  'beta'
-]);
-
 class FlutterVersion {
   @visibleForTesting
   FlutterVersion(this._clock) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+    final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+    _branch = branch == 'HEAD' ? _channel : branch;
 
     final int slash = _channel.indexOf('/');
     if (slash != -1) {
@@ -40,6 +35,7 @@ class FlutterVersion {
 
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
     _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
+    _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
   final Clock _clock;
@@ -47,9 +43,32 @@ class FlutterVersion {
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
 
+  static Set<String> officialChannels = new Set<String>.from(<String>[
+    'master',
+    'dev',
+    'beta',
+    'release',
+  ]);
+
+  /// This maps old branch names to the names of branches that replaced them.
+  ///
+  /// For example, in early 2018 we changed from having an "alpha" branch to
+  /// having a "dev" branch, so anyone using "alpha" now gets transitioned to
+  /// "dev".
+  static Map<String, String> obsoleteBranches = <String, String>{
+    'alpha': 'dev',
+    'hackathon': 'dev',
+    'codelab': 'dev',
+  };
+
   String _channel;
-  /// `master`, `alpha`, `hackathon`, ...
+  /// The channel is the upstream branch.
+  /// `master`, `dev`, `beta`, `release`; or old ones, like `alpha`, `hackathon`, ...
   String get channel => _channel;
+
+  /// The name of the local branch.
+  /// Use getBranchName() to read this.
+  String _branch;
 
   String _frameworkRevision;
   String get frameworkRevision => _frameworkRevision;
@@ -58,23 +77,29 @@ class FlutterVersion {
   String _frameworkAge;
   String get frameworkAge => _frameworkAge;
 
+  String _frameworkVersion;
+  String get frameworkVersion => _frameworkVersion;
+
   String get frameworkDate => frameworkCommitDate;
 
-  String get dartSdkVersion => Cache.dartSdkVersion.split(' ')[0];
+  String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
 
-  String get engineRevision => Cache.engineRevision;
+  String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
+  Future<void> ensureVersionFile() {
+    return fs.file(fs.path.join(Cache.flutterRoot, 'version')).writeAsString(_frameworkVersion);
+  }
 
   @override
   String toString() {
-    final String flutterText = 'Flutter • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
+    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
 
-    // Flutter • channel master • https://github.com/flutter/flutter.git
+    // Flutter 1.3.922-pre.2 • channel master • https://github.com/flutter/flutter.git
     // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
     // Engine • revision fe509b0d96
     // Tools • Dart 1.19.0-dev.5.0
@@ -110,7 +135,7 @@ class FlutterVersion {
   /// In the absence of bugs and crashes a Flutter developer should never see
   /// this remote appear in their `git remote` list, but also if it happens to
   /// persist we do the proper clean-up for extra robustness.
-  static const String _kVersionCheckRemote = '__flutter_version_check__';
+  static const String _versionCheckRemote = '__flutter_version_check__';
 
   /// The date of the latest framework commit in the remote repository.
   ///
@@ -123,11 +148,11 @@ class FlutterVersion {
         'git',
         'remote',
         'add',
-        _kVersionCheckRemote,
+        _versionCheckRemote,
         'https://github.com/flutter/flutter.git',
       ]);
-      await _run(<String>['git', 'fetch', _kVersionCheckRemote, branch]);
-      return _latestGitCommitDate('$_kVersionCheckRemote/$branch');
+      await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
+      return _latestGitCommitDate('$_versionCheckRemote/$branch');
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -136,63 +161,72 @@ class FlutterVersion {
   static Future<Null> _removeVersionCheckRemoteIfExists() async {
     final List<String> remotes = (await _run(<String>['git', 'remote']))
         .split('\n')
-        .map((String name) => name.trim())  // to account for OS-specific line-breaks
+        .map((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
-    if (remotes.contains(_kVersionCheckRemote))
-      await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);
+    if (remotes.contains(_versionCheckRemote))
+      await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
   }
 
-  static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion(const Clock()));
+  static FlutterVersion get instance => context[FlutterVersion];
 
-  /// Return a short string for the version (`alpha/a76bc8e22b`).
-  static String getVersionString({ bool whitelistBranchName: false }) {
-    String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD']));
-    commit = commit.isEmpty ? 'unknown' : commit;
-
-    final String branch = getBranchName(whitelistBranchName: whitelistBranchName);
-
-    return '$branch/$commit';
+  /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
+  String getVersionString({bool redactUnknownBranches = false}) {
+    if (frameworkVersion != 'unknown')
+      return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
+    return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
   }
 
   /// Return the branch name.
   ///
-  /// If whitelistBranchName is true and the branch is unknown,
-  /// the branch name will be returned as 'dev'.
-  static String getBranchName({ bool whitelistBranchName: false }) {
-    String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD']);
-    branch = branch == 'HEAD' ? 'master' : branch;
-
-    if (whitelistBranchName || branch.isEmpty) {
+  /// If [redactUnknownBranches] is true and the branch is unknown,
+  /// the branch name will be returned as `'[user-branch]'`.
+  String getBranchName({ bool redactUnknownBranches = false }) {
+    if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kKnownBranchNames.contains(branch))
-        branch = 'dev';
+      if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
+        return '[user-branch]';
     }
+    return _branch;
+  }
 
-    return branch;
+  /// Returns true if `tentativeDescendantRevision` is a direct descendant to
+  /// the `tentativeAncestorRevision` revision on the Flutter framework repo
+  /// tree.
+  bool checkRevisionAncestry({
+    String tentativeDescendantRevision,
+    String tentativeAncestorRevision,
+  }) {
+    final ProcessResult result = processManager.runSync(
+      <String>['git', 'merge-base', '--is-ancestor', tentativeAncestorRevision, tentativeDescendantRevision],
+      workingDirectory: Cache.flutterRoot,
+    );
+    return result.exitCode == 0;
   }
 
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
-  static const Duration kCheckAgeConsideredUpToDate = const Duration(days: 7);
+  static const Duration kCheckAgeConsideredUpToDate = Duration(days: 3);
 
   /// We warn the user if the age of their Flutter installation is greater than
   /// this duration.
+  ///
+  /// This is set to 5 weeks because releases are currently around every 4 weeks.
   @visibleForTesting
-  static final Duration kVersionAgeConsideredUpToDate = kCheckAgeConsideredUpToDate * 4;
+  static const Duration kVersionAgeConsideredUpToDate = Duration(days: 35);
 
   /// The amount of time we wait between issuing a warning.
   ///
   /// This is to avoid annoying users who are unable to upgrade right away.
   @visibleForTesting
-  static const Duration kMaxTimeSinceLastWarning = const Duration(days: 1);
+  static const Duration kMaxTimeSinceLastWarning = Duration(days: 1);
 
   /// The amount of time we pause for to let the user read the message about
   /// outdated Flutter installation.
   ///
   /// This can be customized in tests to speed them up.
   @visibleForTesting
-  static Duration kPauseToLetUserReadTheMessage = const Duration(seconds: 2);
+  static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
   /// Checks if the currently installed version of Flutter is up-to-date, and
   /// warns the user if it isn't.
@@ -200,30 +234,49 @@ class FlutterVersion {
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
   Future<Null> checkFlutterVersionFreshness() async {
+    // Don't perform update checks if we're not on an official channel.
+    if (!officialChannels.contains(_channel)) {
+      return;
+    }
+
     final DateTime localFrameworkCommitDate = DateTime.parse(frameworkCommitDate);
     final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
-    Future<bool> newerFrameworkVersionAvailable() async {
-      final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterVersion();
+    // Get whether there's a newer version on the remote. This only goes
+    // to the server if we haven't checked recently so won't happen on every
+    // command.
+    final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
+    final VersionCheckResult remoteVersionStatus =
+        latestFlutterCommitDate == null
+            ? VersionCheckResult.unknown
+            : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
+                ? VersionCheckResult.newVersionAvailable
+                : VersionCheckResult.versionIsCurrent;
 
-      if (latestFlutterCommitDate == null)
-        return false;
-
-      return latestFlutterCommitDate.isAfter(localFrameworkCommitDate);
-    }
-
+    // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
     final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
     final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
 
-    if (beenAWhileSinceWarningWasPrinted && installationSeemsOutdated && await newerFrameworkVersionAvailable()) {
-      printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
+    // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
+    // version is outdated.
+    final bool canShowWarning =
+        remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
+            (remoteVersionStatus == VersionCheckResult.unknown &&
+                installationSeemsOutdated);
+
+    if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
+      final String updateMessage =
+          remoteVersionStatus == VersionCheckResult.newVersionAvailable
+              ? newVersionAvailableMessage()
+              : versionOutOfDateMessage(frameworkAge);
+      printStatus(updateMessage, emphasis: true);
       await Future.wait<Null>(<Future<Null>>[
         stamp.store(
           newTimeWarningWasPrinted: _clock.now(),
         ),
-        new Future<Null>.delayed(kPauseToLetUserReadTheMessage),
+        new Future<Null>.delayed(timeToPauseToLetUserReadTheMessage),
       ]);
     }
   }
@@ -243,6 +296,17 @@ class FlutterVersion {
 ''';
   }
 
+  @visibleForTesting
+  static String newVersionAvailableMessage() {
+    return '''
+  ╔════════════════════════════════════════════════════════════════════════════╗
+  ║ A new version of Flutter is available!                                     ║
+  ║                                                                            ║
+  ║ To update to the latest version, run "flutter upgrade".                    ║
+  ╚════════════════════════════════════════════════════════════════════════════╝
+''';
+  }
+
   /// Gets the release date of the latest available Flutter version.
   ///
   /// This method sends a server request if it's been more than
@@ -250,7 +314,7 @@ class FlutterVersion {
   ///
   /// Returns null if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
-  Future<DateTime> _getLatestAvailableFlutterVersion() async {
+  Future<DateTime> _getLatestAvailableFlutterDate() async {
     Cache.checkLockAcquired();
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
@@ -264,8 +328,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final String branch = _channel == 'alpha' ? 'alpha' : 'master';
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(_channel));
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
@@ -276,6 +339,11 @@ class FlutterVersion {
       // there's no Internet connectivity. Remote version check is best effort
       // only. We do not prevent the command from running when it fails.
       printTrace('Failed to check Flutter version in the remote repository: $error');
+      // Still update the timestamp to avoid us hitting the server on every single
+      // command if for some reason we cannot connect (eg. we may be offline).
+      await versionCheckStamp.store(
+        newTimeVersionWasChecked: _clock.now(),
+      );
       return null;
     }
   }
@@ -304,11 +372,11 @@ class VersionCheckStamp {
     if (versionCheckStamp != null) {
       // Attempt to parse stamp JSON.
       try {
-        final dynamic json = JSON.decode(versionCheckStamp);
-        if (json is Map) {
-          return fromJson(json);
+        final dynamic jsonObject = json.decode(versionCheckStamp);
+        if (jsonObject is Map) {
+          return fromJson(jsonObject);
         } else {
-          printTrace('Warning: expected version stamp to be a Map but found: $json');
+          printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
       } catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
@@ -320,11 +388,11 @@ class VersionCheckStamp {
     return const VersionCheckStamp();
   }
 
-  static VersionCheckStamp fromJson(Map<String, String> json) {
+  static VersionCheckStamp fromJson(Map<String, dynamic> jsonObject) {
     DateTime readDateTime(String property) {
-      return json.containsKey(property)
-        ? DateTime.parse(json[property])
-        : null;
+      return jsonObject.containsKey(property)
+          ? DateTime.parse(jsonObject[property])
+          : null;
     }
 
     return new VersionCheckStamp(
@@ -350,7 +418,7 @@ class VersionCheckStamp {
     if (newTimeWarningWasPrinted != null)
       jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
 
-    const JsonEncoder kPrettyJsonEncoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder kPrettyJsonEncoder = JsonEncoder.withIndent('  ');
     Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(jsonData));
   }
 
@@ -397,7 +465,7 @@ class VersionCheckError implements Exception {
 ///
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, {bool lenient: true}) {
+String _runSync(List<String> command, {bool lenient = true}) {
   final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0)
@@ -411,6 +479,10 @@ String _runSync(List<String> command, {bool lenient: true}) {
   }
 
   return '';
+}
+
+String _runGit(String command) {
+  return runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
 }
 
 /// Runs [command] in the root of the Flutter installation and returns the
@@ -433,4 +505,54 @@ String _shortGitRevision(String revision) {
   if (revision == null)
     return '';
   return revision.length > 10 ? revision.substring(0, 10) : revision;
+}
+
+class GitTagVersion {
+  const GitTagVersion(this.x, this.y, this.z, this.commits, this.hash);
+  const GitTagVersion.unknown() : x = null, y = null, z = null, commits = 0, hash = '';
+
+  /// The X in vX.Y.Z.
+  final int x;
+
+  /// The Y in vX.Y.Z.
+  final int y;
+
+  /// The Z in vX.Y.Z.
+  final int z;
+
+  /// Number of commits since the vX.Y.Z tag.
+  final int commits;
+
+  /// The git hash (or an abbreviation thereof) for this commit.
+  final String hash;
+
+  static GitTagVersion determine() {
+    final String version = _runGit('git describe --match v*.*.* --first-parent --long --tags');
+    final RegExp versionPattern = new RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5]);
+    if (parts == null) {
+      printTrace('Could not interpret results of "git describe": $version');
+      return const GitTagVersion.unknown();
+    }
+    final List<int> parsedParts = parts.take(4).map<int>(int.tryParse).toList();
+    return new GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
+  }
+
+  String frameworkVersionFor(String revision) {
+    if (x == null || y == null || z == null || !revision.startsWith(hash))
+      return '0.0.0-unknown';
+    if (commits == 0)
+      return '$x.$y.$z';
+    return '$x.$y.${z + 1}-pre.$commits';
+  }
+}
+
+enum VersionCheckResult {
+  /// Unable to check whether a new version is available, possibly due to
+  /// a connectivity issue.
+  unknown,
+  /// The current version is up to date.
+  versionIsCurrent,
+  /// A newer version is available.
+  newVersionAvailable,
 }

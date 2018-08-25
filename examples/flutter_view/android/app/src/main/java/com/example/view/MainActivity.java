@@ -3,6 +3,7 @@ package com.example.view;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
@@ -20,13 +21,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL = "increment";
     private static final String EMPTY_MESSAGE = "";
     private static final String PING = "ping";
-    private BasicMessageChannel messageChannel;
+    private BasicMessageChannel<String> messageChannel;
 
     private String[] getArgsFromIntent(Intent intent) {
         // Before adding more entries to this list, consider that arbitrary
         // Android applications can generate intents with extra data and that
         // there are many security-sensitive args in the binary.
-        ArrayList<String> args = new ArrayList<String>();
+        ArrayList<String> args = new ArrayList<>();
         if (intent.getBooleanExtra("trace-startup", false)) {
             args.add("--trace-startup");
         }
@@ -52,9 +53,12 @@ public class MainActivity extends AppCompatActivity {
         String[] args = getArgsFromIntent(getIntent());
         FlutterMain.ensureInitializationComplete(getApplicationContext(), args);
         setContentView(R.layout.flutter_view_layout);
-        getSupportActionBar().hide();
+        ActionBar supportActionBar = getSupportActionBar();
+        if (supportActionBar != null) {
+            supportActionBar.hide();
+        }
 
-        flutterView = (FlutterView) findViewById(R.id.flutter_view);
+        flutterView = findViewById(R.id.flutter_view);
         flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
 
         messageChannel = new BasicMessageChannel<>(flutterView, CHANNEL, StringCodec.INSTANCE);
@@ -67,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button);
+        FloatingActionButton fab = findViewById(R.id.button);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -82,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void onFlutterIncrement() {
         counter++;
-        TextView textView = (TextView) findViewById(R.id.button_tap);
+        TextView textView = findViewById(R.id.button_tap);
         String value = "Flutter button tapped " + counter + (counter == 1 ? " time" : " times");
         textView.setText(value);
     }

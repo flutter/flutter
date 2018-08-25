@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -25,7 +24,7 @@ void main() {
     DriveCommand command;
     Device mockDevice;
     MemoryFileSystem fs;
-    Directory cwd;
+    Directory tempDir;
 
     void withMockDevice([Device mock]) {
       mockDevice = mock ?? new MockDevice();
@@ -41,8 +40,8 @@ void main() {
       command = new DriveCommand();
       applyMocksToCommand(command);
       fs = new MemoryFileSystem();
-      cwd = fs.systemTempDirectory.createTempSync('some_app_');
-      fs.currentDirectory = cwd;
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
+      fs.currentDirectory = tempDir;
       fs.directory('test').createSync();
       fs.directory('test_driver').createSync();
       fs.file('pubspec.yaml')..createSync();
@@ -54,7 +53,7 @@ void main() {
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
-      testRunner = (List<String> testArgs, String observatoryUri) {
+      testRunner = (List<String> testArgs, String observatoryUri, bool previewDart2) {
         throw 'Unexpected call to testRunner';
       };
       appStopper = (DriveCommand command) {
@@ -69,13 +68,14 @@ void main() {
       restoreAppStopper();
       restoreTestRunner();
       restoreTargetDeviceFinder();
+      tryToDelete(tempDir);
     });
 
     testUsingContext('returns 1 when test file is not found', () async {
       withMockDevice();
 
-      final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
-      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
       fs.file(testApp).createSync(recursive: true);
 
       final List<String> args = <String>[
@@ -97,8 +97,8 @@ void main() {
       withMockDevice();
       appStarter = expectAsync1((DriveCommand command) async => null);
 
-      final String testApp = fs.path.join(cwd.path, 'test_driver', 'e2e.dart');
-      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() { }');
@@ -120,7 +120,7 @@ void main() {
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
-      final String appFile = fs.path.join(cwd.dirname, 'other_app', 'app.dart');
+      final String appFile = fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         'drive',
@@ -132,7 +132,7 @@ void main() {
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
         expect(testLogger.errorText, contains(
-            'Application file $appFile is outside the package directory ${cwd.path}',
+            'Application file $appFile is outside the package directory ${tempDir.path}',
         ));
       }
     }, overrides: <Type, Generator>{
@@ -140,7 +140,7 @@ void main() {
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
-      final String appFile = fs.path.join(cwd.path, 'main.dart');
+      final String appFile = fs.path.join(tempDir.path, 'main.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         'drive',
@@ -163,13 +163,13 @@ void main() {
     testUsingContext('returns 0 when test ends successfully', () async {
       withMockDevice();
 
-      final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
-      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
       });
-      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
+      testRunner = expectAsync3((List<String> testArgs, String observatoryUri, bool previewDart2) async {
         expect(testArgs, <String>[testFile]);
         return null;
       });
@@ -194,13 +194,13 @@ void main() {
     testUsingContext('returns exitCode set by test runner', () async {
       withMockDevice();
 
-      final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
-      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
       });
-      testRunner = (List<String> testArgs, String observatoryUri) async {
+      testRunner = (List<String> testArgs, String observatoryUri, bool previewDart2) async {
         throwToolExit(null, exitCode: 123);
       };
       appStopper = expectAsync1((DriveCommand command) async {
@@ -279,7 +279,8 @@ void main() {
       testUsingContext('uses existing simulator', () async {
         withMockDevice();
         when(mockDevice.name).thenReturn('mock-simulator');
-        when(mockDevice.isLocalEmulator).thenReturn(new Future<bool>.value(true));
+        when(mockDevice.isLocalEmulator)
+            .thenAnswer((Invocation invocation) => new Future<bool>.value(true));
 
         final Device device = await findTargetDevice();
         expect(device.name, 'mock-simulator');

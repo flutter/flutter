@@ -29,8 +29,7 @@ public class ExampleInstrumentedTest {
         final BitmapPoller poller = new BitmapPoller(5);
         instr.runOnMainSync(new Runnable() {
             public void run() {
-                final FlutterView flutterView = (FlutterView) activityRule.getActivity()
-                    .getFlutterView();
+                final FlutterView flutterView = activityRule.getActivity().getFlutterView();
 
                 // Call onPostResume to start the engine's renderer even if the activity
                 // is paused in the test environment.

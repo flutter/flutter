@@ -6,30 +6,44 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.flutterRoot = getFlutterRoot();
+  });
+
   testUsingContext('pub get 69', () async {
     String error;
+
+    final MockProcessManager processMock = context[ProcessManager];
+
     new FakeAsync().run((FakeAsync time) {
-      pubGet(checkLastModified: false).then((Null value) {
-        error = 'test completed unexpectedly';
-      }, onError: (dynamic error) {
-        error = 'test failed unexpectedly';
-      });
+      expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
       );
+      expect(processMock.lastPubEnvironment, contains('flutter_cli:flutter_tests'));
+      expect(processMock.lastPubCache, isNull);
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
         'Running "flutter packages get" in /...\n'
@@ -73,6 +87,62 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => new MockProcessManager(69),
     FileSystem: () => new MockFileSystem(),
+    Platform: () => new FakePlatform(
+      environment: <String, String>{},
+    ),
+  });
+
+  testUsingContext('pub cache in root is used', () async {
+    String error;
+
+    final MockProcessManager processMock = context[ProcessManager];
+    final MockFileSystem fsMock = context[FileSystem];
+
+    new FakeAsync().run((FakeAsync time) {
+      MockDirectory.findCache = true;
+      expect(processMock.lastPubEnvironment, isNull);
+      expect(processMock.lastPubCache, isNull);
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(processMock.lastPubCache, equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
+      expect(error, isNull);
+    });
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => new MockProcessManager(69),
+    FileSystem: () => new MockFileSystem(),
+    Platform: () => new FakePlatform(
+      environment: <String, String>{},
+    ),
+  });
+
+  testUsingContext('pub cache in environment is used', () async {
+    String error;
+
+    final MockProcessManager processMock = context[ProcessManager];
+
+    new FakeAsync().run((FakeAsync time) {
+      MockDirectory.findCache = true;
+      expect(processMock.lastPubEnvironment, isNull);
+      expect(processMock.lastPubCache, isNull);
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(processMock.lastPubCache, equals('custom/pub-cache/path'));
+      expect(error, isNull);
+    });
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => new MockProcessManager(69),
+    FileSystem: () => new MockFileSystem(),
+    Platform: () => new FakePlatform(
+      environment: <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
+    ),
   });
 }
 
@@ -83,15 +153,20 @@ class MockProcessManager implements ProcessManager {
 
   final int fakeExitCode;
 
+  String lastPubEnvironment;
+  String lastPubCache;
+
   @override
   Future<Process> start(
     List<dynamic> command, {
     String workingDirectory,
     Map<String, String> environment,
-    bool includeParentEnvironment: true,
-    bool runInShell: false,
-    ProcessStartMode mode: ProcessStartMode.NORMAL,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
   }) {
+    lastPubEnvironment = environment['PUB_ENVIRONMENT'];
+    lastPubCache = environment['PUB_CACHE'];
     return new Future<Process>.value(new MockProcess(fakeExitCode));
   }
 
@@ -145,16 +220,23 @@ class MockStreamSubscription<T> implements StreamSubscription<T> {
 }
 
 
-class MockFileSystem extends MemoryFileSystem {
+class MockFileSystem extends ForwardingFileSystem {
+  MockFileSystem() : super(new MemoryFileSystem());
+
   @override
   File file(dynamic path) {
     return new MockFile();
+  }
+
+  @override
+  Directory directory(dynamic path) {
+    return new MockDirectory(path);
   }
 }
 
 class MockFile implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode: FileMode.READ}) async {
+  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
     return new MockRandomAccessFile();
   }
 
@@ -163,6 +245,21 @@ class MockFile implements File {
 
   @override
   DateTime lastModifiedSync() => new DateTime(0);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class MockDirectory implements Directory {
+  static bool findCache = false;
+
+  MockDirectory(this.path);
+
+  @override
+  final String path;
+
+  @override
+  bool existsSync() => findCache && path.endsWith('.pub-cache');
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

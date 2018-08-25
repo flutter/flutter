@@ -7,7 +7,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
+
+import '../flutter_test_alternative.dart';
 
 typedef void HandleEventCallback(PointerEvent event);
 
@@ -21,10 +22,10 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
     super.handleEvent(event, entry);
   }
 
-  static const ui.PointerDataPacket packet = const ui.PointerDataPacket(
-    data: const <ui.PointerData>[
-      const ui.PointerData(change: ui.PointerChange.down),
-      const ui.PointerData(change: ui.PointerChange.up),
+  static const ui.PointerDataPacket packet = ui.PointerDataPacket(
+    data: <ui.PointerData>[
+      ui.PointerData(change: ui.PointerChange.down),
+      ui.PointerData(change: ui.PointerChange.up),
     ]
   );
 

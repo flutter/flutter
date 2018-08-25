@@ -13,7 +13,7 @@ void main() {
         title: const Text('Hardware Key Demo'),
       ),
       body: const Center(
-        child: const RawKeyboardDemo(),
+        child: RawKeyboardDemo(),
       ),
     ),
   ));
@@ -43,7 +43,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   }
 
   @override
-  Widget build(BuildContext context)  {
+  Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return new RawKeyboardListener(
       focusNode: _focusNode,

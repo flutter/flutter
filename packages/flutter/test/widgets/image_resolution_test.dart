@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   TestImage(this.scale);
   final double scale;
 
@@ -24,6 +24,11 @@ class TestImage extends ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }
 
 class TestByteData implements ByteData {
@@ -47,7 +52,7 @@ const String testManifest = '''
 ''';
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ this.manifest: testManifest });
+  TestAssetBundle({ this.manifest = testManifest });
 
   final String manifest;
 
@@ -78,7 +83,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<String> loadString(String key, { bool cache: true }) {
+  Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'AssetManifest.json')
       return new SynchronousFuture<String>(manifest);
     return null;
@@ -88,24 +93,27 @@ class TestAssetBundle extends CachingAssetBundle {
   String toString() => '${describeIdentity(this)}()';
 }
 
+class FakeImageStreamCompleter extends ImageStreamCompleter {
+  FakeImageStreamCompleter(Future<ImageInfo> image) {
+    image.then<void>(setImage);
+  }
+}
+
 class TestAssetImage extends AssetImage {
   TestAssetImage(String name) : super(name);
 
   @override
-  Future<ImageInfo> loadAsync(AssetBundleImageKey key) {
-    ImageInfo result;
-    key.bundle.load(key.name).then<Null>((ByteData data) {
-      decodeImage(data).then<Null>((ui.Image image) {
-        result = new ImageInfo(image: image, scale: key.scale);
-      });
+  ImageStreamCompleter load(AssetBundleImageKey key) {
+    ImageInfo imageInfo;
+    key.bundle.load(key.name).then<void>((ByteData data) {
+      final TestByteData testData = data;
+      final ui.Image image = new TestImage(testData.scale);
+      imageInfo = new ImageInfo(image: image, scale: key.scale);
     });
-    assert(result != null);
-    return new SynchronousFuture<ImageInfo>(result);
-  }
-
-  @override
-  Future<ui.Image> decodeImage(covariant TestByteData data) {
-    return new SynchronousFuture<ui.Image>(new TestImage(data.scale));
+    assert(imageInfo != null);
+    return new FakeImageStreamCompleter(
+      new SynchronousFuture<ImageInfo>(imageInfo)
+    );
   }
 }
 
@@ -125,10 +133,12 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [A
         child: inferSize ?
           new Image(
             key: key,
+            excludeFromSemantics: true,
             image: new TestAssetImage(image)
           ) :
           new Image(
             key: key,
+            excludeFromSemantics: true,
             image: new TestAssetImage(image),
             height: imageSize,
             width: imageSize,
@@ -147,13 +157,13 @@ TestImage getTestImage(WidgetTester tester, Key key) {
 }
 
 Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  final Duration pumpDuration = const Duration(milliseconds: 0);
-  final EnginePhase pumpPhase = EnginePhase.layout;
+  const Duration pumpDuration = Duration(milliseconds: 0);
+  const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }
 
 void main() {
-  final String image = 'assets/image.png';
+  const String image = 'assets/image.png';
 
   testWidgets('Image for device pixel ratio 1.0', (WidgetTester tester) async {
     const double ratio = 1.0;

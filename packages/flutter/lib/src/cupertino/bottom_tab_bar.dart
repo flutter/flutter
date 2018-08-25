@@ -4,7 +4,6 @@
 
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -12,8 +11,8 @@ import 'colors.dart';
 // Standard iOS 10 tab bar height.
 const double _kTabBarHeight = 50.0;
 
-const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
-const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
+const Color _kDefaultTabBarBackgroundColor = Color(0xCCF8F8F8);
+const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -40,18 +39,21 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Key key,
     @required this.items,
     this.onTap,
-    this.currentIndex: 0,
-    this.backgroundColor: _kDefaultTabBarBackgroundColor,
-    this.activeColor: CupertinoColors.activeBlue,
-    this.inactiveColor: CupertinoColors.inactiveGray,
-    this.iconSize: 30.0,
+    this.currentIndex = 0,
+    this.backgroundColor = _kDefaultTabBarBackgroundColor,
+    this.activeColor = CupertinoColors.activeBlue,
+    this.inactiveColor = CupertinoColors.inactiveGray,
+    this.iconSize = 30.0,
   }) : assert(items != null),
        assert(items.length >= 2),
+       assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
+  ///
+  /// Must not be null.
   final List<BottomNavigationBarItem> items;
 
   /// The callback that is called when a item is tapped.
@@ -62,6 +64,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<int> onTap;
 
   /// The index into [items] of the current active item.
+  ///
+  /// Must not be null.
   final int currentIndex;
 
   /// The background color of the tab bar. If it contains transparency, the
@@ -82,6 +86,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// This value is used to to configure the [IconTheme] for the navigation
   /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
   /// should configure itself to match the icon theme's size and color.
+  ///
+  /// Must not be null.
   final double iconSize;
 
   /// True if the tab bar's background color has no transparency.
@@ -92,10 +98,11 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
-          top: const BorderSide(
+          top: BorderSide(
             color: _kDefaultTabBarBorderColor,
             width: 0.0, // One physical pixel.
             style: BorderStyle.solid,
@@ -105,7 +112,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       // TODO(xster): allow icons-only versions of the tab bar too.
       child: new SizedBox(
-        height: _kTabBarHeight,
+        height: _kTabBarHeight + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
           data: new IconThemeData(
             color: inactiveColor,
@@ -115,14 +122,17 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             style: new TextStyle(
               fontFamily: '.SF UI Text',
               fontSize: 10.0,
-              letterSpacing: -0.24,
-              fontWeight: FontWeight.w500,
+              letterSpacing: 0.1,
+              fontWeight: FontWeight.w400,
               color: inactiveColor,
             ),
-            child: new Row(
-              // Align bottom since we want the labels to be aligned.
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildTabItems(),
+            child: new Padding(
+              padding: new EdgeInsets.only(bottom: bottomPadding),
+              child: new Row(
+                // Align bottom since we want the labels to be aligned.
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: _buildTabItems(),
+              ),
             ),
           ),
         ),
@@ -146,25 +156,31 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
+      final bool active = index == currentIndex;
       result.add(
         _wrapActiveItem(
           new Expanded(
-            child: new GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap == null ? null : () { onTap(index); },
-              child: new Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget> [
-                    new Expanded(child: new Center(child: items[index].icon)),
-                    items[index].title,
-                  ],
+            child: new Semantics(
+              selected: active,
+              // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
+              hint: 'tab, ${index + 1} of ${items.length}',
+              child: new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap == null ? null : () { onTap(index); },
+                child: new Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget> [
+                      new Expanded(child: new Center(child: items[index].icon)),
+                      items[index].title,
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          active: index == currentIndex,
+          active: active,
         ),
       );
     }
@@ -173,7 +189,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(Widget item, { bool active }) {
+  Widget _wrapActiveItem(Widget item, { @required bool active }) {
     if (!active)
       return item;
 
@@ -187,7 +203,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Create a clone of the current [CupertinoTabBar] but with provided
-  /// parameters overriden.
+  /// parameters overridden.
   CupertinoTabBar copyWith({
     Key key,
     List<BottomNavigationBarItem> items,

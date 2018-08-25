@@ -9,17 +9,18 @@ void main() {
   test('editable intrinsics', () {
     final RenderEditable editable = new RenderEditable(
       text: const TextSpan(
-        style: const TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
+      locale: const Locale('ja', 'JP'),
       offset: new ViewportOffset.zero(),
     );
-    expect(editable.getMinIntrinsicWidth(double.INFINITY), 50.0);
-    expect(editable.getMaxIntrinsicWidth(double.INFINITY), 50.0);
-    expect(editable.getMinIntrinsicHeight(double.INFINITY), 10.0);
-    expect(editable.getMaxIntrinsicHeight(double.INFINITY), 10.0);
+    expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
+    expect(editable.getMaxIntrinsicWidth(double.infinity), 50.0);
+    expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
+    expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
 
     expect(
       editable.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -33,6 +34,7 @@ void main() {
         ' │ maxLines: 1\n'
         ' │ selectionColor: null\n'
         ' │ textScaleFactor: 1.0\n'
+        ' │ locale: ja_JP\n'
         ' │ selection: null\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' ╘═╦══ text ═══\n'

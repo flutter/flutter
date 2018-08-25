@@ -5,6 +5,82 @@
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
 
+@interface Pair : NSObject
+@property(atomic, readonly, strong, nullable) NSObject* left;
+@property(atomic, readonly, strong, nullable) NSObject* right;
+- (instancetype)initWithLeft:(NSObject*)first right:(NSObject*)right;
+@end
+
+@implementation Pair
+- (instancetype)initWithLeft:(NSObject*)left right:(NSObject*)right {
+  self = [super init];
+  _left = left;
+  _right = right;
+  return self;
+}
+@end
+
+const UInt8 DATE = 128;
+const UInt8 PAIR = 129;
+
+@interface ExtendedWriter : FlutterStandardWriter
+- (void)writeValue:(id)value;
+@end
+
+@implementation ExtendedWriter
+- (void)writeValue:(id)value {
+  if ([value isKindOfClass:[NSDate class]]) {
+    [self writeByte:DATE];
+    NSDate* date = value;
+    NSTimeInterval time = date.timeIntervalSince1970;
+    SInt64 ms = (SInt64) (time * 1000.0);
+    [self writeBytes:&ms length:8];
+  } else if ([value isKindOfClass:[Pair class]]) {
+    Pair* pair = value;
+    [self writeByte:PAIR];
+    [self writeValue:pair.left];
+    [self writeValue:pair.right];
+  } else {
+    [super writeValue:value];
+  }
+}
+@end
+
+@interface ExtendedReader : FlutterStandardReader
+- (id)readValueOfType:(UInt8)type;
+@end
+
+@implementation ExtendedReader
+- (id)readValueOfType:(UInt8)type {
+  switch (type) {
+    case DATE: {
+      SInt64 value;
+      [self readBytes:&value length:8];
+      NSTimeInterval time = [NSNumber numberWithLong:value].doubleValue / 1000.0;
+      return [NSDate dateWithTimeIntervalSince1970:time];
+    }
+    case PAIR: {
+      return [[Pair alloc] initWithLeft:[self readValue] right:[self readValue]];
+    }
+    default: return [super readValueOfType:type];
+  }
+}
+@end
+
+@interface ExtendedReaderWriter : FlutterStandardReaderWriter
+- (FlutterStandardWriter*)writerWithData:(NSMutableData*)data;
+- (FlutterStandardReader*)readerWithData:(NSData*)data;
+@end
+
+@implementation ExtendedReaderWriter
+- (FlutterStandardWriter*)writerWithData:(NSMutableData*)data {
+  return [[ExtendedWriter alloc] initWithData:data];
+}
+- (FlutterStandardReader*)readerWithData:(NSData*)data {
+  return [[ExtendedReader alloc] initWithData:data];
+}
+@end
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -13,6 +89,7 @@
   FlutterViewController *flutterController =
       (FlutterViewController *)self.window.rootViewController;
 
+  ExtendedReaderWriter* extendedReaderWriter = [ExtendedReaderWriter new];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"binary-msg"
                                        binaryMessenger:flutterController
@@ -28,7 +105,7 @@
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"std-msg"
                                        binaryMessenger:flutterController
-                                                 codec:[FlutterStandardMessageCodec sharedInstance]]];
+                                                 codec:[FlutterStandardMessageCodec codecWithReaderWriter:extendedReaderWriter]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"json-method"
                                 binaryMessenger:flutterController
@@ -36,7 +113,7 @@
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"std-method"
                                 binaryMessenger:flutterController
-                                          codec:[FlutterStandardMethodCodec sharedInstance]]];
+                                          codec:[FlutterStandardMethodCodec codecWithReaderWriter:extendedReaderWriter]]];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

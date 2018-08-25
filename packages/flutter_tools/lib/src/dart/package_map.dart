@@ -5,12 +5,14 @@
 import 'package:package_config/packages_file.dart' as packages_file;
 
 import '../base/file_system.dart';
+import '../base/platform.dart';
 
 const String kPackagesFileName = '.packages';
 
 Map<String, Uri> _parse(String packagesPath) {
   final List<int> source = fs.file(packagesPath).readAsBytesSync();
-  return packages_file.parse(source, new Uri.file(packagesPath));
+  return packages_file.parse(source,
+      new Uri.file(packagesPath, windows: platform.isWindows));
 }
 
 class PackageMap {

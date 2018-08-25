@@ -4,9 +4,19 @@
 # found in the LICENSE file.
 
 RunCommand() {
-  echo "♦ $*"
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    echo "♦ $*"
+  fi
   "$@"
   return $?
+}
+
+# When provided with a pipe by the host Flutter build process, output to the
+# pipe goes to stdout of the Flutter build process directly.
+StreamOutput() {
+  if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
+    echo "$1" > $SCRIPT_OUTPUT_STREAM_FILE
+  fi
 }
 
 EchoError() {
@@ -73,14 +83,28 @@ BuildApp() {
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand rm -f -- "${derived_dir}/app.flx"
-  RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
-  RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+
+  if [[ -e "${project_path}/.ios" ]]; then
+    RunCommand rm -rf -- "${derived_dir}/engine"
+    mkdir "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.podspec" "${derived_dir}/engine"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}/engine"
+    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  else
+    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  fi
+
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
+
+  local verbose_flag=""
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    verbose_flag="--verbose"
+  fi
 
   local build_dir="${FLUTTER_BUILD_DIR:-build}"
   local local_engine_flag=""
@@ -88,56 +112,93 @@ BuildApp() {
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
   fi
 
-  if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
-    local aot_flags=""
-    if [[ "$build_mode" == "debug" ]]; then
-      aot_flags="--interpreter --debug"
-    else
-      aot_flags="--${build_mode}"
-    fi
+  local preview_dart_2_flag=""
+  if [[ -n "$PREVIEW_DART_2" ]]; then
+    preview_dart_2_flag="--preview-dart-2"
+  else
+    preview_dart_2_flag="--no-preview-dart-2"
+  fi
 
-    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
+  local track_widget_creation_flag=""
+  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
+    track_widget_creation_flag="--track-widget-creation"
+  fi
+
+  if [[ "${build_mode}" != "debug" ]]; then
+    StreamOutput " ├─Building Dart code..."
+    # Transform ARCHS to comma-separated list of target architectures.
+    local archs="${ARCHS// /,}"
+    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
+      ${verbose_flag}                                                       \
+      build aot                                                             \
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
-      ${aot_flags}                                                          \
-      ${local_engine_flag}
+      --${build_mode}                                                       \
+      --ios-arch="${archs}"                                                 \
+      ${local_engine_flag}                                                  \
+      ${preview_dart_2_flag}                                                \
+      ${track_widget_creation_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
       exit -1
     fi
+    StreamOutput "done"
 
     RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
+
+    # Build stub for all requested architectures.
+    local arch_flags=""
+    read -r -a archs <<< "$ARCHS"
+    for arch in "${archs[@]}"; do
+      arch_flags="${arch_flags}-arch $arch "
+    done
+
     RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        ${arch_flags} \
         -dynamiclib \
         -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
         -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
         -install_name '@rpath/App.framework/App' \
         -o "${derived_dir}/App.framework/App" -)"
   fi
-  RunCommand cp -- "${derived_dir}/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
+
+  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
+  if [[ -e "${project_path}/.ios" ]]; then
+    plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
+  fi
+
+  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
     precompilation_flag="--precompiled"
   fi
 
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
-    --target="${target_path}"                                             \
-    --output-file="${derived_dir}/app.flx"                                \
-    --snapshot="${build_dir}/snapshot_blob.bin"                           \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                          \
-    --working-dir="${build_dir}/flx"                                      \
-    ${precompilation_flag}                                                \
-    ${local_engine_flag}                                                  \
+  StreamOutput " ├─Assembling Flutter resources..."
+  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+    ${verbose_flag}                                                         \
+    build bundle                                                            \
+    --target-platform=ios                                                   \
+    --target="${target_path}"                                               \
+    --snapshot="${build_dir}/snapshot_blob.bin"                             \
+    --${build_mode}                                                         \
+    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
+    --asset-dir="${derived_dir}/flutter_assets"                             \
+    ${precompilation_flag}                                                  \
+    ${local_engine_flag}                                                    \
+    ${preview_dart_2_flag}                                                  \
+    ${track_widget_creation_flag}
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
     exit -1
   fi
+  StreamOutput "done"
+  StreamOutput " └─Compiling, linking and signing..."
 
   RunCommand popd > /dev/null
 
@@ -159,7 +220,8 @@ GetFrameworkExecutablePath() {
 LipoExecutable() {
   local executable="$1"
   shift
-  local archs=("$@")
+  # Split $@ into an array.
+  read -r -a archs <<< "$@"
 
   # Extract architecture-specific framework executables.
   local all_executables=()
@@ -200,11 +262,10 @@ LipoExecutable() {
 ThinFramework() {
   local framework_dir="$1"
   shift
-  local archs=("$@")
 
   local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
-  LipoExecutable "${executable}" "${archs[@]}"
+  LipoExecutable "${executable}" "$@"
 }
 
 ThinAppFrameworks() {
@@ -219,10 +280,10 @@ ThinAppFrameworks() {
 
 # Main entry point.
 
-# TODO(cbracken) improve error handling, then enable set -e
+# TODO(cbracken): improve error handling, then enable set -e
 
 if [[ $# == 0 ]]; then
-  # Backwards-comptibility: if no args are provided, build.
+  # Backwards-compatibility: if no args are provided, build.
   BuildApp
 else
   case $1 in

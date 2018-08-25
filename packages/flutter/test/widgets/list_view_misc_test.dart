@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final Key blockKey = const Key('test');
+const Key blockKey = Key('test');
 
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
@@ -72,7 +72,7 @@ void main() {
     int first = 0;
     int second = 0;
 
-    Widget buildBlock({ bool reverse: false }) {
+    Widget buildBlock({ bool reverse = false }) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new ListView(
@@ -100,7 +100,7 @@ void main() {
 
     await tester.pumpWidget(buildBlock(reverse: true));
 
-    final Offset target = const Offset(200.0, 200.0);
+    const Offset target = Offset(200.0, 200.0);
     await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));
@@ -120,7 +120,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           controller: controller,
-          children: <Widget>[const Text('A'), const Text('B'), const Text('C')],
+          children: const <Widget>[Text('A'), Text('B'), Text('C')],
         ),
       );
     }
@@ -150,7 +150,7 @@ void main() {
       ),
     );
 
-    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList, skipOffstage: false));
 
     final double maxScrollOffset = element.estimateMaxScrollOffset(
       null,
@@ -178,23 +178,23 @@ void main() {
             new Flexible(
               // The overall height of the ListView's contents is 500
               child: new ListView(
-                children: <Widget>[
-                  const SizedBox(
+                children: const <Widget>[
+                  SizedBox(
                     height: 150.0,
-                    child: const Center(
-                      child: const Text('top')
+                    child: Center(
+                      child: Text('top')
                     ),
                   ),
-                  const SizedBox(
+                  SizedBox(
                     height: 200.0,
-                    child: const Center(
-                      child: const Text('middle')
+                    child: Center(
+                      child: Text('middle')
                     ),
                   ),
-                  const SizedBox(
+                  SizedBox(
                     height: 150.0,
-                    child: const Center(
-                      child: const Text('bottom')
+                    child: Center(
+                      child: Text('bottom')
                     ),
                   ),
                 ],
@@ -205,7 +205,7 @@ void main() {
               sizeFactor: controller.view,
               child: const SizedBox(
                 height: 300.0,
-                child: const Text('keyboard'),
+                child: Text('keyboard'),
               ),
             ),
           ],

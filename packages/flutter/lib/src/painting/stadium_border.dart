@@ -41,6 +41,7 @@ class StadiumBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
+    assert(t != null);
     if (a is StadiumBorder)
       return new StadiumBorder(side: BorderSide.lerp(a.side, side, t));
     if (a is CircleBorder) {
@@ -61,6 +62,7 @@ class StadiumBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
+    assert(t != null);
     if (b is StadiumBorder)
       return new StadiumBorder(side: BorderSide.lerp(side, b.side, t));
     if (b is CircleBorder) {
@@ -127,8 +129,8 @@ class StadiumBorder extends ShapeBorder {
 // Class to help with transitioning to/from a CircleBorder.
 class _StadiumToCircleBorder extends ShapeBorder {
   const _StadiumToCircleBorder({
-    this.side: BorderSide.none,
-    this.circleness: 0.0,
+    this.side = BorderSide.none,
+    this.circleness = 0.0,
   }) : assert(side != null),
        assert(circleness != null);
 
@@ -151,6 +153,7 @@ class _StadiumToCircleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
+    assert(t != null);
     if (a is StadiumBorder) {
       return new _StadiumToCircleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -174,6 +177,7 @@ class _StadiumToCircleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
+    assert(t != null);
     if (b is StadiumBorder) {
       return new _StadiumToCircleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -274,9 +278,9 @@ class _StadiumToCircleBorder extends ShapeBorder {
 // Class to help with transitioning to/from a RoundedRectBorder.
 class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   const _StadiumToRoundedRectangleBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
-    this.rectness: 0.0,
+    this.side = BorderSide.none,
+    this.borderRadius = BorderRadius.zero,
+    this.rectness = 0.0,
   }) : assert(side != null),
        assert(borderRadius != null),
        assert(rectness != null);
@@ -303,6 +307,7 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
+    assert(t != null);
     if (a is StadiumBorder) {
       return new _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -329,6 +334,7 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
+    assert(t != null);
     if (b is StadiumBorder) {
       return new _StadiumToRoundedRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -357,7 +363,7 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
     return BorderRadius.lerp(
       borderRadius,
       new BorderRadius.all(new Radius.circular(rect.shortestSide / 2.0)),
-      (1.0 - rectness)
+      1.0 - rectness
     );
   }
 

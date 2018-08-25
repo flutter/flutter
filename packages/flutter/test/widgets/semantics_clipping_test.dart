@@ -45,12 +45,10 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
-            id: 1,
             label: '1',
             rect: new Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           new TestSemantics(
-            id: 2,
             label: '2',
             rect: new Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),
@@ -58,6 +56,7 @@ void main() {
         ],
       ),
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();
@@ -105,18 +104,17 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
-            id: 3,
             label: '1',
             rect: new Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           new TestSemantics(
-            id: 4,
             label: '2\n3',
             rect: new Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),
         ],
       ),
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();

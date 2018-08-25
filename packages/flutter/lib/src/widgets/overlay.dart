@@ -60,8 +60,8 @@ class OverlayEntry {
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
     @required this.builder,
-    bool opaque: false,
-    bool maintainState: false,
+    bool opaque = false,
+    bool maintainState = false,
   }) : assert(builder != null),
        assert(opaque != null),
        assert(maintainState != null),
@@ -202,7 +202,7 @@ class Overlay extends StatefulWidget {
   /// created by the [WidgetsApp] or the [MaterialApp] for the application.
   const Overlay({
     Key key,
-    this.initialEntries: const <OverlayEntry>[]
+    this.initialEntries = const <OverlayEntry>[]
   }) : assert(initialEntries != null),
        super(key: key);
 
@@ -370,11 +370,11 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     // TODO(jacobr): use IterableProperty instead as that would
     // provide a slightly more consistent string summary of the List.
-    description.add(new DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
+    properties.add(new DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
   }
 }
 
@@ -519,7 +519,7 @@ class _TheatreElement extends RenderObjectElement {
 // children of its primary subtree's stack can be moved to this object's list
 // of zombie children without changing their parent data objects.
 class _RenderTheatre extends RenderBox
-  with RenderObjectWithChildMixin<RenderStack>, RenderProxyBoxMixin,
+  with RenderObjectWithChildMixin<RenderStack>, RenderProxyBoxMixin<RenderStack>,
        ContainerRenderObjectMixin<RenderBox, StackParentData> {
 
   @override
@@ -565,7 +565,7 @@ class _RenderTheatre extends RenderBox
     if (child != null)
       children.add(child.toDiagnosticsNode(name: 'onstage'));
 
-    if (firstChild  != null) {
+    if (firstChild != null) {
       RenderBox child = firstChild;
 
       int count = 1;

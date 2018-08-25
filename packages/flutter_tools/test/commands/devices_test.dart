@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -46,10 +45,10 @@ class MockProcessManager extends Mock implements ProcessManager {
       List<dynamic> command, {
         String workingDirectory,
         Map<String, String> environment,
-        bool includeParentEnvironment: true,
-        bool runInShell: false,
-        Encoding stdoutEncoding: SYSTEM_ENCODING,
-        Encoding stderrEncoding: SYSTEM_ENCODING,
+        bool includeParentEnvironment = true,
+        bool runInShell = false,
+        Encoding stdoutEncoding = systemEncoding,
+        Encoding stderrEncoding = systemEncoding,
       }) async {
     return new ProcessResult(0, 0, '', '');
   }
@@ -59,10 +58,10 @@ class MockProcessManager extends Mock implements ProcessManager {
       List<dynamic> command, {
         String workingDirectory,
         Map<String, String> environment,
-        bool includeParentEnvironment: true,
-        bool runInShell: false,
-        Encoding stdoutEncoding: SYSTEM_ENCODING,
-        Encoding stderrEncoding: SYSTEM_ENCODING,
+        bool includeParentEnvironment = true,
+        bool runInShell = false,
+        Encoding stdoutEncoding = systemEncoding,
+        Encoding stderrEncoding = systemEncoding,
       }) {
     return new ProcessResult(0, 0, '', '');
   }

@@ -40,7 +40,7 @@ class _TimePickerLauncher extends StatelessWidget {
 }
 
 Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged,
-    { Locale locale: const Locale('en', 'US') }) async {
+    { Locale locale = const Locale('en', 'US') }) async {
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged, locale: locale,));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -106,9 +106,9 @@ void main() {
   });
 
   testWidgets('uses two-ring 24-hour dial for H and HH hour formats', (WidgetTester tester) async {
-    const List<Locale> locales = const <Locale>[
-      const Locale('en', 'GB'), // HH
-      const Locale('es', 'ES'), // H
+    const List<Locale> locales = <Locale>[
+      Locale('en', 'GB'), // HH
+      Locale('es', 'ES'), // H
     ];
     for (Locale locale in locales) {
       // Tap along the segment stretching from the center to the edge at
@@ -126,71 +126,72 @@ void main() {
     }
   });
 
-  const List<String> labels12To11 = const <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-  const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
-  const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+  const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
+  const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
   Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           GlobalMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
         child: new MediaQuery(
           data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-          child: new Directionality(
-            textDirection: TextDirection.ltr,
-            child: new Navigator(
-              onGenerateRoute: (RouteSettings settings) {
-                return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-                  showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
-                  return new Container();
-                });
-              },
+          child: new Material(
+            child: new Directionality(
+              textDirection: TextDirection.ltr,
+              child: new Navigator(
+                onGenerateRoute: (RouteSettings settings) {
+                  return new MaterialPageRoute<void>(builder: (BuildContext context) {
+                    return new FlatButton(
+                      onPressed: () {
+                        showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
+                      },
+                      child: const Text('X'),
+                    );
+                  });
+                },
+              ),
             ),
           ),
         ),
       ),
     );
-    // Pump once, because the dialog shows up asynchronously.
-    await tester.pump();
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
   }
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, false);
 
-    final CustomPaint dialPaint = tester.widget(find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-      matching: find.byType(CustomPaint),
-    ));
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true);
 
-    final CustomPaint dialPaint = tester.widget(find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-      matching: find.byType(CustomPaint),
-    ));
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
+    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
+    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
   });
 }

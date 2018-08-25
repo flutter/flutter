@@ -7,11 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
-    final MaterialLocalizations localizations = const DefaultMaterialLocalizations();
+    const MaterialLocalizations localizations = DefaultMaterialLocalizations();
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
     expect(localizations.backButtonTooltip, isNotNull);
     expect(localizations.closeButtonTooltip, isNotNull);
+    expect(localizations.deleteButtonTooltip, isNotNull);
     expect(localizations.nextMonthTooltip, isNotNull);
     expect(localizations.previousMonthTooltip, isNotNull);
     expect(localizations.nextPageTooltip, isNotNull);
@@ -28,6 +29,18 @@ void main() {
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);
     expect(localizations.viewLicensesButtonLabel, isNotNull);
+    expect(localizations.modalBarrierDismissLabel, isNotNull);
+    expect(localizations.drawerLabel, isNotNull);
+    expect(localizations.popupMenuLabel, isNotNull);
+    expect(localizations.dialogLabel, isNotNull);
+    expect(localizations.alertDialogLabel, isNotNull);
+    expect(localizations.searchFieldLabel, isNotNull);
+    expect(localizations.reorderItemUp, isNotNull);
+    expect(localizations.reorderItemDown, isNotNull);
+    expect(localizations.reorderItemLeft, isNotNull);
+    expect(localizations.reorderItemRight, isNotNull);
+    expect(localizations.reorderItemToEnd, isNotNull);
+    expect(localizations.reorderItemToStart, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

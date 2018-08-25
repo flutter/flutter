@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 const double kColorItemHeight = 48.0;
 
 class Palette {
-  Palette({ this.name, this.primary, this.accent, this.threshold: 900});
+  Palette({ this.name, this.primary, this.accent, this.threshold = 900});
 
   final String name;
   final MaterialColor primary;
@@ -46,7 +45,7 @@ class ColorItem extends StatelessWidget {
     Key key,
     @required this.index,
     @required this.color,
-    this.prefix: '',
+    this.prefix = '',
   }) : assert(index != null),
        assert(color != null),
        assert(prefix != null),
@@ -60,25 +59,32 @@ class ColorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      height: kColorItemHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      color: color,
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          new Text('$prefix$index'),
-          new Text(colorString()),
-        ],
+    return new Semantics(
+      container: true,
+      child: new Container(
+        height: kColorItemHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        color: color,
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              new Text('$prefix$index'),
+              new Text(colorString()),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
 class PaletteTabView extends StatelessWidget {
-  static const List<int> primaryKeys = const <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-  static const List<int> accentKeys = const <int>[100, 200, 400, 700];
+  static const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   PaletteTabView({
     Key key,
@@ -93,7 +99,7 @@ class PaletteTabView extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    final List<Widget> colorItems =  primaryKeys.map((int index) {
+    final List<Widget> colorItems = primaryKeys.map((int index) {
       return new DefaultTextStyle(
         style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
         child: new ColorItem(index: index, color: colors.primary[index]),

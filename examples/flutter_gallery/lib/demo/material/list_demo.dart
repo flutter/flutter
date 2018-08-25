@@ -52,7 +52,7 @@ class _ListDemoState extends State<ListDemo> {
     final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
         decoration: const BoxDecoration(
-          border: const Border(top: const BorderSide(color: Colors.black26)),
+          border: Border(top: BorderSide(color: Colors.black26)),
         ),
         child: new ListView(
           shrinkWrap: true,
@@ -227,7 +227,11 @@ class _ListDemoState extends State<ListDemo> {
             },
           ),
           new IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: new Icon(
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
+            ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
           ),

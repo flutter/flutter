@@ -28,7 +28,7 @@ Future<Null> generateDocs(String url, String docName, String checkFile) async {
   final Archive archive = new ZipDecoder().decodeBytes(response.bodyBytes);
 
   final Directory output = new Directory('$kDocRoot/$docName');
-  print('Extracing $docName to ${output.path}');
+  print('Extracting $docName to ${output.path}');
   output.createSync(recursive: true);
 
   for (ArchiveFile af in archive) {
