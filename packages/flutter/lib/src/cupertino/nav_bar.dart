@@ -93,6 +93,7 @@ Widget _wrapWithBackground({
   Color backgroundColor,
   Widget child,
   bool updateSystemUiOverlay = true,
+  Clip clipBehavior,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -118,6 +119,7 @@ Widget _wrapWithBackground({
     return childWithBackground;
 
   return new ClipRect(
+    clipBehavior: clipBehavior,
     child: new BackdropFilter(
       filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
@@ -186,9 +188,11 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.actionsForegroundColor = CupertinoColors.activeBlue,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyMiddle != null),
        assert(transitionBetweenRoutes != null),
+       assert(clipBehavior != null),
        assert(
          heroTag != null,
          'heroTag cannot be null. Use transitionBetweenRoutes = false to '
@@ -331,6 +335,11 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Must not be null. Using [Clip.none] will produce undefined visual behavior.
+  final Clip clipBehavior;
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool get fullObstruction => backgroundColor.alpha == 0xFF;
@@ -466,8 +475,10 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.actionsForegroundColor = CupertinoColors.activeBlue,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.clipBehavior = Clip.hardEdge,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
+       assert(clipBehavior != null),
        assert(
          automaticallyImplyTitle == true || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -554,6 +565,11 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.navBar.heroTag}
   final Object heroTag;
 
+  /// {@macro flutter.widgets.Clip}
+  ///
+  /// Must not be null. Using [Clip.none] will produce undefined visual behavior.
+  final Clip clipBehavior;
+
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
@@ -594,6 +610,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         heroTag: widget.heroTag,
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
         alwaysShowMiddle: widget.middle != null,
+        clipBehavior: widget.clipBehavior,
       ),
     );
   }
@@ -618,6 +635,7 @@ class _LargeTitleNavigationBarSliverDelegate
     @required this.heroTag,
     @required this.persistentHeight,
     @required this.alwaysShowMiddle,
+    @required this.clipBehavior,
   }) : assert(persistentHeight != null),
        assert(alwaysShowMiddle != null),
        assert(transitionBetweenRoutes != null);
@@ -638,6 +656,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
+  final Clip clipBehavior;
 
   @override
   double get minExtent => persistentHeight;
@@ -676,6 +695,7 @@ class _LargeTitleNavigationBarSliverDelegate
     final Widget navBar = _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
+      clipBehavior: clipBehavior,
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -685,6 +705,7 @@ class _LargeTitleNavigationBarSliverDelegate
             right: 0.0,
             bottom: 0.0,
             child: new ClipRect(
+              clipBehavior: clipBehavior,
               // The large title starts at the persistent bar.
               // It's aligned with the bottom of the sliver and expands clipped
               // and behind the persistent bar.
