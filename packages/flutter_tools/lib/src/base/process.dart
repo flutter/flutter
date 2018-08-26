@@ -191,14 +191,17 @@ Future<int> runInteractively(List<String> command, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  process.stdin.addStream(stdin);
+  final Future<void> stdinPipe = process.stdin.addStream(stdin);
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
     stdout.addStream(process.stdout),
     stderr.addStream(process.stderr),
   ]);
-  return await process.exitCode;
+  final int exitCode = await process.exitCode;
+  // Give a chance to let all the stdin contents output.
+  await stdinPipe;
+  return exitCode;
 }
 
 Future<Null> runAndKill(List<String> cmd, Duration timeout) {
