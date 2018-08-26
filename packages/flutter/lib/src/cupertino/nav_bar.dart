@@ -93,8 +93,9 @@ Widget _wrapWithBackground({
   Color backgroundColor,
   Widget child,
   bool updateSystemUiOverlay = true,
-  Clip clipBehavior,
+  @required Clip clipBehavior,
 }) {
+  assert(clipBehavior != null);
   Widget result = child;
   if (updateSystemUiOverlay) {
     final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
@@ -387,6 +388,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final Widget navBar = _wrapWithBackground(
       border: widget.border,
       backgroundColor: widget.backgroundColor,
+      clipBehavior: widget.clipBehavior,
       child: new _PersistentNavigationBar(
         components: components,
         padding: widget.padding,
@@ -1478,6 +1480,9 @@ class _NavigationBarTransition extends StatelessWidget {
             updateSystemUiOverlay: false,
             backgroundColor: backgroundTween.evaluate(animation),
             border: borderTween.evaluate(animation),
+            // We need to pick one. Go with the fastest option since the clip
+            // is super simple (just a blur rect) and it's during a fast animation.
+            clipBehavior: Clip.hardEdge,
             child: new SizedBox(
               height: heightTween.evaluate(animation),
               width: double.infinity,
