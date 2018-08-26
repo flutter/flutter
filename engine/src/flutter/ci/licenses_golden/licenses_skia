@@ -1,4 +1,4 @@
-Signature: 258c6edf1dee06e54ca0b396de058074
+Signature: 74524cdbbbd4bf3a3d90b3bee5cb8ef0
 
 UNUSED LICENSES:
 
@@ -4127,7 +4127,6 @@ FILE: ../../../third_party/skia/include/utils/SkShadowUtils.h
 FILE: ../../../third_party/skia/modules/skottie/include/Skottie.h
 FILE: ../../../third_party/skia/modules/skottie/src/Skottie.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAnimator.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieAnimator.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieValue.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGColor.h
