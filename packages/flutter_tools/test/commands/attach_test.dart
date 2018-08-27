@@ -26,48 +26,132 @@ void main() {
           .posix,
     );
 
-    setUpAll(() {
+    setUp(() {
       Cache.disableLocking();
       testFileSystem.directory('lib').createSync();
       testFileSystem.file('lib/main.dart').createSync();
     });
 
-    testUsingContext('finds observatory port and forwards', () async {
+    group('with one device and no specified target file', () {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = new MockDeviceLogReader();
-      final MockPortForwarder portForwarder = new MockPortForwarder();
-      final MockAndroidDevice device = new MockAndroidDevice();
-      when(device.getLogReader()).thenAnswer((_) {
-        // Now that the reader is used, start writing messages to it.
-        Timer.run(() {
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine(
-              'Observatory listening on http://127.0.0.1:$devicePort');
+
+      MockDeviceLogReader mockLogReader;
+      MockPortForwarder portForwarder;
+      MockAndroidDevice device;
+
+      setUp(() {
+        mockLogReader = new MockDeviceLogReader();
+        portForwarder = new MockPortForwarder();
+        device = new MockAndroidDevice();
+        when(device.getLogReader()).thenAnswer((_) {
+          // Now that the reader is used, start writing messages to it.
+          Timer.run(() {
+            mockLogReader.addLine('Foo');
+            mockLogReader.addLine(
+                'Observatory listening on http://127.0.0.1:$devicePort');
+          });
+
+          return mockLogReader;
         });
+        when(device.portForwarder).thenReturn(portForwarder);
+        when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
+            .thenAnswer((_) async => hostPort);
+        when(portForwarder.forwardedPorts).thenReturn(
+            <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+        when(portForwarder.unforward(any)).thenAnswer((_) async => null);
 
-        return mockLogReader;
+        // We cannot add the device to a device manager because that is
+        // only enabled by the context of each testUsingContext call.
+        //
+        // Instead each test will add the device to the device manager
+        // on its own.
       });
-      when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-          .thenAnswer((_) async => hostPort);
-      when(portForwarder.forwardedPorts).thenReturn(
-          <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
-      testDeviceManager.addDevice(device);
 
-      final AttachCommand command = new AttachCommand();
+      tearDown(() {
+        mockLogReader.dispose();
+      });
 
-      await createTestCommandRunner(command).run(<String>['attach']);
+      testUsingContext('finds observatory port and forwards', () async {
+        testDeviceManager.addDevice(device);
 
-      verify(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-          .called(1);
+        final AttachCommand command = new AttachCommand();
 
-      mockLogReader.dispose();
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-    },
-    );
+        await createTestCommandRunner(command).run(<String>['attach']);
+
+        verify(
+          portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
+        ).called(1);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+
+      testUsingContext('accepts filesystem parameters', () async {
+        testDeviceManager.addDevice(device);
+
+        const String filesystemScheme = 'foo';
+        const String filesystemRoot = '/build-output/';
+        const String projectRoot = '/build-output/project-root';
+        const String outputDill = '/tmp/output.dill';
+
+        final MockHotRunnerFactory mockHotRunnerFactory = new MockHotRunnerFactory();
+        when(
+          mockHotRunnerFactory.build(
+            any,
+            target: anyNamed('target'),
+            projectRootPath: anyNamed('projectRootPath'),
+            dillOutputPath: anyNamed('dillOutputPath'),
+            debuggingOptions: anyNamed('debuggingOptions'),
+            packagesFilePath: anyNamed('packagesFilePath'),
+            usesTerminalUI: anyNamed('usesTerminalUI'),
+          ),
+        )..thenReturn(new MockHotRunner());
+
+        final AttachCommand command = new AttachCommand(
+          hotRunnerFactory: mockHotRunnerFactory,
+        );
+        await createTestCommandRunner(command).run(<String>[
+          'attach',
+          '--filesystem-scheme',
+          filesystemScheme,
+          '--filesystem-root',
+          filesystemRoot,
+          '--project-root',
+          projectRoot,
+          '--output-dill',
+          outputDill,
+          '-v',
+        ]);
+
+        // Validate the attach call built a mock runner with the right
+        // project root and output dill.
+        final VerificationResult verificationResult = verify(
+          mockHotRunnerFactory.build(
+            captureAny,
+            target: anyNamed('target'),
+            projectRootPath: projectRoot,
+            dillOutputPath: outputDill,
+            debuggingOptions: anyNamed('debuggingOptions'),
+            packagesFilePath: anyNamed('packagesFilePath'),
+            usesTerminalUI: anyNamed('usesTerminalUI'),
+          ),
+        )..called(1);
+        
+        final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
+        expect(flutterDevices, hasLength(1));
+        
+        // Validate that the attach call built a flutter device with the right
+        // output dill, filesystem scheme, and filesystem root.
+        final FlutterDevice flutterDevice = flutterDevices.first;
+
+        expect(flutterDevice.dillOutputPath, outputDill);
+        expect(flutterDevice.fileSystemScheme, filesystemScheme);
+        expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+      });
+    });
+
 
     testUsingContext('selects specified target', () async {
       const int devicePort = 499;
@@ -177,84 +261,6 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     },);
-
-    testUsingContext('accepts filesystem parameters', () async {
-      const String filesystemScheme = 'foo';
-      const String filesystemRoot = '/build-output/';
-      const String projectRoot = '/build-output/project-root';
-      const String outputDill = '/tmp/output.dill';
-      const int devicePort = 499;
-      const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = new MockDeviceLogReader();
-      final MockPortForwarder portForwarder = new MockPortForwarder();
-      final MockAndroidDevice device = new MockAndroidDevice();
-      final MockHotRunnerFactory mockHotRunnerFactory = new MockHotRunnerFactory();
-      when(device.getLogReader()).thenAnswer((_) {
-        // Now that the reader is used, start writing messages to it.
-        Timer.run(() {
-          mockLogReader.addLine('Foo');
-          mockLogReader.addLine(
-              'Observatory listening on http://127.0.0.1:$devicePort');
-        });
-
-        return mockLogReader;
-      });
-      when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-          .thenAnswer((_) async => hostPort);
-      when(portForwarder.forwardedPorts).thenReturn(
-          <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
-      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
-      when(
-        mockHotRunnerFactory.build(
-          any,
-          target: anyNamed('target'),
-          projectRootPath: anyNamed('projectRootPath'),
-          dillOutputPath: anyNamed('dillOutputPath'),
-          debuggingOptions: anyNamed('debuggingOptions'),
-          packagesFilePath: anyNamed('packagesFilePath'),
-          usesTerminalUI: anyNamed('usesTerminalUI'),
-        ),
-      )..thenReturn(new MockHotRunner());
-
-      testDeviceManager.addDevice(device);
-
-      final AttachCommand command = new AttachCommand(
-        hotRunnerFactory: mockHotRunnerFactory,
-      );
-      await createTestCommandRunner(command).run(<String>[
-        'attach',
-        '--filesystem-scheme',
-        filesystemScheme,
-        '--filesystem-root',
-        filesystemRoot,
-        '--project-root',
-        projectRoot,
-        '--output-dill',
-        outputDill,
-        '-v',
-      ]);
-
-      final VerificationResult verificationResult = verify(
-        mockHotRunnerFactory.build(
-          captureAny,
-          target: anyNamed('target'),
-          projectRootPath: projectRoot,
-          dillOutputPath: outputDill,
-          debuggingOptions: anyNamed('debuggingOptions'),
-          packagesFilePath: anyNamed('packagesFilePath'),
-          usesTerminalUI: anyNamed('usesTerminalUI'),
-        ),
-      )..called(1);
-      final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
-      expect(flutterDevices, hasLength(1));
-      final FlutterDevice flutterDevice = flutterDevices.first;
-      expect(flutterDevice.dillOutputPath, outputDill);
-      expect(flutterDevice.fileSystemScheme, filesystemScheme);
-      expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => testFileSystem,
-    });
   });
 }
 
