@@ -144,6 +144,8 @@ class AccessibilityBridge
         }
 
         AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner, virtualViewId);
+        // Work around for https://github.com/flutter/flutter/issues/2101 
+        result.setViewIdResourceName(""); 
         result.setPackageName(mOwner.getContext().getPackageName());
         result.setClassName("android.view.View");
         result.setSource(mOwner, virtualViewId);
