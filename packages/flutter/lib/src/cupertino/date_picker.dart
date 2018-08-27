@@ -71,7 +71,8 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.minuteInterval = 1,
     this.secondInterval = 1,
     @required this.onTimerDurationChanged,
-  }) : assert(onTimerDurationChanged != null),
+  }) : assert(mode != null),
+       assert(onTimerDurationChanged != null),
        assert(initialTimerDuration >= const Duration(seconds: 0)),
        assert(initialTimerDuration < const Duration(days: 1)),
        assert(minuteInterval > 0 && 60 % minuteInterval == 0),
@@ -97,10 +98,10 @@ class CupertinoTimerPicker extends StatefulWidget {
   final ValueChanged<Duration> onTimerDurationChanged;
 
   @override
-  State<StatefulWidget> createState() => new _TimerState();
+  State<StatefulWidget> createState() => new _CupertinoTimerPickerState();
 }
 
-class _TimerState extends State<CupertinoTimerPicker> {
+class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   int textDirectionFactor;
   CupertinoLocalizations localizations;
 
@@ -114,29 +115,17 @@ class _TimerState extends State<CupertinoTimerPicker> {
   int selectedMinute;
   int selectedSecond;
 
-  // Controllers for the 3 units: hour, minute, and second.
-  FixedExtentScrollController hourController;
-  FixedExtentScrollController minuteController;
-  FixedExtentScrollController secondController;
-
   @override
   void initState() {
     super.initState();
 
     selectedMinute = widget.initialTimerDuration.inMinutes % 60;
-    minuteController = new FixedExtentScrollController(
-      initialItem: selectedMinute ~/ widget.minuteInterval);
 
-    if (widget.mode != CupertinoTimerPickerMode.ms) {
+    if (widget.mode != CupertinoTimerPickerMode.ms)
       selectedHour = widget.initialTimerDuration.inHours;
-      hourController = new FixedExtentScrollController(initialItem: selectedHour);
-    }
 
-    if (widget.mode != CupertinoTimerPickerMode.hm) {
+    if (widget.mode != CupertinoTimerPickerMode.hm)
       selectedSecond = widget.initialTimerDuration.inSeconds % 60;
-      secondController = new FixedExtentScrollController(
-        initialItem: selectedSecond ~/ widget.secondInterval);
-    }
   }
 
   // Builds a text label with customized scale factor and font weight.
@@ -161,7 +150,7 @@ class _TimerState extends State<CupertinoTimerPicker> {
 
   Widget _buildHourPicker() {
     return new CupertinoPicker(
-      scrollController: hourController,
+      scrollController: new FixedExtentScrollController(initialItem: selectedHour),
       offAxisFraction: -0.5 * textDirectionFactor,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
@@ -236,7 +225,9 @@ class _TimerState extends State<CupertinoTimerPicker> {
       offAxisFraction = -0.5 * textDirectionFactor;
 
     return new CupertinoPicker(
-      scrollController: minuteController,
+      scrollController: new FixedExtentScrollController(
+        initialItem: selectedMinute ~/ widget.minuteInterval,
+      ),
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
@@ -329,7 +320,6 @@ class _TimerState extends State<CupertinoTimerPicker> {
       );
     }
 
-
     return Stack(
       children: <Widget>[
         _buildMinutePicker(),
@@ -346,7 +336,9 @@ class _TimerState extends State<CupertinoTimerPicker> {
       widget.mode == CupertinoTimerPickerMode.ms ? _kPickerWidth / 10 : _kPickerWidth / 6;
 
     return new CupertinoPicker(
-      scrollController: secondController,
+      scrollController: new FixedExtentScrollController(
+        initialItem: selectedSecond ~/ widget.secondInterval,
+      ),
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
