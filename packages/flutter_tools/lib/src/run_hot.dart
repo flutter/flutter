@@ -590,7 +590,7 @@ class HotRunner extends ResidentRunner {
           pause: pause
         );
         countExpectedReports += reports.length;
-        Future.wait(reports).catchError((dynamic error) {
+        await Future.wait(reports).catchError((dynamic error) {
           return <Map<String, dynamic>>[error];
         }).then((List<Map<String, dynamic>> list) {
           // TODO(aam): Investigate why we are validating only first reload report,

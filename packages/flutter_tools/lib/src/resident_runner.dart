@@ -762,7 +762,7 @@ abstract class ResidentRunner {
         await handleTerminalCommand(command);
     } catch (error, st) {
       printError('$error\n$st');
-      _cleanUpAndExit(null);
+      await _cleanUpAndExit(null);
     } finally {
       _processingUserRequest = false;
     }
