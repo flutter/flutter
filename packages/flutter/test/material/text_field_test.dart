@@ -1946,7 +1946,7 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home:  Material(
+        home: new Material(
           child: new RawKeyboardListener(
             focusNode: focusNode,
             onKey: null,
@@ -2014,7 +2014,7 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home:  Material(
+        home: new Material(
           child: new RawKeyboardListener(
             focusNode: focusNode,
             onKey: null,
@@ -2076,7 +2076,7 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home:  Material(
+        home: new Material(
           child: new RawKeyboardListener(
             focusNode: focusNode,
             onKey: null,
@@ -2122,7 +2122,7 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home:  Material(
+        home: new Material(
           child: new RawKeyboardListener(
             focusNode: focusNode,
             onKey: null,
