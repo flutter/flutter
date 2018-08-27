@@ -1,4 +1,4 @@
-Signature: c47947255ab6e943a4a7bba87d85b754
+Signature: cd14b2c05a6198a845ccb22510a6694f
 
 UNUSED LICENSES:
 
@@ -1345,6 +1345,7 @@ FILE: ../../../third_party/skia/include/private/SkMacros.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/include/private/SkTo.h
 FILE: ../../../third_party/skia/include/utils/Sk3D.h
+FILE: ../../../third_party/skia/include/utils/SkTextOnPath.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
@@ -1569,6 +1570,7 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
 FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
 FILE: ../../../third_party/skia/src/utils/SkJSON.h
+FILE: ../../../third_party/skia/src/utils/SkTextOnPath.cpp
 FILE: ../../../third_party/skia/src/utils/win/SkDWriteNTDDI_VERSION.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
 FILE: ../../../third_party/skia/third_party/skcms/skcms.h
