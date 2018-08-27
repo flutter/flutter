@@ -50,6 +50,27 @@ void main() {
     expect(find.byTooltip('Add'), findsOneWidget);
   });
 
+  testWidgets('Floating Action Button tooltip (tap off center)', (WidgetTester tester) async {
+    const Icon icon = Icon(Icons.add);
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+            child: icon,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Text), findsNothing);
+    await tester.longPressAt(tester.getTopRight(find.byType(Icon)));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Text), findsOneWidget);
+  });
+
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
