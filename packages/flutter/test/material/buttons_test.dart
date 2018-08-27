@@ -520,4 +520,22 @@ void main() {
 
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
+
+  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async{
+    await tester.pumpWidget(
+      new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new RaisedButton(
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byType(RaisedButton)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
+  });
 }

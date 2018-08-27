@@ -42,14 +42,18 @@ class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
   /// The `viewType` and `hitTestBehavior` parameters must not be null.
-  const AndroidView({
+  /// If `creationParams` is not null then `creationParamsCodec` must not be null.
+  AndroidView({
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
     this.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
     this.layoutDirection,
+    this.creationParams,
+    this.creationParamsCodec
   }) : assert(viewType != null),
        assert(hitTestBehavior != null),
+       assert(creationParams == null || creationParamsCodec != null),
        super(key: key);
 
   /// The unique identifier for Android view type to be embedded by this widget.
@@ -73,6 +77,19 @@ class AndroidView extends StatefulWidget {
   ///
   /// If this is null, the ambient [Directionality] is used instead.
   final TextDirection layoutDirection;
+
+  /// Passed as the args argument of [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
+  ///
+  /// This can be used by plugins to pass constructor parameters to the embedded Android view.
+  final dynamic creationParams;
+
+  /// The codec used to encode `creationParams` before sending it to the
+  /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  ///
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
+  ///
+  /// This must not be null if [creationParams] is not null.
+  final MessageCodec<dynamic> creationParamsCodec;
 
   @override
   State createState() => new _AndroidViewState();
@@ -150,10 +167,12 @@ class _AndroidViewState extends State<AndroidView> {
   void _createNewAndroidView() {
     _id = platformViewsRegistry.getNextPlatformViewId();
     _controller = PlatformViewsService.initAndroidView(
-        id: _id,
-        viewType: widget.viewType,
-        layoutDirection: _layoutDirection,
-        onPlatformViewCreated: widget.onPlatformViewCreated
+      id: _id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection,
+      onPlatformViewCreated: widget.onPlatformViewCreated,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
     );
   }
 }

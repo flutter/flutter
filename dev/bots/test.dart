@@ -25,6 +25,7 @@ final String green = hasColor ? '\x1B[32m' : '';
 final String yellow = hasColor ? '\x1B[33m' : '';
 final String cyan = hasColor ? '\x1B[36m' : '';
 final String reset = hasColor ? '\x1B[0m' : '';
+final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
 const String arrow = '⏩';
 const String clock = '🕐';
 
@@ -421,11 +422,11 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
     print(
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
+      '$redLine\n'
       '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
       '${bold}Command:$red $commandDescription$reset\n'
       '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
+      '$redLine'
     );
     exit(1);
   }
@@ -486,11 +487,11 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
       stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
+      '$redLine\n'
       '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
       '${bold}Command:$cyan $commandDescription$reset\n'
       '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
+      '$redLine'
     );
     exit(1);
   }
@@ -550,7 +551,8 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
       final File file = entity;
       final String name = path.relative(file.path, from: workingDirectory);
       if (name.startsWith('bin/cache') ||
-          name == 'dev/bots/test.dart')
+          name == 'dev/bots/test.dart' ||
+          name.startsWith('.pub-cache'))
         return null;
       final String data = file.readAsStringSync();
       if (data.contains("import 'package:test/test.dart'")) {
@@ -600,7 +602,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
 
   // Fail if any errors
   if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     final String s1 = errors.length == 1 ? 's' : '';
     final String s2 = errors.length == 1 ? '' : 's';
     print('${bold}The following file$s2 use$s1 \'package:test\' incorrectly:$reset');
@@ -608,7 +610,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     print('Rather than depending on \'package:test\' directly, use one of the shims:');
     print(shims.join('\n'));
     print('This insulates us from breaking changes in \'package:test\'.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    print('$redLine\n');
     exit(1);
   }
 }
@@ -658,14 +660,14 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     if (errors.length == 1) {
       print('${bold}An error was detected when looking at import dependencies within the Flutter package:$reset\n');
     } else {
       print('${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset\n');
     }
     print(errors.join('\n\n'));
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    print('$redLine\n');
     exit(1);
   }
 }
@@ -749,14 +751,14 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     if (errors.length == 1) {
       print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
     } else {
       print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
     }
     print(errors.join('\n\n'));
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    print('$redLine\n');
     exit(1);
   }
 }
@@ -799,13 +801,13 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
   }
 
   if (outOfDate.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
     for (String registrant in outOfDate) {
       print(' - $registrant');
     }
     print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
 }
@@ -829,23 +831,23 @@ bool _isGeneratedPluginRegistrant(File file) {
 
 Future<Null> _verifyVersion(String filename) async {
   if (!new File(filename).existsSync()) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic failed to create the Flutter version file.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
   final String version = await new File(filename).readAsString();
   if (version == '0.0.0-unknown') {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic failed to determine the Flutter version.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
   final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
   if (!version.contains(pattern)) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic generated an invalid version string.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
 }
