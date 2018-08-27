@@ -275,7 +275,7 @@ class RenderEditable extends RenderBox {
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
-    } else if (ctrl)
+    } else if (ctrl && (xKey || vKey || cKey || aKey))
       _handleShortcuts(ctrl, xKey, vKey, cKey, aKey);
     if (del)
       _handleDelete();
@@ -399,8 +399,7 @@ class RenderEditable extends RenderBox {
   void _handleShortcuts(bool ctrl, bool xKey, bool vKey, bool cKey, bool aKey) async {
     if (cKey && !selection.isCollapsed) {
       Clipboard.setData(new ClipboardData(text: selection.textInside(text.text)));
-    }
-    else if (xKey && !selection.isCollapsed) {
+    } else if (xKey && !selection.isCollapsed) {
       Clipboard.setData(new ClipboardData(text: selection.textInside(text.text)));
       _textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text)

@@ -1977,6 +1977,8 @@ void main() {
     sendKeyEventWithCode(_kCKeyCode, false, false, false);  // keyup control
     await tester.pumpAndSettle();
 
+    expect(clipboardContent, 'a big');
+
     sendKeyEventWithCode(22, true, false, false);              // RIGHT_ARROW keydown
     await tester.pumpAndSettle();
     sendKeyEventWithCode(22, false, false, false);             // RIGHT_ARROW keyup
@@ -2045,6 +2047,7 @@ void main() {
     sendKeyEventWithCode(_kXKeyCode, false, false, false);  // keyup control X
     await tester.pumpAndSettle();
 
+    expect(clipboardContent, 'a big');
 
     for (int i = 0; i < 5; i += 1) {
       sendKeyEventWithCode(22, true, false, false);  // RIGHT_ARROW keydown
