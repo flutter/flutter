@@ -203,7 +203,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         routeLabel = localizations.dialogLabel;
         break;
     }
-    
+
     return new GestureDetector(
       excludeFromSemantics: true,
       onTap: () => Navigator.pop(context),
