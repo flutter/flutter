@@ -1788,19 +1788,11 @@ void main() {
     });
   }
 
-  const int _kKey_X_Code = 52;
-  const int _kKey_C_Code = 31;
-  const int _kKey_V_Code = 50;
-  const int _kKey_A_Code = 29;
-  const int _kKey_Del_Code = 112;
-
   group('Keyboard Tests', (){
     TextEditingController controller;
-    TextField tf;
 
     setUp( () {
       controller = new TextEditingController();
-      tf = TextField(controller: controller, maxLines: 3);
     });
 
     MaterialApp setupWidget() {
@@ -1813,7 +1805,10 @@ void main() {
           child: new RawKeyboardListener(
             focusNode: focusNode,
             onKey: null,
-            child: tf,
+            child: TextField(
+              controller: controller,
+              maxLines: 3,
+            ),
           ) ,
         ),
       );
@@ -1922,45 +1917,248 @@ void main() {
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
     });
+  });
 
-    testWidgets('Copy paste test', (WidgetTester tester) async{
-      await tester.pumpWidget(setupWidget());
-      const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
-      await tester.enterText(find.byType(TextField), testValue);
+  const int _kKey_X_Code = 52;
+  const int _kKey_C_Code = 31;
+  const int _kKey_V_Code = 50;
+  const int _kKey_A_Code = 29;
+  const int _kKey_Del_Code = 112;
 
-      await tester.idle();
-      await tester.tap(find.byType(TextField));
-      await tester.pumpAndSettle();
+  testWidgets('Copy paste test', (WidgetTester tester) async{
+    final FocusNode focusNode = new FocusNode();
+    final TextEditingController controller = new TextEditingController();
+    final TextField tf =
+      TextField(
+        controller: controller,
+        maxLines: 3,
+      );
 
-      // Select the first 5 characters
-      for (int i = 0; i < 5; i += 1) {
-        sendKeyEventWithCode(22, true, true, false);             // RIGHT_ARROW keydown shift
-        await tester.pumpAndSettle();
-        sendKeyEventWithCode(22, false, false, false);            // RIGHT_ARROW keyup
-        await tester.pumpAndSettle();
-      }
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:  Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: tf,
+          ),
+        ),
+      ),
+    );
 
-      // Copy them
-      sendKeyEventWithCode(_kKey_C_Code, true, false, true);    // keydown shift
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(_kKey_C_Code, false, true, false);    // keydown shift
-      await tester.pumpAndSettle();
+    const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
+    await tester.enterText(find.byType(TextField), testValue);
 
-      sendKeyEventWithCode(22, true, true, false);               // RIGHT_ARROW keydown
-      await tester.pumpAndSettle();
-      sendKeyEventWithCode(22, false, true, false);              // RIGHT_ARROW keyup
-      await tester.pumpAndSettle();
+    await tester.idle();
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
 
-      // Paste them
-      sendKeyEventWithCode(_kKey_V_Code, true, true, false);     // DOWN_ARROW keydown
+    // Select the first 5 characters
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false);             // RIGHT_ARROW keydown shift
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(_kKey_V_Code, false, true, false);              // DOWN_ARROW keyup
+      sendKeyEventWithCode(22, false, false, false);           // RIGHT_ARROW keyup
       await tester.pumpAndSettle();
+    }
 
-      const String expected = 'a biga big house\njumped over a mouse';
-      expect(controller.value.text, expected);
+    // Copy them
+    sendKeyEventWithCode(_kKey_C_Code, true, false, true);    // keydown control
+    await tester.pumpAndSettle();
+    sendKeyEventWithCode(_kKey_C_Code, false, false, false);  // keyup control
+    await tester.pumpAndSettle();
+
+    const String clipboardContent = 'a big';
+    SystemChannels.platform
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{'text': clipboardContent};
+      return null;
     });
 
+    sendKeyEventWithCode(22, true, false, false);              // RIGHT_ARROW keydown
+    await tester.pumpAndSettle();
+    sendKeyEventWithCode(22, false, false, false);             // RIGHT_ARROW keyup
+    await tester.pumpAndSettle();
+
+    // Paste them
+    sendKeyEventWithCode(_kKey_V_Code, true, false, true);     // Control V keydown
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    sendKeyEventWithCode(_kKey_V_Code, false, false, false);   // Control V keyup
+    await tester.pumpAndSettle();
+
+    const String expected = 'a biga big house\njumped over a mouse';
+    expect(find.text(expected), findsOneWidget);
+  });
+
+  testWidgets('Cut test', (WidgetTester tester) async{
+    final FocusNode focusNode = new FocusNode();
+    final TextEditingController controller = new TextEditingController();
+    final TextField tf =
+      TextField(
+        controller: controller,
+        maxLines: 3,
+      );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:  Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: tf,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
+    await tester.enterText(find.byType(TextField), testValue);
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // Select the first 5 characters
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, true, false);             // RIGHT_ARROW keydown shift
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(22, false, false, false);           // RIGHT_ARROW keyup
+      await tester.pumpAndSettle();
+    }
+
+    // Cut them
+    sendKeyEventWithCode(_kKey_X_Code, true, false, true);    // keydown control X
+    await tester.pumpAndSettle();
+    sendKeyEventWithCode(_kKey_X_Code, false, false, false);  // keyup control X
+    await tester.pumpAndSettle();
+
+    const String clipboardContent = 'a big';
+    SystemChannels.platform
+        .setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{'text': clipboardContent};
+      return null;
+    });
+
+    for (int i = 0; i < 5; i += 1) {
+      sendKeyEventWithCode(22, true, false, false);  // RIGHT_ARROW keydown
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(22, false, false, false); // RIGHT_ARROW keyup
+      await tester.pumpAndSettle();
+    }
+
+    // Paste them
+    sendKeyEventWithCode(_kKey_V_Code, true, false, true);     // Control Paste keydown
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    sendKeyEventWithCode(_kKey_V_Code, false, false, false);    // Control Paste keyup
+    await tester.pumpAndSettle();
+
+    const String expected = ' housa bige\njumped over a mouse';
+    expect(find.text(expected), findsOneWidget);
+  });
+
+  testWidgets('Select all test', (WidgetTester tester) async{
+    final FocusNode focusNode = new FocusNode();
+    final TextEditingController controller = new TextEditingController();
+    final TextField tf =
+      TextField(
+        controller: controller,
+        maxLines: 3,
+      );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:  Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: tf,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
+    await tester.enterText(find.byType(TextField), testValue);
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // Select All
+    sendKeyEventWithCode(_kKey_A_Code, true, false, true);    // keydown control A
+    await tester.pumpAndSettle();
+    sendKeyEventWithCode(_kKey_A_Code, false, false, true);   // keyup control A
+    await tester.pumpAndSettle();
+
+    // Delete them
+    sendKeyEventWithCode(_kKey_Del_Code, true, false, false);     // DEL keydown
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    sendKeyEventWithCode(_kKey_Del_Code, false, false, false);     // DEL keyup
+    await tester.pumpAndSettle();
+
+    const String expected = '';
+    expect(find.text(expected), findsOneWidget);
+  });
+
+  testWidgets('Delete test', (WidgetTester tester) async{
+    final FocusNode focusNode = new FocusNode();
+    final TextEditingController controller = new TextEditingController();
+    final TextField tf =
+      TextField(
+        controller: controller,
+        maxLines: 3,
+      );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:  Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child: tf,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
+    await tester.enterText(find.byType(TextField), testValue);
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // Delete
+    for (int i = 0; i < 6; i += 1) {
+      sendKeyEventWithCode(_kKey_Del_Code, true, false, false); // keydown DEL
+      await tester.pumpAndSettle();
+      sendKeyEventWithCode(_kKey_Del_Code, false, false, false); // keyup DEL
+      await tester.pumpAndSettle();
+    }
+
+    const String expected = 'house\njumped over a mouse';
+    expect(find.text(expected), findsOneWidget);
+
+    sendKeyEventWithCode(_kKey_A_Code, true, false, true);    // keydown control A
+    await tester.pumpAndSettle();
+    sendKeyEventWithCode(_kKey_A_Code, false, false, true);   // keyup control A
+    await tester.pumpAndSettle();
+
+
+    sendKeyEventWithCode(_kKey_Del_Code, true, false, false); // keydown DEL
+    await tester.pumpAndSettle();
+    sendKeyEventWithCode(_kKey_Del_Code, false, false, false); // keyup DEL
+    await tester.pumpAndSettle();
+
+    const String expected2 = '';
+    expect(find.text(expected2), findsOneWidget);
   });
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async{

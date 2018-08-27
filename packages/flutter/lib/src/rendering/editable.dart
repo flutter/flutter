@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' show EditableTextState;
 
 import 'box.dart';
 import 'object.dart';
@@ -200,7 +200,6 @@ class RenderEditable extends RenderBox {
   }
 
   EditableTextState _editableTextState;
-
   Rect _lastCaretRect;
 
   static const int _kLeftArrowCode = 21;
@@ -424,12 +423,15 @@ class RenderEditable extends RenderBox {
       }
     }
     else if (A) {
-      _editableTextState.textEditingValue = new TextEditingValue(
-        text: _editableTextState.textEditingValue.text,
-        selection: new TextSelection(
+      _baseOffset = 0;
+      _extentOffset = _editableTextState.textEditingValue.text.length;
+      onSelectionChanged(
+        new TextSelection(
             baseOffset: 0,
-            extentOffset: _editableTextState.textEditingValue.text.length
+            extentOffset: _editableTextState.textEditingValue.text.length,
         ),
+        this,
+        SelectionChangedCause.keyboard,
       );
     }
   }
