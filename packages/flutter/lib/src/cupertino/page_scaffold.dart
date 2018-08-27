@@ -22,10 +22,10 @@ class CupertinoPageScaffold extends StatelessWidget {
     Key key,
     this.navigationBar,
     this.backgroundColor = CupertinoColors.white,
-    this.resizeToAvoidBottomPadding = true,
+    this.resizeToAvoidBottomInset = true,
     @required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
@@ -50,14 +50,14 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// By default uses [CupertinoColors.white] color.
   final Color backgroundColor;
 
-  /// Whether the [child] should size itself to avoid the window's bottom padding.
+  /// Whether the [child] should size itself to avoid the window's bottom inset.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
   /// prevents widgets inside the body from being obscured by the keyboard.
   ///
   /// Defaults to true.
-  final bool resizeToAvoidBottomPadding;
+  final bool resizeToAvoidBottomInset;
 
   @override
   Widget build(BuildContext context) {
@@ -73,9 +73,9 @@ class CupertinoPageScaffold extends StatelessWidget {
           navigationBar.preferredSize.height + existingMediaQuery.padding.top;
 
       // Propagate bottom padding and include viewInsets if appropriate
-      final double bottomPadding = resizeToAvoidBottomPadding
-              ? existingMediaQuery.viewInsets.bottom
-              : 0.0;
+      final double bottomPadding = resizeToAvoidBottomInset
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
 
       // If navigation bar is opaquely obstructing, directly shift the main content
       // down. If translucent, let main content draw behind navigation bar but hint the
@@ -90,10 +90,12 @@ class CupertinoPageScaffold extends StatelessWidget {
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
-              bottom: existingMediaQuery.padding.bottom + bottomPadding,
             ),
           ),
-          child: child,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
+            child: child,
+          ),
         );
       }
     }

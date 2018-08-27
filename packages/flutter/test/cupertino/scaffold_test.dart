@@ -32,9 +32,10 @@ void main() {
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: CupertinoPageScaffold(
           navigationBar: const CupertinoNavigationBar(
-            middle: Text('Title'),
+            middle: Text('Opaque'),
+            backgroundColor: Color(0xFFF8F8F8),
           ),
-          child: SafeArea(child: Container()),
+          child: Container(),
         ),
       ),
     ));
@@ -47,15 +48,30 @@ void main() {
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: CupertinoPageScaffold(
           navigationBar: const CupertinoNavigationBar(
-            middle: Text('Title'),
+            middle: Text('Transparent'),
           ),
-          resizeToAvoidBottomPadding: false,
-          child: SafeArea(child: Container()),
+          child: Container(),
         ),
       ),
     ));
 
-    expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0);
+    expect(tester.getSize(find.byType(Container)).height, 600.0 - 100.0);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          resizeToAvoidBottomInset: false,
+          child: Container(),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
