@@ -93,8 +93,8 @@ class CupertinoPageScaffold extends StatelessWidget {
               top: topPadding,
             ),
           ),
-          child: Padding(
-            padding: EdgeInsets.only(bottom: bottomPadding),
+          child: new Padding(
+            padding: new EdgeInsets.only(bottom: bottomPadding),
             child: child,
           ),
         );
