@@ -233,13 +233,13 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (topLevelResults['bug-report']) {
       // --bug-report implies --record-to=<tmp_path>
-      final Directory tmp = await const LocalFileSystem()
+      final Directory tempDir = const LocalFileSystem()
           .systemTempDirectory
-          .createTemp('flutter_tools_');
-      recordTo = tmp.path;
+          .createTempSync('flutter_tools_bug_report.');
+      recordTo = tempDir.path;
 
       // Record the arguments that were used to invoke this runner.
-      final File manifest = tmp.childFile('MANIFEST.txt');
+      final File manifest = tempDir.childFile('MANIFEST.txt');
       final StringBuffer buffer = new StringBuffer()
         ..writeln('# arguments')
         ..writeln(topLevelResults.arguments)
@@ -251,13 +251,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       // ZIP the recording up once the recording has been serialized.
       addShutdownHook(() async {
         final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
-        os.zip(tmp, zipFile);
+        os.zip(tempDir, zipFile);
         printStatus(
-            'Bug report written to ${zipFile.basename}.\n'
-            'Note that this bug report contains local paths, device '
-            'identifiers, and log snippets.');
+          'Bug report written to ${zipFile.basename}.\n'
+          'Note that this bug report contains local paths, device '
+          'identifiers, and log snippets.'
+        );
       }, ShutdownStage.POST_PROCESS_RECORDING);
-      addShutdownHook(() => tmp.delete(recursive: true), ShutdownStage.CLEANUP);
+      addShutdownHook(() => tempDir.delete(recursive: true), ShutdownStage.CLEANUP);
     }
 
     assert(recordTo == null || replayFrom == null);

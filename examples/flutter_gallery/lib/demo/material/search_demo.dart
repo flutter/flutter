@@ -52,7 +52,11 @@ class _SearchDemoState extends State<SearchDemo> {
           ),
           new IconButton(
             tooltip: 'More (not implemented)',
-            icon: const Icon(Icons.more_vert),
+            icon: new Icon(
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
+            ),
             onPressed: () {},
           ),
         ],

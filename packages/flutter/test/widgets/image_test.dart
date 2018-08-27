@@ -541,20 +541,14 @@ void main() {
     expect(capturedImage, isNull); // The image stream listeners should never be called.
   });
 
-  testWidgets('Removing duplicate listeners removes error listeners', (WidgetTester tester) async {
-    bool errorListenerCalled = false;
-    dynamic reportedException;
-    StackTrace reportedStackTrace;
+  testWidgets('Removing listener removes one listener and error listener', (WidgetTester tester) async {
+    int errorListenerCalled = 0;
     ImageInfo capturedImage;
     final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
-      errorListenerCalled = true;
+      errorListenerCalled++;
     };
     final ImageListener listener = (ImageInfo info, bool synchronous) {
       capturedImage = info;
-    };
-    FlutterError.onError = (FlutterErrorDetails flutterError) {
-      reportedException = flutterError.exception;
-      reportedStackTrace = flutterError.stack;
     };
 
     final Exception testException = new Exception('cannot resolve host');
@@ -563,7 +557,7 @@ void main() {
     imageProvider._streamCompleter.addListener(listener, onError: errorListener);
     // Duplicates the same set of listener and errorListener.
     imageProvider._streamCompleter.addListener(listener, onError: errorListener);
-    // Now remove all specified listeners and associated error listeners.
+    // Now remove one entry of the specified listener and associated error listener.
     // Don't explicitly remove the error listener.
     imageProvider._streamCompleter.removeListener(listener);
     ImageConfiguration configuration;
@@ -583,10 +577,7 @@ void main() {
     await tester.idle(); // Let the failed completer's future hit the stream completer.
     expect(tester.binding.microtaskCount, 0);
 
-    expect(errorListenerCalled, false);
-    // Since the error listener is removed, bubble up to FlutterError.
-    expect(reportedException, testException);
-    expect(reportedStackTrace, testStack);
+    expect(errorListenerCalled, 1);
     expect(capturedImage, isNull); // The image stream listeners should never be called.
   });
 

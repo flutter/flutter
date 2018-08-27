@@ -14,7 +14,7 @@ import 'basic_types.dart';
 /// A property or argument of this type accepts classes created either with [new
 /// Alignment] and its variants, or [new AlignmentDirectional].
 ///
-/// To convert a [AlignmentGeometry] object of indeterminate type into a
+/// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
 @immutable
 abstract class AlignmentGeometry {
@@ -115,7 +115,7 @@ abstract class AlignmentGeometry {
     );
   }
 
-  /// Convert this instance into a [Alignment], which uses literal
+  /// Convert this instance into an [Alignment], which uses literal
   /// coordinates (the `x` coordinate being explicitly a distance from the
   /// left).
   ///
@@ -173,7 +173,7 @@ abstract class AlignmentGeometry {
 /// A variety of widgets use [Alignment] in their configuration, most
 /// notably:
 ///
-///  * [Align] positions a child according to a [Alignment].
+///  * [Align] positions a child according to an [Alignment].
 ///
 /// See also:
 ///
@@ -414,7 +414,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// than -1.0 represent positions beyond the start edge, and values greater than
   /// 1.0 represent positions beyond the end edge.
   ///
-  /// This value is normalized into a [Alignment.x] value by the [resolve]
+  /// This value is normalized into an [Alignment.x] value by the [resolve]
   /// method.
   final double start;
 

@@ -198,6 +198,186 @@ class RenderEditable extends RenderBox {
 
   Rect _lastCaretRect;
 
+  static const int _kLeftArrowCode = 21;
+  static const int _kRightArrowCode = 22;
+  static const int _kUpArrowCode = 19;
+  static const int _kDownArrowCode = 20;
+
+  // The extent offset of the current selection
+  int _extentOffset = -1;
+
+  // The base offset of the current selection
+  int _baseOffset = -1;
+
+  // Holds the last location the user selected in the case that he selects all
+  // the way to the end or beginning of the field.
+  int _previousCursorLocation = -1;
+
+  // Whether we should reset the location of the cursor in the case the user
+  // selects all the way to the end or the beginning of a field.
+  bool _resetCursor = false;
+
+  static const int _kShiftMask = 1; // https://developer.android.com/reference/android/view/KeyEvent.html#META_SHIFT_ON
+  static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
+
+  // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+  void _handleKeyEvent(RawKeyEvent keyEvent){
+    if (defaultTargetPlatform != TargetPlatform.android)
+      return;
+
+    if (keyEvent is RawKeyUpEvent)
+      return;
+
+    final RawKeyEventDataAndroid rawAndroidEvent = keyEvent.data;
+    final int pressedKeyCode = rawAndroidEvent.keyCode;
+    final int pressedKeyMetaState = rawAndroidEvent.metaState;
+
+    if (selection.isCollapsed) {
+      _extentOffset = selection.extentOffset;
+      _baseOffset = selection.baseOffset;
+    }
+
+    // Update current key states
+    final bool shift = pressedKeyMetaState & _kShiftMask > 0;
+    final bool ctrl = pressedKeyMetaState & _kControlMask > 0;
+
+    final bool rightArrow = pressedKeyCode == _kRightArrowCode;
+    final bool leftArrow = pressedKeyCode == _kLeftArrowCode;
+    final bool upArrow = pressedKeyCode == _kUpArrowCode;
+    final bool downArrow = pressedKeyCode == _kDownArrowCode;
+    final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
+
+    // We will only move select or more the caret if an arrow is pressed
+    if (arrow) {
+      int newOffset = _extentOffset;
+
+      // Because the user can use multiple keys to change how he selects
+      // the new offset variable is threaded through these four functions
+      // and potentially changes after each one.
+      if (ctrl)
+        newOffset = _handleControl(rightArrow, leftArrow, ctrl, newOffset);
+      newOffset = _handleHorizontalArrows(rightArrow, leftArrow, shift, newOffset);
+      if (downArrow || upArrow)
+        newOffset = _handleVerticalArrows(upArrow, downArrow, shift, newOffset);
+      newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
+
+      _extentOffset = newOffset;
+    }
+  }
+
+  // Handles full word traversal using control.
+  int _handleControl(bool rightArrow, bool leftArrow, bool ctrl, int newOffset) {
+    // If control is pressed, we will decide which way to look for a word
+    // based on which arrow is pressed.
+    if (leftArrow && _extentOffset > 2) {
+      final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset - 2));
+      newOffset = textSelection.baseOffset + 1;
+    } else if (rightArrow && _extentOffset < text.text.length - 2) {
+      final TextSelection textSelection = _selectWordAtOffset(new TextPosition(offset: _extentOffset + 1));
+      newOffset = textSelection.extentOffset - 1;
+    }
+    return newOffset;
+  }
+
+  int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    // Set the new offset to be +/- 1 depending on which arrow is pressed
+    // If shift is down, we also want to update the previous cursor location
+    if (rightArrow && _extentOffset < text.text.length) {
+      newOffset += 1;
+      if (shift)
+        _previousCursorLocation += 1;
+    }
+    if (leftArrow && _extentOffset > 0) {
+      newOffset -= 1;
+      if (shift)
+        _previousCursorLocation -= 1;
+    }
+    return newOffset;
+  }
+
+  // Handles moving the cursor vertically as well as taking care of the
+  // case where the user moves the cursor to the end or beginning of the text
+  // and then back up or down.
+  int _handleVerticalArrows(bool upArrow, bool downArrow, bool shift, int newOffset) {
+    // The caret offset gives a location in the upper left hand corner of
+    // the caret so the middle of the line above is a half line above that
+    // point and the line below is 1.5 lines below that point.
+    final double plh = _textPainter.preferredLineHeight;
+    final double verticalOffset = upArrow ? -0.5 * plh : 1.5 * plh;
+
+    final Offset caretOffset = _textPainter.getOffsetForCaret(new TextPosition(offset: _extentOffset), _caretPrototype);
+    final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
+    final TextPosition position = _textPainter.getPositionForOffset(caretOffsetTranslated);
+
+    // To account for the possibility where the user vertically highlights
+    // all the way to the top or bottom of the text, we hold the previous
+    // cursor location. This allows us to restore to this position in the
+    // case that the user wants to unhighlight some text.
+    if (position.offset == _extentOffset) {
+      if (downArrow)
+        newOffset = text.text.length;
+      else if (upArrow)
+        newOffset = 0;
+      _resetCursor = shift;
+    } else if (_resetCursor && shift) {
+      newOffset = _previousCursorLocation;
+      _resetCursor = false;
+    } else {
+      newOffset = position.offset;
+      _previousCursorLocation = newOffset;
+    }
+    return newOffset;
+  }
+
+  // Handles the selection of text or removal of the selection and placing
+  // of the caret.
+  int _handleShift(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
+    if (onSelectionChanged == null)
+      return newOffset;
+    // In the text_selection class, a TextSelection is defined such that the
+    // base offset is always less than the extent offset.
+    if (shift) {
+      if (_baseOffset < newOffset) {
+        onSelectionChanged(
+          new TextSelection(
+            baseOffset: _baseOffset,
+            extentOffset: newOffset
+          ),
+          this,
+          SelectionChangedCause.keyboard,
+        );
+      } else {
+        onSelectionChanged(
+          new TextSelection(
+            baseOffset: newOffset,
+            extentOffset: _baseOffset
+          ),
+          this,
+          SelectionChangedCause.keyboard,
+        );
+      }
+    } else {
+      // We want to put the cursor at the correct location depending on which
+      // arrow is used while there is a selection.
+      if (!selection.isCollapsed) {
+        if (leftArrow)
+          newOffset = _baseOffset < _extentOffset ? _baseOffset : _extentOffset;
+        else if (rightArrow)
+          newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
+      }
+      onSelectionChanged(
+        new TextSelection.fromPosition(
+          new TextPosition(
+              offset: newOffset
+          )
+        ),
+        this,
+        SelectionChangedCause.keyboard,
+      );
+    }
+    return newOffset;
+  }
+
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
   ///
@@ -300,11 +480,23 @@ class RenderEditable extends RenderBox {
   /// Whether the editable is currently focused.
   bool get hasFocus => _hasFocus;
   bool _hasFocus;
+  bool _listenerAttached = false;
   set hasFocus(bool value) {
     assert(value != null);
     if (_hasFocus == value)
       return;
     _hasFocus = value;
+    if (_hasFocus) {
+      assert(!_listenerAttached);
+      RawKeyboard.instance.addListener(_handleKeyEvent);
+      _listenerAttached = true;
+    }
+    else {
+      assert(_listenerAttached);
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
+      _listenerAttached = false;
+    }
+
     markNeedsSemanticsUpdate();
   }
 
@@ -423,10 +615,16 @@ class RenderEditable extends RenderBox {
 
     if (_selection?.isValid == true) {
       config.textSelection = _selection;
-      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null)
-        config.onMoveCursorBackwardByCharacter = _handleMoveCursorBackwardByCharacter;
-      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null)
-        config.onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
+      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
+        config
+          ..onMoveCursorBackwardByWord = _handleMoveCursorBackwardByWord
+          ..onMoveCursorBackwardByCharacter = _handleMoveCursorBackwardByCharacter;
+      }
+      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
+        config
+          ..onMoveCursorForwardByWord = _handleMoveCursorForwardByWord
+          ..onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
+      }
     }
   }
 
@@ -454,6 +652,109 @@ class RenderEditable extends RenderBox {
     );
   }
 
+  void _handleMoveCursorForwardByWord(bool extentSelection) {
+    final TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
+    if (currentWord == null)
+      return;
+    final TextRange nextWord = _getNextWord(currentWord.end);
+    if (nextWord == null)
+      return;
+    final int baseOffset = extentSelection ? _selection.baseOffset : nextWord.start;
+    onSelectionChanged(
+      new TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: nextWord.start,
+      ),
+      this,
+      SelectionChangedCause.keyboard,
+    );
+  }
+
+  void _handleMoveCursorBackwardByWord(bool extentSelection) {
+    final TextRange currentWord = _textPainter.getWordBoundary(_selection.extent);
+    if (currentWord == null)
+      return;
+    final TextRange previousWord = _getPreviousWord(currentWord.start - 1);
+    if (previousWord == null)
+      return;
+    final int baseOffset = extentSelection ?  _selection.baseOffset : previousWord.start;
+    onSelectionChanged(
+      new TextSelection(
+        baseOffset: baseOffset,
+        extentOffset: previousWord.start,
+      ),
+      this,
+      SelectionChangedCause.keyboard,
+    );
+  }
+
+  TextRange _getNextWord(int offset) {
+    while (true) {
+      final TextRange range = _textPainter.getWordBoundary(new TextPosition(offset: offset));
+      if (range == null || !range.isValid || range.isCollapsed)
+        return null;
+      if (!_onlyWhitespace(range))
+        return range;
+      offset = range.end;
+    }
+  }
+
+  TextRange _getPreviousWord(int offset) {
+    while (offset >= 0) {
+      final TextRange range = _textPainter.getWordBoundary(new TextPosition(offset: offset));
+      if (range == null || !range.isValid || range.isCollapsed)
+        return null;
+      if (!_onlyWhitespace(range))
+        return range;
+      offset = range.start - 1;
+    }
+    return null;
+  }
+
+  // Check if the given text range only contains white space or separator
+  // characters.
+  //
+  // newline characters from ascii and separators from the
+  // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
+  // TODO(jonahwilliams): replace when we expose this ICU information.
+  bool _onlyWhitespace(TextRange range) {
+    for (int i = range.start; i < range.end; i++) {
+      final int codeUnit = text.codeUnitAt(i);
+      switch (codeUnit) {
+        case 0x9: // horizontal tab
+        case 0xA: // line feed
+        case 0xB: // vertical tab
+        case 0xC: // form feed
+        case 0xD: // carriage return
+        case 0x1C: // file separator
+        case 0x1D: // group separator
+        case 0x1E: // record separator
+        case 0x1F: // unit separator
+        case 0x20: // space
+        case 0xA0: // no-break space
+        case 0x1680: // ogham space mark
+        case 0x2000: // en quad
+        case 0x2001: // em quad
+        case 0x2002: // en space
+        case 0x2003: // em space
+        case 0x2004: // three-per-em space
+        case 0x2005: // four-er-em space
+        case 0x2006: // six-per-em space
+        case 0x2007: // figure space
+        case 0x2008: // punctuation space
+        case 0x2009: // thin space
+        case 0x200A: // hair space
+        case 0x202F: // narrow no-break space
+        case 0x205F: // medium mathematical space
+        case 0x3000: // ideographic space
+          break;
+        default:
+          return false;
+      }
+    }
+    return true;
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -465,6 +766,8 @@ class RenderEditable extends RenderBox {
   void detach() {
     _offset.removeListener(markNeedsPaint);
     _showCursor.removeListener(markNeedsPaint);
+    if (_listenerAttached)
+      RawKeyboard.instance.removeListener(_handleKeyEvent);
     super.detach();
   }
 

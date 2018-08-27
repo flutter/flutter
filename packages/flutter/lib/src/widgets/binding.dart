@@ -411,7 +411,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// giving them the `features` argument.
   ///
   /// This is called by [handleAccessibilityFeaturesChanged] when the
-  /// [Window.onAccessibilityFeaturesChanged] notification is recieved.
+  /// [Window.onAccessibilityFeaturesChanged] notification is received.
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
@@ -694,10 +694,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    // TODO(hansmuller): eliminate the value variable after analyzer bug
-    // https://github.com/flutter/flutter/issues/11646 is fixed.
-    final Future<Null> value = super.performReassemble();
-    return value.then((Null _) {
+    return super.performReassemble().then((Null value) {
       allowFirstFrameReport();
     });
   }
@@ -920,7 +917,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
 /// A concrete binding for applications based on the Widgets framework.
 /// This is the glue that binds the framework to the Flutter engine.
-class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, RendererBinding, WidgetsBinding {
+class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
 
   /// Returns an instance of the [WidgetsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a

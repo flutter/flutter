@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:test/test.dart';
+import 'common.dart';
 
 import 'fake_process_manager.dart';
 

@@ -47,51 +47,58 @@ class CupertinoNavigationDemo extends StatelessWidget {
     return new WillPopScope(
       // Prevent swipe popping of this page. Use explicit exit buttons only.
       onWillPop: () => new Future<bool>.value(true),
-      child: new CupertinoTabScaffold(
-        tabBar: new CupertinoTabBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
-              title: Text('Home'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.conversation_bubble),
-              title: Text('Support'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.profile_circled),
-              title: Text('Profile'),
-            ),
-          ],
+      child: new DefaultTextStyle(
+        style: const TextStyle(
+          fontFamily: '.SF UI Text',
+          fontSize: 17.0,
+          color: CupertinoColors.black,
         ),
-        tabBuilder: (BuildContext context, int index) {
-          return new DefaultTextStyle(
-            style: const TextStyle(
-              fontFamily: '.SF UI Text',
-              fontSize: 17.0,
-              color: CupertinoColors.black,
-            ),
-            child: new CupertinoTabView(
-              builder: (BuildContext context) {
-                switch (index) {
-                  case 0:
+        child: new CupertinoTabScaffold(
+          tabBar: new CupertinoTabBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.home),
+                title: Text('Home'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.conversation_bubble),
+                title: Text('Support'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(CupertinoIcons.profile_circled),
+                title: Text('Profile'),
+              ),
+            ],
+          ),
+          tabBuilder: (BuildContext context, int index) {
+            switch (index) {
+              case 0:
+                return new CupertinoTabView(
+                  builder: (BuildContext context) {
                     return new CupertinoDemoTab1(
                       colorItems: colorItems,
                       colorNameItems: colorNameItems
                     );
-                    break;
-                  case 1:
-                    return new CupertinoDemoTab2();
-                    break;
-                  case 2:
-                    return new CupertinoDemoTab3();
-                    break;
-                  default:
-                }
-              },
-            ),
-          );
-        },
+                  },
+                  defaultTitle: 'Colors',
+                );
+                break;
+              case 1:
+                return new CupertinoTabView(
+                  builder: (BuildContext context) => CupertinoDemoTab2(),
+                  defaultTitle: 'Support Chat',
+                );
+                break;
+              case 2:
+                return new CupertinoTabView(
+                  builder: (BuildContext context) => CupertinoDemoTab3(),
+                  defaultTitle: 'Account',
+                );
+                break;
+              default:
+            }
+          },
+        ),
       ),
     );
   }
@@ -129,7 +136,6 @@ class CupertinoDemoTab1 extends StatelessWidget {
       child: new CustomScrollView(
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
-            largeTitle: Text('Colors'),
             trailing: ExitButton(),
           ),
           new SliverPadding(
@@ -174,6 +180,7 @@ class Tab1RowItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.of(context).push(new CupertinoPageRoute<void>(
+          title: colorName,
           builder: (BuildContext context) => new Tab1ItemPage(
             color: color,
             colorName: colorName,
@@ -285,9 +292,8 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
   @override
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
-      navigationBar: new CupertinoNavigationBar(
-        middle: new Text(widget.colorName),
-        trailing: const ExitButton(),
+      navigationBar: const CupertinoNavigationBar(
+        trailing: ExitButton(),
       ),
       child: new SafeArea(
         top: false,
@@ -415,7 +421,6 @@ class CupertinoDemoTab2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Support Chat'),
         trailing: ExitButton(),
       ),
       child: new ListView(
@@ -699,7 +704,6 @@ class CupertinoDemoTab3 extends StatelessWidget {
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        middle: Text('Account'),
         trailing: ExitButton(),
       ),
       child: new DecoratedBox(

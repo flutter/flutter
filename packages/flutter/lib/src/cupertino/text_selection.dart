@@ -115,9 +115,9 @@ class _TextSelectionToolbar extends StatelessWidget {
             child: new Row(mainAxisSize: MainAxisSize.min, children: items),
           ),
         ),
-        // TODO(https://github.com/flutter/flutter/issues/11274):
-        // Position the triangle based on the layout delegate.
-        // And avoid letting the triangle line up with any dividers.
+        // TODO(xster): Position the triangle based on the layout delegate, and
+        // avoid letting the triangle line up with any dividers.
+        // https://github.com/flutter/flutter/issues/11274
         triangle,
       ],
     );

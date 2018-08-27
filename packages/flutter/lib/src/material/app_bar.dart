@@ -51,7 +51,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
   bool shouldRelayout(_ToolbarContainerLayout oldDelegate) => false;
 }
 
-// TODO(eseidel) Toolbar needs to change size based on orientation:
+// TODO(eseidel): Toolbar needs to change size based on orientation:
 // http://material.google.com/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
 // Mobile Portrait: 56dp

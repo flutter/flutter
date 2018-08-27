@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -34,7 +33,7 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        await updateLocalProperties(project: await FlutterProject.current());
+        updateLocalProperties(project: await FlutterProject.current());
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
@@ -191,7 +190,7 @@ someOtherProperty: someOtherValue
       writeSchemaFile(fs, schemaData);
 
       try {
-        await updateLocalProperties(
+        updateLocalProperties(
           project: await FlutterProject.fromPath('path/to/project'),
           buildInfo: buildInfo,
         );

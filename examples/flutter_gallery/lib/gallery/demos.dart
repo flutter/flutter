@@ -218,6 +218,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new DialogDemo(),
     ),
     new GalleryDemo(
+      title: 'Elevations',
+      subtitle: 'Shadow values on cards',
+      // TODO(larche): Change to custom icon for elevations when one exists.
+      icon: GalleryIcons.cupertino_progress,
+      category: _kMaterialComponents,
+      routeName: ElevationDemo.routeName,
+      buildRoute: (BuildContext context) => new ElevationDemo(),
+    ),
+    new GalleryDemo(
       title: 'Expand/collapse list control',
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
@@ -402,11 +411,11 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
     ),
     new GalleryDemo(
-      title: 'Dialogs',
+      title: 'Alerts',
       icon: GalleryIcons.dialogs,
       category: _kCupertinoComponents,
-      routeName: CupertinoDialogDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoDialogDemo(),
+      routeName: CupertinoAlertDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoAlertDemo(),
     ),
     new GalleryDemo(
       title: 'Navigation',
@@ -428,6 +437,13 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kCupertinoComponents,
       routeName: CupertinoRefreshControlDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Segmented Control',
+      icon: GalleryIcons.tabs,
+      category: _kCupertinoComponents,
+      routeName: CupertinoSegmentedControlDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoSegmentedControlDemo(),
     ),
     new GalleryDemo(
       title: 'Sliders',

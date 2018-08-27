@@ -5,10 +5,11 @@
 import 'dart:async';
 import 'dart:io' show ProcessResult;
 
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:fuchsia_remote_debug_protocol/src/runners/ssh_command_runner.dart';
+
+import '../../common.dart';
 
 void main() {
   group('SshCommandRunner.constructors', () {
@@ -99,7 +100,7 @@ void main() {
         await runner.run('oihaw');
       }
 
-      expect(failingFunction, throwsA(const isInstanceOf<SshCommandError>()));
+      expect(failingFunction, throwsA(isInstanceOf<SshCommandError>()));
     });
 
     test('verify correct args with config', () async {

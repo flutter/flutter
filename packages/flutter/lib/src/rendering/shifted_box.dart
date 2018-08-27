@@ -239,7 +239,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        super(child);
 
   /// A constructor to be used only when the extending class also has a mixin.
-  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/15101 is fixed.
+  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/31543 is fixed.
   @protected
   RenderAligningShiftedBox.mixin(AlignmentGeometry alignment,TextDirection textDirection, RenderBox child)
     : this(alignment: alignment, textDirection: textDirection, child: child);
@@ -267,7 +267,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
   ///
-  /// If this is set to a [AlignmentDirectional] object, then
+  /// If this is set to an [AlignmentDirectional] object, then
   /// [textDirection] must not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -322,7 +322,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   }
 }
 
-/// Positions its child using a [AlignmentGeometry].
+/// Positions its child using an [AlignmentGeometry].
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,

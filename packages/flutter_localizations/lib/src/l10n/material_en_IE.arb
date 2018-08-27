@@ -45,5 +45,7 @@
   "reorderItemUp": "Move up",
   "reorderItemDown": "Move down",
   "reorderItemLeft": "Move left",
-  "reorderItemRight": "Move right"
+  "reorderItemRight": "Move right",
+  "expandedIconTapHint": "Collapse",
+  "collapsedIconTapHint": "Expand"
 }

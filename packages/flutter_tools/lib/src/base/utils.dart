@@ -75,6 +75,14 @@ String camelCase(String str) {
   return str;
 }
 
+final RegExp _upperRegex = new RegExp(r'[A-Z]');
+
+/// Convert `fooBar` to `foo_bar`.
+String snakeCase(String str, [String sep = '_']) {
+  return str.replaceAllMapped(_upperRegex,
+      (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
+}
+
 String toTitleCase(String str) {
   if (str.isEmpty)
     return str;

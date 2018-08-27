@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';

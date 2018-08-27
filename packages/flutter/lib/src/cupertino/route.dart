@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +14,9 @@ const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
 // Barrier color for a Cupertino modal barrier.
 const Color _kModalBarrierColor = Color(0x6604040F);
+
+// The duration of the transition used when a modal popup is shown.
+const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
 // Offset from offscreen to the right to fully on screen.
 final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(
@@ -84,6 +88,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   /// be null.
   CupertinoPageRoute({
     @required this.builder,
+    this.title,
     RouteSettings settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
@@ -92,12 +97,56 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
-    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
+    // ignore: prefer_asserts_in_initializer_lists, https://github.com/dart-lang/sdk/issues/31223
     assert(opaque); // PageRoute makes it return true.
   }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+
+  /// A title string for this route.
+  ///
+  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
+  /// one is not manually supplied.
+  final String title;
+
+  ValueNotifier<String> _previousTitle;
+
+  /// The title string of the previous [CupertinoPageRoute].
+  ///
+  /// The [ValueListenable]'s value is readable after the route is installed
+  /// onto a [Navigator]. The [ValueListenable] will also notify its listeners
+  /// if the value changes (such as by replacing the previous route).
+  ///
+  /// The [ValueListenable] itself will be null before the route is installed.
+  /// Its content value will be null if the previous route has no title or
+  /// is not a [CupertinoPageRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [ValueListenableBuilder], which can be used to listen and rebuild
+  ///    widgets based on a ValueListenable.
+  ValueListenable<String> get previousTitle {
+    assert(
+      _previousTitle != null,
+      'Cannot read the previousTitle for a route that has not yet been installed',
+    );
+    return _previousTitle;
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    final String previousTitleString = previousRoute is CupertinoPageRoute
+        ? previousRoute.title
+        : null;
+    if (_previousTitle == null) {
+      _previousTitle = new ValueNotifier<String>(previousTitleString);
+    } else {
+      _previousTitle.value = previousTitleString;
+    }
+    super.didChangePrevious(previousRoute);
+  }
 
   @override
   final bool maintainState;
@@ -508,7 +557,6 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
   }
 }
 
-
 /// A controller for an iOS-style back gesture.
 ///
 /// This is created by a [CupertinoPageRoute] in response from a gesture caught
@@ -713,6 +761,102 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
     canvas.drawRect(rect, paint);
   }
+}
+
+class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
+  _CupertinoModalPopupRoute({
+    this.builder,
+    this.barrierLabel,
+    RouteSettings settings,
+  }) : super(settings: settings);
+
+  final WidgetBuilder builder;
+
+  @override
+  final String barrierLabel;
+
+  @override
+  Color get barrierColor => _kModalBarrierColor;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  bool get semanticsDismissible => false;
+
+  @override
+  Duration get transitionDuration => _kModalPopupTransitionDuration;
+
+  Animation<double> _animation;
+
+  Tween<Offset> _offsetTween;
+
+  @override
+  Animation<double> createAnimation() {
+    assert(_animation == null);
+    _animation = new CurvedAnimation(
+      parent: super.createAnimation(),
+      curve: Curves.ease,
+      reverseCurve: Curves.ease.flipped,
+    );
+    _offsetTween = new Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: const Offset(0.0, 0.0),
+    );
+    return _animation;
+  }
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return new Align(
+      alignment: Alignment.bottomCenter,
+      child: new FractionalTranslation(
+        translation: _offsetTween.evaluate(_animation),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Shows a modal iOS-style popup that slides up from the bottom of the screen.
+///
+/// Such a popup is an alternative to a menu or a dialog and prevents the user
+/// from interacting with the rest of the app.
+///
+/// The `context` argument is used to look up the [Navigator] for the popup.
+/// It is only used when the method is called. Its corresponding widget can be
+/// safely removed from the tree before the popup is closed.
+///
+/// The `builder` argument typically builds a [CupertinoActionSheet] widget.
+/// Content below the widget is dimmed with a [ModalBarrier]. The widget built
+/// by the `builder` does not share a context with the location that
+/// `showCupertinoModalPopup` is originally called from. Use a
+/// [StatefulBuilder] or a custom [StatefulWidget] if the widget needs to
+/// update dynamically.
+///
+/// Returns a `Future` that resolves to the value that was passed to
+/// [Navigator.pop] when the popup was closed.
+///
+/// See also:
+///
+///  * [ActionSheet], which is the widget usually returned by the `builder`
+///    argument to [showCupertinoModalPopup].
+///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
+Future<T> showCupertinoModalPopup<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+}) {
+  return Navigator.of(context, rootNavigator: true).push(
+    new _CupertinoModalPopupRoute<T>(
+      builder: builder,
+      barrierLabel: 'Dismiss',
+    ),
+  );
 }
 
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {

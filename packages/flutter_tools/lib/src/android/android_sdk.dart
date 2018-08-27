@@ -361,11 +361,7 @@ class AndroidSdk {
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
-        .where((FileSystemEntity entity) => entity is Directory)
-        .map<Directory>((FileSystemEntity entity) {
-          final Directory dir = entity;
-          return dir;
-        });
+        .whereType<Directory>();
     }
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...

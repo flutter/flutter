@@ -962,7 +962,7 @@ class _RenderSlider extends RenderBox {
 
   void _paintOverlay(Canvas canvas, Offset center) {
     if (!_overlayAnimation.isDismissed) {
-      // TODO(gspencer) : We don't really follow the spec here for overlays.
+      // TODO(gspencer): We don't really follow the spec here for overlays.
       // The spec says to use 16% opacity for drawing over light material,
       // and 32% for colored material, but we don't really have a way to
       // know what the underlying color is, so there's no easy way to
