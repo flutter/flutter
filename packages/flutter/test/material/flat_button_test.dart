@@ -33,13 +33,12 @@ void main() {
   });
 
   testWidgets('FlatButton has no clip by default', (WidgetTester tester) async{
-    final GlobalKey buttonKey = new GlobalKey();
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Material(
           child: new FlatButton(
-            key: buttonKey,
+            child: new Container(),
             onPressed: () { /* to make sure the button is enabled */ },
           ),
         )
@@ -47,7 +46,7 @@ void main() {
     );
 
     expect(
-        tester.renderObject(find.byKey(buttonKey)),
+        tester.renderObject(find.byType(FlatButton)),
         paintsExactlyCountTimes(#clipPath, 0)
     );
   });

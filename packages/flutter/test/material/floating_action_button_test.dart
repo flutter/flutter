@@ -441,13 +441,11 @@ void main() {
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
-    final GlobalKey buttonKey = new GlobalKey();
     await tester.pumpWidget(
       new Directionality(
           textDirection: TextDirection.ltr,
           child: new Material(
             child: new FloatingActionButton(
-              key: buttonKey,
               onPressed: () { /* to make sure the button is enabled */ },
             ),
           )
@@ -455,7 +453,7 @@ void main() {
     );
 
     expect(
-        tester.renderObject(find.byKey(buttonKey)),
+        tester.renderObject(find.byType(FloatingActionButton)),
         paintsExactlyCountTimes(#clipPath, 0)
     );
   });
