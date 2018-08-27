@@ -50,7 +50,7 @@ void main() {
     expect(find.byTooltip('Add'), findsOneWidget);
   });
 
-  testWidgets('Floating Action Button tooltip (long press off center)', (WidgetTester tester) async {
+  testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Scaffold(
