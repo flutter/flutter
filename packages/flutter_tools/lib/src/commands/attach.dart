@@ -45,7 +45,7 @@ class AttachCommand extends FlutterCommand {
         help: 'Local port where the observatory is listening.',
       )..addOption(
         'project-root',
-        hide: true,
+        hide: !verboseHelp,
         help: 'Normally used only in run target',
       )..addFlag(
         'preview-dart-2',
