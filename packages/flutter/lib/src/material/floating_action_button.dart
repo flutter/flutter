@@ -260,12 +260,11 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
     if (widget.tooltip != null) {
       final Widget tooltip = MergeSemantics(
-        child: new Tooltip(
+        child: Tooltip(
           message: widget.tooltip,
           child: result,
         ),
       );
-
       // The long-pressable area for the tooltip should always be as big as
       // the tooltip even if there is no child.
       result = widget.child != null ? tooltip : new SizedBox.expand(child: tooltip);
