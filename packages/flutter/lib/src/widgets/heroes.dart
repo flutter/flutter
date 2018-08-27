@@ -109,6 +109,10 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 /// position, and then the widget is inserted into route B. When going back from
 /// B to A, route A's hero's widget is, by default, placed over where route B's
 /// hero's widget was, and then the animation goes the other way.
+///
+/// ## Parts of a Hero Transition
+///
+/// ![Diagrams with parts of the Hero transition.](https://flutter.github.io/assets-for-api-docs/assets/interaction/heroes.png)
 class Hero extends StatefulWidget {
   /// Create a hero.
   ///
