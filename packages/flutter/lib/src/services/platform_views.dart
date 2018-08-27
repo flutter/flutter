@@ -63,6 +63,7 @@ class PlatformViewsService {
   ///
   /// `creationParamsCodec` is the codec used to encode `creationParams` before sending it to the
   /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
+  /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
   /// The Android view will only be created after [AndroidViewController.setSize] is called for the
   /// first time.
