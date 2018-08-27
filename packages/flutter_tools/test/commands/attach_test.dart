@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:mockito/mockito.dart';
 
@@ -102,6 +103,9 @@ void main() {
       final File foo = fs.file('lib/foo.dart')
         ..createSync();
 
+      // Delete the main.dart file to be sure that attach works without it.
+      fs.file('lib/main.dart').deleteSync();
+
       final AttachCommand command = new AttachCommand(
           hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(
@@ -173,6 +177,84 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     },);
+
+    testUsingContext('accepts filesystem parameters', () async {
+      const String filesystemScheme = 'foo';
+      const String filesystemRoot = '/build-output/';
+      const String projectRoot = '/build-output/project-root';
+      const String outputDill = '/tmp/output.dill';
+      const int devicePort = 499;
+      const int hostPort = 42;
+      final MockDeviceLogReader mockLogReader = new MockDeviceLogReader();
+      final MockPortForwarder portForwarder = new MockPortForwarder();
+      final MockAndroidDevice device = new MockAndroidDevice();
+      final MockHotRunnerFactory mockHotRunnerFactory = new MockHotRunnerFactory();
+      when(device.getLogReader()).thenAnswer((_) {
+        // Now that the reader is used, start writing messages to it.
+        Timer.run(() {
+          mockLogReader.addLine('Foo');
+          mockLogReader.addLine(
+              'Observatory listening on http://127.0.0.1:$devicePort');
+        });
+
+        return mockLogReader;
+      });
+      when(device.portForwarder).thenReturn(portForwarder);
+      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
+          .thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts).thenReturn(
+          <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.unforward(any)).thenAnswer((_) async => null);
+      when(
+        mockHotRunnerFactory.build(
+          any,
+          target: anyNamed('target'),
+          projectRootPath: anyNamed('projectRootPath'),
+          dillOutputPath: anyNamed('dillOutputPath'),
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          usesTerminalUI: anyNamed('usesTerminalUI'),
+        ),
+      )..thenReturn(new MockHotRunner());
+
+      testDeviceManager.addDevice(device);
+
+      final AttachCommand command = new AttachCommand(
+        hotRunnerFactory: mockHotRunnerFactory,
+      );
+      await createTestCommandRunner(command).run(<String>[
+        'attach',
+        '--filesystem-scheme',
+        filesystemScheme,
+        '--filesystem-root',
+        filesystemRoot,
+        '--project-root',
+        projectRoot,
+        '--output-dill',
+        outputDill,
+        '-v',
+      ]);
+
+      final VerificationResult verificationResult = verify(
+        mockHotRunnerFactory.build(
+          captureAny,
+          target: anyNamed('target'),
+          projectRootPath: projectRoot,
+          dillOutputPath: outputDill,
+          debuggingOptions: anyNamed('debuggingOptions'),
+          packagesFilePath: anyNamed('packagesFilePath'),
+          usesTerminalUI: anyNamed('usesTerminalUI'),
+        ),
+      )..called(1);
+      final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
+      expect(flutterDevices, hasLength(1));
+      final FlutterDevice flutterDevice = flutterDevices.first;
+      expect(flutterDevice.dillOutputPath, outputDill);
+      expect(flutterDevice.fileSystemScheme, filesystemScheme);
+      expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+    });
   });
 }
 
