@@ -593,17 +593,27 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
 
   @override
   Widget build(BuildContext context) {
+    final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
+      keys: keys,
+      route: ModalRoute.of(context),
+      userLeading: widget.leading,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
+      automaticallyImplyTitle: widget.automaticallyImplyTitle,
+      previousPageTitle: widget.previousPageTitle,
+      userMiddle: widget.middle,
+      userTrailing: widget.trailing,
+      userLargeTitle: widget.largeTitle,
+      padding: widget.padding,
+      actionsForegroundColor: widget.actionsForegroundColor,
+      large: true,
+    );
+
     return new SliverPersistentHeader(
       pinned: true, // iOS navigation bars are always pinned.
       delegate: new _LargeTitleNavigationBarSliverDelegate(
         keys: keys,
-        userLeading: widget.leading,
-        automaticallyImplyLeading: widget.automaticallyImplyLeading,
-        automaticallyImplyTitle: widget.automaticallyImplyTitle,
-        previousPageTitle: widget.previousPageTitle,
+        components: components,
         userMiddle: widget.middle,
-        userTrailing: widget.trailing,
-        userLargeTitle: widget.largeTitle,
         backgroundColor: widget.backgroundColor,
         border: widget.border,
         padding: widget.padding,
@@ -622,13 +632,8 @@ class _LargeTitleNavigationBarSliverDelegate
     extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _LargeTitleNavigationBarSliverDelegate({
     @required this.keys,
-    @required this.userLeading,
-    @required this.automaticallyImplyLeading,
-    @required this.automaticallyImplyTitle,
-    @required this.previousPageTitle,
+    @required this.components,
     @required this.userMiddle,
-    @required this.userTrailing,
-    @required this.userLargeTitle,
     @required this.backgroundColor,
     @required this.border,
     @required this.padding,
@@ -643,13 +648,8 @@ class _LargeTitleNavigationBarSliverDelegate
        assert(transitionBetweenRoutes != null);
 
   final _NavigationBarStaticComponentsKeys keys;
-  final Widget userLeading;
-  final bool automaticallyImplyLeading;
-  final bool automaticallyImplyTitle;
-  final String previousPageTitle;
+  final _NavigationBarStaticComponents components;
   final Widget userMiddle;
-  final Widget userTrailing;
-  final Widget userLargeTitle;
   final Color backgroundColor;
   final Border border;
   final EdgeInsetsDirectional padding;
@@ -669,21 +669,6 @@ class _LargeTitleNavigationBarSliverDelegate
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
-
-    final _NavigationBarStaticComponents components = new _NavigationBarStaticComponents(
-      keys: keys,
-      route: ModalRoute.of(context),
-      userLeading: userLeading,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      automaticallyImplyTitle: automaticallyImplyTitle,
-      previousPageTitle: previousPageTitle,
-      userMiddle: userMiddle,
-      userTrailing: userTrailing,
-      userLargeTitle: userLargeTitle,
-      padding: padding,
-      actionsForegroundColor: actionsForegroundColor,
-      large: true,
-    );
 
     final _PersistentNavigationBar persistentNavigationBar =
         new _PersistentNavigationBar(
@@ -777,20 +762,17 @@ class _LargeTitleNavigationBarSliverDelegate
 
   @override
   bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
-    return userLeading != oldDelegate.userLeading
-        || automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading
-        || automaticallyImplyTitle != oldDelegate.automaticallyImplyTitle
-        || previousPageTitle != oldDelegate.previousPageTitle
+       return components != oldDelegate.components
         || userMiddle != oldDelegate.userMiddle
-        || userTrailing != oldDelegate.userTrailing
-        || userLargeTitle != oldDelegate.userLargeTitle
         || backgroundColor != oldDelegate.backgroundColor
         || border != oldDelegate.border
         || padding != oldDelegate.padding
         || actionsForegroundColor != oldDelegate.actionsForegroundColor
         || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
         || persistentHeight != oldDelegate.persistentHeight
-        || alwaysShowMiddle != oldDelegate.alwaysShowMiddle;
+        || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
+        || heroTag != oldDelegate.heroTag
+        || clipBehavior != oldDelegate.clipBehavior;
   }
 }
 
