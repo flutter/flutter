@@ -58,7 +58,6 @@ class AttachCommand extends FlutterCommand {
           help: 'Handle machine structured JSON command input and provide output\n'
                 'and progress in machine friendly format.',
       );
-    usesTargetOption();
     hotRunnerFactory ??= new HotRunnerFactory();
   }
 
