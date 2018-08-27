@@ -136,10 +136,10 @@ void main() {
             usesTerminalUI: anyNamed('usesTerminalUI'),
           ),
         )..called(1);
-        
+
         final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
         expect(flutterDevices, hasLength(1));
-        
+
         // Validate that the attach call built a flutter device with the right
         // output dill, filesystem scheme, and filesystem root.
         final FlutterDevice flutterDevice = flutterDevices.first;
