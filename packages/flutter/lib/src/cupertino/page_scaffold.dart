@@ -25,6 +25,7 @@ class CupertinoPageScaffold extends StatelessWidget {
     this.resizeToAvoidBottomInset = true,
     @required this.child,
   }) : assert(child != null),
+       assert(resizeToAvoidBottomInset != null),
        super(key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
