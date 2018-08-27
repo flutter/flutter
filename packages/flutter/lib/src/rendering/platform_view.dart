@@ -218,7 +218,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   // the pointer.
   final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>> {};
 
-  // Pointer for which we have already one the arena, events for pointers in this set are
+  // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.
   final Set<int> forwardedPointers = new Set<int>();
 
