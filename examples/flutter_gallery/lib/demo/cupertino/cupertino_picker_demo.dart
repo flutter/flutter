@@ -94,8 +94,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   Widget _buildCountdownTimerPicker(BuildContext context) {
     return new GestureDetector(
-      onTap: () async {
-        await showCupertinoModalPopup<void>(
+      onTap: () {
+        showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
             return _buildBottomPicker(
