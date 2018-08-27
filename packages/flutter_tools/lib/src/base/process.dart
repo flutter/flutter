@@ -191,7 +191,9 @@ Future<int> runInteractively(List<String> command, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  final Future<void> stdinPipe = process.stdin.addStream(stdin);
+  // The real stdin will never finish streaming. Pipe until the child process
+  // finishes.
+  process.stdin.addStream(stdin); // ignore: unawaited_futures
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
@@ -199,8 +201,6 @@ Future<int> runInteractively(List<String> command, {
     stderr.addStream(process.stderr),
   ]);
   final int exitCode = await process.exitCode;
-  // Give a chance to let all the stdin contents output.
-  await stdinPipe;
   return exitCode;
 }
 
