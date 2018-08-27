@@ -615,9 +615,10 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return tester.element(
-            find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
-          ).ancestorStateOfType(const TypeMatcher<_StatefulState>());
+          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+              .evaluate()
+              .first
+              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
         }
         await tester.pumpWidget(new MaterialApp(
           home: new ReorderableListView(
