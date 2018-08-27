@@ -142,9 +142,9 @@ void main() {
         ));
 
         Element getContentElement() {
-          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
           final Widget scrollContents = listScrollView.child;
-          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 
@@ -249,13 +249,17 @@ void main() {
         }
 
         await tester.pumpWidget(buildWithScrollController(primary));
-        SingleChildScrollView scrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+        SingleChildScrollView scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
         expect(scrollView.controller, primary);
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
         final ScrollController primary2 = new ScrollController();
         await tester.pumpWidget(buildWithScrollController(primary2));
-        scrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+        scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
         expect(scrollView.controller, primary2);
       });
 
@@ -289,7 +293,9 @@ void main() {
           fail('Expected no error, but got $e');
         }
         // Expect that we have build *a* ScrollController for use in the view.
-        final SingleChildScrollView scrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+        final SingleChildScrollView scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
         expect(scrollView.controller, isNotNull);
       });
 
@@ -564,9 +570,9 @@ void main() {
         ));
 
         Element getContentElement() {
-          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
           final Widget scrollContents = listScrollView.child;
-          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 
@@ -609,10 +615,9 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
-              .evaluate()
-              .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+          return tester.element(
+            find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          ).ancestorStateOfType(const TypeMatcher<_StatefulState>());
         }
         await tester.pumpWidget(new MaterialApp(
           home: new ReorderableListView(
