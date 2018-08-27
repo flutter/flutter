@@ -123,9 +123,9 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   /// Adds flags for using a specific filesystem root and scheme.
-  /// 
+  ///
   /// Only usable in Dart 2 mode.
-  /// 
+  ///
   /// [hide] indicates whether or not to hide these options when the user asks
   /// for help.
   void usesFilesystemOptions({@required bool hide}) {
