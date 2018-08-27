@@ -52,7 +52,7 @@ void main() {
 
   testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
