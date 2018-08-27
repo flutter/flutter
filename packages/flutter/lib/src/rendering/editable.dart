@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show EditableTextState;
 
 import 'box.dart';
 import 'object.dart';
@@ -136,7 +135,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    EditableTextState editableTextState,
+    TextSelectionDelegate textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -161,7 +160,7 @@ class RenderEditable extends RenderBox {
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
        _obscureText = obscureText,
-       _editableTextState = editableTextState {
+       _textSelectionDelegate = textSelectionDelegate {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer(debugOwner: this)
@@ -199,18 +198,18 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  EditableTextState _editableTextState;
+  TextSelectionDelegate _textSelectionDelegate;
   Rect _lastCaretRect;
 
   static const int _kLeftArrowCode = 21;
   static const int _kRightArrowCode = 22;
   static const int _kUpArrowCode = 19;
   static const int _kDownArrowCode = 20;
-  static const int _kKey_X_Code = 52;
-  static const int _kKey_C_Code = 31;
-  static const int _kKey_V_Code = 50;
-  static const int _kKey_A_Code = 29;
-  static const int _kKey_Del_Code = 112;
+  static const int _kXKeyCode = 52;
+  static const int _kCKeyCode = 31;
+  static const int _kVKeyCode = 50;
+  static const int _kAKeyCode = 29;
+  static const int _kDelKeyCode = 112;
 
   // The extent offset of the current selection
   int _extentOffset = -1;
@@ -255,11 +254,11 @@ class RenderEditable extends RenderBox {
     final bool upArrow = pressedKeyCode == _kUpArrowCode;
     final bool downArrow = pressedKeyCode == _kDownArrowCode;
     final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
-    final bool A = pressedKeyCode == _kKey_A_Code;
-    final bool X = pressedKeyCode == _kKey_X_Code;
-    final bool V = pressedKeyCode == _kKey_V_Code;
-    final bool C = pressedKeyCode == _kKey_C_Code;
-    final bool del = pressedKeyCode == _kKey_Del_Code;
+    final bool aKey = pressedKeyCode == _kAKeyCode;
+    final bool xKey = pressedKeyCode == _kXKeyCode;
+    final bool vKey = pressedKeyCode == _kVKeyCode;
+    final bool cKey = pressedKeyCode == _kCKeyCode;
+    final bool del = pressedKeyCode == _kDelKeyCode;
 
     // We will only move select or more the caret if an arrow is pressed
     if (arrow) {
@@ -276,11 +275,10 @@ class RenderEditable extends RenderBox {
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
-    }
-    if (ctrl)
-      _handleShortcuts(ctrl, X, V, C, A);
+    } else if (ctrl)
+      _handleShortcuts(ctrl, xKey, vKey, cKey, aKey);
     if (del)
-      _handleDelete(del);
+      _handleDelete();
   }
 
   // Handles full word traversal using control.
@@ -396,23 +394,26 @@ class RenderEditable extends RenderBox {
     return newOffset;
   }
 
-  void _handleShortcuts(bool ctrl, bool X, bool V, bool C, bool A) async {
-    if (C && !selection.isCollapsed) {
+  // Handles shortcut functionality including cut, copy, paste and select all
+  // using control + (X, C, V, A).
+  void _handleShortcuts(bool ctrl, bool xKey, bool vKey, bool cKey, bool aKey) async {
+    if (cKey && !selection.isCollapsed) {
       Clipboard.setData(new ClipboardData(text: selection.textInside(text.text)));
     }
-    else if (X && !selection.isCollapsed) {
+    else if (xKey && !selection.isCollapsed) {
       Clipboard.setData(new ClipboardData(text: selection.textInside(text.text)));
-      _editableTextState.textEditingValue = new TextEditingValue(
+      _textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text)
             + selection.textAfter(text.text),
         selection: new TextSelection.collapsed(offset: selection.start),
       );
-    }
-    else if (V) {
-      final TextEditingValue value = _editableTextState.textEditingValue; // Snapshot the input before using `await`.
+    } else if (vKey) {
+      // Snapshot the input before using `await`.
+      // See https://github.com/flutter/flutter/issues/11427
+      final TextEditingValue value = _textSelectionDelegate.textEditingValue;
       final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
       if (data != null) {
-        _editableTextState.textEditingValue = new TextEditingValue(
+        _textSelectionDelegate.textEditingValue = new TextEditingValue(
           text: value.selection.textBefore(value.text)
               + data.text
               + value.selection.textAfter(value.text),
@@ -421,14 +422,13 @@ class RenderEditable extends RenderBox {
           ),
         );
       }
-    }
-    else if (A) {
+    } else if (aKey) {
       _baseOffset = 0;
-      _extentOffset = _editableTextState.textEditingValue.text.length;
+      _extentOffset = _textSelectionDelegate.textEditingValue.text.length;
       onSelectionChanged(
         new TextSelection(
             baseOffset: 0,
-            extentOffset: _editableTextState.textEditingValue.text.length,
+            extentOffset: _textSelectionDelegate.textEditingValue.text.length,
         ),
         this,
         SelectionChangedCause.keyboard,
@@ -436,15 +436,14 @@ class RenderEditable extends RenderBox {
     }
   }
 
-  int _handleDelete(bool del) {
+  int _handleDelete() {
     if (selection.textAfter(text.text).isNotEmpty) {
-      _editableTextState.textEditingValue = new TextEditingValue(
+      _textSelectionDelegate.textEditingValue = new TextEditingValue(
           text: selection.textBefore(text.text)
               + selection.textAfter(text.text).substring(1),
           selection: new TextSelection.collapsed(offset: selection.start));
-    }
-    else {
-      _editableTextState.textEditingValue = new TextEditingValue(
+    } else {
+      _textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text),
         selection: new TextSelection.collapsed(offset: selection.start)
       );
