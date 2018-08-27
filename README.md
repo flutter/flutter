@@ -25,7 +25,7 @@ and Android.
 
 <img src="https://raw.githubusercontent.com/flutter/website/master/src/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app changes instantly.">
 
-## Expressive and Flexible UI
+## Expressive and flexible UI
 Quickly ship features with a focus on native end-user experiences.
 Layered architecture allows full customization, which results in incredibly
 fast rendering and expressive and flexible designs.
