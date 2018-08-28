@@ -908,7 +908,7 @@ class _AppRunLogger extends Logger {
         'progressId': progressId,
         'finished': true
       });
-    });
+    })..start();
     return _status;
   }
 

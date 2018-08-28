@@ -534,7 +534,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.default.png'),
     );
-  }, skip: true);
+  });
 
   Center genPhysicalShape(Clip clipBehavior) {
     return new Center(
@@ -645,5 +645,5 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.default.png'),
     );
-  }, skip: true);
+  });
 }
