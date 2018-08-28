@@ -600,6 +600,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
         }
         return '  $name: uses \'package:test\' directly';
       }
+      return null;
     })
     .where((String line) => line != null)
     .toList()

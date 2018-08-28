@@ -71,6 +71,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
             ],
           ),
           tabBuilder: (BuildContext context, int index) {
+            assert(index >= 0 && index <= 2);
             switch (index) {
               case 0:
                 return new CupertinoTabView(
@@ -95,8 +96,8 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   defaultTitle: 'Account',
                 );
                 break;
-              default:
             }
+            return null;
           },
         ),
       ),

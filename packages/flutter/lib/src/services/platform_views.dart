@@ -494,14 +494,14 @@ class AndroidViewController {
   }
 
   static int _getAndroidDirection(TextDirection direction) {
+    assert(direction != null);
     switch (direction) {
       case TextDirection.ltr:
         return kAndroidLayoutDirectionLtr;
       case TextDirection.rtl:
         return kAndroidLayoutDirectionRtl;
-      default:
-        throw new UnsupportedError('Direction $direction is not supported');
     }
+    return null;
   }
 
   /// Sends an Android [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent)
