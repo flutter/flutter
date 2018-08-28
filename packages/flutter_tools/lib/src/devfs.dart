@@ -509,15 +509,22 @@ class DevFS {
           await generator.recompile(mainPath, invalidatedFiles,
               outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
               packagesFilePath : _packagesFilePath);
-      final String compiledBinary = compilerOutput?.outputFilename;
-      if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = fs.path.toUri(projectRootPath != null ?
-            fs.path.relative(pathToReload, from: projectRootPath):
-            pathToReload);
-        if (!dirtyEntries.containsKey(entryUri)) {
-          final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
-          dirtyEntries[entryUri] = content;
-          numBytes += content.size;
+      // Don't send full kernel file that would overwrite what VM already
+      // started loading from. Generally speaking we would only be able to
+      // restart if there changes since last build and this request to launch
+      // the app.
+      if (!bundleFirstUpload) {
+        final String compiledBinary = compilerOutput?.outputFilename;
+        if (compiledBinary != null && compiledBinary.isNotEmpty) {
+          final Uri entryUri = fs.path.toUri(projectRootPath != null ?
+          fs.path.relative(pathToReload, from: projectRootPath) :
+          pathToReload);
+          if (!dirtyEntries.containsKey(entryUri)) {
+            final DevFSFileContent content = new DevFSFileContent(
+                fs.file(compiledBinary));
+            dirtyEntries[entryUri] = content;
+            numBytes += content.size;
+          }
         }
       }
     }
