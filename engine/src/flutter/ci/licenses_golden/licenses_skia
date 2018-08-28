@@ -1,4 +1,4 @@
-Signature: 2f1d5ae19df3e3eaa4aacafadcb69c3c
+Signature: deea323ebf8e679c9b605ac960dd1376
 
 UNUSED LICENSES:
 
@@ -2255,6 +2255,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_pull.jso
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_push.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_2.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_lottie_web.expected/Test-Debian9-none-GCE-CPU-AVX2-x86_64-Debug-All-LottieWeb.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test_lottie_web.expected/lottie_web_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Debug-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-wasm-Debug-All-PathKit.json
@@ -2286,6 +2288,8 @@ FILE: ../../../third_party/skia/infra/bots/tools/luci-go/win64/isolate.exe.sha1
 FILE: ../../../third_party/skia/infra/branch-config/cq.cfg
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
+FILE: ../../../third_party/skia/infra/lottiecap/docker/gold-lottie-web-puppeteer/Dockerfile
+FILE: ../../../third_party/skia/infra/lottiecap/docker/lottie-web-puppeteer/Dockerfile
 FILE: ../../../third_party/skia/infra/pathkit/docker/emsdk-base/Dockerfile
 FILE: ../../../third_party/skia/infra/pathkit/docker/gold-karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/pathkit/docker/karma-chrome-tests/Dockerfile
@@ -5146,6 +5150,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h + 
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkaroundsAutogen.h
 FILE: ../../../third_party/skia/include/utils/SkTraceEventPhase.h
+FILE: ../../../third_party/skia/infra/lottiecap/gold/lottie-web-aggregator.go
 FILE: ../../../third_party/skia/infra/pathkit/gold/pathkit_aggregator.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Chromium Authors. All rights reserved.
