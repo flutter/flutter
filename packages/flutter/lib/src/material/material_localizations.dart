@@ -307,6 +307,9 @@ abstract class MaterialLocalizations {
   /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
   String get collapsedIconTapHint => 'Expand';
 
+  /// The label for the [TextField]'s character counter.
+  String remainingTextFieldCharacterCount(int remaining);
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -709,4 +712,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
   static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+
+  @override
+  String remainingTextFieldCharacterCount(int remaining) {
+    switch (remaining) {
+      case 0:
+        return 'No characters remaining';
+      case 1:
+        return '1 character remaining';
+      default:
+        return '$remaining characters remaining';
+    }
+  }
 }

@@ -2580,9 +2580,6 @@ void main() {
         child: new TextField(
           key: key,
           controller: controller,
-          maxLengthSemanticFormatterCallback: (int current, int max) {
-            return '$current characters out of $max';
-          },
           maxLength: 10,
           decoration: const InputDecoration(
             labelText: 'label',
@@ -2608,7 +2605,7 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,
-              label: '0 characters out of 10',
+              label: '10 characters remaining',
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -2638,7 +2635,7 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,
-              label: '0 characters out of 10',
+              label: '10 characters remaining',
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -2666,7 +2663,7 @@ void main() {
             hintText: 'hint',
             helperText: 'helper',
             counterText: '0/10',
-            semanticCounterText: '0 characters out of 10',
+            semanticCounterText: '0 out of 10',
           ),
         ),
       ),
@@ -2686,7 +2683,7 @@ void main() {
           ],
           children: <TestSemantics>[
             new TestSemantics(
-              label: '0 characters out of 10',
+              label: '0 out of 10',
               textDirection: TextDirection.ltr,
             ),
           ],

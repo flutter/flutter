@@ -51,5 +51,8 @@
   "reorderItemLeft": "TBD",
   "reorderItemRight": "TBD",
   "expandedIconTapHint": "TBD",
-  "collapsedIconTapHint": "TBD"
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

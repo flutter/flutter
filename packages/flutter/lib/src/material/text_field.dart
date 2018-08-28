@@ -14,14 +14,11 @@ import 'feedback.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
-
-/// A Callback which produces an alternative semantic label for the max lines
-/// decoration of the [TextField].
-typedef String MaxLengthSemanticFormatterCallback(int currentLines, int maxLines);
 
 /// A material design text field.
 ///
@@ -123,7 +120,6 @@ class TextField extends StatefulWidget {
     this.cursorRadius,
     this.cursorColor,
     this.keyboardAppearance,
-    this.maxLengthSemanticFormatterCallback,
     this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(textAlign != null),
        assert(autofocus != null),
@@ -347,16 +343,6 @@ class TextField extends StatefulWidget {
   /// Defaults to EdgeInserts.all(20.0).
   final EdgeInsets scrollPadding;
 
-  /// The callback used to create a semantic value from the current and maximum
-  /// length values.
-  ///
-  /// If not provided, the semantic label for the character counter element
-  /// will default to the same as the visual text.
-  ///
-  /// This is used by accessibility frameworks like TalkBack on Android to
-  /// provide a more useful description of the maximum length.
-  final MaxLengthSemanticFormatterCallback maxLengthSemanticFormatterCallback;
-
   @override
   _TextFieldState createState() => new _TextFieldState();
 
@@ -394,6 +380,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration.counterText == null;
 
   InputDecoration _getEffectiveDecoration() {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(Theme.of(context).inputDecorationTheme)
       .copyWith(
@@ -403,11 +390,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (!needsCounter)
       return effectiveDecoration;
 
-    final int currentLines = _effectiveController.value.text.runes.length;
-    final String counterText = '$currentLines/${widget.maxLength}';
-    final String semanticCounterText = widget.maxLengthSemanticFormatterCallback != null
-      ? widget.maxLengthSemanticFormatterCallback(currentLines, widget.maxLength)
-      : counterText;
+    final int currentLength = _effectiveController.value.text.runes.length;
+    final String counterText = '$currentLength/${widget.maxLength}';
+    final int remaining = currentLength > widget.maxLength ? 0 : widget.maxLength - currentLength;
+    final String semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(

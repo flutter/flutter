@@ -74,7 +74,6 @@ class TextFormField extends FormField<String> {
     bool enabled,
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
-    MaxLengthSemanticFormatterCallback maxLengthSemanticFormatterCallback,
   }) : assert(initialValue == null || controller == null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -117,7 +116,6 @@ class TextFormField extends FormField<String> {
         enabled: enabled,
         scrollPadding: scrollPadding,
         keyboardAppearance: keyboardAppearance,
-        maxLengthSemanticFormatterCallback: maxLengthSemanticFormatterCallback,
       );
     },
   );
