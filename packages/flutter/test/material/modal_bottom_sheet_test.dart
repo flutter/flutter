@@ -242,10 +242,6 @@ void main() {
                 new TestSemantics(
                   label: 'BottomSheet',
                   textDirection: TextDirection.ltr,
-                  actions: <SemanticsAction>[
-                    SemanticsAction.scrollUp,
-                    SemanticsAction.scrollDown,
-                  ],
                 ),
               ],
             ),
