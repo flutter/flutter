@@ -510,9 +510,7 @@ class DevFS {
               outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
               packagesFilePath : _packagesFilePath);
       // Don't send full kernel file that would overwrite what VM already
-      // started loading from. Generally speaking we would only be able to
-      // restart if there changes since last build and this request to launch
-      // the app.
+      // started loading from.
       if (!bundleFirstUpload) {
         final String compiledBinary = compilerOutput?.outputFilename;
         if (compiledBinary != null && compiledBinary.isNotEmpty) {
