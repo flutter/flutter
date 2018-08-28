@@ -1039,6 +1039,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..ignorePointer = rendererIgnoresPointer
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
-      ..cursorRadius = cursorRadius;
+      ..cursorRadius = cursorRadius
+      ..textSelectionDelegate = textSelectionDelegate;
   }
 }

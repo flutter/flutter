@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
 
@@ -160,7 +161,7 @@ class RenderEditable extends RenderBox {
        _cursorWidth = cursorWidth,
        _cursorRadius = cursorRadius,
        _obscureText = obscureText,
-       _textSelectionDelegate = textSelectionDelegate {
+       textSelectionDelegate = textSelectionDelegate {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer(debugOwner: this)
@@ -198,7 +199,11 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  TextSelectionDelegate _textSelectionDelegate;
+  /// This is used for updating the text in the text field in the event
+  /// of cut or paste.
+  TextSelectionDelegate textSelectionDelegate;
+
+
   Rect _lastCaretRect;
 
   static const int _kLeftArrowCode = 21;
@@ -229,7 +234,7 @@ class RenderEditable extends RenderBox {
   static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-  void _handleKeyEvent(RawKeyEvent keyEvent){
+  void _handleKeyEvent(RawKeyEvent keyEvent) async {
     if (defaultTargetPlatform != TargetPlatform.android)
       return;
 
@@ -275,8 +280,10 @@ class RenderEditable extends RenderBox {
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
-    } else if (ctrl && (xKey || vKey || cKey || aKey))
-      _handleShortcuts(ctrl, xKey, vKey, cKey, aKey);
+    } else if (ctrl && (xKey || vKey || cKey || aKey)) {
+      // Do not await this method
+      _handleShortcuts(pressedKeyCode);
+    }
     if (del)
       _handleDelete();
   }
@@ -384,7 +391,7 @@ class RenderEditable extends RenderBox {
       onSelectionChanged(
         new TextSelection.fromPosition(
           new TextPosition(
-              offset: newOffset
+            offset: newOffset
           )
         ),
         this,
@@ -396,53 +403,66 @@ class RenderEditable extends RenderBox {
 
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control + (X, C, V, A).
-  void _handleShortcuts(bool ctrl, bool xKey, bool vKey, bool cKey, bool aKey) async {
-    if (cKey && !selection.isCollapsed) {
-      Clipboard.setData(new ClipboardData(text: selection.textInside(text.text)));
-    } else if (xKey && !selection.isCollapsed) {
-      Clipboard.setData(new ClipboardData(text: selection.textInside(text.text)));
-      _textSelectionDelegate.textEditingValue = new TextEditingValue(
-        text: selection.textBefore(text.text)
-            + selection.textAfter(text.text),
-        selection: new TextSelection.collapsed(offset: selection.start),
-      );
-    } else if (vKey) {
-      // Snapshot the input before using `await`.
-      // See https://github.com/flutter/flutter/issues/11427
-      final TextEditingValue value = _textSelectionDelegate.textEditingValue;
-      final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
-      if (data != null) {
-        _textSelectionDelegate.textEditingValue = new TextEditingValue(
-          text: value.selection.textBefore(value.text)
+  void _handleShortcuts(int pressedKeyCode) async {
+    switch(pressedKeyCode) {
+      case _kCKeyCode:
+        if (selection.isCollapsed) {
+          Clipboard.setData(
+            new ClipboardData(text: selection.textInside(text.text)));
+        }
+        break;
+      case _kXKeyCode:
+        if (!selection.isCollapsed) {
+          Clipboard.setData(
+            new ClipboardData(text: selection.textInside(text.text)));
+          textSelectionDelegate.textEditingValue = new TextEditingValue(
+            text: selection.textBefore(text.text)
+              + selection.textAfter(text.text),
+            selection: new TextSelection.collapsed(offset: selection.start),
+          );
+        }
+        break;
+      case _kVKeyCode:
+        // Snapshot the input before using `await`.
+        // See https://github.com/flutter/flutter/issues/11427
+        final TextEditingValue value = textSelectionDelegate.textEditingValue;
+        final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+        if (data != null) {
+          textSelectionDelegate.textEditingValue = new TextEditingValue(
+            text: value.selection.textBefore(value.text)
               + data.text
               + value.selection.textAfter(value.text),
-          selection: new TextSelection.collapsed(
+            selection: new TextSelection.collapsed(
               offset: value.selection.start + data.text.length
-          ),
-        );
-      }
-    } else if (aKey) {
-      _baseOffset = 0;
-      _extentOffset = _textSelectionDelegate.textEditingValue.text.length;
-      onSelectionChanged(
-        new TextSelection(
+            ),
+          );
+        }
+        break;
+      case _kAKeyCode:
+        _baseOffset = 0;
+        _extentOffset = textSelectionDelegate.textEditingValue.text.length;
+        onSelectionChanged(
+          new TextSelection(
             baseOffset: 0,
-            extentOffset: _textSelectionDelegate.textEditingValue.text.length,
-        ),
-        this,
-        SelectionChangedCause.keyboard,
-      );
+            extentOffset: textSelectionDelegate.textEditingValue.text.length,
+          ),
+          this,
+          SelectionChangedCause.keyboard,
+        );
+        break;
+      default:
+        assert(false);
     }
   }
 
   int _handleDelete() {
     if (selection.textAfter(text.text).isNotEmpty) {
-      _textSelectionDelegate.textEditingValue = new TextEditingValue(
-          text: selection.textBefore(text.text)
-              + selection.textAfter(text.text).substring(1),
-          selection: new TextSelection.collapsed(offset: selection.start));
+      textSelectionDelegate.textEditingValue = new TextEditingValue(
+        text: selection.textBefore(text.text)
+          + selection.textAfter(text.text).substring(1),
+        selection: new TextSelection.collapsed(offset: selection.start));
     } else {
-      _textSelectionDelegate.textEditingValue = new TextEditingValue(
+      textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text),
         selection: new TextSelection.collapsed(offset: selection.start)
       );
