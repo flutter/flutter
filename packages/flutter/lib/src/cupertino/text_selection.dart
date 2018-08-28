@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
 
 import 'button.dart';
 
@@ -75,25 +76,27 @@ class _TextSelectionToolbar extends StatelessWidget {
     final Widget onePhysicalPixelVerticalDivider =
         new SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+
     if (handleCut != null)
-      items.add(_buildToolbarButton('Cut', handleCut));
+      items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
 
     if (handleCopy != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Copy', handleCopy));
+      items.add(_buildToolbarButton(localizations.copyButtonLabel, handleCopy));
     }
 
     if (handlePaste != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Paste', handlePaste));
+      items.add(_buildToolbarButton(localizations.pasteButtonLabel, handlePaste));
     }
 
     if (handleSelectAll != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Select All', handleSelectAll));
+      items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
     final Widget triangle = new SizedBox.fromSize(
