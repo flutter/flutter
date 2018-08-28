@@ -176,7 +176,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           sourceTimeStamp: timestamp,
           delta: _getDeltaForDetails(delta),
           primaryDelta: _getPrimaryValueFromOffset(delta),
-          globalPosition: _initialPosition,
+          globalPosition: _initialPosition + _getDeltaForDetails(delta),
         )));
       }
     }
