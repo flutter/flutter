@@ -19,7 +19,7 @@ void main() {
   group('FlutterTesterDevice', () {
     Directory tempDir;
     FlutterTesterDevice device;
-  
+
     setUp(() async {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tester_device_test.');
       device = new FlutterTesterDevice('flutter-tester', workingDirectory: tempDir.path);
