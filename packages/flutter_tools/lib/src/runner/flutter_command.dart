@@ -129,21 +129,24 @@ abstract class FlutterCommand extends Command<Null> {
   /// [hide] indicates whether or not to hide these options when the user asks
   /// for help.
   void usesFilesystemOptions({@required bool hide}) {
-    argParser..addOption('output-dill',
-      hide: hide,
-      help: 'Specify the path to frontend server output kernel file.',
-    )..addMultiOption(FlutterOptions.kFileSystemRoot,
-      hide: hide,
-      help: 'Specify the path, that is used as root in a virtual file system\n'
-          'for compilation. Input file name should be specified as Uri in\n'
-          'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
-          'Requires --output-dill option to be explicitly specified.\n',
-    )..addOption(FlutterOptions.kFileSystemScheme,
-      defaultsTo: 'org-dartlang-root',
-      hide: hide,
-      help: 'Specify the scheme that is used for virtual file system used in\n'
-          'compilation. See more details on filesystem-root option.\n',
-    );
+    argParser
+      ..addOption('output-dill',
+        hide: hide,
+        help: 'Specify the path to frontend server output kernel file.',
+      )
+      ..addMultiOption(FlutterOptions.kFileSystemRoot,
+        hide: hide,
+        help: 'Specify the path, that is used as root in a virtual file system\n'
+            'for compilation. Input file name should be specified as Uri in\n'
+            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
+            'Requires --output-dill option to be explicitly specified.\n',
+      )
+      ..addOption(FlutterOptions.kFileSystemScheme,
+        defaultsTo: 'org-dartlang-root',
+        hide: hide,
+        help: 'Specify the scheme that is used for virtual file system used in\n'
+            'compilation. See more details on filesystem-root option.\n',
+      );
   }
 
   void usesBuildNumberOption() {
