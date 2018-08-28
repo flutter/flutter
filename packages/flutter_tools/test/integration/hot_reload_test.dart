@@ -48,7 +48,7 @@ void main() {
         final VMIsolate isolate = await _flutter.breakAt(
             _project.breakpointFile, _project.breakpointLine);
 
-        expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
+        expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
       }(), platform.isWindows ? throwsA(anything) : completes);
     }); // https://github.com/flutter/flutter/issues/17833
 

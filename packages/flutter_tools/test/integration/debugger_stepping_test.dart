@@ -7,27 +7,25 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:source_span/src/file.dart';
 import 'package:test/test.dart';
 
+import '../src/common.dart';
 import 'test_data/stepping_project.dart';
 import 'test_driver.dart';
 
-SteppingProject _project = new SteppingProject();
-FlutterTestDriver _flutter;
-
 void main() {
   group('debugger', () {
+    Directory tempDir;
+    final SteppingProject _project = new SteppingProject();
+    FlutterTestDriver _flutter;
+
     setUp(() async {
-      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      tempDir = await fs.systemTempDirectory.createTemp('flutter_debugger_stepping_test.');
       await _project.setUpIn(tempDir);
       _flutter = new FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
-      try {
-        await _flutter.stop();
-        _project.cleanup();
-      } catch (e) {
-        // Don't fail tests if we failed to clean up temp folder.
-      }
+      await _flutter.stop();
+      tryToDelete(tempDir);
     });
 
     test('can step over statements', () async {
