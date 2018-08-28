@@ -1,4 +1,4 @@
-Signature: deea323ebf8e679c9b605ac960dd1376
+Signature: 1ed0384ec3a70bcd5bcf482e6d6a829a
 
 UNUSED LICENSES:
 
@@ -958,9 +958,6 @@ FILE: ../../../third_party/skia/src/core/SkColorSpace.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpacePriv.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformPriv.h
-FILE: ../../../third_party/skia/src/core/SkColorSpace_A2B.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpace_A2B.h
-FILE: ../../../third_party/skia/src/core/SkColorSpace_ICC.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpace_XYZ.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpace_XYZ.h
 FILE: ../../../third_party/skia/src/core/SkCpu.cpp
@@ -969,7 +966,6 @@ FILE: ../../../third_party/skia/src/core/SkDeduper.h
 FILE: ../../../third_party/skia/src/core/SkExchange.h
 FILE: ../../../third_party/skia/src/core/SkFixed15.h
 FILE: ../../../third_party/skia/src/core/SkFuzzLogging.h
-FILE: ../../../third_party/skia/src/core/SkGammas.h
 FILE: ../../../third_party/skia/src/core/SkGlobalInitialization_core.cpp
 FILE: ../../../third_party/skia/src/core/SkICC.cpp
 FILE: ../../../third_party/skia/src/core/SkICCPriv.h
