@@ -1813,10 +1813,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final Widget counter = decoration.counterText == null ? null :
-      new Text(
-        decoration.counterText,
-        style: _getHelperStyle(themeData).merge(decoration.counterStyle),
-        overflow: TextOverflow.ellipsis,
+      new Semantics(
+        container: true,
+        child: new Text(
+          decoration.counterText,
+          style: _getHelperStyle(themeData).merge(decoration.counterStyle),
+          overflow: TextOverflow.ellipsis,
+          semanticsLabel: decoration.semanticCounterText,
+        ),
       );
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
@@ -1940,6 +1944,7 @@ class InputDecoration {
     this.enabledBorder,
     this.border,
     this.enabled = true,
+    this.semanticCounterText,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
@@ -1983,7 +1988,8 @@ class InputDecoration {
        focusedBorder = null,
        focusedErrorBorder = null,
        disabledBorder = null,
-       enabledBorder = null;
+       enabledBorder = null,
+       semanticCounterText = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2197,6 +2203,8 @@ class InputDecoration {
   ///
   /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
   /// null.
+  ///
+  /// The semantic label can be replaced by providing a [semanticCounterText].
   final String counterText;
 
   /// The style to use for the [counterText].
@@ -2380,6 +2388,13 @@ class InputDecoration {
   /// This property is true by default.
   final bool enabled;
 
+  /// A semantic label for the [counterText].
+  ///
+  /// Defaults to null.
+  ///
+  /// If provided, this replaces the semantic label of the [counterText].
+  final String semanticCounterText;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   ///
@@ -2416,6 +2431,7 @@ class InputDecoration {
     InputBorder enabledBorder,
     InputBorder border,
     bool enabled,
+    String semanticCounterText,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -2449,6 +2465,7 @@ class InputDecoration {
       enabledBorder: enabledBorder ?? this.enabledBorder,
       border: border ?? this.border,
       enabled: enabled ?? this.enabled,
+      semanticCounterText: semanticCounterText ?? this.semanticCounterText,
     );
   }
 
@@ -2518,7 +2535,8 @@ class InputDecoration {
         && typedOther.disabledBorder == disabledBorder
         && typedOther.enabledBorder == enabledBorder
         && typedOther.border == border
-        && typedOther.enabled == enabled;
+        && typedOther.enabled == enabled
+        && typedOther.semanticCounterText == semanticCounterText;
   }
 
   @override
@@ -2565,6 +2583,7 @@ class InputDecoration {
         enabledBorder,
         border,
         enabled,
+        semanticCounterText,
       ),
     );
   }
@@ -2630,6 +2649,8 @@ class InputDecoration {
       description.add('border: $border');
     if (!enabled)
       description.add('enabled: false');
+    if (semanticCounterText != null)
+      description.add('semanticCounterText: $semanticCounterText');
     return 'InputDecoration(${description.join(', ')})';
   }
 }

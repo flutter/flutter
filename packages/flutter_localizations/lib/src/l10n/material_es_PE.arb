@@ -41,5 +41,8 @@
   "alertDialogLabel": "Alerta",
   "searchFieldLabel": "Buscar",
   "expandedIconTapHint": "TBD",
-  "collapsedIconTapHint": "TBD"
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }
