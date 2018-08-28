@@ -1817,6 +1817,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       pop();
   }
 
+  /// Return if `route` exist in the navigator history.
+  bool isRouteExist(Route<dynamic> route) {
+    return (_history.indexOf(route) >= 0);
+  }
+
   /// Immediately remove `route` from the navigator, and [Route.dispose] it.
   ///
   /// {@macro flutter.widgets.navigator.removeRoute}
