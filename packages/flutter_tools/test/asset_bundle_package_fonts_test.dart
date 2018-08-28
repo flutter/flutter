@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-void main() {  
+void main() {
   void writePubspecFile(String path, String name, {String fontsSection}) {
     if (fontsSection == null) {
       fontsSection = '';
