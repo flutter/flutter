@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
 
@@ -406,7 +405,7 @@ class RenderEditable extends RenderBox {
   void _handleShortcuts(int pressedKeyCode) async {
     switch(pressedKeyCode) {
       case _kCKeyCode:
-        if (selection.isCollapsed) {
+        if (!selection.isCollapsed) {
           Clipboard.setData(
             new ClipboardData(text: selection.textInside(text.text)));
         }
