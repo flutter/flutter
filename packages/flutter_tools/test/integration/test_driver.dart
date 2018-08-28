@@ -89,7 +89,10 @@ class FlutterTestDriver {
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
 
-    _proc.exitCode.then((_) => _hasExited = true);
+    _proc.exitCode.then((int code) {
+      _debugPrint('Process exited ($code)');
+      _hasExited = true;
+    });
     _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
     _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
