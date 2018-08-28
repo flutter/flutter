@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset;
+import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
@@ -20,13 +20,16 @@ class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragDownDetails({ this.globalPosition = Offset.zero })
+  DragDownDetails({ this.globalPosition = Offset.zero, this.deviceKind = PointerDeviceKind.touch})
     : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
   final Offset globalPosition;
+
+  /// The device kind currently being used as the pointer.
+  final PointerDeviceKind deviceKind;
 
   @override
   String toString() => '$runtimeType($globalPosition)';
@@ -52,7 +55,7 @@ class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero })
+  DragStartDetails({ this.sourceTimeStamp, this.globalPosition = Offset.zero, this.deviceKind = PointerDeviceKind.touch })
     : assert(globalPosition != null);
 
   /// Recorded timestamp of the source pointer event that triggered the drag
@@ -66,6 +69,8 @@ class DragStartDetails {
   /// Defaults to the origin if not specified in the constructor.
   final Offset globalPosition;
 
+  /// The device kind currently being used as the pointer.
+  final PointerDeviceKind deviceKind;
   // TODO(ianh): Expose the current position, so that you can have a no-jump
   // drag even when disambiguating (though of course it would lag the finger
   // instead).
@@ -103,6 +108,7 @@ class DragUpdateDetails {
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
+    this.deviceKind,
     @required this.globalPosition
   }) : assert(delta != null),
        assert(primaryDelta == null
@@ -139,6 +145,9 @@ class DragUpdateDetails {
   /// The pointer's global position when it triggered this update.
   final Offset globalPosition;
 
+  /// The device kind currently being used as the pointer.
+  final PointerDeviceKind deviceKind;
+
   @override
   String toString() => '$runtimeType($delta)';
 }
@@ -167,6 +176,7 @@ class DragEndDetails {
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
+    this.deviceKind,
   }) : assert(velocity != null),
        assert(primaryVelocity == null
            || primaryVelocity == velocity.pixelsPerSecond.dx
@@ -188,6 +198,9 @@ class DragEndDetails {
   ///
   /// Defaults to null if not specified in the constructor.
   final double primaryVelocity;
+
+  /// The device kind currently being used as the pointer.
+  final PointerDeviceKind deviceKind;
 
   @override
   String toString() => '$runtimeType($velocity)';

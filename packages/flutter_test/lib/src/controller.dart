@@ -417,7 +417,7 @@ abstract class WidgetController {
   ///
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
-  Future<Null> drag(Finder finder, Offset offset, { int pointer }) {
+  Future<Null> drag(Finder finder, Offset offset, { int pointer, bool isTouch = true }) {
     return dragFrom(getCenter(finder), offset, pointer: pointer);
   }
 
@@ -427,9 +427,9 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<Null> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
+  Future<Null> dragFrom(Offset startLocation, Offset offset, { int pointer, bool isTouch = true }) {
     return TestAsyncUtils.guard(() async {
-      final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, isTouch: isTouch);
       assert(gesture != null);
       await gesture.moveBy(offset);
       await gesture.up();
@@ -451,12 +451,13 @@ abstract class WidgetController {
 
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
-  Future<TestGesture> startGesture(Offset downLocation, { int pointer }) {
+  Future<TestGesture> startGesture(Offset downLocation, { int pointer, bool isTouch = true }) {
     return TestGesture.down(
       downLocation,
       pointer: pointer ?? _getNextPointer(),
       hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
+      isTouch: isTouch,
     );
   }
 

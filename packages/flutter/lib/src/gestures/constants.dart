@@ -58,6 +58,10 @@ const Duration kZoomControlsTimeout = Duration(milliseconds: 3000);
 // 18.0 after getting complaints that it was too difficult to hit targets.
 const double kTouchSlop = 18.0; // Logical pixels
 
+/// The distance a mouse has to travel for the framework to be confident that
+/// it is not a tap.
+const double kMouseSlop = 1.0; // Logical pixels
+
 /// The distance a touch has to travel for the framework to be confident that
 /// the gesture is a paging gesture. (Currently not used, because paging uses a
 /// regular drag gesture, which uses kTouchSlop.)

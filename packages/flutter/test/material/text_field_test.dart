@@ -2074,6 +2074,110 @@ void main() {
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
   });
 
+  testWidgets('Drag Selection test', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child:
+            new TextField(
+              key: new UniqueKey(),
+              controller: controller,
+              maxLines: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+
+    const String testValue = 'a big house\njumps over a mouse';
+    await tester.enterText(find.byType(TextField).first, testValue);
+    await tester.pumpAndSettle();
+
+    await tester.dragFrom(textOffsetToPosition(tester, 0), textOffsetToPosition(tester, 20), isTouch: false);
+
+    expect(controller.selection.extentOffset - controller.selection.baseOffset, 20);
+  });
+
+  testWidgets('Blank Line Drag Selection test', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child:
+            new TextField(
+              key: new UniqueKey(),
+              controller: controller,
+              maxLines: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+
+    const String testValue = 'a big house\n\njumps over a mouse';
+    await tester.enterText(find.byType(TextField).first, testValue);
+    await tester.pumpAndSettle();
+
+    await tester.dragFrom(textOffsetToPosition(tester, 0), textOffsetToPosition(tester, 20), isTouch: false);
+
+    expect(controller.selection.extentOffset - controller.selection.baseOffset, 20);
+  });
+
+  testWidgets('Backwards Selection test', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        Material(
+          child: new RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: null,
+            child:
+            new TextField(
+              key: new UniqueKey(),
+              controller: controller,
+              maxLines: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+
+    const String testValue = 'a big house\njumps over a mouse';
+    await tester.enterText(find.byType(TextField).first, testValue);
+    await tester.pumpAndSettle();
+    await tester.dragFrom(textOffsetToPosition(tester, 20), -textOffsetToPosition(tester, 20), isTouch: false);
+
+    expect(controller.selection.extentOffset - controller.selection.baseOffset, 20);
+  });
+
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
 

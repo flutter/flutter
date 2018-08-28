@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show PointerDeviceKind;
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
@@ -98,10 +101,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// If null then [kMaxFlingVelocity] is used.
   double maxFlingVelocity;
 
+  /// Whether the recognizer should recognize mouse clicks and drags as touch
+  /// clicks and drags or not.
+  bool enableForMouse = true;
+
   _DragState _state = _DragState.ready;
   Offset _initialPosition;
   Offset _pendingDragOffset;
   Duration _lastPendingEventTimestamp;
+  PointerDeviceKind _deviceKind;
 
   bool _isFlingGesture(VelocityEstimate estimate);
   Offset _getDeltaForDetails(Offset delta);
@@ -112,6 +120,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addPointer(PointerEvent event) {
+    if (!enableForMouse && (event.kind == PointerDeviceKind.mouse))
+      return;
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = new VelocityTracker();
     if (_state == _DragState.ready) {
@@ -119,8 +129,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPosition = event.position;
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = event.timeStamp;
+      _deviceKind = event.kind;
       if (onDown != null)
-        invokeCallback<void>('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition)));
+        invokeCallback<void>('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition, deviceKind: _deviceKind)));
     } else if (_state == _DragState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -128,6 +139,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
+    if (!enableForMouse && (event.kind == PointerDeviceKind.mouse))
+      return;
     assert(_state != _DragState.ready);
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
@@ -145,6 +158,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             delta: _getDeltaForDetails(delta),
             primaryDelta: _getPrimaryValueFromOffset(delta),
             globalPosition: event.position,
+            deviceKind: event.kind,
           )));
         }
       } else {
@@ -159,6 +173,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
+    if (!enableForMouse && (_deviceKind == PointerDeviceKind.mouse))
+      return;
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final Offset delta = _pendingDragOffset;
@@ -169,6 +185,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         invokeCallback<void>('onStart', () => onStart(new DragStartDetails(
           sourceTimeStamp: timestamp,
           globalPosition: _initialPosition,
+          deviceKind: _deviceKind,
         )));
       }
       if (delta != Offset.zero && onUpdate != null) {
@@ -177,6 +194,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           delta: _getDeltaForDetails(delta),
           primaryDelta: _getPrimaryValueFromOffset(delta),
           globalPosition: _initialPosition,
+          deviceKind: _deviceKind,
         )));
       }
     }
@@ -209,6 +227,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         invokeCallback<void>('onEnd', () => onEnd(new DragEndDetails(
           velocity: velocity,
           primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
+          deviceKind: _deviceKind,
         )), debugReport: () {
           return '$estimate; fling at $velocity.';
         });
@@ -216,6 +235,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         invokeCallback<void>('onEnd', () => onEnd(new DragEndDetails(
           velocity: Velocity.zero,
           primaryVelocity: 0.0,
+          deviceKind: _deviceKind,
         )), debugReport: () {
           if (estimate == null)
             return 'Could not estimate velocity.';

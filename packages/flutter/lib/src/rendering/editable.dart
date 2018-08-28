@@ -40,6 +40,9 @@ enum SelectionChangedCause {
   /// Keyboard-triggered selection changes may be caused by the IME as well as
   /// by accessibility tools (e.g. TalkBack on Android).
   keyboard,
+
+  ///
+  mouse,
 }
 
 /// Signature for the callback that reports when the caret location changes.
@@ -166,6 +169,11 @@ class RenderEditable extends RenderBox {
       ..onTap = _handleTap;
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
+    _drag = new PanGestureRecognizer(debugOwner: this)
+      ..onDown = _handleDragDown
+      ..onUpdate = _handleDragUpdate
+      ..enableForMouse = true;
+
   }
 
   /// Character used to obscure text if [obscureText] is true.
@@ -340,8 +348,8 @@ class RenderEditable extends RenderBox {
       if (_baseOffset < newOffset) {
         onSelectionChanged(
           new TextSelection(
-            baseOffset: _baseOffset,
-            extentOffset: newOffset
+              baseOffset: _baseOffset,
+              extentOffset: newOffset
           ),
           this,
           SelectionChangedCause.keyboard,
@@ -349,8 +357,8 @@ class RenderEditable extends RenderBox {
       } else {
         onSelectionChanged(
           new TextSelection(
-            baseOffset: newOffset,
-            extentOffset: _baseOffset
+              baseOffset: newOffset,
+              extentOffset: _baseOffset
           ),
           this,
           SelectionChangedCause.keyboard,
@@ -367,9 +375,9 @@ class RenderEditable extends RenderBox {
       }
       onSelectionChanged(
         new TextSelection.fromPosition(
-          new TextPosition(
-              offset: newOffset
-          )
+            new TextPosition(
+                offset: newOffset
+            )
         ),
         this,
         SelectionChangedCause.keyboard,
@@ -499,6 +507,7 @@ class RenderEditable extends RenderBox {
 
     markNeedsSemanticsUpdate();
   }
+
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
@@ -928,6 +937,11 @@ class RenderEditable extends RenderBox {
 
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
+  PanGestureRecognizer _drag;
+
+  // Because a selection requires the base to be less than extent, we need to store
+  // a temporary base that may be larger than the extent.
+  int _tempBaseOffset;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -937,10 +951,12 @@ class RenderEditable extends RenderBox {
     if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
       _longPress.addPointer(event);
+      _drag.addPointer(event);
     }
   }
 
   Offset _lastTapDownPosition;
+  PointerDeviceKind _lastDeviceKind;
 
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
@@ -950,6 +966,7 @@ class RenderEditable extends RenderBox {
   /// down events by calling this method.
   void handleTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition + -_paintOffset;
+    _lastDeviceKind = details.deviceKind;
   }
   void _handleTapDown(TapDownDetails details) {
     assert(!ignorePointer);
@@ -967,7 +984,8 @@ class RenderEditable extends RenderBox {
     assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
-      onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
+      final SelectionChangedCause cause = _lastDeviceKind == PointerDeviceKind.touch ? SelectionChangedCause.tap : SelectionChangedCause.mouse;
+      onSelectionChanged(new TextSelection.fromPosition(position), this, cause);
     }
   }
   void _handleTap() {
@@ -982,6 +1000,8 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to long
   /// press events by calling this method.
   void handleLongPress() {
+    if (_lastDeviceKind == PointerDeviceKind.mouse)
+      return;
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
@@ -992,6 +1012,58 @@ class RenderEditable extends RenderBox {
   void _handleLongPress() {
     assert(!ignorePointer);
     handleLongPress();
+  }
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [LongPressRecognizer.onLongPress]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to long
+  /// press events by calling this method. This event only fires when a mouse
+  /// is dragging in a text field.
+  void handleDragDown(DragDownDetails details) {
+    if (details.deviceKind == PointerDeviceKind.mouse) {
+      if (onSelectionChanged != null) {
+        // We need to subtract the _paintOffset to find the real tap position
+        final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(details.globalPosition -_paintOffset));
+        onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.mouse);
+        onCaretChanged(getLocalRectForCaret(new TextPosition(offset: _baseOffset)));
+        _baseOffset = position.offset;
+        _tempBaseOffset = _baseOffset;
+      }
+    }
+  }
+
+  void _handleDragDown(DragDownDetails details) {
+    assert(!ignorePointer);
+    _handleDragDown(details);
+  }
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [LongPressRecognizer.onLongPress]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to long
+  /// press events by calling this method. This event only fires when a mouse
+  /// is dragging in a text field.
+  void handleDragUpdate(DragUpdateDetails details) {
+    if (details.deviceKind == PointerDeviceKind.mouse) {
+      if (onSelectionChanged != null) {
+        // We need to subtract the _paintOffset to find the real tap position
+        final int calculatedExtent = _textPainter.getPositionForOffset(globalToLocal(details.globalPosition -_paintOffset)).offset;
+        final int base = _tempBaseOffset < calculatedExtent ? _tempBaseOffset : calculatedExtent;
+        final int extent = calculatedExtent > _tempBaseOffset ? calculatedExtent : _tempBaseOffset;
+        onSelectionChanged(new TextSelection(baseOffset: base, extentOffset: extent), this, SelectionChangedCause.mouse);
+        onCaretChanged(getLocalRectForCaret(new TextPosition(offset: calculatedExtent)));
+        _baseOffset = base;
+        _extentOffset = extent;
+      }
+    }
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    assert(!ignorePointer);
+    _handleDragUpdate(details);
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
