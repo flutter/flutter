@@ -301,6 +301,15 @@ abstract class MaterialLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
+  /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
+  String get expandedIconTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
+  String get collapsedIconTapHint => 'Expand';
+
+  /// The label for the [TextField]'s character counter.
+  String remainingTextFieldCharacterCount(int remaining);
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -681,6 +690,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String get reorderItemToStart => 'Move to the start';
 
+  @override
+  String get expandedIconTapHint => 'Collapse';
+
+  @override
+  String get collapsedIconTapHint => 'Expand';
+
   /// Creates an object that provides US English resource values for the material
   /// library widgets.
   ///
@@ -697,4 +712,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
   static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+
+  @override
+  String remainingTextFieldCharacterCount(int remaining) {
+    switch (remaining) {
+      case 0:
+        return 'No characters remaining';
+      case 1:
+        return '1 character remaining';
+      default:
+        return '$remaining characters remaining';
+    }
+  }
 }

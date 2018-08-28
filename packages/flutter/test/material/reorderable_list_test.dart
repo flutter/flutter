@@ -142,9 +142,9 @@ void main() {
         ));
 
         Element getContentElement() {
-          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
           final Widget scrollContents = listScrollView.child;
-          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 
@@ -224,6 +224,80 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
+      testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
+        final ScrollController primary = new ScrollController();
+        final Widget reorderableList = new ReorderableListView(
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+          ],
+          onReorder: (int oldIndex, int newIndex) {},
+        );
+
+        Widget buildWithScrollController(ScrollController controller) {
+          return new MaterialApp(
+            home: new PrimaryScrollController(
+              controller: controller,
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: reorderableList,
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildWithScrollController(primary));
+        SingleChildScrollView scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
+        expect(scrollView.controller, primary);
+
+        // Now try changing the primary scroll controller and checking that the scroll view gets updated.
+        final ScrollController primary2 = new ScrollController();
+        await tester.pumpWidget(buildWithScrollController(primary2));
+        scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
+        expect(scrollView.controller, primary2);
+      });
+
+      testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
+        final Widget reorderableList = new ReorderableListView(
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+          ],
+          onReorder: (int oldIndex, int newIndex) {},
+        );
+        final Widget boilerplate = new Localizations(
+          locale: const Locale('en'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child:new SizedBox(
+            width: 100.0,
+            height: 100.0,
+            child: new Directionality(
+              textDirection: TextDirection.ltr,
+              child: reorderableList,
+            ),
+          ),
+        );
+        try {
+          await tester.pumpWidget(boilerplate);
+        } catch (e) {
+          fail('Expected no error, but got $e');
+        }
+        // Expect that we have build *a* ScrollController for use in the view.
+        final SingleChildScrollView scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
+        expect(scrollView.controller, isNotNull);
+      });
 
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
@@ -350,6 +424,63 @@ void main() {
 
           handle.dispose();
         });
+
+        testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
+          final SemanticsHandle handle = tester.ensureSemantics();
+          final Widget reorderableListView = new ReorderableListView(
+            children: <Widget>[
+              const SizedBox(
+                key: Key('List tile 1'),
+                height: itemHeight,
+                child: Text('List tile 1'),
+              ),
+              new SizedBox(
+                key: const Key('Switch tile'),
+                height: itemHeight,
+                child: new Material(
+                  child: new SwitchListTile(
+                    title: const Text('Switch tile'),
+                    value: true,
+                    onChanged: (bool newValue) {},
+                  ),
+                ),
+              ),
+              const SizedBox(
+                key: Key('List tile 2'),
+                height: itemHeight,
+                child: Text('List tile 2'),
+              ),
+            ],
+            scrollDirection: Axis.vertical,
+            onReorder: (int oldIndex, int newIndex) {},
+          );
+          await tester.pumpWidget(new MaterialApp(
+            home: new SizedBox(
+              height: itemHeight * 10,
+              child: reorderableListView,
+            ),
+          ));
+
+          // Get the switch tile's semantics:
+          final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
+
+          // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
+          expect(semanticsData, matchesSemanticsData(
+            hasToggledState: true,
+            isToggled: true,
+            isEnabled: true,
+            hasEnabledState: true,
+            label: 'Switch tile',
+            hasTapAction: true,
+            customActions: const <CustomSemanticsAction>[
+              CustomSemanticsAction(label: 'Move up'),
+              CustomSemanticsAction(label: 'Move down'),
+              CustomSemanticsAction(label: 'Move to the end'),
+              CustomSemanticsAction(label: 'Move to the start'),
+            ],
+          ));
+          handle.dispose();
+        });
       });
     });
 
@@ -439,9 +570,9 @@ void main() {
         ));
 
         Element getContentElement() {
-          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
           final Widget scrollContents = listScrollView.child;
-          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 

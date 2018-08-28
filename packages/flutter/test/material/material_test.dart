@@ -182,7 +182,7 @@ void main() {
       );
 
       expect(find.byKey(materialKey), hasNoImmediateClip);
-    }, skip: true);
+    });
 
     testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();

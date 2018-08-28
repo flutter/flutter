@@ -1027,9 +1027,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) {
+              if (notification is ScrollUpdateNotification)
                 scrolledPositions.add(notification.metrics.pixels);
-              }
+              return false;
             },
             child: new ListWheelScrollView(
               controller: controller,
@@ -1078,9 +1078,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) {
+              if (notification is ScrollUpdateNotification)
                 scrolledPositions.add(notification.metrics.pixels);
-              }
+              return false;
             },
             child: new ListWheelScrollView(
               controller: controller,

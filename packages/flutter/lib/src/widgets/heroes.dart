@@ -321,12 +321,16 @@ class _HeroFlight {
     assert(!_aborted);
     assert(() {
       final Animation<double> initial = initialManifest.animation;
-      switch (initialManifest.type) {
+      assert(initial != null);
+      final _HeroFlightType type = initialManifest.type;
+      assert(type != null);
+      switch (type) {
         case _HeroFlightType.pop:
           return initial.value == 1.0 && initial.status == AnimationStatus.reverse;
         case _HeroFlightType.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
+      return null;
     }());
 
     manifest = initialManifest;

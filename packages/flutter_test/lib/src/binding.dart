@@ -86,6 +86,7 @@ const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        GestureBinding,
+       SemanticsBinding,
        RendererBinding,
        ServicesBinding,
        PaintingBinding,
@@ -126,6 +127,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// always run with aggressive intrinsic sizing tests enabled.
   @protected
   bool get checkIntrinsicSizes => false;
+
+  @override
+  bool disableAnimations = false;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
@@ -1029,9 +1033,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   int get microtaskCount {
-    // Unsupported until we have a wrapper around the real async API
-    // https://github.com/flutter/flutter/issues/4637
-    assert(false);
+    // The Dart SDK doesn't report this number.
+    assert(false, 'microtaskCount cannot be reported when running in real time');
     return -1;
   }
 

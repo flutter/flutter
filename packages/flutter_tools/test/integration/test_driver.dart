@@ -18,9 +18,9 @@ import '../src/common.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printJsonAndStderr = false;
-const Duration defaultTimeout = Duration(seconds: 20);
-const Duration appStartTimeout = Duration(seconds: 60);
-const Duration quitTimeout = Duration(seconds: 5);
+const Duration defaultTimeout = Duration(seconds: 40);
+const Duration appStartTimeout = Duration(seconds: 120);
+const Duration quitTimeout = Duration(seconds: 10);
 
 class FlutterTestDriver {
   FlutterTestDriver(this._projectFolder);
@@ -76,18 +76,23 @@ class FlutterTestDriver {
 
   Future<void> _setupProcess(List<String> args, {bool withDebugger = false, bool pauseOnExceptions = false}) async {
     final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
-    _debugPrint('Spawning flutter $args in ${_projectFolder.path}');
+    final List<String> flutterArgs = withDebugger
+        ? args.followedBy(<String>['--start-paused']).toList()
+        : args;
+    _debugPrint('Spawning flutter $flutterArgs in ${_projectFolder.path}');
 
     const ProcessManager _processManager = LocalProcessManager();
     _proc = await _processManager.start(
         <String>[flutterBin]
-            .followedBy(args)
-            .followedBy(withDebugger ? <String>['--start-paused'] : <String>[])
+            .followedBy(flutterArgs)
             .toList(),
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
 
-    _proc.exitCode.then((_) => _hasExited = true);
+    _proc.exitCode.then((int code) {
+      _debugPrint('Process exited ($code)');
+      _hasExited = true;
+    });
     _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
     _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
@@ -164,10 +169,13 @@ class FlutterTestDriver {
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping app');
-      await _sendRequest(
-        'app.stop',
-        <String, dynamic>{'appId': _currentRunningAppId}
-      ).timeout(
+      await Future.any<void>(<Future<void>>[
+        _proc.exitCode,
+        _sendRequest(
+          'app.stop',
+          <String, dynamic>{'appId': _currentRunningAppId}
+        ),
+      ]).timeout(
         quitTimeout,
         onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); }
       );
@@ -176,6 +184,8 @@ class FlutterTestDriver {
     _debugPrint('Waiting for process to end');
     return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
   }
+
+  Future<int> quit() => _killGracefully();
 
   Future<int> _killGracefully() async {
     if (_procPid == null)
@@ -263,16 +273,35 @@ class FlutterTestDriver {
     return script.sourceLocation(frame.location.token);
   }
 
-  Future<Map<String, dynamic>> _waitFor({String event, int id, Duration timeout}) async {
+  Future<Map<String, dynamic>> _waitFor({
+    String event,
+    int id,
+    Duration timeout,
+    bool ignoreAppStopEvent = false,
+  }) async {
     final Completer<Map<String, dynamic>> response = new Completer<Map<String, dynamic>>();
-    final StreamSubscription<String> sub = _stdout.stream.listen((String line) {
+    StreamSubscription<String> sub;
+    sub = _stdout.stream.listen((String line) async {
       final dynamic json = _parseFlutterResponse(line);
       if (json == null) {
         return;
       } else if (
           (event != null && json['event'] == event)
           || (id != null && json['id'] == id)) {
+        await sub.cancel();
         response.complete(json);
+      } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
+        await sub.cancel();
+        final StringBuffer error = new StringBuffer();
+        error.write('Received app.stop event while waiting for ');
+        error.write('${event != null ? '$event event' : 'response to request $id.'}.\n\n');
+        if (json['params'] != null && json['params']['error'] != null) {
+          error.write('${json['params']['error']}\n\n');
+        }
+        if (json['params'] != null && json['params']['trace'] != null) {
+          error.write('${json['params']['trace']}\n\n');
+        }
+        response.completeError(error.toString());
       }
     });
 
@@ -327,8 +356,12 @@ class FlutterTestDriver {
     _debugPrint(jsonEncoded);
 
     // Set up the response future before we send the request to avoid any
-    // races.
-    final Future<Map<String, dynamic>> responseFuture = _waitFor(id: requestId);
+    // races. If the method we're calling is app.stop then we tell waitFor not
+    // to throw if it sees an app.stop event before the response to this request.
+    final Future<Map<String, dynamic>> responseFuture = _waitFor(
+      id: requestId,
+      ignoreAppStopEvent: method == 'app.stop',
+    );
     _proc.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> response = await responseFuture;
 

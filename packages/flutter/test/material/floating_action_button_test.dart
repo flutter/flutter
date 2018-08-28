@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -407,5 +409,52 @@ void main() {
     expect(longFAB, findsOneWidget);
     expect(shortFAB, findsNothing);
     expect(helloWorld, findsOneWidget);
+  });
+
+  // This test prevents https://github.com/flutter/flutter/issues/20483
+  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Center(
+            child: new RepaintBoundary(
+              key: key,
+              child: new FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.press(find.byKey(key));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('floating_action_button_test.clip.1.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+    await tester.pumpWidget(
+      new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new FloatingActionButton(
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byType(FloatingActionButton)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
   });
 }

@@ -90,7 +90,7 @@ class KernelCompiler {
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
 
-    // TODO(cbracken) eliminate pathFilter.
+    // TODO(cbracken): eliminate pathFilter.
     // Currently the compiler emits buildbot paths for the core libs in the
     // depfile. None of these are available on the local host.
     Fingerprinter fingerprinter;

@@ -10,6 +10,11 @@ import 'events.dart';
 import 'recognizer.dart';
 
 /// Details for [GestureTapDownCallback], such as position.
+///
+/// See also:
+///
+///  * [GestureDetector.onTapDown], which receives this information.
+///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
@@ -26,9 +31,19 @@ class TapDownDetails {
 ///
 /// The position at which the pointer contacted the screen is available in the
 /// `details`.
+///
+/// See also:
+///
+///  * [GestureDetector.onTapDown], which matches this signature.
+///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef void GestureTapDownCallback(TapDownDetails details);
 
 /// Details for [GestureTapUpCallback], such as position.
+///
+/// See also:
+///
+///  * [GestureDetector.onTapUp], which receives this information.
+///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
@@ -45,24 +60,53 @@ class TapUpDetails {
 ///
 /// The position at which the pointer stopped contacting the screen is available
 /// in the `details`.
+///
+/// See also:
+///
+///  * [GestureDetector.onTapUp], which matches this signature.
+///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef void GestureTapUpCallback(TapUpDetails details);
 
 /// Signature for when a tap has occurred.
+///
+/// See also:
+///
+///  * [GestureDetector.onTap], which matches this signature.
+///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef void GestureTapCallback();
 
 /// Signature for when the pointer that previously triggered a
 /// [GestureTapDownCallback] will not end up causing a tap.
+///
+/// See also:
+///
+///  * [GestureDetector.onTapCancel], which matches this signature.
+///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
 typedef void GestureTapCancelCallback();
 
 /// Recognizes taps.
+///
+/// Gesture recognizers take part in gesture arenas to enable potential gestures
+/// to be disambiguated from each other. This process is managed by a
+/// [GestureArenaManager] (q.v.).
 ///
 /// [TapGestureRecognizer] considers all the pointers involved in the pointer
 /// event sequence as contributing to one gesture. For this reason, extra
 /// pointer interactions during a tap sequence are not recognized as additional
 /// taps. For example, down-1, down-2, up-1, up-2 produces only one tap on up-1.
 ///
+/// The lifecycle of events for a tap gesture is as follows:
+///
+/// * [onTapDown], which triggers after a short timeout ([deadline]) even if the
+///   gesture has not won its arena yet.
+/// * [onTapUp] and [onTap], which trigger when the pointer is released if the
+///   gesture wins the arena.
+/// * [onTapCancel], which triggers instead of [onTapUp] and [onTap] in the case
+///   of the gesture not winning the arena.
+///
 /// See also:
 ///
+///  * [GestureDetector.onTap], which uses this recognizer.
 ///  * [MultiTapGestureRecognizer]
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
@@ -70,17 +114,54 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.
+  ///
+  /// This triggers before the gesture has won the arena, after a short timeout
+  /// ([deadline]).
+  ///
+  /// If the gesture doesn't win the arena, [onTapCancel] is called next.
+  /// Otherwise, [onTapUp] is called next.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureDetector.onTapDown], which exposes this callback.
   GestureTapDownCallback onTapDown;
 
   /// A pointer that will trigger a tap has stopped contacting the screen at a
   /// particular location.
+  ///
+  /// This triggers once the gesture has won the arena, immediately before
+  /// [onTap].
+  ///
+  /// If the gesture doesn't win the arena, [onTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureDetector.onTapUp], which exposes this callback.
+  ///  * [TapUpDetails], which is passed as an argument to this callback.
   GestureTapUpCallback onTapUp;
 
   /// A tap has occurred.
+  ///
+  /// This triggers once the gesture has won the arena, immediately after
+  /// [onTapUp].
+  ///
+  /// If the gesture doesn't win the arena, [onTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureDetector.onTap], which exposes this callback.
   GestureTapCallback onTap;
 
   /// The pointer that previously triggered [onTapDown] will not end up causing
   /// a tap.
+  ///
+  /// This triggers if the gesture loses the arena.
+  ///
+  /// If the gesture wins the arena, [onTapUp] and [onTap] are called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onTapCancel;
 
   bool _sentTapDown = false;

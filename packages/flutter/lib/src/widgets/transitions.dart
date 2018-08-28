@@ -19,9 +19,8 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
 ///
-/// [AnimatedWidget] is most useful for widgets widgets that are otherwise
-/// stateless. To use [AnimatedWidget], simply subclass it and implement the
-/// build function.
+/// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
+/// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
