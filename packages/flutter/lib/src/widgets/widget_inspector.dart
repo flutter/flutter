@@ -7,13 +7,15 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
-import 'dart:ui' as ui show window, Picture, SceneBuilder, PictureRecorder;
-import 'dart:ui' show Offset;
+import 'dart:typed_data';
+import 'dart:ui' as ui show window, Image, Picture, SceneBuilder, PictureRecorder;
+import 'dart:ui' show ImageByteFormat, Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'app.dart';
 import 'basic.dart';
@@ -30,6 +32,255 @@ typedef void _RegisterServiceExtensionCallback({
   @required String name,
   @required ServiceExtensionCallback callback
 });
+
+/// A layer that duplicates an existing layer allowing it to be placed in a
+/// separate layer tree.
+class _ProxyLayer<L extends Layer> extends Layer {
+  final L _layer;
+
+  _ProxyLayer(this._layer);
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    _layer.addToScene(builder, layerOffset);
+  }
+
+  @override
+  S find<S>(Offset regionOffset) =>_layer.find(regionOffset);
+}
+
+class _OffsetProxyLayer extends _ProxyLayer<OffsetLayer> {
+  final Offset _offset;
+
+  _OffsetProxyLayer(OffsetLayer _layer, this._offset) : super(_layer);
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    // Conversion so the offset from the proxied layer can be used.
+    final Offset deltaOffset = _offset - _layer.offset;
+    _layer.addToScene(builder, layerOffset + deltaOffset);
+  }
+
+  @override
+  S find<S>(Offset regionOffset) =>_layer.find(regionOffset);
+}
+
+/// A place to paint screenshots of [RenderObject] that are already being
+/// rendered by an existing application.
+class _ScreenshotPaintingContext implements PaintingContext {
+  _ScreenshotPaintingContext(this._containerLayer, this.estimatedBounds)
+      : assert(_containerLayer != null),
+        assert(estimatedBounds != null);
+
+  final ContainerLayer _containerLayer;
+
+  @override
+  final Rect estimatedBounds;
+
+  @override
+  void paintChild(RenderObject child, Offset offset) {
+    if (child.isRepaintBoundary) {
+      _stopRecordingIfNeeded();
+      _compositeChild(child, offset);
+    } else {
+      child.paint(this, offset);
+      // TODO(jacobr): fix analyzer warning that debugPaint can only be used
+      // within instance members of subclasses of RenderObject.
+      child.debugPaint(this, offset);
+    }
+  }
+
+  void _compositeChild(RenderObject child, Offset offset) {
+    assert(!_isRecording);
+    assert(child.isRepaintBoundary);
+    assert(_canvas == null || _canvas.getSaveCount() == 1);
+
+    // Create a layer for our child, and paint the child into it.
+    if (child.debugNeedsPaint) {
+      // TODO(jacobr): draw a bounding box showing the child that isn't
+      // available to take a screenshot of.
+      // Alternately we could consider duplicating
+      // repaintCompositedChild(child, debugAlsoPaintedParent: true);
+      // but we would need to be careful not to cache our layers as they aren't
+      // right for the regular Layer tree.
+      return;
+    }
+    _appendLayer(new _OffsetProxyLayer(child.debugLayer, offset));
+  }
+
+  void _appendLayer(Layer layer) {
+    assert(!_isRecording);
+    assert(!layer.attached);
+    _containerLayer.append(layer);
+  }
+
+  bool get _isRecording {
+    final bool hasCanvas = _canvas != null;
+    assert(() {
+      if (hasCanvas) {
+        assert(_currentLayer != null);
+        assert(_recorder != null);
+        assert(_canvas != null);
+      } else {
+        assert(_currentLayer == null);
+        assert(_recorder == null);
+        assert(_canvas == null);
+      }
+      return true;
+    }());
+    return hasCanvas;
+  }
+
+  // Recording state
+  PictureLayer _currentLayer;
+  ui.PictureRecorder _recorder;
+  Canvas _canvas;
+
+  @override
+  Canvas get canvas {
+    if (_canvas == null)
+      _startRecording();
+    return _canvas;
+  }
+
+  void _startRecording() {
+    assert(!_isRecording);
+    _currentLayer = new PictureLayer(estimatedBounds);
+    _recorder = new ui.PictureRecorder();
+    _canvas = new Canvas(_recorder);
+    _containerLayer.append(_currentLayer);
+  }
+
+  void _stopRecordingIfNeeded() {
+    if (!_isRecording)
+      return;
+    assert(() {
+      if (debugRepaintRainbowEnabled) {
+        final Paint paint = new Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 6.0
+          ..color = debugCurrentRepaintColor.toColor();
+        canvas.drawRect(estimatedBounds.deflate(3.0), paint);
+      }
+      if (debugPaintLayerBordersEnabled) {
+        final Paint paint = new Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0
+          ..color = const Color(0xFFFF9800);
+        canvas.drawRect(estimatedBounds, paint);
+      }
+      return true;
+    }());
+    _currentLayer.picture = _recorder.endRecording();
+    _currentLayer = null;
+    _recorder = null;
+    _canvas = null;
+  }
+
+  @override
+  void setIsComplexHint() {
+    _currentLayer?.isComplexHint = true;
+  }
+
+  @override
+  void setWillChangeHint() {
+    _currentLayer?.willChangeHint = true;
+  }
+
+  @override
+  void addLayer(Layer layer) {
+    _stopRecordingIfNeeded();
+    _appendLayer(new _ProxyLayer<Layer>(layer));
+  }
+
+  @override
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+    assert(!childLayer.attached);
+    assert(childLayer.parent == null);
+    assert(painter != null);
+    _stopRecordingIfNeeded();
+    _appendLayer(childLayer);
+    final _ScreenshotPaintingContext childContext = new _ScreenshotPaintingContext(childLayer, childPaintBounds ?? estimatedBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  @override
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
+    final Rect offsetClipRect = clipRect.shift(offset);
+    if (needsCompositing) {
+      pushLayer(new ClipRectLayer(clipRect: offsetClipRect), painter, offset, childPaintBounds: offsetClipRect);
+    } else {
+      canvas
+        ..save()
+        ..clipRect(offsetClipRect);
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  @override
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
+    if (needsCompositing) {
+      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect), painter, offset, childPaintBounds: offsetBounds);
+    } else {
+      canvas
+        ..save()
+        ..clipRRect(offsetClipRRect);
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  @override
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final Path offsetClipPath = clipPath.shift(offset);
+    if (needsCompositing) {
+      pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
+    } else {
+      canvas
+        ..save()
+        ..clipPath(clipPath.shift(offset));
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  @override
+  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+    final Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+      ..multiply(transform)..translate(-offset.dx, -offset.dy);
+    if (needsCompositing) {
+      pushLayer(
+        new TransformLayer(transform: effectiveTransform),
+        painter,
+        offset,
+        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
+      );
+    } else {
+      canvas
+        ..save()
+        ..transform(effectiveTransform.storage);
+      painter(this, offset);
+      canvas
+        ..restore();
+    }
+  }
+
+  @override
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
+  }
+
+  @override
+  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+}
 
 /// A class describing a step along a path through a tree of [DiagnosticsNode]
 /// objects.
@@ -94,7 +345,6 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
 /// Signature for the selection change callback used by
 /// [WidgetInspectorService.selectionChangedCallback].
 typedef void InspectorSelectionChangedCallback();
-
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
 class _InspectorReferenceData {
@@ -173,6 +423,7 @@ class _WidgetInspectorService extends Object with WidgetInspectorService {
 ///
 /// All methods returning String values return JSON.
 class WidgetInspectorService {
+
   // This class is usable as a mixin for test purposes and as a singleton
   // [instance] for production purposes.
   factory WidgetInspectorService._() => new _WidgetInspectorService();
@@ -434,6 +685,7 @@ class WidgetInspectorService {
       name: 'getRootWidget',
       callback: _getRootWidget,
     );
+
     _registerObjectGroupServiceExtension(
       name: 'getRootRenderObject',
       callback: _getRootRenderObject,
@@ -463,6 +715,18 @@ class WidgetInspectorService {
     _registerSignalServiceExtension(
       name: 'isWidgetCreationTracked',
       callback: isWidgetCreationTracked,
+    );
+    registerServiceExtension(
+      name: 'screenshot',
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('objectGroup'));
+        assert(parameters.containsKey('id'));
+        assert(parameters.containsKey('width'));
+        assert(parameters.containsKey('height'));
+         return <String, Object>{
+          'result': await screenshot(parameters['id'], double.parse(parameters['width']), double.parse(parameters['height']), parameters['objectGroup']),
+        };
+      },
     );
   }
 
@@ -1034,6 +1298,52 @@ class WidgetInspectorService {
   @protected
   String getSelectedWidget(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedWidget(previousSelectionId, groupName));
+  }
+
+  Future<String> screenshot(String objectId, double width, double height, String groupName) async {
+    final Object object = toObject(objectId);
+    final RenderObject renderObject = object is Element ? object.renderObject : object;
+    if (renderObject == null || !renderObject.attached || renderObject.debugNeedsPaint) {
+      return null;
+    }
+    
+    final Rect renderBounds = renderObject.semanticBounds;
+    final double pixelRatio = math.min(1.0,
+        math.min(
+          width / renderBounds.width,
+          height / renderBounds.height,
+        )
+    );
+
+    ui.Image image;
+    if (renderObject is RenderRepaintBoundary) {
+      image = await renderObject.toImage(pixelRatio: pixelRatio);
+    } else {
+      // For simplicity use a 1.0 pixel ratio for the device transform.
+      // TODO(jacobr): should we instead match the pixel ratio of the actual
+      // device here to keep rendering as consistent as possible with the
+      // settings on the actual device? The pixel ratio for the final toImage
+      // call would then need to be tweaked to compensate.
+      final Float64List deviceTransform = new Float64List(16)
+        ..[0] = 1.0
+        ..[5] = 1.0
+        ..[10] = 1.0
+        ..[15] = 1.0;
+      final TransformLayer containerLayer = new TransformLayer(
+        transform: new Matrix4.fromFloat64List(deviceTransform),
+      );
+      final _ScreenshotPaintingContext context = new _ScreenshotPaintingContext(
+        containerLayer,
+        renderBounds,
+      );
+
+      context.paintChild(renderObject, Offset.zero);
+      context._stopRecordingIfNeeded();
+      image = await containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
+    }
+    
+    final ByteData byteData = await image.toByteData(format:ImageByteFormat.png);
+    return base64.encoder.convert(new Uint8List.view(byteData.buffer));
   }
 
   Map<String, Object> _getSelectedWidget(String previousSelectionId, String groupName) {
