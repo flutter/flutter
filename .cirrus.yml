@@ -69,6 +69,7 @@ task:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
     cpu: 4
+  timeout_in: 90m
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
   git_fetch_script:
@@ -132,6 +133,7 @@ task:
 task:
   osx_instance:
     image: high-sierra-xcode-9.4.1
+  timeout_in: 90m
   depends_on:
     - analyze
   env:
