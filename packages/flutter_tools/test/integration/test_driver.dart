@@ -166,10 +166,13 @@ class FlutterTestDriver {
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping app');
-      await _sendRequest(
-        'app.stop',
-        <String, dynamic>{'appId': _currentRunningAppId}
-      ).timeout(
+      await Future.any<void>(<Future<void>>[
+        _proc.exitCode,
+        _sendRequest(
+          'app.stop',
+          <String, dynamic>{'appId': _currentRunningAppId}
+        ),
+      ]).timeout(
         quitTimeout,
         onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); }
       );
