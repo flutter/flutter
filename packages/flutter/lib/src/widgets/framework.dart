@@ -3644,7 +3644,7 @@ abstract class ComponentElement extends Element {
   void performRebuild() {
     assert(() {
       if (debugProfileBuildsEnabled)
-        Timeline.startSync('${widget.runtimeType}');
+        Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
       return true;
     }());
 
