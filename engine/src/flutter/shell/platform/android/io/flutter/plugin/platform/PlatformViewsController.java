@@ -254,8 +254,8 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         }
 
         MotionEvent event = MotionEvent.obtain(
-                downTime.intValue(),
-                eventTime.intValue(),
+                downTime.longValue(),
+                eventTime.longValue(),
                 action,
                 pointerCount,
                 pointerProperties,
