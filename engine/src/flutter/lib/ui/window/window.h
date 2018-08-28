@@ -30,6 +30,7 @@ enum class AccessibilityFeatureFlag : int32_t {
   kAccessibleNavigation = 1 << 0,
   kInvertColors = 1 << 1,
   kDisableAnimations = 1 << 2,
+  kBoldText = 1 << 3,
 };
 
 class WindowClient {

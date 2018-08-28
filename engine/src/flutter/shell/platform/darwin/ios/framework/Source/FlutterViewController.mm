@@ -296,6 +296,11 @@
                object:nil];
 
   [center addObserver:self
+             selector:@selector(onAccessibilityStatusChanged:)
+                 name:UIAccessibilityBoldTextStatusDidChangeNotification
+               object:nil];
+
+  [center addObserver:self
              selector:@selector(onMemoryWarning:)
                  name:UIApplicationDidReceiveMemoryWarningNotification
                object:nil];
@@ -811,6 +816,8 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kInvertColors);
   if (UIAccessibilityIsReduceMotionEnabled())
     flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kDisableAnimations);
+  if (UIAccessibilityIsBoldTextEnabled())
+    flags ^= static_cast<int32_t>(blink::AccessibilityFeatureFlag::kBoldText);
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
