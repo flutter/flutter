@@ -49,21 +49,24 @@ class CoverageCollector extends TestWatcher {
     // Synchronization is enforced by the API contract. Error handling
     // synchronization is done in the code below where `exitCode` is checked.
     // Callback cannot throw.
-    process.exitCode.then<Null>((int code) { // ignore: unawaited_futures
+    final Future<void> processFuture = process.exitCode.then<Null>((int code) { // ignore: unawaited_futures
       exitCode = code;
     });
     if (exitCode != null)
       throw new Exception('Failed to collect coverage, process terminated before coverage could be collected.');
 
     printTrace('pid $pid: collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await coverage
+    Map<String, dynamic> data;
+    final Future<void> coverageFuture = coverage
         .collect(observatoryUri, false, false)
+        .then((Map<String, dynamic> result) { data = result; })
         .timeout(
           const Duration(minutes: 2),
           onTimeout: () {
             throw new Exception('Timed out while collecting coverage.');
           },
         );
+    await Future.any<void>(<Future<void>>[coverageFuture, processFuture]);
     printTrace(() {
       final StringBuffer buf = new StringBuffer()
           ..write('pid $pid ($observatoryUri): ')
