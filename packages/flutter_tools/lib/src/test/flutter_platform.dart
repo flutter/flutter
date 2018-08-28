@@ -932,17 +932,12 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
       _shellProcessClosed,
     ]).then<void>(
       (List<dynamic> futureResults) {
-        final dynamic failure = futureResults.reduce((dynamic value, dynamic element) {
-          if (element is _AsyncError) {
-            assert(value == null);
-            return element;
-          }
-          return value;
-        });
-        if (failure is _AsyncError) {
-          _done.completeError(failure.error, failure.stack);
+        assert(futureResults.length == 2);
+        assert(futureResults.first == null);
+        if (futureResults.last is _AsyncError) {
+          _done.completeError(futureResults.last.error, futureResults.last.stack);
         } else {
-          assert(failure == null);
+          assert(futureResults.last == null);
           _done.complete();
         }
       },
