@@ -259,15 +259,15 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     );
 
     if (widget.tooltip != null) {
-      final Widget tooltip = MergeSemantics(
-        child: Tooltip(
+      final Widget tooltip = new MergeSemantics(
+        child: new Tooltip(
           message: widget.tooltip,
           child: result,
         ),
       );
       // The long-pressable area for the tooltip should always be as big as
       // the tooltip even if there is no child.
-      result = widget.child != null ? tooltip : SizedBox.expand(child: tooltip);
+      result = widget.child != null ? tooltip : new SizedBox.expand(child: tooltip);
     }
 
     if (widget.heroTag != null) {
