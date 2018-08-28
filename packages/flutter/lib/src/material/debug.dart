@@ -89,21 +89,21 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
       final StringBuffer message = new StringBuffer();
       message.writeln('No MaterialLocalizations found.');
       message.writeln(
-          '${context.widget.runtimeType} widgets require MaterialLocalizations '
-              'to be provided by a Localizations widget ancestor.'
+        '${context.widget.runtimeType} widgets require MaterialLocalizations '
+        'to be provided by a Localizations widget ancestor.'
       );
       message.writeln(
-          'Localizations are used to generate many different messages, labels,'
-            'and abbreviations which are used by the material library. '
+        'Localizations are used to generate many different messages, labels,'
+        'and abbreviations which are used by the material library. '
       );
       message.writeln(
-          'To introduce a MaterialLocalizations, either use a'
-              ' MaterialApp at the root of your application to include them '
-              'automatically, or add a Localization widget with a '
-              'MaterialLocalizations delegate.'
+        'To introduce a MaterialLocalizations, either use a '
+        ' MaterialApp at the root of your application to include them '
+        'automatically, or add a Localization widget with a '
+        'MaterialLocalizations delegate.'
       );
       message.writeln(
-          'The specific widget that could not find a MaterialLocalizations ancestor was:'
+        'The specific widget that could not find a MaterialLocalizations ancestor was:'
       );
       message.writeln('  ${context.widget}');
       final List<Widget> ancestors = <Widget>[];
@@ -117,8 +117,8 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           message.write('\n  $ancestor');
       } else {
         message.writeln(
-            'This widget is the root of the tree, so it has no '
-                'ancestors, let alone a "Localizations" ancestor.'
+          'This widget is the root of the tree, so it has no '
+          'ancestors, let alone a "Localizations" ancestor.'
         );
       }
       throw new FlutterError(message.toString());
