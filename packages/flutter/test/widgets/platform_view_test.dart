@@ -584,4 +584,51 @@ void main() {
       ]),
     );
   });
+
+  testWidgets('Android view rebuilt during gesture', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    await gesture.up();
+
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionMove, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+      ]),
+    );
+  });
 }

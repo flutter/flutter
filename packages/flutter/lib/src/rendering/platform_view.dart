@@ -98,6 +98,9 @@ class RenderAndroidView extends RenderBox {
   /// will be dispatched to the Android view.
   set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
     assert(recognizers != null);
+    if (recognizers == _gestureRecognizer?.gestureRecognizers) {
+      return;
+    }
     _gestureRecognizer?.dispose();
     _gestureRecognizer = new _AndroidViewGestureRecognizer(_motionEventsDispatcher, recognizers);
   }
@@ -226,6 +229,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
   List<OneSequenceGestureRecognizer> _gestureRecognizers;
+  List<OneSequenceGestureRecognizer> get gestureRecognizers => _gestureRecognizers;
   set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
     _gestureRecognizers = recognizers;
     team = new GestureArenaTeam();
