@@ -298,6 +298,7 @@ Future<Null> _runToolTests() async {
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     enableFlutterToolAsserts: true,
+    runConcurrently: false,
   );
 
   print('${bold}DONE: All tests successful.$reset');
@@ -350,9 +351,13 @@ Future<Null> _runCoverage() async {
 Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
+  bool runConcurrently = true,
   bool enableFlutterToolAsserts = false
 }) {
-  final List<String> args = <String>['run', 'test', '-j1', '-rcompact'];
+  final List<String> args = <String>['run', 'test', '-rcompact'];
+  if (!runConcurrently) {
+    args.add('-j1');
+  }
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
