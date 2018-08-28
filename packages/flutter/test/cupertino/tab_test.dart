@@ -71,6 +71,7 @@ void main() {
                 }
               );
             }
+            return null;
           },
         ),
       ),
@@ -86,6 +87,7 @@ void main() {
         home: new CupertinoTabView(
           onUnknownRoute: (RouteSettings settings) {
             unknownForRouteCalled = settings.name;
+            return null;
           },
         ),
       ),

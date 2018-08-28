@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) {
+  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
@@ -53,7 +53,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) {
+  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
@@ -95,7 +95,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) {
+  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     debugPrintRecognizerCallbacksTrace = true;

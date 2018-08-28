@@ -1531,13 +1531,13 @@ class _MatchesGoldenFile extends AsyncMatcher {
         return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(key, bytes.buffer.asUint8List());
-      } else {
-        try {
-          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
-          return success ? null : 'does not match';
-        } on TestFailure catch (ex) {
-          return ex.message;
-        }
+        return null;
+      }
+      try {
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
+        return success ? null : 'does not match';
+      } on TestFailure catch (ex) {
+        return ex.message;
       }
     }, additionalTime: const Duration(seconds: 11));
   }
