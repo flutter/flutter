@@ -15,6 +15,7 @@ namespace shell {
 class GPUSurfaceSoftwareDelegate {
  public:
   virtual sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) = 0;
+
   virtual bool PresentBackingStore(sk_sp<SkSurface> backing_store) = 0;
 };
 
@@ -24,10 +25,16 @@ class GPUSurfaceSoftware : public Surface {
 
   ~GPUSurfaceSoftware() override;
 
+  // |shell::Surface|
   bool IsValid() override;
 
+  // |shell::Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
 
+  // |shell::Surface|
+  SkMatrix GetRootTransformation() const override;
+
+  // |shell::Surface|
   GrContext* GetContext() override;
 
  private:

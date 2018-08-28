@@ -128,6 +128,24 @@ FlutterResult FlutterEngineRun(size_t version,
                                       user_data]() { return ptr(user_data); };
   }
 
+  std::function<SkMatrix(void)> gl_surface_transformation_callback = nullptr;
+  if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) != nullptr) {
+    gl_surface_transformation_callback =
+        [ptr = config->open_gl.surface_transformation, user_data]() {
+          FlutterTransformation transformation = ptr(user_data);
+          return SkMatrix::MakeAll(transformation.scaleX,  //
+                                   transformation.skewX,   //
+                                   transformation.transX,  //
+                                   transformation.skewY,   //
+                                   transformation.scaleY,  //
+                                   transformation.transY,  //
+                                   transformation.pers0,   //
+                                   transformation.pers1,   //
+                                   transformation.pers2    //
+          );
+        };
+  }
+
   bool fbo_reset_after_present =
       SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
 
@@ -194,6 +212,7 @@ FlutterResult FlutterEngineRun(size_t version,
       fbo_callback,                        // gl_fbo_callback
       platform_message_response_callback,  // platform_message_response_callback
       make_resource_current_callback,      // gl_make_resource_current_callback
+      gl_surface_transformation_callback   // gl_surface_transformation_callback
   };
 
   shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =

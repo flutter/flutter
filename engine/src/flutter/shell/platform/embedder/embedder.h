@@ -31,7 +31,29 @@ typedef enum {
 
 typedef struct _FlutterEngine* FlutterEngine;
 
+typedef struct {
+  //   horizontal scale factor
+  double scaleX;
+  //    horizontal skew factor
+  double skewX;
+  //   horizontal translation
+  double transX;
+  //    vertical skew factor
+  double skewY;
+  //   vertical scale factor
+  double scaleY;
+  //   vertical translation
+  double transY;
+  //    input x-axis perspective factor
+  double pers0;
+  //    input y-axis perspective factor
+  double pers1;
+  //    perspective scale factor
+  double pers2;
+} FlutterTransformation;
+
 typedef bool (*BoolCallback)(void* /* user data */);
+typedef FlutterTransformation (*TransformationCallback)(void* /* user data */);
 typedef uint32_t (*UIntCallback)(void* /* user data */);
 
 typedef struct {
@@ -47,6 +69,9 @@ typedef struct {
   // engine will ask the embedder for an updated FBO target (via an fbo_callback
   // invocation) after a present call.
   bool fbo_reset_after_present;
+  // The transformation to apply to the render target before any rendering
+  // operations. This callback is optional.
+  TransformationCallback surface_transformation;
 } FlutterOpenGLRendererConfig;
 
 typedef struct {

@@ -32,18 +32,26 @@ void CompositorContext::EndFrame(ScopedFrame& frame,
 std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     GrContext* gr_context,
     SkCanvas* canvas,
+    const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled) {
-  return std::make_unique<ScopedFrame>(*this, gr_context, canvas,
-                                       instrumentation_enabled);
+  return std::make_unique<ScopedFrame>(*this,                        //
+                                       gr_context,                   //
+                                       canvas,                       //
+                                       root_surface_transformation,  //
+                                       instrumentation_enabled       //
+  );
 }
 
-CompositorContext::ScopedFrame::ScopedFrame(CompositorContext& context,
-                                            GrContext* gr_context,
-                                            SkCanvas* canvas,
-                                            bool instrumentation_enabled)
+CompositorContext::ScopedFrame::ScopedFrame(
+    CompositorContext& context,
+    GrContext* gr_context,
+    SkCanvas* canvas,
+    const SkMatrix& root_surface_transformation,
+    bool instrumentation_enabled)
     : context_(context),
       gr_context_(gr_context),
       canvas_(canvas),
+      root_surface_transformation_(root_surface_transformation),
       instrumentation_enabled_(instrumentation_enabled) {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
