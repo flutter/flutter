@@ -392,7 +392,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     final int currentLength = _effectiveController.value.text.runes.length;
     final String counterText = '$currentLength/${widget.maxLength}';
-    final int remaining = currentLength > widget.maxLength ? 0 : widget.maxLength - currentLength;
+    final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
     final String semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);

@@ -2203,6 +2203,8 @@ class InputDecoration {
   ///
   /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
   /// null.
+  ///
+  /// The semantic label can be replaced by providing a [semanticCounterText].
   final String counterText;
 
   /// The style to use for the [counterText].
@@ -2386,7 +2388,11 @@ class InputDecoration {
   /// This property is true by default.
   final bool enabled;
 
-  /// An alternative semantic label for the [counterText].
+  /// A semantic label for the [counterText].
+  ///
+  /// Defaults to null.
+  ///
+  /// If provided, this replaces the semantic label of the [counterText].
   final String semanticCounterText;
 
   /// Creates a copy of this input decoration with the given fields replaced

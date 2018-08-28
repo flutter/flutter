@@ -400,11 +400,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// See also:
   ///
   ///  * [Intl.plural], to which this form is passed.
-  ///  * [selectedRowCountTitleZero], the "zero" form
-  ///  * [selectedRowCountTitleOne], the "one" form
-  ///  * [selectedRowCountTitleTwo], the "two" form
-  ///  * [selectedRowCountTitleFew], the "few" form
-  ///  * [selectedRowCountTitleMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountZero;
 
