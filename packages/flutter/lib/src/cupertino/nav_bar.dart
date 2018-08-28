@@ -93,9 +93,7 @@ Widget _wrapWithBackground({
   Color backgroundColor,
   Widget child,
   bool updateSystemUiOverlay = true,
-  @required Clip clipBehavior,
 }) {
-  assert(clipBehavior != null);
   Widget result = child;
   if (updateSystemUiOverlay) {
     final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
@@ -120,7 +118,6 @@ Widget _wrapWithBackground({
     return childWithBackground;
 
   return new ClipRect(
-    clipBehavior: clipBehavior,
     child: new BackdropFilter(
       filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
@@ -189,11 +186,9 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.actionsForegroundColor = CupertinoColors.activeBlue,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.clipBehavior = Clip.hardEdge,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyMiddle != null),
        assert(transitionBetweenRoutes != null),
-       assert(clipBehavior != null),
        assert(
          heroTag != null,
          'heroTag cannot be null. Use transitionBetweenRoutes = false to '
@@ -336,11 +331,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Must not be null. Using [Clip.none] will produce undefined visual behavior.
-  final Clip clipBehavior;
-
   /// True if the navigation bar's background color has no transparency.
   @override
   bool get fullObstruction => backgroundColor.alpha == 0xFF;
@@ -388,7 +378,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final Widget navBar = _wrapWithBackground(
       border: widget.border,
       backgroundColor: widget.backgroundColor,
-      clipBehavior: widget.clipBehavior,
       child: new _PersistentNavigationBar(
         components: components,
         padding: widget.padding,
@@ -477,10 +466,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.actionsForegroundColor = CupertinoColors.activeBlue,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-    this.clipBehavior = Clip.hardEdge,
   }) : assert(automaticallyImplyLeading != null),
        assert(automaticallyImplyTitle != null),
-       assert(clipBehavior != null),
        assert(
          automaticallyImplyTitle == true || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
@@ -567,11 +554,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// {@macro flutter.cupertino.navBar.heroTag}
   final Object heroTag;
 
-  /// {@macro flutter.widgets.Clip}
-  ///
-  /// Must not be null. Using [Clip.none] will produce undefined visual behavior.
-  final Clip clipBehavior;
-
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
@@ -622,7 +604,6 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         heroTag: widget.heroTag,
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
         alwaysShowMiddle: widget.middle != null,
-        clipBehavior: widget.clipBehavior,
       ),
     );
   }
@@ -642,7 +623,6 @@ class _LargeTitleNavigationBarSliverDelegate
     @required this.heroTag,
     @required this.persistentHeight,
     @required this.alwaysShowMiddle,
-    @required this.clipBehavior,
   }) : assert(persistentHeight != null),
        assert(alwaysShowMiddle != null),
        assert(transitionBetweenRoutes != null);
@@ -658,7 +638,6 @@ class _LargeTitleNavigationBarSliverDelegate
   final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
-  final Clip clipBehavior;
 
   @override
   double get minExtent => persistentHeight;
@@ -682,7 +661,6 @@ class _LargeTitleNavigationBarSliverDelegate
     final Widget navBar = _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
-      clipBehavior: clipBehavior,
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
@@ -692,7 +670,6 @@ class _LargeTitleNavigationBarSliverDelegate
             right: 0.0,
             bottom: 0.0,
             child: new ClipRect(
-              clipBehavior: clipBehavior,
               // The large title starts at the persistent bar.
               // It's aligned with the bottom of the sliver and expands clipped
               // and behind the persistent bar.
@@ -771,8 +748,7 @@ class _LargeTitleNavigationBarSliverDelegate
         || transitionBetweenRoutes != oldDelegate.transitionBetweenRoutes
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
-        || heroTag != oldDelegate.heroTag
-        || clipBehavior != oldDelegate.clipBehavior;
+        || heroTag != oldDelegate.heroTag;
   }
 }
 
@@ -975,8 +951,8 @@ class _NavigationBarStaticComponents {
       leadingContent = userLeading;
     } else if (
       automaticallyImplyLeading &&
-      route.canPop &&
       route is PageRoute &&
+      route.canPop &&
       route.fullscreenDialog
     ) {
       leadingContent = new CupertinoButton(
@@ -1020,6 +996,7 @@ class _NavigationBarStaticComponents {
     if (
       userLeading != null ||
       !automaticallyImplyLeading ||
+      route == null ||
       !route.canPop ||
       (route is PageRoute && route.fullscreenDialog)
     ) {
@@ -1042,6 +1019,7 @@ class _NavigationBarStaticComponents {
     if (
       userLeading != null ||
       !automaticallyImplyLeading ||
+      route == null ||
       !route.canPop ||
       (route is PageRoute && route.fullscreenDialog)
     ) {
@@ -1462,9 +1440,6 @@ class _NavigationBarTransition extends StatelessWidget {
             updateSystemUiOverlay: false,
             backgroundColor: backgroundTween.evaluate(animation),
             border: borderTween.evaluate(animation),
-            // We need to pick one. Go with the fastest option since the clip
-            // is super simple (just a blur rect) and it's during a fast animation.
-            clipBehavior: Clip.hardEdge,
             child: new SizedBox(
               height: heightTween.evaluate(animation),
               width: double.infinity,

@@ -58,6 +58,8 @@ CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
       ),
     );
   }
+  assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
+  return null;
 }
 
 Finder flying(WidgetTester tester, Finder finder) {
