@@ -25,6 +25,7 @@ final String green = hasColor ? '\x1B[32m' : '';
 final String yellow = hasColor ? '\x1B[33m' : '';
 final String cyan = hasColor ? '\x1B[36m' : '';
 final String reset = hasColor ? '\x1B[0m' : '';
+final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
 const String arrow = '⏩';
 const String clock = '🕐';
 
@@ -294,7 +295,11 @@ Future<Null> _runSmokeTests() async {
 Future<Null> _runToolTests() async {
   await _runSmokeTests();
 
-  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+  await _pubRunTest(
+    path.join(flutterRoot, 'packages', 'flutter_tools'),
+    enableFlutterToolAsserts: true,
+    runConcurrently: false,
+  );
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -309,6 +314,7 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
@@ -345,8 +351,13 @@ Future<Null> _runCoverage() async {
 Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
+  bool runConcurrently = true,
+  bool enableFlutterToolAsserts = false
 }) {
-  final List<String> args = <String>['run', 'test', '-j1', '-rcompact'];
+  final List<String> args = <String>['run', 'test', '-rcompact'];
+  if (!runConcurrently) {
+    args.add('-j1');
+  }
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
@@ -354,6 +365,14 @@ Future<Null> _pubRunTest(
   final Map<String, String> pubEnvironment = <String, String>{};
   if (new Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
+  }
+  if (enableFlutterToolAsserts) {
+    // If an existing env variable exists append to it, but only if
+    // it doesn't appear to already include enable-asserts.
+    String toolsArgs = Platform.environment['FLUTTER_TOOL_ARGS'] ?? '';
+    if (!toolsArgs.contains('--enable-asserts'))
+        toolsArgs += ' --enable-asserts';
+    pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
   return _runCommand(
     pub, args,
@@ -408,11 +427,11 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);
     print(
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
+      '$redLine\n'
       '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
       '${bold}Command:$red $commandDescription$reset\n'
       '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
+      '$redLine'
     );
     exit(1);
   }
@@ -473,11 +492,11 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
       stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
+      '$redLine\n'
       '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
       '${bold}Command:$cyan $commandDescription$reset\n'
       '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
+      '$redLine'
     );
     exit(1);
   }
@@ -537,7 +556,8 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
       final File file = entity;
       final String name = path.relative(file.path, from: workingDirectory);
       if (name.startsWith('bin/cache') ||
-          name == 'dev/bots/test.dart')
+          name == 'dev/bots/test.dart' ||
+          name.startsWith('.pub-cache'))
         return null;
       final String data = file.readAsStringSync();
       if (data.contains("import 'package:test/test.dart'")) {
@@ -580,6 +600,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
         }
         return '  $name: uses \'package:test\' directly';
       }
+      return null;
     })
     .where((String line) => line != null)
     .toList()
@@ -587,7 +608,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
 
   // Fail if any errors
   if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     final String s1 = errors.length == 1 ? 's' : '';
     final String s2 = errors.length == 1 ? '' : 's';
     print('${bold}The following file$s2 use$s1 \'package:test\' incorrectly:$reset');
@@ -595,7 +616,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     print('Rather than depending on \'package:test\' directly, use one of the shims:');
     print(shims.join('\n'));
     print('This insulates us from breaking changes in \'package:test\'.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    print('$redLine\n');
     exit(1);
   }
 }
@@ -645,14 +666,14 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     if (errors.length == 1) {
       print('${bold}An error was detected when looking at import dependencies within the Flutter package:$reset\n');
     } else {
       print('${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset\n');
     }
     print(errors.join('\n\n'));
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    print('$redLine\n');
     exit(1);
   }
 }
@@ -736,14 +757,14 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     if (errors.length == 1) {
       print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
     } else {
       print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
     }
     print(errors.join('\n\n'));
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    print('$redLine\n');
     exit(1);
   }
 }
@@ -786,13 +807,13 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
   }
 
   if (outOfDate.isNotEmpty) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
     for (String registrant in outOfDate) {
       print(' - $registrant');
     }
     print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
 }
@@ -816,23 +837,23 @@ bool _isGeneratedPluginRegistrant(File file) {
 
 Future<Null> _verifyVersion(String filename) async {
   if (!new File(filename).existsSync()) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic failed to create the Flutter version file.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
   final String version = await new File(filename).readAsString();
   if (version == '0.0.0-unknown') {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic failed to determine the Flutter version.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
   final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
   if (!version.contains(pattern)) {
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     print('The version logic generated an invalid version string.');
-    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('$redLine');
     exit(1);
   }
 }

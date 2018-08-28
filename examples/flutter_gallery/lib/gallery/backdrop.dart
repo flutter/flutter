@@ -304,6 +304,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                   borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
                 ),
               ),
+              clipBehavior: Clip.antiAlias,
               child: child,
             );
           },

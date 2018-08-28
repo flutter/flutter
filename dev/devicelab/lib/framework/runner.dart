@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
@@ -81,6 +82,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   } finally {
     if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);
+    await cleanupSystem();
     await stdoutSub.cancel();
     await stderrSub.cancel();
   }
@@ -123,5 +125,42 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       print('Will retry in $pauseBetweenRetries.');
       await new Future<Null>.delayed(pauseBetweenRetries);
     }
+  }
+}
+
+Future<void> cleanupSystem() async {
+  print('\n\nCleaning up system after task...');
+  final String javaHome = await findJavaHome();
+  if (javaHome != null) {
+    // To shut gradle down, we have to call "gradlew --stop".
+    // To call gradlew, we need to have a gradle-wrapper.properties file along
+    // with a shell script, a .jar file, etc. We get these from various places
+    // as you see in the code below, and we save them all into a temporary dir
+    // which we can then delete after.
+    // All the steps below are somewhat tolerant of errors, because it doesn't
+    // really matter if this succeeds every time or not.
+    print('\nTelling Gradle to shut down (JAVA_HOME=$javaHome)');
+    final String gradlewBinaryName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_shutdown_gradle.');
+    recursiveCopy(new Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
+    copy(new File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'create', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), new Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
+    if (!Platform.isWindows) {
+      await exec(
+        'chmod',
+        <String>['a+x', path.join(tempDir.path, gradlewBinaryName)],
+        canFail: true,
+      );
+    }
+    await exec(
+      path.join(tempDir.path, gradlewBinaryName),
+      <String>['--stop'],
+      environment: <String, String>{ 'JAVA_HOME': javaHome },
+      workingDirectory: tempDir.path,
+      canFail: true,
+    );
+    rmTree(tempDir);
+    print('\n');
+  } else {
+    print('Could not determine JAVA_HOME; not shutting down Gradle.');
   }
 }

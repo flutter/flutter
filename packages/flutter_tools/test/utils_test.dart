@@ -130,7 +130,7 @@ baz=qux
 
     test('fires at start', () async {
       bool called = false;
-      poller = new Poller(() {
+      poller = new Poller(() async {
         called = true;
       }, const Duration(seconds: 1));
       expect(called, false);
@@ -141,7 +141,7 @@ baz=qux
     test('runs periodically', () async {
       // Ensure we get the first (no-delay) callback, and one of the periodic callbacks.
       int callCount = 0;
-      poller = new Poller(() {
+      poller = new Poller(() async {
         callCount++;
       }, new Duration(milliseconds: kShortDelay.inMilliseconds ~/ 2));
       expect(callCount, 0);

@@ -154,6 +154,7 @@ class _ReorderableListContent extends StatefulWidget {
 }
 
 class _ReorderableListContentState extends State<_ReorderableListContent> with TickerProviderStateMixin {
+
   // The extent along the [widget.scrollDirection] axis to allow a child to
   // drop into when the user reorders list children.
   //
@@ -172,7 +173,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   static const Duration _scrollAnimationDuration = Duration(milliseconds: 200);
 
   // Controls scrolls and measures scroll progress.
-  final ScrollController _scrollController = new ScrollController();
+  ScrollController _scrollController;
 
   // This controls the entrance of the dragging widget into a new place.
   AnimationController _entranceController;
@@ -231,6 +232,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   }
 
   @override
+  void didChangeDependencies() {
+    _scrollController = PrimaryScrollController.of(context) ?? new ScrollController();
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _entranceController.dispose();
     _ghostController.dispose();
@@ -280,6 +287,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
       viewport.getOffsetToReveal(contextObject, 1.0).offset + margin,
     );
     final bool onScreen = scrollOffset <= topOffset && scrollOffset >= bottomOffset;
+
     // If the context is off screen, then we request a scroll to make it visible.
     if (!onScreen) {
       _scrolling = true;

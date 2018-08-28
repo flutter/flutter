@@ -142,9 +142,9 @@ void main() {
         ));
 
         Element getContentElement() {
-          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
           final Widget scrollContents = listScrollView.child;
-          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 
@@ -224,6 +224,80 @@ void main() {
         expect(findState(const Key('A')).checked, true);
       });
 
+      testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
+        final ScrollController primary = new ScrollController();
+        final Widget reorderableList = new ReorderableListView(
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+          ],
+          onReorder: (int oldIndex, int newIndex) {},
+        );
+
+        Widget buildWithScrollController(ScrollController controller) {
+          return new MaterialApp(
+            home: new PrimaryScrollController(
+              controller: controller,
+              child: new SizedBox(
+                height: 100.0,
+                width: 100.0,
+                child: reorderableList,
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildWithScrollController(primary));
+        SingleChildScrollView scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
+        expect(scrollView.controller, primary);
+
+        // Now try changing the primary scroll controller and checking that the scroll view gets updated.
+        final ScrollController primary2 = new ScrollController();
+        await tester.pumpWidget(buildWithScrollController(primary2));
+        scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
+        expect(scrollView.controller, primary2);
+      });
+
+      testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
+        final Widget reorderableList = new ReorderableListView(
+          children: const <Widget>[
+            SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
+            SizedBox(width: 100.0, height: 100.0, child: Text('A'), key: Key('A')),
+          ],
+          onReorder: (int oldIndex, int newIndex) {},
+        );
+        final Widget boilerplate = new Localizations(
+          locale: const Locale('en'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+          ],
+          child:new SizedBox(
+            width: 100.0,
+            height: 100.0,
+            child: new Directionality(
+              textDirection: TextDirection.ltr,
+              child: reorderableList,
+            ),
+          ),
+        );
+        try {
+          await tester.pumpWidget(boilerplate);
+        } catch (e) {
+          fail('Expected no error, but got $e');
+        }
+        // Expect that we have build *a* ScrollController for use in the view.
+        final SingleChildScrollView scrollView = tester.widget(
+          find.byType(SingleChildScrollView),
+        );
+        expect(scrollView.controller, isNotNull);
+      });
 
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
@@ -496,9 +570,9 @@ void main() {
         ));
 
         Element getContentElement() {
-          final SingleChildScrollView listScrollView = find.byType(SingleChildScrollView).evaluate().first.widget;
+          final SingleChildScrollView listScrollView = tester.widget(find.byType(SingleChildScrollView));
           final Widget scrollContents = listScrollView.child;
-          final Element contentElement = find.byElementPredicate((Element element) => element.widget == scrollContents).evaluate().first;
+          final Element contentElement = tester.element(find.byElementPredicate((Element element) => element.widget == scrollContents));
           return contentElement;
         }
 

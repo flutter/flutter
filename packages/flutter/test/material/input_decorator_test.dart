@@ -66,10 +66,10 @@ InputBorder getBorder(WidgetTester tester) {
   if (!tester.any(findBorderPainter()))
     return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic/* _InputBorderPainter */ inputBorderPainter = customPaint.foregroundPainter;
-  final dynamic/*_InputBorderTween */ inputBorderTween = inputBorderPainter.border;
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
   final Animation<double> animation = inputBorderPainter.borderAnimation;
-  final dynamic/*_InputBorder */ border = inputBorderTween.evaluate(animation);
+  final dynamic/*_InputBorder*/ border = inputBorderTween.evaluate(animation);
   return border;
 }
 

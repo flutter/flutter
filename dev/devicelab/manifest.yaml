@@ -130,6 +130,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  embedded_android_views_integration_test:
+    description: >
+      Tests embedded Android views.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   run_release_test:
     description: >
       Checks that `flutter run --release` does not crash.
@@ -453,6 +459,7 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
