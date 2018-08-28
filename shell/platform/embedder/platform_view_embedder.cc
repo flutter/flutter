@@ -43,6 +43,17 @@ bool PlatformViewEmbedder::GLContextFBOResetAfterPresent() const {
   return fbo_reset_after_present_;
 }
 
+// |shell::GPUSurfaceGLDelegate|
+SkMatrix PlatformViewEmbedder::GLContextSurfaceTransformation() const {
+  auto callback = dispatch_table_.gl_surface_transformation_callback;
+  if (!callback) {
+    SkMatrix matrix;
+    matrix.setIdentity();
+    return matrix;
+  }
+  return callback();
+}
+
 void PlatformViewEmbedder::HandlePlatformMessage(
     fml::RefPtr<blink::PlatformMessage> message) {
   if (!message) {

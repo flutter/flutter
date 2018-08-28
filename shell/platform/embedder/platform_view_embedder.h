@@ -25,6 +25,8 @@ class PlatformViewEmbedder final : public PlatformView,
     PlatformMessageResponseCallback
         platform_message_response_callback;                       // optional
     std::function<bool(void)> gl_make_resource_current_callback;  // optional
+    std::function<SkMatrix(void)>
+        gl_surface_transformation_callback;  // optional
   };
 
   PlatformViewEmbedder(PlatformView::Delegate& delegate,
@@ -48,6 +50,9 @@ class PlatformViewEmbedder final : public PlatformView,
 
   // |shell::GPUSurfaceGLDelegate|
   bool GLContextFBOResetAfterPresent() const override;
+
+  // |shell::GPUSurfaceGLDelegate|
+  SkMatrix GLContextSurfaceTransformation() const override;
 
   // |shell::PlatformView|
   void HandlePlatformMessage(

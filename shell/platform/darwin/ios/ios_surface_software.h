@@ -21,16 +21,22 @@ class IOSSurfaceSoftware final : public IOSSurface,
 
   ~IOSSurfaceSoftware() override;
 
+  // |shell::IOSSurface|
   bool IsValid() const override;
 
+  // |shell::IOSSurface|
   bool ResourceContextMakeCurrent() override;
 
+  // |shell::IOSSurface|
   void UpdateStorageSizeIfNecessary() override;
 
+  // |shell::IOSSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
+  // |shell::GPUSurfaceSoftwareDelegate|
   sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
 
+  // |shell::GPUSurfaceSoftwareDelegate|
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
  private:

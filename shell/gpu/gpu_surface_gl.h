@@ -5,6 +5,8 @@
 #ifndef SHELL_GPU_GPU_SURFACE_GL_H_
 #define SHELL_GPU_GPU_SURFACE_GL_H_
 
+#include <memory>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
@@ -25,6 +27,12 @@ class GPUSurfaceGLDelegate {
   virtual bool GLContextFBOResetAfterPresent() const { return false; }
 
   virtual bool UseOffscreenSurface() const { return false; }
+
+  virtual SkMatrix GLContextSurfaceTransformation() const {
+    SkMatrix matrix;
+    matrix.setIdentity();
+    return matrix;
+  }
 };
 
 class GPUSurfaceGL : public Surface {
@@ -33,10 +41,16 @@ class GPUSurfaceGL : public Surface {
 
   ~GPUSurfaceGL() override;
 
+  // |shell::Surface|
   bool IsValid() override;
 
+  // |shell::Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
 
+  // |shell::Surface|
+  SkMatrix GetRootTransformation() const override;
+
+  // |shell::Surface|
   GrContext* GetContext() override;
 
  private:
@@ -49,7 +63,9 @@ class GPUSurfaceGL : public Surface {
 
   bool CreateOrUpdateSurfaces(const SkISize& size);
 
-  sk_sp<SkSurface> AcquireRenderSurface(const SkISize& size);
+  sk_sp<SkSurface> AcquireRenderSurface(
+      const SkISize& untransformed_size,
+      const SkMatrix& root_surface_transformation);
 
   bool PresentSurface(SkCanvas* canvas);
 

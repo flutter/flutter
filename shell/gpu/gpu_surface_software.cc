@@ -14,10 +14,12 @@ GPUSurfaceSoftware::GPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate)
 
 GPUSurfaceSoftware::~GPUSurfaceSoftware() = default;
 
+// |shell::Surface|
 bool GPUSurfaceSoftware::IsValid() {
   return delegate_ != nullptr;
 }
 
+// |shell::Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
     const SkISize& logical_size) {
   if (!IsValid()) {
@@ -58,6 +60,16 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
   return std::make_unique<SurfaceFrame>(backing_store, on_submit);
 }
 
+// |shell::Surface|
+SkMatrix GPUSurfaceSoftware::GetRootTransformation() const {
+  // This backend does not currently support root surface transformations. Just
+  // return identity.
+  SkMatrix matrix;
+  matrix.reset();
+  return matrix;
+}
+
+// |shell::Surface|
 GrContext* GPUSurfaceSoftware::GetContext() {
   // There is no GrContext associated with a software surface.
   return nullptr;

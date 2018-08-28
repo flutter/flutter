@@ -15,10 +15,12 @@ GPUSurfaceVulkan::GPUSurfaceVulkan(
 
 GPUSurfaceVulkan::~GPUSurfaceVulkan() = default;
 
+// |shell::Surface|
 bool GPUSurfaceVulkan::IsValid() {
   return window_.IsValid();
 }
 
+// |shell::Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
     const SkISize& size) {
   auto surface = window_.AcquireSurface();
@@ -42,6 +44,16 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
                                         std::move(callback));
 }
 
+// |shell::Surface|
+SkMatrix GPUSurfaceVulkan::GetRootTransformation() const {
+  // This backend does not support delegating to the underlying platform to
+  // query for root surface transformations. Just return identity.
+  SkMatrix matrix;
+  matrix.reset();
+  return matrix;
+}
+
+// |shell::Surface|
 GrContext* GPUSurfaceVulkan::GetContext() {
   return window_.GetSkiaGrContext();
 }

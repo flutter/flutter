@@ -110,8 +110,8 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
 
   auto canvas = frame->SkiaCanvas();
 
-  auto compositor_frame =
-      compositor_context_->AcquireFrame(surface_->GetContext(), canvas, true);
+  auto compositor_frame = compositor_context_->AcquireFrame(
+      surface_->GetContext(), canvas, surface_->GetRootTransformation(), true);
 
   if (canvas) {
     canvas->clear(SK_ColorBLACK);
@@ -134,8 +134,12 @@ static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(
   recorder.beginRecording(
       SkRect::MakeWH(tree->frame_size().width(), tree->frame_size().height()));
 
-  auto frame = compositor_context.AcquireFrame(
-      nullptr, recorder.getRecordingCanvas(), false);
+  SkMatrix root_surface_transformation;
+  root_surface_transformation.reset();
+
+  auto frame =
+      compositor_context.AcquireFrame(nullptr, recorder.getRecordingCanvas(),
+                                      root_surface_transformation, false);
 
   frame->Raster(*tree, true);
 
@@ -174,7 +178,14 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
 
   // Draw the current layer tree into the snapshot surface.
   auto canvas = snapshot_surface->getCanvas();
-  auto frame = compositor_context.AcquireFrame(surface_context, canvas, false);
+
+  // There is no root surface transformation for the screenshot layer. Reset the
+  // matrix to identity.
+  SkMatrix root_surface_transformation;
+  root_surface_transformation.reset();
+
+  auto frame = compositor_context.AcquireFrame(
+      surface_context, canvas, root_surface_transformation, false);
   canvas->clear(SK_ColorBLACK);
   frame->Raster(*tree, true);
   canvas->flush();

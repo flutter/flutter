@@ -17,12 +17,16 @@
 
 namespace flow {
 
-void RasterCacheResult::draw(SkCanvas& canvas) const {
+void RasterCacheResult::draw(
+    SkCanvas& canvas,
+    const SkMatrix& root_surface_transformation) const {
   SkAutoCanvasRestore auto_restore(&canvas, true);
   SkIRect bounds =
       RasterCache::GetDeviceBounds(logical_rect_, canvas.getTotalMatrix());
   FML_DCHECK(bounds.size() == image_->dimensions());
-  canvas.resetMatrix();
+  // Clear all transformations on the canvas except the root surface
+  // transormation.
+  canvas.setMatrix(root_surface_transformation);
   canvas.drawImage(image_, bounds.fLeft, bounds.fTop);
 }
 

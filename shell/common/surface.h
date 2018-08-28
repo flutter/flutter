@@ -51,6 +51,8 @@ class Surface {
 
   virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) = 0;
 
+  virtual SkMatrix GetRootTransformation() const = 0;
+
   virtual GrContext* GetContext() = 0;
 
  private:
