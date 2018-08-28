@@ -42,7 +42,13 @@ enum _PlatformViewState {
 /// Android [View](https://developer.android.com/reference/android/view/View).
 ///
 /// The render object's layout behavior is to fill all available space, the parent of this object must
-/// provide bounded layout constraints
+/// provide bounded layout constraints.
+///
+/// RenderAndroidView participates in Flutter's [GestureArena]s, and dispatches touch events to the
+/// Android view iff it won the arena. Specific gestures that should be dispatched to the Android
+/// view can be specified in [RenderAndroidView.gestureRecognizers]. If
+/// [RenderAndroidView.gestureRecognizers] is empty, the gesture will be dispatched to the Android
+/// view iff it was not claimed by any other gesture recognizer.
 ///
 /// See also:
 ///  * [AndroidView] which is a widget that is used to show an Android view.
@@ -53,10 +59,14 @@ class RenderAndroidView extends RenderBox {
   RenderAndroidView({
     @required AndroidViewController viewController,
     @required this.hitTestBehavior,
+    List<OneSequenceGestureRecognizer> gestureRecognizers = const <OneSequenceGestureRecognizer> [],
   }) : assert(viewController != null),
        assert(hitTestBehavior != null),
-       _viewController = viewController {
+       assert(gestureRecognizers != null),
+       _viewController = viewController
+  {
     _motionEventsDispatcher = new _MotionEventsDispatcher(globalToLocal, viewController);
+    this.gestureRecognizers = gestureRecognizers;
   }
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
@@ -80,6 +90,21 @@ class RenderAndroidView extends RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
+  /// Which gestures should be forwarded to the Android view.
+  ///
+  /// The gesture recognizers on this list participate in the gesture arena for each pointer
+  /// that was put down on the render box. If any of the recognizers on this list wins the
+  /// gesture arena, the entire pointer event sequence starting from the pointer down event
+  /// will be dispatched to the Android view.
+  set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
+    assert(recognizers != null);
+    if (recognizers == _gestureRecognizer?.gestureRecognizers) {
+      return;
+    }
+    _gestureRecognizer?.dispose();
+    _gestureRecognizer = new _AndroidViewGestureRecognizer(_motionEventsDispatcher, recognizers);
+  }
+
   @override
   bool get sizedByParent => true;
 
@@ -90,6 +115,8 @@ class RenderAndroidView extends RenderBox {
   bool get isRepaintBoundary => true;
 
   _MotionEventsDispatcher _motionEventsDispatcher;
+
+  _AndroidViewGestureRecognizer _gestureRecognizer;
 
   @override
   void performResize() {
@@ -169,7 +196,110 @@ class RenderAndroidView extends RenderBox {
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    _motionEventsDispatcher.handlePointerEvent(event);
+    if (event is PointerDownEvent) {
+      _gestureRecognizer.addPointer(event);
+    }
+  }
+
+  @override
+  void detach() {
+    _gestureRecognizer.reset();
+    super.detach();
+  }
+}
+
+class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
+  _AndroidViewGestureRecognizer(this.dispatcher, List<OneSequenceGestureRecognizer> gestureRecognizers) {
+    this.gestureRecognizers = gestureRecognizers;
+  }
+
+  final _MotionEventsDispatcher dispatcher;
+
+  // Maps a pointer to a list of its cached pointer events.
+  // Before the arena for a pointer is resolved all events are cached here, if we win the arena
+  // the cached events are dispatched to the view, if we lose the arena we clear the cache for
+  // the pointer.
+  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>> {};
+
+  // Pointer for which we have already won the arena, events for pointers in this set are
+  // immediately dispatched to the Android view.
+  final Set<int> forwardedPointers = new Set<int>();
+
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  List<OneSequenceGestureRecognizer> _gestureRecognizers;
+  List<OneSequenceGestureRecognizer> get gestureRecognizers => _gestureRecognizers;
+  set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
+    _gestureRecognizers = recognizers;
+    team = new GestureArenaTeam();
+    team.captain = this;
+    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+      recognizer.team = team;
+    }
+  }
+
+  @override
+  void addPointer(PointerDownEvent event) {
+    startTrackingPointer(event.pointer);
+    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+      recognizer.addPointer(event);
+    }
+  }
+
+  @override
+  String get debugDescription => 'Android view';
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    resolve(GestureDisposition.rejected);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (!forwardedPointers.contains(event.pointer)) {
+      cacheEvent(event);
+    } else {
+      dispatcher.handlePointerEvent(event);
+    }
+    stopTrackingIfPointerNoLongerDown(event);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    flushPointerCache(pointer);
+    forwardedPointers.add(pointer);
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    stopTrackingPointer(pointer);
+    cachedEvents.remove(pointer);
+  }
+
+  void cacheEvent(PointerEvent event) {
+    if (!cachedEvents.containsKey(event.pointer)) {
+      cachedEvents[event.pointer] = <PointerEvent> [];
+    }
+    cachedEvents[event.pointer].add(event);
+  }
+
+  void flushPointerCache(int pointer) {
+    cachedEvents.remove(pointer)?.forEach(dispatcher.handlePointerEvent);
+  }
+
+  @override
+  void stopTrackingPointer(int pointer) {
+    super.stopTrackingPointer(pointer);
+    forwardedPointers.remove(pointer);
+  }
+
+  void reset() {
+    forwardedPointers.forEach(super.stopTrackingPointer);
+    forwardedPointers.clear();
+    cachedEvents.keys.forEach(super.stopTrackingPointer);
+    cachedEvents.clear();
+    resolve(GestureDisposition.rejected);
   }
 }
 
