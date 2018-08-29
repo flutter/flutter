@@ -64,7 +64,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               new Builder(
                 builder: (BuildContext context) {
                   return new IconButton(
-                    icon: const Icon(Icons.description),
+                    icon: const Icon(Icons.code),
                     tooltip: 'Show example code',
                     onPressed: () {
                       _showExampleCode(context);

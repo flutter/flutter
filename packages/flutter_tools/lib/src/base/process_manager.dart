@@ -46,14 +46,7 @@ Future<ReplayProcessManager> getReplayProcessManager(String location) async {
 
   ProcessManager manager;
   try {
-    manager = await ReplayProcessManager.create(dir,
-      // TODO(tvolkert): Once https://github.com/flutter/flutter/issues/7166 is
-      //     resolved, we can use the default `streamDelay`. In the
-      //     meantime, native file I/O operations cause our `tail` process
-      //     streams to flush before our protocol discovery is listening on
-      //     them, causing us to timeout waiting for the observatory port.
-      streamDelay: const Duration(milliseconds: 50),
-    );
+    manager = await ReplayProcessManager.create(dir);
   } on ArgumentError catch (error) {
     throwToolExit('Invalid replay-from: $error');
   }

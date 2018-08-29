@@ -10,8 +10,6 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 
-import 'package:test/test.dart';
-
 import 'src/common.dart';
 import 'src/context.dart';
 
@@ -22,20 +20,14 @@ void main() {
   Directory oldCurrentDir;
 
   setUp(() async {
-    tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
     oldCurrentDir = fs.currentDirectory;
     fs.currentDirectory = tempDir;
   });
 
   tearDown(() {
     fs.currentDirectory = oldCurrentDir;
-    try {
-      tempDir?.deleteSync(recursive: true);
-      tempDir = null;
-    } on FileSystemException catch (e) {
-      // Do nothing, windows sometimes has trouble deleting.
-      print('Ignored exception during tearDown: $e');
-    }
+    tryToDelete(tempDir);
   });
 
   group('AssetBundle asset variants', () {

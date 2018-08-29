@@ -9,7 +9,7 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
@@ -17,9 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'widget_tester.dart' show WidgetTester;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -191,8 +193,8 @@ final Matcher isFlutterError = isInstanceOf<FlutterError>();
 final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
-// TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
-Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
+Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -459,6 +461,37 @@ Matcher matchesSemanticsData({
     customActions: customActions,
     hintOverrides: hintOverrides,
   );
+}
+
+/// Asserts that the currently rendered widget meets the provided accessibility
+/// `guideline`.
+///
+/// This matcher requires the result to be awaited and for semantics to be
+/// enabled first.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// handle.dispose();
+/// ```
+///
+/// Supported accessibility guidelines:
+///
+///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
+  return new _MatchesAccessibilityGuideline(guideline);
+}
+
+/// The inverse matcher of [meetsGuideline].
+///
+/// This is needed because the [isNot] matcher does not compose with an
+/// [AsyncMatcher].
+AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
+  return new _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -1155,7 +1188,7 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
 
   @override
   Description describe(Description description) {
-    description.add('does not have a clip as an immediate child');
+    return description.add('does not have a clip as an immediate child');
   }
 }
 
@@ -1498,13 +1531,13 @@ class _MatchesGoldenFile extends AsyncMatcher {
         return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(key, bytes.buffer.asUint8List());
-      } else {
-        try {
-          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
-          return success ? null : 'does not match';
-        } on TestFailure catch (ex) {
-          return ex.message;
-        }
+        return null;
+      }
+      try {
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
+        return success ? null : 'does not match';
+      } on TestFailure catch (ex) {
+        return ex.message;
       }
     }, additionalTime: const Duration(seconds: 11));
   }
@@ -1658,5 +1691,43 @@ class _MatchesSemanticsData extends Matcher {
       bool verbose
       ) {
     return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchesAccessibilityGuideline extends AsyncMatcher {
+  _MatchesAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add(guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return null;
+    return result.reason;
+  }
+}
+
+class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
+  _DoesNotMatchAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add('Does not ' + guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return 'Failed';
+    return null;
   }
 }

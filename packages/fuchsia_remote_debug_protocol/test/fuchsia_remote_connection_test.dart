@@ -4,11 +4,12 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
+
+import 'common.dart';
 
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
@@ -152,7 +153,7 @@ void main() {
 
       // Should fail as no env variable has been passed.
       expect(failingFunction,
-          throwsA(const isInstanceOf<FuchsiaRemoteConnectionError>()));
+          throwsA(isInstanceOf<FuchsiaRemoteConnectionError>()));
     });
   });
 }

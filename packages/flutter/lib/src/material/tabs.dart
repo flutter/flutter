@@ -61,7 +61,7 @@ class Tab extends StatelessWidget {
     this.icon,
     this.child,
   }) : assert(text != null || child != null || icon != null),
-       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/31140
+       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/34180
        super(key: key);
 
   /// The text to display as the tab's label.
@@ -744,6 +744,7 @@ class _TabBarState extends State<TabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(debugCheckHasMaterial(context));
     _updateTabController();
     _initIndicatorPainter();
   }

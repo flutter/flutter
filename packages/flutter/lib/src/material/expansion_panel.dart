@@ -144,7 +144,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-  }) : children = children, //ignore:prefer_initializing_formals
+  }) : children = children, // ignore: prefer_initializing_formals
        assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -288,7 +288,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           key: new _SaltedKey<BuildContext, int>(context, index * 2),
           child: new Column(
             children: <Widget>[
-              header,
+              new MergeSemantics(child: header),
               new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
                 secondChild: child.body,

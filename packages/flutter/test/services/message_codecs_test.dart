@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('Binary codec', () {
@@ -23,6 +23,19 @@ void main() {
       _checkEncodeDecode<String>(string, '');
       _checkEncodeDecode<String>(string, 'hello');
       _checkEncodeDecode<String>(string, 'special chars >\u263A\u{1F602}<');
+    });
+    test('ByteData with offset', () {
+      const MessageCodec<String> string = StringCodec();
+      final ByteData helloWorldByteData = string.encodeMessage('hello world');
+      final ByteData helloByteData = string.encodeMessage('hello');
+
+      final ByteData offsetByteData = new ByteData.view(
+          helloWorldByteData.buffer,
+          helloByteData.lengthInBytes,
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes
+      );
+
+      expect(string.decodeMessage(offsetByteData), ' world');
     });
   });
   group('JSON message codec', () {

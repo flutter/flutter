@@ -45,7 +45,7 @@ void main() {
       test_package.expect(completed, isFalse);
       await future;
       test_package.expect(completed, isTrue);
-    }, skip: true /* Enable once https://github.com/dart-lang/test/pull/831 lands */);
+    });
   });
 
   group('findsOneWidget', () {
@@ -500,7 +500,7 @@ void main() {
       final Object key = new Object();
       await runZoned(() {
         expect(Zone.current[key], 'abczed');
-        return tester.runAsync<String>(() async {
+        return tester.runAsync<void>(() async {
           expect(Zone.current[key], 'abczed');
         });
       }, zoneValues: <dynamic, dynamic>{

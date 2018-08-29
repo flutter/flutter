@@ -150,8 +150,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
         final Iterable<Directory> directories = fs
             .directory(path)
             .listSync()
-            .where((FileSystemEntity e) => e is Directory)
-            .cast<Directory>();
+            .whereType<Directory>();
         for (Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.

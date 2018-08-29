@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('Mock binary message handler control test', () async {
@@ -13,6 +13,7 @@ void main() {
 
     BinaryMessages.setMockMessageHandler('test1', (ByteData message) async {
       log.add(message);
+      return null;
     });
 
     final ByteData message = new ByteData(2)..setUint16(0, 0xABCD);

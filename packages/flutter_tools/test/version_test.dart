@@ -8,7 +8,6 @@ import 'package:collection/collection.dart' show ListEquality;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/version.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 final Clock _testClock = new Clock.fixed(new DateTime(2015, 1, 1));

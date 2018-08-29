@@ -66,9 +66,10 @@ void main() {
     await tester.pumpWidget(new NotificationListener<MyNotification>(
       onNotification: (MyNotification value) {
         log.add(value.runtimeType);
+        return false;
       },
       child: new NotificationListener<MyNotification>(
-        onNotification: (MyNotification value) { },
+        onNotification: (MyNotification value) => false,
         child: new Container(key: key),
       ),
     ));

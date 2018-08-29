@@ -100,7 +100,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   /// The modifiers that we present when the key event occurred.
   ///
-  /// See <https://fuchsia.googlesource.com/mozart/+/master/services/input/input_event_constants.fidl>
+  /// See <https://fuchsia.googlesource.com/garnet/+/master/public/fidl/fuchsia.ui.input/input_event_constants.fidl>
   /// for the numerical values of the modifiers.
   final int modifiers;
 }
