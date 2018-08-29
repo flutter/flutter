@@ -51,6 +51,7 @@ class AndroidView extends StatefulWidget {
   /// The `viewType`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   AndroidView({ // ignore: prefer_const_constructors_in_immutables
+                // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
