@@ -68,10 +68,10 @@ class Ticker {
 
   TickerFuture _future;
 
-  /// Whether the platform is requesting that animations be disabled.
+  /// Whether or not the platform is requesting that animations be disabled.
   ///
   /// See also:
-  ///   [AccessibilityFeatures.disableAnimations], for the setting this value comes from.
+  ///   * [AccessibilityFeatures.disableAnimations], for the setting this value comes from.
   bool disableAnimations = false;
 
   /// Whether this ticker has been silenced.
