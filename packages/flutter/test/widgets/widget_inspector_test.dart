@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/material.dart';
@@ -1543,6 +1544,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       );
 
       // Add a margin so that the clip icon shows up in the screenshot.
+      // This golden image is platform dependent due to the clip icon.
       await expectLater(
         service.screenshot(
           find.byType(ClipRRect).evaluate().single,
@@ -1552,6 +1554,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           debugPaint: true,
         ),
         matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
+        skip: !Platform.isLinux
       );
 
       // Test with a very visible debug paint
