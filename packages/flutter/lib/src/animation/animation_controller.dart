@@ -499,7 +499,9 @@ class AnimationController extends Animation<double>
     if (_ticker.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
-          scale = 200.0; // TODO(jonahwilliams): determine a better process for setting velocity.
+          // TODO(jonahwilliams): determine a better process for setting velocity.
+          // the value below was arbitrarily chosen because it worked for the drawer widget.
+          scale = 200.0;
           break;
         case AnimationBehavior.preserve:
           break;
