@@ -95,8 +95,10 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
     }());
+    final ValueListenable<AccessibilityFeatures> accessibilityFeatures = SemanticsBinding.instance.accessibilityFeatures;
     _ticker = new Ticker(onTick, debugLabel: 'created by $this')
-      ..disableAnimations = SemanticsBinding.instance.accessibilityFeatures.disableAnimations;
+      ..disableAnimations = accessibilityFeatures.value.disableAnimations;
+    accessibilityFeatures.addListener(_handleAccessibilityFeaturesChanged);
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
@@ -119,6 +121,8 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
         'The offending ticker was: ${_ticker.toString(debugIncludeStack: true)}'
       );
     }());
+    final ValueListenable<AccessibilityFeatures> accessibilityFeatures = SemanticsBinding.instance.accessibilityFeatures;
+    accessibilityFeatures.removeListener(_handleAccessibilityFeaturesChanged);
     super.dispose();
   }
 
@@ -146,6 +150,12 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
     properties.add(new DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
   }
 
+  void _handleAccessibilityFeaturesChanged() {
+    final ValueListenable<AccessibilityFeatures> accessibilityFeatures = SemanticsBinding.instance.accessibilityFeatures;
+    if (_ticker != null) {
+      _ticker.disableAnimations = accessibilityFeatures.value.disableAnimations;
+    }
+  }
 }
 
 /// Provides [Ticker] objects that are configured to only tick while the current
@@ -169,9 +179,11 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= new Set<_WidgetTicker>();
+    final ValueListenable<AccessibilityFeatures> accessibilityFeatures = SemanticsBinding.instance.accessibilityFeatures;
     final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this')
-      ..disableAnimations = SemanticsBinding.instance.accessibilityFeatures.disableAnimations;
+      ..disableAnimations = accessibilityFeatures.value.disableAnimations;
     _tickers.add(result);
+    accessibilityFeatures.addListener(_handleAccessibilityFeaturesChanged);
     return result;
   }
 
@@ -201,6 +213,8 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
       }
       return true;
     }());
+    final ValueListenable<AccessibilityFeatures> accessibilityFeatures = SemanticsBinding.instance.accessibilityFeatures;
+    accessibilityFeatures.removeListener(_handleAccessibilityFeaturesChanged);
     super.dispose();
   }
 
@@ -228,6 +242,14 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
     ));
   }
 
+  void _handleAccessibilityFeaturesChanged() {
+    final ValueListenable<AccessibilityFeatures> accessibilityFeatures = SemanticsBinding.instance.accessibilityFeatures;
+    if (_tickers != null) {
+      for (Ticker ticker in _tickers) {
+        ticker.disableAnimations = accessibilityFeatures.value.disableAnimations;
+      }
+    }
+  }
 }
 
 // This class should really be called _DisposingTicker or some such, but this

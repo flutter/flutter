@@ -23,7 +23,7 @@ class SemanticsBinding extends BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = new ValueNotifier<ui.AccessibilityFeatures>(ui.window.accessibilityFeatures);
   }
 
   /// Called when the platform accessibility features change.
@@ -31,7 +31,7 @@ class SemanticsBinding extends BindingBase {
   /// See [Window.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures.value = ui.window.accessibilityFeatures;
   }
 
   /// The currently active set of [AccessibilityFeatures].
@@ -41,6 +41,6 @@ class SemanticsBinding extends BindingBase {
   ///
   /// To listen to changes to accessibility features, create a
   /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
-  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
-  ui.AccessibilityFeatures _accessibilityFeatures;
+  ValueListenable<ui.AccessibilityFeatures> get accessibilityFeatures => _accessibilityFeatures;
+  ValueNotifier<ui.AccessibilityFeatures> _accessibilityFeatures;
 }
