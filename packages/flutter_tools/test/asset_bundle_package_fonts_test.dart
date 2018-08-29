@@ -12,10 +12,10 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/schema.dart';
 
 void main() {
   String fixPath(String path) {
@@ -100,23 +100,6 @@ $fontsSection
       ..writeAsStringSync(font);
   }
 
-  // TODO(dantup): This function exists in many tests, is there somewhere appropriate
-  // to put a single copy and call from tests that need it?
-  void writeSchemaFile(FileSystem filesystem, String schemaData) {
-    final String schemaPath = buildSchemaPath(filesystem);
-    final File schemaFile = filesystem.file(schemaPath);
-
-    final String schemaDir = buildSchemaDir(filesystem);
-
-    filesystem.directory(schemaDir).createSync(recursive: true);
-    filesystem.file(schemaFile).writeAsStringSync(schemaData);
-  }
-
-  void writeBasicSchemaFile() {
-    // Write schemaData otherwise pubspec.yaml file can't be loaded.
-      writeSchemaFile(fs, '{}');
-  }
-
   group('AssetBundle fonts from packages', () {
     FileSystem testFileSystem;
 
@@ -131,7 +114,7 @@ $fontsSection
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -147,7 +130,7 @@ $fontsSection
 
     testUsingContext('App font uses font file from package', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -175,7 +158,7 @@ $fontsSection
 
     testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -207,7 +190,7 @@ $fontsSection
 
     testUsingContext('App uses package font with own font file', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -240,7 +223,7 @@ $fontsSection
 
     testUsingContext('App uses package font with font file from another package', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
@@ -274,7 +257,7 @@ $fontsSection
 
     testUsingContext('App uses package font with properties and own font file', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -309,7 +292,7 @@ $fontsSection
 
     testUsingContext('App uses local font and package font with own font file.', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile();
+      writeBasicSchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
