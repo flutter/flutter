@@ -391,7 +391,7 @@ Information about project "Runner":
       manifestFile.writeAsStringSync(manifestString);
 
       // write schemaData otherwise pubspec.yaml file can't be loaded
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       await updateGeneratedXcodeProperties(
         project: await FlutterProject.fromPath('path/to/project'),

@@ -186,7 +186,7 @@ someOtherProperty: someOtherValue
       manifestFile.writeAsStringSync(manifest);
 
       // write schemaData otherwise pubspec.yaml file can't be loaded
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       try {
         updateLocalProperties(

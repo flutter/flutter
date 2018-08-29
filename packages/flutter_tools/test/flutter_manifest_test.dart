@@ -520,7 +520,7 @@ flutter:
         dynamic testMethod()) {
       testUsingContext(description,
               () async {
-            writeBasicSchemaFile(filesystem);
+            writeEmptySchemaFile(filesystem);
             testMethod();
       },
           overrides: <Type, Generator>{

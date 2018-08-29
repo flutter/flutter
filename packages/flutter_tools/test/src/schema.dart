@@ -3,7 +3,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 
 /// Writes a schemaData, required for pubspec.yaml to be loaded.
- void writeSchemaFile(FileSystem filesystem, String schemaData) {
+void writeSchemaFile(FileSystem filesystem, String schemaData) {
   final String schemaPath = buildSchemaPath(filesystem);
   final File schemaFile = filesystem.file(schemaPath);
 
@@ -14,6 +14,6 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 }
 
 /// Writes an empty schemaData. A schema file is required for pubspec.yaml to be loaded.
-void writeBasicSchemaFile(FileSystem filesystem) {
-    writeSchemaFile(filesystem, '{}');
+void writeEmptySchemaFile(FileSystem filesystem) {
+  writeSchemaFile(filesystem, '{}');
 }

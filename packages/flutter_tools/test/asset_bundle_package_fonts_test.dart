@@ -114,7 +114,7 @@ $fontsSection
 
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -130,7 +130,7 @@ $fontsSection
 
     testUsingContext('App font uses font file from package', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -158,7 +158,7 @@ $fontsSection
 
     testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -190,7 +190,7 @@ $fontsSection
 
     testUsingContext('App uses package font with own font file', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -223,7 +223,7 @@ $fontsSection
 
     testUsingContext('App uses package font with font file from another package', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
@@ -257,7 +257,7 @@ $fontsSection
 
     testUsingContext('App uses package font with properties and own font file', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -292,7 +292,7 @@ $fontsSection
 
     testUsingContext('App uses local font and package font with own font file.', () async {
       establishFlutterRoot();
-      writeBasicSchemaFile(fs);
+      writeEmptySchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
