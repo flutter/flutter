@@ -30,6 +30,10 @@ class AnalyzeCommand extends FlutterCommand {
         valueHelp: 'file',
         help: 'Also output the results to a file. This is useful with --watch '
               'if you want a file to always contain the latest results.');
+    argParser.addFlag('successful-if-correct',
+        negatable: false,
+        help: 'Exit successfully if the analyzer ran correctly, even if it'
+              'reported any issues.');
     argParser.addOption('dart-sdk',
         valueHelp: 'path-to-sdk',
         help: 'The path to the Dart SDK.',

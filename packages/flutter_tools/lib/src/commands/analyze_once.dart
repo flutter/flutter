@@ -147,10 +147,17 @@ class AnalyzeOnce extends AnalyzeBase {
     if (errors.isNotEmpty) {
       final int errorCount = errors.length;
       printStatus('');
+      String status;
       if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
+        status = '$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)';
       } else {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
+        status = '$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)';
+      }
+      if (argResults['successful-if-correct']) {
+        printStatus(status);
+        return;
+      } else {
+        throwToolExit(status);
       }
     }
 
