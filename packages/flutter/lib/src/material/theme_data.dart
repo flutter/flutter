@@ -174,7 +174,7 @@ class ThemeData extends Diagnosticable {
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
     // todo (sandrasandeep): change to color provided by Material Design team
-    cursorColor = const Color.fromRGBO(66, 133, 244, 1.0);
+    cursorColor = cursorColor ?? const Color.fromRGBO(66, 133, 244, 1.0);
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
