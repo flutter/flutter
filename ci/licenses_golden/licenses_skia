@@ -1,4 +1,4 @@
-Signature: a9d95a633c59d4d671161b5c6e77dd26
+Signature: 1d32492992cd05af3176966f60968758
 
 UNUSED LICENSES:
 
@@ -906,6 +906,7 @@ FILE: ../../../third_party/skia/src/compute/hs/gen/target_glsl.c
 FILE: ../../../third_party/skia/src/compute/hs/gen/target_opencl.c
 FILE: ../../../third_party/skia/src/compute/hs/vk/bench/main.c
 FILE: ../../../third_party/skia/src/compute/hs/vk/hs_glsl_macros.h
+FILE: ../../../third_party/skia/src/compute/hs/vk/hs_glsl_preamble.h
 FILE: ../../../third_party/skia/src/compute/hs/vk/hs_vk.c
 FILE: ../../../third_party/skia/src/compute/hs/vk/hs_vk.h
 FILE: ../../../third_party/skia/src/compute/hs/vk/hs_vk_target.h
