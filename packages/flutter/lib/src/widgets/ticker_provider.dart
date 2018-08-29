@@ -84,7 +84,6 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    final bool disableAnimations = MediaQuery.of(context).disableAnimations;
     assert(() {
       if (_ticker == null)
         return true;
@@ -96,7 +95,7 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
     }());
-    _ticker = new Ticker(onTick, debugLabel: 'created by $this', disableAnimations: disableAnimations);
+    _ticker = new Ticker(onTick, debugLabel: 'created by $this');
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
@@ -170,9 +169,8 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    final bool disableAnimations = MediaQuery.of(context).disableAnimations;
     _tickers ??= new Set<_WidgetTicker>();
-    final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this', disableAnimations: disableAnimations);
+    final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this');
     _tickers.add(result);
     return result;
   }
