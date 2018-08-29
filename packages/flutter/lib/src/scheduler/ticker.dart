@@ -59,7 +59,7 @@ class Ticker {
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
-  Ticker(this._onTick, { this.debugLabel, this.disableAnimations = false}) {
+  Ticker(this._onTick, { this.debugLabel }) {
     assert(() {
       _debugCreationStack = StackTrace.current;
       return true;
@@ -72,7 +72,7 @@ class Ticker {
   ///
   /// See also:
   ///   [AccessibilityFeatures.disableAnimations], for the setting this value comes from.
-  bool disableAnimations;
+  bool disableAnimations = false;
 
   /// Whether this ticker has been silenced.
   ///
@@ -279,6 +279,7 @@ class Ticker {
     assert(_startTime == null);
     assert(_animationId == null);
     assert((originalTicker._future == null) == (originalTicker._startTime == null), 'Cannot absorb Ticker after it has been disposed.');
+    disableAnimations = originalTicker.disableAnimations;
     if (originalTicker._future != null) {
       _future = originalTicker._future;
       _startTime = originalTicker._startTime;

@@ -4,9 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 
 import 'framework.dart';
-import 'media_query.dart';
 
 export 'package:flutter/scheduler.dart' show TickerProvider;
 
@@ -95,7 +95,8 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
     }());
-    _ticker = new Ticker(onTick, debugLabel: 'created by $this');
+    _ticker = new Ticker(onTick, debugLabel: 'created by $this')
+      ..disableAnimations = SemanticsBinding.instance.accessibilityFeatures.disableAnimations;
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
@@ -123,10 +124,8 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
 
   @override
   void didChangeDependencies() {
-    if (_ticker != null) {
+    if (_ticker != null)
       _ticker.muted = !TickerMode.of(context);
-      _ticker.disableAnimations = MediaQuery.of(context).disableAnimations;
-    }
     super.didChangeDependencies();
   }
 
@@ -170,7 +169,8 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
   @override
   Ticker createTicker(TickerCallback onTick) {
     _tickers ??= new Set<_WidgetTicker>();
-    final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this');
+    final _WidgetTicker result = new _WidgetTicker(onTick, this, debugLabel: 'created by $this')
+      ..disableAnimations = SemanticsBinding.instance.accessibilityFeatures.disableAnimations;
     _tickers.add(result);
     return result;
   }
@@ -207,11 +207,9 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
   @override
   void didChangeDependencies() {
     final bool muted = !TickerMode.of(context);
-    final bool disableAnimations = MediaQuery.of(context).disableAnimations;
     if (_tickers != null) {
       for (Ticker ticker in _tickers) {
         ticker.muted = muted;
-        ticker.disableAnimations = disableAnimations;
       }
     }
     super.didChangeDependencies();
@@ -237,7 +235,7 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
 // confusing. Instead we use the less precise but more anodyne "_WidgetTicker",
 // which attracts less attention.
 class _WidgetTicker extends Ticker {
-  _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel, bool disableAnimations = false}) : super(onTick, debugLabel: debugLabel, disableAnimations: disableAnimations);
+  _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel }) : super(onTick, debugLabel: debugLabel);
 
   final TickerProviderStateMixin _creator;
 

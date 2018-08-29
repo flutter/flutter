@@ -21,5 +21,5 @@ class TestVSync implements TickerProvider {
   final bool disableAnimations;
 
   @override
-  Ticker createTicker(TickerCallback onTick) => new Ticker(onTick, disableAnimations: disableAnimations);
+  Ticker createTicker(TickerCallback onTick) => new Ticker(onTick)..disableAnimations = disableAnimations;
 }
