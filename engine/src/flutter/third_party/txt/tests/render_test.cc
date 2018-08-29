@@ -28,7 +28,7 @@
 namespace txt {
 
 RenderTest::RenderTest()
-    : snapshots_(0), font_collection_(GetTestFontCollection()) {}
+    : snapshots_(0), font_collection_(txt::GetTestFontCollection()) {}
 
 RenderTest::~RenderTest() = default;
 
