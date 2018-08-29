@@ -18,6 +18,14 @@ import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
+  String fixPath(String path) {
+    // The in-memory file system is strict about slashes on Windows being the
+    // correct way so until https://github.com/google/file.dart/issues/112 is
+    // fixed we fix them here.
+    // TODO(dantup): Remove this function once the above issue is fixed and
+    // rolls into Flutter.
+    return path?.replaceAll('/', fs.path.separator);
+  }
   void writePubspecFile(String path, String name, {String fontsSection}) {
     if (fontsSection == null) {
       fontsSection = '';
@@ -29,7 +37,7 @@ $fontsSection
 ''';
     }
 
-    fs.file(path)
+    fs.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: $name
@@ -87,7 +95,7 @@ $fontsSection
   }
 
   void writeFontAsset(String path, String font) {
-    fs.file('$path$font')
+    fs.file(fixPath('$path$font'))
       ..createSync(recursive: true)
       ..writeAsStringSync(font);
   }
