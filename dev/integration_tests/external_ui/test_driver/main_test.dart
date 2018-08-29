@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 final RegExp calibrationRegExp = new RegExp('Flutter frame rate is (.*)fps');
 final RegExp statsRegExp = new RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');

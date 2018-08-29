@@ -77,15 +77,23 @@ void fail(String message) {
   throw new BuildFailedError(message);
 }
 
-void rm(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync();
+// Remove the given file or directory.
+void rm(FileSystemEntity entity, { bool recursive = false}) {
+  if (entity.existsSync()) {
+    // This should not be necessary, but it turns out that
+    // on Windows it's common for deletions to fail due to
+    // bogus (we think) "access denied" errors.
+    try {
+      entity.deleteSync(recursive: recursive);
+    } on FileSystemException catch (error) {
+      print('Failed to delete ${entity.path}: $error');
+    }
+  }
 }
 
 /// Remove recursively.
 void rmTree(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync(recursive: true);
+  rm(entity, recursive: true);
 }
 
 List<FileSystemEntity> ls(Directory directory) => directory.listSync();
@@ -228,7 +236,7 @@ Future<Process> startProcess(
   _runningProcesses.add(processInfo);
 
   process.exitCode.then((int exitCode) {
-    print('exitcode: $exitCode');
+    print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
   });
 
@@ -257,9 +265,10 @@ Future<int> exec(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
   final Completer<Null> stdoutDone = new Completer<Null>();
   final Completer<Null> stderrDone = new Completer<Null>();
@@ -280,7 +289,7 @@ Future<int> exec(
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
-    fail('Executable failed with exit code $exitCode.');
+    fail('Executable "$executable" failed with exit code $exitCode.');
 
   return exitCode;
 }
@@ -292,9 +301,10 @@ Future<String> eval(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
   final StringBuffer output = new StringBuffer();
   final Completer<Null> stdoutDone = new Completer<Null>();
@@ -317,14 +327,14 @@ Future<String> eval(
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
-    fail('Executable failed with exit code $exitCode.');
+    fail('Executable "$executable" failed with exit code $exitCode.');
 
   return output.toString().trimRight();
 }
 
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
@@ -335,7 +345,7 @@ Future<int> flutter(String command, {
 /// Runs a `flutter` command and returns the standard output as a string.
 Future<String> evalFlutter(String command, {
   List<String> options = const <String>[],
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
@@ -414,7 +424,7 @@ Future<Null> getFlutter(String revision) async {
   section('Get Flutter!');
 
   if (exists(flutterDirectory)) {
-    rmTree(flutterDirectory);
+    flutterDirectory.deleteSync(recursive: true);
   }
 
   await inDirectory(flutterDirectory.parent, () async {

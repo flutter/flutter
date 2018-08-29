@@ -11,8 +11,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -369,7 +369,7 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   String mockCompilerOutput) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
-  new Future<List<int>>(() {
+  scheduleMicrotask(() {
     streamController.add(utf8.encode(mockCompilerOutput));
   });
   final CompilerOutput output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);

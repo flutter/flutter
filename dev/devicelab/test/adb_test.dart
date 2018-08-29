@@ -4,10 +4,11 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/adb.dart';
+
+import 'common.dart';
 
 void main() {
   group('device', () {

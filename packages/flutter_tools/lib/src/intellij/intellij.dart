@@ -53,7 +53,7 @@ class IntelliJPlugins {
     final String jarPath = packageName.endsWith('.jar')
         ? fs.path.join(pluginsPath, packageName)
         : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
-    // TODO(danrubel) look for a better way to extract a single 2K file from the zip
+    // TODO(danrubel): look for a better way to extract a single 2K file from the zip
     // rather than reading the entire file into memory.
     try {
       final Archive archive =

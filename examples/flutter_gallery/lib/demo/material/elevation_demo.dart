@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+
+class ElevationDemo extends StatefulWidget {
+  static const String routeName = '/material/elevation';
+
+  @override
+  State<StatefulWidget> createState() => _ElevationDemoState();
+}
+
+class _ElevationDemoState extends State<ElevationDemo> {
+  bool _showElevation = true;
+
+  List<Widget> buildCards() {
+    const List<double> elevations = <double>[
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      8.0,
+      16.0,
+      24.0,
+    ];
+
+    return elevations.map((double elevation) {
+      return new Center(
+        child: new Card(
+          margin: const EdgeInsets.all(20.0),
+          elevation: _showElevation ? elevation : 0.0,
+          child: new SizedBox(
+            height: 100.0,
+            width: 100.0,
+            child: new Center(
+              child: new Text('${elevation.toStringAsFixed(0)} pt'),
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: const Text('Elevation'),
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() => _showElevation = !_showElevation);
+            },
+          )
+        ],
+      ),
+      body: new ListView(
+        children: buildCards(),
+      ),
+    );
+  }
+}

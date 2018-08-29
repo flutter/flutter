@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -59,7 +58,7 @@ void main() {
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
-      expect(device, const isInstanceOf<FlutterTesterDevice>());
+      expect(device, isInstanceOf<FlutterTesterDevice>());
       expect(device.id, 'flutter-tester');
     });
   });

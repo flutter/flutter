@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
@@ -19,6 +20,176 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scrollable.dart';
+
+/// A delegate that supplies children for [ListWheelScrollView].
+///
+/// [ListWheelScrollView] lazily constructs its children during layout to avoid
+/// creating more children than are visible through the [Viewport]. This
+/// delegate is responsible for providing children to [ListWheelScrollView]
+/// during that stage.
+///
+/// See also:
+///  * [ListWheelChildListDelegate], a delegate that supplies children using an
+///    explicit list.
+///  * [ListWheelChildLoopingListDelegate], a delegate that supplies infinite
+///    children by looping an explicit list.
+///  * [ListWheelChildBuilderDelegate], a delegate that supplies children using
+///    a builder callback.
+abstract class ListWheelChildDelegate {
+  /// Return the child at the given index. If the child at the given
+  /// index does not exist, return null.
+  Widget build(BuildContext context, int index);
+
+  /// Returns an estimate of the number of children this delegate will build.
+  int get estimatedChildCount;
+
+  /// Returns the true index for a child built at a given index. Defaults to
+  /// the given index, however if the delegate is [ListWheelChildLoopingListDelegate],
+  /// this value is the index of the true element that the delegate is looping to.
+  ///
+  ///
+  /// Example: [ListWheelChildLoopingListDelegate] is built by looping a list of
+  /// length 8. Then, trueIndexOf(10) = 2 and trueIndexOf(-5) = 3.
+  int trueIndexOf(int index) => index;
+
+  /// Called to check whether this and the old delegate are actually 'different',
+  /// so that the caller can decide to rebuild or not.
+  bool shouldRebuild(covariant ListWheelChildDelegate oldDelegate);
+}
+
+/// A delegate that supplies children for [ListWheelScrollView] using an
+/// explicit list.
+///
+/// [ListWheelScrollView] lazily constructs its children to avoid creating more
+/// children than are visible through the [Viewport]. This delegate provides
+/// children using an explicit list, which is convenient but reduces the benefit
+/// of building children lazily.
+///
+/// In general building all the widgets in advance is not efficient. It is
+/// better to create a delegate that builds them on demand using
+/// [ListWheelChildBuilderDelegate] or by subclassing [ListWheelChildDelegate]
+/// directly.
+///
+/// This class is provided for the cases where either the list of children is
+/// known well in advance (ideally the children are themselves compile-time
+/// constants, for example), and therefore will not be built each time the
+/// delegate itself is created, or the list is small, such that it's likely
+/// always visible (and thus there is nothing to be gained by building it on
+/// demand). For example, the body of a dialog box might fit both of these
+/// conditions.
+class ListWheelChildListDelegate extends ListWheelChildDelegate {
+  /// Constructs the delegate from a concrete list of children.
+  ListWheelChildListDelegate({@required this.children}) : assert(children != null);
+
+  /// The list containing all children that can be supplied.
+  final List<Widget> children;
+
+  @override
+  int get estimatedChildCount => children.length;
+
+  @override
+  Widget build(BuildContext context, int index) {
+    if (index < 0 || index >= children.length)
+      return null;
+    return children[index];
+  }
+
+  @override
+  bool shouldRebuild(covariant ListWheelChildListDelegate oldDelegate) {
+    return children != oldDelegate.children;
+  }
+}
+
+/// A delegate that supplies infinite children for [ListWheelScrollView] by
+/// looping an explicit list.
+///
+/// [ListWheelScrollView] lazily constructs its children to avoid creating more
+/// children than are visible through the [Viewport]. This delegate provides
+/// children using an explicit list, which is convenient but reduces the benefit
+/// of building children lazily.
+///
+/// In general building all the widgets in advance is not efficient. It is
+/// better to create a delegate that builds them on demand using
+/// [ListWheelChildBuilderDelegate] or by subclassing [ListWheelChildDelegate]
+/// directly.
+///
+/// This class is provided for the cases where either the list of children is
+/// known well in advance (ideally the children are themselves compile-time
+/// constants, for example), and therefore will not be built each time the
+/// delegate itself is created, or the list is small, such that it's likely
+/// always visible (and thus there is nothing to be gained by building it on
+/// demand). For example, the body of a dialog box might fit both of these
+/// conditions.
+class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
+  /// Constructs the delegate from a concrete list of children.
+  ListWheelChildLoopingListDelegate({@required this.children}) : assert(children != null);
+
+  /// The list containing all children that can be supplied.
+  final List<Widget> children;
+
+  @override
+  int get estimatedChildCount => null;
+
+  @override
+  int trueIndexOf(int index) => index % children.length;
+
+  @override
+  Widget build(BuildContext context, int index) {
+    if (children.isEmpty)
+      return null;
+    return children[index % children.length];
+  }
+
+  @override
+  bool shouldRebuild(covariant ListWheelChildLoopingListDelegate oldDelegate) {
+    return children != oldDelegate.children;
+  }
+}
+
+/// A delegate that supplies children for [ListWheelScrollView] using a builder
+/// callback.
+///
+/// [ListWheelScrollView] lazily constructs its children to avoid creating more
+/// children than are visible through the [Viewport]. This delegate provides
+/// children using an [IndexedWidgetBuilder] callback, so that the children do
+/// not have to be built until they are displayed.
+class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
+  /// Constructs the delegate from a builder callback.
+  ListWheelChildBuilderDelegate({
+    @required this.builder,
+    this.childCount,
+  }) : assert(builder != null);
+
+  /// Called lazily to build children.
+  final IndexedWidgetBuilder builder;
+
+  /// {@template flutter.widgets.wheelList.childCount}
+  /// If non-null, [childCount] is the maximum number of children that can be
+  /// provided, and children are available from 0 to [childCount] - 1.
+  ///
+  /// If null, then the lower and upper limit are not known. However the [builder]
+  /// must provide children for a contiguous segment. If the builder returns null
+  /// at some index, the segment terminates there.
+  /// {@endtemplate}
+  final int childCount;
+
+  @override
+  int get estimatedChildCount => childCount;
+
+  @override
+  Widget build(BuildContext context, int index) {
+    if (childCount == null)
+      return builder(context, index);
+    if (index < 0 || index >= childCount)
+      return null;
+    return builder(context, index);
+  }
+
+  @override
+  bool shouldRebuild(covariant ListWheelChildBuilderDelegate oldDelegate) {
+    return builder != oldDelegate.builder || childCount != oldDelegate.childCount;
+  }
+}
 
 /// A controller for scroll views whose items have the same size.
 ///
@@ -388,8 +559,9 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 /// The children are rendered as if rotating on a wheel instead of scrolling on
 /// a plane.
 class ListWheelScrollView extends StatefulWidget {
-  /// Creates a box in which children are scrolled on a wheel.
-  const ListWheelScrollView({
+  /// Constructs a list in which children are scrolled a wheel. Its children
+  /// are passed to a delegate and lazily built during layout.
+  ListWheelScrollView({
     Key key,
     this.controller,
     this.physics,
@@ -402,8 +574,43 @@ class ListWheelScrollView extends StatefulWidget {
     this.onSelectedItemChanged,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
-    @required this.children,
-  }) : assert(diameterRatio != null),
+    @required List<Widget> children,
+  }) : assert(children != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(perspective != null),
+       assert(perspective > 0),
+       assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+       assert(magnification > 0),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       assert(clipToSize != null),
+       assert(renderChildrenOutsideViewport != null),
+       assert(
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
+       ),
+       childDelegate = new ListWheelChildListDelegate(children: children),
+       super(key: key);
+
+  /// Constructs a list in which children are scrolled a wheel. Its children
+  /// are managed by a delegate and are lazily built during layout.
+  const ListWheelScrollView.useDelegate({
+    Key key,
+    this.controller,
+    this.physics,
+    this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
+    this.perspective = RenderListWheelViewport.defaultPerspective,
+    this.offAxisFraction = 0.0,
+    this.useMagnifier = false,
+    this.magnification = 1.0,
+    @required this.itemExtent,
+    this.onSelectedItemChanged,
+    this.clipToSize = true,
+    this.renderChildrenOutsideViewport = false,
+    @required this.childDelegate,
+  }) : assert(childDelegate != null),
+       assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective != null),
        assert(perspective > 0),
@@ -472,8 +679,8 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
-  /// List of children to scroll on top of the cylinder.
-  final List<Widget> children;
+  /// A delegate that helps lazily instantiating child.
+  final ListWheelChildDelegate childDelegate;
 
   @override
   _ListWheelScrollViewState createState() => new _ListWheelScrollViewState();
@@ -517,7 +724,8 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
           final int currentItemIndex = metrics.itemIndex;
           if (currentItemIndex != _lastReportedItemIndex) {
             _lastReportedItemIndex = currentItemIndex;
-            widget.onSelectedItemChanged(currentItemIndex);
+            final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);
+            widget.onSelectedItemChanged(trueIndex);
           }
         }
         return false;
@@ -537,7 +745,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
             clipToSize: widget.clipToSize,
             renderChildrenOutsideViewport: widget.renderChildrenOutsideViewport,
             offset: offset,
-            children: widget.children,
+            childDelegate: widget.childDelegate,
           );
         },
       ),
@@ -545,11 +753,159 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   }
 }
 
+/// Element that supports building children lazily for [ListWheelViewport].
+class ListWheelElement extends RenderObjectElement implements ListWheelChildManager {
+  /// Creates an element that lazily builds children for the given widget.
+  ListWheelElement(ListWheelViewport widget) : super(widget);
+
+  @override
+  ListWheelViewport get widget => super.widget;
+
+  @override
+  RenderListWheelViewport get renderObject => super.renderObject;
+
+  // We inflate widgets at two different times:
+  //  1. When we ourselves are told to rebuild (see performRebuild).
+  //  2. When our render object needs a new child (see createChild).
+  // In both cases, we cache the results of calling into our delegate to get the
+  // widget, so that if we do case 2 later, we don't call the builder again.
+  // Any time we do case 1, though, we reset the cache.
+
+  /// A cache of widgets so that we don't have to rebuild every time.
+  final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
+
+  /// The map containing all active child elements. SplayTreeMap is used so that
+  /// we have all elements ordered and iterable by their keys.
+  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+
+  @override
+  void update(ListWheelViewport newWidget) {
+    final ListWheelViewport oldWidget = widget;
+    super.update(newWidget);
+    final ListWheelChildDelegate newDelegate = newWidget.childDelegate;
+    final ListWheelChildDelegate oldDelegate = oldWidget.childDelegate;
+    if (newDelegate != oldDelegate &&
+        (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRebuild(oldDelegate)))
+      performRebuild();
+  }
+
+  @override
+  int get childCount => widget.childDelegate.estimatedChildCount;
+
+  @override
+  void performRebuild() {
+    _childWidgets.clear();
+    super.performRebuild();
+    if (_childElements.isEmpty)
+      return;
+
+    final int firstIndex = _childElements.firstKey();
+    final int lastIndex = _childElements.lastKey();
+
+    for (int index = firstIndex; index <= lastIndex; ++index) {
+      final Element newChild = updateChild(_childElements[index], retrieveWidget(index), index);
+      if (newChild != null) {
+        _childElements[index] = newChild;
+      } else {
+        _childElements.remove(index);
+      }
+    }
+  }
+
+  /// Asks the underlying delegate for a widget at the given index.
+  ///
+  /// Normally the builder is only called once for each index and the result
+  /// will be cached. However when the element is rebuilt, the cache will be
+  /// cleared.
+  Widget retrieveWidget(int index) {
+    return _childWidgets.putIfAbsent(index, () => widget.childDelegate.build(this, index));
+  }
+
+  @override
+  bool childExistsAt(int index) => retrieveWidget(index) != null;
+
+  @override
+  void createChild(int index, { @required RenderBox after }) {
+    owner.buildScope(this, () {
+      final bool insertFirst = after == null;
+      assert(insertFirst || _childElements[index - 1] != null);
+      final Element newChild =
+        updateChild(_childElements[index], retrieveWidget(index), index);
+      if (newChild != null) {
+        _childElements[index] = newChild;
+      } else {
+        _childElements.remove(index);
+      }
+    });
+  }
+
+  @override
+  void removeChild(RenderBox child) {
+    final int index = renderObject.indexOf(child);
+    owner.buildScope(this, () {
+      assert(_childElements.containsKey(index));
+      final Element result = updateChild(_childElements[index], null, index);
+      assert(result == null);
+      _childElements.remove(index);
+      assert(!_childElements.containsKey(index));
+    });
+  }
+
+  @override
+  Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    final ListWheelParentData oldParentData = child?.renderObject?.parentData;
+    final Element newChild = super.updateChild(child, newWidget, newSlot);
+    final ListWheelParentData newParentData = newChild?.renderObject?.parentData;
+    if (newParentData != null) {
+      newParentData.index = newSlot;
+      if (oldParentData != null)
+        newParentData.offset = oldParentData.offset;
+    }
+
+    return newChild;
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child, int slot) {
+    final RenderListWheelViewport renderObject = this.renderObject;
+    assert(renderObject.debugValidateChild(child));
+    renderObject.insert(child, after: _childElements[slot - 1]?.renderObject);
+    assert(renderObject == this.renderObject);
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    const String moveChildRenderObjectErrorMessage =
+        'Currently we maintain the list in contiguous increasing order, so '
+        'moving children around is not allowed.';
+    assert(false, moveChildRenderObjectErrorMessage);
+  }
+
+  @override
+  void removeChildRenderObject(RenderObject child) {
+    assert(child.parent == renderObject);
+    renderObject.remove(child);
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    _childElements.forEach((int key, Element child) {
+      visitor(child);
+    });
+  }
+
+  @override
+  void forgetChild(Element child) {
+    _childElements.remove(child.slot);
+  }
+
+}
+
 /// A viewport showing a subset of children on a wheel.
 ///
 /// Typically used with [ListWheelScrollView], this viewport is similar to
 /// [Viewport] in that it shows a subset of children in a scrollable based
-/// on the scrolling offset and the childrens' dimensions. But uses
+/// on the scrolling offset and the children's dimensions. But uses
 /// [RenderListWheelViewport] to display the children on a wheel.
 ///
 /// See also:
@@ -557,8 +913,8 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 ///  * [ListWheelScrollView], widget that combines this viewport with a scrollable.
 ///  * [RenderListWheelViewport], the render object that renders the children
 ///    on a wheel.
-class ListWheelViewport extends MultiChildRenderObjectWidget {
-  /// Create a viewport where children are rendered onto a wheel.
+class ListWheelViewport extends RenderObjectWidget {
+  /// Creates a viewport where children are rendered onto a wheel.
   ///
   /// The [diameterRatio] argument defaults to 2.0 and must not be null.
   ///
@@ -572,7 +928,7 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// not be null.
   ///
   /// The [offset] argument must be provided and must not be null.
-  ListWheelViewport({
+  const ListWheelViewport({
     Key key,
     this.diameterRatio = RenderListWheelViewport.defaultDiameterRatio,
     this.perspective = RenderListWheelViewport.defaultPerspective,
@@ -583,8 +939,9 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required this.offset,
-    List<Widget> children,
-  }) : assert(offset != null),
+    @required this.childDelegate,
+  }) : assert(childDelegate != null),
+       assert(offset != null),
        assert(diameterRatio != null),
        assert(diameterRatio > 0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(perspective != null),
@@ -598,7 +955,7 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
          !renderChildrenOutsideViewport || !clipToSize,
          RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
-       super(key: key, children: children);
+       super(key: key);
 
   /// {@macro flutter.rendering.wheelList.diameterRatio}
   final double diameterRatio;
@@ -628,9 +985,18 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// in the viewport.
   final ViewportOffset offset;
 
+  /// A delegate that lazily instantiates children.
+  final ListWheelChildDelegate childDelegate;
+
+  @override
+  ListWheelElement createElement() => new ListWheelElement(this);
+
   @override
   RenderListWheelViewport createRenderObject(BuildContext context) {
+    final ListWheelElement childManager = context;
     return new RenderListWheelViewport(
+      childManager: childManager,
+      offset: offset,
       diameterRatio: diameterRatio,
       perspective: perspective,
       offAxisFraction: offAxisFraction,
@@ -639,13 +1005,13 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
       itemExtent: itemExtent,
       clipToSize: clipToSize,
       renderChildrenOutsideViewport: renderChildrenOutsideViewport,
-      offset: offset,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderListWheelViewport renderObject) {
     renderObject
+      ..offset = offset
       ..diameterRatio = diameterRatio
       ..perspective = perspective
       ..offAxisFraction = offAxisFraction
@@ -653,7 +1019,6 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
       ..magnification = magnification
       ..itemExtent = itemExtent
       ..clipToSize = clipToSize
-      ..renderChildrenOutsideViewport = renderChildrenOutsideViewport
-      ..offset = offset;
+      ..renderChildrenOutsideViewport = renderChildrenOutsideViewport;
   }
 }

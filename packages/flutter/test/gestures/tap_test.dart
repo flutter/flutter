@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
+import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
 class TestGestureArenaMember extends GestureArenaMember {

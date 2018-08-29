@@ -399,7 +399,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (String deviceId in await discoverDevices()) {
-      // TODO: do a more meaningful connectivity check than just recording the ID
+      // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = new HealthCheckResult.success();
     }
     return results;

@@ -8,7 +8,8 @@ import 'dart:io';
 
 import 'package:process/process.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
+
+import 'common.dart';
 
 /// A mock that can be used to fake a process manager that runs commands
 /// and returns results.

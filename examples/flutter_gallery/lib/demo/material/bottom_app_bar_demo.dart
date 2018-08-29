@@ -372,7 +372,11 @@ class _DemoBottomAppBar extends StatelessWidget {
         },
       ),
       new IconButton(
-        icon: const Icon(Icons.more_vert),
+        icon: new Icon(
+          Theme.of(context).platform == TargetPlatform.iOS
+              ? Icons.more_horiz
+              : Icons.more_vert,
+        ),
         onPressed: () {
           Scaffold.of(context).showSnackBar(
             const SnackBar(content: Text('This is a dummy menu action.')),

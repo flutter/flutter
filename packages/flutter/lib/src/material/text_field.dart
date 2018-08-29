@@ -14,6 +14,7 @@ import 'feedback.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -71,9 +72,7 @@ class TextField extends StatefulWidget {
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
   /// the number of lines. By default, it is one, meaning this is a single-line
-  /// text field. [maxLines] must not be zero. If [maxLines] is not one, then
-  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard
-  /// type is used.
+  /// text field. [maxLines] must not be zero.
   ///
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
@@ -89,8 +88,8 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
-  /// [autocorrect] arguments must not be null.
+  /// The [textAlign], [autofocus], [obscureText], and [autocorrect] arguments
+  /// must not be null.
   ///
   /// See also:
   ///
@@ -101,8 +100,8 @@ class TextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration = const InputDecoration(),
-    TextInputType keyboardType = TextInputType.text,
-    this.textInputAction = TextInputAction.done,
+    TextInputType keyboardType,
+    this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
@@ -122,9 +121,7 @@ class TextField extends StatefulWidget {
     this.cursorColor,
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
-  }) : assert(keyboardType != null),
-       assert(textInputAction != null),
-       assert(textAlign != null),
+  }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
@@ -132,7 +129,7 @@ class TextField extends StatefulWidget {
        assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
-       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
   /// Controls the text being edited.
@@ -156,14 +153,14 @@ class TextField extends StatefulWidget {
 
   /// The type of keyboard to use for editing the text.
   ///
-  /// Defaults to [TextInputType.text]. Must not be null. If
-  /// [maxLines] is not one, then [keyboardType] is ignored, and the
-  /// [TextInputType.multiline] keyboard type is used.
+  /// Defaults to [TextInputType.text] if [maxLines] is one and
+  /// [TextInputType.multiline] otherwise.
   final TextInputType keyboardType;
 
   /// The type of action button to use for the keyboard.
   ///
-  /// Defaults to [TextInputAction.done]. Must not be null.
+  /// Defaults to [TextInputAction.newline] if [keyboardType] is
+  /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
   final TextInputAction textInputAction;
 
   /// Configures how the platform keyboard will select an uppercase or
@@ -383,6 +380,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration.counterText == null;
 
   InputDecoration _getEffectiveDecoration() {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(Theme.of(context).inputDecorationTheme)
       .copyWith(
@@ -392,7 +390,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (!needsCounter)
       return effectiveDecoration;
 
-    final String counterText = '${_effectiveController.value.text.runes.length}/${widget.maxLength}';
+    final int currentLength = _effectiveController.value.text.runes.length;
+    final String counterText = '$currentLength/${widget.maxLength}';
+    final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
+    final String semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
@@ -400,9 +401,13 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         counterStyle: effectiveDecoration.errorStyle
           ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
         counterText: counterText,
+        semanticCounterText: semanticCounterText,
       );
     }
-    return effectiveDecoration.copyWith(counterText: counterText);
+    return effectiveDecoration.copyWith(
+      counterText: counterText,
+      semanticCounterText: semanticCounterText,
+    );
   }
 
   @override

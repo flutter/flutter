@@ -358,7 +358,7 @@ void main() {
         home: new RefreshIndicator(
           onRefresh: () {
             refreshCalled = true;
-            // Missing a returned Future value here.
+            return null; // Missing a returned Future value here, should cause framework to throw.
           },
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),

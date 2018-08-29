@@ -457,7 +457,7 @@ void main() {
     await tester.tap(find.text('B'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(box, paints..circle(x: 200.0)..circle(x: 600.0));
+    expect(box, paints..circle(x: 200.0)..translate(x: 400.0)..circle(x: 200.0));
 
     // Now we flip the directionality and verify that the circles switch positions.
     await tester.pumpWidget(
@@ -478,12 +478,23 @@ void main() {
       ),
     );
 
-    expect(box, paints..circle(x: 600.0)..circle(x: 200.0));
+    expect(box, paints..translate()..save()..translate(x: 400.0)..circle(x: 200.0)..restore()..circle(x: 200.0));
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
-    expect(box, paints..circle(x: 600.0)..circle(x: 200.0)..circle(x: 600.0));
+    expect(
+        box,
+        paints
+          ..translate(x: 0.0, y: 0.0)
+          ..save()
+          ..translate(x: 400.0)
+          ..circle(x: 200.0)
+          ..restore()
+          ..circle(x: 200.0)
+          ..translate(x: 400.0)
+          ..circle(x: 200.0)
+    );
   });
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
@@ -711,6 +722,64 @@ void main() {
     expect(find.text('item 1'), findsOneWidget);
     expect(find.text('item 2'), findsNothing);
     expect(find.text('item 3'), findsNothing);
+  });
+
+  testWidgets('BottomNavigationBar change backgroundColor test', (WidgetTester tester) async {
+    // Regression test for: https://github.com/flutter/flutter/issues/19653
+
+    Color _backgroundColor = Colors.red;
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Scaffold(
+              body: new Center(
+                child: new RaisedButton(
+                  child: const Text('green'),
+                  onPressed: () {
+                    setState(() {
+                      _backgroundColor = Colors.green;
+                    });
+                  },
+                ),
+              ),
+              bottomNavigationBar: new BottomNavigationBar(
+                type: BottomNavigationBarType.shifting,
+                items: <BottomNavigationBarItem>[
+                  new BottomNavigationBarItem(
+                    title: const Text('Page 1'),
+                    backgroundColor: _backgroundColor,
+                    icon: const Icon(Icons.dashboard),
+                  ),
+                  new BottomNavigationBarItem(
+                    title: const Text('Page 2'),
+                    backgroundColor: _backgroundColor,
+                    icon: const Icon(Icons.menu),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Finder backgroundMaterial = find.descendant(
+      of: find.byType(BottomNavigationBar),
+      matching: find.byWidgetPredicate((Widget w) {
+        if (w is Material)
+          return w.type == MaterialType.canvas;
+        return false;
+      }),
+    );
+
+    expect(_backgroundColor, Colors.red);
+    expect(tester.widget<Material>(backgroundMaterial).color, Colors.red);
+    await tester.tap(find.text('green'));
+    await tester.pumpAndSettle();
+    expect(_backgroundColor, Colors.green);
+    expect(tester.widget<Material>(backgroundMaterial).color, Colors.green);
   });
 }
 
