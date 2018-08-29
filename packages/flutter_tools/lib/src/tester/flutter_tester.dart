@@ -127,7 +127,8 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath = bundle.defaultApplicationKernelPath;
+    final String applicationKernelFilePath =
+        fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill');
     await bundle.build(
       mainPath: mainPath,
       assetDirPath: assetDirPath,
