@@ -15,6 +15,5 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 
 /// Writes an empty schemaData. A schema file is required for pubspec.yaml to be loaded.
 void writeBasicSchemaFile(FileSystem filesystem) {
-  // Write schemaData otherwise pubspec.yaml file can't be loaded.
     writeSchemaFile(filesystem, '{}');
 }
