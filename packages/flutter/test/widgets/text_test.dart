@@ -218,7 +218,7 @@ void main() {
             new TestSemantics(
               rect: new Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
-              textDirection: TextDirection.rtl, // Still RTL.
+              textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
               ],
@@ -231,15 +231,15 @@ void main() {
             new TestSemantics(
               rect: new Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
               label: 'YOB',
-              textDirection: TextDirection.rtl, // in the last string we switched to RTL using RLE.
+              textDirection: TextDirection.rtl, // Still RTL.
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
               ],
             ),
             new TestSemantics(
               rect: new Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
-              label: ' good bye', // Begin as RTL but pop to LTR.
-              textDirection: TextDirection.rtl,
+              label: ' good bye',
+              textDirection: TextDirection.rtl, // Begin as RTL but pop to LTR.
             ),
           ],
         ),
