@@ -94,14 +94,44 @@ TEST(MatrixDecomposition, Combination) {
   ASSERT_FLOAT_EQ(cos(rotation * 0.5), decomposition.rotation().fData[3]);
 }
 
-TEST(MatrixDecomposition, DISABLED_ScaleFloatError) {
-  SkMatrix44 matrix = SkMatrix44::I();
+TEST(MatrixDecomposition, ScaleFloatError) {
+  for (float scale = 0.0001f; scale < 2.0f; scale += 0.000001f) {
+    SkMatrix44 matrix = SkMatrix44::I();
+    matrix.setScale(scale, scale, 1.0f);
 
+    flow::MatrixDecomposition decomposition3(matrix);
+    ASSERT_TRUE(decomposition3.IsValid());
+
+    ASSERT_FLOAT_EQ(scale, decomposition3.scale().fX);
+    ASSERT_FLOAT_EQ(scale, decomposition3.scale().fY);
+    ASSERT_FLOAT_EQ(1.f, decomposition3.scale().fZ);
+    ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[0]);
+    ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
+    ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
+  }
+
+  SkMatrix44 matrix = SkMatrix44::I();
   const auto scale = 1.7734375f;
   matrix.setScale(scale, scale, 1.f);
 
+  // Bug upper bound (empirical)
+  const auto scale2 = 1.773437559603f;
+  SkMatrix44 matrix2 = SkMatrix44::I();
+  matrix2.setScale(scale2, scale2, 1.f);
+
+  // Bug lower bound (empirical)
+  const auto scale3 = 1.7734374403954f;
+  SkMatrix44 matrix3 = SkMatrix44::I();
+  matrix3.setScale(scale3, scale3, 1.f);
+
   flow::MatrixDecomposition decomposition(matrix);
   ASSERT_TRUE(decomposition.IsValid());
+
+  flow::MatrixDecomposition decomposition2(matrix2);
+  ASSERT_TRUE(decomposition2.IsValid());
+
+  flow::MatrixDecomposition decomposition3(matrix3);
+  ASSERT_TRUE(decomposition3.IsValid());
 
   ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
   ASSERT_FLOAT_EQ(scale, decomposition.scale().fY);
@@ -109,4 +139,18 @@ TEST(MatrixDecomposition, DISABLED_ScaleFloatError) {
   ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
   ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
   ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[2]);
+
+  ASSERT_FLOAT_EQ(scale2, decomposition2.scale().fX);
+  ASSERT_FLOAT_EQ(scale2, decomposition2.scale().fY);
+  ASSERT_FLOAT_EQ(1.f, decomposition2.scale().fZ);
+  ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[0]);
+  ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[1]);
+  ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[2]);
+
+  ASSERT_FLOAT_EQ(scale3, decomposition3.scale().fX);
+  ASSERT_FLOAT_EQ(scale3, decomposition3.scale().fY);
+  ASSERT_FLOAT_EQ(1.f, decomposition3.scale().fZ);
+  ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[0]);
+  ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
+  ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
 }
