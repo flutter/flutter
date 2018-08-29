@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
-import 'src/schema.dart';
+import 'src/pubspec_schema.dart';
 
 void main() {
   void writePubspecFile(String path, String name, {List<String> assets}) {
