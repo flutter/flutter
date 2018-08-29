@@ -67,8 +67,10 @@ class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
 
 class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
   /// Creates a widget that isolates repaints.
-  const RepaintBoundaryWithDebugPaint({Key key, Widget child})
-      : super(key: key, child: child);
+  const RepaintBoundaryWithDebugPaint({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
 
   @override
   RenderRepaintBoundary createRenderObject(BuildContext context) {
