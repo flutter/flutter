@@ -59,7 +59,7 @@ class Ticker {
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
-  Ticker(this._onTick, { this.debugLabel }) {
+  Ticker(this._onTick, { this.debugLabel, this.disableAnimations = false}) {
     assert(() {
       _debugCreationStack = StackTrace.current;
       return true;
@@ -67,6 +67,12 @@ class Ticker {
   }
 
   TickerFuture _future;
+
+  /// Whether the platform is requesting that animations be disabled.
+  ///
+  /// See also:
+  ///   [AccessibilityFeatures.disableAnimations], for the setting this value comes from.
+  bool disableAnimations;
 
   /// Whether this ticker has been silenced.
   ///
