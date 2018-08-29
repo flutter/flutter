@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  /*
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     String fieldValue;
@@ -392,7 +391,6 @@ void main() {
     expect(controller2.text, equals('Xyzzy'));
   });
 
-  */
   testWidgets('No crash when a TextFormField is removed from the tree', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     String fieldValue;

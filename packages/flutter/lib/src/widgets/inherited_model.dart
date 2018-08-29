@@ -8,11 +8,15 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// An [InheritedWidget] that's intended to be used as the base class for data
-/// models which are scoped to a widget tree.
+/// An [InheritedWidget] that's intended to be used as the base class for
+/// models whose dependents may only depend on one part or "aspect" of the
+/// overall model.
 ///
 /// An inherited widget's dependents are unconditionally rebuilt when the
 /// inherited widget changes per [InheritedWidget.updateShouldNotify].
+/// This widget is similar except that dependents aren't rebuilt
+/// unconditionally.
+///
 /// Widgets that depend on an [InheritedModel] qualify their dependence
 /// with a value that indicates what "aspect" of the model they depend
 /// on. When the model is rebuilt, dependents will also be rebuilt, but
@@ -38,7 +42,7 @@ import 'framework.dart';
 ///
 /// Calling `MyModel.of(context, 'foo')` means that `context` should only
 /// be rebuilt when the `foo` aspect of `MyModel` changes. If the aspect
-/// is null, then the the model supports all aspects.
+/// is null, then the model supports all aspects.
 ///
 /// When the inherited model is rebuilt the [updateShouldNotify] and
 /// [updateShouldNotifyDependent] methods are used to decide what

@@ -1705,7 +1705,7 @@ class _InactiveElements {
     try {
       elements.reversed.forEach(_unmount);
     } finally {
-       assert(_elements.isEmpty);
+      assert(_elements.isEmpty);
       _locked = false;
     }
   }
@@ -1870,15 +1870,17 @@ abstract class BuildContext {
   /// render object is usually short.
   Size get size;
 
-  /// Registers this build context with [ancestor] such that when that when
+  /// Registers this build context with [ancestor] such that when
   /// [ancestor]'s widget changes this build context is rebuilt.
+  ///
+  /// Returns `ancestor.widget`.
   ///
   /// This method is rarely called directly. Most applications should use
   /// [inheritFromWidgetOfExactType], which calls this method after finding
   /// the appropriate [InheritedElement] ancestor.
   ///
   /// All of the qualifications about when [inheritFromWidgetOfExactType] can
-  /// be called, apply to this method as well.
+  /// be called apply to this method as well.
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
 
   /// Obtains the nearest widget of the given type, which must be the type of a
@@ -1892,7 +1894,7 @@ abstract class BuildContext {
   ///
   /// This method should not be called from widget constructors or from
   /// [State.initState] methods, because those methods would not get called
-  /// again if the inherited value was to change. To ensure that the widget
+  /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
   /// from [State.didChangeDependencies].
@@ -4100,6 +4102,8 @@ class InheritedElement extends ProxyElement {
   /// so that they can selectively rebuild dependents in
   /// [notifyDependents].
   ///
+  /// This method is typically only called in overrides of [updateDependencies].
+  ///
   /// See also:
   ///
   ///  * [updateDependencies], which is called each time a dependency is
@@ -4108,6 +4112,8 @@ class InheritedElement extends ProxyElement {
   ///    element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
   ///    dependencies value to decide if the dependent needs to be rebuilt.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
   @protected
   Object getDependencies(Element dependent) {
     return _dependents[dependent];
@@ -4117,11 +4123,13 @@ class InheritedElement extends ProxyElement {
   ///
   /// Each dependent element is mapped to a single object value
   /// which represents how the element depends on this
-  /// [InheritedElement]. This value is null by default and by default
-  /// dependent elements are rebuilt unconditionally.
+  /// [InheritedElement]. The [updateDependencies] method sets this value to
+  /// null by default so that dependent elements are rebuilt unconditionally.
   ///
   /// Subclasses can manage these values with [updateDependencies]
   /// so that they can selectively rebuild dependents in [notifyDependents].
+  ///
+  /// This method is typically only called in overrides of [updateDependencies].
   ///
   /// See also:
   ///
@@ -4131,6 +4139,8 @@ class InheritedElement extends ProxyElement {
   ///    element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
   ///    [getDependencies] value to decide if the dependent needs to be rebuilt.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
   @protected
   void setDependencies(Element dependent, Object value) {
     _dependents[dependent] = value;
@@ -4143,7 +4153,10 @@ class InheritedElement extends ProxyElement {
   /// [getDependencies].
   ///
   /// By default this method sets the inherited dependencies for [dependent]
-  /// to null. Subclasses can manage their own dependencies values so that they
+  /// to null. This only serves to record an unconditional dependency on
+  /// [dependent].
+  ///
+  /// Subclasses can manage their own dependencies values so that they
   /// can selectively rebuild dependents in [notifyDependents].
   ///
   /// See also:
@@ -4153,6 +4166,8 @@ class InheritedElement extends ProxyElement {
   ///  * [setDependencies], which sets the value for a dependent element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
   ///    dependencies value to decide if the dependent needs to be rebuilt.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
   @protected
   void updateDependencies(Element dependent, Object aspect) {
     setDependencies(dependent, null);
@@ -4164,6 +4179,16 @@ class InheritedElement extends ProxyElement {
   ///
   /// Subclasses can override this method to selectively call
   /// [didChangeDependencies] based on the value of [getDependencies].
+  ///
+  /// See also:
+  ///
+  ///  * [updateDependencies], which is called each time a dependency is
+  ///    created with [inheritFromWidgetOfExactType].
+  ///  * [getDependencies], which returns the current value for a dependent
+  ///    element.
+  ///  * [setDependencies], which sets the value for a dependent element.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
   @protected
   void notifyDependent(covariant InheritedWidget oldWidget, Element dependent) {
     dependent.didChangeDependencies();
