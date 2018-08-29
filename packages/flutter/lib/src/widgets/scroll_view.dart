@@ -51,6 +51,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If the [primary] argument is true, the [controller] must be null.
   ScrollView({ // ignore: prefer_const_constructors_in_immutables
+               // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
