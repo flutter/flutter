@@ -5,12 +5,12 @@
 import 'dart:ui' as ui show AccessibilityFeatures, window;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
+export 'dart:ui' show AccessibilityFeatures;
 
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(jonahwilliams): move the remaining semantic related bindings here.
-class SemanticsBinding extends BindingBase with ServicesBinding {
+class SemanticsBinding extends BindingBase {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory SemanticsBinding._() => null;
@@ -23,7 +23,7 @@ class SemanticsBinding extends BindingBase with ServicesBinding {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures = new ValueNotifier<ui.AccessibilityFeatures>(ui.window.accessibilityFeatures);
   }
 
   /// Called when the platform accessibility features change.
@@ -31,7 +31,7 @@ class SemanticsBinding extends BindingBase with ServicesBinding {
   /// See [Window.onAccessibilityFeaturesChanged].
   @protected
   void handleAccessibilityFeaturesChanged() {
-    _accessibilityFeatures = ui.window.accessibilityFeatures;
+    _accessibilityFeatures.value = ui.window.accessibilityFeatures;
   }
 
   /// The currently active set of [AccessibilityFeatures].
@@ -41,9 +41,6 @@ class SemanticsBinding extends BindingBase with ServicesBinding {
   ///
   /// To listen to changes to accessibility features, create a
   /// [WidgetsBindingObserver] and listen to [didChangeAccessibilityFeatures].
-  ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
-  ui.AccessibilityFeatures _accessibilityFeatures;
-
-  /// Whether the device is requesting that animations be disabled.
-  bool get disableAnimations => accessibilityFeatures.disableAnimations;
+  ValueListenable<ui.AccessibilityFeatures> get accessibilityFeatures => _accessibilityFeatures;
+  ValueNotifier<ui.AccessibilityFeatures> _accessibilityFeatures;
 }
