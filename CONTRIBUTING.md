@@ -129,7 +129,7 @@ which provides flutter-specific extensions on top of [package:test](https://pub.
 option to start the test in a paused state and wait for connection from a debugger. This option lets you
 set breakpoints before the test runs.
 
-To run all the tests for the entire Flutter repository, the same way that Cirrus runs them, run `dart dev/bots/test.dart`.
+To run analysis and all the tests for the entire Flutter repository, the same way that Cirrus runs them, run `dart dev/bots/test.dart` and `dart dev/bots/analyze.dart`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you
 can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
