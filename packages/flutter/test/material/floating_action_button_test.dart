@@ -64,11 +64,11 @@ void main() {
       ),
     );
 
-    expect(find.byType(Text), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPressAt(_rightEdgeOfFab(tester));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   // Regression test for: https://github.com/flutter/flutter/pull/21084
@@ -84,11 +84,11 @@ void main() {
       ),
     );
 
-    expect(find.byType(Text), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPressAt(_rightEdgeOfFab(tester));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
@@ -103,10 +103,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Text), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
