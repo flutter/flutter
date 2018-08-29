@@ -10,7 +10,7 @@ void writeSchemaFile(FileSystem filesystem, String schemaData) {
   final String schemaDir = buildSchemaDir(filesystem);
 
   filesystem.directory(schemaDir).createSync(recursive: true);
-  filesystem.file(schemaFile).writeAsStringSync(schemaData);
+  schemaFile.writeAsStringSync(schemaData);
 }
 
 /// Writes an empty schemaData. A schema file is required for pubspec.yaml to be loaded.
