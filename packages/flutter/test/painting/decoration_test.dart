@@ -352,8 +352,8 @@ void main() {
     for (double scale = 1.0; scale <= 4.0; scale += 1.0) {
       final TestCanvas canvas = new TestCanvas(<Invocation>[]);
 
-      final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
-      final ui.Image image = TestImage();
+      final Rect outputRect = new Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      final ui.Image image = new TestImage();
 
       paintImage(
         canvas: canvas,
@@ -381,7 +381,7 @@ void main() {
       // Image should be scaled down (divided by scale)
       // and be positioned in the bottom right of the outputRect
       final Size expectedTileSize = imageSize / scale;
-      final Rect expectedTileRect = Rect.fromPoints(
+      final Rect expectedTileRect = new Rect.fromPoints(
         outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
         outputRect.bottomRight,
       );
@@ -396,8 +396,8 @@ void main() {
       final TestCanvas canvas = new TestCanvas(<Invocation>[]);
 
       // container size > scaled image size
-      final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
-      final ui.Image image = TestImage();
+      final Rect outputRect = new Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      final ui.Image image = new TestImage();
 
       paintImage(
         canvas: canvas,
@@ -425,7 +425,7 @@ void main() {
       // Image should be scaled down (divided by scale)
       // and be positioned in the bottom right of the outputRect
       final Size expectedTileSize = imageSize / scale;
-      final Rect expectedTileRect = Rect.fromPoints(
+      final Rect expectedTileRect = new Rect.fromPoints(
         outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
         outputRect.bottomRight,
       );
@@ -439,8 +439,8 @@ void main() {
     final TestCanvas canvas = new TestCanvas(<Invocation>[]);
 
     // container height (20 px) < scaled image height (50 px)
-    final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
-    final ui.Image image = TestImage();
+    final Rect outputRect = new Rect.fromLTWH(30.0, 30.0, 250.0, 20.0);
+    final ui.Image image = new TestImage();
 
     paintImage(
       canvas: canvas,
@@ -468,7 +468,7 @@ void main() {
     // Image should be scaled down to fit in hejght
     // and be positioned in the bottom right of the outputRect
     const Size expectedTileSize = Size(20.0, 20.0);
-    final Rect expectedTileRect = Rect.fromPoints(
+    final Rect expectedTileRect = new Rect.fromPoints(
       outputRect.bottomRight.translate(-expectedTileSize.width, -expectedTileSize.height),
       outputRect.bottomRight,
     );
@@ -478,7 +478,7 @@ void main() {
   });
 
   test('paintImage boxFit, scale and alignment test', () {
-    final List<BoxFit> boxFits = <BoxFit>[
+    const List<BoxFit> boxFits = <BoxFit>[
       BoxFit.contain,
       BoxFit.cover,
       BoxFit.fitWidth,
@@ -491,8 +491,8 @@ void main() {
     for(BoxFit boxFit in boxFits) {
       final TestCanvas canvas = new TestCanvas(<Invocation>[]);
 
-      final Rect outputRect = Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
-      final ui.Image image = TestImage();
+      final Rect outputRect = new Rect.fromLTWH(30.0, 30.0, 250.0, 250.0);
+      final ui.Image image = new TestImage();
 
       paintImage(
         canvas: canvas,
