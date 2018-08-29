@@ -291,7 +291,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// shows a divider placed between the two menu items.)
 ///
 /// ```dart
-/// new PopupMenuButton<Commands>(
+/// PopupMenuButton<Commands>(
 ///   onSelected: (Commands result) {
 ///     switch (result) {
 ///       case Commands.heroAndScholar:
@@ -304,7 +304,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 ///     }
 ///   },
 ///   itemBuilder: (BuildContext context) => <PopupMenuEntry<Commands>>[
-///     new CheckedPopupMenuItem<Commands>(
+///     CheckedPopupMenuItem<Commands>(
 ///       checked: _heroAndScholar,
 ///       value: Commands.heroAndScholar,
 ///       child: const Text('Hero and scholar'),
@@ -774,7 +774,7 @@ typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 ///
 /// // This menu button widget updates a _selection field (of type WhyFarther,
 /// // not shown here).
-/// new PopupMenuButton<WhyFarther>(
+/// PopupMenuButton<WhyFarther>(
 ///   onSelected: (WhyFarther result) { setState(() { _selection = result; }); },
 ///   itemBuilder: (BuildContext context) => <PopupMenuEntry<WhyFarther>>[
 ///     const PopupMenuItem<WhyFarther>(

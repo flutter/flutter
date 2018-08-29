@@ -167,11 +167,11 @@ class DefaultTextStyle extends InheritedWidget {
 /// ## Sample code
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
-///   style: new TextStyle(fontWeight: FontWeight.bold),
+///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 ///
@@ -331,7 +331,7 @@ class Text extends StatelessWidget {
   /// text value:
   ///
   /// ```dart
-  /// new Text(r'$$', semanticsLabel: 'Double dollars')
+  /// Text(r'$$', semanticsLabel: 'Double dollars')
   ///
   /// ```
   final String semanticsLabel;

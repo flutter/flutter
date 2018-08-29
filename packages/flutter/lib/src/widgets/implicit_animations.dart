@@ -1023,7 +1023,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// ```dart
 /// class LogoFade extends StatefulWidget {
 ///   @override
-///   createState() => new LogoFadeState();
+///   createState() => LogoFadeState();
 /// }
 ///
 /// class LogoFadeState extends State<LogoFade> {
@@ -1035,16 +1035,16 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Column(
+///     return Column(
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: [
-///         new AnimatedOpacity(
+///         AnimatedOpacity(
 ///           opacity: opacityLevel,
-///           duration: new Duration(seconds: 3),
-///           child: new FlutterLogo(),
+///           duration: Duration(seconds: 3),
+///           child: FlutterLogo(),
 ///         ),
-///         new RaisedButton(
-///           child: new Text('Fade Logo'),
+///         RaisedButton(
+///           child: Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
 ///         ),
 ///       ],

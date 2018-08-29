@@ -37,7 +37,7 @@ import 'framework.dart';
 ///
 /// ```java
 ///   public static void registerWith(Registrar registrar) {
-///     registrar.platformViewRegistry().registerViewFactory("webview", new WebViewFactory(registrar.messenger()));
+///     registrar.platformViewRegistry().registerViewFactory("webview", WebViewFactory(registrar.messenger()));
 ///   }
 /// ```
 ///

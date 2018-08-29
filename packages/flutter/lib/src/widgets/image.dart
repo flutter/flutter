@@ -286,7 +286,7 @@ class Image extends StatefulWidget {
   /// render the `images/2x/cat.png` file:
   ///
   /// ```dart
-  /// new Image.asset('images/cat.png')
+  /// Image.asset('images/cat.png')
   /// ```
   ///
   /// This corresponds to the file that is in the project's `images/2x/`
@@ -311,7 +311,7 @@ class Image extends StatefulWidget {
   /// Then to display the image, use:
   ///
   /// ```dart
-  /// new Image.asset('icons/heart.png', package: 'my_icons')
+  /// Image.asset('icons/heart.png', package: 'my_icons')
   /// ```
   ///
   /// Assets used by the package itself should also be displayed using the

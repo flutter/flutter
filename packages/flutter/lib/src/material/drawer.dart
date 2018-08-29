@@ -56,9 +56,9 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// a drawer item might close the drawer when tapped:
 ///
 /// ```dart
-/// new ListTile(
-///   leading: new Icon(Icons.change_history),
-///   title: new Text('Change history'),
+/// ListTile(
+///   leading: Icon(Icons.change_history),
+///   title: Text('Change history'),
 ///   onTap: () {
 ///     // change app state...
 ///     Navigator.pop(context); // close the drawer

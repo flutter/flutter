@@ -348,16 +348,16 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// set by a selector elsewhere in the UI.
 ///
 /// ```dart
-/// new StreamBuilder<int>(
+/// StreamBuilder<int>(
 ///   stream: _lot?.bids, // a Stream<int> or null
 ///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
 ///     if (snapshot.hasError)
-///       return new Text('Error: ${snapshot.error}');
+///       return Text('Error: ${snapshot.error}');
 ///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return new Text('Select lot');
-///       case ConnectionState.waiting: return new Text('Awaiting bids...');
-///       case ConnectionState.active: return new Text('\$${snapshot.data}');
-///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
+///       case ConnectionState.none: return Text('Select lot');
+///       case ConnectionState.waiting: return Text('Awaiting bids...');
+///       case ConnectionState.active: return Text('\$${snapshot.data}');
+///       case ConnectionState.done: return Text('\$${snapshot.data} (closed)');
 ///     }
 ///     return null; // unreachable
 ///   },
@@ -479,19 +479,19 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `_calculation` field is set by pressing a button elsewhere in the UI.
 ///
 /// ```dart
-/// new FutureBuilder<String>(
+/// FutureBuilder<String>(
 ///   future: _calculation, // a previously-obtained Future<String> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
 ///       case ConnectionState.none:
-///         return new Text('Press button to start.');
+///         return Text('Press button to start.');
 ///       case ConnectionState.active:
 ///       case ConnectionState.waiting:
-///         return new Text('Awaiting result...');
+///         return Text('Awaiting result...');
 ///       case ConnectionState.done:
 ///         if (snapshot.hasError)
-///           return new Text('Error: ${snapshot.error}');
-///         return new Text('Result: ${snapshot.data}');
+///           return Text('Error: ${snapshot.error}');
+///         return Text('Result: ${snapshot.data}');
 ///     }
 ///     return null; // unreachable
 ///   },
