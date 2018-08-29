@@ -50,7 +50,7 @@ class AndroidView extends StatefulWidget {
   ///
   /// The `viewType`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
-  AndroidView({
+  AndroidView({ // ignore: prefer_const_constructors_in_immutables
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
