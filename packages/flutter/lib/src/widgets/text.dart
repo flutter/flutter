@@ -184,11 +184,11 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// ```dart
 /// const Text.rich(
-///   const TextSpan(
+///   TextSpan(
 ///     text: 'Hello', // default text style
-///     children: const <TextSpan>[
-///       const TextSpan(text: ' beautiful ', style: const TextStyle(fontStyle: FontStyle.italic)),
-///       const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
+///     children: <TextSpan>[
+///       TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
+///       TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
 ///     ],
 ///   ),
 /// )

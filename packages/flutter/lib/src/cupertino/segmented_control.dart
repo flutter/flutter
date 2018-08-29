@@ -135,8 +135,8 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   ///
   /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
   ///   final Map<int, Widget> children = const {
-  ///     0: const Text('Child 1'),
-  ///     1: const Text('Child 2'),
+  ///     0: Text('Child 1'),
+  ///     1: Text('Child 2'),
   ///   };
   ///
   ///   int currentValue;

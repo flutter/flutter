@@ -279,8 +279,8 @@ abstract class ScrollView extends StatelessWidget {
 ///     const SliverAppBar(
 ///       pinned: true,
 ///       expandedHeight: 250.0,
-///       flexibleSpace: const FlexibleSpaceBar(
-///         title: const Text('Demo'),
+///       flexibleSpace: FlexibleSpaceBar(
+///         title: Text('Demo'),
 ///       ),
 ///     ),
 ///     new SliverGrid(

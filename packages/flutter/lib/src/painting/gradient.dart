@@ -740,11 +740,11 @@ class RadialGradient extends Gradient {
 ///       startAngle: 0.0,
 ///       endAngle: math.pi * 2,
 ///       colors: const <Color>[
-///         const Color(0xFF4285F4), // blue
-///         const Color(0xFF34A853), // green
-///         const Color(0xFFFBBC05), // yellow
-///         const Color(0xFFEA4335), // red
-///         const Color(0xFF4285F4), // blue again to seamlessly transition to the start
+///         Color(0xFF4285F4), // blue
+///         Color(0xFF34A853), // green
+///         Color(0xFFFBBC05), // yellow
+///         Color(0xFFEA4335), // red
+///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
 ///      ),

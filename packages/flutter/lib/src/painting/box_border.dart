@@ -265,28 +265,28 @@ abstract class BoxBorder extends ShapeBorder {
 /// ```dart
 /// new Container(
 ///   decoration: const BoxDecoration(
-///     border: const Border(
-///       top: const BorderSide(width: 1.0, color: const Color(0xFFFFFFFFFF)),
-///       left: const BorderSide(width: 1.0, color: const Color(0xFFFFFFFFFF)),
-///       right: const BorderSide(width: 1.0, color: const Color(0xFFFF000000)),
-///       bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000)),
+///     border: Border(
+///       top: BorderSide(width: 1.0, color: Color(0xFFFFFFFFFF)),
+///       left: BorderSide(width: 1.0, color: Color(0xFFFFFFFFFF)),
+///       right: BorderSide(width: 1.0, color: Color(0xFFFF000000)),
+///       bottom: BorderSide(width: 1.0, color: Color(0xFFFF000000)),
 ///     ),
 ///   ),
 ///   child: new Container(
 ///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
 ///     decoration: const BoxDecoration(
-///       border: const Border(
-///         top: const BorderSide(width: 1.0, color: const Color(0xFFFFDFDFDF)),
-///         left: const BorderSide(width: 1.0, color: const Color(0xFFFFDFDFDF)),
-///         right: const BorderSide(width: 1.0, color: const Color(0xFFFF7F7F7F)),
-///         bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF7F7F7F)),
+///       border: Border(
+///         top: BorderSide(width: 1.0, color: Color(0xFFFFDFDFDF)),
+///         left: BorderSide(width: 1.0, color: Color(0xFFFFDFDFDF)),
+///         right: BorderSide(width: 1.0, color: Color(0xFFFF7F7F7F)),
+///         bottom: BorderSide(width: 1.0, color: Color(0xFFFF7F7F7F)),
 ///       ),
-///       color: const Color(0xFFBFBFBF),
+///       color: Color(0xFFBFBFBF),
 ///     ),
 ///     child: const Text(
 ///       'OK',
 ///       textAlign: TextAlign.center,
-///       style: const TextStyle(color: const Color(0xFF000000))
+///       style: TextStyle(color: Color(0xFF000000))
 ///     ),
 ///   ),
 /// )
