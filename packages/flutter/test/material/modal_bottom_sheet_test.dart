@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
     BuildContext savedContext;
@@ -202,5 +204,51 @@ void main() {
       MediaQuery.of(innerContext).padding,
       const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
     );
+  });
+
+  testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+
+    showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
+      return new Container(
+        child: const Text('BottomSheet')
+      );
+    });
+
+    await tester.pump(); // bottom sheet show animation starts
+    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          children: <TestSemantics>[
+            new TestSemantics(
+              label: 'Dialog',
+              textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'BottomSheet',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
   });
 }

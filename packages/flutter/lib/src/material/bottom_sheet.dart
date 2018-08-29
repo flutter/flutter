@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -141,6 +142,7 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragUpdate: _handleDragUpdate,
       onVerticalDragEnd: _handleDragEnd,
       child: bottomSheet,
+      excludeFromSemantics: true,
     );
   }
 }
@@ -190,20 +192,43 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   @override
   Widget build(BuildContext context) {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    String routeLabel;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        routeLabel = '';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        routeLabel = localizations.dialogLabel;
+        break;
+    }
+
     return new GestureDetector(
+      excludeFromSemantics: true,
       onTap: () => Navigator.pop(context),
       child: new AnimatedBuilder(
         animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
-          return new ClipRect(
-            child: new CustomSingleChildLayout(
-              delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
-              child: new BottomSheet(
-                animationController: widget.route._animationController,
-                onClosing: () => Navigator.pop(context),
-                builder: widget.route.builder
-              )
-            )
+          // Disable the initial animation when accessible navigation is on so
+          // that the semantics are added to the tree at the correct time.
+          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+          return new Semantics(
+            scopesRoute: true,
+            namesRoute: true,
+            label: routeLabel,
+            explicitChildNodes: true,
+            child: new ClipRect(
+              child: new CustomSingleChildLayout(
+                delegate: new _ModalBottomSheetLayout(animationValue),
+                child: new BottomSheet(
+                  animationController: widget.route._animationController,
+                  onClosing: () => Navigator.pop(context),
+                  builder: widget.route.builder,
+                ),
+              ),
+            ),
           );
         }
       )
