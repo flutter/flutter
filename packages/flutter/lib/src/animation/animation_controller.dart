@@ -7,8 +7,8 @@ import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 
 import 'animation.dart';
 import 'curves.dart';
@@ -44,7 +44,7 @@ const Tolerance _kFlingTolerance = Tolerance(
 /// When [AccessibilityFeatures.disableAnimations] is true, the device is asking
 /// flutter to reduce or disable animations as much as possible. To honor this,
 /// we reduce the duration and the corresponding number of frames for animations.
-/// This enum is used to allow certain [AnimationControllers] to opt out of this
+/// This enum is used to allow certain [AnimationController]s to opt out of this
 /// behavior.
 ///
 /// For example, the [AnimationController] which controls the physics simulation
@@ -200,9 +200,9 @@ class AnimationController extends Animation<double>
   /// The behavior of the controller when [AccessibilityFeatures.disableAnimations]
   /// is true.
   ///
-  /// Defaults to [AnimationBehavior.normal] for the [new AnimationBehavior]
+  /// Defaults to [AnimationBehavior.normal] for the [new AnimationController]
   /// constructor, and [AnimationBehavior.preserve] for the
-  /// [new AnimationBehavior.unbounded] constructor.
+  /// [new AnimationController.unbounded] constructor.
   final AnimationBehavior animationBehavior;
 
   /// Returns an [Animation<double>] for this animation controller, so that a
@@ -401,9 +401,12 @@ class AnimationController extends Animation<double>
   TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear, AnimationBehavior animationBehavior }) {
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
     double scale = 1.0;
-    if (SemanticsBinding.instance.disableAnimations) {
+    if (_ticker.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
+          // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
+          // duration to limit most animations to a single frame.
+          // TODO(jonahwilliams): determine a better process for setting duration.
           scale = 0.05;
           break;
         case AnimationBehavior.preserve:
@@ -487,15 +490,17 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
-  TickerFuture fling({ double velocity = 1.0, AnimationBehavior animationBehavior}) {
+  TickerFuture fling({ double velocity = 1.0, AnimationBehavior animationBehavior }) {
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
     double scale = 1.0;
     final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
-    if (SemanticsBinding.instance.disableAnimations) {
+    if (_ticker.disableAnimations) {
       switch (behavior) {
         case AnimationBehavior.normal:
+          // TODO(jonahwilliams): determine a better process for setting velocity.
+          // the value below was arbitrarily chosen because it worked for the drawer widget.
           scale = 200.0;
           break;
         case AnimationBehavior.preserve:
