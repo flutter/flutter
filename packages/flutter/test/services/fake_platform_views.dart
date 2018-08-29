@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:collection/collection.dart';
 
 import 'package:flutter/foundation.dart';
@@ -60,6 +61,7 @@ class FakePlatformViewsController {
     final double width = args['width'];
     final double height = args['height'];
     final int layoutDirection = args['direction'];
+    final Uint8List creationParams = args['params'];
 
     if (_views.containsKey(id))
       throw new PlatformException(
@@ -73,7 +75,7 @@ class FakePlatformViewsController {
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
 
-    _views[id] = new FakePlatformView(id, viewType, new Size(width, height), layoutDirection);
+    _views[id] = new FakePlatformView(id, viewType, new Size(width, height), layoutDirection, creationParams);
     final int textureId = _textureCounter++;
     return new Future<int>.sync(() => textureId);
   }
@@ -152,10 +154,11 @@ class FakePlatformViewsController {
 
 class FakePlatformView {
 
-  FakePlatformView(this.id, this.type, this.size, this.layoutDirection);
+  FakePlatformView(this.id, this.type, this.size, this.layoutDirection, [this.creationParams]);
 
   final int id;
   final String type;
+  final Uint8List creationParams;
   Size size;
   int layoutDirection;
 
@@ -166,6 +169,7 @@ class FakePlatformView {
     final FakePlatformView typedOther = other;
     return id == typedOther.id &&
         type == typedOther.type &&
+        creationParams == typedOther.creationParams &&
         size == typedOther.size;
   }
 
@@ -174,7 +178,7 @@ class FakePlatformView {
 
   @override
   String toString() {
-    return 'FakePlatformView(id: $id, type: $type, size: $size, layoutDirection: $layoutDirection)';
+    return 'FakePlatformView(id: $id, type: $type, size: $size, layoutDirection: $layoutDirection, creationParams: $creationParams)';
   }
 }
 

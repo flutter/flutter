@@ -13,6 +13,7 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({bool verboseHelp = false}) {
     usesTargetOption();
+    usesFilesystemOptions(hide: !verboseHelp);
     addBuildModeFlags();
     argParser
       ..addFlag('precompiled', negatable: false)
@@ -58,18 +59,7 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addFlag('report-licensed-packages',
         help: 'Whether to report the names of all the packages that are included '
               'in the application\'s LICENSE file.',
-        defaultsTo: false)
-      ..addMultiOption('filesystem-root',
-        hide: !verboseHelp,
-        help: 'Specify the path, that is used as root in a virtual file system\n'
-            'for compilation. Input file name should be specified as Uri in\n'
-            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
-            'Requires --output-dill option to be explicitly specified.\n')
-      ..addOption('filesystem-scheme',
-        defaultsTo: 'org-dartlang-root',
-        hide: !verboseHelp,
-        help: 'Specify the scheme that is used for virtual file system used in\n'
-            'compilation. See more details on filesystem-root option.\n');
+        defaultsTo: false);
     usesPubOption();
   }
 

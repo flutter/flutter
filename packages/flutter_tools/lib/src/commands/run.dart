@@ -80,6 +80,7 @@ class RunCommand extends RunCommandBase {
 
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
+    usesFilesystemOptions(hide: !verboseHelp);
 
     argParser
       ..addFlag('start-paused',
@@ -171,23 +172,8 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is\n'
               'intended for use in generating automated flutter benchmarks.',
       )
-      ..addOption('output-dill',
-        hide: !verboseHelp,
-        help: 'Specify the path to frontend server output kernel file.',
-      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
-      ..addMultiOption('filesystem-root',
-        hide: !verboseHelp,
-        help: 'Specify the path, that is used as root in a virtual file system\n'
-            'for compilation. Input file name should be specified as Uri in\n'
-            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
-            'Requires --output-dill option to be explicitly specified.\n')
-      ..addOption('filesystem-scheme',
-        defaultsTo: 'org-dartlang-root',
-        hide: !verboseHelp,
-        help: 'Specify the scheme that is used for virtual file system used in\n'
-            'compilation. See more details on filesystem-root option.\n');
+      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
 
   List<Device> devices;

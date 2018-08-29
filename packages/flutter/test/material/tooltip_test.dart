@@ -679,7 +679,7 @@ void main() {
 
   testWidgets('has semantic events', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = new SemanticsTester(tester);

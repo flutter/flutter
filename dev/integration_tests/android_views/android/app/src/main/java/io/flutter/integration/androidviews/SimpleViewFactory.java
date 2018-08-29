@@ -11,15 +11,16 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
 import io.flutter.plugin.platform.PlatformViewFactory;
 
-public class SimpleViewFactory implements PlatformViewFactory {
+public class SimpleViewFactory extends PlatformViewFactory {
     final BinaryMessenger messenger;
 
     public SimpleViewFactory(BinaryMessenger messenger) {
+        super(null);
         this.messenger = messenger;
     }
 
     @Override
-    public PlatformView create(Context context, int id) {
+    public PlatformView create(Context context, int id, Object params) {
         MethodChannel methodChannel = new MethodChannel(messenger, "simple_view/" + id);
         return new SimplePlatformView(context, methodChannel);
     }

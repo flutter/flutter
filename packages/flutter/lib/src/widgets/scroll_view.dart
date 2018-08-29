@@ -50,7 +50,7 @@ abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  ScrollView({
+  ScrollView({ // ignore: prefer_const_constructors_in_immutables
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,

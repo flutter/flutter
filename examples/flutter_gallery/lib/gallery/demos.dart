@@ -404,18 +404,18 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new CupertinoProgressIndicatorDemo(),
     ),
     new GalleryDemo(
-      title: 'Buttons',
-      icon: GalleryIcons.generic_buttons,
-      category: _kCupertinoComponents,
-      routeName: CupertinoButtonsDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
-    ),
-    new GalleryDemo(
       title: 'Alerts',
       icon: GalleryIcons.dialogs,
       category: _kCupertinoComponents,
       routeName: CupertinoAlertDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoAlertDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Buttons',
+      icon: GalleryIcons.generic_buttons,
+      category: _kCupertinoComponents,
+      routeName: CupertinoButtonsDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
     ),
     new GalleryDemo(
       title: 'Navigation',

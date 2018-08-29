@@ -74,7 +74,7 @@ void main() {
   group('getSemanticsId', () {
     FlutterDriverExtension extension;
     setUp(() {
-      extension = new FlutterDriverExtension((String arg) async {}, true);
+      extension = new FlutterDriverExtension((String arg) async => '', true);
     });
 
     testWidgets('works when semantics are enabled', (WidgetTester tester) async {

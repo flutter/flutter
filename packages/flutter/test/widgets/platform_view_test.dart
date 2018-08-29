@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -20,7 +21,7 @@ void main() {
     viewsController.registerViewType('webview');
 
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -37,12 +38,70 @@ void main() {
     );
   });
 
+  testWidgets('Create Android view with params', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+            creationParams: 'creation parameters',
+            creationParamsCodec: const StringCodec(),
+          ),
+        ),
+      ),
+    );
+
+    final FakePlatformView fakeView = viewsController.views.first;
+    final Uint8List rawCreationParams = fakeView.creationParams;
+    final ByteData byteData = new ByteData.view(
+        rawCreationParams.buffer,
+        rawCreationParams.offsetInBytes,
+        rawCreationParams.lengthInBytes
+    );
+    final dynamic actualParams = const StringCodec().decodeMessage(byteData);
+
+    expect(actualParams, 'creation parameters');
+    expect(
+      viewsController.views,
+      unorderedEquals(<FakePlatformView>[
+        new FakePlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr, fakeView.creationParams)
+      ]),
+    );
+  });
+
+  testWidgets('Zero sized Android view is not created', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+        ),
+      ),
+    );
+
+    expect(
+      viewsController.views,
+      isEmpty,
+    );
+  });
+
   testWidgets('Resize Android view', (WidgetTester tester) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -54,7 +113,7 @@ void main() {
     viewsController.resizeCompleter = new Completer<void>();
 
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 100.0,
           height: 50.0,
@@ -91,7 +150,7 @@ void main() {
     viewsController.registerViewType('webview');
     viewsController.registerViewType('maps');
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -101,7 +160,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -122,7 +181,7 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -186,7 +245,7 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('webview');
     await tester.pumpWidget(
-      const Align(
+      Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
           width: 200.0,
@@ -223,7 +282,7 @@ void main() {
               behavior: HitTestBehavior.opaque,
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
             ),
-            const Positioned(
+            Positioned(
               child: SizedBox(
                 width: 200.0,
                 height: 100.0,
@@ -266,7 +325,7 @@ void main() {
               behavior: HitTestBehavior.opaque,
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
             ),
-            const Positioned(
+            Positioned(
               child: SizedBox(
                 width: 200.0,
                 height: 100.0,
@@ -311,7 +370,7 @@ void main() {
               behavior: HitTestBehavior.opaque,
               onPointerDown: (PointerDownEvent e) { numPointerDownsOnParent++; },
             ),
-            const Positioned(
+            Positioned(
               child: SizedBox(
                 width: 200.0,
                 height: 100.0,
@@ -350,7 +409,7 @@ void main() {
         alignment: Alignment.topLeft,
         child: new Container(
           margin: const EdgeInsets.all(10.0),
-          child: const SizedBox(
+          child: SizedBox(
             width: 200.0,
             height: 100.0,
             child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
@@ -376,7 +435,7 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('maps');
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -393,7 +452,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const Center(
+      Center(
         child: SizedBox(
           width: 200.0,
           height: 100.0,
@@ -415,7 +474,7 @@ void main() {
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
     viewsController.registerViewType('maps');
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
         child: Center(
           child: SizedBox(
@@ -435,7 +494,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox(
@@ -451,6 +510,124 @@ void main() {
       viewsController.views,
       unorderedEquals(<FakePlatformView>[
         new FakePlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0), AndroidViewController.kAndroidLayoutDirectionLtr)
+      ]),
+    );
+  });
+
+  testWidgets('Android view can lose gesture arenas', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    bool verticalDragAcceptedByParent = false;
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: new Container(
+          margin: const EdgeInsets.all(10.0),
+          child: GestureDetector(
+            onVerticalDragStart: (DragStartDetails d) { verticalDragAcceptedByParent = true; },
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await gesture.up();
+
+    expect(verticalDragAcceptedByParent, true);
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      isNull,
+    );
+  });
+
+  testWidgets('Android view gesture recognizers', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    bool verticalDragAcceptedByParent = false;
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          onVerticalDragStart: (DragStartDetails d) { verticalDragAcceptedByParent = true; },
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              gestureRecognizers: <OneSequenceGestureRecognizer> [new VerticalDragGestureRecognizer()],
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await gesture.up();
+
+    expect(verticalDragAcceptedByParent, false);
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionMove, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+      ]),
+    );
+  });
+
+  testWidgets('Android view rebuilt during gesture', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 200.0,
+          height: 100.0,
+          child: AndroidView(
+            viewType: 'webview',
+            layoutDirection: TextDirection.ltr,
+          ),
+        ),
+      ),
+    );
+
+    await gesture.up();
+
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionMove, <int> [0], <Offset> [Offset(50.0, 150.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 150.0)]),
       ]),
     );
   });

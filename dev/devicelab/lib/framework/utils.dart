@@ -236,7 +236,7 @@ Future<Process> startProcess(
   _runningProcesses.add(processInfo);
 
   process.exitCode.then((int exitCode) {
-    print('exitcode: $exitCode');
+    print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
   });
 
@@ -266,8 +266,9 @@ Future<int> exec(
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
   final Completer<Null> stdoutDone = new Completer<Null>();
   final Completer<Null> stderrDone = new Completer<Null>();
@@ -288,7 +289,7 @@ Future<int> exec(
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
-    fail('Executable failed with exit code $exitCode.');
+    fail('Executable "$executable" failed with exit code $exitCode.');
 
   return exitCode;
 }
@@ -301,8 +302,9 @@ Future<String> eval(
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
   final StringBuffer output = new StringBuffer();
   final Completer<Null> stdoutDone = new Completer<Null>();
@@ -325,7 +327,7 @@ Future<String> eval(
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
-    fail('Executable failed with exit code $exitCode.');
+    fail('Executable "$executable" failed with exit code $exitCode.');
 
   return output.toString().trimRight();
 }

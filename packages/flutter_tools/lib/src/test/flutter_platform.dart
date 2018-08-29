@@ -367,7 +367,7 @@ class _FlutterPlatform extends PlatformPlugin {
     _testCount += 1;
     final StreamController<dynamic> localController = new StreamController<dynamic>();
     final StreamController<dynamic> remoteController = new StreamController<dynamic>();
-    final Completer<Null> testCompleteCompleter = new Completer<Null>();
+    final Completer<_AsyncError> testCompleteCompleter = new Completer<_AsyncError>();
     final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink = new _FlutterPlatformStreamSinkWrapper<dynamic>(
       remoteController.sink,
       testCompleteCompleter.future,
@@ -384,13 +384,14 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
-  Future<Null> _startTest(
+  Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
-    int ourTestCount) async {
+    int ourTestCount,
+  ) async {
     printTrace('test $ourTestCount: starting test $testPath');
 
-    dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     final List<_Finalizer> finalizers = <_Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
@@ -440,8 +441,7 @@ class _FlutterPlatform extends PlatformPlugin {
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
-          controller.sink.addError(
-              _getErrorMessage('Compilation failed', testPath, shellPath));
+          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
           return null;
         }
       }
@@ -630,7 +630,7 @@ class _FlutterPlatform extends PlatformPlugin {
         controller.sink.addError(error, stack);
       } else {
         printError('unhandled error during test:\n$testPath\n$error\n$stack');
-        outOfBandError ??= error;
+        outOfBandError ??= new _AsyncError(error, stack);
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
@@ -644,7 +644,7 @@ class _FlutterPlatform extends PlatformPlugin {
             controller.sink.addError(error, stack);
           } else {
             printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
-            outOfBandError ??= error;
+            outOfBandError ??= new _AsyncError(error, stack);
           }
         }
       }
@@ -659,10 +659,10 @@ class _FlutterPlatform extends PlatformPlugin {
     assert(controllerSinkClosed);
     if (outOfBandError != null) {
       printTrace('test $ourTestCount: finished with out-of-band failure');
-      throw outOfBandError;
+    } else {
+      printTrace('test $ourTestCount: finished');
     }
-    printTrace('test $ourTestCount: finished');
-    return null;
+    return outOfBandError;
   }
 
   String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
@@ -902,10 +902,24 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 }
 
+// The [_shellProcessClosed] future can't have errors thrown on it because it
+// crosses zones (it's fed in a zone created by the test package, but listened
+// to by a parent zone, the same zone that calls [close] below).
+//
+// This is because Dart won't let errors that were fed into a Future in one zone
+// propagate to listeners in another zone. (Specifically, the zone in which the
+// future was completed with the error, and the zone in which the listener was
+// registered, are what matters.)
+//
+// Because of this, the [_shellProcessClosed] future takes an [_AsyncError]
+// object as a result. If it's null, it's as if it had completed correctly; if
+// it's non-null, it contains the error and stack trace of the actual error, as
+// if it had completed with that error.
 class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   _FlutterPlatformStreamSinkWrapper(this._parent, this._shellProcessClosed);
+
   final StreamSink<S> _parent;
-  final Future<void> _shellProcessClosed;
+  final Future<_AsyncError> _shellProcessClosed;
 
   @override
   Future<void> get done => _done.future;
@@ -913,12 +927,19 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<dynamic> close() {
-   Future.wait<dynamic>(<Future<dynamic>>[
+    Future.wait<dynamic>(<Future<dynamic>>[
       _parent.close(),
       _shellProcessClosed,
     ]).then<void>(
-      (List<dynamic> value) {
-        _done.complete();
+      (List<dynamic> futureResults) {
+        assert(futureResults.length == 2);
+        assert(futureResults.first == null);
+        if (futureResults.last is _AsyncError) {
+          _done.completeError(futureResults.last.error, futureResults.last.stack);
+        } else {
+          assert(futureResults.last == null);
+          _done.complete();
+        }
       },
       onError: _done.completeError,
     );
@@ -931,4 +952,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
+}
+
+@immutable
+class _AsyncError {
+  const _AsyncError(this.error, this.stack);
+  final dynamic error;
+  final StackTrace stack;
 }

@@ -359,9 +359,11 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///       case ConnectionState.active: return new Text('\$${snapshot.data}');
 ///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
@@ -491,9 +493,11 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///           return new Text('Error: ${snapshot.error}');
 ///         return new Text('Result: ${snapshot.data}');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
