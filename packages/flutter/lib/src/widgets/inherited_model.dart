@@ -106,7 +106,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   @mustCallSuper
   @override
   bool updateShouldNotify(covariant InheritedModel<T> oldWidget) {
-    return _notEqual<T>(aspects, oldWidget.aspects);
+    return !setEquals<T>(aspects, oldWidget.aspects);
   }
 
   /// Return true if the changes between this model and [oldWidget] match any
@@ -116,16 +116,10 @@ abstract class InheritedModel<T> extends InheritedWidget {
 
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
-  static void _findModels<T extends InheritedModel<Object>>(
-    BuildContext context,
-    Object aspect,
-    List<InheritedElement> result,
-  ) {
+  static Iterable<InheritedElement> _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect) sync* {
     final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
-    if (model == null)
-      return;
-
-    result.add(model);
+    if (model != null)
+      yield model;
 
     assert(model.widget is T);
     final T modelWidget = model.widget;
@@ -139,7 +133,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     });
     if (modelParent == null)
       return;
-    _findModels<T>(modelParent, aspect, result);
+    yield* _findModels<T>(modelParent, aspect);
   }
 
   /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
@@ -164,8 +158,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // a model is found whose aspects are null or contain the given aspect.
     // Rebuilding one of the intermediate models only causes its dependents
     // to be rebuilt if its aspects property changes (see _shouldNotify).
-    final List<InheritedElement> models = <InheritedElement>[];
-    _findModels<T>(context, aspect, models);
+    final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
     if (models.isEmpty)
       return null;
     final InheritedElement lastModel = models.last;
@@ -174,7 +167,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
       if (model == lastModel)
         return value;
     }
-    assert(false, 'Unreachable');
+    assert(false);
     return null;
   }
 }
@@ -197,15 +190,13 @@ class InheritedModelElement<T> extends InheritedElement {
       setDependencies(dependent, new HashSet<T>());
     } else {
       assert(aspect is T);
-      setDependencies(dependent, dependencies == null
-        ? (new HashSet<T>()..add(aspect))
-        : dependencies..add(aspect));
+      setDependencies(dependent, (dependencies ?? new HashSet<T>())..add(aspect));
     }
   }
 
   bool _shouldNotify(InheritedModel<T> oldWidget, Element dependent, Set<T> aspects) {
     // If the aspects the model supports have changed, then rebuild.
-    if (_notEqual<T>(widget.aspects, oldWidget.aspects))
+    if (!setEquals<T>(widget.aspects, oldWidget.aspects))
       return true;
 
     // The aspects argument specifies the model aspects that the dependent element depends on.
@@ -223,16 +214,4 @@ class InheritedModelElement<T> extends InheritedElement {
     if (dependencies.isEmpty || _shouldNotify(oldWidget, dependent, dependencies))
       dependent.didChangeDependencies();
   }
-}
-
-bool _notEqual<T>(Set<T> a, Set<T> b) {
-  if (identical(a, b))
-    return false;
-  if (a?.length != b?.length)
-    return true;
-  for(T elementA in a) {
-    if (!b.contains(elementA))
-      return true;
-  }
-  return false;
 }
