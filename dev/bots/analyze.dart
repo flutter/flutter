@@ -9,6 +9,8 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
+import 'run_command.dart';
+
 typedef Future<Null> ShardRunner();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
@@ -16,19 +18,6 @@ final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutt
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
-final bool hasColor = stdout.supportsAnsiEscapes;
-
-final String bold = hasColor ? '\x1B[1m' : '';
-final String red = hasColor ? '\x1B[31m' : '';
-final String green = hasColor ? '\x1B[32m' : '';
-final String yellow = hasColor ? '\x1B[33m' : '';
-final String cyan = hasColor ? '\x1B[36m' : '';
-final String reset = hasColor ? '\x1B[0m' : '';
-final String redLine = '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset';
-const String arrow = '⏩';
-const String clock = '🕐';
-
-const Duration _kLongTimeout = Duration(minutes: 45);
 
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter analyze. For example, you might want to call this
@@ -51,12 +40,12 @@ Future<Null> main(List<String> args) async {
   }
 
   // Ensure that all package dependencies are in sync.
-  await _runCommand(flutter, <String>['update-packages', '--verify-only'],
+  await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the sample code in the repo
-  await _runCommand(dart,
+  await runCommand(dart,
     <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
@@ -75,7 +64,7 @@ Future<Null> main(List<String> args) async {
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
 
   try {
-    await _runCommand(dart,
+    await runCommand(dart,
       <String>[
         '--preview-dart-2',
         path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
@@ -169,7 +158,7 @@ Future<Null> _checkForTrailingSpaces() async {
       return new File(filename).existsSync();
     }).toList();
     if (changedFiles.isNotEmpty) {
-      await _runCommand('grep',
+      await runCommand('grep',
         <String>[
           '--line-number',
           '--extended-regexp',
@@ -205,10 +194,10 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
   if (skip) {
-    _printProgress('SKIPPING', relativeWorkingDir, commandDescription);
+    printProgress('SKIPPING', relativeWorkingDir, commandDescription);
     return null;
   }
-  _printProgress('RUNNING', relativeWorkingDir, commandDescription);
+  printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
   final DateTime start = new DateTime.now();
   final Process process = await Process.start(executable, arguments,
@@ -242,73 +231,10 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   return result;
 }
 
-String elapsedTime(DateTime start) {
-  return new DateTime.now().difference(start).toString();
-}
-
-Future<Null> _runCommand(String executable, List<String> arguments, {
-  String workingDirectory,
-  Map<String, String> environment,
-  bool expectNonZeroExit = false,
-  int expectedExitCode,
-  String failureMessage,
-  bool printOutput = true,
-  bool skip = false,
-  Duration timeout = _kLongTimeout,
-}) async {
-  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = path.relative(workingDirectory);
-  if (skip) {
-    _printProgress('SKIPPING', relativeWorkingDir, commandDescription);
-    return null;
-  }
-  _printProgress('RUNNING', relativeWorkingDir, commandDescription);
-
-  final DateTime start = new DateTime.now();
-  final Process process = await Process.start(executable, arguments,
-    workingDirectory: workingDirectory,
-    environment: environment,
-  );
-
-  Future<List<List<int>>> savedStdout, savedStderr;
-  if (printOutput) {
-    await Future.wait(<Future<void>>[
-      stdout.addStream(process.stdout),
-      stderr.addStream(process.stderr)
-    ]);
-  } else {
-    savedStdout = process.stdout.toList();
-    savedStderr = process.stderr.toList();
-  }
-
-  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
-    stderr.writeln('Process timed out after $timeout');
-    return expectNonZeroExit ? 0 : 1;
-  });
-  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
-  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
-    if (failureMessage != null) {
-      print(failureMessage);
-    }
-    if (!printOutput) {
-      stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
-    }
-    print(
-      '$redLine\n'
-      '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
-      '${bold}Command:$cyan $commandDescription$reset\n'
-      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
-      '$redLine'
-    );
-    exit(1);
-  }
-}
-
 Future<Null> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[]
 }) {
-  return _runCommand(flutter, <String>['analyze']..addAll(options),
+  return runCommand(flutter, <String>['analyze']..addAll(options),
     workingDirectory: workingDirectory,
   );
 }
@@ -538,10 +464,6 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   }
 }
 
-void _printProgress(String action, String workingDir, String command) {
-  print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
-}
-
 Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
   final Directory flutterRootDir = new Directory(flutterRoot);
 
@@ -564,7 +486,7 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     for (File f in packageToRegistrants[package]) {
       fileToContent[f] = f.readAsStringSync();
     }
-    await _runCommand(flutter, <String>['inject-plugins'],
+    await runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
       printOutput: false,
     );
