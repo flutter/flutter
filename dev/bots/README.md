@@ -148,15 +148,9 @@ components need to be updated or installed, follow the steps below:
 The Flutter codelabs exercise Material Components in the form of a demo application.
 The Flutter codelabs build test ensures that the final version of
 [Material Components for Flutter Codelabs](https://github.com/material-components/material-components-flutter-codelabs)
-can be built. If a PR fails the codelabs build test check, run through the following steps.
+can be built. This test serves as a smoke test for the Flutter framework and should not fail. Please
+address the issue from within your PR and rerun the test. If you feel that the test failing is not a
+direct result of changes made in your PR, submit an issue to the MDC-Flutter Team. 
+Note that the code for the codelabs is similar to but distinct from the code for the Shrine demo app in Flutter Gallery.
 
-1. Make sure no other checks are failing as well.
 
-2. If your PR makes a change to a component that the Flutter codelabs use, submit a PR to the
-    [codelabs repo](https://github.com/material-components/material-components-flutter-codelabs)
-    with the appropriate changes to account for the adjusted component. Do this for the branch with 
-    the completed code (the branch with the highest number).
-
-3. Merge the PR to the codelabs repo, then rerun the codelabs build script on Cirrus. 
-
-4. Merge your flutter/flutter PR.
