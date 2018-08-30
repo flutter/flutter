@@ -158,6 +158,9 @@ class InputConnectionAdaptor extends BaseInputConnection {
                 int character = event.getUnicodeChar();
                 if (character != 0) {
                     int selStart = Math.max(0, Selection.getSelectionStart(mEditable));
+                    int selEnd = Selection.getSelectionEnd(mEditable);
+                    if (selEnd != selStart)
+                        mEditable.delete(selStart, selEnd);
                     mEditable.insert(selStart, String.valueOf((char) character));
                     setSelection(selStart + 1, selStart + 1);
                     updateEditingState();
