@@ -2144,15 +2144,17 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 /// For an illustration of the algorithm see http://bit.ly/flutter-default-traversal.
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
+  // Using a small offset value to shrink child rects removes overlapping cases.
+  const Offset smallOffset = Offset(0.1, 0.1);
   for (SemanticsNode child in children) {
     edges.add(new _BoxEdge(
       isLeadingEdge: true,
-      offset: _pointInParentCoordinates(child, child.rect.topLeft).dy,
+      offset: _pointInParentCoordinates(child, child.rect.topLeft + smallOffset).dy,
       node: child,
     ));
     edges.add(new _BoxEdge(
       isLeadingEdge: false,
-      offset: _pointInParentCoordinates(child, child.rect.bottomRight).dy,
+      offset: _pointInParentCoordinates(child, child.rect.bottomRight - smallOffset).dy,
       node: child,
     ));
   }
