@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -41,6 +42,10 @@ void main() {
           new Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
-    });
+
+      // TODO(dantup): Unskip for Mac when [1] is fixed.
+      // [1] hot reload/breakpoints fail when uris prefixed with file://
+      //     https://github.com/flutter/flutter/issues/18441
+    }, skip: !platform.isLinux && !platform.isWindows);
   }, timeout: const Timeout.factor(6));
 }
