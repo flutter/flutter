@@ -484,7 +484,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     final double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
-    final ScrollPosition position = widget.controller?.position;
     if (position != null) {
       final double targetScrollPixels = math.min(
           math.max(position.pixels + delta, position.minScrollExtent),
