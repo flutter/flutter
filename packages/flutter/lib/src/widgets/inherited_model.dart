@@ -83,36 +83,29 @@ import 'framework.dart';
 /// If a widget depends on the model but doesn't specify an aspect,
 /// then changes in the model will cause the widget to be rebuilt
 /// unconditionally.
-///
-/// The `super.updateShouldNotify()` call, which is required, will return
-/// true if the model's [aspects] have changed. By default the model's
-/// [aspects] are null, which means the model supports all aspects.
 abstract class InheritedModel<T> extends InheritedWidget {
-  /// Creates an inherited widget that supports partial dependencies called "aspects".
-  ///
-  /// If [aspects] is null (the default) then this model is "universal",
-  /// i.e. it supports all aspects.
-  const InheritedModel({ Key key, Widget child, this.aspects }) : super(key: key, child: child);
+  /// Creates an inherited widget that supports dependencies qualified by
+  /// "aspects", i.e. a descendant widget can indicate that it should
+  /// only be rebuilt if a specific aspect of the model changes.
+  const InheritedModel({ Key key, Widget child }) : super(key: key, child: child);
 
   @override
   InheritedModelElement<T> createElement() => new InheritedModelElement<T>(this);
-
-  /// The features of this model that widgets can depend on with [inheritFrom].
-  ///
-  /// This property is null by default, which means that the model supports
-  /// all aspects.
-  final Set<T> aspects;
-
-  @mustCallSuper
-  @override
-  bool updateShouldNotify(covariant InheritedModel<T> oldWidget) {
-    return !setEquals<T>(aspects, oldWidget.aspects);
-  }
 
   /// Return true if the changes between this model and [oldWidget] match any
   /// of the [dependencies].
   @protected
   bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
+
+  /// Returns true if this model supports the given [aspect].
+  ///
+  /// Returns true by default: this model supports all aspects.
+  ///
+  /// Subclasses may override this method to indicate that they do not support
+  /// all model aspects. This is typically done when a model can be used
+  /// to "shadow" some aspects of an ancestor.
+  @protected
+  bool isSupportedAspect(T aspect) => true;
 
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
@@ -121,11 +114,11 @@ abstract class InheritedModel<T> extends InheritedWidget {
     if (model == null)
       return;
 
-    yield(model);
+    yield model;
 
     assert(model.widget is T);
     final T modelWidget = model.widget;
-    if (aspect == null || modelWidget.aspects == null || modelWidget.aspects.contains(aspect))
+    if (modelWidget.isSupportedAspect(aspect))
       return;
 
     Element modelParent;
@@ -142,14 +135,13 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
   /// of type T.
   ///
-  /// When the given [aspect] of the model changes, the context will be
+  /// When the given [aspect] of the model changes, the [context] will be
   /// rebuilt. The [updateShouldNotifyDependent] method must determine if a
-  /// change in the model widget corresponds to an `aspect` value.
+  /// change in the model widget corresponds to an [aspect] value.
   ///
-  /// The dependency created by this method targets the first
-  /// [InheritedModel] ancestor of type T whose [InheritedModel.aspects] set
-  /// is either null (the default) or contains [aspect]. If [aspect] is
-  /// null then it's the first ancestor of type T.
+  /// The dependencies created by this method target all [InheritedModel] ancestors
+  /// of type T up to and including the first one for which [isSupportedAspect]
+  /// returns true.
   ///
   /// If [aspect] is null this method is the same as
   /// `context.inheritFromWidgetOfExactType(T)`.
@@ -158,9 +150,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
       return context.inheritFromWidgetOfExactType(T);
 
     // Create a dependency on all of the type T ancestor models up until
-    // a model is found whose aspects are null or contain the given aspect.
-    // Rebuilding one of the intermediate models only causes its dependents
-    // to be rebuilt if its aspects property changes (see _shouldNotify).
+    // a model is found for which isSupportedAspect(aspect) is true.
     final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
     final InheritedElement lastModel = models.last;
     for (InheritedElement model in models) {
@@ -192,21 +182,8 @@ class InheritedModelElement<T> extends InheritedElement {
       setDependencies(dependent, new HashSet<T>());
     } else {
       assert(aspect is T);
-      var foo = getDependencies(dependent);
       setDependencies(dependent, (dependencies ?? new HashSet<T>())..add(aspect));
     }
-  }
-
-  bool _shouldNotify(InheritedModel<T> oldWidget, Element dependent, Set<T> aspects) {
-    // If the aspects the model supports have changed, then rebuild.
-    if (!setEquals<T>(widget.aspects, oldWidget.aspects))
-      return true;
-
-    // The aspects argument specifies the model aspects that the dependent element depends on.
-    if (widget.aspects == null || widget.aspects.any((T aspect) => aspects.contains(aspect)))
-      return widget.updateShouldNotifyDependent(oldWidget, aspects);
-
-    return false;
   }
 
   @override
@@ -214,7 +191,7 @@ class InheritedModelElement<T> extends InheritedElement {
     final Set<T> dependencies = getDependencies(dependent);
     if (dependencies == null)
       return;
-    if (dependencies.isEmpty || _shouldNotify(oldWidget, dependent, dependencies))
+    if (dependencies.isEmpty || widget.updateShouldNotifyDependent(oldWidget, dependencies))
       dependent.didChangeDependencies();
   }
 }

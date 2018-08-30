@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // A simple "flat" InheritedModel: the data model is just 3 integer
@@ -13,22 +15,35 @@ class ABCModel extends InheritedModel<String> {
     this.a,
     this.b,
     this.c,
-    Set<String> aspects,
+    this.aspects,
     Widget child,
-  }) : super(key: key, child: child, aspects: aspects);
+  }) : super(key: key, child: child);
 
   final int a;
   final int b;
   final int c;
 
+  // The aspects (fields) of this model that widgets can depend on with
+  // inheritFrom.
+  //
+  // This property is null by default, which means that the model supports
+  // all 3 fields.
+  final Set<String> aspects;
+
+  @override
+  bool isSupportedAspect(String aspect) {
+    return aspect == null || aspects == null || aspects.contains(aspect);
+  }
+
   @override
   bool updateShouldNotify(ABCModel old) {
-    return super.updateShouldNotify(old) || a != old.a || b != old.b || c != old.c;
+    return !setEquals<String>(aspects, old.aspects) || a != old.a || b != old.b || c != old.c;
   }
 
   @override
   bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
-    return (a != old.a && dependencies.contains('a'))
+    return !setEquals<String>(aspects, old.aspects)
+        || (a != old.a && dependencies.contains('a'))
         || (b != old.b && dependencies.contains('b'))
         || (c != old.c && dependencies.contains('c'));
   }
@@ -377,7 +392,7 @@ void main() {
 
     _innerModelAspects = new Set<String>.of(<String>['a']);
     await tester.pumpWidget(new MaterialApp(home: abcPage));
-    expect(find.text('a: 100 [0]'), findsOneWidget); // showA depends on the outer model
+    expect(find.text('a: 100 [0]'), findsOneWidget); // showA depends on the inner model
     expect(find.text('b: 1 [0]'), findsOneWidget); // showB depends on the outer model
     expect(find.text('c: 2 [0]'), findsOneWidget);
     expect(find.text('a: 100 b: 101 c: null'), findsOneWidget); // inner model's a, b, c
