@@ -41,17 +41,6 @@ void main() {
     });
   });
 
-  group('BuildableIOSApp', () {
-    testUsingContext('check isSwift', () {
-      final BuildableIOSApp buildableIOSApp = new BuildableIOSApp(
-        projectBundleId: 'blah',
-        appDirectory: 'not/important',
-        buildSettings: _swiftBuildSettings,
-      );
-      expect(buildableIOSApp.isSwift, true);
-    });
-  });
-
   group('PrebuiltIOSApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
       FileSystem: () => new MemoryFileSystem(),
@@ -164,19 +153,6 @@ void main() {
     }, overrides: overrides);
   });
 }
-
-final Map<String, String> _swiftBuildSettings = <String, String>{
-  'ARCHS': 'arm64',
-  'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
-  'CLANG_ENABLE_MODULES': 'YES',
-  'ENABLE_BITCODE': 'NO',
-  'INFOPLIST_FILE': 'Runner/Info.plist',
-  'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test',
-  'PRODUCT_NAME': 'blah',
-  'SWIFT_OBJC_BRIDGING_HEADER': 'Runner/Runner-Bridging-Header.h',
-  'SWIFT_OPTIMIZATION_LEVEL': '-Onone',
-  'SWIFT_VERSION': '3.0',
-};
 
 const String _aaptDataWithExplicitEnabledActivity =
 '''N: android=http://schemas.android.com/apk/res/android
