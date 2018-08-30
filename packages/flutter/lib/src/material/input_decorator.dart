@@ -847,9 +847,12 @@ class _RenderDecoration extends RenderBox {
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
-      // elements and the floating label.
-      containerHeight += decoration.floatingLabelHeight;
-      inputBaseline += decoration.floatingLabelHeight;
+      // elements and the floating label. This value breaks down for the
+      // very large font sizes available on iOS, so the approximation below
+      // is used instead.
+      final int overflowHeight =  label.size.height ~/ 2;
+      containerHeight += math.max(decoration.floatingLabelHeight, overflowHeight);
+      inputBaseline += math.max(decoration.floatingLabelHeight, overflowHeight);
     }
 
     containerHeight = math.max(
