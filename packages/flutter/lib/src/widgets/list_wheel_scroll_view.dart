@@ -9,6 +9,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 
 import 'framework.dart';
 import 'notification_listener.dart';
@@ -91,7 +92,7 @@ class ListWheelChildListDelegate extends ListWheelChildDelegate {
   Widget build(BuildContext context, int index) {
     if (index < 0 || index >= children.length)
       return null;
-    return children[index];
+    return new Semantics(child: children[index], indexInParent: index, container: true);
   }
 
   @override
@@ -137,7 +138,7 @@ class ListWheelChildLoopingListDelegate extends ListWheelChildDelegate {
   Widget build(BuildContext context, int index) {
     if (children.isEmpty)
       return null;
-    return children[index % children.length];
+    return new Semantics(child: children[index % children.length], indexInParent: index, container: true);
   }
 
   @override
@@ -179,10 +180,10 @@ class ListWheelChildBuilderDelegate extends ListWheelChildDelegate {
   @override
   Widget build(BuildContext context, int index) {
     if (childCount == null)
-      return builder(context, index);
+      return new Semantics(child: builder(context, index), indexInParent: index, container: true);
     if (index < 0 || index >= childCount)
       return null;
-    return builder(context, index);
+    return new Semantics(child: builder(context, index), indexInParent: index, container: true);
   }
 
   @override

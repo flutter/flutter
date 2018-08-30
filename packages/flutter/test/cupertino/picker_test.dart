@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -267,5 +269,49 @@ void main() {
 
       debugDefaultTargetPlatformOverride = null;
     });
+  });
+
+  testWidgets('CupertinoPicker exports semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CupertinoPicker(
+          itemExtent: 100.0,
+          onSelectedItemChanged: (int index) {},
+          children: new List<Widget>.generate(100, (int index) {
+            return new Center(
+              child: new Container(
+                width: 400.0,
+                height: 100.0,
+                child: new Text(index.toString()),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(tester.getFirstChildSemanticsData(find.byType(CupertinoPicker)), matchesSemanticsData(
+      hasIncreaseAction: true,
+      hasDecreaseAction: false,
+      increasedValue: '1',
+      value: '0',
+      textDirection: TextDirection.ltr,
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(1, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+
+    expect(tester.getFirstChildSemanticsData(find.byType(CupertinoPicker)), matchesSemanticsData(
+      hasIncreaseAction: true,
+      hasDecreaseAction: true,
+      increasedValue: '2',
+      decreasedValue: '0',
+      value: '1',
+      textDirection: TextDirection.ltr,
+    ));
+
+    handle.dispose();
   });
 }

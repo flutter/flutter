@@ -3269,6 +3269,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
+    int indexInParent,
     Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : assert(container != null),
        _container = container,
@@ -3317,6 +3318,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
        _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        _customSemanticsActions = customSemanticsActions,
+       _indexInParent = indexInParent,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3591,6 +3593,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_hint == value)
       return;
     _hint = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.indexInParent] to the given value.
+  int get indexInParent => _indexInParent;
+  int _indexInParent;
+  set indexInParent(int value) {
+    if (value == indexInParent)
+      return;
+    _indexInParent = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4093,6 +4105,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.textDirection = textDirection;
     if (sortKey != null)
       config.sortKey = sortKey;
+    if (indexInParent != null)
+      config.indexInParent = indexInParent;
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.

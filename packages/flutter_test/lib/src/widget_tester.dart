@@ -617,7 +617,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  /// Attempts to find the [SemanticsData] of first result from `finder`.
+  /// Attempts to find the [SemanticsData] of the result from `finder`.
   ///
   /// If the object identified by the finder doesn't own it's semantic node,
   /// this will return the semantics data of the first ancestor with semantics
@@ -630,12 +630,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (binding.pipelineOwner.semanticsOwner == null)
       throw new StateError('Semantics are not enabled.');
     final Iterable<Element> candidates = finder.evaluate();
-    if (candidates.isEmpty) {
+    if (candidates.isEmpty)
       throw new StateError('Finder returned no matching elements.');
-    }
-    if (candidates.length > 1) {
+    if (candidates.length > 1)
       throw new StateError('Finder returned more than one element.');
-    }
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
@@ -646,6 +644,42 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (result == null)
       throw new StateError('No Semantics data found.');
     return result.getSemanticsData();
+  }
+
+  /// Attempts to find the [SemanticsData] of the first child of the result from
+  /// `finder`.
+  ///
+  /// Unlike [getSemanticsData], this is useful when a widget under test has a
+  /// semantic container inside of it, provided its direct parent exists above
+  /// the widget in question.
+  ///
+  /// Will throw a [StateError] if the finder returns more than one element or
+  /// if no semantics are found or are not enabled.
+  SemanticsData getFirstChildSemanticsData(Finder finder) {
+    if (binding.pipelineOwner.semanticsOwner == null)
+      throw new StateError('Semantics are not enabled.');
+    final Iterable<Element> candidates = finder.evaluate();
+    if (candidates.isEmpty)
+      throw new StateError('Finder returned no matching elements.');
+    if (candidates.length > 1)
+      throw new StateError('Finder returned more than one element.');
+    final Element element = candidates.single;
+    RenderObject renderObject = element.findRenderObject();
+    SemanticsNode parent = renderObject.debugSemantics;
+    while (renderObject != null && parent == null) {
+      renderObject = renderObject?.parent;
+      parent = renderObject?.debugSemantics;
+    }
+    if (parent == null)
+      throw new StateError('No parent Semantics data found.');
+    SemanticsNode child;
+    parent.visitChildren((SemanticsNode localChild) {
+      child = localChild;
+      return false;
+    });
+    if (child == null)
+      throw new StateError('No child Semantics data found.');
+    return child.getSemanticsData();
   }
 
   /// Enable semantics in a test by creating a [SemanticsHandle].
