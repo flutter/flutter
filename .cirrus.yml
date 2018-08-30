@@ -43,10 +43,8 @@ task:
         ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0b3e681b4507aec433ef29c79b715f15f8c75ecd25315ea286b0b2bcb8b28d578634eead5aa2c54086a25e8da1bb219a]
       test_script: ./dev/bots/deploy_gallery.sh
     - name: analyze
-      env:
-        SHARD: analyze
       test_script:
-        - dart ./dev/bots/test.dart
+        - dart ./dev/bots/analyze.dart
     - name: tests-linux
       env:
         SHARD: tests
