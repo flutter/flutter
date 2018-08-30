@@ -7,6 +7,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+/// Determines the order of time picker in [CupertinoDatePicker].
+enum DatePickerTimeOrder {
+  /// Corresponds to the ICU 'h:mm a' pattern.
+  ///
+  /// The order of the pickers in [CupertinoDatePicker] is: hour, minute, am/pm.
+  hma,
+  /// Corresponds to the ICU 'a h:mm' pattern.
+  ///
+  /// The order of the pickers in [CupertinoDatePicker] is: am/pm, hour, minute.
+  ahm,
+}
 
 /// Defines the localized resource values used by the Cupertino widgets.
 ///
@@ -61,6 +72,9 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ٠١
   String datePickerHour(int hour);
 
+  /// Semantics label for the given hour value in [CupertinoDatePicker].
+  String datePickerHourSemanticsLabel(int hour);
+
   /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given minute value.
   ///
@@ -70,9 +84,15 @@ abstract class CupertinoLocalizations {
   ///  - Arabic: ٠١
   String datePickerMinute(int minute);
 
+  /// Semantics label for the given minute value in [CupertinoDatePicker].
+  String datePickerMinuteSemanticsLabel(int minute);
+
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
   /// Can be any permutation of 'DMY' ('D': day, 'M': month, 'Y': year).
   String get datePickerDateOrder;
+
+  /// The order of the time elements that will be shown in [CupertinoDatePicker].
+  DatePickerTimeOrder get datePickerTimeOrder;
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.
   String get anteMeridiemAbbreviation;
@@ -217,7 +237,17 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerHour(int hour) => hour.toString().padLeft(2, '0');
 
   @override
+  String datePickerHourSemanticsLabel(int hour) => hour.toString() + " o'clock";
+
+  @override
   String datePickerMinute(int minute) => minute.toString().padLeft(2, '0');
+
+  @override
+  String datePickerMinuteSemanticsLabel(int minute) {
+    if (minute == 1)
+       return '1 minute';
+    return minute.toString() + ' minutes';
+  }
 
   @override
   String datePickerMediumDate(DateTime date) {
@@ -228,6 +258,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String get datePickerDateOrder => 'MDY';
+
+  @override
+  DatePickerTimeOrder get datePickerTimeOrder => DatePickerTimeOrder.hma;
 
   @override
   String get anteMeridiemAbbreviation => 'AM';
