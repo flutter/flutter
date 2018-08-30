@@ -19,12 +19,9 @@ final String pubCache = path.join(flutterRoot, '.pub-cache');
 final List<String> flutterTestArgs = <String>[];
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
-  // 'analyze': _analyzeRepo, handled by analyze.dart
   'tests': _runTests,
   'tool_tests': _runToolTests,
   'coverage': _runCoverage,
-  // 'docs': handled by docs.sh
-  // 'build_and_deploy_gallery': handled by deploy_gallery.sh
 };
 
 const Duration _kLongTimeout = Duration(minutes: 45);
