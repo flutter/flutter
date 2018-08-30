@@ -224,50 +224,50 @@ void main() {
     group('organization names set', () {
       testInMemory('is empty, if project not created', () async {
         final FlutterProject project = await someProject();
-        expect(await project.organizationNames(), isEmpty);
+        expect(project.organizationNames, isEmpty);
       });
       testInMemory('is empty, if no platform folders exist', () async {
         final FlutterProject project = await someProject();
         project.directory.createSync();
-        expect(await project.organizationNames(), isEmpty);
+        expect(project.organizationNames, isEmpty);
       });
       testInMemory('is populated from iOS bundle identifier', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.directory, 'io.flutter.someProject');
-        expect(await project.organizationNames(), <String>['io.flutter']);
+        expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from Android application ID', () async {
         final FlutterProject project = await someProject();
         addAndroidWithApplicationId(project.directory, 'io.flutter.someproject');
-        expect(await project.organizationNames(), <String>['io.flutter']);
+        expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from iOS bundle identifier in plugin example', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.example.directory, 'io.flutter.someProject');
-        expect(await project.organizationNames(), <String>['io.flutter']);
+        expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from Android application ID in plugin example', () async {
         final FlutterProject project = await someProject();
         addAndroidWithApplicationId(project.example.directory, 'io.flutter.someproject');
-        expect(await project.organizationNames(), <String>['io.flutter']);
+        expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from Android group in plugin', () async {
         final FlutterProject project = await someProject();
         addAndroidWithGroup(project.directory, 'io.flutter.someproject');
-        expect(await project.organizationNames(), <String>['io.flutter']);
+        expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is singleton, if sources agree', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.directory, 'io.flutter.someProject');
         addAndroidWithApplicationId(project.directory, 'io.flutter.someproject');
-        expect(await project.organizationNames(), <String>['io.flutter']);
+        expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is non-singleton, if sources disagree', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.directory, 'io.flutter.someProject');
         addAndroidWithApplicationId(project.directory, 'io.clutter.someproject');
         expect(
-          await project.organizationNames(),
+          project.organizationNames,
           <String>['io.flutter', 'io.clutter'],
         );
       });

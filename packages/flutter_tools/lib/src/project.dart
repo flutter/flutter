@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -64,17 +63,17 @@ class FlutterProject {
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
 
-  /// Asynchronously returns the organization names found in this project as
+  /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
-  Future<Set<String>> organizationNames() async {
-    final List<String> candidates = await Future.wait(<Future<String>>[
-      ios.productBundleIdentifier(),
-      android.applicationId(),
-      android.group(),
-      example.android.applicationId(),
-      example.ios.productBundleIdentifier(),
-    ]);
+  Set<String> get organizationNames {
+    final List<String> candidates = <String>[
+      ios.productBundleIdentifier,
+      android.applicationId,
+      android.group,
+      example.android.applicationId,
+      example.ios.productBundleIdentifier,
+    ];
     return new Set<String>.from(candidates
         .map(_organizationNameFromPackageName)
         .where((String name) => name != null));
@@ -93,6 +92,13 @@ class FlutterProject {
   /// The Android sub project of this project.
   AndroidProject get android => new AndroidProject._(this);
 
+  /// The `pubspec.yaml` file of this project.
+  File get pubspecFile => directory.childFile('pubspec.yaml');
+
+  /// The `.packages` file of this project.
+  File get packagesFile => directory.childFile('.packages');
+
+  /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
   /// The example sub-project of this project.
@@ -128,6 +134,7 @@ class FlutterProject {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (!directory.existsSync() || hasExampleApp)
       return;
+    refreshPluginsList(this);
     await android.ensureReadyForPlatformSpecificTooling();
     await ios.ensureReadyForPlatformSpecificTooling();
     await injectPlugins(this);
@@ -140,6 +147,7 @@ class FlutterProject {
 /// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
   static final RegExp _productBundleIdPattern = new RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static const String _hostAppBundleName = 'Runner';
 
   IosProject._(this.parent);
 
@@ -148,6 +156,8 @@ class IosProject {
 
   /// The directory of this project.
   Directory get directory => parent.directory.childDirectory(isModule ? '.ios' : 'ios');
+
+  String get hostAppBundleName => '$_hostAppBundleName.app';
 
   /// True, if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
@@ -164,19 +174,30 @@ class IosProject {
   /// The 'Manifest.lock'.
   File get podManifestLock => directory.childDirectory('Pods').childFile('Manifest.lock');
 
-  Future<String> productBundleIdentifier() {
-    final File projectFile = directory.childDirectory('Runner.xcodeproj').childFile('project.pbxproj');
-    return _firstMatchInFile(projectFile, _productBundleIdPattern).then((Match match) => match?.group(1));
+  /// '.xcodeproj' folder of the host app.
+  Directory get xcodeProject => directory.childDirectory('$_hostAppBundleName.xcodeproj');
+
+  /// The '.pbxproj' file of the host app.
+  File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  /// The product bundle identifier of the host app.
+  String get productBundleIdentifier {
+    return _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
+  }
+
+  /// True, if the host app project is using Swift.
+  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
+
+  /// The build settings for the host app of this project, as a detached map.
+  Map<String, String> get buildSettings {
+    return xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path, _hostAppBundleName);
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (isModule && _shouldRegenerateFromTemplate()) {
-      final Template template = new Template.fromName(fs.path.join('module', 'ios'));
-      template.render(directory, <String, dynamic>{}, printStatusWhenWriting: false);
-    }
+    _regenerateFromTemplateIfNeeded();
     if (!directory.existsSync())
       return;
-    if (Cache.instance.fileOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.debug,
@@ -186,12 +207,23 @@ class IosProject {
     }
   }
 
-  Future<void> materialize() async {
-    throwToolExit('flutter materialize has not yet been implemented for iOS');
+  void _regenerateFromTemplateIfNeeded() {
+    if (!isModule)
+      return;
+    final bool pubspecChanged = isOlderThanReference(entity: directory, referenceFile: parent.pubspecFile);
+    final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(directory);
+    if (!pubspecChanged && !toolingChanged)
+      return;
+    _deleteIfExistsSync(directory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), directory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), directory);
+    if (hasPlugins(parent)) {
+      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), directory);
+    }
   }
 
-  bool _shouldRegenerateFromTemplate() {
-    return Cache.instance.fileOlderThanToolsStamp(directory.childFile('podhelper.rb'));
+  Future<void> materialize() async {
+    throwToolExit('flutter materialize has not yet been implemented for iOS');
   }
 
   File get generatedXcodePropertiesFile => directory.childDirectory('Flutter').childFile('Generated.xcconfig');
@@ -199,7 +231,20 @@ class IosProject {
   Directory get pluginRegistrantHost {
     return isModule
         ? directory.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
-        : directory.childDirectory('Runner');
+        : directory.childDirectory(_hostAppBundleName);
+  }
+
+  void _overwriteFromTemplate(String path, Directory target) {
+    final Template template = new Template.fromName(path);
+    template.render(
+      target,
+      <String, dynamic>{
+        'projectName': parent.manifest.appName,
+        'iosIdentifier': parent.manifest.iosBundleIdentifier
+      },
+      printStatusWhenWriting: false,
+      overwriteExisting: true,
+    );
   }
 }
 
@@ -237,7 +282,7 @@ class AndroidProject {
   bool get isModule => parent.isModule;
 
   File get appManifestFile {
-    return isUsingGradle()
+    return isUsingGradle
         ? fs.file(fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
         : hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
@@ -248,18 +293,18 @@ class AndroidProject {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
   }
 
-  bool isUsingGradle() {
+  bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
 
-  Future<String> applicationId() {
+  String get applicationId {
     final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return _firstMatchInFile(gradleFile, _applicationIdPattern).then((Match match) => match?.group(1));
+    return _firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
   }
 
-  Future<String> group() {
+  String get group {
     final File gradleFile = hostAppGradleRoot.childFile('build.gradle');
-    return _firstMatchInFile(gradleFile, _groupPattern).then((Match match) => match?.group(1));
+    return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
@@ -278,7 +323,8 @@ class AndroidProject {
   }
 
   bool _shouldRegenerateFromTemplate() {
-    return Cache.instance.fileOlderThanToolsStamp(_ephemeralDirectory.childFile('build.gradle'));
+    return isOlderThanReference(entity: _ephemeralDirectory, referenceFile: parent.pubspecFile)
+        || Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
   }
 
   Future<void> materialize() async {
@@ -305,11 +351,6 @@ class AndroidProject {
     gradle.injectGradleWrapper(_ephemeralDirectory);
   }
 
-  void _deleteIfExistsSync(Directory directory) {
-    if (directory.existsSync())
-      directory.deleteSync(recursive: true);
-  }
-
   void _overwriteFromTemplate(String path, Directory target) {
     final Template template = new Template.fromName(path);
     template.render(
@@ -324,17 +365,25 @@ class AndroidProject {
   }
 }
 
-/// Asynchronously returns the first line-based match for [regExp] in [file].
+/// Deletes [directory] with all content.
+void _deleteIfExistsSync(Directory directory) {
+  if (directory.existsSync())
+    directory.deleteSync(recursive: true);
+}
+
+
+/// Returns the first line-based match for [regExp] in [file].
 ///
 /// Assumes UTF8 encoding.
-Future<Match> _firstMatchInFile(File file, RegExp regExp) async {
-  if (!await file.exists()) {
+Match _firstMatchInFile(File file, RegExp regExp) {
+  if (!file.existsSync()) {
     return null;
   }
-  return file
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .map(regExp.firstMatch)
-      .firstWhere((Match match) => match != null, orElse: () => null);
+  for (String line in file.readAsLinesSync()) {
+    final Match match = regExp.firstMatch(line);
+    if (match != null) {
+      return match;
+    }
+  }
+  return null;
 }

@@ -140,6 +140,14 @@ class FlutterManifest {
     return null;
   }
 
+  /// Returns the iOS bundle identifier declared by this manifest in its
+  /// module descriptor. Returns null, if there is no such declaration.
+  String get iosBundleIdentifier {
+    if (isModule)
+      return _flutterDescriptor['module']['iosBundleIdentifier'];
+    return null;
+  }
+
   List<Map<String, dynamic>> get fontsDescriptor {
     final List<dynamic> fontList = _flutterDescriptor['fonts'];
     return fontList == null
