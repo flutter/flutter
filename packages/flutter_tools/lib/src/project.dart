@@ -212,7 +212,6 @@ class IosProject {
     _deleteIfExistsSync(directory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), directory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), directory);
-    refreshPluginsList(parent);
     if (hasPlugins(parent)) {
       _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), directory);
     }
