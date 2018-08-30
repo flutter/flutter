@@ -1,4 +1,4 @@
-Signature: 55fe586ba44fb4ac9fcec9857ce134ab
+Signature: 055777fad7c590dd7df4f1eecc2b975f
 
 UNUSED LICENSES:
 
@@ -1474,9 +1474,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.h
@@ -3006,7 +3003,6 @@ FILE: ../../../third_party/skia/src/core/SkSurfacePriv.h
 FILE: ../../../third_party/skia/src/core/SkTaskGroup.cpp
 FILE: ../../../third_party/skia/src/core/SkTaskGroup.h
 FILE: ../../../third_party/skia/src/core/SkTextBlob.cpp
-FILE: ../../../third_party/skia/src/core/SkTextMapStateProc.h
 FILE: ../../../third_party/skia/src/core/SkVertState.cpp
 FILE: ../../../third_party/skia/src/core/SkVertState.h
 FILE: ../../../third_party/skia/src/fonts/SkFontMgr_indirect.cpp
@@ -4615,6 +4611,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzMockGPUCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPNGEncoder.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathop.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzWEBPEncoder.cpp
