@@ -96,20 +96,21 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
   bool usesTerminalUi = true
 }) async{
-  if (iosApp.buildSettings == null)
+  final Map<String, String> buildSettings = iosApp.project.buildSettings;
+  if (buildSettings == null)
     return null;
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (isNotEmpty(iosApp.buildSettings['DEVELOPMENT_TEAM'])) {
+  if (isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
     printStatus(
       'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}'
+      'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}'
     );
     return null;
   }
 
-  if (isNotEmpty(iosApp.buildSettings['PROVISIONING_PROFILE']))
+  if (isNotEmpty(buildSettings['PROVISIONING_PROFILE']))
     return null;
 
   // If the user's environment is missing the tools needed to find and read

@@ -17,6 +17,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -91,9 +92,11 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
   });
   group('logging', () {
     MockIMobileDevice mockIMobileDevice;
+    MockIosProject mockIosProject;
 
     setUp(() {
       mockIMobileDevice = new MockIMobileDevice();
+      mockIosProject = new MockIosProject();
     });
 
     testUsingContext('suppresses non-Flutter lines from output', () async {
@@ -117,7 +120,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
 
       final IOSDevice device = new IOSDevice('123456');
       final DeviceLogReader logReader = device.getLogReader(
-        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+        app: new BuildableIOSApp(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -147,7 +150,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
 
       final IOSDevice device = new IOSDevice('123456');
       final DeviceLogReader logReader = device.getLogReader(
-        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+        app: new BuildableIOSApp(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
