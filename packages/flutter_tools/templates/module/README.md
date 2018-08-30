@@ -25,9 +25,7 @@ Flutter views.
 
 Written to `.android/` or `android/`.
 
-Mixin for adding Gradle boilerplate to Android projects. The `build.gradle`
-file is a template file so that it is created, not copied, on instantiation.
-That way, its timestamp reflects template instantiation time.
+Mixin for adding Gradle boilerplate to Android projects.
 
 #### host_app_common
 
@@ -83,7 +81,7 @@ suitable only when the Flutter part declares no plugin dependencies.
 
 Written to `.ios/` on top of `host_app_ephemeral`.
  
-Adds CocoaPods.
+Adds CocoaPods support.
 
 Combined contents define an ephemeral host app suitable for when the
-Flutter part sdeclares plugin dependencies.
+Flutter part declares plugin dependencies.

@@ -169,11 +169,11 @@ class Cache {
     return fs.file(fs.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
-  /// Returns `true` if either [file] is older than the tools stamp or if
-  /// [file] doesn't exist.
-  bool fileOlderThanToolsStamp(File file) {
+  /// Returns `true` if either [entity] is older than the tools stamp or if
+  /// [entity] doesn't exist.
+  bool isOlderThanToolsStamp(FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
-    return isOlderThanReference(file: file, referenceFile: flutterToolsStamp);
+    return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
   bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());

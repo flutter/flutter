@@ -194,11 +194,10 @@ class IosProject {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (_shouldRegenerateFromTemplate())
-      regenerateFromTemplate();
+    _regenerateFromTemplateIfNeeded();
     if (!directory.existsSync())
       return;
-    if (Cache.instance.fileOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.debug,
@@ -208,7 +207,13 @@ class IosProject {
     }
   }
 
-  void regenerateFromTemplate() {
+  void _regenerateFromTemplateIfNeeded() {
+    if (!isModule)
+      return;
+    final bool pubspecChanged = isOlderThanReference(entity: directory, referenceFile: parent.pubspecFile);
+    final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(directory);
+    if (!pubspecChanged && !toolingChanged)
+      return;
     _deleteIfExistsSync(directory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), directory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), directory);
@@ -219,14 +224,6 @@ class IosProject {
 
   Future<void> materialize() async {
     throwToolExit('flutter materialize has not yet been implemented for iOS');
-  }
-
-  bool _shouldRegenerateFromTemplate() {
-    if (!isModule)
-      return false;
-    final File templateFile = directory.childDirectory('Flutter').childFile('podhelper.rb');
-    return isOlderThanReference(file: templateFile, referenceFile: parent.pubspecFile)
-        || Cache.instance.fileOlderThanToolsStamp(templateFile);
   }
 
   File get generatedXcodePropertiesFile => directory.childDirectory('Flutter').childFile('Generated.xcconfig');
@@ -326,7 +323,8 @@ class AndroidProject {
   }
 
   bool _shouldRegenerateFromTemplate() {
-    return Cache.instance.fileOlderThanToolsStamp(_ephemeralDirectory.childFile('build.gradle'));
+    return isOlderThanReference(entity: _ephemeralDirectory, referenceFile: parent.pubspecFile)
+        || Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
   }
 
   Future<void> materialize() async {
