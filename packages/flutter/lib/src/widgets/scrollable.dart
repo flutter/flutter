@@ -480,16 +480,21 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // SCROLL WHEEL
 
-  void _handlePointerScroll(PointerScrollEvent event) {
+  bool _handlePointerScroll(PointerScrollEvent event) {
     final double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
     if (position != null) {
-      final double targetScrollPixels = math.min(
-          math.max(position.pixels + delta, position.minScrollExtent),
+      final double currentScrollOffset = position.pixels;
+      final double targetScrollOffset = math.min(
+          math.max(currentScrollOffset + delta, position.minScrollExtent),
           position.maxScrollExtent);
-      position.jumpTo(targetScrollPixels);
+      if (targetScrollOffset != currentScrollOffset) {
+        position.jumpTo(targetScrollOffset);
+        return true;
+      }
     }
+    return false;
   }
 
   // DESCRIPTION

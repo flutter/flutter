@@ -359,7 +359,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   /// Handler for device events caught by the binding in live test mode.
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
+  void dispatchEvent(PointerEvent event, HitTestResult result, bool propagating) {
     if (event is PointerDownEvent) {
       final RenderObject innerTarget = result.path.firstWhere(
         (HitTestEntry candidate) => candidate.target is RenderObject,
