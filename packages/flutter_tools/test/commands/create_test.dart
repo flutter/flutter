@@ -340,7 +340,7 @@ void main() {
       await _createProject(projectDir, <String>['--no-pub'], <String>[]);
       final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await project.ios.productBundleIdentifier(),
+        project.ios.productBundleIdentifier,
         'com.bar.foo.flutterProject',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -367,7 +367,7 @@ void main() {
       );
       final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await project.example.ios.productBundleIdentifier(),
+        project.example.ios.productBundleIdentifier,
         'com.bar.foo.flutterProjectExample',
       );
     }, timeout: allowForCreateFlutterProject);

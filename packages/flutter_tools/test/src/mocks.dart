@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -29,10 +30,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       file: fs.file('/mock/path/to/android/SkyShell.apk'),
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
-    iOS: new BuildableIOSApp(
-      appDirectory: '/mock/path/to/iOS/SkyShell.app',
-      projectBundleId: 'io.flutter.ios.mock'
-    )
+    iOS: new BuildableIOSApp(new MockIosProject())
   );
 }
 
@@ -333,6 +331,14 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   Stream<Device> get onRemoved => _onRemovedController.stream;
+}
+
+class MockIosProject extends Mock implements IosProject {
+  @override
+  String get productBundleIdentifier => 'com.example.test';
+
+  @override
+  String get hostAppBundleName => 'Runner.app';
 }
 
 class MockAndroidDevice extends Mock implements AndroidDevice {

@@ -1,11 +1,3 @@
-# This file should be used from the target section of the host-app's Podfile like this:
-# ```
-# target 'host' do
-#     flutter_application_path = /"(.*)\/.ios\/Flutter\/Generated.xcconfig"/.match(File.read("./Flutter/FlutterConfig.xcconfig"))[1]
-#     eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')))
-# end
-# ```
-
 def parse_KV_file(file, separator='=')
     file_abs_path = File.expand_path(file)
     if !File.exists? file_abs_path

@@ -17,7 +17,6 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
-import 'ios/xcodeproj.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 
@@ -93,7 +92,7 @@ class AndroidApk extends ApplicationPackage {
   static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
     File apkFile;
 
-    if (androidProject.isUsingGradle()) {
+    if (androidProject.isUsingGradle) {
       apkFile = await getGradleAppOut(androidProject);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
@@ -217,26 +216,10 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  factory IOSApp.fromCurrentDirectory() {
+  factory IOSApp.fromIosProject(IosProject project) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
-
-    final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
-    String id = iosWorkflow.getPlistValueFromFile(
-      plistPath,
-      plist.kCFBundleIdentifierKey,
-    );
-    if (id == null || !xcodeProjectInterpreter.isInstalled)
-      return null;
-    final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
-    final Map<String, String> buildSettings = xcodeProjectInterpreter.getBuildSettings(projectPath, 'Runner');
-    id = substituteXcodeVariables(id, buildSettings);
-
-    return new BuildableIOSApp(
-      appDirectory: 'ios',
-      projectBundleId: id,
-      buildSettings: buildSettings,
-    );
+    return new BuildableIOSApp(project);
   }
 
   @override
@@ -248,25 +231,12 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  static const String kBundleName = 'Runner.app';
+  BuildableIOSApp(this.project) : super(projectBundleId: project.productBundleIdentifier);
 
-  BuildableIOSApp({
-    this.appDirectory,
-    String projectBundleId,
-    this.buildSettings,
-  }) : super(projectBundleId: projectBundleId);
-
-  final String appDirectory;
-
-  /// Build settings of the app's Xcode project.
-  ///
-  /// These are the build settings as specified in the Xcode project files.
-  ///
-  /// Build settings may change depending on the parameters passed while building.
-  final Map<String, String> buildSettings;
+  final IosProject project;
 
   @override
-  String get name => kBundleName;
+  String get name => project.hostAppBundleName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -274,11 +244,8 @@ class BuildableIOSApp extends IOSApp {
   @override
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
-  /// True if the app is built from a Swift project. Null if unknown.
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
-
   String _buildAppPath(String type) {
-    return fs.path.join(getIosBuildDirectory(), type, kBundleName);
+    return fs.path.join(getIosBuildDirectory(), type, name);
   }
 }
 
@@ -317,7 +284,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(
           : new AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
       return applicationBinary == null
-          ? new IOSApp.fromCurrentDirectory()
+          ? new IOSApp.fromIosProject((await FlutterProject.current()).ios)
           : new IOSApp.fromPrebuiltApp(applicationBinary);
     case TargetPlatform.tester:
       return new FlutterTesterApp.fromCurrentDirectory();
@@ -346,7 +313,7 @@ class ApplicationPackageStore {
         android ??= await AndroidApk.fromAndroidProject((await FlutterProject.current()).android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= new IOSApp.fromCurrentDirectory();
+        iOS ??= IOSApp.fromIosProject((await FlutterProject.current()).ios);
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
