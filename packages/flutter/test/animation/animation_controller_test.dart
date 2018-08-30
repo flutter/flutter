@@ -581,17 +581,16 @@ void main() {
 
   group('AnimationBehavior', () {
     test('Default values for constructor', () {
-      final AnimationController controller = new AnimationController(vsync: const TestVSync());
+      final AnimationController controller = new AnimationController(vsync: const TestVSync(disableAnimations: true));
       expect(controller.animationBehavior, AnimationBehavior.normal);
 
-      final AnimationController repeating = new AnimationController.unbounded(vsync: const TestVSync());
+      final AnimationController repeating = new AnimationController.unbounded(vsync: const TestVSync(disableAnimations: true));
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
     });
 
-    testWidgets('AnimationBehavior.preserve runs at normal speed when animatingTo', (WidgetTester tester) async {
-      tester.binding.disableAnimations = true;
+    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () async {
       final AnimationController controller = new AnimationController(
-        vsync: const TestVSync(),
+        vsync: const TestVSync(disableAnimations: true),
         animationBehavior: AnimationBehavior.preserve,
       );
 
@@ -610,13 +609,11 @@ void main() {
 
       expect(controller.value, 1.0);
       expect(controller.status, AnimationStatus.completed);
-      tester.binding.disableAnimations = false;
     });
 
-    testWidgets('AnimationBehavior.normal runs at 20x speed when animatingTo', (WidgetTester tester) async {
-      tester.binding.disableAnimations = true;
+    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () async {
       final AnimationController controller = new AnimationController(
-        vsync: const TestVSync(),
+        vsync: const TestVSync(disableAnimations: true),
         animationBehavior: AnimationBehavior.normal,
       );
 
@@ -635,17 +632,14 @@ void main() {
 
       expect(controller.value, 1.0);
       expect(controller.status, AnimationStatus.completed);
-
-      tester.binding.disableAnimations = false;
     });
 
-    testWidgets('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', (WidgetTester tester) async {
-      tester.binding.disableAnimations = true;
+    test('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', () {
       final AnimationController controller = new AnimationController(
-        vsync: const TestVSync(),
+        vsync: const TestVSync(disableAnimations: true),
       );
       final AnimationController fastController = new AnimationController(
-        vsync: const TestVSync(),
+        vsync: const TestVSync(disableAnimations: true),
       );
 
       controller.fling(velocity: 1.0, animationBehavior: AnimationBehavior.preserve);
@@ -655,7 +649,6 @@ void main() {
 
       // We don't assert a specific faction that normal animation.
       expect(controller.value < fastController.value, true);
-      tester.binding.disableAnimations = false;
     });
   });
 }
