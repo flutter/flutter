@@ -49,7 +49,7 @@
   // We keep a separate reference to this and create it ahead of time because we want to be able to
   // setup a shell along with its platform view before the view has to appear.
   fml::scoped_nsobject<FlutterView> _flutterView;
-  fml::scoped_nsobject<UIView> _launchView;
+  fml::scoped_nsobject<UIView> _splashScreenView;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
@@ -322,47 +322,46 @@
   self.view.multipleTouchEnabled = YES;
   self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
-  [self installLaunchViewIfNecessary];
+  [self installSplashScreenViewIfNecessary];
 }
 
 #pragma mark - Managing launch views
 
-- (void)installLaunchViewIfNecessary {
+- (void)installSplashScreenViewIfNecessary {
   // Show the launch screen view again on top of the FlutterView if available.
   // This launch screen view will be removed once the first Flutter frame is rendered.
-  [_launchView.get() removeFromSuperview];
-  _launchView.reset();
-  NSString* launchStoryboardName =
-      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
-  if (launchStoryboardName && !self.isBeingPresented && !self.isMovingToParentViewController) {
-    UIViewController* launchViewController =
-        [[UIStoryboard storyboardWithName:launchStoryboardName bundle:nil]
-            instantiateInitialViewController];
-    _launchView.reset([launchViewController.view retain]);
-    _launchView.get().frame = self.view.bounds;
-    _launchView.get().autoresizingMask =
-        UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [self.view addSubview:_launchView.get()];
+  if (self.isBeingPresented || self.isMovingToParentViewController) {
+    [_splashScreenView.get() removeFromSuperview];
+    _splashScreenView.reset();
+    return;
   }
+
+  // Use the property getter to initialize the default value.
+  UIView* splashScreenView = self.splashScreenView;
+  if (splashScreenView == nil) {
+    return;
+  }
+  splashScreenView.frame = self.view.bounds;
+  [self.view addSubview:splashScreenView];
 }
 
-- (void)removeLaunchViewIfPresent {
-  if (!_launchView) {
+- (void)removeSplashScreenViewIfPresent {
+  if (!_splashScreenView) {
     return;
   }
 
   [UIView animateWithDuration:0.2
       animations:^{
-        _launchView.get().alpha = 0;
+        _splashScreenView.get().alpha = 0;
       }
       completion:^(BOOL finished) {
-        [_launchView.get() removeFromSuperview];
-        _launchView.reset();
+        [_splashScreenView.get() removeFromSuperview];
+        _splashScreenView.reset();
       }];
 }
 
-- (void)installLaunchViewCallback {
-  if (!_shell || !_launchView) {
+- (void)installSplashScreenViewCallback {
+  if (!_shell || !_splashScreenView) {
     return;
   }
   auto weak_platform_view = _shell->GetPlatformView();
@@ -381,10 +380,32 @@
           // association. Thus, we are not convinced that the unsafe unretained weak object is in
           // fact alive.
           if (weak_platform_view) {
-            [weak_flutter_view_controller removeLaunchViewIfPresent];
+            [weak_flutter_view_controller removeSplashScreenViewIfPresent];
           }
         });
       });
+}
+
+#pragma mark - Properties
+
+- (UIView*)splashScreenView {
+  if (_splashScreenView == nullptr) {
+    NSString* launchStoryboardName =
+        [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
+    UIStoryboard* storyboard = [UIStoryboard storyboardWithName:launchStoryboardName bundle:nil];
+    if (storyboard == nil) {
+      return nil;
+    }
+    UIViewController* splashScreenViewController = [storyboard instantiateInitialViewController];
+    self.splashScreenView = splashScreenViewController.view;
+  }
+  return _splashScreenView.get();
+}
+
+- (void)setSplashScreenView:(UIView*)view {
+  _splashScreenView.reset([view retain]);
+  _splashScreenView.get().autoresizingMask =
+      UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 }
 
 #pragma mark - Surface creation and teardown updates
@@ -392,7 +413,7 @@
 - (void)surfaceUpdated:(BOOL)appeared {
   // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and GPU thread.
   if (appeared) {
-    [self installLaunchViewCallback];
+    [self installSplashScreenViewCallback];
     _shell->GetPlatformView()->NotifyCreated();
 
   } else {
