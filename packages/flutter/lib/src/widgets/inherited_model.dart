@@ -118,8 +118,10 @@ abstract class InheritedModel<T> extends InheritedWidget {
   // with the one that supports the specified model [aspect].
   static Iterable<InheritedElement> _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect) sync* {
     final InheritedElement model = context.ancestorInheritedElementForWidgetOfExactType(T);
-    if (model != null)
-      yield model;
+    if (model == null)
+      return;
+
+    yield(model);
 
     assert(model.widget is T);
     final T modelWidget = model.widget;
@@ -133,6 +135,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     });
     if (modelParent == null)
       return;
+
     yield* _findModels<T>(modelParent, aspect);
   }
 
@@ -159,14 +162,13 @@ abstract class InheritedModel<T> extends InheritedWidget {
     // Rebuilding one of the intermediate models only causes its dependents
     // to be rebuilt if its aspects property changes (see _shouldNotify).
     final List<InheritedElement> models = _findModels<T>(context, aspect).toList();
-    if (models.isEmpty)
-      return null;
     final InheritedElement lastModel = models.last;
     for (InheritedElement model in models) {
       final T value = context.inheritFromElement(model, aspect: aspect);
       if (model == lastModel)
         return value;
     }
+
     assert(false);
     return null;
   }
@@ -190,6 +192,7 @@ class InheritedModelElement<T> extends InheritedElement {
       setDependencies(dependent, new HashSet<T>());
     } else {
       assert(aspect is T);
+      var foo = getDependencies(dependent);
       setDependencies(dependent, (dependencies ?? new HashSet<T>())..add(aspect));
     }
   }
