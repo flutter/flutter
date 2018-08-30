@@ -4,7 +4,6 @@
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -38,7 +37,5 @@ void main() {
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });
-    // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
-    // https://github.com/flutter/flutter/issues/17833.
-  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
+  }, timeout: const Timeout.factor(6));
 }
