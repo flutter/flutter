@@ -434,15 +434,6 @@ void addIosWithBundleId(Directory directory, String id) {
         ..writeAsStringSync(projectFileWithBundleId(id));
 }
 
-void addIosWithBundleIdInPlist(Directory directory, String id) {
-  directory
-      .childDirectory('ios')
-      .childDirectory('Runner')
-      .childFile('Info.plist')
-    ..createSync(recursive: true)
-    ..writeAsStringSync(projectFileWithBundleId(id));
-}
-
 void addAndroidWithApplicationId(Directory directory, String id) {
   directory
       .childDirectory('android')

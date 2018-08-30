@@ -188,9 +188,9 @@ Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
 /// project and target.
 String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
-  if (matches.isEmpty) {
+  if (matches.isEmpty)
     return str;
-  }
+
   return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
 }
 
