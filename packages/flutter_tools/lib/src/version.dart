@@ -228,6 +228,22 @@ class FlutterVersion {
   @visibleForTesting
   static Duration timeToPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
+  /// Reset the version freshness information by removing the stamp file.
+  ///
+  /// New version freshness information will be regenerated when
+  /// [checkFlutterVersionFreshness] is called after this. This is typically
+  /// used when switching channels so that stale information from another
+  /// channel doesn't linger.
+  static Future<Null> resetFlutterVersionFreshnessCheck() async {
+    try {
+      await Cache.instance.getStampFileFor(
+        VersionCheckStamp.kFlutterVersionCheckStampFile,
+      ).delete();
+    } on FileSystemException {
+      // Ignore, since we don't mind if the file didn't exist in the first place.
+    }
+  }
+
   /// Checks if the currently installed version of Flutter is up-to-date, and
   /// warns the user if it isn't.
   ///
