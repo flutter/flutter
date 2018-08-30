@@ -850,7 +850,7 @@ class _RenderDecoration extends RenderBox {
       // elements and the floating label. This value breaks down for the
       // very large font sizes available on iOS, so the approximation below
       // is used instead.
-      final double overflowHeight = label.size.height > 40.0 ? label.size.height / 2 : 0.0;
+      final double overflowHeight = label.size.height > 30.0 ? label.size.height / 2 : 0.0;
       containerHeight += math.max(decoration.floatingLabelHeight, overflowHeight);
       inputBaseline += math.max(decoration.floatingLabelHeight, overflowHeight);
     }
