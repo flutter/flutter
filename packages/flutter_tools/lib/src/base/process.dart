@@ -200,8 +200,7 @@ Future<int> runInteractively(List<String> command, {
     stdout.addStream(process.stdout),
     stderr.addStream(process.stderr),
   ]);
-  final int exitCode = await process.exitCode;
-  return exitCode;
+  return await process.exitCode;
 }
 
 Future<Null> runAndKill(List<String> cmd, Duration timeout) {
