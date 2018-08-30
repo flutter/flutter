@@ -105,7 +105,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// all model aspects. This is typically done when a model can be used
   /// to "shadow" some aspects of an ancestor.
   @protected
-  bool isSupportedAspect(T aspect) => true;
+  bool isSupportedAspect(Object aspect) => true;
 
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
