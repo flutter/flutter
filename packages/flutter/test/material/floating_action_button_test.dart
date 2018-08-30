@@ -51,6 +51,47 @@ void main() {
     expect(find.byTooltip('Add'), findsOneWidget);
   });
 
+  // Regression test for: https://github.com/flutter/flutter/pull/21084
+  testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+            child: Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+    await tester.longPressAt(_rightEdgeOfFab(tester));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
+  // Regression test for: https://github.com/flutter/flutter/pull/21084
+  testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+    await tester.longPressAt(_rightEdgeOfFab(tester));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
@@ -63,10 +104,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Text), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -457,4 +498,9 @@ void main() {
         paintsExactlyCountTimes(#clipPath, 0)
     );
   });
+}
+
+Offset _rightEdgeOfFab(WidgetTester tester) {
+  final Finder fab = find.byType(FloatingActionButton);
+  return tester.getRect(fab).centerRight - const Offset(1.0, 0.0);
 }
