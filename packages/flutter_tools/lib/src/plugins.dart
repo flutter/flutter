@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/template.dart';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
@@ -21,17 +20,6 @@ void _renderTemplateToFile(String template, dynamic context, String filePath) {
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
-
-void _overwriteFromTemplate(String path, Directory target) {
-  final Template template = new Template.fromName(path);
-  template.render(
-    target,
-    const <String, dynamic>{},
-    printStatusWhenWriting: false,
-    overwriteExisting: true,
-  );
-}
-
 
 class Plugin {
   final String name;
