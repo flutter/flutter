@@ -189,13 +189,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
-  if (!await upgradePbxProjWithFlutterAssets(app.name, app.appDirectory))
+  if (!await upgradePbxProjWithFlutterAssets(app.project))
     return new XcodeBuildResult(success: false);
 
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
 
-  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
+  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.directory.path);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -230,8 +230,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
-  final Directory appDirectory = fs.directory(app.appDirectory);
-  await _addServicesToBundle(appDirectory);
+  await _addServicesToBundle(app.project.directory);
 
   final FlutterProject project = await FlutterProject.current();
   await updateGeneratedXcodeProperties(
@@ -242,22 +241,21 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   if (hasPlugins(project)) {
-    final String iosPath = fs.path.join(fs.currentDirectory.path, app.appDirectory);
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
     final Fingerprinter fingerprinter = new Fingerprinter(
       fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
       paths: <String>[
-        _getPbxProjPath(app.appDirectory),
-        fs.path.join(iosPath, 'Podfile'),
-        fs.path.join(iosPath, 'Flutter', 'Generated.xcconfig'),
+        app.project.xcodeProjectInfoFile.path,
+        app.project.podfile.path,
+        app.project.generatedXcodePropertiesFile.path,
       ],
       properties: <String, String>{},
     );
     final bool didPodInstall = await cocoaPods.processPods(
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
+      isSwift: project.ios.isSwift,
       dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
     );
     if (didPodInstall)
@@ -288,7 +286,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
+  final List<FileSystemEntity> contents = app.project.directory.listSync();
   for (FileSystemEntity entity in contents) {
     if (fs.path.extension(entity.path) == '.xcworkspace') {
       buildCommands.addAll(<String>[
@@ -353,7 +351,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
-    workingDirectory: app.appDirectory,
+    workingDirectory: app.project.directory.path,
     allowReentrantFlutter: true
   );
   buildSubStatus?.stop();
@@ -381,7 +379,7 @@ Future<XcodeBuildResult> buildXcodeProject({
             '-allowProvisioningDeviceRegistration',
           ].contains(buildCommand);
         }).toList(),
-    workingDirectory: app.appDirectory,
+    workingDirectory: app.project.directory.path,
   ));
 
   if (buildResult.exitCode != 0) {
@@ -400,7 +398,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       stderr: buildResult.stderr,
       xcodeBuildExecution: new XcodeBuildExecution(
         buildCommands: buildCommands,
-        appDirectory: app.appDirectory,
+        appDirectory: app.project.directory.path,
         buildForPhysicalDevice: buildForDevice,
         buildSettings: buildSettings,
       ),
@@ -568,9 +566,6 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
   }
 }
 
-/// The path of the Xcode project file.
-String _getPbxProjPath(String appPath) => fs.path.join(fs.currentDirectory.path, appPath, 'Runner.xcodeproj', 'project.pbxproj');
-
 void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
   printTrace("Creating service definitions manifest at '${manifest.path}'");
   final List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => <String, String>{
@@ -583,8 +578,8 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
-Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {
-  final File xcodeProjectFile = fs.file(_getPbxProjPath(appPath));
+Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
+  final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(await xcodeProjectFile.exists());
   final List<String> lines = await xcodeProjectFile.readAsLines();
 
@@ -601,7 +596,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {
   const String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
 
 
-  printStatus("Upgrading project.pbxproj of $app' to include the "
+  printStatus("Upgrading project.pbxproj of ${project.hostAppBundleName}' to include the "
               "'flutter_assets' directory");
 
   if (!lines.contains(l1) || !lines.contains(l3) ||
