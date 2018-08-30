@@ -411,11 +411,11 @@ class MaterialButton extends StatelessWidget {
       case ButtonTextTheme.normal:
         return enabled
           ? (themeIsDark ? Colors.white : Colors.black87)
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.accent:
         return enabled
           ? theme.accentColor
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.primary:
         return enabled
           ? (fillIsDark ? Colors.white : Colors.black)
