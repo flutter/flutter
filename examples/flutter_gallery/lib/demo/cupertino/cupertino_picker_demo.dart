@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
@@ -20,6 +21,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedColorIndex = 0;
 
   Duration timer = Duration();
+
+  DateTime date = new DateTime.now();
 
   Widget _buildMenu(List<Widget> children) {
     return Container(
@@ -114,15 +117,47 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         );
       },
       child: _buildMenu(
-          <Widget>[
-            const Text('Countdown Timer'),
-            Text(
-              '${timer.inHours}:'
-                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
-                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
-              style: const TextStyle(color: CupertinoColors.inactiveGray),
-            ),
-          ]
+        <Widget>[
+          const Text('Countdown Timer'),
+          new Text(
+            '${timer.inHours}:'
+              '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
+              '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(BuildContext context) {
+    return new GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              new CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: date,
+                onDateTimeChanged: (DateTime newDate) {
+                  setState(() {
+                    date = newDate;
+                  });
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+        <Widget>[
+          const Text('Calendar'),
+          new Text(
+            DateFormat.yMMMMd().format(date),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ]
       ),
     );
   }
@@ -166,6 +201,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 ),
               ),
               _buildCountdownTimerPicker(context),
+              _buildDatePicker(context),
             ],
           ),
         ),
