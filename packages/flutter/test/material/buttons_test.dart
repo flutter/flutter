@@ -326,7 +326,7 @@ void main() {
 
     await tester.pumpWidget(buttonWidget);
 
-    final RichText text = tester.widget(find.byType(RichText));
+    final RichText text = tester.widget<RichText>(find.byType(RichText));
     expect(text.text.style.color, Colors.black38);
   });
 
