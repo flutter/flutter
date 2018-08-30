@@ -13,9 +13,9 @@ class ButtonsDemo {
 
   void buttons() {
 
-// START buttons_raised
-// Create a raised button.
-new RaisedButton(
+// START buttons_contained
+// Create a contained button.
+new ContainedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -25,14 +25,14 @@ new RaisedButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const RaisedButton(
+const ContainedButton(
   child: Text('BUTTON TITLE'),
   onPressed: null
 );
 
 // Create a button with an icon and a
 // title.
-new RaisedButton.icon(
+new ContainedButton.icon(
   icon: const Icon(Icons.add, size: 18.0),
   label: const Text('BUTTON TITLE'),
   onPressed: () {
@@ -69,9 +69,9 @@ new OutlineButton.icon(
 );
 // END
 
-// START buttons_flat
-// Create a flat button.
-new FlatButton(
+// START buttons_text
+// Create a text button.
+new TextButton(
   child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
@@ -81,7 +81,7 @@ new FlatButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-const FlatButton(
+const TextButton(
   child: Text('BUTTON TITLE'),
   onPressed: null
 );

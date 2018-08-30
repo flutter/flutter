@@ -6,21 +6,21 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-const String _raisedText =
-    'Raised buttons add dimension to mostly flat layouts. They emphasize '
+const String _containedText =
+    'Contained buttons add dimension to mostly flat layouts. They emphasize '
     'functions on busy or wide spaces.';
 
-const String _raisedCode = 'buttons_raised';
+const String _containedCode = 'buttons_contained';
 
-const String _flatText = 'A flat button displays an ink splash on press '
-    'but does not lift. Use flat buttons on toolbars, in dialogs and '
+const String _textText = 'A text button displays an ink splash on press '
+    'but does not lift. Use text buttons on toolbars, in dialogs and '
     'inline with padding';
 
-const String _flatCode = 'buttons_flat';
+const String _textCode = 'buttons_flat';
 
 const String _outlineText =
     'Outline buttons become opaque and elevate when pressed. They are often '
-    'paired with raised buttons to indicate an alternative, secondary action.';
+    'paired with contained buttons to indicate an alternative, secondary action.';
 
 const String _outlineCode = 'buttons_outline';
 
@@ -63,22 +63,22 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       new ComponentDemoTabData(
-        tabName: 'RAISED',
-        description: _raisedText,
+        tabName: 'CONTAINED',
+        description: _containedText,
         demoWidget: new ButtonTheme.fromButtonThemeData(
           data: buttonTheme,
-          child: buildRaisedButton(),
+          child: buildContainedButton(),
         ),
-        exampleCodeTag: _raisedCode,
+        exampleCodeTag: _containedCode,
       ),
       new ComponentDemoTabData(
-        tabName: 'FLAT',
-        description: _flatText,
+        tabName: 'TEXT',
+        description: _textText,
         demoWidget: new ButtonTheme.fromButtonThemeData(
           data: buttonTheme,
-          child: buildFlatButton(),
+          child: buildTextButton(),
         ),
-        exampleCodeTag: _flatCode,
+        exampleCodeTag: _textCode,
       ),
       new ComponentDemoTabData(
         tabName: 'OUTLINE',
@@ -125,7 +125,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildRaisedButton() {
+  Widget buildContainedButton() {
     return new Align(
       alignment: const Alignment(0.0, -0.2),
       child: new Column(
@@ -134,13 +134,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new RaisedButton(
-                child: const Text('RAISED BUTTON'),
+              new ContainedButton(
+                child: const Text('CONTAINED'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              const RaisedButton(
+              const ContainedButton(
                 child: Text('DISABLED'),
                 onPressed: null,
               ),
@@ -149,14 +149,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new RaisedButton.icon(
+              new ContainedButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
-                label: const Text('RAISED BUTTON'),
+                label: const Text('CONTAINED'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              new RaisedButton.icon(
+              new ContainedButton.icon(
                 icon: const Icon(Icons.add, size: 18.0),
                 label: const Text('DISABLED'),
                 onPressed: null,
@@ -168,7 +168,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildFlatButton() {
+  Widget buildTextButton() {
     return new Align(
       alignment: const Alignment(0.0, -0.2),
       child: new Column(
@@ -177,13 +177,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new FlatButton(
-                child: const Text('FLAT BUTTON'),
+              new TextButton(
+                child: const Text('TEXT BUTTON'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              const FlatButton(
+              const TextButton(
                 child: Text('DISABLED'),
                 onPressed: null,
               ),
@@ -192,14 +192,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new ButtonBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new FlatButton.icon(
+              new TextButton.icon(
                 icon: const Icon(Icons.add_circle_outline, size: 18.0),
-                label: const Text('FLAT BUTTON'),
+                label: const Text('TEXT BUTTON'),
                 onPressed: () {
                   // Perform some action
                 },
               ),
-              new FlatButton.icon(
+              new TextButton.icon(
                 icon: const Icon(Icons.add_circle_outline, size: 18.0),
                 label: const Text('DISABLED'),
                 onPressed: null,

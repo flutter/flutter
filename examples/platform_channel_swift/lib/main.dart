@@ -65,7 +65,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
               new Text(_batteryLevel, key: const Key('Battery level label')),
               new Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: new RaisedButton(
+                child: new ContainedButton(
                   child: const Text('Refresh'),
                   onPressed: _getBatteryLevel,
                 ),

@@ -194,7 +194,7 @@ void main() {
                 child: new ListView(
                   children: <Widget>[
                     const Text('drawer'),
-                    new FlatButton(
+                    new TextButton(
                       child: const Text('close'),
                       onPressed: () => Navigator.pop(context),
                     ),
@@ -202,7 +202,7 @@ void main() {
                 ),
               ),
               body: new Container(
-                child: new FlatButton(
+                child: new TextButton(
                   child: const Text('button'),
                   onPressed: () { buttonPressed = true; },
                 ),

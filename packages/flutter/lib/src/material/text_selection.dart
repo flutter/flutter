@@ -7,9 +7,9 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-import 'flat_button.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_button.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
@@ -38,13 +38,13 @@ class _TextSelectionToolbar extends StatelessWidget {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     if (handleCut != null)
-      items.add(new FlatButton(child: new Text(localizations.cutButtonLabel), onPressed: handleCut));
+      items.add(new TextButton(child: new Text(localizations.cutButtonLabel), onPressed: handleCut));
     if (handleCopy != null)
-      items.add(new FlatButton(child: new Text(localizations.copyButtonLabel), onPressed: handleCopy));
+      items.add(new TextButton(child: new Text(localizations.copyButtonLabel), onPressed: handleCopy));
     if (handlePaste != null)
-      items.add(new FlatButton(child: new Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
+      items.add(new TextButton(child: new Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
     if (handleSelectAll != null)
-      items.add(new FlatButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
+      items.add(new TextButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
 
     return new Material(
       elevation: 1.0,

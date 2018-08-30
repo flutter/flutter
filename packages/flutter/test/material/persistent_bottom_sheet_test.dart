@@ -147,7 +147,7 @@ void main() {
             height: 200.0,
             child: new Builder(
               builder: (BuildContext context) {
-                return new RaisedButton(
+                return new ContainedButton(
                   child: const Text('showModalBottomSheet'),
                   onPressed: () {
                     showModalBottomSheet<void>(

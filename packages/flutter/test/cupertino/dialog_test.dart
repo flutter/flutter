@@ -926,7 +926,7 @@ Widget createAppWithButtonThatLaunchesDialog({WidgetBuilder dialogBuilder}) {
     home: new Material(
       child: new Center(
         child: new Builder(builder: (BuildContext context) {
-          return new RaisedButton(
+          return new ContainedButton(
             onPressed: () {
               showDialog<void>(
                 context: context,

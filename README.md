@@ -73,7 +73,7 @@ class CounterState extends State<Counter> {
     // instances of widgets.
     return new Row(
       children: <Widget>[
-        new RaisedButton(
+        new ContainedButton(
           onPressed: increment,
           child: new Text('Increment'),
         ),

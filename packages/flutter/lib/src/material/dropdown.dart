@@ -465,7 +465,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
-///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
+///  * [ContainedButton], [TextButton], ordinary buttons that trigger a single action.
 ///  * <https://material.google.com/components/buttons.html#buttons-dropdown-buttons>
 class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.

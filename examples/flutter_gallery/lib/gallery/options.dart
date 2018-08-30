@@ -152,7 +152,7 @@ class _ActionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new _OptionsItem(
-      child: new _FlatButton(
+      child: new _TextButton(
         onPressed: onTap,
         child: new Text(text),
       ),
@@ -160,15 +160,15 @@ class _ActionItem extends StatelessWidget {
   }
 }
 
-class _FlatButton extends StatelessWidget {
-  const _FlatButton({ Key key, this.onPressed, this.child }) : super(key: key);
+class _TextButton extends StatelessWidget {
+  const _TextButton({ Key key, this.onPressed, this.child }) : super(key: key);
 
   final VoidCallback onPressed;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return new FlatButton(
+    return new TextButton(
       padding: EdgeInsets.zero,
       onPressed: onPressed,
       child: new DefaultTextStyle(

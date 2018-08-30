@@ -81,7 +81,7 @@ void main() {
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new FlatButton(
+                child: new TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -135,7 +135,7 @@ void main() {
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new FlatButton(
+                child: new TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(new MaterialPageRoute<void>(
@@ -188,11 +188,11 @@ void main() {
         builder: (BuildContext context) {
           return new AlertDialog(
             actions: <Widget> [
-              new FlatButton(
+              new TextButton(
                 child: const Text('YES'),
                 onPressed: () { Navigator.of(context).pop(true); },
               ),
-              new FlatButton(
+              new TextButton(
                 child: const Text('NO'),
                 onPressed: () { Navigator.of(context).pop(false); },
               ),
@@ -209,7 +209,7 @@ void main() {
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new FlatButton(
+                child: new TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(new MaterialPageRoute<void>(
@@ -295,7 +295,7 @@ void main() {
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new FlatButton(
+                child: new TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(route);

@@ -117,7 +117,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     Widget body;
     if (leaveBehindItems.isEmpty) {
       body = new Center(
-        child: new RaisedButton(
+        child: new ContainedButton(
           onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
           child: const Text('Reset the list'),
         ),

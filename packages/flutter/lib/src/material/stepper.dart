@@ -7,11 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
-import 'flat_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_button.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -347,7 +347,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         constraints: const BoxConstraints.tightFor(height: 48.0),
         child: new Row(
           children: <Widget>[
-            new FlatButton(
+            new TextButton(
               onPressed: widget.onStepContinue,
               color: _isDark() ? themeData.backgroundColor : themeData.primaryColor,
               textColor: Colors.white,
@@ -356,7 +356,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             ),
             new Container(
               margin: const EdgeInsetsDirectional.only(start: 8.0),
-              child: new FlatButton(
+              child: new TextButton(
                 onPressed: widget.onStepCancel,
                 textColor: cancelColor,
                 textTheme: ButtonTextTheme.normal,

@@ -944,7 +944,7 @@ class FilterChip extends StatelessWidget
 /// Action chips are displayed after primary content, such as below a card or
 /// persistently at the bottom of a screen.
 ///
-/// The material button widgets, [RaisedButton], [FlatButton], and
+/// The material button widgets, [ContainedButton], [TextButton], and
 /// [OutlineButton], are an alternative to action chips, which should appear
 /// statically and consistently in a UI.
 ///

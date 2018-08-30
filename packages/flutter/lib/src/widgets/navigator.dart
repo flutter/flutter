@@ -402,7 +402,7 @@ class NavigatorObserver {
 ///     return new Scaffold(
 ///       appBar: new AppBar(title: new Text('My Page')),
 ///       body: new Center(
-///         child: new FlatButton(
+///         child: new TextButton(
 ///           child: new Text('POP'),
 ///           onPressed: () {
 ///             Navigator.pop(context);

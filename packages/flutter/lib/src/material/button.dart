@@ -24,7 +24,7 @@ import 'theme_data.dart';
 /// be used for custom Material buttons that optionally incorporate defaults
 /// from the themes or from app-specific sources.
 ///
-/// [RaisedButton] and [FlatButton] configure a [RawMaterialButton] based
+/// [ContainedButton] and [TextButton] configure a [RawMaterialButton] based
 /// on the current [Theme] and [ButtonTheme].
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
@@ -233,8 +233,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for onPressed.
 ///
-/// Rather than using this class directly, consider using [FlatButton] or
-/// [RaisedButton], which configure this class with appropriate defaults that
+/// Rather than using this class directly, consider using [TextButton] or
+/// [ContainedButton], which configure this class with appropriate defaults that
 /// match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
@@ -250,7 +250,7 @@ class MaterialButton extends StatelessWidget {
   /// Creates a material button.
   ///
   /// Rather than creating a material button directly, consider using
-  /// [FlatButton] or [RaisedButton]. To create a custom Material button
+  /// [TextButton] or [ContainedButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
   ///
   /// The [clipBehavior] argument must not be null.
@@ -332,9 +332,9 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [FlatButton], a material button specialized for the case where the
+  ///  * [TextButton], a material button specialized for the case where the
   ///    elevation is zero.
-  ///  * [RaisedButton], a material button specialized for the case where the
+  ///  * [ContainedButton], a material button specialized for the case where the
   ///    elevation is non-zero.
   final double elevation;
 

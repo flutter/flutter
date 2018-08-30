@@ -126,13 +126,13 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
             style: dialogTextStyle
           ),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
               child: const Text('CANCEL'),
               onPressed: () {
                 Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
               }
             ),
-            new FlatButton(
+            new TextButton(
               child: const Text('DISCARD'),
               onPressed: () {
                 Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
@@ -152,7 +152,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
       appBar: new AppBar(
         title: new Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
-          new FlatButton(
+          new TextButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
             onPressed: () {
               Navigator.pop(context, DismissDialogAction.save);

@@ -13,13 +13,13 @@ import 'package:flutter/widgets.dart' hide Flow;
 import 'app_bar.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
 import 'list_tile.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
+import 'text_button.dart';
 import 'theme.dart';
 
 /// A [ListTile] that shows an about box.
@@ -295,7 +295,7 @@ class AboutDialog extends StatelessWidget {
         child: new ListBody(children: body),
       ),
       actions: <Widget>[
-        new FlatButton(
+        new TextButton(
           child: new Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
@@ -307,7 +307,7 @@ class AboutDialog extends StatelessWidget {
             );
           }
         ),
-        new FlatButton(
+        new TextButton(
           child: new Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);

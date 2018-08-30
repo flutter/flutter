@@ -29,11 +29,11 @@ import 'theme.dart';
 ///       new ButtonTheme.bar( // make buttons use the appropriate styles for cards
 ///         child: new ButtonBar(
 ///           children: <Widget>[
-///             new FlatButton(
+///             new TextButton(
 ///               child: const Text('BUY TICKETS'),
 ///               onPressed: () { /* ... */ },
 ///             ),
-///             new FlatButton(
+///             new TextButton(
 ///               child: const Text('LISTEN'),
 ///               onPressed: () { /* ... */ },
 ///             ),

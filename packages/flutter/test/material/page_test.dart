@@ -283,7 +283,7 @@ void main() {
   testWidgets('back gesture while OS changes', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => new Material(
-        child: new FlatButton(
+        child: new TextButton(
           child: const Text('PUSH'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),

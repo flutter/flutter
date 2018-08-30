@@ -6,9 +6,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
-import 'flat_button.dart';
 import 'material.dart';
 import 'scaffold.dart';
+import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -115,7 +115,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    return new FlatButton(
+    return new TextButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
       child: new Text(widget.label),
     );

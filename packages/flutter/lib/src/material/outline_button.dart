@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
 import 'colors.dart';
-import 'raised_button.dart';
+import 'contained_button.dart';
 import 'theme.dart';
 
 // The total time to make the button's fill color opaque and change
@@ -18,7 +18,7 @@ const Duration _kPressDuration = Duration(milliseconds: 150);
 // elevation.
 const Duration _kElevationDuration = Duration(milliseconds: 75);
 
-/// A cross between [RaisedButton] and [FlatButton]: a bordered button whose
+/// A cross between [ContainedButton] and [TextButton]: a bordered button whose
 /// elevation increases and whose background becomes opaque when the button
 /// is pressed.
 ///
@@ -31,7 +31,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 /// and [highlightedBorderColor].
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and by
-/// default will resemble a flat button in the [disabledColor].
+/// default will resemble a text button in the [disabledColor].
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
@@ -41,12 +41,12 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///
 /// See also:
 ///
-///  * [RaisedButton], a filled material design button with a shadow.
-///  * [FlatButton], a material design button without a shadow.
+///  * [ContainedButton], a filled material design button with a shadow.
+///  * [TextButton], a material design button without a shadow.
 ///  * [DropdownButton], a button that shows options to select from.
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
-///  * [InkWell], which implements the ink splash part of a flat button.
+///  * [InkWell], which implements the ink splash part of a text button.
 ///  * <https://material.google.com/components/buttons.html>
 class OutlineButton extends StatefulWidget {
   /// Create a filled button.
@@ -309,7 +309,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     return widget.textTheme ?? buttonTheme.textTheme;
   }
 
-  // TODO(hmuller): this method is the same as FlatButton
+  // TODO(hmuller): this method is the same as TextButton
   Color _getTextColor(ThemeData theme, ButtonThemeData buttonTheme) {
     final Color color = widget.enabled ? widget.textColor : widget.disabledTextColor;
     if (color != null)
@@ -345,7 +345,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     return colorTween.evaluate(_fillAnimation);
   }
 
-  // TODO(hmuller): this method is the same as FlatButton
+  // TODO(hmuller): this method is the same as TextButton
   Color _getSplashColor(ThemeData theme, ButtonThemeData buttonTheme) {
     if (widget.splashColor != null)
       return widget.splashColor;
@@ -398,7 +398,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     return new AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
-        return new RaisedButton(
+        return new ContainedButton(
           textColor: textColor,
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(theme),

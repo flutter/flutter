@@ -14,8 +14,8 @@ import 'button_theme.dart';
 import 'colors.dart';
 import 'dialog.dart';
 import 'feedback.dart';
-import 'flat_button.dart';
 import 'material_localizations.dart';
+import 'text_button.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'time.dart';
@@ -1543,11 +1543,11 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
-          new FlatButton(
+          new TextButton(
             child: new Text(localizations.cancelButtonLabel),
             onPressed: _handleCancel
           ),
-          new FlatButton(
+          new TextButton(
             child: new Text(localizations.okButtonLabel),
             onPressed: _handleOk
           ),

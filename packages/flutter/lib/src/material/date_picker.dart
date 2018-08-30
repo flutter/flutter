@@ -15,12 +15,12 @@ import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
 import 'feedback.dart';
-import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_button.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -955,11 +955,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
-          new FlatButton(
+          new TextButton(
             child: new Text(localizations.cancelButtonLabel),
             onPressed: _handleCancel,
           ),
-          new FlatButton(
+          new TextButton(
             child: new Text(localizations.okButtonLabel),
             onPressed: _handleOk,
           ),

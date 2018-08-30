@@ -54,7 +54,7 @@ const double _kMinButtonSize = 48.0;
 ///    current platform's conventions.
 ///  * [CloseButton], an icon button for closing pages.
 ///  * [AppBar], to show a toolbar at the top of an application.
-///  * [RaisedButton] and [FlatButton], for buttons with text in them.
+///  * [ContainedButton] and [TextButton], for buttons with text in them.
 ///  * [InkResponse] and [InkWell], for the ink splash effect itself.
 class IconButton extends StatelessWidget {
   /// Creates an icon button.

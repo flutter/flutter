@@ -106,7 +106,7 @@ void main() {
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
-            return new FlatButton(
+            return new TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -149,7 +149,7 @@ void main() {
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
-            return new FlatButton(
+            return new TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -189,7 +189,7 @@ void main() {
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
-            return new FlatButton(
+            return new TextButton(
               onPressed: () async {
                 await showDatePicker(
                   context: context,

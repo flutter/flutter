@@ -735,7 +735,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return new Scaffold(
               body: new Center(
-                child: new RaisedButton(
+                child: new ContainedButton(
                   child: const Text('green'),
                   onPressed: () {
                     setState(() {

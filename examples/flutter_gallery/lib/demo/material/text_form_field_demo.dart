@@ -145,11 +145,11 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           title: const Text('This form has errors'),
           content: const Text('Really leave this form?'),
           actions: <Widget> [
-            new FlatButton(
+            new TextButton(
               child: const Text('YES'),
               onPressed: () { Navigator.of(context).pop(true); },
             ),
-            new FlatButton(
+            new TextButton(
               child: const Text('NO'),
               onPressed: () { Navigator.of(context).pop(false); },
             ),
@@ -270,7 +270,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 ),
                 const SizedBox(height: 24.0),
                 new Center(
-                  child: new RaisedButton(
+                  child: new ContainedButton(
                     child: const Text('SUBMIT'),
                     onPressed: _handleSubmitted,
                   ),

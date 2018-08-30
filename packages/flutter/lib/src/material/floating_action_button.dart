@@ -51,8 +51,8 @@ class _DefaultHeroTag {
 /// See also:
 ///
 ///  * [Scaffold]
-///  * [RaisedButton]
-///  * [FlatButton]
+///  * [ContainedButton]
+///  * [TextButton]
 ///  * <https://material.google.com/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
   /// Creates a circular floating action button.

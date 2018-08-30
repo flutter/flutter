@@ -23,7 +23,7 @@ class _NotImplementedDialog extends StatelessWidget {
       title: const Text('Not Implemented'),
       content: const Text('This feature has not yet been implemented.'),
       actions: <Widget>[
-        new FlatButton(
+        new TextButton(
           onPressed: debugDumpApp,
           child: new Row(
             children: <Widget>[
@@ -38,7 +38,7 @@ class _NotImplementedDialog extends StatelessWidget {
             ],
           ),
         ),
-        new FlatButton(
+        new TextButton(
           onPressed: () {
             Navigator.pop(context, false);
           },

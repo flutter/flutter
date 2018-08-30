@@ -96,7 +96,7 @@ class TextTheme extends Diagnosticable {
   /// Used for auxiliary text associated with images.
   final TextStyle caption;
 
-  /// Used for text on [RaisedButton] and [FlatButton].
+  /// Used for text on [ContainedButton] and [TextButton].
   final TextStyle button;
 
   /// Creates a copy of this text theme but with the given fields replaced with

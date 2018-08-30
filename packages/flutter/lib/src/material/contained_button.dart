@@ -12,41 +12,41 @@ import 'constants.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A material design "raised button".
+/// A material design "contained button".
 ///
-/// A raised button is based on a [Material] widget whose [Material.elevation]
+/// A contained button is based on a [Material] widget whose [Material.elevation]
 /// increases when the button is pressed.
 ///
-/// Use raised buttons to add dimension to otherwise mostly flat layouts, e.g.
-/// in long busy lists of content, or in wide spaces. Avoid using raised buttons
+/// Use contained buttons to add dimension to otherwise mostly text layouts, e.g.
+/// in long busy lists of content, or in wide spaces. Avoid using contained buttons
 /// on already-raised content such as dialogs or cards.
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and by
-/// default will resemble a flat button in the [disabledColor]. If you are
+/// default will resemble a text button in the [disabledColor]. If you are
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Contained buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
 /// See also:
 ///
-///  * [FlatButton], a material design button without a shadow.
+///  * [TextButton], a material design button without a shadow.
 ///  * [DropdownButton], a button that shows options to select from.
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
-///  * [InkWell], which implements the ink splash part of a flat button.
+///  * [InkWell], which implements the ink splash part of a text button.
 ///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
-class RaisedButton extends StatelessWidget {
+class ContainedButton extends StatelessWidget {
   /// Create a filled button.
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], and
   /// [clipBehavior] arguments must not be null.
-  const RaisedButton({
+  const ContainedButton({
     Key key,
     @required this.onPressed,
     this.onHighlightChanged,
@@ -82,7 +82,7 @@ class RaisedButton extends StatelessWidget {
   ///
   /// The [elevation], [highlightElevation], [disabledElevation], [icon],
   /// [label], and [clipBehavior] arguments must not be null.
-  RaisedButton.icon({
+  ContainedButton.icon({
     Key key,
     @required this.onPressed,
     this.onHighlightChanged,
@@ -170,7 +170,7 @@ class RaisedButton extends StatelessWidget {
   /// for example:
   ///
   /// ```dart
-  ///  new RaisedButton(
+  ///  new ContainedButton(
   ///    color: Colors.blue,
   ///    onPressed: _handleTap,
   ///    child: new Text('DEMO'),
@@ -215,13 +215,13 @@ class RaisedButton extends StatelessWidget {
   final Color highlightColor;
 
   /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the raised button.
+  /// the shadow below the contained button.
   ///
-  /// Defaults to 2, the appropriate elevation for raised buttons.
+  /// Defaults to 2, the appropriate elevation for contained buttons.
   ///
   /// See also:
   ///
-  ///  * [FlatButton], a button with no elevation or fill color.
+  ///  * [TextButton], a button with no elevation or fill color.
   ///  * [disabledElevation], the elevation when the button is disabled.
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double elevation;

@@ -130,12 +130,12 @@ class TravelDestinationItem extends StatelessWidget {
                 child: new ButtonBar(
                   alignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    new FlatButton(
+                    new TextButton(
                       child: const Text('SHARE'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
-                    new FlatButton(
+                    new TextButton(
                       child: const Text('EXPLORE'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },

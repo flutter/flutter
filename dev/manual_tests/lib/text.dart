@@ -43,37 +43,37 @@ class _HomeState extends State<Home> {
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                new FlatButton(
+                new TextButton(
                   child: const Text('Test Underlines'),
                   color: Colors.red.shade800,
                   textColor: Colors.white,
                   onPressed: () { Navigator.pushNamed(context, 'underlines'); },
                 ),
-                new FlatButton(
+                new TextButton(
                   child: const Text('Test Font Fallback'),
                   color: Colors.orange.shade700,
                   textColor: Colors.white,
                   onPressed: () { Navigator.pushNamed(context, 'fallback'); },
                 ),
-                new FlatButton(
+                new TextButton(
                   child: const Text('Test Bidi Formatting'),
                   color: Colors.yellow.shade700,
                   textColor: Colors.black,
                   onPressed: () { Navigator.pushNamed(context, 'bidi'); },
                 ),
-                new FlatButton(
+                new TextButton(
                   child: const Text('TextSpan Fuzzer'),
                   color: Colors.green.shade400,
                   textColor: Colors.black,
                   onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
                 ),
-                new FlatButton(
+                new TextButton(
                   child: const Text('Diacritics Fuzzer'),
                   color: Colors.blue.shade400,
                   textColor: Colors.white,
                   onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
                 ),
-                new FlatButton(
+                new TextButton(
                   child: const Text('Painting Fuzzer'),
                   color: Colors.purple.shade200,
                   textColor: Colors.black,
@@ -580,7 +580,7 @@ class _UnderlinesState extends State<Underlines> {
           new Material(
             child: new ButtonBar(
               children: <Widget>[
-                new FlatButton(
+                new TextButton(
                   onPressed: () {
                     setState(() {
                       _text += 'i';
@@ -589,7 +589,7 @@ class _UnderlinesState extends State<Underlines> {
                   color: Colors.yellow,
                   child: const Text('ADD i'),
                 ),
-                new FlatButton(
+                new TextButton(
                   onPressed: () {
                     setState(() {
                       _text += 'w';
@@ -598,7 +598,7 @@ class _UnderlinesState extends State<Underlines> {
                   color: Colors.yellow,
                   child: const Text('ADD w'),
                 ),
-                new FlatButton(
+                new TextButton(
                   onPressed: _text == '' ? null : () {
                     setState(() {
                       _text = _text.substring(0, _text.length - 1);
@@ -1038,11 +1038,11 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                 ),
                 new ButtonBar(
                   children: <Widget>[
-                    new FlatButton(
+                    new TextButton(
                       onPressed: _ticker.isActive ? null : () => _update(null),
                       child: const Text('ITERATE'),
                     ),
-                    new FlatButton(
+                    new TextButton(
                       onPressed: _ticker.isActive ? null : () {
                         print('The currently visible text is: $_text');
                         print(_text.runes.map((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));

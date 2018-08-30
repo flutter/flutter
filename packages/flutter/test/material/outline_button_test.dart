@@ -229,7 +229,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.3),
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -239,7 +239,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
+    expect(tester.getSize(find.byType(TextButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
@@ -253,7 +253,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(textScaleFactor: 3.0),
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -265,8 +265,8 @@ void main() {
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
-    expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
+    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[158.0, 159.0]));
+    expect(tester.getSize(find.byType(TextButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });

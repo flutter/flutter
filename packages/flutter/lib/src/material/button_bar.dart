@@ -5,9 +5,9 @@
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
+import 'contained_button.dart';
 import 'dialog.dart';
-import 'flat_button.dart';
-import 'raised_button.dart';
+import 'text_button.dart';
 
 /// A horizontal arrangement of buttons.
 ///
@@ -18,8 +18,8 @@ import 'raised_button.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton], a kind of button.
-///  * [FlatButton], another kind of button.
+///  * [ContainedButton], a kind of button.
+///  * [TextButton], another kind of button.
 ///  * [Card], at the bottom of which it is common to place a [ButtonBar].
 ///  * [Dialog], which uses a [ButtonBar] for its actions.
 ///  * [ButtonTheme], which configures the [ButtonBar].
@@ -42,7 +42,7 @@ class ButtonBar extends StatelessWidget {
 
   /// The buttons to arrange horizontally.
   ///
-  /// Typically [RaisedButton] or [FlatButton] widgets.
+  /// Typically [ContainedButton] or [TextButton] widgets.
   final List<Widget> children;
 
   @override

@@ -333,7 +333,7 @@ void main() {
             ),
           ),
           persistentFooterButtons: <Widget>[
-            new FlatButton(
+            new TextButton(
               onPressed: () {
                 didPressButton = true;
               },
@@ -534,7 +534,7 @@ void main() {
         child: new MediaQuery(
           data: const MediaQueryData(),
           child: new Scaffold(
-            body: new FlatButton(
+            body: new TextButton(
               key: testKey,
               onPressed: () { },
               child: const Text(''),

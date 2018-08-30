@@ -180,7 +180,7 @@ abstract class InteractiveInkFeatureFactory {
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [ContainedButton] and [TextButton], two kinds of buttons in material design.
 ///  * [IconButton], which combines [InkResponse] with an [Icon].
 class InkResponse extends StatefulWidget {
   /// Creates an area of a [Material] that responds to touch.
@@ -611,7 +611,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
-///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [ContainedButton] and [TextButton], two kinds of buttons in material design.
 ///  * [InkResponse], a variant of [InkWell] that doesn't force a rectangular
 ///    shape on the ink reaction.
 class InkWell extends InkResponse {

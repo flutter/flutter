@@ -746,7 +746,7 @@ class Scaffold extends StatefulWidget {
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
-  /// Typically this is a list of [FlatButton] widgets. These buttons are
+  /// Typically this is a list of [TextButton] widgets. These buttons are
   /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
   /// These widgets will be wrapped in a [ButtonBar].
@@ -850,7 +850,7 @@ class Scaffold extends StatefulWidget {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return new RaisedButton(
+  ///   return new ContainedButton(
   ///     child: new Text('SHOW A SNACKBAR'),
   ///     onPressed: () {
   ///       Scaffold.of(context).showSnackBar(new SnackBar(
@@ -879,7 +879,7 @@ class Scaffold extends StatefulWidget {
   ///       // can refer to the Scaffold with Scaffold.of().
   ///       builder: (BuildContext context) {
   ///         return new Center(
-  ///           child: new RaisedButton(
+  ///           child: new ContainedButton(
   ///             child: new Text('SHOW A SNACKBAR'),
   ///             onPressed: () {
   ///               Scaffold.of(context).showSnackBar(new SnackBar(

@@ -50,7 +50,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                 margin: const EdgeInsets.all(10.0),
                 child: new Row(
                   children: <Widget>[
-                    new RaisedButton(
+                    new ContainedButton(
                       child: new Row(
                         children: <Widget>[
                           new Image.network('https://flutter.io/images/favicon.png'),

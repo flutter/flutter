@@ -94,7 +94,7 @@ void main() {
         home: new Builder(
           builder: (BuildContext context) {
             return new Material(
-              child: new RaisedButton(
+              child: new ContainedButton(
                 child: const Text('X'),
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
@@ -251,7 +251,7 @@ void main() {
           home: new Builder(
               builder: (BuildContext context) {
                 return new Material(
-                  child: new RaisedButton(
+                  child: new ContainedButton(
                       child: const Text('X'),
                       onPressed: () async {
                         result = Navigator.of(context).pushNamed('/a');
@@ -263,7 +263,7 @@ void main() {
           routes: <String, WidgetBuilder>{
             '/a': (BuildContext context) {
               return new Material(
-                child: new RaisedButton(
+                child: new ContainedButton(
                   child: const Text('Y'),
                   onPressed: () {
                     Navigator.of(context).pop('all done');
