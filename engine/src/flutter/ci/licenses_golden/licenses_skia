@@ -1,4 +1,4 @@
-Signature: 055777fad7c590dd7df4f1eecc2b975f
+Signature: 560483fbd6f0671f2dbc3b1915817ce8
 
 UNUSED LICENSES:
 
@@ -1483,10 +1483,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrDDLTextureStripAtlas.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrDDLTextureStripAtlas.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrDynamicTextureStripAtlas.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrDynamicTextureStripAtlas.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.h
@@ -3225,12 +3221,10 @@ FILE: ../../../third_party/skia/src/gpu/GrShaderCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrSoftwarePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSoftwarePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/GrSurface.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTextureStripAtlas.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrGaussianConvolutionFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrGaussianConvolutionFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureDomain.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureDomain.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrTextureStripAtlas.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLCaps.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLPath.cpp
