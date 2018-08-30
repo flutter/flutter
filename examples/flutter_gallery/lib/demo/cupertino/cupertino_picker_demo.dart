@@ -22,7 +22,14 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   Duration timer = Duration();
 
+  // Value that is shown in the date picker in date mode.
   DateTime date = new DateTime.now();
+
+  // Value that is shown in the date picker in time mode.
+  DateTime time = new DateTime.now();
+
+  // Value that is shown in the date picker in dateAndTime mode.
+  DateTime dateTime = new DateTime.now();
 
   Widget _buildMenu(List<Widget> children) {
     return Container(
@@ -140,9 +147,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               new CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
-                onDateTimeChanged: (DateTime newDate) {
+                onDateTimeChanged: (DateTime newDateTime) {
                   setState(() {
-                    date = newDate;
+                    date = newDateTime;
                   });
                 },
               ),
@@ -152,12 +159,76 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
       },
       child: _buildMenu(
         <Widget>[
-          const Text('Calendar'),
+          const Text('Date'),
           new Text(
             DateFormat.yMMMMd().format(date),
             style: const TextStyle(color: CupertinoColors.inactiveGray),
           ),
         ]
+      ),
+    );
+  }
+
+  Widget _buildTimePicker(BuildContext context) {
+    return new GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              new CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: time,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    time = newDateTime;
+                  });
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+          <Widget>[
+            const Text('Time'),
+            new Text(
+              DateFormat('hh:mm aa').format(time),
+              style: const TextStyle(color: CupertinoColors.inactiveGray),
+            ),
+          ]
+      ),
+    );
+  }
+
+  Widget _buildDateAndTimePicker(BuildContext context) {
+    return new GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              new CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                initialDateTime: dateTime,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    dateTime = newDateTime;
+                  });
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+          <Widget>[
+            const Text('Date and Time'),
+            new Text(
+              DateFormat('hh:mm aa, MMM dd yyyy').format(dateTime),
+              style: const TextStyle(color: CupertinoColors.inactiveGray),
+            ),
+          ]
       ),
     );
   }
@@ -202,6 +273,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               ),
               _buildCountdownTimerPicker(context),
               _buildDatePicker(context),
+              _buildTimePicker(context),
+              _buildDateAndTimePicker(context),
             ],
           ),
         ),
