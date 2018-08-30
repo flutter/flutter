@@ -392,7 +392,7 @@ abstract class TappableChipAttributes {
 /// button for deleting the chip.
 ///
 /// Requires one of its ancestors to be a [Material] widget. The [label]
-/// argument must not be null.
+/// and [clipBehavior] arguments must not be null.
 ///
 /// ## Sample code
 ///
@@ -422,7 +422,7 @@ abstract class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
-  /// The [label] and [clipBehavior] argument must not be null.
+  /// The [label] and [clipBehavior] arguments must not be null.
   const Chip({
     Key key,
     this.avatar,
@@ -575,6 +575,7 @@ class InputChip extends StatelessWidget
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
+        assert(clipBehavior != null),
         super(key: key);
 
   @override
