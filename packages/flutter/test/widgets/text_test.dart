@@ -159,15 +159,12 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             new TestSemantics(
-              rect: new Rect.fromLTRB(-4.0, -4.0, 88.0, 18.0),
               label: 'hello ',
               textDirection: TextDirection.ltr,
             ),
             new TestSemantics(
-              rect: new Rect.fromLTRB(80.0, -4.0, 158.0, 18.0),
               label: 'world',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -175,7 +172,6 @@ void main() {
               ],
             ),
             new TestSemantics(
-              rect: new Rect.fromLTRB(150.0, -4.0, 480.0, 18.0),
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
             )
@@ -183,7 +179,7 @@ void main() {
         ),
       ],
     );
-    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
   });
 
