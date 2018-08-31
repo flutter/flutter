@@ -104,7 +104,6 @@ void main() {
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then<Null>((int code) async {
-        await responses.close();
         await commands.close();
         expect(code, 0);
       });
