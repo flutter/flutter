@@ -8,7 +8,10 @@
 #include "flutter/fml/time/time_point.h"
 
 // clang-format off
-#if __has_include(<sys/timerfd.h>)
+#if __has_include(<sys/timerfd.h>) && \
+    (!defined(__ANDROID_API__) || __ANDROID_API__ >= 19)
+    // sys/timerfd.h is always present in Android NDK due to unified headers,
+    // but timerfd functions are only available on API 19 or later.
 // clang-format on
 
 #include <sys/timerfd.h>
