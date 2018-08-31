@@ -189,20 +189,20 @@ class IosProject {
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   String get productBundleIdentifier {
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
     final String fromPlist = iosWorkflow.getPlistValueFromFile(
       hostInfoPlist.path,
       plist.kCFBundleIdentifierKey,
     );
+    if (fromPlist != null && !fromPlist.contains('\$')) {
+      // Info.plist has no build variables in product bundle ID.
+      return fromPlist;
+    }
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
     if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
       // Common case. Avoids parsing build settings.
       return fromPbxproj;
     }
-    if (fromPlist == null || !fromPlist.contains('\$')) {
-      // Info.plist has no build variables in product bundle ID.
-      return fromPlist;
-    }
-    if (xcode.xcodeProjectInterpreter.isInstalled) {
+    if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
       // General case: perform variable substitution using build settings.
       return xcode.substituteXcodeVariables(fromPlist, buildSettings);
     }
