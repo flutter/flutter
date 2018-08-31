@@ -251,9 +251,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Android view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
-    resolve(GestureDisposition.rejected);
-  }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {
