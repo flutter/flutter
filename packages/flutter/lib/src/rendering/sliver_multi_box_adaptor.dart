@@ -132,10 +132,15 @@ abstract class KeepAliveParentDataMixin extends ParentData {
 }
 
 // This class exists to dissociate [KeepAlive] from [RenderSliverMultiBoxAdaptor].
-abstract class RenderSliverWithKeepAliveMixin extends RenderSliver{
+abstract class RenderSliverWithKeepAliveMixin extends RenderSliver {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory RenderSliverWithKeepAliveMixin._() => null;
+
+  @override
+  void setupParentData(RenderObject child) {
+    assert(child.parentData is KeepAliveParentDataMixin);
+  }
 }
 
 /// Parent data structure used by [RenderSliverMultiBoxAdaptor].
@@ -177,9 +182,8 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///    array with a fixed extent in the main axis.
 ///  * [RenderSliverGrid], which places its children in arbitrary positions.
 abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
-    with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
-        RenderSliverWithKeepAliveMixin,
-        RenderSliverHelpers {
+  with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
+       RenderSliverHelpers,RenderSliverWithKeepAliveMixin {
 
   /// Creates a sliver with multiple box children.
   ///
@@ -187,7 +191,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   RenderSliverMultiBoxAdaptor({
     @required RenderSliverBoxChildManager childManager
   }) : assert(childManager != null),
-        _childManager = childManager;
+       _childManager = childManager;
 
   @override
   void setupParentData(RenderObject child) {

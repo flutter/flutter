@@ -12,9 +12,9 @@ import 'basic.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
-SliverGridDelegate,
-SliverGridDelegateWithFixedCrossAxisCount,
-SliverGridDelegateWithMaxCrossAxisExtent;
+  SliverGridDelegate,
+  SliverGridDelegateWithFixedCrossAxisCount,
+  SliverGridDelegateWithMaxCrossAxisExtent;
 
 /// A delegate that supplies children for slivers.
 ///
@@ -67,11 +67,11 @@ abstract class SliverChildDelegate {
   /// The default implementation returns null, which causes the caller to
   /// extrapolate the max scroll offset from the given parameters.
   double estimateMaxScrollOffset(
-      int firstIndex,
-      int lastIndex,
-      double leadingScrollOffset,
-      double trailingScrollOffset,
-      ) => null;
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) => null;
 
   /// Called at the end of layout to indicate that layout is now complete.
   ///
@@ -138,13 +138,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// The [builder], [addAutomaticKeepAlives], and [addRepaintBoundaries]
   /// arguments must not be null.
   const SliverChildBuilderDelegate(
-      this.builder, {
-        this.childCount,
-        this.addAutomaticKeepAlives = true,
-        this.addRepaintBoundaries = true,
-      }) : assert(builder != null),
-        assert(addAutomaticKeepAlives != null),
-        assert(addRepaintBoundaries != null);
+    this.builder, {
+    this.childCount,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
+  }) : assert(builder != null),
+       assert(addAutomaticKeepAlives != null),
+       assert(addRepaintBoundaries != null);
 
   /// Called to build children for the sliver.
   ///
@@ -247,12 +247,12 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// The [children], [addAutomaticKeepAlives], and [addRepaintBoundaries]
   /// arguments must not be null.
   const SliverChildListDelegate(
-      this.children, {
-        this.addAutomaticKeepAlives = true,
-        this.addRepaintBoundaries = true,
-      }) : assert(children != null),
-        assert(addAutomaticKeepAlives != null),
-        assert(addRepaintBoundaries != null);
+    this.children, {
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
+  }) : assert(children != null),
+       assert(addAutomaticKeepAlives != null),
+       assert(addRepaintBoundaries != null);
 
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
@@ -553,12 +553,12 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double childAspectRatio = 1.0,
     List<Widget> children = const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: crossAxisCount,
-    mainAxisSpacing: mainAxisSpacing,
-    crossAxisSpacing: crossAxisSpacing,
-    childAspectRatio: childAspectRatio,
-  ),
-        super(key: key, delegate: new SliverChildListDelegate(children));
+         crossAxisCount: crossAxisCount,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with tiles that each have a maximum cross-axis extent.
@@ -577,12 +577,12 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double childAspectRatio = 1.0,
     List<Widget> children = const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
-    maxCrossAxisExtent: maxCrossAxisExtent,
-    mainAxisSpacing: mainAxisSpacing,
-    crossAxisSpacing: crossAxisSpacing,
-    childAspectRatio: childAspectRatio,
-  ),
-        super(key: key, delegate: new SliverChildListDelegate(children));
+         maxCrossAxisExtent: maxCrossAxisExtent,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -600,12 +600,12 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 
   @override
   double estimateMaxScrollOffset(
-      SliverConstraints constraints,
-      int firstIndex,
-      int lastIndex,
-      double leadingScrollOffset,
-      double trailingScrollOffset,
-      ) {
+    SliverConstraints constraints,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
     return super.estimateMaxScrollOffset(
       constraints,
       firstIndex,
@@ -638,8 +638,8 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
     @required SliverChildDelegate delegate,
     this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
-        assert(viewportFraction > 0.0),
-        super(key: key, delegate: delegate);
+       assert(viewportFraction > 0.0),
+       super(key: key, delegate: delegate);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -801,12 +801,12 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement with SliverWithKe
   }
 
   static double _extrapolateMaxScrollOffset(
-      int firstIndex,
-      int lastIndex,
-      double leadingScrollOffset,
-      double trailingScrollOffset,
-      int childCount,
-      ) {
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+    int childCount,
+  ) {
     if (lastIndex == childCount - 1)
       return trailingScrollOffset;
     final int reifiedCount = lastIndex - firstIndex + 1;
@@ -906,9 +906,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement with SliverWithKe
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    // The toList() is to make a copy so that the underlying list can be modified by
-    // the visitor:
-    assert(!_childElements.values.any((Element child) => child == null));
+   // The toList() is to make a copy so that the underlying list can be modified by
+   // the visitor:
+   assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
   }
 
@@ -972,8 +972,8 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
     @required this.keepAlive,
     @required Widget child,
   }) : assert(child != null),
-        assert(keepAlive != null),
-        super(key: key, child: child);
+       assert(keepAlive != null),
+       super(key: key, child: child);
 
   /// Whether to keep the child alive.
   ///

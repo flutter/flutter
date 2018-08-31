@@ -140,10 +140,10 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       assert(() {
         if (!mounted) {
           throw new FlutterError(
-              'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.'
-                  'Widgets should always trigger their KeepAliveNotification handle when they are '
-                  'deactivated, so that they (or their handle) do not send spurious events later '
-                  'when they are no longer in the tree.'
+            'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.'
+            'Widgets should always trigger their KeepAliveNotification handle when they are '
+            'deactivated, so that they (or their handle) do not send spurious events later '
+            'when they are no longer in the tree.'
           );
         }
         return true;
@@ -239,8 +239,8 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       'handles',
       _handles,
       description: _handles != null ?
-      '${_handles.length} active client${ _handles.length == 1 ? "" : "s" }' :
-      null,
+        '${_handles.length} active client${ _handles.length == 1 ? "" : "s" }' :
+        null,
       ifNull: 'no notifications ever received',
     ));
   }
