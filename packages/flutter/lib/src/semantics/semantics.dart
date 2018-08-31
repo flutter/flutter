@@ -2001,14 +2001,16 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   List<SemanticsNode> sortedWithinVerticalGroup() {
     final List<_BoxEdge> edges = <_BoxEdge>[];
     for (SemanticsNode child in nodes) {
+      // Using a small delta to shrink child rects removes overlapping cases.
+      final Rect childRect = child.rect.deflate(0.1);
       edges.add(new _BoxEdge(
         isLeadingEdge: true,
-        offset: _pointInParentCoordinates(child, child.rect.topLeft).dx,
+        offset: _pointInParentCoordinates(child, childRect.topLeft).dx,
         node: child,
       ));
       edges.add(new _BoxEdge(
         isLeadingEdge: false,
-        offset: _pointInParentCoordinates(child, child.rect.bottomRight).dx,
+        offset: _pointInParentCoordinates(child, childRect.bottomRight).dx,
         node: child,
       ));
     }
@@ -2145,14 +2147,16 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
   for (SemanticsNode child in children) {
+    // Using a small delta to shrink child rects removes overlapping cases.
+    final Rect childRect = child.rect.deflate(0.1);
     edges.add(new _BoxEdge(
       isLeadingEdge: true,
-      offset: _pointInParentCoordinates(child, child.rect.topLeft).dy,
+      offset: _pointInParentCoordinates(child, childRect.topLeft).dy,
       node: child,
     ));
     edges.add(new _BoxEdge(
       isLeadingEdge: false,
-      offset: _pointInParentCoordinates(child, child.rect.bottomRight).dy,
+      offset: _pointInParentCoordinates(child, childRect.bottomRight).dy,
       node: child,
     ));
   }
