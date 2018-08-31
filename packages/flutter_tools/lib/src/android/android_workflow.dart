@@ -32,8 +32,6 @@ final RegExp licenseNotAccepted = new RegExp(r'licenses? not accepted', caseSens
 final RegExp licenseAccepted = new RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
-  AndroidWorkflow();
-
   @override
   bool get appliesToHostPlatform => true;
 

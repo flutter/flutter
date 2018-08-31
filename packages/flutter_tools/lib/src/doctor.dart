@@ -70,11 +70,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows {
-    if (_workflows == null) {
-      _workflows = <Workflow>[];
-      _workflows.add(iosWorkflow);
-      _workflows.add(androidWorkflow);
-    }
+    _workflows ??= <Workflow>[iosWorkflow, androidWorkflow];
     return _workflows;
   }
 
@@ -132,6 +128,7 @@ class Doctor {
           results.add(await subValidator.validate());
         }
         result = _mergeValidationResults(results);
+        finishedGroups.add(currentCategory);
       } else {
         result = await validator.validate();
       }
@@ -183,7 +180,7 @@ class Doctor {
       ValidationResult result;
 
       if (currentCategory.isGrouped) {
-        if(finishedGroups.contains(currentCategory)) {
+        if (finishedGroups.contains(currentCategory)) {
           continue;
         }
 
@@ -253,9 +250,17 @@ class Doctor {
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
 
     for (ValidationResult result in results) {
-      if (mergedType == ValidationType.installed &&
-          result.type != ValidationType.installed) {
-        mergedType = ValidationType.partial;
+      switch (result.type) {
+        case ValidationType.installed:
+          break;
+        case ValidationType.partial:
+        case ValidationType.missing:
+          if (mergedType == ValidationType.installed) {
+            mergedType = ValidationType.partial;
+          }
+          break;
+        default:
+          throw ("Unrecognized validation type: " + result.type.toString());
       }
       mergedMessages.addAll(result.messages);
     }
@@ -303,15 +308,15 @@ class ValidatorCategory {
   // Whether we should bundle results for validators sharing this cateogry,
   // or let each stand alone.
   final bool isGrouped;
-  const ValidatorCategory(this.name, this.isGrouped);
+  const ValidatorCategory._create(this.name, this.isGrouped);
 
-  static const ValidatorCategory androidToolchain = ValidatorCategory('androidToolchain', false);
-  static const ValidatorCategory androidStudio = ValidatorCategory('androidStudio', false);
-  static const ValidatorCategory ios = ValidatorCategory('ios', false);
-  static const ValidatorCategory flutter = ValidatorCategory('flutter', false);
-  static const ValidatorCategory ide = ValidatorCategory('ide', false);
-  static const ValidatorCategory device = ValidatorCategory('device', false);
-  static const ValidatorCategory other = ValidatorCategory('other', false);
+  static const ValidatorCategory androidToolchain = ValidatorCategory._create('androidToolchain', true);
+  static const ValidatorCategory androidStudio = ValidatorCategory._create('androidStudio', false);
+  static const ValidatorCategory ios = ValidatorCategory._create('ios', true);
+  static const ValidatorCategory flutter = ValidatorCategory._create('flutter', false);
+  static const ValidatorCategory ide = ValidatorCategory._create('ide', false);
+  static const ValidatorCategory device = ValidatorCategory._create('device', false);
+  static const ValidatorCategory other = ValidatorCategory._create('other', false);
 }
 
 abstract class DoctorValidator {
