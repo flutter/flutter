@@ -444,7 +444,8 @@ class _PortForwarder {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String data) { printTrace(data); });
-    process.exitCode.then((int c) {
+    // Best effort to print the exit code.
+    process.exitCode.then((int c) { // ignore: unawaited_futures
       printTrace("'${command.join(' ')}' exited with exit code $c");
     });
     printTrace('Set up forwarding from $localPort to $address:$remotePort');

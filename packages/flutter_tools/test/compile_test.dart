@@ -276,7 +276,7 @@ void main() {
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
       )));
 
-      generator.recompile(
+      await generator.recompile(
           '/path/to/main.dart', null /* invalidatedFiles */
       ).then((CompilerOutput output) {
         expect(mockFrontendServerStdIn.getAndClear(),
@@ -320,7 +320,8 @@ void main() {
             compileExpressionResponseCompleter2.future,
           ]));
 
-      generator.recompile(
+      // The test manages timing via completers.
+      generator.recompile( // ignore: unawaited_futures
           '/path/to/main.dart', null /* invalidatedFiles */
       ).then((CompilerOutput outputCompile) {
         expect(logger.errorText,
@@ -332,8 +333,9 @@ void main() {
         )));
       });
 
+      // The test manages timing via completers.
       final Completer<bool> lastExpressionCompleted = new Completer<bool>();
-      generator.compileExpression('0+1', null, null, null, null, false).then(
+      generator.compileExpression('0+1', null, null, null, null, false).then( // ignore: unawaited_futures
           (CompilerOutput outputExpression) {
             expect(outputExpression, isNotNull);
             expect(outputExpression.outputFilename,
@@ -344,7 +346,8 @@ void main() {
             )));
           });
 
-      generator.compileExpression('1+1', null, null, null, null, false).then(
+      // The test manages timing via completers.
+      generator.compileExpression('1+1', null, null, null, null, false).then( // ignore: unawaited_futures
           (CompilerOutput outputExpression) {
             expect(outputExpression, isNotNull);
             expect(outputExpression.outputFilename,

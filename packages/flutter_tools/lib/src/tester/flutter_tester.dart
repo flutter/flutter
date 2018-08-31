@@ -157,7 +157,8 @@ class FlutterTesterDevice extends Device {
           'FLUTTER_TEST': 'true',
         },
       );
-      _process.exitCode.then((_) => _isRunning = false);
+      // Setting a bool can't fail in the callback.
+      _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
       _process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())

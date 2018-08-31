@@ -153,9 +153,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   );
 
   final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
-  opensslProcess.stdin
-      ..write(signingCertificate)
-      ..close();
+  await (opensslProcess.stdin..write(signingCertificate)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.

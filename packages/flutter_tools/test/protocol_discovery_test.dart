@@ -1,3 +1,4 @@
+
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -134,7 +135,7 @@ void main() {
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
 
@@ -153,7 +154,7 @@ void main() {
         expect(uri.port, 1243);
         expect('$uri', 'http://127.0.0.1:1243/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
 
@@ -172,7 +173,7 @@ void main() {
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
 
@@ -192,7 +193,7 @@ void main() {
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
     });

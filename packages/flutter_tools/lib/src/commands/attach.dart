@@ -82,7 +82,7 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<Null> validateCommand() async {
-    super.validateCommand();
+    await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
     observatoryPort;
