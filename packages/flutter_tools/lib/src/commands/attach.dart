@@ -47,11 +47,6 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addFlag(
-        'preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
       )..addFlag('machine',
           hide: !verboseHelp,
           negatable: false,
@@ -124,7 +119,7 @@ class AttachCommand extends FlutterCommand {
       final FlutterDevice flutterDevice = new FlutterDevice(
         device,
         trackWidgetCreation: false,
-        previewDart2: argResults['preview-dart-2'],
+        previewDart2: true,
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],

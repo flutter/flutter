@@ -64,11 +64,6 @@ class TestCommand extends FlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('track-widget-creation',
         negatable: false,
         hide: !verboseHelp,
@@ -172,7 +167,7 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
-      previewDart2: argResults['preview-dart-2'],
+      previewDart2: true,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,

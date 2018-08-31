@@ -43,7 +43,7 @@ Future<void> build({
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
-  bool previewDart2  = false,
+  bool previewDart2 = true,
   bool precompiledSnapshot = false,
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,

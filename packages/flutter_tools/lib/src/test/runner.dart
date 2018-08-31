@@ -29,7 +29,7 @@ Future<int> runTests(
   bool startPaused = false,
   bool ipv6 = false,
   bool machine = false,
-  bool previewDart2 = false,
+  bool previewDart2 = true,
   String precompiledDillPath,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
@@ -38,7 +38,7 @@ Future<int> runTests(
 }) async {
   if (trackWidgetCreation && !previewDart2) {
     throw new UsageException(
-      '--track-widget-creation is valid only when --preview-dart-2 is specified.',
+      '--track-widget-creation is valid only when previewDart2 is specified.',
       null,
     );
   }
