@@ -9,7 +9,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   collection: 1.14.11
-  file: 5.0.4
+  file: 5.0.6
   meta: 1.1.6
   platform: 2.2.0
   process: 3.0.5
@@ -70,4 +70,4 @@ dependencies:
 dev_dependencies:
   mockito: 3.0.0
 
-# PUBSPEC CHECKSUM: 7a75
+# PUBSPEC CHECKSUM: d077
