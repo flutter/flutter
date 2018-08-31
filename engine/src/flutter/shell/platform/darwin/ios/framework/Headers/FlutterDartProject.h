@@ -21,7 +21,7 @@ FLUTTER_EXPORT
 - (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssetsURL
     NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)initFromDefaultSourceForConfiguration FLUTTER_DEPRECATED("Use -init instead.");
+- (instancetype)initFromDefaultSourceForConfiguration FLUTTER_UNAVAILABLE("Use -init instead.");
 
 /**
  Returns the file name for the given asset.

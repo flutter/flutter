@@ -66,16 +66,13 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeUInt32) {
   checkEncodeDecode(@(value), [NSData dataWithBytes:bytes length:9]);
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 TEST(FlutterStandardCodec, CanEncodeAndDecodeUInt64AsHexString) {
   FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   UInt64 u64 = 0xfffffffffffffffa;
   NSData* encoded = [codec encode:@(u64)];
-  FlutterStandardBigInteger* decoded = [codec decode:encoded];
-  ASSERT_TRUE([decoded.hex isEqual:@"fffffffffffffffa"]);
+  NSString* decoded = [codec decode:encoded];
+  ASSERT_TRUE([decoded isEqual:@"fffffffffffffffa"]);
 }
-#pragma clang diagnostic pop
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeSInt8) {
   uint8_t bytes[5] = {0x03, 0xfe, 0xff, 0xff, 0xff};
@@ -98,15 +95,6 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeSInt64) {
   uint8_t bytes[9] = {0x04, 0xef, 0xcd, 0xab, 0x90, 0x78, 0x56, 0x34, 0x12};
   checkEncodeDecode(@(0x1234567890abcdef), [NSData dataWithBytes:bytes length:9]);
 }
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-TEST(FlutterStandardCodec, CanEncodeAndDecodeBigInteger) {
-  FlutterStandardBigInteger* value =
-      [FlutterStandardBigInteger bigIntegerWithHex:@"-abcdef0123456789abcdef01234567890"];
-  checkEncodeDecode(value);
-}
-#pragma clang diagnostic pop
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeFloat32) {
   uint8_t bytes[16] = {0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

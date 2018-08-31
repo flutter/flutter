@@ -203,41 +203,6 @@ using namespace shell;
 }
 @end
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
-@implementation FlutterStandardBigInteger
-+ (instancetype)bigIntegerWithHex:(NSString*)hex {
-  return [[[FlutterStandardBigInteger alloc] initWithHex:hex] autorelease];
-}
-
-- (instancetype)initWithHex:(NSString*)hex {
-  NSAssert(hex, @"Hex cannot be nil");
-  self = [super init];
-  NSAssert(self, @"Super init cannot be nil");
-  _hex = [hex retain];
-  return self;
-}
-
-- (void)dealloc {
-  [_hex release];
-  [super dealloc];
-}
-
-- (BOOL)isEqual:(id)object {
-  if (self == object)
-    return YES;
-  if (![object isKindOfClass:[FlutterStandardBigInteger class]])
-    return NO;
-  FlutterStandardBigInteger* other = (FlutterStandardBigInteger*)object;
-  return [self.hex isEqual:other.hex];
-}
-
-- (NSUInteger)hash {
-  return [self.hex hash];
-}
-@end
-
 #pragma mark - Writer and reader of standard codec
 
 @implementation FlutterStandardWriter {
@@ -336,10 +301,6 @@ using namespace shell;
     NSString* string = value;
     [self writeByte:FlutterStandardFieldString];
     [self writeUTF8:string];
-  } else if ([value isKindOfClass:[FlutterStandardBigInteger class]]) {
-    FlutterStandardBigInteger* bigInt = value;
-    [self writeByte:FlutterStandardFieldIntHex];
-    [self writeUTF8:bigInt.hex];
   } else if ([value isKindOfClass:[FlutterStandardTypedData class]]) {
     FlutterStandardTypedData* typedData = value;
     [self writeByte:FlutterStandardFieldForDataType(typedData.type)];
@@ -479,7 +440,6 @@ using namespace shell;
       return [NSNumber numberWithDouble:value];
     }
     case FlutterStandardFieldIntHex:
-      return [FlutterStandardBigInteger bigIntegerWithHex:[self readUTF8]];
     case FlutterStandardFieldString:
       return [self readUTF8];
     case FlutterStandardFieldUInt8Data:
@@ -522,4 +482,3 @@ using namespace shell;
   return [[[FlutterStandardReader alloc] initWithData:data] autorelease];
 }
 @end
-#pragma clang diagnostic pop

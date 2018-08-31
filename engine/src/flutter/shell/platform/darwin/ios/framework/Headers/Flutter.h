@@ -8,6 +8,10 @@
 /**
  BREAKING CHANGES:
 
+ August 31, 2018: Marked -[FlutterDartProject
+ initFromDefaultSourceForConfiguration] and FlutterStandardBigInteger as
+ unavailable.
+
  July 26, 2018: Marked -[FlutterDartProject
  initFromDefaultSourceForConfiguration] deprecated.
 

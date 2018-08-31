@@ -154,13 +154,6 @@ FLUTTER_EXPORT
  - `FlutterStandardTypedData`: `Uint8List`, `Int32List`, `Int64List`, or `Float64List`
  - `NSArray`: `List`
  - `NSDictionary`: `Map`
-
- Support for `FlutterStandardBigInteger` has been deprecated on 2018-01-09 to be
- made unavailable four weeks after this change is available on the Flutter alpha
- branch. `FlutterStandardBigInteger` were needed because the Dart 1.0 `int` type
- had no size limit. With Dart 2.0, the `int` type is a fixed-size, 64-bit signed
- integer. If you need to communicate larger integers, use `NSString` encoding
- instead.
  */
 FLUTTER_EXPORT
 @interface FlutterStandardMessageCodec : NSObject <FlutterMessageCodec>
@@ -309,25 +302,13 @@ FLUTTER_EXPORT
  and `FlutterStandardMethodCodec`.
  */
 FLUTTER_EXPORT
-FLUTTER_DEPRECATED(
-    "Deprecated on 2018-01-09 to be made unavailable four weeks after the "
-    "deprecation is available on the flutter/flutter alpha branch. "
+FLUTTER_UNAVAILABLE(
+    "Unavailable on 2018-08-31. Deprecated on 2018-01-09. "
     "FlutterStandardBigInteger was needed because the Dart 1.0 int type had no "
     "size limit. With Dart 2.0, the int type is a fixed-size, 64-bit signed "
     "integer. If you need to communicate larger integers, use NSString encoding "
     "instead.")
 @interface FlutterStandardBigInteger : NSObject
-/**
- Creates a `FlutterStandardBigInteger` from a hexadecimal representation.
-
- - Parameter hex: a hexadecimal string.
- */
-+ (instancetype)bigIntegerWithHex:(NSString*)hex;
-
-/**
- The hexadecimal string representation of this integer.
- */
-@property(readonly, nonatomic) NSString* hex;
 @end
 
 /**
