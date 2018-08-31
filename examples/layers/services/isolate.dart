@@ -253,7 +253,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
           ),
           new Text(_status),
           new Center(
-            child: new RaisedButton(
+            child: new ContainedButton(
               child: new Text(_label),
               onPressed: _handleButtonPressed
             )

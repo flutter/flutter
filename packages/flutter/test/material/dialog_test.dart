@@ -20,7 +20,7 @@ void main() {
           child: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new RaisedButton(
+                child: new ContainedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -33,7 +33,7 @@ void main() {
                             color: Colors.green[500],
                           ),
                           actions: <Widget>[
-                            new FlatButton(
+                            new TextButton(
                               onPressed: () {
                                 didPressOk = true;
                               },
@@ -70,7 +70,7 @@ void main() {
           child: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new RaisedButton(
+                child: new ContainedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
@@ -109,7 +109,7 @@ void main() {
       new MaterialApp(
         home: const Material(
           child: Center(
-            child: RaisedButton(
+            child: ContainedButton(
               onPressed: null,
               child: Text('Go'),
             ),
@@ -152,7 +152,7 @@ void main() {
       new MaterialApp(
         home: const Material(
           child: Center(
-            child: RaisedButton(
+            child: ContainedButton(
               onPressed: null,
               child: Text('Go'),
             ),
@@ -215,7 +215,7 @@ void main() {
       new MaterialApp(
         home: const Material(
           child: Center(
-            child: RaisedButton(
+            child: ContainedButton(
               onPressed: null,
               child: Text(buttonText),
             ),
@@ -343,7 +343,7 @@ void main() {
           child: new Builder(
             builder: (BuildContext context) {
               return new Center(
-                child: new RaisedButton(
+                child: new ContainedButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(

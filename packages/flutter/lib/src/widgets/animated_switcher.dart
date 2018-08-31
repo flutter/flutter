@@ -106,7 +106,7 @@ typedef Widget AnimatedSwitcherLayoutBuilder(Widget currentChild, List<Widget> p
 ///                 style: Theme.of(context).textTheme.display1,
 ///               ),
 ///             ),
-///             new RaisedButton(
+///             new ContainedButton(
 ///               child: const Text('Increment'),
 ///               onPressed: () {
 ///                 setState(() {

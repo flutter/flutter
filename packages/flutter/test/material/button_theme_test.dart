@@ -52,7 +52,7 @@ void main() {
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: FlatButton(
+                child: TextButton(
                   onPressed: null,
                   child: Text('b'), // intrinsic width < minimum width
                 ),
@@ -109,7 +109,7 @@ void main() {
     await tester.pumpWidget(
       new Theme(
         data: lightTheme.copyWith(
-          disabledColor: const Color(0xFF00FF00), // disabled RaisedButton fill color
+          disabledColor: const Color(0xFF00FF00), // disabled ContainedButton fill color
           textTheme: lightTheme.textTheme.copyWith(
             button: lightTheme.textTheme.button.copyWith(
               // The button's height will match because there's no
@@ -129,7 +129,7 @@ void main() {
               alignment: Alignment.topLeft,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
-                child: RaisedButton(
+                child: ContainedButton(
                   onPressed: null,
                   child: Text('b'), // intrinsic width < minimum width
                 ),
@@ -161,7 +161,7 @@ void main() {
     await tester.pumpWidget(
       new Theme(
         data: new ThemeData.light().copyWith(
-          buttonColor: const Color(0xFF00FF00), // enabled RaisedButton fill color
+          buttonColor: const Color(0xFF00FF00), // enabled ContainedButton fill color
         ),
         child: new ButtonTheme(
           textTheme: ButtonTextTheme.primary,
@@ -180,7 +180,7 @@ void main() {
                 alignment: Alignment.topLeft,
                 child: new Directionality(
                   textDirection: TextDirection.ltr,
-                  child: new RaisedButton(
+                  child: new ContainedButton(
                     onPressed: () { },
                     child: const Text('b'), // intrinsic width < minimum width
                   ),

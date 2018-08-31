@@ -13,8 +13,8 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
-///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
+///  * [ContainedButton], which styles itself based on the ambient [ButtonTheme].
+///  * [TextButton], which styles itself based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
@@ -38,10 +38,10 @@ enum ButtonTextTheme {
 ///
 /// See also:
 ///
-///  * [FlatButton] and [RaisedButton], which are styled based on the
+///  * [TextButton] and [ContainedButton], which are styled based on the
 ///    ambient button theme.
 ///  * [ThemeData.textTheme], `button` is the default text style for button labels.
-///  * [ThemeData.buttonColor], the fill color for [RaisedButton]s unless the
+///  * [ThemeData.buttonColor], the fill color for [ContainedButton]s unless the
 ///    button theme's text theme is [ButtonTextTheme.primary].
 ///  * [ThemeData.primaryColor], the fill or text color if a button theme's text
 ///    theme is [ButtonTextTheme.primary].

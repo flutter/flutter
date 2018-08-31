@@ -84,11 +84,11 @@ class PlatformViewState extends State<PlatformViewPage> {
         ),
         new Row(
           children: <Widget>[
-            new RaisedButton(
+            new ContainedButton(
               child: const Text('RECORD'),
               onPressed: listenToFlutterViewEvents,
             ),
-            new RaisedButton(
+            new ContainedButton(
               child: const Text('CLEAR'),
               onPressed: () {
                 setState(() {
@@ -97,7 +97,7 @@ class PlatformViewState extends State<PlatformViewPage> {
                 });
               },
             ),
-            new RaisedButton(
+            new ContainedButton(
               child: const Text('SAVE'),
               onPressed: () {
                 const StandardMessageCodec codec = StandardMessageCodec();
@@ -105,7 +105,7 @@ class PlatformViewState extends State<PlatformViewPage> {
                     codec.encodeMessage(flutterViewEvents), context);
               },
             ),
-            new RaisedButton(
+            new ContainedButton(
               key: const ValueKey<String>('play'),
               child: const Text('PLAY FILE'),
               onPressed: () { playEventsFile(); },

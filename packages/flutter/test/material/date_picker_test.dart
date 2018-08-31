@@ -133,7 +133,7 @@ void _tests() {
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
-            return new RaisedButton(
+            return new ContainedButton(
               onPressed: () {
                 buttonContext = context;
               },

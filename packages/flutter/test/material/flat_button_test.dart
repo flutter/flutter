@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('FlatButton implements debugFillDescription', (WidgetTester tester) async {
+  testWidgets('TextButton implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
-    new FlatButton(
+    new TextButton(
         onPressed: () {},
         textColor: const Color(0xFF00FF00),
         disabledTextColor: const Color(0xFFFF0000),
@@ -32,12 +32,12 @@ void main() {
     ]);
   });
 
-  testWidgets('FlatButton has no clip by default', (WidgetTester tester) async{
+  testWidgets('TextButton has no clip by default', (WidgetTester tester) async{
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Material(
-          child: new FlatButton(
+          child: new TextButton(
             child: new Container(),
             onPressed: () { /* to make sure the button is enabled */ },
           ),
@@ -46,7 +46,7 @@ void main() {
     );
 
     expect(
-        tester.renderObject(find.byType(FlatButton)),
+        tester.renderObject(find.byType(TextButton)),
         paintsExactlyCountTimes(#clipPath, 0)
     );
   });

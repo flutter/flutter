@@ -368,7 +368,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///           children: <Widget>[
   ///             new Text('HomePage'),
   ///             // Press this button to open the SecondPage.
-  ///             new RaisedButton(
+  ///             new ContainedButton(
   ///               child: new Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
@@ -413,7 +413,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
-  ///       : new RaisedButton(
+  ///       : new ContainedButton(
   ///           child: new Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
@@ -424,7 +424,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             localNavContent,
-  ///             new RaisedButton(
+  ///             new ContainedButton(
   ///               child: new Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is

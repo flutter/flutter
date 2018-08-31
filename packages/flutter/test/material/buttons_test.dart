@@ -15,14 +15,14 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
+  testWidgets('Does TextButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Material(
           child: new Center(
-            child: new FlatButton(
+            child: new TextButton(
               onPressed: () { },
               child: const Text('ABC')
             ),
@@ -55,14 +55,14 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Does RaisedButton contribute semantics', (WidgetTester tester) async {
+  testWidgets('Does ContainedButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Material(
           child: new Center(
-            child: new RaisedButton(
+            child: new ContainedButton(
               onPressed: () { },
               child: const Text('ABC')
             ),
@@ -95,7 +95,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Does FlatButton scale with font scale changes', (WidgetTester tester) async {
+  testWidgets('Does TextButton scale with font scale changes', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
@@ -103,7 +103,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.0),
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -113,7 +113,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
+    expect(tester.getSize(find.byType(TextButton)), equals(const Size(88.0, 48.0)));
     expect(tester.getSize(find.byType(Text)), equals(const Size(42.0, 14.0)));
 
     // textScaleFactor expands text, but not button.
@@ -124,7 +124,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.3),
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -134,7 +134,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 48.0)));
+    expect(tester.getSize(find.byType(TextButton)), equals(const Size(88.0, 48.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
@@ -148,7 +148,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(textScaleFactor: 3.0),
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -160,8 +160,8 @@ void main() {
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
-    expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
+    expect(tester.getSize(find.byType(TextButton)).width, isIn(<double>[158.0, 159.0]));
+    expect(tester.getSize(find.byType(TextButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
   });
@@ -433,7 +433,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('FlatButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = new UniqueKey();
     await tester.pumpWidget(
       new Theme(
@@ -442,7 +442,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new Material(
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -463,7 +463,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new Material(
             child: new Center(
-              child: new FlatButton(
+              child: new TextButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -477,7 +477,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('RaisedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('ContainedButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = new UniqueKey();
     await tester.pumpWidget(
       new Theme(
@@ -486,7 +486,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new Material(
             child: new Center(
-              child: new RaisedButton(
+              child: new ContainedButton(
                 key: key1,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -507,7 +507,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new Material(
             child: new Center(
-              child: new RaisedButton(
+              child: new ContainedButton(
                 key: key2,
                 child: const SizedBox(width: 50.0, height: 8.0),
                 onPressed: () {},
@@ -521,12 +521,12 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async{
+  testWidgets('ContainedButton has no clip by default', (WidgetTester tester) async{
     await tester.pumpWidget(
       new Directionality(
           textDirection: TextDirection.ltr,
           child: new Material(
-            child: new RaisedButton(
+            child: new ContainedButton(
               onPressed: () { /* to make sure the button is enabled */ },
             ),
           )
@@ -534,7 +534,7 @@ void main() {
     );
 
     expect(
-        tester.renderObject(find.byType(RaisedButton)),
+        tester.renderObject(find.byType(ContainedButton)),
         paintsExactlyCountTimes(#clipPath, 0)
     );
   });

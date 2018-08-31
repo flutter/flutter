@@ -22,7 +22,7 @@ class _TimePickerLauncher extends StatelessWidget {
         child: new Center(
           child: new Builder(
             builder: (BuildContext context) {
-              return new RaisedButton(
+              return new ContainedButton(
                 child: const Text('X'),
                 onPressed: () async {
                   onChanged(await showTimePicker(
@@ -48,7 +48,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(ContainedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -146,7 +146,7 @@ void main() {
               child: new Navigator(
                 onGenerateRoute: (RouteSettings settings) {
                   return new MaterialPageRoute<void>(builder: (BuildContext context) {
-                    return new FlatButton(
+                    return new TextButton(
                       onPressed: () {
                         showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
                       },

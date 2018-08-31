@@ -171,7 +171,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
     new GalleryDemo(
       title: 'Buttons',
-      subtitle: 'Flat, raised, dropdown, and more',
+      subtitle: 'Text, contained, dropdown, and more',
       icon: GalleryIcons.generic_buttons,
       category: _kMaterialComponents,
       routeName: ButtonsDemo.routeName,

@@ -46,8 +46,8 @@ const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
 ///   * [FloatingActionButton], only the mini tap target size is increased.
 ///   * [MaterialButton]
 ///   * [OutlineButton]
-///   * [FlatButton]
-///   * [RaisedButton]
+///   * [TextButton]
+///   * [ContainedButton]
 ///   * [TimePicker]
 ///   * [SnackBar]
 ///   * [Chip]
@@ -451,15 +451,15 @@ class ThemeData extends Diagnosticable {
   /// checked or unchecked).
   final Color disabledColor;
 
-  /// The default fill color of the [Material] used in [RaisedButton]s.
+  /// The default fill color of the [Material] used in [ContainedButton]s.
   final Color buttonColor;
 
   /// The color used to highlight the active states of toggleable widgets like
   /// [Switch], [Radio], and [Checkbox].
   final Color toggleableActiveColor;
 
-  /// Defines the default configuration of button widgets, like [RaisedButton]
-  /// and [FlatButton].
+  /// Defines the default configuration of button widgets, like [ContainedButton]
+  /// and [TextButton].
   final ButtonThemeData buttonTheme;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.

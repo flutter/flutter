@@ -408,7 +408,7 @@ void main() {
                           onPressed: () { },
                         ),
                         body: new Center(
-                          child: new RaisedButton(
+                          child: new ContainedButton(
                             child: const Text('POP'),
                             onPressed: () {
                               Navigator.pop(context);

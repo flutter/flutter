@@ -33,7 +33,7 @@ class TogglerState extends State<Toggler> {
         body: new Material(
           child: new Column(
             children: <Widget>[
-              new FlatButton(
+              new TextButton(
                 key: const ValueKey<String>('toggle'),
                 child: const Text('Toggle visibility'),
                 onPressed: () {

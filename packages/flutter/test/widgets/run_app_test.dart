@@ -9,7 +9,7 @@ void main() {
   testWidgets('runApp inside onPressed does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Material(
-        child: new RaisedButton(
+        child: new ContainedButton(
           onPressed: () {
             runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr)));
           },

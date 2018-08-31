@@ -346,7 +346,7 @@ void main() {
           home: new Center(
             child: new Builder(
               builder: (BuildContext context) {
-                return new RaisedButton(
+                return new ContainedButton(
                   child: const Text('Next'),
                   onPressed: () {
                     Navigator.push<void>(context, new MaterialPageRoute<void>(

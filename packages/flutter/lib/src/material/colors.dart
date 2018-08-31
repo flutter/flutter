@@ -263,7 +263,7 @@ class Colors {
 
   /// Black with 26% opacity.
   ///
-  /// Used for disabled radio buttons and the text of disabled flat buttons in light themes.
+  /// Used for disabled radio buttons and the text of disabled text buttons in light themes.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
@@ -280,7 +280,7 @@ class Colors {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
-  /// Used for the background of disabled raised buttons in light themes.
+  /// Used for the background of disabled contained buttons in light themes.
   ///
   /// See also:
   ///
@@ -323,7 +323,7 @@ class Colors {
 
   /// White with 32% opacity.
   ///
-  /// Used for disabled radio buttons and the text of disabled flat buttons in dark themes.
+  /// Used for disabled radio buttons and the text of disabled text buttons in dark themes.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
@@ -352,7 +352,7 @@ class Colors {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
-  /// Used for the background of disabled raised buttons in dark themes.
+  /// Used for the background of disabled contained buttons in dark themes.
   ///
   /// See also:
   ///
@@ -1718,7 +1718,7 @@ class Colors {
   ///
   /// This swatch, in addition to the values 50 and 100 to 900 in 100
   /// increments, also features the special values 350 and 850. The 350 value is
-  /// used for raised button while pressed in light themes, and 850 is used for
+  /// used for contained button while pressed in light themes, and 850 is used for
   /// the background color of the dark theme. See [ThemeData.brightness].
   ///
   /// ## Sample code
@@ -1744,7 +1744,7 @@ class Colors {
       100: Color(0xFFF5F5F5),
       200: Color(0xFFEEEEEE),
       300: Color(0xFFE0E0E0),
-      350: Color(0xFFD6D6D6), // only for raised button while pressed in light theme
+      350: Color(0xFFD6D6D6), // only for contained button while pressed in light theme
       400: Color(0xFFBDBDBD),
       500: Color(_greyPrimaryValue),
       600: Color(0xFF757575),

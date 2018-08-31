@@ -1043,7 +1043,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///           duration: new Duration(seconds: 3),
 ///           child: new FlutterLogo(),
 ///         ),
-///         new RaisedButton(
+///         new ContainedButton(
 ///           child: new Text('Fade Logo'),
 ///           onPressed: _changeOpacity,
 ///         ),

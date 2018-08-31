@@ -159,7 +159,7 @@ void main() {
             body: new Center(
               child: new Builder(
                 builder: (BuildContext context) {
-                  return new RaisedButton(
+                  return new ContainedButton(
                     onPressed: () {
                       showModalBottomSheet<void>(
                         context: context,
@@ -196,7 +196,7 @@ void main() {
             body: new Center(
               child: new Builder(
                 builder: (BuildContext context) {
-                  return new RaisedButton(
+                  return new ContainedButton(
                     onPressed: () {
                       showDialog<void>(
                         context: context,

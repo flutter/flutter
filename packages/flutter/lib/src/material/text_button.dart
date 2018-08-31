@@ -11,20 +11,20 @@ import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// A material design "flat button".
+/// A material design "text button".
 ///
-/// A flat button is a text label displayed on a (zero elevation) [Material]
+/// A text button is a text label displayed on a (zero elevation) [Material]
 /// widget that reacts to touches by filling with color.
 ///
-/// Use flat buttons on toolbars, in dialogs, or inline with other content but
+/// Use text buttons on toolbars, in dialogs, or inline with other content but
 /// offset from that content with padding so that the button's presence is
-/// obvious. Flat buttons intentionally do not have visible borders and must
+/// obvious. Text buttons intentionally do not have visible borders and must
 /// therefore rely on their position relative to other content for context. In
 /// dialogs and cards, they should be grouped together in one of the bottom
-/// corners. Avoid using flat buttons where they would blend in with other
+/// corners. Avoid using text buttons where they would blend in with other
 /// content, for example in the middle of lists.
 ///
-/// Material design flat buttons have an all-caps label, some internal padding,
+/// Material design text buttons have an all-caps label, some internal padding,
 /// and some defined dimensions. To have a part of your application be
 /// interactive, with ink splashes, without also committing to these stylistic
 /// choices, consider using [InkWell] instead.
@@ -35,23 +35,23 @@ import 'theme_data.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
-/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Text buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
 /// The [clipBehavior] argument must not be null.
 ///
 /// See also:
 ///
-///  * [RaisedButton], a filled button whose material elevates when pressed.
+///  * [ContainedButton], a filled button whose material elevates when pressed.
 ///  * [DropdownButton], which offers the user a choice of a number of options.
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
 ///  * [IconButton], to create buttons that just contain icons.
-///  * [InkWell], which implements the ink splash part of a flat button.
+///  * [InkWell], which implements the ink splash part of a text button.
 ///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
-class FlatButton extends StatelessWidget {
+class TextButton extends StatelessWidget {
   /// Create a simple text button.
-  const FlatButton({
+  const TextButton({
     Key key,
     @required this.onPressed,
     this.onHighlightChanged,
@@ -77,7 +77,7 @@ class FlatButton extends StatelessWidget {
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
   /// The [icon], [label], and [clipBehavior] arguments must not be null.
-  FlatButton.icon({
+  TextButton.icon({
     Key key,
     @required this.onPressed,
     this.onHighlightChanged,
@@ -151,14 +151,14 @@ class FlatButton extends StatelessWidget {
   /// The button's fill color, displayed by its [Material], while it
   /// is in its default (unpressed, enabled) state.
   ///
-  /// Typically not specified for [FlatButton]s.
+  /// Typically not specified for [TextButton]s.
   ///
   /// The default is null.
   final Color color;
 
   /// The fill color of the button when the button is disabled.
   ///
-  /// Typically not specified for [FlatButton]s.
+  /// Typically not specified for [TextButton]s.
   ///
   /// The default is null.
   final Color disabledColor;
