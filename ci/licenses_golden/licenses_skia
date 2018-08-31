@@ -1,4 +1,4 @@
-Signature: 673603465118960f6671d748396ceaf2
+Signature: 8af7d381cac2c89a8800197e383f7c57
 
 UNUSED LICENSES:
 
@@ -1379,6 +1379,7 @@ FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
+FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
