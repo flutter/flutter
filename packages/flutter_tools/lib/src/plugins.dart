@@ -228,6 +228,7 @@ Depends on all your plugins, and provides a function to register them.
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
+  s.dependency 'Flutter'
   {{#plugins}}
   s.dependency '{{name}}'
   {{/plugins}}
@@ -296,7 +297,7 @@ Future<void> injectPlugins(FlutterProject project) async {
   final List<Plugin> plugins = findPlugins(project);
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
-  if (!project.isModule && project.ios.directory.existsSync()) {
+  if (!project.isModule && project.ios.hostAppRoot.existsSync()) {
     final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(project.ios);
