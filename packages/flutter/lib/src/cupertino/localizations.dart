@@ -7,16 +7,45 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// Determines the order of time picker in [CupertinoDatePicker].
-enum DatePickerTimeOrder {
-  /// Corresponds to the ICU 'h:mm a' pattern.
+/// Determines the order of the columns inside [CupertinoDatePicker] in
+/// time and date time mode.
+enum DatePickerDateTimeOrder {
+  /// Order of the columns, from left to right: date, hour, minute, am/pm.
   ///
-  /// The order of the pickers in [CupertinoDatePicker] is: hour, minute, am/pm.
-  hma,
-  /// Corresponds to the ICU 'a h:mm' pattern.
+  /// Example: [Fri Aug 31 | 02 | 08 | PM].
+  date_time_dayPeriod,
+  /// Order of the columns, from left to right: date, am/pm, hour, minute.
   ///
-  /// The order of the pickers in [CupertinoDatePicker] is: am/pm, hour, minute.
-  ahm,
+  /// Example: [Fri Aug 31 | PM | 02 | 08].
+  date_dayPeriod_time,
+  /// Order of the columns, from left to right: hour, minute, am/pm, date.
+  ///
+  /// Example: [02 | 08 | PM | Fri Aug 31].
+  time_dayPeriod_date,
+  /// Order of the columns, from left to right: am/pm, hour, minute, date.
+  ///
+  /// Example: [PM | 02 | 08 | Fri Aug 31].
+  dayPeriod_time_date,
+}
+
+/// Determines the order of the columns inside [CupertinoDatePicker] in date mode.
+enum DatePickerDateOrder {
+  /// Order of the columns, from left to right: day, month, year.
+  ///
+  /// Example: [12 | March | 1996]
+  dmy,
+  /// Order of the columns, from left to right: month, day, year.
+  ///
+  /// Example: [March | 12 | 1996]
+  mdy,
+  /// Order of the columns, from left to right: year, month, day.
+  ///
+  /// Example: [1996 | March | 12]
+  ymd,
+  /// Order of the columns, from left to right: year, day, month.
+  ///
+  /// Example: [1996 | 12 | March]
+  ydm,
 }
 
 /// Defines the localized resource values used by the Cupertino widgets.
@@ -88,11 +117,10 @@ abstract class CupertinoLocalizations {
   String datePickerMinuteSemanticsLabel(int minute);
 
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
-  /// Can be any permutation of 'DMY' ('D': day, 'M': month, 'Y': year).
-  String get datePickerDateOrder;
+  DatePickerDateOrder get datePickerDateOrder;
 
   /// The order of the time elements that will be shown in [CupertinoDatePicker].
-  DatePickerTimeOrder get datePickerTimeOrder;
+  DatePickerDateTimeOrder get datePickerDateTimeOrder;
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.
   String get anteMeridiemAbbreviation;
@@ -257,10 +285,10 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String get datePickerDateOrder => 'MDY';
+  DatePickerDateOrder get datePickerDateOrder => DatePickerDateOrder.mdy;
 
   @override
-  DatePickerTimeOrder get datePickerTimeOrder => DatePickerTimeOrder.hma;
+  DatePickerDateTimeOrder get datePickerDateTimeOrder => DatePickerDateTimeOrder.date_time_dayPeriod;
 
   @override
   String get anteMeridiemAbbreviation => 'AM';

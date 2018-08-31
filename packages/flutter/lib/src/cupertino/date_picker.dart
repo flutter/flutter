@@ -11,15 +11,15 @@ import 'picker.dart';
 /// Default aesthetic values obtained by comparing with iOS pickers.
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
-const bool _kUseMagnifier = false;
-const double _kMagnification = 1.0;
-const double _kDatePickerPadSize = 18.0;
+const bool _kUseMagnifier = true;
+const double _kMagnification = 1.1;
+const double _kDatePickerPadSize = 12.0;
 /// Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
 
 // Lays out the date picker based on how much space each single column needs.
 //
-// Each column will be padded horizontally by 18.0 both left and right.
+// Each column will be padded horizontally by 12.0 both left and right.
 //
 // The picker will be placed in the center, and the leftmost and rightmost
 // column will be extended equally to the remaining width.
@@ -283,15 +283,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         }
         else {
           // Automatically scrolls the am/pm column if condition is met.
-          if(selectedHour == 0 && index == 11 || selectedHour == 11 && index == 0) {
-            selectedHour = index;
+          if (selectedHour == 0 && index % 12 == 11 || selectedHour == 11 && index % 12 == 0) {
+            selectedHour = index % 12;
             amPmController.animateToItem(
               1 - amPmController.selectedItem,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeOut);
           }
           else {
-            selectedHour = index;
+            selectedHour = index % 12;
             widget.onDateTimeChanged(_getDateTime());
           }
         }
@@ -362,21 +362,21 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     String longestText = '';
 
     if (columnType == 'd') {
-      // Measuring the length of all possible date is very costly, so here
+      // Measuring the length of all possible date is impossible, so here
       // just some dates are measured.
       for (int i = 1; i <= 12; i++) {
-        final DateTime date = new DateTime(widget.initialDateTime.year, i, 16);
+        final DateTime date = new DateTime(widget.initialDateTime.year, i, 25);
         if (longestText.length < localizations.datePickerMediumDate(date).length)
           longestText = localizations.datePickerMediumDate(date);
       }
     }
     else if (columnType == 'h') {
-      for(int i = 0 ; i < 24; i++)
+      for (int i = 0 ; i < 24; i++)
         if (longestText.length < localizations.datePickerHour(i).length)
           longestText = localizations.datePickerHour(i);
     }
     else if (columnType == 'm') {
-      for(int i = 0 ; i < 60; i++)
+      for (int i = 0 ; i < 60; i++)
         if (longestText.length < localizations.datePickerMinute(i).length)
           longestText = localizations.datePickerMinute(i);
     }
@@ -412,7 +412,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     // Adds am/pm column if the picker is not using 24h format.
     if (!widget.use24hFormat) {
-      if (localizations.datePickerTimeOrder == DatePickerTimeOrder.hma) {
+      if (localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.date_time_dayPeriod
+        || localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.time_dayPeriod_date) {
         pickerBuilder.add(_buildAmPmPicker);
         columnWidth.add(_getPickerWidth('a'));
       }
@@ -424,8 +425,15 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
     // Adds medium date column if the picker's mode is date and time.
     if (widget.mode == CupertinoDatePickerMode.dateAndTime) {
-      pickerBuilder.insert(0, _buildMediumDatePicker);
-      columnWidth.insert(0, _getPickerWidth('d'));
+      if (localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.time_dayPeriod_date
+          || localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.dayPeriod_time_date) {
+        pickerBuilder.add(_buildMediumDatePicker);
+        columnWidth.add(_getPickerWidth('d'));
+      }
+      else {
+        pickerBuilder.insert(0, _buildMediumDatePicker);
+        columnWidth.insert(0, _getPickerWidth('d'));
+      }
     }
 
     final List<Widget> children = <Widget>[];
@@ -438,8 +446,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         offAxisFraction = 0.5 * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
+      if (i == columnWidth.length - 1)
+        padding = padding.flipped;
       if (textDirectionFactor == -1)
-        padding = const EdgeInsets.only(left: _kDatePickerPadSize);
+        padding = padding.flipped;
 
       children.add(LayoutId(
         id: i,
@@ -452,8 +462,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
                 : alignCenterRight,
               padding: padding,
               child: new Container(
-                alignment: alignCenterRight,
-                width: columnWidth[i] + _kDatePickerPadSize,
+                alignment: i == columnWidth.length - 1 ? alignCenterLeft : alignCenterRight,
+                width: i == 0 || i == columnWidth.length - 1
+                  ? null
+                  : columnWidth[i] + _kDatePickerPadSize,
                 child: child,
               ),
             );
@@ -593,12 +605,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     String longestText = '';
 
     if (columnType == 'D') {
-      for(int i = 1 ; i <=31; i++)
+      for (int i = 1 ; i <=31; i++)
         if (longestText.length < localizations.datePickerDayOfMonth(i).length)
           longestText = localizations.datePickerDayOfMonth(i);
     }
     else if (columnType == 'M') {
-      for(int i = 1 ; i <=12; i++)
+      for (int i = 1 ; i <=12; i++)
         if (longestText.length < localizations.datePickerMonth(i).length)
           longestText = localizations.datePickerMonth(i);
     }
@@ -619,17 +631,54 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, Function> pickerBuilder = <String, Function>{
-      'D' : _buildDayPicker,
-      'M' : _buildMonthPicker,
-      'Y' : _buildYearPicker,
-    };
+    List<Function> pickerBuilder = <Function>[];
+    List<double> columnWidth = <double>[];
 
-    final List<double> columnWidth = <double>[
-      _getPickerWidth(localizations.datePickerDateOrder[0]),
-      _getPickerWidth(localizations.datePickerDateOrder[1]),
-      _getPickerWidth(localizations.datePickerDateOrder[2]),
-    ];
+    if (localizations.datePickerDateOrder == DatePickerDateOrder.mdy) {
+      pickerBuilder = <Function>[_buildMonthPicker, _buildDayPicker, _buildYearPicker];
+      columnWidth = <double>[_getPickerWidth('M'), _getPickerWidth('D'), _getPickerWidth('Y')];
+    }
+    else if (localizations.datePickerDateOrder == DatePickerDateOrder.dmy) {
+      pickerBuilder = <Function>[_buildDayPicker, _buildMonthPicker, _buildYearPicker];
+      columnWidth = <double>[_getPickerWidth('D'), _getPickerWidth('M'), _getPickerWidth('Y')];
+    }
+    else if (localizations.datePickerDateOrder == DatePickerDateOrder.ymd) {
+      pickerBuilder = <Function>[_buildYearPicker, _buildMonthPicker, _buildDayPicker];
+      columnWidth = <double>[_getPickerWidth('Y'), _getPickerWidth('M'), _getPickerWidth('D')];
+    }
+    else {
+      pickerBuilder = <Function>[_buildYearPicker, _buildDayPicker, _buildMonthPicker];
+      columnWidth = <double>[_getPickerWidth('Y'), _getPickerWidth('D'), _getPickerWidth('M')];
+    }
+    final List<Widget> children = <Widget>[];
+
+    for (int i = 0; i < columnWidth.length; i++) {
+      final double offAxisFraction = (i - 1) * 0.5 * textDirectionFactor;
+
+      EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
+      if (textDirectionFactor == -1)
+        padding = const EdgeInsets.only(left: _kDatePickerPadSize);
+
+      children.add(LayoutId(
+        id: i,
+        child: pickerBuilder[i](
+          offAxisFraction,
+              (Widget child) {
+            return new Container(
+              alignment: i == columnWidth.length - 1
+                  ? alignCenterLeft
+                  : alignCenterRight,
+              padding: i == 0 ? null : padding,
+              child: new Container(
+                alignment: i == 0 ? alignCenterLeft : alignCenterRight,
+                width: columnWidth[i] + _kDatePickerPadSize,
+                child: child,
+              ),
+            );
+          },
+        ),
+      ));
+    }
 
     return new MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.0),
@@ -654,56 +703,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             columnWidth: columnWidth,
             textDirectionFactor: textDirectionFactor,
           ),
-          children: <Widget>[
-            new LayoutId(
-              id: 0,
-              child: pickerBuilder[localizations.datePickerDateOrder[0]](
-                -0.5 * textDirectionFactor,
-                (Widget child) {
-                  return new Container(
-                    alignment: alignCenterRight,
-                    child: new Container(
-                      alignment: alignCenterLeft,
-                      width: columnWidth[0] + _kDatePickerPadSize,
-                      child: child,
-                    ),
-                  );
-                }
-              ),
-            ),
-            new LayoutId(
-              id: 1,
-              child: pickerBuilder[localizations.datePickerDateOrder[1]](
-                  0.0,
-                  (Widget child) {
-                    return new Container(
-                      alignment: alignCenterLeft,
-                      child: new Container(
-                        alignment: alignCenterRight,
-                        width: columnWidth[1] + _kDatePickerPadSize,
-                        child: child,
-                      ),
-                    );
-                  }
-              ),
-            ),
-            new LayoutId(
-              id: 2,
-              child: pickerBuilder[localizations.datePickerDateOrder[2]](
-                0.5 * textDirectionFactor,
-                (Widget child) {
-                  return new Container(
-                    alignment: alignCenterLeft,
-                    child: new Container(
-                      alignment: alignCenterRight,
-                      width: columnWidth[2] + _kDatePickerPadSize,
-                      child: child,
-                    ),
-                  );
-                }
-              ),
-            ),
-          ],
+          children: children,
         ),
       ),
     );

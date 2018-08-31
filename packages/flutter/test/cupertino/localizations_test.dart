@@ -18,7 +18,7 @@ void main() {
     expect(localizations.datePickerMinuteSemanticsLabel(0), isNotNull);
     expect(localizations.datePickerMediumDate(DateTime.now()), isNotNull);
     expect(localizations.datePickerDateOrder, isNotNull);
-    expect(localizations.datePickerTimeOrder, isNotNull);
+    expect(localizations.datePickerDateTimeOrder, isNotNull);
 
     expect(localizations.anteMeridiemAbbreviation, isNotNull);
     expect(localizations.postMeridiemAbbreviation, isNotNull);
