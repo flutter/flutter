@@ -54,6 +54,7 @@ class SemanticsBinding extends BindingBase {
     assert(() {
       if (debugSemanticsDisableAnimations != null)
           value = debugSemanticsDisableAnimations;
+      return true;
     }());
     return value;
   }
