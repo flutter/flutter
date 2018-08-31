@@ -298,7 +298,7 @@ class ChipThemeData extends Diagnosticable {
   /// label, and zero on top and bottom.
   final EdgeInsetsGeometry labelPadding;
 
-  /// The padding between the contents of the chip and the outside [border].
+  /// The padding between the contents of the chip and the outside [shape].
   ///
   /// Defaults to 4 logical pixels on all sides.
   final EdgeInsetsGeometry padding;
