@@ -47,9 +47,10 @@ class FlutterDevice {
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    ResidentCompiler generator,
   }) {
     if (previewDart2) {
-      generator = new ResidentCompiler(
+      this.generator = generator ?? new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
