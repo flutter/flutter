@@ -16,6 +16,7 @@ typedef NS_ENUM(NSInteger, FlutterStandardField) {
   FlutterStandardFieldIntHex,
   FlutterStandardFieldFloat64,
   FlutterStandardFieldString,
+  // The following must match the corresponding order from `FlutterStandardDataType`.
   FlutterStandardFieldUInt8Data,
   FlutterStandardFieldInt32Data,
   FlutterStandardFieldInt64Data,

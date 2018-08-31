@@ -21,7 +21,7 @@
 #endif  // defined(NS_ASSUME_NONNULL_BEGIN)
 
 /**
- Indicates that the API has been deprecated for the specifed reason. Code that
+ Indicates that the API has been deprecated for the specified reason. Code that
  uses the deprecated API will continue to work as before. However, the API will
  soon become unavailable and users are encouraged to immediately take the
  appropriate action mentioned in the deprecation message and the BREAKING

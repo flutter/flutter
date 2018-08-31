@@ -208,12 +208,7 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
   return self;
 }
 
-#pragma mark - Convenience initializers
-
-// Exists for backward-compatibility.  Expect this to be removed.
-- (instancetype)initFromDefaultSourceForConfiguration {
-  return [self init];
-}
+#pragma mark - Settings accessors
 
 - (const blink::Settings&)settings {
   return _settings;
