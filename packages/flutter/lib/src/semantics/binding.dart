@@ -5,7 +5,8 @@
 import 'dart:ui' as ui show AccessibilityFeatures, window;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/semantics/debug.dart';
+
+import 'debug.dart';
 
 export 'dart:ui' show AccessibilityFeatures;
 
