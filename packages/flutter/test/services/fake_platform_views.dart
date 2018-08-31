@@ -203,7 +203,7 @@ class FakeMotionEvent {
   }
 
   @override
-  int get hashCode => hashValues(action, pointers, pointerIds);
+  int get hashCode => hashValues(action, hashList(pointers), hashList(pointerIds));
 
   @override
   String toString() {
