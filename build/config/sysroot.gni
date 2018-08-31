@@ -15,21 +15,7 @@ if (current_toolchain == default_toolchain && target_sysroot != "") {
   sysroot = target_sysroot
 } else if (is_android) {
   import("//build/config/android/config.gni")
-  if (current_cpu == "x86") {
-    sysroot = rebase_path("$android_ndk_root/$x86_android_sysroot_subdir")
-  } else if (current_cpu == "arm") {
-    sysroot = rebase_path("$android_ndk_root/$arm_android_sysroot_subdir")
-  } else if (current_cpu == "mipsel") {
-    sysroot = rebase_path("$android_ndk_root/$mips_android_sysroot_subdir")
-  } else if (current_cpu == "x64") {
-    sysroot = rebase_path("$android_ndk_root/$x86_64_android_sysroot_subdir")
-  } else if (current_cpu == "arm64") {
-    sysroot = rebase_path("$android_ndk_root/$arm64_android_sysroot_subdir")
-  } else if (current_cpu == "mips64") {
-    sysroot = rebase_path("$android_ndk_root/$mips64_android_sysroot_subdir")
-  } else {
-    sysroot = ""
-  }
+  sysroot = rebase_path("$android_ndk_root/sysroot")
 } else if (is_linux && !is_chromeos) {
   if (current_cpu == "mipsel") {
     sysroot = rebase_path("//mipsel-sysroot/sysroot")

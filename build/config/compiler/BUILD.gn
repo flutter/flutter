@@ -300,10 +300,9 @@ config("compiler") {
       }
     }
 
-    defines += [ "_FILE_OFFSET_BITS=64" ]
-
     if (!is_android) {
       defines += [
+        "_FILE_OFFSET_BITS=64", # https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md#32_bit-and
         "_LARGEFILE_SOURCE",
         "_LARGEFILE64_SOURCE",
       ]
@@ -526,13 +525,17 @@ config("runtime_library") {
     # caution.
     cflags += [
       "-isystem" +
-          rebase_path("$android_libcpp_root/libcxx/include", root_build_dir),
+          rebase_path("$android_libcpp_root/include", root_build_dir),
       "-isystem" + rebase_path(
-              "$android_ndk_root/sources/cxx-stl/llvm-libc++abi/libcxxabi/include",
+              "$android_ndk_root/sources/cxx-stl/llvm-libc++abi/include",
               root_build_dir),
       "-isystem" +
           rebase_path("$android_ndk_root/sources/android/support/include",
                       root_build_dir),
+      "-isystem" + rebase_path(
+              "$android_ndk_root/sysroot/usr/include/$android_target_triple",
+              root_build_dir),
+      "-D__ANDROID_API__=$android_api_level",
     ]
 
     lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
@@ -540,8 +543,11 @@ config("runtime_library") {
     libs += [
       "$android_libcpp_library",
       "c++abi",
-      "android_support",
     ]
+
+    if (android_api_level < 21) {
+      libs += [ "android_support" ]
+    }
 
     if (current_cpu == "arm") {
       libs += [ "unwind" ]
