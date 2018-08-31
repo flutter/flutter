@@ -89,7 +89,9 @@ class FlutterTestDriver {
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
 
-    _proc.exitCode.then((int code) {
+    // This class doesn't use the result of the future. It's made available
+    // via a getter for external uses.
+    _proc.exitCode.then((int code) { // ignore: unawaited_futures
       _debugPrint('Process exited ($code)');
       _hasExited = true;
     });

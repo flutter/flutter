@@ -236,7 +236,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       environment: androidSdk.sdkManagerEnv,
     );
 
-    process.stdin.addStream(stdin);
+    // The real stdin will never finish streaming. Pipe until the child process
+    // finishes.
+    process.stdin.addStream(stdin); // ignore: unawaited_futures
+    // Wait for stdout and stderr to be fully processed, because process.exitCode
+    // may complete first.
     await waitGroup<void>(<Future<void>>[
       stdout.addStream(process.stdout),
       stderr.addStream(process.stderr),

@@ -97,7 +97,7 @@ void main() {
       testInMemory('exits on already materialized module', () async {
         final FlutterProject project = await aModuleProject();
         await project.android.materialize();
-        expectToolExitLater(project.android.materialize(), contains('already materialized'));
+        return expectToolExitLater(project.android.materialize(), contains('already materialized'));
       });
       testInMemory('creates android/app folder in place of .android/app', () async {
         final FlutterProject project = await aModuleProject();
