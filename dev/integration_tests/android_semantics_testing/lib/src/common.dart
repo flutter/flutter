@@ -70,7 +70,7 @@ class AndroidSemanticsNode  {
   /// This field is used for controls like switches, radios, and checkboxes
   /// instead of [text].
   ///
-  /// This is produced by combining the value. label, and hint fields from
+  /// This is produced by combining the value, label, and hint fields from
   /// the Flutter [SemanticsNode].
   String get contentDescription => _values['contentDescription'];
 
