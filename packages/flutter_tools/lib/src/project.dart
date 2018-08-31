@@ -13,6 +13,8 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'flutter_manifest.dart';
+import 'ios/ios_workflow.dart';
+import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
@@ -147,6 +149,7 @@ class FlutterProject {
 /// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
   static final RegExp _productBundleIdPattern = new RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
   IosProject._(this.parent);
@@ -174,22 +177,47 @@ class IosProject {
   /// The 'Manifest.lock'.
   File get podManifestLock => directory.childDirectory('Pods').childFile('Manifest.lock');
 
+  /// The 'Info.plist' file of the host app.
+  File get hostInfoPlist => directory.childDirectory(_hostAppBundleName).childFile('Info.plist');
+
   /// '.xcodeproj' folder of the host app.
   Directory get xcodeProject => directory.childDirectory('$_hostAppBundleName.xcodeproj');
 
   /// The '.pbxproj' file of the host app.
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
-  /// The product bundle identifier of the host app.
+  /// The product bundle identifier of the host app, or null if not set or if
+  /// iOS tooling needed to read it is not installed.
   String get productBundleIdentifier {
-    return _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
+    final String fromPlist = iosWorkflow.getPlistValueFromFile(
+      hostInfoPlist.path,
+      plist.kCFBundleIdentifierKey,
+    );
+    if (fromPlist != null && !fromPlist.contains('\$')) {
+      // Info.plist has no build variables in product bundle ID.
+      return fromPlist;
+    }
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(1);
+    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
+      // Common case. Avoids parsing build settings.
+      return fromPbxproj;
+    }
+    if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
+      // General case: perform variable substitution using build settings.
+      return xcode.substituteXcodeVariables(fromPlist, buildSettings);
+    }
+    return null;
   }
 
   /// True, if the host app project is using Swift.
   bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
 
   /// The build settings for the host app of this project, as a detached map.
+  ///
+  /// Returns null, if iOS tooling is unavailable.
   Map<String, String> get buildSettings {
+    if (!xcode.xcodeProjectInterpreter.isInstalled)
+      return null;
     return xcode.xcodeProjectInterpreter.getBuildSettings(xcodeProject.path, _hostAppBundleName);
   }
 

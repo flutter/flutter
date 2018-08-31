@@ -9,10 +9,13 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:mockito/mockito.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -218,6 +221,55 @@ void main() {
       testInMemory('does not exist for non-plugin', () async {
         final FlutterProject project = await someProject();
         expect(project.hasExampleApp, isFalse);
+      });
+    });
+
+    group('product bundle identifier', () {
+      MemoryFileSystem fs;
+      MockIOSWorkflow mockIOSWorkflow;
+      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      setUp(() {
+        fs = new MemoryFileSystem();
+        mockIOSWorkflow = new MockIOSWorkflow();
+        mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
+      });
+
+      void testWithMocks(String description, Future<Null> testMethod()) {
+        testUsingContext(description, testMethod, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          IOSWorkflow: () => mockIOSWorkflow,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+        });
+      }
+
+      testWithMocks('null, if no pbxproj or plist entries', () async {
+        final FlutterProject project = await someProject();
+        expect(project.ios.productBundleIdentifier, isNull);
+      });
+      testWithMocks('from pbxproj file, if no plist', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, 'io.flutter.someProject');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+      testWithMocks('from plist, if no variables', () async {
+        final FlutterProject project = await someProject();
+        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('io.flutter.someProject');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+      testWithMocks('from pbxproj and plist, if default variable', () async {
+        final FlutterProject project = await someProject();
+        addIosWithBundleId(project.directory, 'io.flutter.someProject');
+        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+      testWithMocks('from pbxproj and plist, by substitution', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
+          'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+          'SUFFIX': 'suffix',
+        });
+        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
     });
 
@@ -456,4 +508,11 @@ File androidPluginRegistrant(Directory parent) {
     .childDirectory('flutter')
     .childDirectory('plugins')
     .childFile('GeneratedPluginRegistrant.java');
+}
+
+class MockIOSWorkflow extends Mock implements IOSWorkflow {}
+
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
+  @override
+  bool get isInstalled => true;
 }
