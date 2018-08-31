@@ -585,6 +585,44 @@ void main() {
     );
   });
 
+  testWidgets('Android view can claim gesture after all pointers are up', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    bool verticalDragAcceptedByParent = false;
+    // The long press recognizer rejects the gesture after the AndroidView gets the pointer up event.
+    // This test makes sure that the Android view can win the gesture after it got the pointer up event.
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          onVerticalDragStart: (DragStartDetails d) { verticalDragAcceptedByParent = true; },
+          onLongPress: () {},
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+    await gesture.up();
+
+    expect(verticalDragAcceptedByParent, false);
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+        const FakeMotionEvent(AndroidViewController.kActionUp, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      ]),
+    );
+  });
+
   testWidgets('Android view rebuilt during gesture', (WidgetTester tester) async {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
     final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
