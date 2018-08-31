@@ -116,6 +116,80 @@ class _NoInputBorder extends InputBorder {
   }
 }
 
+// Used to create the an InputBorder that has no paint and rounded corners.
+class UnpaintedRoundedBorder extends InputBorder {
+  /// Creates an unpainted rounded border for an [InputDecorator].
+  ///
+  /// The [borderSide] parameter defaults to [BorderSide.none] (it must not be
+  /// null). Applications typically do not specify a [borderSide] parameter
+  /// because the input decorator substitutes its own, using [copyWith], based
+  /// on the current theme and [InputDecorator.isFocused].
+  ///
+  /// The [borderRadius] parameter defaults to a value where all corners have a
+  /// circular radius of 4.0. The [borderRadius] parameter must not be null.
+  ///
+  const UnpaintedRoundedBorder({
+    BorderSide borderSide = BorderSide.none,
+    this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
+  }) : assert(borderRadius != null),
+        super(borderSide: borderSide);
+
+  final BorderRadius borderRadius;
+
+  @override
+  UnpaintedRoundedBorder copyWith({ BorderSide borderSide, BorderRadius borderRadius }) {
+    return new UnpaintedRoundedBorder(
+      borderSide: borderSide ?? this.borderSide,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
+
+  @override
+  bool get isOutline => false;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  UnpaintedRoundedBorder scale(double t) {
+    return new UnpaintedRoundedBorder(borderSide: borderSide.scale(t));
+  }
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+    return new Path()
+      ..addRect(new Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+    return new Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {
+    double gapStart,
+    double gapExtent = 0.0,
+    double gapPercentage = 0.0,
+    TextDirection textDirection,
+  }) {
+    // Do not paint
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
+    final InputBorder typedOther = other;
+    return typedOther.borderSide == borderSide;
+  }
+
+  @override
+  int get hashCode => borderSide.hashCode;
+}
+
 /// Draws a horizontal line at the bottom of an [InputDecorator]'s container and
 /// defines the container's shape.
 ///
