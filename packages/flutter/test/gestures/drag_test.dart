@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 
 import 'gesture_tester.dart';
 
@@ -330,4 +331,33 @@ void main() {
     expect(new DragUpdateDetails(globalPosition: Offset.zero), hasOneLineDescription);
     expect(new DragEndDetails(), hasOneLineDescription);
   });
+
+  testWidgets('Drag Selection test', (WidgetTester tester) async {
+    Offset newGlobalPosition;
+    void _handleUpdate(DragUpdateDetails details) {
+      newGlobalPosition = details.globalPosition;
+    }
+    await tester.pumpWidget(
+      new MaterialApp(
+        home:
+        new Material(
+          child: new GestureDetector(
+            onPanUpdate: _handleUpdate,
+            child: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
+    await tester.pumpAndSettle();
+    const Offset start = Offset(50.0, 10.0);
+    const Offset offset = Offset(10.0, 50.0);
+    await tester.dragFrom(start, offset);
+    expect(newGlobalPosition, const Offset(60.0, 60.0));
+  });
+
 }
