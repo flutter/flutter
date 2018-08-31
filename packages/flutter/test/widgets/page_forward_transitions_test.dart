@@ -108,6 +108,7 @@ void main() {
             case '/3': return new TestRoute<Null>(settings: settings, child: const Text('F'));
             case '/4': return new TestRoute<Null>(settings: settings, child: const Text('G'));
           }
+          return null;
         }
       )
     );
@@ -192,6 +193,7 @@ void main() {
             case '/': return new TestRoute<Null>(settings: settings, child: const Text('A'));
             case '/1': return new TestRoute<Null>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
+          return null;
         }
       )
     );

@@ -500,7 +500,7 @@ void main() {
       final Object key = new Object();
       await runZoned(() {
         expect(Zone.current[key], 'abczed');
-        return tester.runAsync<String>(() async {
+        return tester.runAsync<void>(() async {
           expect(Zone.current[key], 'abczed');
         });
       }, zoneValues: <dynamic, dynamic>{

@@ -608,7 +608,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return TestAsyncUtils.guard(() async {
       Finder backButton = find.byTooltip('Back');
       if (backButton.evaluate().isEmpty) {
-        backButton = find.widgetWithIcon(CupertinoButton, CupertinoIcons.back);
+        backButton = find.byType(CupertinoNavigationBarBackButton);
       }
 
       expectSync(backButton, findsOneWidget, reason: 'One back button expected on screen');

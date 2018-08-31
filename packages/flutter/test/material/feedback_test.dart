@@ -29,7 +29,7 @@ void main () {
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
-      SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
         final Map<dynamic, dynamic> typedMessage = message;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });

@@ -125,8 +125,12 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand =
-          new DummyFlutterCommand(commandFunction: () async { throwToolExit('fail'); });
+      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        },
+      );
 
       try {
         await flutterCommand.run();

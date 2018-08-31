@@ -306,6 +306,65 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
   });
 
+  testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final Key segmentedControlsKey = new UniqueKey();
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: new CupertinoPageScaffold(
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              new CupertinoSliverNavigationBar(
+                middle: new ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 200.0),
+                  child: new CupertinoSegmentedControl<int>(
+                    key: segmentedControlsKey,
+                    children: const <int, Widget>{
+                      0: Text('Option A'),
+                      1: Text('Option B'),
+                    },
+                    onValueChanged: (int selected) { },
+                    groupValue: 0,
+                  ),
+                ),
+                largeTitle: const Text('Title'),
+              ),
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+    expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
+    expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
+
+    expect(find.text('Title'), findsOneWidget);
+    expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
+
+    expect(tester.getTopLeft(find.widgetWithText(OverflowBox, 'Title')).dy, 44.0);
+    expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 52.0);
+
+    scrollController.jumpTo(600.0);
+    await tester.pump(); // Once to trigger the opacity animation.
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(tester.getCenter(find.byKey(segmentedControlsKey)).dx, 400.0);
+    // The large title is invisible now.
+    expect(
+      tester.renderObject<RenderAnimatedOpacity>(
+        find.widgetWithText(AnimatedOpacity, 'Title')
+      ).opacity.value,
+      0.0,
+    );
+  });
+
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
@@ -390,10 +449,10 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(CupertinoButton), findsOneWidget);
-    expect(find.byType(Icon), findsOneWidget);
+    expect(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       fullscreenDialog: true,
@@ -405,25 +464,67 @@ void main() {
     ));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.byType(CupertinoButton), findsNWidgets(2));
-    expect(find.text('Close'), findsOneWidget);
+    expect(find.widgetWithText(CupertinoButton, 'Close'), findsOneWidget);
 
     // Test popping goes back correctly.
     await tester.tap(find.text('Close'));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Page 2'), findsOneWidget);
 
-    await tester.tap(find.byType(Icon));
+    await tester.tap(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Home page'), findsOneWidget);
+  });
+
+  testWidgets('Long back label turns into "back"', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CupertinoApp(
+        home: const Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      new CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              previousPageTitle: '012345678901',
+            ),
+            child: Placeholder(),
+          );
+        }
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.widgetWithText(CupertinoButton, '012345678901'), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      new CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              previousPageTitle: '0123456789012',
+            ),
+            child: Placeholder(),
+          );
+        }
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.widgetWithText(CupertinoButton, 'Back'), findsOneWidget);
   });
 
   testWidgets('Border should be displayed by default', (WidgetTester tester) async {

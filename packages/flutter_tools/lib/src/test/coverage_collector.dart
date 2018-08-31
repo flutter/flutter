@@ -45,35 +45,29 @@ class CoverageCollector extends TestWatcher {
     assert(observatoryUri != null);
 
     final int pid = process.pid;
-    int exitCode;
-    // Synchronization is enforced by the API contract. Error handling
-    // synchronization is done in the code below where `exitCode` is checked.
-    // Callback cannot throw.
-    process.exitCode.then<Null>((int code) { // ignore: unawaited_futures
-      exitCode = code;
-    });
-    if (exitCode != null)
-      throw new Exception('Failed to collect coverage, process terminated before coverage could be collected.');
-
     printTrace('pid $pid: collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await coverage
-        .collect(observatoryUri, false, false)
-        .timeout(
-          const Duration(minutes: 2),
-          onTimeout: () {
-            throw new Exception('Timed out while collecting coverage.');
-          },
-        );
-    printTrace(() {
-      final StringBuffer buf = new StringBuffer()
-          ..write('pid $pid ($observatoryUri): ')
-          ..write(exitCode == null
-              ? 'collected coverage data; merging...'
-              : 'process terminated prematurely with exit code $exitCode; aborting');
-      return buf.toString();
-    }());
-    if (exitCode != null)
-      throw new Exception('Failed to collect coverage, process terminated while coverage was being collected.');
+
+    Map<String, dynamic> data;
+    final Future<void> processComplete = process.exitCode
+      .then<void>((int code) {
+        throw new Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
+      });
+    final Future<void> collectionComplete = coverage.collect(observatoryUri, false, false)
+      .then<void>((Map<String, dynamic> result) {
+        if (result == null)
+          throw new Exception('Failed to collect coverage.');
+        data = result;
+      })
+      .timeout(
+        const Duration(minutes: 10),
+        onTimeout: () {
+          throw new Exception('Timed out while collecting coverage.');
+        },
+      );
+    await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
+    assert(data != null);
+
+    printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
     _addHitmap(coverage.createHitmap(data['coverage']));
     printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }

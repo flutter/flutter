@@ -32,8 +32,7 @@ void main() {
     test('works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
-    }, skip: platform.isWindows);
+    });
 
     test('hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
@@ -43,7 +42,10 @@ void main() {
           new Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
-    }, skip: !platform.isLinux);
+
+      // TODO(dantup): Unskip for Mac when [1] is fixed.
+      // [1] hot reload/breakpoints fail when uris prefixed with file://
+      //     https://github.com/flutter/flutter/issues/18441
+    }, skip: !platform.isLinux && !platform.isWindows);
   }, timeout: const Timeout.factor(6));
 }

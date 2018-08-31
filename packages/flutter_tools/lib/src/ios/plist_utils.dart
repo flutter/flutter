@@ -16,7 +16,9 @@ String getValueFromFile(String plistFilePath, String key) {
   // Don't use PlistBuddy since that is not guaranteed to be installed.
   // 'defaults' requires the path to be absolute and without the 'plist'
   // extension.
-
+  const String executable = '/usr/bin/defaults';
+  if (!fs.isFileSync(executable))
+    return null;
   if (!fs.isFileSync(plistFilePath))
     return null;
 
@@ -24,7 +26,7 @@ String getValueFromFile(String plistFilePath, String key) {
 
   try {
     final String value = runCheckedSync(<String>[
-      '/usr/bin/defaults', 'read', normalizedPlistPath, key
+      executable, 'read', normalizedPlistPath, key
     ]);
     return value.isEmpty ? null : value;
   } catch (error) {

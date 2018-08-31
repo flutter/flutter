@@ -173,7 +173,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
   static const Duration _scrollAnimationDuration = Duration(milliseconds: 200);
 
   // Controls scrolls and measures scroll progress.
-  final ScrollController _scrollController = new ScrollController();
+  ScrollController _scrollController;
 
   // This controls the entrance of the dragging widget into a new place.
   AnimationController _entranceController;
@@ -229,6 +229,12 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
     _entranceController = new AnimationController(vsync: this, duration: _reorderAnimationDuration);
     _ghostController = new AnimationController(vsync: this, duration: _reorderAnimationDuration);
     _entranceController.addStatusListener(_onEntranceStatusChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    _scrollController = PrimaryScrollController.of(context) ?? new ScrollController();
+    super.didChangeDependencies();
   }
 
   @override

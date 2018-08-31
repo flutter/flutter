@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
+import 'package:meta/meta.dart';
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
@@ -145,3 +146,16 @@ String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path)
 /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
 /// path unchanged.
 String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
+
+/// Returns true if the file system [entity] has not been modified since the
+/// latest modification to [referenceFile].
+///
+/// Returns true, if [entity] does not exist.
+///
+/// Returns false, if [entity] exists, but [referenceFile] does not.
+bool isOlderThanReference({@required FileSystemEntity entity, @required File referenceFile}) {
+  if (!entity.existsSync())
+    return true;
+  return referenceFile.existsSync()
+      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+}

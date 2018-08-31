@@ -89,7 +89,12 @@ class FlutterTestDriver {
         workingDirectory: _projectFolder.path,
         environment: <String, String>{'FLUTTER_TEST': 'true'});
 
-    _proc.exitCode.then((_) => _hasExited = true);
+    // This class doesn't use the result of the future. It's made available
+    // via a getter for external uses.
+    _proc.exitCode.then((int code) { // ignore: unawaited_futures
+      _debugPrint('Process exited ($code)');
+      _hasExited = true;
+    });
     _transformToLines(_proc.stdout).listen((String line) => _stdout.add(line));
     _transformToLines(_proc.stderr).listen((String line) => _stderr.add(line));
 
@@ -166,10 +171,13 @@ class FlutterTestDriver {
     }
     if (_currentRunningAppId != null) {
       _debugPrint('Stopping app');
-      await _sendRequest(
-        'app.stop',
-        <String, dynamic>{'appId': _currentRunningAppId}
-      ).timeout(
+      await Future.any<void>(<Future<void>>[
+        _proc.exitCode,
+        _sendRequest(
+          'app.stop',
+          <String, dynamic>{'appId': _currentRunningAppId}
+        ),
+      ]).timeout(
         quitTimeout,
         onTimeout: () { _debugPrint('app.stop did not return within $quitTimeout'); }
       );
