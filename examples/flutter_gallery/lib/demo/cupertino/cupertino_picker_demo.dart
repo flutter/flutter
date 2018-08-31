@@ -193,7 +193,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           <Widget>[
             const Text('Time'),
             new Text(
-              DateFormat('hh:mm aa').format(time),
+              DateFormat.jm().format(time),
               style: const TextStyle(color: CupertinoColors.inactiveGray),
             ),
           ]
@@ -225,7 +225,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           <Widget>[
             const Text('Date and Time'),
             new Text(
-              DateFormat('hh:mm aa, MMM dd yyyy').format(dateTime),
+              DateFormat.yMMMd().add_jm().format(dateTime),
               style: const TextStyle(color: CupertinoColors.inactiveGray),
             ),
           ]
