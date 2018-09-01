@@ -7,7 +7,7 @@ import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/shell/platform/embedder/embedder.gni")
 
 shell_gpu_configuration("embedder_gpu_configuration") {
-  enable_software = false
+  enable_software = true
   enable_vulkan = false
   enable_gl = true
 }
@@ -16,6 +16,12 @@ source_set("embedder") {
   sources = [
     "embedder.cc",
     "embedder.h",
+    "embedder_surface.cc",
+    "embedder_surface.h",
+    "embedder_surface_gl.cc",
+    "embedder_surface_gl.h",
+    "embedder_surface_software.cc",
+    "embedder_surface_software.h",
     "embedder_engine.cc",
     "embedder_engine.h",
     "embedder_include.c",

@@ -39,8 +39,8 @@
     return static_cast<decltype(pointer->member)>((default_value));      \
   })()
 
-bool IsRendererValid(const FlutterRendererConfig* config) {
-  if (config == nullptr || config->type != kOpenGL) {
+static bool IsOpenGLRendererConfigValid(const FlutterRendererConfig* config) {
+  if (config->type != kOpenGL) {
     return false;
   }
 
@@ -54,6 +54,167 @@ bool IsRendererValid(const FlutterRendererConfig* config) {
   }
 
   return true;
+}
+
+static bool IsSoftwareRendererConfigValid(const FlutterRendererConfig* config) {
+  if (config->type != kSoftware) {
+    return false;
+  }
+
+  const FlutterSoftwareRendererConfig* software_config = &config->software;
+
+  if (SAFE_ACCESS(software_config, surface_present_callback, nullptr) ==
+      nullptr) {
+    return false;
+  }
+
+  return true;
+}
+
+static bool IsRendererValid(const FlutterRendererConfig* config) {
+  if (config == nullptr) {
+    return false;
+  }
+
+  switch (config->type) {
+    case kOpenGL:
+      return IsOpenGLRendererConfigValid(config);
+    case kSoftware:
+      return IsSoftwareRendererConfigValid(config);
+    default:
+      return false;
+  }
+
+  return false;
+}
+
+static shell::Shell::CreateCallback<shell::PlatformView>
+InferOpenGLPlatformViewCreationCallback(
+    const FlutterRendererConfig* config,
+    void* user_data,
+    shell::PlatformViewEmbedder::PlatformDispatchTable
+        platform_dispatch_table) {
+  if (config->type != kOpenGL) {
+    return nullptr;
+  }
+
+  auto gl_make_current = [ptr = config->open_gl.make_current,
+                          user_data]() -> bool { return ptr(user_data); };
+
+  auto gl_clear_current = [ptr = config->open_gl.clear_current,
+                           user_data]() -> bool { return ptr(user_data); };
+
+  auto gl_present = [ptr = config->open_gl.present, user_data]() -> bool {
+    return ptr(user_data);
+  };
+
+  auto gl_fbo_callback = [ptr = config->open_gl.fbo_callback,
+                          user_data]() -> intptr_t { return ptr(user_data); };
+
+  const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
+  std::function<bool()> gl_make_resource_current_callback = nullptr;
+  if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) != nullptr) {
+    gl_make_resource_current_callback =
+        [ptr = config->open_gl.make_resource_current, user_data]() {
+          return ptr(user_data);
+        };
+  }
+
+  std::function<SkMatrix(void)> gl_surface_transformation_callback = nullptr;
+  if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) != nullptr) {
+    gl_surface_transformation_callback =
+        [ptr = config->open_gl.surface_transformation, user_data]() {
+          FlutterTransformation transformation = ptr(user_data);
+          return SkMatrix::MakeAll(transformation.scaleX,  //
+                                   transformation.skewX,   //
+                                   transformation.transX,  //
+                                   transformation.skewY,   //
+                                   transformation.scaleY,  //
+                                   transformation.transY,  //
+                                   transformation.pers0,   //
+                                   transformation.pers1,   //
+                                   transformation.pers2    //
+          );
+        };
+  }
+
+  bool fbo_reset_after_present =
+      SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
+
+  shell::EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table = {
+      gl_make_current,                    // gl_make_current_callback
+      gl_clear_current,                   // gl_clear_current_callback
+      gl_present,                         // gl_present_callback
+      gl_fbo_callback,                    // gl_fbo_callback
+      gl_make_resource_current_callback,  // gl_make_resource_current_callback
+      gl_surface_transformation_callback  // gl_surface_transformation_callback
+  };
+
+  return [gl_dispatch_table, fbo_reset_after_present,
+          platform_dispatch_table](shell::Shell& shell) {
+    return std::make_unique<shell::PlatformViewEmbedder>(
+        shell,                    // delegate
+        shell.GetTaskRunners(),   // task runners
+        gl_dispatch_table,        // embedder GL dispatch table
+        fbo_reset_after_present,  // fbo reset after present
+        platform_dispatch_table   // embedder platform dispatch table
+    );
+  };
+}
+
+static shell::Shell::CreateCallback<shell::PlatformView>
+InferSoftwarePlatformViewCreationCallback(
+    const FlutterRendererConfig* config,
+    void* user_data,
+    shell::PlatformViewEmbedder::PlatformDispatchTable
+        platform_dispatch_table) {
+  if (config->type != kSoftware) {
+    return nullptr;
+  }
+
+  auto software_present_backing_store =
+      [ptr = config->software.surface_present_callback, user_data](
+          const void* allocation, size_t row_bytes, size_t height) -> bool {
+    return ptr(user_data, allocation, row_bytes, height);
+  };
+
+  shell::EmbedderSurfaceSoftware::SoftwareDispatchTable
+      software_dispatch_table = {
+          software_present_backing_store,  // required
+      };
+
+  return
+      [software_dispatch_table, platform_dispatch_table](shell::Shell& shell) {
+        return std::make_unique<shell::PlatformViewEmbedder>(
+            shell,                    // delegate
+            shell.GetTaskRunners(),   // task runners
+            software_dispatch_table,  // software dispatch table
+            platform_dispatch_table   // platform dispatch table
+        );
+      };
+}
+
+static shell::Shell::CreateCallback<shell::PlatformView>
+InferPlatformViewCreationCallback(
+    const FlutterRendererConfig* config,
+    void* user_data,
+    shell::PlatformViewEmbedder::PlatformDispatchTable
+        platform_dispatch_table) {
+  if (config == nullptr) {
+    return nullptr;
+  }
+
+  switch (config->type) {
+    case kOpenGL:
+      return InferOpenGLPlatformViewCreationCallback(config, user_data,
+                                                     platform_dispatch_table);
+    case kSoftware:
+      return InferSoftwarePlatformViewCreationCallback(config, user_data,
+                                                       platform_dispatch_table);
+    default:
+      return nullptr;
+  }
+  return nullptr;
 }
 
 struct _FlutterPlatformMessageResponseHandle {
@@ -87,67 +248,6 @@ FlutterResult FlutterEngineRun(size_t version,
   if (!IsRendererValid(config)) {
     return kInvalidArguments;
   }
-
-  auto make_current = [ptr = config->open_gl.make_current,
-                       user_data]() -> bool { return ptr(user_data); };
-
-  auto clear_current = [ptr = config->open_gl.clear_current,
-                        user_data]() -> bool { return ptr(user_data); };
-
-  auto present = [ptr = config->open_gl.present, user_data]() -> bool {
-    return ptr(user_data);
-  };
-
-  auto fbo_callback = [ptr = config->open_gl.fbo_callback,
-                       user_data]() -> intptr_t { return ptr(user_data); };
-
-  shell::PlatformViewEmbedder::PlatformMessageResponseCallback
-      platform_message_response_callback = nullptr;
-  if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
-    platform_message_response_callback =
-        [ptr = args->platform_message_callback,
-         user_data](fml::RefPtr<blink::PlatformMessage> message) {
-          auto handle = new FlutterPlatformMessageResponseHandle();
-          const FlutterPlatformMessage incoming_message = {
-              sizeof(FlutterPlatformMessage),  // struct_size
-              message->channel().c_str(),      // channel
-              message->data().data(),          // message
-              message->data().size(),          // message_size
-              handle,                          // response_handle
-          };
-          handle->message = std::move(message);
-          return ptr(&incoming_message, user_data);
-        };
-  }
-
-  const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
-  std::function<bool()> make_resource_current_callback = nullptr;
-  if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) != nullptr) {
-    make_resource_current_callback = [ptr =
-                                          config->open_gl.make_resource_current,
-                                      user_data]() { return ptr(user_data); };
-  }
-
-  std::function<SkMatrix(void)> gl_surface_transformation_callback = nullptr;
-  if (SAFE_ACCESS(open_gl_config, surface_transformation, nullptr) != nullptr) {
-    gl_surface_transformation_callback =
-        [ptr = config->open_gl.surface_transformation, user_data]() {
-          FlutterTransformation transformation = ptr(user_data);
-          return SkMatrix::MakeAll(transformation.scaleX,  //
-                                   transformation.skewX,   //
-                                   transformation.transX,  //
-                                   transformation.skewY,   //
-                                   transformation.scaleY,  //
-                                   transformation.transY,  //
-                                   transformation.pers0,   //
-                                   transformation.pers1,   //
-                                   transformation.pers2    //
-          );
-        };
-  }
-
-  bool fbo_reset_after_present =
-      SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
 
   std::string icu_data_path;
   if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
@@ -205,25 +305,35 @@ FlutterResult FlutterEngineRun(size_t version,
       thread_host.io_thread->GetTaskRunner()           // io
   );
 
-  shell::PlatformViewEmbedder::DispatchTable dispatch_table = {
-      make_current,                        // gl_make_current_callback
-      clear_current,                       // gl_clear_current_callback
-      present,                             // gl_present_callback
-      fbo_callback,                        // gl_fbo_callback
+  shell::PlatformViewEmbedder::PlatformMessageResponseCallback
+      platform_message_response_callback = nullptr;
+  if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
+    platform_message_response_callback =
+        [ptr = args->platform_message_callback,
+         user_data](fml::RefPtr<blink::PlatformMessage> message) {
+          auto handle = new FlutterPlatformMessageResponseHandle();
+          const FlutterPlatformMessage incoming_message = {
+              sizeof(FlutterPlatformMessage),  // struct_size
+              message->channel().c_str(),      // channel
+              message->data().data(),          // message
+              message->data().size(),          // message_size
+              handle,                          // response_handle
+          };
+          handle->message = std::move(message);
+          return ptr(&incoming_message, user_data);
+        };
+  }
+
+  shell::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table = {
       platform_message_response_callback,  // platform_message_response_callback
-      make_resource_current_callback,      // gl_make_resource_current_callback
-      gl_surface_transformation_callback   // gl_surface_transformation_callback
   };
 
-  shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =
-      [dispatch_table, fbo_reset_after_present](shell::Shell& shell) {
-        return std::make_unique<shell::PlatformViewEmbedder>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            dispatch_table,          // embedder dispatch table
-            fbo_reset_after_present  // fbo reset after present
-        );
-      };
+  auto on_create_platform_view = InferPlatformViewCreationCallback(
+      config, user_data, platform_dispatch_table);
+
+  if (!on_create_platform_view) {
+    return kInvalidArguments;
+  }
 
   shell::Shell::CreateCallback<shell::Rasterizer> on_create_rasterizer =
       [](shell::Shell& shell) {
