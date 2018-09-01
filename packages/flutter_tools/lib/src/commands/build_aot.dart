@@ -110,7 +110,6 @@ class BuildAotCommand extends BuildSubCommand {
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            previewDart2: true,
             buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
           ).then((int buildExitCode) {
@@ -141,7 +140,6 @@ class BuildAotCommand extends BuildSubCommand {
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          previewDart2: true,
           buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
