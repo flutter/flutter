@@ -4,55 +4,31 @@
 
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
-#include "flutter/shell/common/io_manager.h"
-
 namespace shell {
 
-PlatformViewEmbedder::PlatformViewEmbedder(PlatformView::Delegate& delegate,
-                                           blink::TaskRunners task_runners,
-                                           DispatchTable dispatch_table,
-                                           bool fbo_reset_after_present)
+PlatformViewEmbedder::PlatformViewEmbedder(
+    PlatformView::Delegate& delegate,
+    blink::TaskRunners task_runners,
+    EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
+    bool fbo_reset_after_present,
+    PlatformDispatchTable platform_dispatch_table)
     : PlatformView(delegate, std::move(task_runners)),
-      dispatch_table_(dispatch_table),
-      fbo_reset_after_present_(fbo_reset_after_present) {}
+      embedder_surface_(
+          std::make_unique<EmbedderSurfaceGL>(gl_dispatch_table,
+                                              fbo_reset_after_present)),
+      platform_dispatch_table_(platform_dispatch_table) {}
+
+PlatformViewEmbedder::PlatformViewEmbedder(
+    PlatformView::Delegate& delegate,
+    blink::TaskRunners task_runners,
+    EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
+    PlatformDispatchTable platform_dispatch_table)
+    : PlatformView(delegate, std::move(task_runners)),
+      embedder_surface_(
+          std::make_unique<EmbedderSurfaceSoftware>(software_dispatch_table)),
+      platform_dispatch_table_(platform_dispatch_table) {}
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
-
-// |shell::GPUSurfaceGLDelegate|
-bool PlatformViewEmbedder::GLContextMakeCurrent() {
-  return dispatch_table_.gl_make_current_callback();
-}
-
-// |shell::GPUSurfaceGLDelegate|
-bool PlatformViewEmbedder::GLContextClearCurrent() {
-  return dispatch_table_.gl_clear_current_callback();
-}
-
-// |shell::GPUSurfaceGLDelegate|
-bool PlatformViewEmbedder::GLContextPresent() {
-  return dispatch_table_.gl_present_callback();
-}
-
-// |shell::GPUSurfaceGLDelegate|
-intptr_t PlatformViewEmbedder::GLContextFBO() const {
-  return dispatch_table_.gl_fbo_callback();
-}
-
-// |shell::GPUSurfaceGLDelegate|
-bool PlatformViewEmbedder::GLContextFBOResetAfterPresent() const {
-  return fbo_reset_after_present_;
-}
-
-// |shell::GPUSurfaceGLDelegate|
-SkMatrix PlatformViewEmbedder::GLContextSurfaceTransformation() const {
-  auto callback = dispatch_table_.gl_surface_transformation_callback;
-  if (!callback) {
-    SkMatrix matrix;
-    matrix.setIdentity();
-    return matrix;
-  }
-  return callback();
-}
 
 void PlatformViewEmbedder::HandlePlatformMessage(
     fml::RefPtr<blink::PlatformMessage> message) {
@@ -64,25 +40,31 @@ void PlatformViewEmbedder::HandlePlatformMessage(
     return;
   }
 
-  if (dispatch_table_.platform_message_response_callback == nullptr) {
+  if (platform_dispatch_table_.platform_message_response_callback == nullptr) {
     message->response()->CompleteEmpty();
     return;
   }
 
-  dispatch_table_.platform_message_response_callback(std::move(message));
+  platform_dispatch_table_.platform_message_response_callback(
+      std::move(message));
 }
 
+// |shell::PlatformView|
 std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
-  return std::make_unique<GPUSurfaceGL>(this);
+  if (embedder_surface_ == nullptr) {
+    FML_LOG(ERROR) << "Embedder surface was null.";
+    return nullptr;
+  }
+  return embedder_surface_->CreateGPUSurface();
 }
 
+// |shell::PlatformView|
 sk_sp<GrContext> PlatformViewEmbedder::CreateResourceContext() const {
-  auto callback = dispatch_table_.gl_make_resource_current_callback;
-  if (callback && callback()) {
-    return IOManager::CreateCompatibleResourceLoadingContext(
-        GrBackend::kOpenGL_GrBackend);
+  if (embedder_surface_ == nullptr) {
+    FML_LOG(ERROR) << "Embedder surface was null.";
+    return nullptr;
   }
-  return nullptr;
+  return embedder_surface_->CreateResourceContext();
 }
 
 }  // namespace shell

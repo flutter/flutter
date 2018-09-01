@@ -5,62 +5,50 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_PLATFORM_VIEW_EMBEDDER_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_PLATFORM_VIEW_EMBEDDER_H_
 
+#include <functional>
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_surface.h"
+#include "flutter/shell/platform/embedder/embedder_surface_gl.h"
+#include "flutter/shell/platform/embedder/embedder_surface_software.h"
 
 namespace shell {
 
-class PlatformViewEmbedder final : public PlatformView,
-                                   public GPUSurfaceGLDelegate {
+class PlatformViewEmbedder final : public PlatformView {
  public:
   using PlatformMessageResponseCallback =
       std::function<void(fml::RefPtr<blink::PlatformMessage>)>;
-  struct DispatchTable {
-    std::function<bool(void)> gl_make_current_callback;   // required
-    std::function<bool(void)> gl_clear_current_callback;  // required
-    std::function<bool(void)> gl_present_callback;        // required
-    std::function<intptr_t(void)> gl_fbo_callback;        // required
+
+  struct PlatformDispatchTable {
     PlatformMessageResponseCallback
-        platform_message_response_callback;                       // optional
-    std::function<bool(void)> gl_make_resource_current_callback;  // optional
-    std::function<SkMatrix(void)>
-        gl_surface_transformation_callback;  // optional
+        platform_message_response_callback;  // optional
   };
 
+  // Creates a platform view that sets up an OpenGL rasterizer.
   PlatformViewEmbedder(PlatformView::Delegate& delegate,
                        blink::TaskRunners task_runners,
-                       DispatchTable dispatch_table,
-                       bool fbo_reset_after_present);
+                       EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table,
+                       bool fbo_reset_after_present,
+                       PlatformDispatchTable platform_dispatch_table);
+
+  // Create a platform view that sets up a software rasterizer.
+  PlatformViewEmbedder(
+      PlatformView::Delegate& delegate,
+      blink::TaskRunners task_runners,
+      EmbedderSurfaceSoftware::SoftwareDispatchTable software_dispatch_table,
+      PlatformDispatchTable platform_dispatch_table);
 
   ~PlatformViewEmbedder() override;
-
-  // |shell::GPUSurfaceGLDelegate|
-  bool GLContextMakeCurrent() override;
-
-  // |shell::GPUSurfaceGLDelegate|
-  bool GLContextClearCurrent() override;
-
-  // |shell::GPUSurfaceGLDelegate|
-  bool GLContextPresent() override;
-
-  // |shell::GPUSurfaceGLDelegate|
-  intptr_t GLContextFBO() const override;
-
-  // |shell::GPUSurfaceGLDelegate|
-  bool GLContextFBOResetAfterPresent() const override;
-
-  // |shell::GPUSurfaceGLDelegate|
-  SkMatrix GLContextSurfaceTransformation() const override;
 
   // |shell::PlatformView|
   void HandlePlatformMessage(
       fml::RefPtr<blink::PlatformMessage> message) override;
 
  private:
-  DispatchTable dispatch_table_;
-  bool fbo_reset_after_present_;
+  std::unique_ptr<EmbedderSurface> embedder_surface_;
+  PlatformDispatchTable platform_dispatch_table_;
 
   // |shell::PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;

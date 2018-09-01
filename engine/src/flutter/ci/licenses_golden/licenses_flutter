@@ -609,6 +609,12 @@ FILE: ../../../flutter/shell/platform/android/platform_message_response_android.
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
 FILE: ../../../flutter/shell/version/version.cc
 FILE: ../../../flutter/shell/version/version.h
 ----------------------------------------------------------------------------------------------------

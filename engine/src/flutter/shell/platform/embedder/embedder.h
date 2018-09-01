@@ -27,6 +27,7 @@ typedef enum {
 
 typedef enum {
   kOpenGL,
+  kSoftware,
 } FlutterRendererType;
 
 typedef struct _FlutterEngine* FlutterEngine;
@@ -55,6 +56,10 @@ typedef struct {
 typedef bool (*BoolCallback)(void* /* user data */);
 typedef FlutterTransformation (*TransformationCallback)(void* /* user data */);
 typedef uint32_t (*UIntCallback)(void* /* user data */);
+typedef bool (*SoftwareSurfacePresentCallback)(void* /* user data */,
+                                               const void* /* allocation */,
+                                               size_t /* row bytes */,
+                                               size_t /* height */);
 
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
@@ -75,9 +80,20 @@ typedef struct {
 } FlutterOpenGLRendererConfig;
 
 typedef struct {
+  // The size of this struct. Must be sizeof(FlutterSoftwareRendererConfig).
+  size_t struct_size;
+  // The callback presented to the embedder to present a fully populated buffer
+  // to the user. The pixel format of the buffer is the native 32-bit RGBA
+  // format. The buffer is owned by the Flutter engine and must be copied in
+  // this callback if needed.
+  SoftwareSurfacePresentCallback surface_present_callback;
+} FlutterSoftwareRendererConfig;
+
+typedef struct {
   FlutterRendererType type;
   union {
     FlutterOpenGLRendererConfig open_gl;
+    FlutterSoftwareRendererConfig software;
   };
 } FlutterRendererConfig;
 
