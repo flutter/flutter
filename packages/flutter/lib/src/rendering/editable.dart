@@ -198,9 +198,11 @@ class RenderEditable extends RenderBox {
   }
 
   /// This is used for updating the text in the text field in the event
-  /// of cut or paste.
+  /// of cut or paste. It must not be null, when set dynamically, it will
+  /// make cut, copy and paste functionality work with the most set
+  /// [TextSelectionDelegate]. It should be used only to update the
+  /// text in the text field.
   TextSelectionDelegate textSelectionDelegate;
-
 
   Rect _lastCaretRect;
 
