@@ -332,32 +332,131 @@ void main() {
     expect(new DragEndDetails(), hasOneLineDescription);
   });
 
-  testWidgets('Drag Selection test', (WidgetTester tester) async {
-    Offset newGlobalPosition;
-    void _handleUpdate(DragUpdateDetails details) {
-      newGlobalPosition = details.globalPosition;
-    }
-    await tester.pumpWidget(
-      new MaterialApp(
-        home:
-        new Material(
-          child: new GestureDetector(
-            onPanUpdate: _handleUpdate,
-            child: const SizedBox(
-              width: 100.0,
-              height: 100.0,
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.idle();
-    await tester.tap(find.byType(TextField).first);
-    await tester.pumpAndSettle();
-    const Offset start = Offset(50.0, 10.0);
-    const Offset offset = Offset(10.0, 50.0);
-    await tester.dragFrom(start, offset);
-    expect(newGlobalPosition, const Offset(60.0, 60.0));
+  testGesture('Should recognize drag', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    bool didStartDrag = false;
+    drag.onStart = (_) {
+      didStartDrag = true;
+    };
+
+    double updatedDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
+    };
+
+    bool didEndDrag = false;
+    drag.onEnd = (DragEndDetails details) {
+      didEndDrag = true;
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(down);
+    expect(didStartDrag, isTrue);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isTrue);
+    didStartDrag = false;
+    expect(updatedDelta, 10.0);
+    updatedDelta = null;
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, 0.0);
+    updatedDelta = null;
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.up());
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isTrue);
+    didEndDrag = false;
+
+    drag.dispose();
   });
+
+  testGesture('Should recognize drag', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Offset newGlobalPosition;
+    drag.onUpdate = (DragUpdateDetails details) {
+      newGlobalPosition = details.globalPosition;
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    tester.closeArena(5);
+    tester.route(down);
+    expect(newGlobalPosition, const Offset(20.0, 10.0));
+    tester.route(pointer.up());
+    drag.dispose();
+  });
+
+//  testWidgets('Drag Selection test', (WidgetTester tester) async {
+//    Offset newGlobalPosition;
+//    void _handleUpdate(DragUpdateDetails details) {
+//      debugPrint('handling');
+//      newGlobalPosition = details.globalPosition;
+//    }
+//    await tester.pumpWidget(
+//      new MaterialApp(
+//        home:
+//        new Material(
+//          child: new GestureDetector(
+//            onVerticalDragUpdate: _handleUpdate,
+//            child: new ListView(
+//              children: <Widget>[
+//                const SizedBox(
+//                  width: 100.0,
+//                  height: 100.0,
+//                ),
+//                const SizedBox(
+//                  width: 100.0,
+//                  height: 100.0,
+//                ),
+//                const SizedBox(
+//                  width: 100.0,
+//                  height: 100.0,
+//                ),
+//                const SizedBox(
+//                  width: 100.0,
+//                  height: 100.0,
+//                ),
+//                const SizedBox(
+//                  width: 100.0,
+//                  height: 100.0,
+//                ),
+//                const SizedBox(
+//                  width: 100.0,
+//                  height: 100.0,
+//                ),
+//
+//                ]
+//              ),
+//            ),
+//          ),
+//        ),
+//      );
+//
+//    await tester.idle();
+////    await tester.tap(find.byType(SizedBox).first);
+//    await tester.pumpAndSettle();
+//    const Offset start = Offset(50.0, 10.0);
+//    const Offset offset = Offset(-10.0, -50.0);
+//    await tester.drag(find.byType(SizedBox).last, offset);
+//    expect(newGlobalPosition, const Offset(60.0, 60.0));
+//  });
 
 }
