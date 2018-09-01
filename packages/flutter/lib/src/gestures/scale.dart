@@ -48,7 +48,7 @@ class ScaleStartDetails {
 class ScaleUpdateDetails {
   /// Creates details for [GestureScaleUpdateCallback].
   ///
-  /// The [focalPoint], [scale] and [rotation] arguments must not be null. The [scale]
+  /// The [focalPoint], [scale], [rotation] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
@@ -66,7 +66,7 @@ class ScaleUpdateDetails {
   /// greater than or equal to zero.
   final double scale;
 
-  /// The Rotation implied by the first two pointers to enter in contact with
+  /// The Angle implied by the first two pointers to enter in contact with
   /// the screen. Expressed in radians.
   final double rotation;
 
@@ -140,7 +140,7 @@ class _LineBetweenPointers{
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
 /// calculates their focal point, indicated scale and rotation. When a focal pointer is
-/// established, the recognizer calls [onStart]. As the focal point, scale and rotation
+/// established, the recognizer calls [onStart]. As the focal point, scale, rotation
 /// change, the recognizer calls [onUpdate]. When the pointers are no longer in
 /// contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
@@ -167,14 +167,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   _LineBetweenPointers _initialLine;
   _LineBetweenPointers _currentLine;
   Map<int, Offset> _pointerLocations;
-  /// A queue to sort pointers in order of entrance
-  List<int> _pointerQueue;
+  List<int> _pointerQueue; /// A queue to sort pointers in order of entrance
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
-  double _rotationFactor () {
-    if(_initialLine == null || _currentLine == null){
+  double _computeRotationFactor() {
+    if (_initialLine == null || _currentLine == null) {
       return 0.0;
     }
     final double fx = _initialLine.pointerStartLocation.dx;
@@ -255,29 +254,29 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// Updates [_initialLine] and [_currentLine] accordingly to the situation of
   /// the registered pointers
-  void _updateLines(){
+  void _updateLines() {
     final int count = _pointerLocations.keys.length;
-
+    assert(_pointerQueue.length >= count);
     /// In case of just one pointer registered, reconfigure [_initialLine]
-    if(count < 2 ){
+    if (count < 2) {
       _initialLine = _currentLine;
-    } else if(_initialLine != null
-        && _initialLine.pointerStartId == _pointerQueue[0]
-        && _initialLine.pointerEndId == _pointerQueue[1]){
+    } else if (_initialLine != null &&
+      _initialLine.pointerStartId == _pointerQueue[0] &&
+      _initialLine.pointerEndId == _pointerQueue[1]) {
       /// Rotation updated, set the [_currentLine]
       _currentLine = new _LineBetweenPointers(
-          pointerStartId: _pointerQueue[0],
-          pointerStartLocation: _pointerLocations[_pointerQueue[0]],
-          pointerEndId: _pointerQueue[1],
-          pointerEndLocation: _pointerLocations[ _pointerQueue[1]]
+        pointerStartId: _pointerQueue[0],
+        pointerStartLocation: _pointerLocations[_pointerQueue[0]],
+        pointerEndId: _pointerQueue[1],
+        pointerEndLocation: _pointerLocations[ _pointerQueue[1]]
       );
     } else {
       /// A new rotation process is on the way, set the [_initialLine]
       _initialLine = new _LineBetweenPointers(
-          pointerStartId: _pointerQueue[0],
-          pointerStartLocation: _pointerLocations[_pointerQueue[0]],
-          pointerEndId: _pointerQueue[1],
-          pointerEndLocation: _pointerLocations[ _pointerQueue[1]]
+        pointerStartId: _pointerQueue[0],
+        pointerStartLocation: _pointerLocations[_pointerQueue[0]],
+        pointerEndId: _pointerQueue[1],
+        pointerEndLocation: _pointerLocations[ _pointerQueue[1]]
       );
       _currentLine = null;
     }
@@ -327,7 +326,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint, rotation: _rotationFactor())));
+      invokeCallback<void>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint, rotation: _computeRotationFactor())));
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
