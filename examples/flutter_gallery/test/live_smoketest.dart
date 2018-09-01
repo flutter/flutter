@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ATTENTION!
+//
+// This file is not named "*_test.dart", and as such will not run when you run
+// "flutter test". It is only intended to be run as part of the
+// flutter_gallery_instrumentation_test devicelab test.
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -14,11 +20,11 @@ import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 // Reports success or failure to the native code.
-const MethodChannel _kTestChannel = const MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
+const MethodChannel _kTestChannel = MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
 
 // We don't want to wait for animations to complete before tapping the
 // back button in the demos with these titles.
-const List<String> _kUnsynchronizedDemoTitles = const <String>[
+const List<String> _kUnsynchronizedDemoTitles = <String>[
   'Progress indicators',
   'Activity Indicator',
   'Video',
@@ -26,7 +32,7 @@ const List<String> _kUnsynchronizedDemoTitles = const <String>[
 
 // These demos can't be backed out of by tapping a button whose
 // tooltip is 'Back'.
-const List<String> _kSkippedDemoTitles = const <String>[
+const List<String> _kSkippedDemoTitles = <String>[
   'Pull to refresh',
   'Progress indicators',
   'Activity Indicator',
@@ -43,39 +49,40 @@ Future<Null> main() async {
     if (!new Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
       fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
 
+    print('Starting app...');
     runApp(const GalleryApp(testMode: true));
-    final _LiveWidgetController controller = new _LiveWidgetController();
+    final _LiveWidgetController controller = new _LiveWidgetController(WidgetsBinding.instance);
     for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
+      print('Tapping "${category.name}" section...');
       await controller.tap(find.text(category.name));
       for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
         final Finder demoItem = find.text(demo.title);
+        print('Scrolling to "${demo.title}"...');
         await controller.scrollIntoView(demoItem, alignment: 0.5);
-
-        if (_kSkippedDemoTitles.contains(demo.title)) {
-          print('> skipped $demo');
+        if (_kSkippedDemoTitles.contains(demo.title))
           continue;
-        }
-
         for (int i = 0; i < 2; i += 1) {
+          print('Tapping "${demo.title}"...');
           await controller.tap(demoItem); // Launch the demo
           controller.frameSync = !_kUnsynchronizedDemoTitles.contains(demo.title);
+          print('Going back to demo list...');
           await controller.tap(find.byTooltip('Back'));
           controller.frameSync = true;
         }
-        print('Success');
       }
+      print('Going back to home screen...');
       await controller.tap(find.byTooltip('Back'));
     }
-
+    print('Finished successfully!');
     _kTestChannel.invokeMethod('success');
-  } catch (error) {
+  } catch (error, stack) {
+    print('Caught error: $error\n$stack');
     _kTestChannel.invokeMethod('failure');
   }
 }
 
-class _LiveWidgetController {
-
-  final WidgetController _controller = new WidgetController(WidgetsBinding.instance);
+class _LiveWidgetController extends LiveWidgetController {
+  _LiveWidgetController(WidgetsBinding binding) : super(binding);
 
   /// With [frameSync] enabled, Flutter Driver will wait to perform an action
   /// until there are no pending frames in the app under test.
@@ -97,18 +104,16 @@ class _LiveWidgetController {
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) async {
     if (frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
-
+      await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     await _waitUntilFrame(() => finder.precache());
-
     if (frameSync)
-      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
-
+      await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     return finder;
   }
 
-  Future<Null> tap(Finder finder) async {
-    await _controller.tap(await _waitForElement(finder));
+  @override
+  Future<Null> tap(Finder finder, { int pointer }) async {
+    await super.tap(await _waitForElement(finder), pointer: pointer);
   }
 
   Future<Null> scrollIntoView(Finder finder, {double alignment}) async {

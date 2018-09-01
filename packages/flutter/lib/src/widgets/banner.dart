@@ -16,9 +16,9 @@ const double _kHeight = 12.0; // height of banner
 const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
 final Rect _kRect = new Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
 
-const Color _kColor = const Color(0xA0B71C1C);
-const TextStyle _kTextStyle = const TextStyle(
-  color: const Color(0xFFFFFFFF),
+const Color _kColor = Color(0xA0B71C1C);
+const TextStyle _kTextStyle = TextStyle(
+  color: Color(0xFFFFFFFF),
   fontSize: _kHeight * 0.85,
   fontWeight: FontWeight.w900,
   height: 1.0
@@ -87,7 +87,7 @@ class BannerPainter extends CustomPainter {
   /// [location].
   final TextDirection textDirection;
 
-  /// Where to show the banner (e.g., the upper right corder).
+  /// Where to show the banner (e.g., the upper right corner).
   final BannerLocation location;
 
   /// The directionality of the layout.
@@ -108,8 +108,8 @@ class BannerPainter extends CustomPainter {
   /// Defaults to bold, white text.
   final TextStyle textStyle;
 
-  static const BoxShadow _shadow = const BoxShadow(
-    color: const Color(0x7F000000),
+  static const BoxShadow _shadow = BoxShadow(
+    color: Color(0x7F000000),
     blurRadius: 6.0,
   );
 
@@ -280,7 +280,7 @@ class Banner extends StatelessWidget {
   /// [location].
   final TextDirection textDirection;
 
-  /// Where to show the banner (e.g., the upper right corder).
+  /// Where to show the banner (e.g., the upper right corner).
   final BannerLocation location;
 
   /// The directionality of the layout.

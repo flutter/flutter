@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -358,7 +359,7 @@ void main() {
 
       testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(new Column(
-          children: const <Widget>[const Text('hello'), const Text('world')],
+          children: const <Widget>[Text('hello'), Text('world')],
         )));
         final Finder finder = find.byType(Text);
         try {
@@ -380,6 +381,172 @@ void main() {
       expect(comparator.imageBytes, hasLength(greaterThan(0)));
       expect(comparator.golden, Uri.parse('foo.png'));
       autoUpdateGoldenFiles = false;
+    });
+  });
+
+  group('matchesSemanticsData', () {
+    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const Key key = Key('semantics');
+      await tester.pumpWidget(new Semantics(
+        key: key,
+        namesRoute: true,
+        header: true,
+        button: true,
+        onTap: () {},
+        onLongPress: () {},
+        label: 'foo',
+        hint: 'bar',
+        value: 'baz',
+        increasedValue: 'a',
+        decreasedValue: 'b',
+        textDirection: TextDirection.rtl,
+        onTapHint: 'scan',
+        onLongPressHint: 'fill',
+        customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+          const CustomSemanticsAction(label: 'foo'): () {},
+          const CustomSemanticsAction(label: 'bar'): () {},
+        },
+      ));
+
+      expect(tester.getSemanticsData(find.byKey(key)),
+        matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          increasedValue: 'a',
+          decreasedValue: 'b',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
+        ),
+      );
+
+      // Doesn't match custom actions
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scan',
+          onLongPressHint: 'fill',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'barz')
+          ],
+        )),
+      );
+
+      // Doesn't match wrong hints
+      expect(tester.getSemanticsData(find.byKey(key)),
+        isNot(matchesSemanticsData(
+          label: 'foo',
+          hint: 'bar',
+          value: 'baz',
+          textDirection: TextDirection.rtl,
+          hasTapAction: true,
+          hasLongPressAction: true,
+          isButton: true,
+          isHeader: true,
+          namesRoute: true,
+          onTapHint: 'scans',
+          onLongPressHint: 'fills',
+          customActions: <CustomSemanticsAction>[
+            const CustomSemanticsAction(label: 'foo'),
+            const CustomSemanticsAction(label: 'bar')
+          ],
+        )),
+      );
+
+      handle.dispose();
+    });
+
+    testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
+      int actions = 0;
+      int flags = 0;
+      const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
+      for (int index in SemanticsAction.values.keys)
+        actions |= index;
+      for (int index in SemanticsFlag.values.keys)
+        flags |= index;
+      final SemanticsData data = new SemanticsData(
+        flags: flags,
+        actions: actions,
+        label: 'a',
+        increasedValue: 'b',
+        value: 'c',
+        decreasedValue: 'd',
+        hint: 'e',
+        textDirection: TextDirection.ltr,
+        rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        textSelection: null,
+        scrollPosition: null,
+        scrollExtentMax: null,
+        scrollExtentMin: null,
+        customSemanticsActionIds: <int>[CustomSemanticsAction.getIdentifier(action)],
+      );
+
+      expect(data, matchesSemanticsData(
+         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+         size: const Size(10.0, 10.0),
+         /* Flags */
+         hasCheckedState: true,
+         isChecked: true,
+         isSelected: true,
+         isButton: true,
+         isTextField: true,
+         hasEnabledState: true,
+         isFocused: true,
+         isEnabled: true,
+         isInMutuallyExclusiveGroup: true,
+         isHeader: true,
+         isObscured: true,
+         namesRoute: true,
+         scopesRoute: true,
+         isHidden: true,
+         isImage: true,
+         isLiveRegion: true,
+         hasToggledState: true,
+         isToggled: true,
+         hasImplicitScrolling: true,
+         /* Actions */
+         hasTapAction: true,
+         hasLongPressAction: true,
+         hasScrollLeftAction: true,
+         hasScrollRightAction: true,
+         hasScrollUpAction: true,
+         hasScrollDownAction: true,
+         hasIncreaseAction: true,
+         hasDecreaseAction: true,
+         hasShowOnScreenAction: true,
+         hasMoveCursorForwardByCharacterAction: true,
+         hasMoveCursorBackwardByCharacterAction: true,
+         hasMoveCursorForwardByWordAction: true,
+         hasMoveCursorBackwardByWordAction: true,
+         hasSetSelectionAction: true,
+         hasCopyAction: true,
+         hasCutAction: true,
+         hasPasteAction: true,
+         hasDidGainAccessibilityFocusAction: true,
+         hasDidLoseAccessibilityFocusAction: true,
+         hasDismissAction: true,
+         customActions: <CustomSemanticsAction>[action],
+      ));
     });
   });
 }

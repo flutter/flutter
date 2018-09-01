@@ -43,5 +43,16 @@
   "popupMenuLabel": "قائمة منبثقة",
   "dialogLabel": "مربع حوار",
   "alertDialogLabel": "مربع حوار التنبيه",
-  "searchFieldLabel": "بحث"
+  "searchFieldLabel": "بحث",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

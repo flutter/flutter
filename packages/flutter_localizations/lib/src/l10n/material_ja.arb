@@ -39,5 +39,16 @@
   "popupMenuLabel": "ポップアップ メニュー",
   "dialogLabel": "ダイアログ",
   "alertDialogLabel": "アラート",
-  "searchFieldLabel": "サーチ"
+  "searchFieldLabel": "サーチ",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

@@ -8,8 +8,8 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -88,7 +88,7 @@ Use the 'android' tool to install them:
     setUp(() {
       hardware = 'unknown';
       buildCharacteristics = 'unused';
-      when(mockProcessManager.run(typedArgThat(contains('getprop')),
+      when(mockProcessManager.run(argThat(contains('getprop')),
           stderrEncoding: anyNamed('stderrEncoding'),
           stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
         final StringBuffer buf = new StringBuffer()

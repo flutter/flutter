@@ -17,7 +17,8 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
+
+import '../flutter_test_alternative.dart';
 
 part 'package:flutter/src/material/animated_icons/animated_icons.dart';
 part 'package:flutter/src/material/animated_icons/animated_icons_data.dart';
@@ -46,8 +47,8 @@ class MockPath extends Mock implements ui.Path {}
 void main () {
   group('Interpolate points', () {
     test('- single point', () {
-      const List<Offset> points = const <Offset>[
-        const Offset(25.0, 1.0),
+      const List<Offset> points = <Offset>[
+        Offset(25.0, 1.0),
       ];
       expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
       expect(_interpolate(points, 0.5, Offset.lerp), const Offset(25.0, 1.0));
@@ -55,9 +56,9 @@ void main () {
     });
 
     test('- two points', () {
-      const List<Offset> points = const <Offset>[
-        const Offset(25.0, 1.0),
-        const Offset(12.0, 12.0),
+      const List<Offset> points = <Offset>[
+        Offset(25.0, 1.0),
+        Offset(12.0, 12.0),
       ];
       expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
       expect(_interpolate(points, 0.5, Offset.lerp), const Offset(18.5, 6.5));
@@ -65,10 +66,10 @@ void main () {
     });
 
     test('- three points', () {
-      const List<Offset> points = const <Offset>[
-        const Offset(25.0, 1.0),
-        const Offset(12.0, 12.0),
-        const Offset(23.0, 9.0),
+      const List<Offset> points = <Offset>[
+        Offset(25.0, 1.0),
+        Offset(12.0, 12.0),
+        Offset(23.0, 9.0),
       ];
       expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
       expect(_interpolate(points, 0.25, Offset.lerp), const Offset(18.5, 6.5));
@@ -79,7 +80,7 @@ void main () {
   });
 
   group('_AnimatedIconPainter', () {
-    const Size size = const Size(48.0, 48.0);
+    const Size size = Size(48.0, 48.0);
     final MockCanvas mockCanvas = new MockCanvas();
     List<MockPath> generatedPaths;
     final _UiPathFactory pathFactory = () {
@@ -340,86 +341,86 @@ void main () {
   });
 }
 
-const _AnimatedIconData movingBar = const _AnimatedIconData(
-  const Size(48.0, 48.0),
-  const <_PathFrames> [
-    const _PathFrames(
-      opacities: const <double> [1.0, 0.2],
-      commands: const <_PathCommand> [
-        const _PathMoveTo(
-          const <Offset> [
-            const Offset(0.0, 0.0),
-            const Offset(0.0, 38.0),
+const _AnimatedIconData movingBar = _AnimatedIconData(
+  Size(48.0, 48.0),
+  <_PathFrames> [
+    _PathFrames(
+      opacities: <double> [1.0, 0.2],
+      commands: <_PathCommand> [
+        _PathMoveTo(
+          <Offset> [
+            Offset(0.0, 0.0),
+            Offset(0.0, 38.0),
           ],
         ),
-        const _PathLineTo(
-          const <Offset> [
-            const Offset(48.0, 0.0),
-            const Offset(48.0, 38.0),
+        _PathLineTo(
+          <Offset> [
+            Offset(48.0, 0.0),
+            Offset(48.0, 38.0),
           ],
         ),
-        const _PathLineTo(
-          const <Offset> [
-            const Offset(48.0, 10.0),
-            const Offset(48.0, 48.0),
+        _PathLineTo(
+          <Offset> [
+            Offset(48.0, 10.0),
+            Offset(48.0, 48.0),
           ],
         ),
-        const _PathLineTo(
-          const <Offset> [
-            const Offset(0.0, 10.0),
-            const Offset(0.0, 48.0),
+        _PathLineTo(
+          <Offset> [
+            Offset(0.0, 10.0),
+            Offset(0.0, 48.0),
           ],
         ),
-        const _PathLineTo(
-          const <Offset> [
-            const Offset(0.0, 0.0),
-            const Offset(0.0, 38.0),
+        _PathLineTo(
+          <Offset> [
+            Offset(0.0, 0.0),
+            Offset(0.0, 38.0),
           ],
         ),
-        const _PathClose(),
+        _PathClose(),
       ],
     ),
   ],
 );
 
-const _AnimatedIconData bow = const _AnimatedIconData(
-  const Size(48.0, 48.0),
-  const <_PathFrames> [
-    const _PathFrames(
-      opacities: const <double> [1.0, 1.0],
-      commands: const <_PathCommand> [
-        const _PathMoveTo(
-          const <Offset> [
-            const Offset(0.0, 24.0),
-            const Offset(0.0, 24.0),
-            const Offset(0.0, 24.0),
+const _AnimatedIconData bow = _AnimatedIconData(
+  Size(48.0, 48.0),
+  <_PathFrames> [
+    _PathFrames(
+      opacities: <double> [1.0, 1.0],
+      commands: <_PathCommand> [
+        _PathMoveTo(
+          <Offset> [
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
           ],
         ),
-        const _PathCubicTo(
-          const <Offset> [
-            const Offset(16.0, 24.0),
-            const Offset(16.0, 10.0),
-            const Offset(16.0, 48.0),
+        _PathCubicTo(
+          <Offset> [
+            Offset(16.0, 24.0),
+            Offset(16.0, 10.0),
+            Offset(16.0, 48.0),
           ],
-          const <Offset> [
-            const Offset(32.0, 24.0),
-            const Offset(32.0, 10.0),
-            const Offset(32.0, 48.0),
+          <Offset> [
+            Offset(32.0, 24.0),
+            Offset(32.0, 10.0),
+            Offset(32.0, 48.0),
           ],
-          const <Offset> [
-            const Offset(48.0, 24.0),
-            const Offset(48.0, 24.0),
-            const Offset(48.0, 24.0),
-          ],
-        ),
-        const _PathLineTo(
-          const <Offset> [
-            const Offset(0.0, 24.0),
-            const Offset(0.0, 24.0),
-            const Offset(0.0, 24.0),
+          <Offset> [
+            Offset(48.0, 24.0),
+            Offset(48.0, 24.0),
+            Offset(48.0, 24.0),
           ],
         ),
-        const _PathClose(),
+        _PathLineTo(
+          <Offset> [
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+            Offset(0.0, 24.0),
+          ],
+        ),
+        _PathClose(),
       ],
     ),
   ],

@@ -4,6 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
@@ -12,6 +13,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
+import 'transitions.dart';
 
 /// An interpolation between two [BoxConstraints].
 ///
@@ -123,6 +125,24 @@ class BorderRadiusTween extends Tween<BorderRadius> {
   /// Returns the value this variable has at the given animation clock value.
   @override
   BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t);
+}
+
+/// An interpolation between two [Border]s.
+///
+/// This class specializes the interpolation of [Tween<Border>] to use
+/// [Border.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
+class BorderTween extends Tween<Border> {
+  /// Creates a [Border] tween.
+  ///
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as having no border.
+  BorderTween({ Border begin, Border end }) : super(begin: begin, end: end);
+
+  /// Returns the value this variable has at the given animation clock value.
+  @override
+  Border lerp(double t) => Border.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Matrix4]s.
@@ -257,6 +277,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     );
     _updateCurve();
     _constructTweens();
+    didUpdateTweens();
   }
 
   @override
@@ -273,6 +294,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       _controller
         ..value = 0.0
         ..forward();
+      didUpdateTweens();
     }
   }
 
@@ -329,9 +351,23 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// as the begin value.
   ///
   /// 2. Take the value returned from the callback, and store it. This is the
-  /// value to use as the current value the next time that the forEachTween()
+  /// value to use as the current value the next time that the [forEachTween]
   /// method is called.
+  ///
+  /// Subclasses that contain properties based on tweens created by
+  /// [forEachTween] should override [didUpdateTweens] to update those
+  /// properties. Dependent properties should not be updated within
+  /// [forEachTween].
+  @protected
   void forEachTween(TweenVisitor<dynamic> visitor);
+
+  /// Optional hook for subclasses that runs after all tweens have been updated
+  /// via [forEachTween].
+  ///
+  /// Any properties that depend upon tweens created by [forEachTween] should be
+  /// updated within [didUpdateTweens], not within [forEachTween].
+  @protected
+  void didUpdateTweens() {}
 }
 
 /// A base class for widgets with implicit animations that need to rebuild their
@@ -368,11 +404,20 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
 /// [AnimationController].
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only
 ///    supports animating the [padding].
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
+///  * [AnimatedAlign], which automatically transitions its child's
+///    position over a given duration whenever the given [alignment] changes.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -528,9 +573,15 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// Animated version of [Padding] which automatically transitions the
 /// indentation over a given duration whenever the given inset changes.
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
+///  * [AnimatedAlign], which automatically transitions its child's
+///    position over a given duration whenever the given [alignment] changes.
 class AnimatedPadding extends ImplicitlyAnimatedWidget {
   /// Creates a widget that insets its child by a value that animates
   /// implicitly.
@@ -590,9 +641,18 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// Animated version of [Align] which automatically transitions the child's
 /// position over a given duration whenever the given [alignment] changes.
 ///
+/// Here's an illustration of what this can look like, using a [curve] of
+/// [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_align.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
+///  * [AnimatedPadding], which can animate the padding instead of the
+///    alignment.
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
 class AnimatedAlign extends ImplicitlyAnimatedWidget {
   /// Creates a widget that positions its child by an alignment that animates
   /// implicitly.
@@ -667,6 +727,17 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// position over a given duration whenever the given position changes.
 ///
 /// Only works if it's the child of a [Stack].
+///
+/// This widget is a good choice if the _size_ of the child would end up
+/// changing as a result of this animation. If the size is intended to remain
+/// the same, with only the _position_ changing over time, then consider
+/// [SlideTransition] instead. [SlideTransition] only triggers a repaint each
+/// frame of the animation, whereas [AnimatedPositioned] will trigger a relayout
+/// as well.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned.mp4}
 ///
 /// See also:
 ///
@@ -810,10 +881,21 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 ///
 /// Only works if it's the child of a [Stack].
 ///
+/// This widget is a good choice if the _size_ of the child would end up
+/// changing as a result of this animation. If the size is intended to remain
+/// the same, with only the _position_ changing over time, then consider
+/// [SlideTransition] instead. [SlideTransition] only triggers a repaint each
+/// frame of the animation, whereas [AnimatedPositionedDirectional] will trigger
+/// a relayout as well. ([SlideTransition] is also text-direction-aware.)
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned_directional.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedPositioned], which specifies the widget's position visually (the
-///  * same as this widget, but for animating [Positioned]).
+///    same as this widget, but for animating [Positioned]).
 class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its position implicitly.
   ///
@@ -932,6 +1014,10 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// Animating an opacity is relatively expensive because it requires painting
 /// the child into an intermediate buffer.
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
+///
 /// ## Sample code
 ///
 /// ```dart
@@ -966,6 +1052,11 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///   }
 /// }
 /// ```
+///
+/// See also:
+///
+///  * [FadeTransition], an explicitly animated version of this widget, where
+///    an [Animation] is provided by the caller instead of being built in.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
   ///
@@ -1003,8 +1094,9 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
+class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
   Tween<double> _opacity;
+  Animation<double> _opacityAnimation;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
@@ -1012,9 +1104,14 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
   }
 
   @override
+  void didUpdateTweens() {
+    _opacityAnimation = _opacity.animate(animation);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return new Opacity(
-      opacity: _opacity.evaluate(animation),
+    return new FadeTransition(
+      opacity: _opacityAnimation,
       child: widget.child
     );
   }
@@ -1027,6 +1124,10 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
 ///
 /// The [textAlign], [softWrap], [textOverflow], and [maxLines] properties are
 /// not animated and take effect immediately when changed.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.elasticInOut].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
@@ -1130,6 +1231,10 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 /// because it is being driven by an [AnimatedTheme]).
 ///
 /// The [shape] is not animated.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_physical_model.mp4}
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
@@ -1143,6 +1248,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     Key key,
     @required this.child,
     @required this.shape,
+    this.clipBehavior = Clip.none,
     this.borderRadius = BorderRadius.zero,
     @required this.elevation,
     @required this.color,
@@ -1153,6 +1259,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(child != null),
        assert(shape != null),
+       assert(clipBehavior != null),
        assert(borderRadius != null),
        assert(elevation != null),
        assert(color != null),
@@ -1170,6 +1277,9 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   ///
   /// This property is not animated.
   final BoxShape shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The target border radius of the rounded corners for a rectangle shape.
   final BorderRadius borderRadius;
@@ -1224,6 +1334,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
     return new PhysicalModel(
       child: widget.child,
       shape: widget.shape,
+      clipBehavior: widget.clipBehavior,
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,

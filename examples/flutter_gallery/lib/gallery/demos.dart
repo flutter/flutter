@@ -31,27 +31,27 @@ class GalleryDemoCategory {
   }
 }
 
-const GalleryDemoCategory _kDemos = const GalleryDemoCategory._(
+const GalleryDemoCategory _kDemos = GalleryDemoCategory._(
   name: 'Studies',
   icon: GalleryIcons.animation,
 );
 
-const GalleryDemoCategory _kStyle = const GalleryDemoCategory._(
+const GalleryDemoCategory _kStyle = GalleryDemoCategory._(
   name: 'Style',
   icon: GalleryIcons.custom_typography,
 );
 
-const GalleryDemoCategory _kMaterialComponents = const GalleryDemoCategory._(
+const GalleryDemoCategory _kMaterialComponents = GalleryDemoCategory._(
   name: 'Material',
   icon: GalleryIcons.category_mdc,
 );
 
-const GalleryDemoCategory _kCupertinoComponents = const GalleryDemoCategory._(
+const GalleryDemoCategory _kCupertinoComponents = GalleryDemoCategory._(
   name: 'Cupertino',
   icon: GalleryIcons.phone_iphone,
 );
 
-const GalleryDemoCategory _kMedia = const GalleryDemoCategory._(
+const GalleryDemoCategory _kMedia = GalleryDemoCategory._(
   name: 'Media',
   icon: GalleryIcons.drive_video,
 );
@@ -218,6 +218,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new DialogDemo(),
     ),
     new GalleryDemo(
+      title: 'Elevations',
+      subtitle: 'Shadow values on cards',
+      // TODO(larche): Change to custom icon for elevations when one exists.
+      icon: GalleryIcons.cupertino_progress,
+      category: _kMaterialComponents,
+      routeName: ElevationDemo.routeName,
+      buildRoute: (BuildContext context) => new ElevationDemo(),
+    ),
+    new GalleryDemo(
       title: 'Expand/collapse list control',
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
@@ -264,6 +273,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kMaterialComponents,
       routeName: LeaveBehindDemo.routeName,
       buildRoute: (BuildContext context) => const LeaveBehindDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Lists: reorderable',
+      subtitle: 'Reorderable lists',
+      icon: GalleryIcons.list_alt,
+      category: _kMaterialComponents,
+      routeName: ReorderableListDemo.routeName,
+      buildRoute: (BuildContext context) => const ReorderableListDemo(),
     ),
     new GalleryDemo(
       title: 'Menus',
@@ -387,18 +404,18 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => new CupertinoProgressIndicatorDemo(),
     ),
     new GalleryDemo(
+      title: 'Alerts',
+      icon: GalleryIcons.dialogs,
+      category: _kCupertinoComponents,
+      routeName: CupertinoAlertDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoAlertDemo(),
+    ),
+    new GalleryDemo(
       title: 'Buttons',
       icon: GalleryIcons.generic_buttons,
       category: _kCupertinoComponents,
       routeName: CupertinoButtonsDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
-    ),
-    new GalleryDemo(
-      title: 'Dialogs',
-      icon: GalleryIcons.dialogs,
-      category: _kCupertinoComponents,
-      routeName: CupertinoDialogDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoDialogDemo(),
     ),
     new GalleryDemo(
       title: 'Navigation',
@@ -420,6 +437,13 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kCupertinoComponents,
       routeName: CupertinoRefreshControlDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
+    ),
+    new GalleryDemo(
+      title: 'Segmented Control',
+      icon: GalleryIcons.tabs,
+      category: _kCupertinoComponents,
+      routeName: CupertinoSegmentedControlDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoSegmentedControlDemo(),
     ),
     new GalleryDemo(
       title: 'Sliders',

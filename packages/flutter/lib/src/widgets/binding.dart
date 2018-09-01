@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures;
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
@@ -229,6 +229,12 @@ abstract class WidgetsBindingObserver {
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void didHaveMemoryPressure() { }
+
+  /// Called when the system changes the set of currently active accessibility
+  /// features.
+  ///
+  /// This method exposes notifications from [Window.onAccessibilityFeaturesChanged].
+  void didChangeAccessibilityFeatures() {}
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -243,6 +249,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
+    ui.window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
   }
@@ -368,6 +375,13 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didChangeTextScaleFactor();
   }
 
+  @override
+  void handleAccessibilityFeaturesChanged() {
+    super.handleAccessibilityFeaturesChanged();
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangeAccessibilityFeatures();
+  }
+
   /// Called when the system locale changes.
   ///
   /// Calls [dispatchLocaleChanged] to notify the binding observers.
@@ -390,6 +404,19 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   void dispatchLocaleChanged(Locale locale) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeLocale(locale);
+  }
+
+  /// Notify all the observers that the active set of [AccessibilityFeatures]
+  /// has changed (using [WidgetsBindingObserver.didChangeAccessibilityFeatures]),
+  /// giving them the `features` argument.
+  ///
+  /// This is called by [handleAccessibilityFeaturesChanged] when the
+  /// [Window.onAccessibilityFeaturesChanged] notification is received.
+  @protected
+  @mustCallSuper
+  void dispatchAccessibilityFeaturesChanged() {
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangeAccessibilityFeatures();
   }
 
   /// Called when the system pops the current route.
@@ -667,10 +694,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    // TODO(hansmuller): eliminate the value variable after analyzer bug
-    // https://github.com/flutter/flutter/issues/11646 is fixed.
-    final Future<Null> value = super.performReassemble();
-    return value.then((Null _) {
+    return super.performReassemble().then((Null value) {
       allowFirstFrameReport();
     });
   }
@@ -807,7 +831,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
   Element _child;
 
-  static const Object _rootChildSlot = const Object();
+  static const Object _rootChildSlot = Object();
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -893,7 +917,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
 
 /// A concrete binding for applications based on the Widgets framework.
 /// This is the glue that binds the framework to the Flutter engine.
-class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, RendererBinding, WidgetsBinding {
+class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, PaintingBinding, SemanticsBinding, RendererBinding, WidgetsBinding {
 
   /// Returns an instance of the [WidgetsBinding], creating and
   /// initializing it if necessary. If one is created, it will be a

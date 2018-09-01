@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show base64, utf8;
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:meta/meta.dart';
 
 import 'asset.dart';
 import 'base/context.dart';
@@ -46,7 +47,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(GZIP.encoder); // ignore: deprecated_member_use
+    return contentsAsStream().transform(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -86,7 +87,7 @@ class DevFSFileContent extends DevFSContent {
       return;
     }
     _fileStat = file.statSync();
-    if (_fileStat.type == FileSystemEntityType.LINK) { // ignore: deprecated_member_use
+    if (_fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
       final FileSystemEntity linkTarget = fs.file(resolved);
@@ -329,7 +330,7 @@ class _DevFSHttpWriter {
 }
 
 class DevFS {
-  /// Create a [DevFS] named [fsName] for the local files in [directory].
+  /// Create a [DevFS] named [fsName] for the local files in [rootDirectory].
   DevFS(VMService serviceProtocol,
         this.fsName,
         this.rootDirectory, {
@@ -401,17 +402,18 @@ class DevFS {
   ///
   /// Returns the number of bytes synced.
   Future<int> update({
-    String mainPath,
+    @required String mainPath,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     Set<String> fileFilter,
-    ResidentCompiler generator,
+    @required ResidentCompiler generator,
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
+    @required String pathToReload,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -510,13 +512,12 @@ class DevFS {
               packagesFilePath : _packagesFilePath);
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final String entryUri = projectRootPath != null ?
-            fs.path.relative(mainPath, from: projectRootPath):
-            mainPath;
-        final Uri kernelUri = fs.path.toUri(entryUri + '.dill');
-        if (!dirtyEntries.containsKey(kernelUri)) {
+        final Uri entryUri = fs.path.toUri(projectRootPath != null ?
+            fs.path.relative(pathToReload, from: projectRootPath):
+            pathToReload);
+        if (!dirtyEntries.containsKey(entryUri)) {
           final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
-          dirtyEntries[kernelUri] = content;
+          dirtyEntries[entryUri] = content;
           numBytes += content.size;
         }
       }
@@ -666,7 +667,7 @@ class DevFS {
           try {
             final FileSystemEntityType linkType =
                 fs.statSync(file.resolveSymbolicLinksSync()).type;
-            if (linkType == FileSystemEntityType.DIRECTORY) // ignore: deprecated_member_use
+            if (linkType == FileSystemEntityType.directory)
               continue;
           } on FileSystemException catch (e) {
             _printScanDirectoryError(file.path, e);

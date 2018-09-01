@@ -5,18 +5,18 @@
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
-const int _kDefaultSizeBytes = 10485760; // 10 MiB
+const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 
 /// Class for the [imageCache] object.
 ///
-/// Implements a least-recently-used cache of up to 1000 images. The maximum
-/// size can be adjusted using [maximumSize]. Images that are actively in use
-/// (i.e. to which the application is holding references, either via
-/// [ImageStream] objects, [ImageStreamCompleter] objects, [ImageInfo] objects,
-/// or raw [dart:ui.Image] objects) may get evicted from the cache (and thus
-/// need to be refetched from the network if they are referenced in the
-/// [putIfAbsent] method), but the raw bits are kept in memory for as long as
-/// the application is using them.
+/// Implements a least-recently-used cache of up to 1000 images, and up to 100
+/// MB. The maximum size can be adjusted using [maximumSize] and
+/// [maximumSizeBytes]. Images that are actively in use (i.e. to which the
+/// application is holding references, either via [ImageStream] objects,
+/// [ImageStreamCompleter] objects, [ImageInfo] objects, or raw [dart:ui.Image]
+/// objects) may get evicted from the cache (and thus need to be refetched from
+/// the network if they are referenced in the [putIfAbsent] method), but the raw
+/// bits are kept in memory for as long as the application is using them.
 ///
 /// The [putIfAbsent] method is the main entry-point to the cache API. It
 /// returns the previously cached [ImageStreamCompleter] for the given key, if
@@ -143,8 +143,14 @@ class ImageCache {
     result = loader();
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
-      final int imageSize = info.image == null ? 0 : info.image.height * info.image.width * 4;
+      final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = new _CachedImage(result, imageSize);
+      // If the image is bigger than the maximum cache size, and the cache size
+      // is not zero, then increase the cache size to the size of the image plus
+      // some change.
+      if (maximumSizeBytes > 0 && imageSize > maximumSizeBytes) {
+        _maximumSizeBytes = imageSize + 1000;
+      }
       _currentSizeBytes += imageSize;
       _pendingImages.remove(key);
       _cache[key] = image;

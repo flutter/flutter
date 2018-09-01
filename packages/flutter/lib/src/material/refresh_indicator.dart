@@ -20,11 +20,11 @@ const double _kDragSizeFactorLimit = 1.5;
 
 // When the scroll ends, the duration of the refresh indicator's animation
 // to the RefreshIndicator's displacement.
-const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
+const Duration _kIndicatorSnapDuration = Duration(milliseconds: 150);
 
 // The duration of the ScaleTransition that starts when the refresh action
 // has completed.
-const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
+const Duration _kIndicatorScaleDuration = Duration(milliseconds: 200);
 
 /// The signature for a function that's called when the user has dragged a
 /// [RefreshIndicator] far enough to demonstrate that they want the app to
@@ -32,7 +32,7 @@ const Duration _kIndicatorScaleDuration = const Duration(milliseconds: 200);
 /// finished.
 ///
 /// Used by [RefreshIndicator.onRefresh].
-typedef Future<Null> RefreshCallback();
+typedef Future<void> RefreshCallback();
 
 // The state machine moves through these modes only when the scrollable
 // identified by scrollableKey has been scrolled to its min or max limit.
@@ -75,7 +75,7 @@ enum _RefreshIndicatorMode {
 ///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
 ///    the inner circular progress spinner during refreshes.
-///  * [CupertinoRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
+///  * [CupertinoSliverRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
 ///    Must be used as a sliver inside a [CustomScrollView] instead of wrapping
 ///    around a [ScrollView] because it's a part of the scrollable instead of
 ///    being overlaid on top of it.
@@ -146,14 +146,13 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   Animation<Color> _valueColor;
 
   _RefreshIndicatorMode _mode;
-  Future<Null> _pendingRefreshFuture;
+  Future<void> _pendingRefreshFuture;
   bool _isIndicatorAtTop;
   double _dragOffset;
 
   @override
   void initState() {
     super.initState();
-
     _positionController = new AnimationController(vsync: this);
     _positionFactor = new Tween<double>(
       begin: 0.0,
@@ -297,7 +296,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   // Stop showing the refresh indicator.
-  Future<Null> _dismiss(_RefreshIndicatorMode newMode) async {
+  Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
+    await new Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
     // direction change.
@@ -327,7 +327,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _show() {
     assert(_mode != _RefreshIndicatorMode.refresh);
     assert(_mode != _RefreshIndicatorMode.snap);
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<void> completer = new Completer<void>();
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
     _positionController
@@ -340,7 +340,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             _mode = _RefreshIndicatorMode.refresh;
           });
 
-          final Future<Null> refreshResult = widget.onRefresh();
+          final Future<void> refreshResult = widget.onRefresh();
           assert(() {
             if (refreshResult == null)
               FlutterError.reportError(new FlutterErrorDetails(
@@ -381,7 +381,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<Null> show({ bool atTop = true }) {
+  Future<void> show({ bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
       if (_mode == null)

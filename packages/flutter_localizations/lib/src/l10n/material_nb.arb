@@ -39,5 +39,16 @@
   "popupMenuLabel": "Forgrunnsmeny",
   "dialogLabel": "Dialogboks",
   "alertDialogLabel": "Varsling",
-  "searchFieldLabel": "Søke"
+  "searchFieldLabel": "Søke",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

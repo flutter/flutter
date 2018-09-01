@@ -39,5 +39,16 @@
   "popupMenuLabel": "Menu popup",
   "dialogLabel": "Finestra di dialogo",
   "alertDialogLabel": "Mettere in guardia",
-  "searchFieldLabel": "Ricerca"
+  "searchFieldLabel": "Ricerca",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

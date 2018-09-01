@@ -39,5 +39,16 @@
   "popupMenuLabel": "Menu bật lên",
   "dialogLabel": "Hộp thoại",
   "alertDialogLabel": "Hộp thoại",
-  "searchFieldLabel": "Tìm kiếm"
+  "searchFieldLabel": "Tìm kiếm",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

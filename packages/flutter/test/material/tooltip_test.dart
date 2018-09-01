@@ -612,9 +612,9 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Center(
-          child: const Tooltip(
+          child: Tooltip(
             message: 'Foo',
-            child: const Text('Bar'),
+            child: Text('Bar'),
           ),
         ),
       ),
@@ -647,9 +647,9 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: const Center(
-          child: const Tooltip(
+          child: Tooltip(
             message: 'Foo',
-            child: const Text('Bar'),
+            child: Text('Bar'),
             excludeFromSemantics: true,
           ),
         ),
@@ -679,7 +679,7 @@ void main() {
 
   testWidgets('has semantic events', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = new SemanticsTester(tester);

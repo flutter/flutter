@@ -16,7 +16,7 @@ import 'overlay.dart';
 import 'page_storage.dart';
 import 'transitions.dart';
 
-const Color _kTransparent = const Color(0x00000000);
+const Color _kTransparent = Color(0x00000000);
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
 abstract class OverlayRoute<T> extends Route<T> {
@@ -898,6 +898,21 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   bool get barrierDismissible;
 
+  /// Whether the semantics of the modal barrier are included in the
+  /// semantics tree.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// If [semanticsDismissible] is true, then modal barrier semantics are
+  /// included in the semantics tree.
+  ///
+  /// If [semanticsDismissible] is false, then modal barrier semantics are
+  /// excluded from the the semantics tree and tapping on the modal barrier
+  /// has no effect.
+  bool get semanticsDismissible => true;
+
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
   ///
@@ -1173,11 +1188,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        barrierSemanticsDismissible: semanticsDismissible,
       );
     } else {
       barrier = new ModalBarrier(
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        barrierSemanticsDismissible: semanticsDismissible,
       );
     }
     return new IgnorePointer(
@@ -1379,3 +1396,143 @@ abstract class RouteAware {
   /// longer visible.
   void didPushNext() { }
 }
+
+class _DialogRoute<T> extends PopupRoute<T> {
+  _DialogRoute({
+    @required RoutePageBuilder pageBuilder,
+    bool barrierDismissible = true,
+    String barrierLabel,
+    Color barrierColor = const Color(0x80000000),
+    Duration transitionDuration = const Duration(milliseconds: 200),
+    RouteTransitionsBuilder transitionBuilder,
+    RouteSettings settings,
+  })  : assert(barrierDismissible != null),
+        _pageBuilder = pageBuilder,
+        _barrierDismissible = barrierDismissible,
+        _barrierLabel = barrierLabel,
+        _barrierColor = barrierColor,
+        _transitionDuration = transitionDuration,
+        _transitionBuilder = transitionBuilder,
+        super(settings: settings);
+
+  final RoutePageBuilder _pageBuilder;
+
+  @override
+  bool get barrierDismissible => _barrierDismissible;
+  final bool _barrierDismissible;
+
+  @override
+  String get barrierLabel => _barrierLabel;
+  final String _barrierLabel;
+
+  @override
+  Color get barrierColor => _barrierColor;
+  final Color _barrierColor;
+
+  @override
+  Duration get transitionDuration => _transitionDuration;
+  final Duration _transitionDuration;
+
+  final RouteTransitionsBuilder _transitionBuilder;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return new Semantics(
+      child: _pageBuilder(context, animation, secondaryAnimation),
+      scopesRoute: true,
+      explicitChildNodes: true,
+    );
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (_transitionBuilder == null) {
+      return new FadeTransition(
+          opacity: new CurvedAnimation(
+            parent: animation,
+            curve: Curves.linear,
+          ),
+          child: child);
+    } // Some default transition
+    return _transitionBuilder(context, animation, secondaryAnimation, child);
+  }
+}
+
+/// Displays a dialog above the current contents of the app.
+///
+/// This function allows for customization of aspects of the dialog popup.
+///
+/// This function takes a `pageBuilder` which is used to build the primary
+/// content of the route (typically a dialog widget). Content below the dialog
+/// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
+/// does not share a context with the location that `showGeneralDialog` is
+/// originally called from. Use a [StatefulBuilder] or a custom
+/// [StatefulWidget] if the dialog needs to update dynamically. The
+/// `pageBuilder` argument can not be null.
+///
+/// The `context` argument is used to look up the [Navigator] for the dialog.
+/// It is only used when the method is called. Its corresponding widget can
+/// be safely removed from the tree before the dialog is closed.
+///
+/// The `barrierDismissible` argument is used to determine whether this route
+/// can be dismissed by tapping the modal barrier. This argument defaults
+/// to true. If `barrierDismissible` is true, a non-null `barrierLabel` must be
+/// provided.
+///
+/// The `barrierLabel` argument is the semantic label used for a dismissible
+/// barrier. This argument defaults to "Dismiss".
+///
+/// The `barrierColor` argument is the color used for the modal barrier. This
+/// argument defaults to `Color(0x80000000)`.
+///
+/// The `transitionDuration` argument is used to determine how long it takes
+/// for the route to arrive on or leave off the screen. This argument defaults
+/// to 200 milliseconds.
+///
+/// The `transitionBuilder` argument is used to define how the route arrives on
+/// and leaves off the screen. By default, the transition is a linear fade of
+/// the page's contents.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
+///
+/// The dialog route created by this method is pushed to the root navigator.
+/// If the application has multiple [Navigator] objects, it may be necessary to
+/// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
+/// dialog rather than just `Navigator.pop(context, result)`.
+///
+/// See also:
+///  * [showDialog], which displays a Material-style dialog.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+Future<T> showGeneralDialog<T>({
+  @required BuildContext context,
+  @required RoutePageBuilder pageBuilder,
+  bool barrierDismissible,
+  String barrierLabel,
+  Color barrierColor,
+  Duration transitionDuration,
+  RouteTransitionsBuilder transitionBuilder,
+}) {
+  assert(pageBuilder != null);
+  assert(!barrierDismissible || barrierLabel != null);
+  return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
+    pageBuilder: pageBuilder,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: barrierLabel,
+    barrierColor: barrierColor,
+    transitionDuration: transitionDuration,
+    transitionBuilder: transitionBuilder,
+  ));
+}
+
+/// Signature for the function that builds a route's primary contents.
+/// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// See [ModalRoute.buildPage] for complete definition of the parameters.
+typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
+
+/// Signature for the function that builds a route's transitions.
+/// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// See [ModalRoute.buildTransitions] for complete definition of the parameters.
+typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);

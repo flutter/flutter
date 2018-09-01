@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import 'error.dart';
 import 'message.dart';
 
-const List<Type> _supportedKeyValueTypes = const <Type>[String, int];
+const List<Type> _supportedKeyValueTypes = <Type>[String, int];
 
 DriverError _createInvalidKeyValueTypeError(String invalidType) {
   return new DriverError('Unsupported key value type $invalidType. Flutter Driver only supports ${_supportedKeyValueTypes.join(", ")}');
@@ -251,4 +251,47 @@ class ByType extends SerializableFinder {
   static ByType deserialize(Map<String, String> json) {
     return new ByType(json['type']);
   }
+}
+
+/// A Flutter driver command that retrieves a semantics id using a specified finder.
+///
+/// This command requires assertions to be enabled on the device.
+///
+/// If the object returned by the finder does not have its own semantics node,
+/// then the semantics node of the first ancestor is returned instead.
+///
+/// Throws an error if a finder returns multiple objects or if there are no
+/// semantics nodes.
+///
+/// Semantics must be enabled to use this method, either using a platform
+/// specific shell command or [FlutterDriver.setSemantics].
+class GetSemanticsId extends CommandWithTarget {
+
+  /// Creates a command which finds a Widget and then looks up the semantic id.
+  GetSemanticsId(SerializableFinder finder, {Duration timeout}) : super(finder, timeout: timeout);
+
+  /// Creates a command from a json map.
+  GetSemanticsId.deserialize(Map<String, String> json)
+      : super.deserialize(json);
+
+  @override
+  String get kind => 'get_semantics_id';
+}
+
+/// The result of a [GetSemanticsId] command.
+class GetSemanticsIdResult extends Result {
+
+  /// Creates a new [GetSemanticsId] result.
+  GetSemanticsIdResult(this.id);
+
+  /// The semantics id of the node;
+  final int id;
+
+  /// Deserializes this result from JSON.
+  static GetSemanticsIdResult fromJson(Map<String, dynamic> json) {
+    return new GetSemanticsIdResult(json['id']);
+  }
+
+  @override
+  Map<String, dynamic> toJson() => <String, dynamic>{'id': id};
 }

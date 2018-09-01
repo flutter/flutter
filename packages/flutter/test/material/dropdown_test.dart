@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const List<String> menuItems = const <String>['one', 'two', 'three', 'four'];
+const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 
 final Type dropdownButtonType = new DropdownButton<String>(
   onChanged: (_) { },
@@ -470,7 +470,7 @@ void main() {
     // In all of the tests that follow we're assuming that the dropdown menu
     // is horizontally aligned with the center of the dropdown button and padded
     // on the top, left, and right.
-    const EdgeInsets buttonPadding = const EdgeInsets.only(top: 8.0, left: 16.0, right: 24.0);
+    const EdgeInsets buttonPadding = EdgeInsets.only(top: 8.0, left: 16.0, right: 24.0);
 
     Rect getExpandedButtonRect() {
       final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
@@ -578,6 +578,104 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: menuItems[2])));
     expect(semantics, isNot(includesNodeWith(label: menuItems[3])));
 
+    semantics.dispose();
+  });
+
+  testWidgets('Dropdown button includes semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const Key key = Key('test');
+    await tester.pumpWidget(buildFrame(
+      buttonKey: key,
+      value: null,
+      items: menuItems,
+      onChanged: (String _) {},
+      hint: const Text('test'),
+    ));
+
+    // By default the hint contributes the label.
+    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+      isButton: true,
+      label: 'test',
+      hasTapAction: true,
+    ));
+
+    await tester.pumpWidget(buildFrame(
+      buttonKey: key,
+      value: 'three',
+      items: menuItems,
+      onChanged: null,
+      hint: const Text('test'),
+    ));
+
+    // Displays label of select item and is no longer tappable.
+    expect(tester.getSemanticsData(find.byKey(key)), matchesSemanticsData(
+      isButton: true,
+      label: 'three',
+      hasTapAction: true,
+    ));
+    handle.dispose();
+  });
+
+  testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const Key key = Key('test');
+    await tester.pumpWidget(buildFrame(
+      buttonKey: key,
+      value: null,
+      items: menuItems,
+    ));
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.scopesRoute,
+                SemanticsFlag.namesRoute,
+              ],
+              label: 'Popup menu',
+              children: <TestSemantics>[
+                new TestSemantics(
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: 'one',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        new TestSemantics(
+                          label: 'two',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        new TestSemantics(
+                          label: 'three',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                        new TestSemantics(
+                          label: 'four',
+                          textDirection: TextDirection.ltr,
+                          tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreId: true, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
 }

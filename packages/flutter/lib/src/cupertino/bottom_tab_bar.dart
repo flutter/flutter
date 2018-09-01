@@ -11,8 +11,8 @@ import 'colors.dart';
 // Standard iOS 10 tab bar height.
 const double _kTabBarHeight = 50.0;
 
-const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
-const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
+const Color _kDefaultTabBarBackgroundColor = Color(0xCCF8F8F8);
+const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -102,7 +102,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
-          top: const BorderSide(
+          top: BorderSide(
             color: _kDefaultTabBarBorderColor,
             width: 0.0, // One physical pixel.
             style: BorderStyle.solid,
@@ -156,25 +156,31 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
+      final bool active = index == currentIndex;
       result.add(
         _wrapActiveItem(
           new Expanded(
-            child: new GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap == null ? null : () { onTap(index); },
-              child: new Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget> [
-                    new Expanded(child: new Center(child: items[index].icon)),
-                    items[index].title,
-                  ],
+            child: new Semantics(
+              selected: active,
+              // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
+              hint: 'tab, ${index + 1} of ${items.length}',
+              child: new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap == null ? null : () { onTap(index); },
+                child: new Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: new Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget> [
+                      new Expanded(child: new Center(child: items[index].icon)),
+                      items[index].title,
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          active: index == currentIndex,
+          active: active,
         ),
       );
     }
@@ -183,7 +189,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(Widget item, { bool active }) {
+  Widget _wrapActiveItem(Widget item, { @required bool active }) {
     if (!active)
       return item;
 

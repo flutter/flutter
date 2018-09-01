@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -25,10 +26,9 @@ import '../runner/flutter_command.dart';
 /// ```
 ///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
 /// ```
-const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
+const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-alpha+5', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
-  'matcher': '0.12.2', // TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
+  'flutter_gallery_assets': '0.1.6', // See //examples/flutter_gallery/pubspec.yaml
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -39,12 +39,14 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Attempt to update all the dependencies to their latest versions.\n'
               'This will actually modify the pubspec.yaml files in your checkout.',
         defaultsTo: false,
+        negatable: false,
       )
       ..addFlag(
         'paths',
         help: 'Finds paths in the dependency chain leading from package specified '
               'in --from to package specified in --to.',
         defaultsTo: false,
+        negatable: false,
       )
       ..addOption(
         'from',
@@ -61,11 +63,13 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'Prints the dependency graph that is the transitive closure of '
               'packages the Flutter SDK depends on.',
         defaultsTo: false,
+        negatable: false,
       )
       ..addFlag(
         'verify-only',
         help: 'verifies the package checksum without changing or updating deps',
         defaultsTo: false,
+        negatable: false,
       );
   }
 
@@ -79,7 +83,10 @@ class UpdatePackagesCommand extends FlutterCommand {
   final bool hidden;
 
   Future<Null> _downloadCoverageData() async {
-    final Status status = logger.startProgress('Downloading lcov data for package:flutter...', expectSlowOperation: true);
+    final Status status = logger.startProgress(
+      'Downloading lcov data for package:flutter...',
+      expectSlowOperation: true,
+    );
     final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
     final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
     final String coverageDir = fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');
@@ -101,13 +108,25 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isPrintTransitiveClosure = argResults['transitive-closure'];
     final bool isVerifyOnly = argResults['verify-only'];
 
+    // The dev/integration_tests/android_views integration test depends on an assets
+    // package that is in the goldens repository. We need to make sure that the goldens
+    // repository is cloned locally before we verify or update pubspecs.
+    printStatus('Cloning goldens repository...');
+    final GoldensClient goldensClient = new GoldensClient();
+    await goldensClient.prepare();
+
     if (isVerifyOnly) {
       bool needsUpdate = false;
       printStatus('Verifying pubspecs...');
       for (Directory directory in packages) {
-        final PubspecYaml pubspec = new PubspecYaml(directory);
+        PubspecYaml pubspec;
+        try {
+          pubspec = new PubspecYaml(directory);
+        } on String catch (message) {
+          throwToolExit(message);
+        }
         printTrace('Reading pubspec.yaml from ${directory.path}');
-        if (pubspec.checksum.value == -1) {
+        if (pubspec.checksum.value == null) {
           // If the checksum is invalid or missing, we can just ask them run to run
           // upgrade again to compute it.
           printError(
@@ -117,15 +136,12 @@ class UpdatePackagesCommand extends FlutterCommand {
           needsUpdate = true;
         }
         // all dependencies in the pubspec sorted lexically.
-        final Set<String> checksumDependencies = new Set<String>();
+        final Map<String, String> checksumDependencies = <String, String>{};
         for (PubspecLine data in pubspec.inputData) {
-          if (data is PubspecDependency) {
-            if (!_ignoreForChecksum.contains(data.name))
-              checksumDependencies.add('${data.name}${data.version ?? ""}');
-          }
+          if (data is PubspecDependency && data.kind == DependencyKind.normal)
+            checksumDependencies[data.name] = data.version;
         }
-        final List<String> sortedChecksunDependencies = checksumDependencies.toList()..sort();
-        final int checksum = _computeChecksum(sortedChecksunDependencies);
+        final String checksum = _computeChecksum(checksumDependencies.keys, (String name) => checksumDependencies[name]);
         if (checksum != pubspec.checksum.value) {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
@@ -163,7 +179,12 @@ class UpdatePackagesCommand extends FlutterCommand {
       final Set<String> specialDependencies = new Set<String>();
       for (Directory directory in packages) { // these are all the directories with pubspec.yamls we care about
         printTrace('Reading pubspec.yaml from: ${directory.path}');
-        final PubspecYaml pubspec = new PubspecYaml(directory); // this parses the pubspec.yaml
+        PubspecYaml pubspec;
+        try {
+          pubspec = new PubspecYaml(directory); // this parses the pubspec.yaml
+        } on String catch (message) {
+          throwToolExit(message);
+        }
         pubspecs.add(pubspec); // remember it for later
         for (PubspecDependency dependency in pubspec.allDependencies) { // this is all the explicit dependencies
           if (dependencies.containsKey(dependency.name)) {
@@ -179,9 +200,11 @@ class UpdatePackagesCommand extends FlutterCommand {
             // saying "path: ../../..." in another.
             final PubspecDependency previous = dependencies[dependency.name];
             if (dependency.kind != previous.kind || dependency.lockTarget != previous.lockTarget) {
-              throw 'Inconsistent requirements around ${dependency.name}; '
-                    'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
-                    'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".';
+              throwToolExit(
+                'Inconsistent requirements around ${dependency.name}; '
+                'saw ${dependency.kind} (${dependency.lockTarget}) in "${dependency.sourcePath}" '
+                'and ${previous.kind} (${previous.lockTarget}) in "${previous.sourcePath}".'
+              );
             }
           }
           // Remember this dependency by name so we can look it up again.
@@ -200,13 +223,13 @@ class UpdatePackagesCommand extends FlutterCommand {
       // pub tool will attempt to bring these dependencies up to the most recent
       // possible versions while honoring all their constraints.
       final PubDependencyTree tree = new PubDependencyTree(); // object to collect results
-      final Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('flutter_update_packages_');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_update_packages.');
       try {
-        final File fakePackage = _pubspecFor(temporaryDirectory);
+        final File fakePackage = _pubspecFor(tempDir);
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(context: PubContext.updatePackages, directory: temporaryDirectory.path, upgrade: true, checkLastModified: false);
+        await pubGet(context: PubContext.updatePackages, directory: tempDir.path, upgrade: true, checkLastModified: false);
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive
@@ -215,12 +238,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         await pub(
           <String>['deps', '--style=compact'],
           context: PubContext.updatePackages,
-          directory: temporaryDirectory.path,
+          directory: tempDir.path,
           filter: tree.fill,
           retry: false, // errors here are usually fatal since we're not hitting the network
         );
       } finally {
-        temporaryDirectory.deleteSync(recursive: true);
+        tempDir.deleteSync(recursive: true);
       }
 
       // The transitive dependency tree for the fake package does not contain
@@ -287,9 +310,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     @required PubDependencyTree tree,
   }) {
     if (!tree.contains(from))
-      throw new ToolExit('Package $from not found in the dependency tree.');
+      throwToolExit('Package $from not found in the dependency tree.');
     if (!tree.contains(to))
-      throw new ToolExit('Package $to not found in the dependency tree.');
+      throwToolExit('Package $to not found in the dependency tree.');
 
     final Queue<_DependencyLink> traversalQueue = new Queue<_DependencyLink>();
     final Set<String> visited = new Set<String>();
@@ -540,7 +563,7 @@ class PubspecYaml {
         lastDependency = null;
       }
     }
-    return new PubspecYaml._(file, packageName, packageVersion, result, checksum ?? new PubspecChecksum(-1, ''));
+    return new PubspecYaml._(file, packageName, packageVersion, result, checksum ?? new PubspecChecksum(null, ''));
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
@@ -698,20 +721,13 @@ class PubspecYaml {
     for (String package in transitiveDevDependenciesAsList)
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
-
     // Build a sorted list of all dependencies for the checksum.
     final Set<String> checksumDependencies = new Set<String>()
       ..addAll(directDependencies)
       ..addAll(devDependencies)
       ..addAll(transitiveDependenciesAsList)
       ..addAll(transitiveDevDependenciesAsList);
-
-    // Combine the package name with a version, if availible, and sort them.
-    final List<String> sortedChecksumDependencies = checksumDependencies
-      .where((String name) => !_ignoreForChecksum.contains(name))
-      .map((String name) => '$name${versions.versionFor(name) ?? ""}')
-      .toList()
-      ..sort();
+    checksumDependencies.removeAll(specialDependencies);
 
     // Add a blank line before and after each section to keep the resulting output clean.
     transitiveDependencyOutput
@@ -722,7 +738,7 @@ class PubspecYaml {
       ..add('');
 
     // Compute a new checksum from all sorted dependencies and their version and convert to a hex string.
-    final String checksumString = _computeChecksum(sortedChecksumDependencies).toRadixString(16).padLeft(4, '0');
+    final String checksumString = _computeChecksum(checksumDependencies, versions.versionFor);
 
     // Insert the block of transitive dependency declarations into the output after [endOfDirectDependencies],
     // and the blocks of transitive dev dependency declarations into the output after [lastPossiblePlace]. Finally,
@@ -773,21 +789,18 @@ class PubspecChecksum extends PubspecLine {
   /// The checksum value, computed using [hashValues] over the direct, dev,
   /// and special dependencies sorted lexically.
   ///
-  /// If the line cannot be parsed, [value] will equal `-1`.
-  final int value;
+  /// If the line cannot be parsed, [value] will be null.
+  final String value;
 
   /// Parses a [PubspecChecksum] from a line.
   ///
-  /// on a parse error, returns `-1` which could never come from the
-  /// hash function.
+  /// The returned PubspecChecksum will have a null [value] if no checksum could
+  /// be found on this line. This is a value that [_computeChecksum] cannot return.
   static PubspecChecksum parse(String line) {
-    final List<String> twoLines = line.split(kDependencyChecksum);
-    if (twoLines.length != 2) {
-      return new PubspecChecksum(-1, line);
-    }
-    // ignore: deprecated_member_use
-    final int value = int.parse(twoLines.last.trim(), radix: 16, onError: (String _) => -1);
-    return new PubspecChecksum(value, line);
+    final List<String> tokens = line.split(kDependencyChecksum);
+    if (tokens.length != 2)
+      return new PubspecChecksum(null, line);
+    return new PubspecChecksum(tokens.last.trim(), line);
   }
 }
 
@@ -978,7 +991,9 @@ class PubspecDependency extends PubspecLine {
     assert(kind == DependencyKind.unknown);
     if (line.startsWith(_pathPrefix)) {
       // We're a path dependency; remember the (absolute) path.
-      _lockTarget = fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length));
+      _lockTarget = fs.path.canonicalize(
+          fs.path.absolute(fs.path.dirname(pubspecPath), line.substring(_pathPrefix.length, line.length))
+      );
       _kind = DependencyKind.path;
     } else if (line.startsWith(_sdkPrefix)) {
       // We're an SDK dependency.
@@ -1170,13 +1185,18 @@ class PubDependencyTree {
   }
 }
 
-
 // Produces a 16-bit checksum from the codePoints of the package name and
 // version strings using Fletcher's algorithm.
-int _computeChecksum(List<String> values) {
+String _computeChecksum(Iterable<String> names, String getVersion(String name)) {
   int lowerCheck = 0;
   int upperCheck = 0;
-  for (String value in values) {
+  final List<String> sortedNames = names.toList()..sort();
+  for (String name in sortedNames) {
+    final String version = getVersion(name);
+    assert(version != '');
+    if (version == null)
+      continue;
+    final String value = '$name: $version';
     // Each code unit is 16 bits.
     for (int codeUnit in value.codeUnits) {
       final int upper = codeUnit >> 8;
@@ -1187,19 +1207,5 @@ int _computeChecksum(List<String> values) {
       upperCheck = (upperCheck + lowerCheck) % 255;
     }
   }
-  return (upperCheck << 8) | lowerCheck;
+  return ((upperCheck << 8) | lowerCheck).toRadixString(16).padLeft(4, '0');
 }
-
-// The exact versioning is tricky to figure out for these, but the packages aren't
-// frequently added or removed by users - it should be okay.
-const List<String> _ignoreForChecksum = const <String>[
-  'analyzer',
-  'flutter',
-  'flutter_test',
-  'flutter_tools',
-  'flutter_driver',
-  'flutter_localizations',
-  'front_end',
-  'kernel',
-  'sky_engine',
-];

@@ -99,8 +99,9 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       formKey.currentState.reset();
-      await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pumpWidget(builder(false));
+      await tester.enterText(find.byType(TextFormField), testValue);
+      await tester.pump();
 
       // We have to manually validate if we're not autovalidating.
       expect(find.text(errorText(testValue)), findsNothing);
@@ -110,8 +111,9 @@ void main() {
 
       // Try again with autovalidation. Should validate immediately.
       formKey.currentState.reset();
-      await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pumpWidget(builder(true));
+      await tester.enterText(find.byType(TextFormField), testValue);
+      await tester.pump();
 
       expect(find.text(errorText(testValue)), findsOneWidget);
     }

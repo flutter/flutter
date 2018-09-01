@@ -13,6 +13,10 @@ import 'message_codec.dart';
 ///
 /// On Android, messages will be represented using `java.nio.ByteBuffer`.
 /// On iOS, messages will be represented using `NSData`.
+///
+/// When sending outgoing messages from Android, be sure to use direct `ByteBuffer`
+/// as opposed to indirect. The `wrap()` API provides indirect buffers by default
+/// and you will get empty `ByteData` objects in Dart.
 class BinaryCodec implements MessageCodec<ByteData> {
   /// Creates a [MessageCodec] with unencoded binary messages represented using
   /// [ByteData].
@@ -37,7 +41,7 @@ class StringCodec implements MessageCodec<String> {
   String decodeMessage(ByteData message) {
     if (message == null)
       return null;
-    return utf8.decoder.convert(message.buffer.asUint8List());
+    return utf8.decoder.convert(message.buffer.asUint8List(message.offsetInBytes, message.lengthInBytes));
   }
 
   @override

@@ -20,7 +20,7 @@ void main() {
         },
         columns: <DataColumn>[
           const DataColumn(
-            label: const Text('Name'),
+            label: Text('Name'),
             tooltip: 'Name',
           ),
           new DataColumn(
@@ -110,10 +110,10 @@ void main() {
               ),
             ],
             rows: const <DataRow>[
-              const DataRow(
-                cells: const <DataCell>[
-                  const DataCell(
-                    const Text('X'),
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('X'),
                   ),
                 ],
               ),
@@ -138,10 +138,10 @@ void main() {
               ),
             ],
             rows: const <DataRow>[
-              const DataRow(
-                cells: const <DataCell>[
-                  const DataCell(
-                    const Text('X'),
+              DataRow(
+                cells: <DataCell>[
+                  DataCell(
+                    Text('X'),
                   ),
                 ],
               ),
@@ -161,8 +161,8 @@ void main() {
         home: new Material(
           child: new DataTable(
             columns: const <DataColumn>[
-              const DataColumn(
-                label: const Text('X'),
+              DataColumn(
+                label: Text('X'),
               ),
             ],
             rows: <DataRow>[
@@ -189,8 +189,8 @@ void main() {
         home: new Material(
           child: new DataTable(
             columns: const <DataColumn>[
-              const DataColumn(
-                label: const Text('X'),
+              DataColumn(
+                label: Text('X'),
               ),
             ],
             rows: <DataRow>[

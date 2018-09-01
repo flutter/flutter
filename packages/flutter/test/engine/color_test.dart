@@ -4,11 +4,11 @@
 
 import 'dart:ui';
 
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('color accessors should work', () {
-    const Color foo = const Color(0x12345678);
+    const Color foo = Color(0x12345678);
     expect(foo.alpha, equals(0x12));
     expect(foo.red, equals(0x34));
     expect(foo.green, equals(0x56));
@@ -16,7 +16,7 @@ void main() {
   });
 
   test('paint set to black', () {
-    const Color c = const Color(0x00000000);
+    const Color c = Color(0x00000000);
     final Paint p = new Paint();
     p.color = c;
     expect(c.toString(), equals('Color(0x00000000)'));
@@ -24,7 +24,7 @@ void main() {
 
   test('color created with out of bounds value', () {
     try {
-      const Color c = const Color(0x100 << 24);
+      const Color c = Color(0x100 << 24);
       final Paint p = new Paint();
       p.color = c;
     } catch (e) {
@@ -34,7 +34,7 @@ void main() {
 
   test('color created with wildly out of bounds value', () {
     try {
-      const Color c = const Color(1 << 1000000);
+      const Color c = Color(1 << 1000000);
       final Paint p = new Paint();
       p.color = c;
     } catch (e) {

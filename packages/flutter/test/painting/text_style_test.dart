@@ -5,7 +5,7 @@
 import 'dart:ui' as ui show TextStyle, ParagraphStyle;
 
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('TextStyle control test', () {
@@ -18,7 +18,7 @@ void main() {
       equals('TextStyle(<all styles inherited>)'),
     );
 
-    const TextStyle s1 = const TextStyle(
+    const TextStyle s1 = TextStyle(
       fontSize: 10.0,
       fontWeight: FontWeight.w800,
       height: 123.0,
@@ -187,20 +187,20 @@ void main() {
   });
 
   test('TextStyle using package font', () {
-    const TextStyle s6 = const TextStyle(fontFamily: 'test');
+    const TextStyle s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
     expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified)');
 
-    const TextStyle s7 = const TextStyle(fontFamily: 'test', package: 'p');
+    const TextStyle s7 = TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified)');
   });
 
   test('TextStyle.debugLabel', () {
-    const TextStyle unknown = const TextStyle();
-    const TextStyle foo = const TextStyle(debugLabel: 'foo', fontSize: 1.0);
-    const TextStyle bar = const TextStyle(debugLabel: 'bar', fontSize: 2.0);
-    const TextStyle baz = const TextStyle(debugLabel: 'baz', fontSize: 3.0);
+    const TextStyle unknown = TextStyle();
+    const TextStyle foo = TextStyle(debugLabel: 'foo', fontSize: 1.0);
+    const TextStyle bar = TextStyle(debugLabel: 'bar', fontSize: 2.0);
+    const TextStyle baz = TextStyle(debugLabel: 'baz', fontSize: 3.0);
 
     expect(unknown.debugLabel, null);
     expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
@@ -215,5 +215,46 @@ void main() {
     expect(foo.apply().debugLabel, '(foo).apply');
     expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo ⎯0.5→ bar)');
     expect(TextStyle.lerp(foo.merge(bar), baz, 0.51).copyWith().debugLabel, '(lerp((foo).merge(bar) ⎯0.5→ baz)).copyWith');
+  });
+
+  test('TextStyle foreground and color combos', () {
+    const Color red = Color.fromARGB(255, 255, 0, 0);
+    const Color blue = Color.fromARGB(255, 0, 0, 255);
+    const TextStyle redTextStyle = TextStyle(color: red);
+    const TextStyle blueTextStyle = TextStyle(color: blue);
+    final TextStyle redPaintTextStyle = new TextStyle(foreground: new Paint()..color = red);
+    final TextStyle bluePaintTextStyle = new TextStyle(foreground: new Paint()..color = blue);
+
+    // merge/copyWith
+    final TextStyle redBlueBothForegroundMerged = redTextStyle.merge(blueTextStyle);
+    expect(redBlueBothForegroundMerged.color, blue);
+    expect(redBlueBothForegroundMerged.foreground, isNull);
+
+    final TextStyle redBlueBothPaintMerged = redPaintTextStyle.merge(bluePaintTextStyle);
+    expect(redBlueBothPaintMerged.color, null);
+    expect(redBlueBothPaintMerged.foreground, bluePaintTextStyle.foreground);
+
+    final TextStyle redPaintBlueColorMerged = redPaintTextStyle.merge(blueTextStyle);
+    expect(redPaintBlueColorMerged.color, null);
+    expect(redPaintBlueColorMerged.foreground, redPaintTextStyle.foreground);
+
+    final TextStyle blueColorRedPaintMerged = blueTextStyle.merge(redPaintTextStyle);
+    expect(blueColorRedPaintMerged.color, null);
+    expect(blueColorRedPaintMerged.foreground, redPaintTextStyle.foreground);
+
+    // apply
+    expect(redPaintTextStyle.apply(color: blue).color, isNull);
+    expect(redPaintTextStyle.apply(color: blue).foreground.color, red);
+    expect(redTextStyle.apply(color: blue).color, blue);
+
+    // lerp
+    expect(TextStyle.lerp(redTextStyle, blueTextStyle, .25).color, Color.lerp(red, blue, .25));
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).color, isNull);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .25).foreground.color, red);
+    expect(TextStyle.lerp(redTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
+
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).color, isNull);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).foreground.color, red);
+    expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).foreground.color, blue);
   });
 }

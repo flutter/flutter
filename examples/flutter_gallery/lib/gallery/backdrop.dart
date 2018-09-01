@@ -14,12 +14,12 @@ const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 // The size of the front layer heading's left and right beveled corners.
 final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
   begin: const BorderRadius.only(
-    topLeft: const Radius.circular(12.0),
-    topRight: const Radius.circular(12.0),
+    topLeft: Radius.circular(12.0),
+    topRight: Radius.circular(12.0),
   ),
   end: const BorderRadius.only(
-    topLeft: const Radius.circular(_kFrontHeadingHeight),
-    topRight: const Radius.circular(_kFrontHeadingHeight),
+    topLeft: Radius.circular(_kFrontHeadingHeight),
+    topRight: Radius.circular(_kFrontHeadingHeight),
   ),
 );
 
@@ -67,11 +67,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   Widget build(BuildContext context) {
     return new AbsorbPointer(
       absorbing: !_active,
-      // Redundant. TODO(xster): remove after https://github.com/flutter/flutter/issues/17179.
-      child: new IgnorePointer(
-        ignoring: !_active,
-        child: widget.child
-      ),
+      child: widget.child,
     );
   }
 }
@@ -286,11 +282,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             ),
           ),
           new Expanded(
-            child: new _TappableWhileStatusIs(
-              AnimationStatus.dismissed,
-              controller: _controller,
+            child: new Visibility(
               child: widget.backLayer,
-            ),
+              visible: _controller.status != AnimationStatus.completed,
+              maintainState: true,
+            )
           ),
         ],
       ),
@@ -308,6 +304,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                   borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
                 ),
               ),
+              clipBehavior: Clip.antiAlias,
               child: child,
             );
           },

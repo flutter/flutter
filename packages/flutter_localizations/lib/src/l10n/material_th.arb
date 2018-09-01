@@ -39,5 +39,16 @@
   "popupMenuLabel": "เมนูป๊อปอัป",
   "dialogLabel": "กล่องโต้ตอบ",
   "alertDialogLabel": "เตือนภัย",
-  "searchFieldLabel": "ค้นหา"
+  "searchFieldLabel": "ค้นหา",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

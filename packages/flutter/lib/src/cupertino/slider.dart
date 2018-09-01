@@ -57,7 +57,7 @@ class CupertinoSlider extends StatefulWidget {
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
-    this.activeColor = CupertinoColors.activeBlue,
+    this.activeColor,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -95,7 +95,7 @@ class CupertinoSlider extends StatefulWidget {
   ///   },
   /// )
   /// ```
-  /// 
+  ///
   /// See also:
   ///
   ///  * [onChangeStart] for a callback that is called when the user starts
@@ -185,6 +185,8 @@ class CupertinoSlider extends StatefulWidget {
   final int divisions;
 
   /// The color to use for the portion of the slider that has been selected.
+  ///
+  /// Defaults to [CupertinoColors.activeBlue].
   final Color activeColor;
 
   @override
@@ -223,7 +225,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     return new _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
-      activeColor: widget.activeColor,
+      activeColor: widget.activeColor ?? CupertinoColors.activeBlue,
       onChanged: widget.onChanged != null ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
@@ -282,10 +284,10 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const Color _kTrackColor = const Color(0xFFB5B5B5);
+const Color _kTrackColor = Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
-const Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
+const Duration _kDiscreteTransitionDuration = Duration(milliseconds: 500);
 
 const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
@@ -329,6 +331,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
       _position.animateTo(newValue, curve: Curves.fastOutSlowIn);
     else
       _position.value = newValue;
+    markNeedsSemanticsUpdate();
   }
 
   int get divisions => _divisions;
@@ -501,8 +504,12 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
+      config.textDirection = textDirection;
       config.onIncrease = _increaseAction;
       config.onDecrease = _decreaseAction;
+      config.value = '${(value * 100).round()}%';
+      config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
+      config.decreasedValue = '${((value - _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
     }
   }
 

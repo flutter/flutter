@@ -116,6 +116,7 @@ void _tests() {
                       children: <TestSemantics>[
                         new TestSemantics(
                           id: 6,
+                          flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
                             new TestSemantics(
                               id: 4,

@@ -359,9 +359,11 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///       case ConnectionState.active: return new Text('\$${snapshot.data}');
 ///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
@@ -411,11 +413,30 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// Widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
 ///
+/// The [future] must have been obtained earlier, e.g. during [State.initState],
+/// [State.didUpdateConfig], or [State.didChangeDependencies]. It must not be
+/// created during the [State.build] or [StatelessWidget.build] method call when
+/// constructing the [FutureBuilder]. If the [future] is created at the same
+/// time as the [FutureBuilder], then every time the [FutureBuilder]'s parent is
+/// rebuilt, the asynchronous task will be restarted.
+///
+/// A general guideline is to assume that every `build` method could get called
+/// every frame, and to treat omitted calls as an optimization.
+///
+/// ## Timing
+///
 /// Widget rebuilding is scheduled by the completion of the future, using
 /// [State.setState], but is otherwise decoupled from the timing of the future.
 /// The [builder] callback is called at the discretion of the Flutter pipeline, and
 /// will thus receive a timing-dependent sub-sequence of the snapshots that
 /// represent the interaction with the future.
+///
+/// A side-effect of this is that providing a new but already-completed future
+/// to a [FutureBuilder] will result in a single frame in the
+/// [ConnectionState.waiting] state. This is because there is no way to
+/// synchronously determine that a [Future] has already completed.
+///
+/// ## Builder contract
 ///
 /// For a future that completes successfully with data, assuming [initialData]
 /// is null, the [builder] will be called with either both or only the latter of
@@ -459,20 +480,24 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ```dart
 /// new FutureBuilder<String>(
-///   future: _calculation, // a Future<String> or null
+///   future: _calculation, // a previously-obtained Future<String> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return new Text('Press button to start');
-///       case ConnectionState.waiting: return new Text('Awaiting result...');
-///       default:
+///       case ConnectionState.none:
+///         return new Text('Press button to start.');
+///       case ConnectionState.active:
+///       case ConnectionState.waiting:
+///         return new Text('Awaiting result...');
+///       case ConnectionState.done:
 ///         if (snapshot.hasError)
 ///           return new Text('Error: ${snapshot.error}');
-///         else
-///           return new Text('Result: ${snapshot.data}');
+///         return new Text('Result: ${snapshot.data}');
 ///     }
+///     return null; // unreachable
 ///   },
 /// )
 /// ```
+// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/linter/issues/1141 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].

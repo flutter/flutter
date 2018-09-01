@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
@@ -43,8 +43,8 @@ void main() {
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
       expect(response['result'] is String, true);
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
 
     testUsingContext('printError should send daemon.logMessage event', () async {
@@ -64,8 +64,8 @@ void main() {
       final Map<String, String> logMessage = response['params'].cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     }, overrides: <Type, Generator>{
       Logger: () => notifyingLogger,
     });
@@ -103,32 +103,10 @@ void main() {
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
-      return daemon.onExit.then<Null>((int code) {
-        responses.close();
-        commands.close();
+      return daemon.onExit.then<Null>((int code) async {
+        await commands.close();
         expect(code, 0);
       });
-    });
-
-    testUsingContext('app.start without a deviceId should report an error', () async {
-      final DaemonCommand command = new DaemonCommand();
-      applyMocksToCommand(command);
-
-      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
-      daemon = new Daemon(
-        commands.stream,
-        responses.add,
-        daemonCommand: command,
-        notifyingLogger: notifyingLogger
-      );
-
-      commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.start' });
-      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
-      expect(response['id'], 0);
-      expect(response['error'], contains('deviceId is required'));
-      responses.close();
-      commands.close();
     });
 
     testUsingContext('app.restart without an appId should report an error', () async {
@@ -141,15 +119,15 @@ void main() {
         commands.stream,
         responses.add,
         daemonCommand: command,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.restart' });
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
 
     testUsingContext('ext.flutter.debugPaint via service extension without an appId should report an error', () async {
@@ -162,7 +140,7 @@ void main() {
           commands.stream,
           responses.add,
           daemonCommand: command,
-          notifyingLogger: notifyingLogger
+          notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{
@@ -175,8 +153,8 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
 
     testUsingContext('app.stop without appId should report an error', () async {
@@ -189,15 +167,15 @@ void main() {
         commands.stream,
         responses.add,
         daemonCommand: command,
-        notifyingLogger: notifyingLogger
+        notifyingLogger: notifyingLogger,
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
 
     testUsingContext('daemon should send showMessage on startup if no Android devices are available', () async {
@@ -233,11 +211,11 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isList);
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
 
-    testUsingContext('should send device.added event when device is discovered', () {
+    testUsingContext('should send device.added event when device is discovered', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -250,15 +228,15 @@ void main() {
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(new MockAndroidDevice());
 
-      return responses.stream.skipWhile(_isConnectedEvent).first.then((Map<String, dynamic> response) {
+      return await responses.stream.skipWhile(_isConnectedEvent).first.then((Map<String, dynamic> response) async {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
         final Map<String, dynamic> params = response['params'];
         expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
 
-        responses.close();
-        commands.close();
+        await responses.close();
+        await commands.close();
       });
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => new MockAndroidWorkflow(),
@@ -282,8 +260,8 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('emulatorId is required'));
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
 
     testUsingContext('emulator.getEmulators should respond with list', () async {
@@ -298,8 +276,8 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isList);
-      responses.close();
-      commands.close();
+      await responses.close();
+      await commands.close();
     });
   });
 

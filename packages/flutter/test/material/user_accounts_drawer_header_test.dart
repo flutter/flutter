@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const Key avatarA = const Key('A');
-const Key avatarC = const Key('C');
-const Key avatarD = const Key('D');
+const Key avatarA = Key('A');
+const Key avatarC = Key('C');
+const Key avatarD = Key('D');
 
 Future<Null> pumpTestWidget(WidgetTester tester, {
   bool withName = true,
@@ -21,7 +21,7 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
     new MaterialApp(
       home: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             left: 10.0,
             top: 20.0,
             right: 30.0,
@@ -33,25 +33,25 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
             child: new UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
               currentAccountPicture: const ExcludeSemantics(
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   key: avatarA,
-                  child: const Text('A'),
+                  child: Text('A'),
                 ),
               ),
               otherAccountsPictures: const <Widget>[
-                const CircleAvatar(
-                  child: const Text('B'),
+                CircleAvatar(
+                  child: Text('B'),
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   key: avatarC,
-                  child: const Text('C'),
+                  child: Text('C'),
                 ),
-                const CircleAvatar(
+                CircleAvatar(
                   key: avatarD,
-                  child: const Text('D'),
+                  child: Text('D'),
                 ),
-                const CircleAvatar(
-                  child: const Text('E'),
+                CircleAvatar(
+                  child: Text('E'),
                 )
               ],
               accountName: withName ? const Text('name') : null,
@@ -188,18 +188,18 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(child: Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    const Key avatarA = const Key('A');
+    const Key avatarA = Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(
@@ -299,18 +299,18 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(child: Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    const Key avatarA = const Key('A');
+    const Key avatarA = Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(
@@ -372,6 +372,27 @@ void main() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await pumpTestWidget(tester);
+
+    expect(tester.getSemanticsData(find.text('B')), matchesSemanticsData(
+      label: 'B',
+      size: const Size(48.0, 48.0),
+    ));
+
+    expect(tester.getSemanticsData(find.text('C')), matchesSemanticsData(
+      label: 'C',
+      size: const Size(48.0, 48.0),
+    ));
+
+    expect(tester.getSemanticsData(find.text('D')), matchesSemanticsData(
+      label: 'D',
+      size: const Size(48.0, 48.0),
+    ));
+    handle.dispose();
   });
 
   testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {

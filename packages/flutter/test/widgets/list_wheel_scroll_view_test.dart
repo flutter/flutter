@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -39,15 +41,173 @@ void main() {
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: const ListWheelScrollView(
+          child: ListWheelScrollView(
             itemExtent: 50.0,
             children: const <Widget>[],
           ),
         ),
       );
       expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
+    });
+
+
+    testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
+      expect(
+            () {
+          new ListWheelScrollView(
+            useMagnifier: true,
+            magnification: -1.0,
+            itemExtent: 20.0,
+            children: <Widget>[new Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+    });
+  });
+
+  group('infinite scrolling', () {
+    testWidgets('infinite looping list', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildLoopingListDelegate(
+              children: List<Widget>.generate(10, (int index) {
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+
+      // The first item is at the center of the viewport.
+      expect(
+      tester.getTopLeft(find.widgetWithText(Container, '0')),
+      const Offset(0.0, 250.0)
+      );
+
+      // The last item is just before the first item.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '9')),
+        const Offset(0.0, 150.0)
+      );
+
+      controller.jumpTo(1000.0);
+      await tester.pump();
+
+      // We have passed the end of the list, the list should have looped back.
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '0')),
+        const Offset(0.0, 250.0)
+      );
+    });
+
+    testWidgets('infinite child builder', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        )
+      );
+
+      // Can be scrolled infinitely for negative indexes.
+      controller.jumpTo(-100000.0);
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '-1000')),
+        const Offset(0.0, 250.0)
+      );
+
+      // Can be scrolled infinitely for positive indexes.
+      controller.jumpTo(100000.0);
+      await tester.pump();
+      expect(
+        tester.getTopLeft(find.widgetWithText(Container, '1000')),
+        const Offset(0.0, 250.0)
+      );
+    });
+
+    testWidgets('child builder with lower and upper limits', (WidgetTester tester) async {
+      final List<int> paintedChildren = <int>[];
+
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController(initialItem: -10);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                if (index < -15 || index > -5)
+                  return null;
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: new CustomPaint(
+                    painter: new TestCallbackPainter(onPaint: () {
+                      paintedChildren.add(index);
+                    }),
+                  ),
+                );
+              },
+            ),
+          ),
+        )
+      );
+
+      expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
+
+      // Flings with high velocity and stop at the lower limit.
+      paintedChildren.clear();
+      await tester.fling(
+        find.byType(ListWheelScrollView),
+        const Offset(0.0, 1000.0),
+        1000.0,
+      );
+      await tester.pumpAndSettle();
+      expect(controller.selectedItem, -15);
+
+      // Flings with high velocity and stop at the upper limit.
+      await tester.fling(
+        find.byType(ListWheelScrollView),
+        const Offset(0.0, -1000.0),
+        1000.0,
+      );
+      await tester.pumpAndSettle();
+      expect(controller.selectedItem, -5);
     });
   });
 
@@ -96,16 +256,16 @@ void main() {
 
     testWidgets("ListWheelScrollView children can't be bigger than itemExtent", (WidgetTester tester) async {
       await tester.pumpWidget(
-        const Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: const ListWheelScrollView(
+          child: ListWheelScrollView(
             itemExtent: 50.0,
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
                 width: 200.0,
-                child: const Center(
-                  child: const Text('blah'),
+                child: Center(
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -114,6 +274,80 @@ void main() {
       );
       expect(tester.getSize(find.byType(SizedBox)), const Size(200.0, 50.0));
       expect(find.text('blah'), findsOneWidget);
+    });
+
+    testWidgets('builder is never called twice for same index', (WidgetTester tester) async {
+      final Set<int> builtChildren = Set<int>();
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView.useDelegate(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            childDelegate: new ListWheelChildBuilderDelegate(
+              builder: (BuildContext context, int index) {
+                expect(builtChildren.contains(index), false);
+                builtChildren.add(index);
+
+                return new Container(
+                  width: 400.0,
+                  height: 100.0,
+                  child: Text(index.toString()),
+                );
+              },
+            ),
+          ),
+        )
+      );
+
+      // Scrolls up and down to check if builder is called twice.
+      controller.jumpTo(-10000.0);
+      await tester.pump();
+      controller.jumpTo(10000.0);
+      await tester.pump();
+      controller.jumpTo(-10000.0);
+      await tester.pump();
+    });
+
+    testWidgets('only visible children are maintained as children of the rendered viewport', (WidgetTester tester) async {
+      final FixedExtentScrollController controller =
+        new FixedExtentScrollController();
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            onSelectedItemChanged: (_) {},
+            children: List<Widget>.generate(16, (int index) {
+              return new Text(index.toString());
+            }),
+          ),
+        )
+      );
+
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent;
+
+      // Item 0 is in the middle. There are 3 children visible after it, so the
+      // value of childCount should be 4.
+      expect(viewport.childCount, 4);
+
+      controller.jumpToItem(8);
+      await tester.pump();
+      // Item 8 is in the middle. There are 3 children visible before it and 3
+      // after it, so the value of childCount should be 7.
+      expect(viewport.childCount, 7);
+
+      controller.jumpToItem(15);
+      await tester.pump();
+      // Item 15 is in the middle. There are 3 children visible before it, so the
+      // value of childCount should be 4.
+      expect(viewport.childCount, 4);
     });
   });
 
@@ -238,6 +472,31 @@ void main() {
   });
 
   group('viewport transformation', () {
+    testWidgets('Center child is magnified', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new RepaintBoundary(
+            key: const Key('list_wheel_scroll_view'),
+            child: new ListWheelScrollView(
+              useMagnifier: true,
+              magnification: 2.0,
+              itemExtent: 50.0,
+              children: List<Widget>.generate(10, (int index) {
+                return const Placeholder();
+              }),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byKey(const Key('list_wheel_scroll_view')),
+        matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
+        skip: !Platform.isLinux,
+      );
+    });
+
     testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
         new Directionality(
@@ -248,7 +507,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -267,6 +526,32 @@ void main() {
       ));
     });
 
+    testWidgets('Curve the wheel to the left', (WidgetTester tester) async {
+      final ScrollController controller = new ScrollController(initialScrollOffset: 300.0);
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new RepaintBoundary(
+            key: const Key('list_wheel_scroll_view'),
+            child: new ListWheelScrollView(
+              controller: controller,
+              offAxisFraction: 0.5,
+              itemExtent: 50.0,
+              children: List<Widget>.generate(32, (int index) {
+                return const Placeholder();
+              }),
+          ),
+        ),
+      ),
+      );
+
+      await expectLater(
+        find.byKey(const Key('list_wheel_scroll_view')),
+        matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
+        skip: !Platform.isLinux,
+      );
+    });
+
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
       final ScrollController controller = new ScrollController(initialScrollOffset: 200.0);
 
@@ -280,7 +565,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -310,7 +595,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -339,7 +624,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -368,7 +653,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -384,6 +669,99 @@ void main() {
           moreOrLessEquals(276.46170927520404), moreOrLessEquals(-52.46133917892857), moreOrLessEquals(-230.38475772933677), moreOrLessEquals(1.69115427318801),
         ]),
       ));
+    });
+
+    testWidgets('offAxisFraction, magnification changes matrix', (WidgetTester tester) async {
+      final ScrollController controller = new ScrollController(
+          initialScrollOffset: 200.0);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            offAxisFraction: 0.5,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+      expect(viewport, paints
+        ..transform(
+          matrix4: equals(<dynamic>[
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            moreOrLessEquals(0.6318744917928063),
+            moreOrLessEquals(0.3420201433256688),
+            moreOrLessEquals(-0.0010260604299770066),
+            0.0,
+            moreOrLessEquals(-1.1877435020329863),
+            moreOrLessEquals(0.9396926207859083),
+            moreOrLessEquals(-0.002819077862357725),
+            0.0,
+            moreOrLessEquals(-62.20844875763376),
+            moreOrLessEquals(-138.79047052615562),
+            moreOrLessEquals(1.4163714115784667),
+          ]),
+        ));
+
+      controller.jumpTo(0.0);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            offAxisFraction: 0.5,
+            useMagnifier: true,
+            magnification: 1.5,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(viewport, paints
+        ..transform(
+          matrix4: equals(<dynamic>[
+            1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.5,
+            0.0,
+            0.0,
+            -150.0,
+            0.0,
+            1.0,
+          ]),
+        ));
+
     });
   });
 
@@ -402,7 +780,7 @@ void main() {
               new Container(
                 width: 200.0,
                 child: const Center(
-                  child: const Text('blah'),
+                  child: Text('blah'),
                 ),
               ),
             ],
@@ -544,6 +922,43 @@ void main() {
       expect(controller.selectedItem, 0);
     });
 
+    testWidgets('controller animateToItem', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
+      final List<int> paintedChildren = <int>[];
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            children: new List<Widget>.generate(100, (int index) {
+              return new CustomPaint(
+                painter: new TestCallbackPainter(onPaint: () {
+                  paintedChildren.add(index);
+                }),
+              );
+            }),
+          ),
+        ),
+      );
+
+      // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
+      expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
+
+      paintedChildren.clear();
+      controller.animateToItem(
+        0,
+        duration: const Duration(seconds: 1),
+        curve: Curves.linear,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(paintedChildren, <int>[0, 1, 2, 3]);
+      expect(controller.selectedItem, 0);
+    });
+
     testWidgets('onSelectedItemChanged and controller are in sync', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
       final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
@@ -649,9 +1064,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) {
+              if (notification is ScrollUpdateNotification)
                 scrolledPositions.add(notification.metrics.pixels);
-              }
+              return false;
             },
             child: new ListWheelScrollView(
               controller: controller,
@@ -700,9 +1115,9 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification notification) {
-              if (notification is ScrollUpdateNotification) {
+              if (notification is ScrollUpdateNotification)
                 scrolledPositions.add(notification.metrics.pixels);
-              }
+              return false;
             },
             child: new ListWheelScrollView(
               controller: controller,
@@ -852,6 +1267,10 @@ void main() {
     tester.renderObject(find.byWidget(outerChildren[5])).showOnScreen();
     await tester.pumpAndSettle();
     expect(controller.offset, 500.0);
+
+    tester.renderObject(find.byWidget(outerChildren[7])).showOnScreen();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 700.0);
 
     tester.renderObject(find.byWidget(innerChildren[9])).showOnScreen();
     await tester.pumpAndSettle();

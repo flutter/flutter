@@ -4,7 +4,7 @@
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart' show nonconst;
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('TextSpan equals', () {
@@ -29,20 +29,20 @@ void main() {
   });
 
   test('TextSpan toStringDeep', () {
-    const TextSpan test = const TextSpan(
+    const TextSpan test = TextSpan(
       text: 'a',
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 10.0,
       ),
-      children: const <TextSpan>[
-        const TextSpan(
+      children: <TextSpan>[
+        TextSpan(
           text: 'b',
-          children: const <TextSpan>[
-            const TextSpan(),
+          children: <TextSpan>[
+            TextSpan(),
           ],
         ),
         null,
-        const TextSpan(
+        TextSpan(
           text: 'c',
         ),
       ],

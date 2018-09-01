@@ -43,6 +43,46 @@ void main() {
     expect(value, isTrue);
   });
 
+  testWidgets('Switch size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Switch(
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 48.0));
+
+    await tester.pumpWidget(
+      new Theme(
+        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Switch(
+                value: true,
+                onChanged: (bool newValue) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
+  });
+
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     bool value = false;
 
@@ -234,7 +274,7 @@ void main() {
   testWidgets('switch has semantic events', (WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = new SemanticsTester(tester);
@@ -262,6 +302,56 @@ void main() {
     );
     await tester.tap(find.byType(Switch));
     final RenderObject object = tester.firstRenderObject(find.byType(Switch));
+
+    expect(value, true);
+    expect(semanticEvent, <String, dynamic>{
+      'type': 'tap',
+      'nodeId': object.debugSemantics.id,
+      'data': <String, dynamic>{},
+    });
+    expect(object.debugSemantics.getSemanticsData().hasAction(SemanticsAction.tap), true);
+
+    semanticsTester.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+
+  testWidgets('switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
+    dynamic semanticEvent;
+    bool value = false;
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      semanticEvent = message;
+    });
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            void onChanged(bool newValue) {
+              setState(() {
+                value = newValue;
+              });
+            }
+            return new Material(
+              child: new MergeSemantics(
+                child: new ListTile(
+                  leading: const Text('test'),
+                  onTap: () {
+                    onChanged(!value);
+                  },
+                  trailing: new Switch(
+                    value: value,
+                    onChanged: onChanged,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.byType(MergeSemantics));
+    final RenderObject object = tester.firstRenderObject(find.byType(MergeSemantics));
 
     expect(value, true);
     expect(semanticEvent, <String, dynamic>{

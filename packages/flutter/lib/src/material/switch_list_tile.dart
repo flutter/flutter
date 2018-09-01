@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'list_tile.dart';
 import 'switch.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
@@ -171,6 +172,7 @@ class SwitchListTile extends StatelessWidget {
       activeColor: activeColor,
       activeThumbImage: activeThumbImage,
       inactiveThumbImage: inactiveThumbImage,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     return new MergeSemantics(
       child: ListTileTheme.merge(

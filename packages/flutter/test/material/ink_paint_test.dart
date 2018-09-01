@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xAA0000FF);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -40,8 +40,12 @@ void main() {
     expect(
       box,
       paints
-        ..clipRRect(rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)))
-        ..circle(x: 400.0, y: 300.0, radius: 21.0, color: splashColor)
+        ..translate(x: 0.0, y: 0.0)
+        ..save()
+        ..translate(x: 300.0, y: 270.0)
+        ..clipRRect(rrect: new RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
+        ..circle(x: 100.0, y: 30.0, radius: 21.0, color: splashColor)
+        ..restore()
         ..rrect(
           rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)),
           color: highlightColor,
@@ -52,8 +56,8 @@ void main() {
   });
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xB40000FF);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xB40000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -86,93 +90,50 @@ void main() {
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
 
-    // Initially the ripple's center is where the tap occurred,
-    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      final Paint paint = arguments[2];
-      if (offsetsAreClose(center, tapDownOffset) && radius == 30.0 && paint.color.alpha == 0)
-        return true;
-      throw '''
-        Expected: center == $tapDownOffset, radius == 30.0, alpha == 0
-        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-    }));
+    PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius, int expectedAlpha) {
+      return paints
+        ..translate(x: 0.0, y: 0.0)
+        ..translate(x: tapDownOffset.dx, y: tapDownOffset.dy)
+        ..something((Symbol method, List<dynamic> arguments) {
+          if (method != #drawCircle)
+            return false;
+          final Offset center = arguments[0];
+          final double radius = arguments[1];
+          final Paint paint = arguments[2];
+          if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == expectedAlpha)
+            return true;
+          throw '''
+            Expected: center == $expectedCenter, radius == $expectedRadius, alpha == $expectedAlpha
+            Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+        }
+      );
+    }
+
+    // Initially the ripple's center is where the tap occurred. Note that
+    // ripplePattern always add a translation of tapDownOffset.
+    expect(box, ripplePattern(Offset.zero, 30.0, 0));
 
     // The ripple fades in for 75ms. During that time its alpha is eased from
     // 0 to the splashColor's alpha value and its center moves towards the
     // center of the ink well.
     await tester.pump(const Duration(milliseconds: 50));
-    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      final Paint paint = arguments[2];
-      final Offset expectedCenter = tapDownOffset + const Offset(17.0, 17.0);
-      const double expectedRadius = 56.0;
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 120)
-        return true;
-      throw '''
-        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 120
-        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-    }));
+    expect(box, ripplePattern(const Offset(17.0, 17.0), 56.0, 120));
 
     // At 75ms the ripple has fade in: it's alpha matches the splashColor's
     // alpha and its center has moved closer to the ink well's center.
     await tester.pump(const Duration(milliseconds: 25));
-    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      final Paint paint = arguments[2];
-      final Offset expectedCenter = tapDownOffset + const Offset(29.0, 29.0);
-      const double expectedRadius = 73.0;
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
-        return true;
-      throw '''
-        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 180
-        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-    }));
+    expect(box, ripplePattern(const Offset(29.0, 29.0), 73.0, 180));
 
     // At this point the splash radius has expanded to its limit: 5 past the
     // ink well's radius parameter. The splash center has moved to its final
     // location at the inkwell's center and the fade-out is about to start.
     // The fade-out begins at 225ms = 50ms + 25ms + 150ms.
     await tester.pump(const Duration(milliseconds: 150));
-    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      final Paint paint = arguments[2];
-      final Offset expectedCenter = inkWellCenter;
-      const double expectedRadius = 105.0;
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
-        return true;
-      throw '''
-        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 180
-        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-    }));
+    expect(box, ripplePattern(inkWellCenter - tapDownOffset, 105.0, 180));
 
     // After another 150ms the fade-out is complete.
     await tester.pump(const Duration(milliseconds: 150));
-    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
-      if (method != #drawCircle)
-        return false;
-      final Offset center = arguments[0];
-      final double radius = arguments[1];
-      final Paint paint = arguments[2];
-      final Offset expectedCenter = inkWellCenter;
-      const double expectedRadius = 105.0;
-      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 0)
-        return true;
-      throw '''
-        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 0
-        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-    }));
+    expect(box, ripplePattern(inkWellCenter - tapDownOffset, 105.0, 0));
   });
 
   testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
@@ -280,8 +241,8 @@ void main() {
   });
 
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
-    const Color highlightColor = const Color(0xAAFF0000);
-    const Color splashColor = const Color(0xB40000FF);
+    const Color highlightColor = Color(0xAAFF0000);
+    const Color splashColor = Color(0xB40000FF);
 
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(

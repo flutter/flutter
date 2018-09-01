@@ -187,10 +187,10 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 ///
 /// See also:
 ///
-///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
-///    many languages.
-///  * [WidgetsApp.delegates], which automatically includes
-///    [DefaultWidgetsLocalizations.delegate] by default.
+/// * [GlobalWidgetsLocalizations], which provides widgets localizations for
+///   many languages.
+/// * [WidgetsApp.delegates], which automatically includes
+///   [DefaultWidgetsLocalizations.delegate] by default.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
   /// library for US English (only).
@@ -216,7 +216,7 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// to create an instance of this class.
   ///
   /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
-  static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate = _WidgetsLocalizationsDelegate();
 }
 
 class _LocalizationsScope extends InheritedWidget {
@@ -257,9 +257,9 @@ class _LocalizationsScope extends InheritedWidget {
 ///   @override
 ///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
 ///
-///  @override
-///  bool shouldReload(MyLocalizationsDelegate old) => false;
-///}
+///   @override
+///   bool shouldReload(MyLocalizationsDelegate old) => false;
+/// }
 /// ```
 ///
 /// Each delegate can be viewed as a factory for objects that encapsulate a

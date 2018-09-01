@@ -26,42 +26,51 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            new Column(
-              children: <Widget>[
-                new CupertinoSwitch(
-                  value: _switchValue,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _switchValue = value;
-                    });
-                  },
-                ),
-                const Text(
-                  'Active'
-                ),
-              ],
+            new Semantics(
+              container: true,
+              child: new Column(
+                children: <Widget>[
+                  new CupertinoSwitch(
+                    value: _switchValue,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _switchValue = value;
+                      });
+                    },
+                  ),
+                  const Text(
+                    'Active'
+                  ),
+                ],
+              ),
             ),
-            new Column(
-              children: const <Widget>[
-                const CupertinoSwitch(
-                  value: true,
-                  onChanged: null,
-                ),
-                const Text(
-                  'Disabled'
-                ),
-              ],
+            new Semantics(
+              container: true,
+              child: new Column(
+                children: const <Widget>[
+                  CupertinoSwitch(
+                    value: true,
+                    onChanged: null,
+                  ),
+                  Text(
+                    'Disabled'
+                  ),
+                ],
+              ),
             ),
-            new Column(
-              children: const <Widget>[
-                const CupertinoSwitch(
-                  value: false,
-                  onChanged: null,
-                ),
-                const Text(
-                  'Disabled'
-                ),
-              ],
+            new Semantics(
+              container: true,
+              child: new Column(
+                children: const <Widget>[
+                  CupertinoSwitch(
+                    value: false,
+                    onChanged: null,
+                  ),
+                  Text(
+                    'Disabled'
+                  ),
+                ],
+              ),
             ),
           ],
         ),

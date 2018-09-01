@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) {
+  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
@@ -21,7 +21,7 @@ void main() {
       ..onTapCancel = () { };
     expect(log, isEmpty);
 
-    event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
+    event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ ★ Opening new gesture arena.'));
@@ -36,7 +36,7 @@ void main() {
     GestureBinding.instance.pointerRouter.route(event);
     expect(log, isEmpty);
 
-    event = const PointerUpEvent(pointer: 1, position: const Offset(12.0, 8.0));
+    event = const PointerUpEvent(pointer: 1, position: Offset(12.0, 8.0));
     GestureBinding.instance.pointerRouter.route(event);
     expect(log, isEmpty);
 
@@ -53,7 +53,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) {
+  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
@@ -67,7 +67,7 @@ void main() {
       ..onTapCancel = () { };
     expect(log, isEmpty);
 
-    event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
+    event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     expect(log, isEmpty);
 
@@ -77,7 +77,7 @@ void main() {
     GestureBinding.instance.pointerRouter.route(event);
     expect(log, isEmpty);
 
-    event = const PointerUpEvent(pointer: 1, position: const Offset(12.0, 8.0));
+    event = const PointerUpEvent(pointer: 1, position: Offset(12.0, 8.0));
     GestureBinding.instance.pointerRouter.route(event);
     expect(log, isEmpty);
 
@@ -95,7 +95,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) {
+  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     debugPrintRecognizerCallbacksTrace = true;
@@ -110,7 +110,7 @@ void main() {
       ..onTapCancel = () { };
     expect(log, isEmpty);
 
-    event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
+    event = const PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ ★ Opening new gesture arena.'));
@@ -125,7 +125,7 @@ void main() {
     GestureBinding.instance.pointerRouter.route(event);
     expect(log, isEmpty);
 
-    event = const PointerUpEvent(pointer: 1, position: const Offset(12.0, 8.0));
+    event = const PointerUpEvent(pointer: 1, position: Offset(12.0, 8.0));
     GestureBinding.instance.pointerRouter.route(event);
     expect(log, isEmpty);
 
@@ -149,7 +149,7 @@ void main() {
   test('TapGestureRecognizer _sentTapDown toString', () {
     final TapGestureRecognizer tap = new TapGestureRecognizer();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
-    const PointerEvent event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
+    const PointerEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);
     tap.didExceedDeadline();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: possible, sent tap down)'));

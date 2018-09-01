@@ -11,8 +11,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -276,25 +276,91 @@ void main() {
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
       )));
 
-      final CompilerOutput output = await generator.recompile(
+      await generator.recompile(
           '/path/to/main.dart', null /* invalidatedFiles */
-      );
-      expect(mockFrontendServerStdIn.getAndClear(),
-          'compile /path/to/main.dart\n');
-      verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(logger.errorText,
-          equals('compiler message: line1\ncompiler message: line2\n'));
-      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
+      ).then((CompilerOutput output) {
+        expect(mockFrontendServerStdIn.getAndClear(),
+            'compile /path/to/main.dart\n');
+        verifyNoMoreInteractions(mockFrontendServerStdIn);
+        expect(logger.errorText,
+            equals('compiler message: line1\ncompiler message: line2\n'));
+        expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
-      compileExpressionResponseCompleter.complete(new Future<List<int>>.value(utf8.encode(
-          'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+        compileExpressionResponseCompleter.complete(
+            new Future<List<int>>.value(utf8.encode(
+                'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+            )));
+        generator.compileExpression(
+            '2+2', null, null, null, null, false).then(
+                (CompilerOutput outputExpression) {
+                  expect(outputExpression, isNotNull);
+                  expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
+                  expect(outputExpression.errorCount, 0);
+                }
+        );
+      });
+
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('compile expressions without awaiting', () async {
+      final BufferLogger logger = context[Logger];
+
+      final Completer<List<int>> compileResponseCompleter = new Completer<List<int>>();
+      final Completer<List<int>> compileExpressionResponseCompleter1 = new Completer<List<int>>();
+      final Completer<List<int>> compileExpressionResponseCompleter2 = new Completer<List<int>>();
+
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) =>
+      new Stream<List<int>>.fromFutures(
+          <Future<List<int>>>[
+            compileResponseCompleter.future,
+            compileExpressionResponseCompleter1.future,
+            compileExpressionResponseCompleter2.future,
+          ]));
+
+      // The test manages timing via completers.
+      generator.recompile( // ignore: unawaited_futures
+          '/path/to/main.dart', null /* invalidatedFiles */
+      ).then((CompilerOutput outputCompile) {
+        expect(logger.errorText,
+            equals('compiler message: line1\ncompiler message: line2\n'));
+        expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
+
+        compileExpressionResponseCompleter1.complete(new Future<List<int>>.value(utf8.encode(
+            'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+        )));
+      });
+
+      // The test manages timing via completers.
+      final Completer<bool> lastExpressionCompleted = new Completer<bool>();
+      generator.compileExpression('0+1', null, null, null, null, false).then( // ignore: unawaited_futures
+          (CompilerOutput outputExpression) {
+            expect(outputExpression, isNotNull);
+            expect(outputExpression.outputFilename,
+                equals('/path/to/main.dart.dill.incremental'));
+            expect(outputExpression.errorCount, 0);
+            compileExpressionResponseCompleter2.complete(new Future<List<int>>.value(utf8.encode(
+                'result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'
+            )));
+          });
+
+      // The test manages timing via completers.
+      generator.compileExpression('1+1', null, null, null, null, false).then( // ignore: unawaited_futures
+          (CompilerOutput outputExpression) {
+            expect(outputExpression, isNotNull);
+            expect(outputExpression.outputFilename,
+                equals('/path/to/main.dart.dill.incremental'));
+            expect(outputExpression.errorCount, 0);
+            lastExpressionCompleted.complete(true);
+          });
+
+      compileResponseCompleter.complete(new Future<List<int>>.value(utf8.encode(
+          'result abc\nline1\nline2\nabc /path/to/main.dart.dill 0\n'
       )));
 
-      final CompilerOutput outputExpression = await generator.compileExpression(
-          '2+2', null, null, null, null, false);
-      expect(outputExpression, isNotNull);
-      expect(outputExpression.outputFilename, equals('/path/to/main.dart.dill.incremental'));
-      expect(outputExpression.errorCount, 0);
+      expect(await lastExpressionCompleted.future, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -306,7 +372,7 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   String mockCompilerOutput) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
-  new Future<List<int>>(() {
+  scheduleMicrotask(() {
     streamController.add(utf8.encode(mockCompilerOutput));
   });
   final CompilerOutput output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);

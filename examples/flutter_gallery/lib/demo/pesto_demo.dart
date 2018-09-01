@@ -86,7 +86,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           child: const Icon(Icons.edit),
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(const SnackBar(
-              content: const Text('Not supported.'),
+              content: Text('Not supported.'),
             ));
           },
         ),
@@ -110,7 +110,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           tooltip: 'Search',
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(const SnackBar(
-              content: const Text('Not supported.'),
+              content: Text('Not supported.'),
             ));
           },
         ),
@@ -268,10 +268,14 @@ class RecipeCard extends StatelessWidget {
           children: <Widget>[
             new Hero(
               tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
-              child: new Image.asset(
-                recipe.imagePath,
-                package: recipe.imagePackage,
-                fit: BoxFit.contain,
+              child: AspectRatio(
+                aspectRatio: 4.0 / 3.0,
+                child: Image.asset(
+                  recipe.imagePath,
+                  package: recipe.imagePackage,
+                  fit: BoxFit.cover,
+                  semanticLabel: recipe.name,
+                ),
               ),
             ),
             new Expanded(
@@ -366,12 +370,12 @@ class _RecipePageState extends State<RecipePage> {
                   ),
                 ],
                 flexibleSpace: const FlexibleSpaceBar(
-                  background: const DecoratedBox(
-                    decoration: const BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: const Alignment(0.0, -1.0),
-                        end: const Alignment(0.0, -0.2),
-                        colors: const<Color>[const Color(0x60000000), const Color(0x00000000)],
+                  background: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(0.0, -1.0),
+                        end: Alignment(0.0, -0.2),
+                        colors: <Color>[Color(0x60000000), Color(0x00000000)],
                       ),
                     ),
                   ),
@@ -448,7 +452,7 @@ class RecipeSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
           child: new Table(
             columnWidths: const <int, TableColumnWidth>{
-              0: const FixedColumnWidth(64.0)
+              0: FixedColumnWidth(64.0)
             },
             children: <TableRow>[
               new TableRow(
@@ -567,268 +571,147 @@ class RecipeStep {
   final String description;
 }
 
-const List<Recipe> kPestoRecipes = const <Recipe>[
-  const Recipe(
-    name: 'Pesto Bruschetta',
+const List<Recipe> kPestoRecipes = <Recipe>[
+  Recipe(
+    name: 'Roasted Chicken',
     author: 'Peter Carlsson',
-    ingredientsImagePath: 'food/icons/quick.png',
+    ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Bask in greens this season by trying this delightful take on traditional bruschetta. Top with a dollop of homemade pesto, and season with freshly ground sea salt and pepper.',
-    imagePath: 'food/image1.jpg',
+    description: 'The perfect dish to welcome your family and friends with on a crisp autumn night. Pair with roasted veggies to truly impress them.',
+    imagePath: 'food/roasted_chicken.png',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '6 pieces', description: 'Mozzarella cheese'),
-      const RecipeIngredient(amount: '6 pieces', description: 'Toasts'),
-      const RecipeIngredient(amount: '⅔ cup', description: 'Homemade pesto'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Freshly ground pepper'),
-      const RecipeIngredient(amount: '1 tsp', description: 'Salt'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1 whole', description: 'Chicken'),
+      RecipeIngredient(amount: '1/2 cup', description: 'Butter'),
+      RecipeIngredient(amount: '1 tbsp', description: 'Onion powder'),
+      RecipeIngredient(amount: '1 tbsp', description: 'Freshly ground pepper'),
+      RecipeIngredient(amount: '1 tsp', description: 'Salt'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(description: 'Put in oven'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '1 min', description: 'Put in oven'),
+      RecipeStep(duration: '1hr 45 min', description: 'Cook'),
     ],
   ),
-  const Recipe(
-    name: 'Rustic purple mash',
+  Recipe(
+    name: 'Chopped Beet Leaves',
     author: 'Trevor Hansen',
     ingredientsImagePath: 'food/icons/veggie.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Abundant in color, and healthy, delicious goodness, cooking with these South American purple potatoes is a treat. Boil, mash, bake, or roast them. For taste cook with chicken stock, and a dash of extra virgin olive oil.',
-    imagePath: 'food/image2.jpg',
+    description: 'This vegetable has more to offer than just its root. Beet greens can be tossed into a salad to add some variety or sauteed on its own with some oil and garlic.',
+    imagePath: 'food/chopped_beet_leaves.png',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '2 lbs', description: 'Purple potatoes, skin on'),
-      const RecipeIngredient(amount: '1 tsp', description: 'Salt'),
-      const RecipeIngredient(amount: '2 tsp', description: 'Lemon'),
-      const RecipeIngredient(amount: '4 cups', description: 'Chicken stock'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Extra virgin olive oil')
+    ingredients: <RecipeIngredient>[
+       RecipeIngredient(amount: '3 cups', description: 'Beet greens'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '5 min', description: 'Chop'),
     ],
   ),
-  const Recipe(
-    name: 'Bacon Sprouts',
+  Recipe(
+    name: 'Pesto Pasta',
     author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'This beautiful sprouts recipe is the most glorious side dish on a cold winter’s night. Construct it with bacon or fake-on, but always make sure the sprouts are deliciously seasoned and appropriately sautéed.',
-    imagePath: 'food/image3.jpg',
+    description: 'With this pesto recipe, you can quickly whip up a meal to satisfy your savory needs. And if you\'re feeling festive, you can add bacon to taste.',
+    imagePath: 'food/pesto_pasta.png',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '2 lbs', description: 'Brussel sprouts'),
-      const RecipeIngredient(amount: '3 lbs', description: 'Bacon'),
-      const RecipeIngredient(amount: '⅔ cup', description: 'Shaved parmesan cheese'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Extra virgin olive oil'),
-      const RecipeIngredient(amount: '1 tsp', description: 'Lemon juice'),
-      const RecipeIngredient(amount: '1/2 cup', description: 'Sun dried tomatoes'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1/4 cup ', description: 'Pasta'),
+      RecipeIngredient(amount: '2 cups', description: 'Fresh basil leaves'),
+      RecipeIngredient(amount: '1/2 cup', description: 'Parmesan cheese'),
+      RecipeIngredient(amount: '1/2 cup', description: 'Extra virgin olive oil'),
+      RecipeIngredient(amount: '1/3 cup', description: 'Pine nuts'),
+      RecipeIngredient(amount: '1/4 cup', description: 'Lemon juice'),
+      RecipeIngredient(amount: '3 cloves', description: 'Garlic'),
+      RecipeIngredient(amount: '1/4 tsp', description: 'Salt'),
+      RecipeIngredient(amount: '1/8 tsp', description: 'Pepper'),
+      RecipeIngredient(amount: '3 lbs', description: 'Bacon'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '15 min', description: 'Blend'),
     ],
   ),
-  const Recipe(
-    name: 'Oven Sausage',
+  Recipe(
+    name: 'Cherry Pie',
     author: 'Sandra Adams',
-    ingredientsImagePath: 'food/icons/meat.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Robust cuts of portuguese sausage add layers of flavour. Bake or fry until sausages are slightly browned and with a crispy skin. Serve warm and with cuts of pineapple for a delightful mix of sweet and savory flavour. This is the perfect dish after a swim in the sea.',
-    imagePath: 'food/image4.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1 1/2 lbs', description: 'Linguisa'),
-      const RecipeIngredient(amount: '1 lbs', description: 'Pineapple or other fresh citrus fruit'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Chicken tostadas',
-    author: 'Peter Carlsson',
-    ingredientsImagePath: 'food/icons/spicy.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Crisp flavours and a bit of spice make this roasted chicken dish an easy go to when cooking for large groups. Top with Baja sauce for an extra kick of spice.',
-    imagePath: 'food/image5.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '4-6', description: 'Small corn tortillas'),
-      const RecipeIngredient(amount: '½ cup', description: 'Chopped onion'),
-      const RecipeIngredient(amount: '⅔', description: 'Cream'),
-      const RecipeIngredient(amount: '3-4oz', description: 'Roasted, shredded chicken breast'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Coconut rice',
-    author: 'Ali Connors',
-    ingredientsImagePath: 'food/icons/healthy.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'This dish is a terrific pairing to almost any main. Bonus- it’s quick, easy to make, and turns even the simplest of dishes into a delicacy. Sweet coconut cream will leave your mouth watering, with yummy caramelized flecks of rice adding an extra bit of taste. Fluff with fork before serving for best results.',
-    imagePath: 'food/image6.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '2 cups', description: 'Jasmine rice'),
-      const RecipeIngredient(amount: '1 1/2 cups', description: 'Water'),
-      const RecipeIngredient(amount: '1 cup', description: 'Coconut milk'),
-      const RecipeIngredient(amount: '1 1/2 tbsp', description: 'Sugar'),
-      const RecipeIngredient(amount: '1tsp', description: 'Salt'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook')
-    ],
-  ),
-  const Recipe(
-    name: 'Gin basil cocktail',
-    author: 'Trevor Hansen',
-    ingredientsImagePath: 'food/icons/quick.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'This mellow and herb filled blending of simple ingredients is easy enough to mix that a novice host will feel like a seasoned bartender. Top with crushed basil, shake or stir.',
-    imagePath: 'food/image7.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '3 parts', description: 'Gin'),
-      const RecipeIngredient(amount: '1 part', description: 'Fresh lemon juice'),
-      const RecipeIngredient(amount: '½ part', description: 'Simple syrup'),
-      const RecipeIngredient(amount: '5', description: 'Basil leaves, crushed'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Seared sesame fish',
-    author: 'Ali Connors',
-    ingredientsImagePath: 'food/icons/fish.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Cuts of fish like this are perfect for simple searing with bright flavours. Try Sesame seeds on these fillets for crusty skin filled with crunch. For added flavour try dipping in a homemade ponzu sauce - delicious.',
-    imagePath: 'food/image8.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1 ½ lbs', description: 'Thin fish fillets'),
-      const RecipeIngredient(amount: '1 lb', description: 'Salt and black pepper to taste'),
-      const RecipeIngredient(amount: '3/4 cup', description: 'Sesame seeds'),
-      const RecipeIngredient(amount: '2tbsp', description: 'Sesame oil'),
-      const RecipeIngredient(amount: '1tbsp', description: 'Lime juice'),
-      const RecipeIngredient(amount: '2 tbsp', description: 'Soy sauce'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Herb artichoke',
-    author: 'Sandra Adams',
-    ingredientsImagePath: 'food/icons/healthy.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'This tasty and healthy veggie is a favorite. Artichoke like this can be paired with a hearty main or works well as a small meal with some white wine on the side. Simple and fresh, all foodies love tasty artichoke.',
-    imagePath: 'food/image9.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1', description: 'Small garlic clove, peeled'),
-      const RecipeIngredient(amount: '2', description: 'Whole artichokes'),
-      const RecipeIngredient(amount: '4 tbsp', description: 'Fresh lemon juice'),
-      const RecipeIngredient(amount: '4 tbsp', description: 'Unsalted butter'),
-      const RecipeIngredient(amount: '2 tbsp', description: 'Extra-virgin olive oil'),
-      const RecipeIngredient(amount: '1⁄4 tsp', description: 'Freshly ground black pepper'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Pesto bruschetta',
-    author: 'Trevor Hansen',
-    ingredientsImagePath: 'food/icons/veggie.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Life is good when you add amazingly warm bread, fresh pesto sauce, and roasted tomatoes to the table. This a classic starter to break out in a pinch. It’s easy to make and extra tasty.',
-    imagePath: 'food/image10.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1 loaf', description: 'Sliced French bread'),
-      const RecipeIngredient(amount: '½ cup', description: 'Cheese'),
-      const RecipeIngredient(amount: '1 cup', description: 'Heirloom tomatoes'),
-      const RecipeIngredient(amount: '1 cup', description: 'Fresh basil'),
-      const RecipeIngredient(amount: '1 clove', description: 'Garlic '),
-      const RecipeIngredient(amount: '½ tbsp', description: 'Olive oil'),
-      const RecipeIngredient(amount: '3tsp', description: 'White wine vinegar'),
-      const RecipeIngredient(amount: '¼ tsp', description: 'Sea salt'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Garlic bok choy',
-    author: 'Sandra Adams',
-    ingredientsImagePath: 'food/icons/spicy.png',
-    ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Great stir-fried bok choy starts at the market. For me, nothing says tasty like garlic and baby bok choy. Choose fresh, crisp greens. Once home, wash, chop, and then ready for the wok. No family style spread is complete without these greens.',
-    imagePath: 'food/image11.jpg',
-    imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1/2 cup', description: 'Chick broth'),
-      const RecipeIngredient(amount: '1 tbsp', description: 'Soy sauce'),
-      const RecipeIngredient(amount: '¼ cup', description: 'Sliced garlic'),
-      const RecipeIngredient(amount: '2-3 lbs', description: 'Bok choy'),
-      const RecipeIngredient(amount: '2 tsp', description: 'Sesame oil'),
-    ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
-    ],
-  ),
-  const Recipe(
-    name: 'Fresh Fettuccine',
-    author: 'Ali Connors',
     ingredientsImagePath: 'food/icons/main.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Satisfy a need for rich, creamy homemade goodness with this classic. Creamy fettuccine alfredo will have you hitting the gym the next day, but it’s so good it’s worth it.',
-    imagePath: 'food/image12.jpg',
+    description: 'Sometimes when you\'re craving some cheer in your life you can jumpstart your day with some cherry pie. Dessert for breakfast is perfectly acceptable.',
+    imagePath: 'food/cherry_pie.png',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '¾ cup', description: 'Milk'),
-      const RecipeIngredient(amount: '1 ½ tsp', description: 'Salt'),
-      const RecipeIngredient(amount: '1 tbsp', description: 'Olive oil'),
-      const RecipeIngredient(amount: '8oz', description: 'Fettuccine'),
-      const RecipeIngredient(amount: '½ cup', description: 'Fresh basil'),
-      const RecipeIngredient(amount: '½ cup', description: 'Fresh ground pepper'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1', description: 'Pie crust'),
+      RecipeIngredient(amount: '4 cups', description: 'Fresh or frozen cherries'),
+      RecipeIngredient(amount: '1 cup', description: 'Granulated sugar'),
+      RecipeIngredient(amount: '4 tbsp', description: 'Cornstarch'),
+      RecipeIngredient(amount: '1½ tbsp', description: 'Butter'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '15 min', description: 'Mix'),
+      RecipeStep(duration: '1hr 30 min', description: 'Bake'),
     ],
   ),
-  const Recipe(
-    name: 'Sicilian-Style sardines',
+  Recipe(
+    name: 'Spinach Salad',
     author: 'Peter Carlsson',
+    ingredientsImagePath: 'food/icons/spicy.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
+    description: 'Everyone\'s favorite leafy green is back. Paired with fresh sliced onion, it\'s ready to tackle any dish, whether it be a salad or an egg scramble.',
+    imagePath: 'food/spinach_onion_salad.png',
+    imagePackage: _kGalleryAssetsPackage,
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '4 cups', description: 'Spinach'),
+      RecipeIngredient(amount: '1 cup', description: 'Sliced onion'),
+    ],
+    steps: <RecipeStep>[
+      RecipeStep(duration: '5 min', description: 'Mix'),
+    ],
+  ),
+  Recipe(
+    name: 'Butternut Squash Soup',
+    author: 'Ali Connors',
+    ingredientsImagePath: 'food/icons/healthy.png',
+    ingredientsImagePackage: _kGalleryAssetsPackage,
+    description: 'This creamy butternut squash soup will warm you on the chilliest of winter nights and bring a delightful pop of orange to the dinner table.',
+    imagePath: 'food/butternut_squash_soup.png',
+    imagePackage: _kGalleryAssetsPackage,
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1', description: 'Butternut squash'),
+      RecipeIngredient(amount: '4 cups', description: 'Chicken stock'),
+      RecipeIngredient(amount: '2', description: 'Potatoes'),
+      RecipeIngredient(amount: '1', description: 'Onion'),
+      RecipeIngredient(amount: '1', description: 'Carrot'),
+      RecipeIngredient(amount: '1', description: 'Celery'),
+      RecipeIngredient(amount: '1 tsp', description: 'Salt'),
+      RecipeIngredient(amount: '1 tsp', description: 'Pepper'),
+    ],
+    steps: <RecipeStep>[
+      RecipeStep(duration: '10 min', description: 'Prep vegetables'),
+      RecipeStep(duration: '5 min', description: 'Stir'),
+      RecipeStep(duration: '1 hr 10 min', description: 'Cook')
+    ],
+  ),
+  Recipe(
+    name: 'Spanakopita',
+    author: 'Trevor Hansen',
     ingredientsImagePath: 'food/icons/quick.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'My go to way to eat sardines is with a splash of tangy lemon and fresh fennel drizzled on top. The best thing about this dish is the flavour it packs. Prepaid with wild caught sardines or canned.',
-    imagePath: 'food/image13.jpg',
+    description: 'You \'feta\' believe this is a crowd-pleaser! Flaky phyllo pastry surrounds a delicious mixture of spinach and cheeses to create the perfect appetizer.',
+    imagePath: 'food/spanakopita.png',
     imagePackage: _kGalleryAssetsPackage,
-    ingredients: const<RecipeIngredient>[
-      const RecipeIngredient(amount: '1/4 cup', description: 'Dry white wine'),
-      const RecipeIngredient(amount: '1', description: 'Finely chopped shallot'),
-      const RecipeIngredient(amount: '2 tbsp', description: 'Fresh lemon juice'),
-      const RecipeIngredient(amount: '1 tbsp', description: 'Fennel seeds, crushed'),
-      const RecipeIngredient(amount: '4 tbsp', description: 'Extra virgin olive oil, to taste'),
-      const RecipeIngredient(amount: '2 cans', description: 'Sardines in oil, drained'),
+    ingredients: <RecipeIngredient>[
+      RecipeIngredient(amount: '1 lb', description: 'Spinach'),
+      RecipeIngredient(amount: '½ cup', description: 'Feta cheese'),
+      RecipeIngredient(amount: '½ cup', description: 'Cottage cheese'),
+      RecipeIngredient(amount: '2', description: 'Eggs'),
+      RecipeIngredient(amount: '1', description: 'Onion'),
+      RecipeIngredient(amount: '½ lb', description: 'Phyllo dough'),
     ],
-    steps: const<RecipeStep>[
-      const RecipeStep(duration: '3 min', description: 'Stir'),
-      const RecipeStep(duration: '45 min', description: 'Cook'),
+    steps: <RecipeStep>[
+      RecipeStep(duration: '5 min', description: 'Sauté vegetables'),
+      RecipeStep(duration: '3 min', description: 'Stir vegetables and other filling ingredients'),
+      RecipeStep(duration: '10 min', description: 'Fill phyllo squares half-full with filling and fold.'),
+      RecipeStep(duration: '40 min', description: 'Bake')
     ],
   ),
 ];

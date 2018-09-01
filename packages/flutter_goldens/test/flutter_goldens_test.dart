@@ -46,13 +46,13 @@ void main() {
 
     group('prepare', () {
       test('performs minimal work if versions match', () async {
-        when(process.run(typed(captureAny), workingDirectory: typed(captureAny, named: 'workingDirectory')))
+        when(process.run(any, workingDirectory: anyNamed('workingDirectory')))
             .thenAnswer((_) => new Future<io.ProcessResult>.value(io.ProcessResult(123, 0, _kGoldensVersion, '')));
         await goldens.prepare();
 
         // Verify that we only spawned `git rev-parse HEAD`
         final VerificationResult verifyProcessRun =
-            verify(process.run(typed(captureAny), workingDirectory: typed(captureAny, named: 'workingDirectory')));
+            verify(process.run(captureAny, workingDirectory: captureAnyNamed('workingDirectory')));
         verifyProcessRun.called(1);
         expect(verifyProcessRun.captured.first, <String>['git', 'rev-parse', 'HEAD']);
         expect(verifyProcessRun.captured.last, _kRepositoryRoot);

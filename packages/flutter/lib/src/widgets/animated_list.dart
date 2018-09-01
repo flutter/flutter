@@ -20,7 +20,7 @@ typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animatio
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
-const Duration _kDuration = const Duration(milliseconds: 300);
+const Duration _kDuration = Duration(milliseconds: 300);
 
 // Incoming and outgoing AnimatedList items.
 class _ActiveItem implements Comparable<_ActiveItem> {
@@ -166,7 +166,7 @@ class AnimatedList extends StatefulWidget {
     if (nullOk || result != null)
       return result;
     throw new FlutterError(
-      'AnimatedList.of() called with a context that does not contain a AnimatedList.\n'
+      'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
       'No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of(). '
       'This can happen when the context provided is from the same StatefulWidget that '
       'built the AnimatedList. Please see the AnimatedList documentation for examples '

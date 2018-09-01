@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/device.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -28,12 +28,12 @@ void main() {
       Future<Null> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id).toList(), expected);
       }
-      expectDevice('01abfc49119c410e', <Device>[device2]);
-      expectDevice('Nexus 5X', <Device>[device2]);
-      expectDevice('0553790d0a4e726f', <Device>[device1]);
-      expectDevice('Nexus 5', <Device>[device1]);
-      expectDevice('0553790', <Device>[device1]);
-      expectDevice('Nexus', <Device>[device1, device2]);
+      await expectDevice('01abfc49119c410e', <Device>[device2]);
+      await expectDevice('Nexus 5X', <Device>[device2]);
+      await expectDevice('0553790d0a4e726f', <Device>[device1]);
+      await expectDevice('Nexus 5', <Device>[device1]);
+      await expectDevice('0553790', <Device>[device1]);
+      await expectDevice('Nexus', <Device>[device1, device2]);
     });
   });
 }

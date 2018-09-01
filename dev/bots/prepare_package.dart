@@ -520,7 +520,7 @@ class ArchivePublisher {
 
     jsonData = _addRelease(jsonData);
 
-    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
     await _cloudCopy(metadataFile.absolute.path, metadataGsPath);
   }
@@ -640,7 +640,7 @@ Future<Null> main(List<String> argList) async {
   Directory tempDir;
   bool removeTempDir = false;
   if (args['temp_dir'] == null || args['temp_dir'].isEmpty) {
-    tempDir = Directory.systemTemp.createTempSync('flutter_');
+    tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
     tempDir = new Directory(args['temp_dir']);

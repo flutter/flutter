@@ -14,7 +14,7 @@ import 'basic_types.dart';
 /// A property or argument of this type accepts classes created either with [new
 /// Alignment] and its variants, or [new AlignmentDirectional].
 ///
-/// To convert a [AlignmentGeometry] object of indeterminate type into a
+/// To convert an [AlignmentGeometry] object of indeterminate type into an
 /// [Alignment] object, call the [resolve] method.
 @immutable
 abstract class AlignmentGeometry {
@@ -115,7 +115,7 @@ abstract class AlignmentGeometry {
     );
   }
 
-  /// Convert this instance into a [Alignment], which uses literal
+  /// Convert this instance into an [Alignment], which uses literal
   /// coordinates (the `x` coordinate being explicitly a distance from the
   /// left).
   ///
@@ -173,7 +173,7 @@ abstract class AlignmentGeometry {
 /// A variety of widgets use [Alignment] in their configuration, most
 /// notably:
 ///
-///  * [Align] positions a child according to a [Alignment].
+///  * [Align] positions a child according to an [Alignment].
 ///
 /// See also:
 ///
@@ -216,31 +216,31 @@ class Alignment extends AlignmentGeometry {
   double get _y => y;
 
   /// The top left corner.
-  static const Alignment topLeft = const Alignment(-1.0, -1.0);
+  static const Alignment topLeft = Alignment(-1.0, -1.0);
 
   /// The center point along the top edge.
-  static const Alignment topCenter = const Alignment(0.0, -1.0);
+  static const Alignment topCenter = Alignment(0.0, -1.0);
 
   /// The top right corner.
-  static const Alignment topRight = const Alignment(1.0, -1.0);
+  static const Alignment topRight = Alignment(1.0, -1.0);
 
   /// The center point along the left edge.
-  static const Alignment centerLeft = const Alignment(-1.0, 0.0);
+  static const Alignment centerLeft = Alignment(-1.0, 0.0);
 
   /// The center point, both horizontally and vertically.
-  static const Alignment center = const Alignment(0.0, 0.0);
+  static const Alignment center = Alignment(0.0, 0.0);
 
   /// The center point along the right edge.
-  static const Alignment centerRight = const Alignment(1.0, 0.0);
+  static const Alignment centerRight = Alignment(1.0, 0.0);
 
   /// The bottom left corner.
-  static const Alignment bottomLeft = const Alignment(-1.0, 1.0);
+  static const Alignment bottomLeft = Alignment(-1.0, 1.0);
 
   /// The center point along the bottom edge.
-  static const Alignment bottomCenter = const Alignment(0.0, 1.0);
+  static const Alignment bottomCenter = Alignment(0.0, 1.0);
 
   /// The bottom right corner.
-  static const Alignment bottomRight = const Alignment(1.0, 1.0);
+  static const Alignment bottomRight = Alignment(1.0, 1.0);
 
   @override
   AlignmentGeometry add(AlignmentGeometry other) {
@@ -414,7 +414,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// than -1.0 represent positions beyond the start edge, and values greater than
   /// 1.0 represent positions beyond the end edge.
   ///
-  /// This value is normalized into a [Alignment.x] value by the [resolve]
+  /// This value is normalized into an [Alignment.x] value by the [resolve]
   /// method.
   final double start;
 
@@ -439,40 +439,40 @@ class AlignmentDirectional extends AlignmentGeometry {
   double get _y => y;
 
   /// The top corner on the "start" side.
-  static const AlignmentDirectional topStart = const AlignmentDirectional(-1.0, -1.0);
+  static const AlignmentDirectional topStart = AlignmentDirectional(-1.0, -1.0);
 
   /// The center point along the top edge.
   ///
   /// Consider using [Alignment.topCenter] instead, as it does not need
   /// to be [resolve]d to be used.
-  static const AlignmentDirectional topCenter = const AlignmentDirectional(0.0, -1.0);
+  static const AlignmentDirectional topCenter = AlignmentDirectional(0.0, -1.0);
 
   /// The top corner on the "end" side.
-  static const AlignmentDirectional topEnd = const AlignmentDirectional(1.0, -1.0);
+  static const AlignmentDirectional topEnd = AlignmentDirectional(1.0, -1.0);
 
   /// The center point along the "start" edge.
-  static const AlignmentDirectional centerStart = const AlignmentDirectional(-1.0, 0.0);
+  static const AlignmentDirectional centerStart = AlignmentDirectional(-1.0, 0.0);
 
   /// The center point, both horizontally and vertically.
   ///
   /// Consider using [Alignment.center] instead, as it does not need to
   /// be [resolve]d to be used.
-  static const AlignmentDirectional center = const AlignmentDirectional(0.0, 0.0);
+  static const AlignmentDirectional center = AlignmentDirectional(0.0, 0.0);
 
   /// The center point along the "end" edge.
-  static const AlignmentDirectional centerEnd = const AlignmentDirectional(1.0, 0.0);
+  static const AlignmentDirectional centerEnd = AlignmentDirectional(1.0, 0.0);
 
   /// The bottom corner on the "start" side.
-  static const AlignmentDirectional bottomStart = const AlignmentDirectional(-1.0, 1.0);
+  static const AlignmentDirectional bottomStart = AlignmentDirectional(-1.0, 1.0);
 
   /// The center point along the bottom edge.
   ///
   /// Consider using [Alignment.bottomCenter] instead, as it does not
   /// need to be [resolve]d to be used.
-  static const AlignmentDirectional bottomCenter = const AlignmentDirectional(0.0, 1.0);
+  static const AlignmentDirectional bottomCenter = AlignmentDirectional(0.0, 1.0);
 
   /// The bottom corner on the "end" side.
-  static const AlignmentDirectional bottomEnd = const AlignmentDirectional(1.0, 1.0);
+  static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
 
   @override
   AlignmentGeometry add(AlignmentGeometry other) {

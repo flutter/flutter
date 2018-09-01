@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -115,7 +115,7 @@ void main() {
 
 class MockFileSystem extends ForwardingFileSystem {
   MockFileSystem() : super(new MemoryFileSystem());
-    
+
   @override
   File file(dynamic path) {
     return new MockFile();
@@ -124,7 +124,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile extends Mock implements File {
   @override
-  Future<RandomAccessFile> open({FileMode mode = FileMode.READ}) async { // ignore: deprecated_member_use
+  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
     return new MockRandomAccessFile();
   }
 }

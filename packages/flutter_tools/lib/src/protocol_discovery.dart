@@ -4,9 +4,7 @@
 
 import 'dart:async';
 
-import 'base/common.dart';
 import 'base/io.dart';
-import 'base/port_scanner.dart';
 import 'device.dart';
 import 'globals.dart';
 
@@ -18,11 +16,8 @@ class ProtocolDiscovery {
     this.serviceName, {
     this.portForwarder,
     this.hostPort,
-    this.defaultHostPort,
     this.ipv6,
-  }) : assert(logReader != null),
-       assert(portForwarder == null || defaultHostPort != null),
-       _prefix = '$serviceName listening on ' {
+  }) : assert(logReader != null) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
   }
 
@@ -34,10 +29,10 @@ class ProtocolDiscovery {
   }) {
     const String kObservatoryService = 'Observatory';
     return new ProtocolDiscovery._(
-      logReader, kObservatoryService,
+      logReader,
+      kObservatoryService,
       portForwarder: portForwarder,
       hostPort: hostPort,
-      defaultHostPort: kDefaultObservatoryPort,
       ipv6: ipv6,
     );
   }
@@ -46,10 +41,8 @@ class ProtocolDiscovery {
   final String serviceName;
   final DevicePortForwarder portForwarder;
   final int hostPort;
-  final int defaultHostPort;
   final bool ipv6;
 
-  final String _prefix;
   final Completer<Uri> _completer = new Completer<Uri>();
 
   StreamSubscription<String> _deviceLogSubscription;
@@ -66,10 +59,13 @@ class ProtocolDiscovery {
 
   void _handleLine(String line) {
     Uri uri;
-    final int index = line.indexOf(_prefix + 'http://');
-    if (index >= 0) {
+
+    final RegExp r = new RegExp('${RegExp.escape(serviceName)} listening on (http://[^ \n]+)');
+    final Match match = r.firstMatch(line);
+
+    if (match != null) {
       try {
-        uri = Uri.parse(line.substring(index + _prefix.length));
+        uri = Uri.parse(match[1]);
       } catch (error) {
         _stopScrapingLogs();
         _completer.completeError(error);
@@ -81,6 +77,7 @@ class ProtocolDiscovery {
       _stopScrapingLogs();
       _completer.complete(_forwardPort(uri));
     }
+
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
@@ -88,16 +85,15 @@ class ProtocolDiscovery {
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
-      final int devicePort = deviceUri.port;
-      int hostPort = this.hostPort ?? await portScanner.findPreferredPort(defaultHostPort);
-      hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $hostPort to device port $devicePort for $serviceName');
-      hostUri = deviceUri.replace(port: hostPort);
+      final int actualDevicePort = deviceUri.port;
+      final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
+      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      hostUri = deviceUri.replace(port: actualHostPort);
     }
 
     assert(new InternetAddress(hostUri.host).isLoopback);
     if (ipv6) {
-      hostUri = hostUri.replace(host: InternetAddress.LOOPBACK_IP_V6.host); // ignore: deprecated_member_use
+      hostUri = hostUri.replace(host: InternetAddress.loopbackIPv6.host);
     }
 
     return hostUri;

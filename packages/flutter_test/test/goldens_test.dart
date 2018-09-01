@@ -7,12 +7,10 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
-import 'package:test/test.dart' as test_package;
-import 'package:test/test.dart' hide test;
+import 'package:flutter_test/flutter_test.dart' hide test;
+import 'package:flutter_test/flutter_test.dart' as test_package;
 
-import 'package:flutter_test/flutter_test.dart' show goldenFileComparator, LocalFileComparator;
-
-const List<int> _kExpectedBytes = const <int>[1, 2, 3];
+const List<int> _kExpectedBytes = <int>[1, 2, 3];
 
 void main() {
   MemoryFileSystem fs;
@@ -59,7 +57,7 @@ void main() {
   group('goldenFileComparator', () {
     test('is initialized by test framework', () {
       expect(goldenFileComparator, isNotNull);
-      expect(goldenFileComparator, const isInstanceOf<LocalFileComparator>());
+      expect(goldenFileComparator, isInstanceOf<LocalFileComparator>());
       final LocalFileComparator comparator = goldenFileComparator;
       expect(comparator.basedir.path, contains('flutter_test'));
     });
@@ -133,7 +131,7 @@ void main() {
       group('fails', () {
         test('when golden file does not exist', () async {
           final Future<bool> comparison = doComparison();
-          expect(comparison, throwsA(const isInstanceOf<TestFailure>()));
+          expect(comparison, throwsA(isInstanceOf<TestFailure>()));
         });
 
         test('when golden bytes are leading subset of image bytes', () async {
@@ -171,14 +169,14 @@ void main() {
     group('update', () {
       test('updates existing file', () async {
         fs.file(fix('/golden.png')).writeAsBytesSync(_kExpectedBytes);
-        const List<int> newBytes = const <int>[11, 12, 13];
+        const List<int> newBytes = <int>[11, 12, 13];
         await comparator.update(fs.file('golden.png').uri, new Uint8List.fromList(newBytes));
         expect(fs.file(fix('/golden.png')).readAsBytesSync(), newBytes);
       });
 
       test('creates non-existent file', () async {
         expect(fs.file(fix('/foo.png')).existsSync(), isFalse);
-        const List<int> newBytes = const <int>[11, 12, 13];
+        const List<int> newBytes = <int>[11, 12, 13];
         await comparator.update(fs.file('foo.png').uri, new Uint8List.fromList(newBytes));
         expect(fs.file(fix('/foo.png')).existsSync(), isTrue);
         expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);

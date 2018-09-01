@@ -16,21 +16,21 @@ class _Page {
   final String text;
 }
 
-const List<_Page> _allPages = const <_Page>[
-  const _Page(icon: Icons.grade, text: 'TRIUMPH'),
-  const _Page(icon: Icons.playlist_add, text: 'NOTE'),
-  const _Page(icon: Icons.check_circle, text: 'SUCCESS'),
-  const _Page(icon: Icons.question_answer, text: 'OVERSTATE'),
-  const _Page(icon: Icons.sentiment_very_satisfied, text: 'SATISFACTION'),
-  const _Page(icon: Icons.camera, text: 'APERTURE'),
-  const _Page(icon: Icons.assignment_late, text: 'WE MUST'),
-  const _Page(icon: Icons.assignment_turned_in, text: 'WE CAN'),
-  const _Page(icon: Icons.group, text: 'ALL'),
-  const _Page(icon: Icons.block, text: 'EXCEPT'),
-  const _Page(icon: Icons.sentiment_very_dissatisfied, text: 'CRYING'),
-  const _Page(icon: Icons.error, text: 'MISTAKE'),
-  const _Page(icon: Icons.loop, text: 'TRYING'),
-  const _Page(icon: Icons.cake, text: 'CAKE'),
+const List<_Page> _allPages = <_Page>[
+  _Page(icon: Icons.grade, text: 'TRIUMPH'),
+  _Page(icon: Icons.playlist_add, text: 'NOTE'),
+  _Page(icon: Icons.check_circle, text: 'SUCCESS'),
+  _Page(icon: Icons.question_answer, text: 'OVERSTATE'),
+  _Page(icon: Icons.sentiment_very_satisfied, text: 'SATISFACTION'),
+  _Page(icon: Icons.camera, text: 'APERTURE'),
+  _Page(icon: Icons.assignment_late, text: 'WE MUST'),
+  _Page(icon: Icons.assignment_turned_in, text: 'WE CAN'),
+  _Page(icon: Icons.group, text: 'ALL'),
+  _Page(icon: Icons.block, text: 'EXCEPT'),
+  _Page(icon: Icons.sentiment_very_dissatisfied, text: 'CRYING'),
+  _Page(icon: Icons.error, text: 'MISTAKE'),
+  _Page(icon: Icons.loop, text: 'TRYING'),
+  _Page(icon: Icons.cake, text: 'CAKE'),
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
@@ -71,14 +71,14 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       case TabsDemoStyle.iconsAndText:
         return new ShapeDecoration(
           shape: const RoundedRectangleBorder(
-            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
-            side: const BorderSide(
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            side: BorderSide(
               color: Colors.white24,
               width: 2.0,
             ),
           ) + const RoundedRectangleBorder(
-            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
-            side: const BorderSide(
+            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            side: BorderSide(
               color: Colors.transparent,
               width: 4.0,
             ),
@@ -88,12 +88,12 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       case TabsDemoStyle.iconsOnly:
         return new ShapeDecoration(
           shape: const CircleBorder(
-            side: const BorderSide(
+            side: BorderSide(
               color: Colors.white24,
               width: 4.0,
             ),
           ) + const CircleBorder(
-            side: const BorderSide(
+            side: BorderSide(
               color: Colors.transparent,
               width: 4.0,
             ),
@@ -103,12 +103,12 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       case TabsDemoStyle.textOnly:
         return new ShapeDecoration(
           shape: const StadiumBorder(
-            side: const BorderSide(
+            side: BorderSide(
               color: Colors.white24,
               width: 2.0,
             ),
           ) + const StadiumBorder(
-            side: const BorderSide(
+            side: BorderSide(
               color: Colors.transparent,
               width: 4.0,
             ),
@@ -138,15 +138,15 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsAndText,
-                child: const Text('Icons and text')
+                child: Text('Icons and text')
               ),
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsOnly,
-                child: const Text('Icons only')
+                child: Text('Icons only')
               ),
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.textOnly,
-                child: const Text('Text only')
+                child: Text('Text only')
               ),
             ],
           ),
@@ -155,7 +155,8 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           controller: _controller,
           isScrollable: true,
           indicator: getIndicator(),
-          tabs: _allPages.map((_Page page) {
+          tabs: _allPages.map<Tab>((_Page page) {
+            assert(_demoStyle != null);
             switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:
                 return new Tab(text: page.text, icon: new Icon(page.icon));
@@ -164,6 +165,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
               case TabsDemoStyle.textOnly:
                 return new Tab(text: page.text);
             }
+            return null;
           }).toList(),
         ),
       ),

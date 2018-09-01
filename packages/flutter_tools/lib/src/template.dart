@@ -66,6 +66,7 @@ class Template {
     Directory destination,
     Map<String, dynamic> context, {
     bool overwriteExisting = true,
+    bool printStatusWhenWriting = true,
   }) {
     destination.createSync(recursive: true);
     int fileCount = 0;
@@ -106,6 +107,10 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
+      final bool withRootModule = context['withRootModule'] ?? false;
+      if (!withRootModule && absoluteSourcePath.contains('flutter_root'))
+        return;
+
       final String finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null)
         return;
@@ -117,14 +122,17 @@ class Template {
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
-          printStatus('  $relativePathForLogging (overwritten)');
+          if (printStatusWhenWriting)
+            printStatus('  $relativePathForLogging (overwritten)');
         } else {
           // The file exists but we cannot overwrite it, move on.
-          printTrace('  $relativePathForLogging (existing - skipped)');
+          if (printStatusWhenWriting)
+            printTrace('  $relativePathForLogging (existing - skipped)');
           return;
         }
       } else {
-        printStatus('  $relativePathForLogging (created)');
+        if (printStatusWhenWriting)
+          printStatus('  $relativePathForLogging (created)');
       }
 
       fileCount++;

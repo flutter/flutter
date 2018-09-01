@@ -28,7 +28,7 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    const PopupMenuItem<String>(child: const Text('menuItem'))
+                    const PopupMenuItem<String>(child: Text('menuItem'))
                   ];
                 }
               ),
@@ -97,7 +97,7 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      const PopupMenuItem<String>(child: const Text('menuItem'))
+                      const PopupMenuItem<String>(child: Text('menuItem'))
                     ];
                   }
                 ),
@@ -129,9 +129,9 @@ void main() {
                   onChanged: (String newValue) { },
                   value: 'menuItem',
                   items: const <DropdownMenuItem<String>>[
-                    const DropdownMenuItem<String>(
+                    DropdownMenuItem<String>(
                       value: 'menuItem',
-                      child: const Text('menuItem'),
+                      child: Text('menuItem'),
                     ),
                   ],
                 )
@@ -219,7 +219,7 @@ void main() {
   });
 
   testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
-    const Color green = const Color(0xFF00FF00);
+    const Color green = Color(0xFF00FF00);
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -234,7 +234,7 @@ void main() {
                       context: context,
                       builder: (BuildContext context) {
                         return const Scaffold(
-                          body: const SizedBox(
+                          body: SizedBox(
                             width: 200.0,
                             height: 200.0,
                           ),
@@ -452,6 +452,7 @@ class _TextStyleProxy implements TextStyle {
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
   @override Locale get locale => _delegate.locale;
+  @override ui.Paint get foreground => _delegate.foreground;
   @override ui.Paint get background => _delegate.background;
   @override bool get inherit => _delegate.inherit;
   @override double get letterSpacing => _delegate.letterSpacing;
@@ -479,7 +480,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, Locale locale, ui.Paint foreground, ui.Paint background, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw new UnimplementedError();
   }
 

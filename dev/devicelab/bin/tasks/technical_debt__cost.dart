@@ -15,10 +15,12 @@ const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
 const double pythonCost = 3001.0; // six average SWE days, in dollars
 const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
+const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2003.0; // same as ignoring analyzer warning
 
 final RegExp todoPattern = new RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = new RegExp(r'// *ignore:');
+final RegExp ignoreForFilePattern = new RegExp(r'// *ignore_for_file:');
 final RegExp asDynamicPattern = new RegExp(r'as dynamic');
 
 Future<double> findCostsForFile(File file) async {
@@ -35,6 +37,8 @@ Future<double> findCostsForFile(File file) async {
       total += todoCost;
     if (line.contains(ignorePattern))
       total += ignoreCost;
+    if (line.contains(ignoreForFilePattern))
+      total += ignoreForFileCost;
     if (line.contains(asDynamicPattern))
       total += asDynamicCost;
     if (isTest && line.contains('skip:'))
@@ -43,24 +47,46 @@ Future<double> findCostsForFile(File file) async {
   return total;
 }
 
-const String _kBenchmarkKey = 'technical_debt_in_dollars';
+Future<double> findCostsForRepo() async {
+  final Process git = await startProcess(
+    'git',
+    <String>['ls-files', '--full-name', flutterDirectory.path],
+    workingDirectory: flutterDirectory.path,
+  );
+  double total = 0.0;
+  await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
+    total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
+  final int gitExitCode = await git.exitCode;
+  if (gitExitCode != 0)
+    throw new Exception('git exit with unexpected error code $gitExitCode');
+  return total;
+}
+
+Future<int> countDependencies() async {
+  final List<String> lines = (await evalFlutter(
+    'update-packages',
+    options: <String>['--transitive-closure'],
+  )).split('\n');
+  final int count = lines.where((String line) => line.contains('->')).length;
+  if (count < 2) // we'll always have flutter and flutter_test, at least...
+    throw new Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+  return count;
+}
+
+const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
+const String _kNumberOfDependenciesKey = 'dependencies_count';
 
 Future<Null> main() async {
   await task(() async {
-    final Process git = await startProcess(
-      'git',
-      <String>['ls-files', '--full-name', flutterDirectory.path],
-      workingDirectory: flutterDirectory.path,
-    );
-    double total = 0.0;
-    await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
-      total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
-    final int gitExitCode = await git.exitCode;
-    if (gitExitCode != 0)
-      throw new Exception('git exit with unexpected error code $gitExitCode');
     return new TaskResult.success(
-      <String, dynamic>{_kBenchmarkKey: total},
-      benchmarkScoreKeys: <String>[_kBenchmarkKey],
+      <String, dynamic>{
+        _kCostBenchmarkKey: await findCostsForRepo(),
+        _kNumberOfDependenciesKey: await countDependencies(),
+      },
+      benchmarkScoreKeys: <String>[
+        _kCostBenchmarkKey,
+        _kNumberOfDependenciesKey,
+      ],
     );
   });
 }

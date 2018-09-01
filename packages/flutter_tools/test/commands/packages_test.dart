@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -36,18 +35,18 @@ class AlwaysFalseBotDetector implements BotDetector {
 void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
-    Directory temp;
+    Directory tempDir;
 
     setUp(() {
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     Future<String> createProjectWithPlugin(String plugin) async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
@@ -104,23 +103,23 @@ void main() {
       );
     }
 
-    const List<String> pubOutput = const <String>[
+    const List<String> pubOutput = <String>[
       '.packages',
       'pubspec.lock',
     ];
 
-    const List<String> pluginRegistrants = const <String>[
+    const List<String> pluginRegistrants = <String>[
       'ios/Runner/GeneratedPluginRegistrant.h',
       'ios/Runner/GeneratedPluginRegistrant.m',
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const List<String> pluginWitnesses = const <String>[
+    const List<String> pluginWitnesses = <String>[
       '.flutter-plugins',
       'ios/Podfile',
     ];
 
-    const Map<String, String> pluginContentWitnesses = const <String, String>{
+    const Map<String, String> pluginContentWitnesses = <String, String>{
       'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
@@ -169,7 +168,7 @@ void main() {
     }
 
     testUsingContext('get fetches packages', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -179,7 +178,7 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get --offline fetches packages', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get', args: <String>['--offline']);
@@ -189,7 +188,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {
-      final String projectPath = await createProject(temp);
+      final String projectPath = await createProject(tempDir);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'upgrade');
@@ -211,7 +210,7 @@ void main() {
     }, timeout: allowForRemotePubInvocation, skip: true);
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
-        temp,
+        tempDir,
         arguments: <String>['-t', 'plugin', '--no-pub'],
       );
       final String exampleProjectPath = fs.path.join(projectPath, 'example');

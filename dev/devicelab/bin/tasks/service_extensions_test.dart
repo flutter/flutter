@@ -33,12 +33,14 @@ void main() {
           .transform(const LineSplitter())
           .listen((String line) {
         print('run:stdout: $line');
-        if (lineContainsServicePort(line)) {
+        if (vmServicePort == null) {
           vmServicePort = parseServicePort(line);
-          print('service protocol connection available at port $vmServicePort');
-          print('run: ready!');
-          ready.complete();
-          ok ??= true;
+          if (vmServicePort != null) {
+            print('service protocol connection available at port $vmServicePort');
+            print('run: ready!');
+            ready.complete();
+            ok ??= true;
+          }
         }
       });
       run.stderr

@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_data.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
@@ -21,7 +22,8 @@ void main() {
       new Container(
         key: key,
         child: new Image(
-          image: imageProvider1
+          image: imageProvider1,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -42,7 +44,8 @@ void main() {
       new Container(
         key: key,
         child: new Image(
-          image: imageProvider2
+          image: imageProvider2,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -61,7 +64,8 @@ void main() {
         key: key,
         child: new Image(
           gaplessPlayback: true,
-          image: imageProvider1
+          image: imageProvider1,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -83,7 +87,8 @@ void main() {
         key: key,
         child: new Image(
           gaplessPlayback: true,
-          image: imageProvider2
+          image: imageProvider2,
+          excludeFromSemantics: true,
         )
       ),
       null,
@@ -100,7 +105,8 @@ void main() {
     await tester.pumpWidget(
       new Image(
         key: key,
-        image: imageProvider1
+        image: imageProvider1,
+        excludeFromSemantics: true,
       ),
       null,
       EnginePhase.layout
@@ -119,7 +125,8 @@ void main() {
     await tester.pumpWidget(
       new Image(
         key: key,
-        image: imageProvider2
+        image: imageProvider2,
+        excludeFromSemantics: true,
       ),
       null,
       EnginePhase.layout
@@ -136,7 +143,8 @@ void main() {
       new Image(
         key: key,
         gaplessPlayback: true,
-        image: imageProvider1
+        image: imageProvider1,
+        excludeFromSemantics: true,
       ),
       null,
       EnginePhase.layout
@@ -156,6 +164,7 @@ void main() {
       new Image(
         key: key,
         gaplessPlayback: true,
+        excludeFromSemantics: true,
         image: imageProvider2
       ),
       null,
@@ -188,6 +197,7 @@ void main() {
             padding: EdgeInsets.zero,
           ),
           child: new Image(
+            excludeFromSemantics: true,
             key: imageKey,
             image: imageProvider
           ),
@@ -214,6 +224,7 @@ void main() {
             padding: EdgeInsets.zero,
           ),
           child: new Image(
+            excludeFromSemantics: true,
             key: imageKey,
             image: imageProvider
           ),
@@ -243,6 +254,7 @@ void main() {
               padding: EdgeInsets.zero,
             ),
             child: new Image(
+              excludeFromSemantics: true,
               key: imageKey,
               image: imageProvider
             )
@@ -280,6 +292,7 @@ void main() {
               padding: EdgeInsets.zero,
             ),
             child: new Image(
+              excludeFromSemantics: true,
               key: imageKey,
               image: imageProvider
             )
@@ -293,7 +306,7 @@ void main() {
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
     final TestImageProvider imageProvider = new TestImageProvider();
-    await tester.pumpWidget(new Image(image: imageProvider));
+    await tester.pumpWidget(new Image(image: imageProvider, excludeFromSemantics: true));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null)'));
     imageProvider.complete();
@@ -303,13 +316,279 @@ void main() {
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 0 listeners), pixels: [100×100] @ 1.0x)'));
   });
 
+  testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+    // If there is an error listener, there should be no FlutterError reported.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Stream completer errors can be listened to by attaching after resolving', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    dynamic reportedException;
+    StackTrace reportedStackTrace;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+    FlutterError.onError = (FlutterErrorDetails flutterError) {
+      reportedException = flutterError.exception;
+      reportedStackTrace = flutterError.stack;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    final ImageStream streamUnderTest = imageProvider.resolve(configuration);
+
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    // Since there's no listeners attached yet, report error up via
+    // FlutterError.
+    expect(reportedException, testException);
+    expect(reportedStackTrace, testStack);
+
+    streamUnderTest.addListener(listener, onError: errorListener);
+
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+  });
+
+  testWidgets('Duplicate listener registration does not affect error listeners', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Add the exact same listener a second time without the errorListener.
+    imageProvider._streamCompleter.addListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+    // If there is an error listener, there should be no FlutterError reported.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Duplicate error listeners are all called', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    ImageInfo capturedImage;
+    int errorListenerCalled = 0;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+      errorListenerCalled++;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Add the exact same errorListener a second time.
+    imageProvider._streamCompleter.addListener(null, onError: errorListener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+    expect(errorListenerCalled, 2);
+    // If there is an error listener, there should be no FlutterError reported.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Error listeners are removed along with listeners', (WidgetTester tester) async {
+    bool errorListenerCalled = false;
+    dynamic reportedException;
+    StackTrace reportedStackTrace;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      errorListenerCalled = true;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+    FlutterError.onError = (FlutterErrorDetails flutterError) {
+      reportedException = flutterError.exception;
+      reportedStackTrace = flutterError.stack;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Now remove the listener the error listener is attached to.
+    // Don't explicitly remove the error listener.
+    imageProvider._streamCompleter.removeListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(errorListenerCalled, false);
+    // Since the error listener is removed, bubble up to FlutterError.
+    expect(reportedException, testException);
+    expect(reportedStackTrace, testStack);
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+  });
+
+  testWidgets('Removing listener removes one listener and error listener', (WidgetTester tester) async {
+    int errorListenerCalled = 0;
+    ImageInfo capturedImage;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      errorListenerCalled++;
+    };
+    final ImageListener listener = (ImageInfo info, bool synchronous) {
+      capturedImage = info;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Duplicates the same set of listener and errorListener.
+    imageProvider._streamCompleter.addListener(listener, onError: errorListener);
+    // Now remove one entry of the specified listener and associated error listener.
+    // Don't explicitly remove the error listener.
+    imageProvider._streamCompleter.removeListener(listener);
+    ImageConfiguration configuration;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          configuration = createLocalImageConfiguration(context);
+          return new Container();
+        },
+      ),
+    );
+    imageProvider.resolve(configuration);
+
+    imageProvider.fail(testException, testStack);
+
+    expect(tester.binding.microtaskCount, 1);
+    await tester.idle(); // Let the failed completer's future hit the stream completer.
+    expect(tester.binding.microtaskCount, 0);
+
+    expect(errorListenerCalled, 1);
+    expect(capturedImage, isNull); // The image stream listeners should never be called.
+  });
+
   testWidgets('Image.memory control test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage)));
+    await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage), excludeFromSemantics: true,));
   });
 
   testWidgets('Image color and colorBlend parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Image(
+        excludeFromSemantics: true,
         image: new TestImageProvider(),
         color: const Color(0xFF00FF00),
         colorBlendMode: BlendMode.clear
@@ -342,9 +621,40 @@ void main() {
     expect(isSync, isTrue);
   });
 
+  testWidgets('Precache completes with onError on error', (WidgetTester tester) async {
+    dynamic capturedException;
+    StackTrace capturedStackTrace;
+    final ImageErrorListener errorListener = (dynamic exception, StackTrace stackTrace) {
+      capturedException = exception;
+      capturedStackTrace = stackTrace;
+    };
+
+    final Exception testException = new Exception('cannot resolve host');
+    final StackTrace testStack = StackTrace.current;
+    final TestImageProvider imageProvider = new TestImageProvider();
+    Future<Null> precache;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          precache = precacheImage(imageProvider, context, onError: errorListener);
+          return new Container();
+        }
+      )
+    );
+    imageProvider.fail(testException, testStack);
+    await precache;
+
+    // The image stream error handler should have the original exception.
+    expect(capturedException, testException);
+    expect(capturedStackTrace, testStack);
+    // If there is an error listener, there should be no FlutterError reported.
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('TickerMode controls stream registration', (WidgetTester tester) async {
     final TestImageStreamCompleter imageStreamCompleter = new TestImageStreamCompleter();
     final Image image = new Image(
+      excludeFromSemantics: true,
       image: new TestImageProvider(streamCompleter: imageStreamCompleter),
     );
     await tester.pumpWidget(
@@ -373,6 +683,7 @@ void main() {
         new Container(
             key: key,
             child: new Image(
+                excludeFromSemantics: true,
                 image: imageProvider1
             )
         ),
@@ -396,7 +707,8 @@ void main() {
         new Container(
             key: key,
             child: new Image(
-                image: imageProvider2
+              excludeFromSemantics: true,
+              image: imageProvider2
             )
         ),
         null,
@@ -409,8 +721,8 @@ void main() {
   });
 
   testWidgets('Image State can be reconfigured to use another image', (WidgetTester tester) async {
-    final Image image1 = new Image(image: new TestImageProvider()..complete(), width: 10.0);
-    final Image image2 = new Image(image: new TestImageProvider()..complete(), width: 20.0);
+    final Image image1 = new Image(image: new TestImageProvider()..complete(), width: 10.0, excludeFromSemantics: true);
+    final Image image2 = new Image(image: new TestImageProvider()..complete(), width: 20.0, excludeFromSemantics: true);
 
     final Column column = new Column(children: <Widget>[image1, image2]);
     await tester.pumpWidget(column, null, EnginePhase.layout);
@@ -424,6 +736,58 @@ void main() {
     expect(renderObjects[0].width, 20.0);
     expect(renderObjects[1].image, isNotNull);
     expect(renderObjects[1].width, 10.0);
+  });
+
+  testWidgets('Image contributes semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Row(
+          children: <Widget>[
+            new Image(
+              image: new TestImageProvider(),
+              width: 100.0,
+              height: 100.0,
+              semanticLabel: 'test',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          label: 'test',
+          rect: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0),
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[SemanticsFlag.isImage],
+        )
+      ]
+    ), ignoreTransform: true));
+    semantics.dispose();
+  });
+
+  testWidgets('Image can exclude semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Image(
+          image: new TestImageProvider(),
+          width: 100.0,
+          height: 100.0,
+          excludeFromSemantics: true,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[]
+    )));
+    semantics.dispose();
   });
 }
 
@@ -455,16 +819,20 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
     _completer.complete(new ImageInfo(image: new TestImage()));
   }
 
+  void fail(dynamic exception, StackTrace stackTrace) {
+    _completer.completeError(exception, stackTrace);
+  }
+
   @override
   String toString() => '${describeIdentity(this)}()';
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  final List<ImageListener> listeners = <ImageListener> [];
+  final Map<ImageListener, ImageErrorListener> listeners = <ImageListener, ImageErrorListener> {};
 
   @override
-  void addListener(ImageListener listener) {
-    listeners.add(listener);
+  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+    listeners[listener] = onError;
   }
 
   @override

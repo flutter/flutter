@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:flutter_tools/src/commands/fuchsia_reload.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -38,8 +38,8 @@ class MockProcessManager extends Mock implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    Encoding stdoutEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-    Encoding stderrEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
+    Encoding stdoutEncoding = systemEncoding,
+    Encoding stderrEncoding = systemEncoding,
   }) async {
     return new ProcessResult(0, 0, '1234\n5678\n5', '');
   }

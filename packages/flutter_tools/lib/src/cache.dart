@@ -29,7 +29,7 @@ class Cache {
     }
   }
 
-  static const List<String> _hostsBlockedInChina = const <String> [
+  static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
   ];
 
@@ -74,7 +74,7 @@ class Cache {
     if (!_lockEnabled)
       return null;
     assert(_lock == null);
-    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.WRITE); // ignore: deprecated_member_use
+    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write);
     bool locked = false;
     bool printed = false;
     while (!locked) {
@@ -167,6 +167,13 @@ class Cache {
 
   File getStampFileFor(String artifactName) {
     return fs.file(fs.path.join(getRoot().path, '$artifactName.stamp'));
+  }
+
+  /// Returns `true` if either [entity] is older than the tools stamp or if
+  /// [entity] doesn't exist.
+  bool isOlderThanToolsStamp(FileSystemEntity entity) {
+    final File flutterToolsStamp = getStampFileFor('flutter_tools');
+    return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
   bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
@@ -282,11 +289,15 @@ abstract class CachedArtifact {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
         final Status status = logger.startProgress(message, expectSlowOperation: true);
-        await _downloadFile(url, tempFile).then<Null>((_) {
+        try {
+          await _downloadFile(url, tempFile);
           status.stop();
-        }).whenComplete(status.cancel);
+        } catch (exception) {
+          status.cancel();
+          rethrow;
+        }
       } else {
-        logger.printStatus('$message(cached)');
+        logger.printTrace('$message (cached)');
       }
       _ensureExists(location);
       extractor(tempFile, location);
@@ -386,6 +397,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
     <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
     <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+    <String>['android-arm-dynamic-profile/linux-x64', 'android-arm-dynamic-profile/linux-x64.zip'],
+    <String>['android-arm-dynamic-release/linux-x64', 'android-arm-dynamic-release/linux-x64.zip'],
+    <String>['android-arm64-dynamic-profile/linux-x64', 'android-arm64-dynamic-profile/linux-x64.zip'],
+    <String>['android-arm64-dynamic-release/linux-x64', 'android-arm64-dynamic-release/linux-x64.zip'],
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
@@ -405,6 +420,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm64', 'android-arm64/artifacts.zip'],
     <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
     <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
+    <String>['android-arm-dynamic-profile', 'android-arm-dynamic-profile/artifacts.zip'],
+    <String>['android-arm-dynamic-release', 'android-arm-dynamic-release/artifacts.zip'],
+    <String>['android-arm64-dynamic-profile', 'android-arm64-dynamic-profile/artifacts.zip'],
+    <String>['android-arm64-dynamic-release', 'android-arm64-dynamic-release/artifacts.zip'],
   ];
 
   List<List<String>> get _iosBinaryDirs => <List<String>>[

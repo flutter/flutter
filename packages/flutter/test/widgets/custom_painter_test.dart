@@ -327,6 +327,7 @@ void _defineTests() {
           key: const ValueKey<int>(1),
           rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
           properties: new SemanticsProperties(
+            onDismiss: () => performedActions.add(SemanticsAction.dismiss),
             onTap: () => performedActions.add(SemanticsAction.tap),
             onLongPress: () => performedActions.add(SemanticsAction.longPress),
             onScrollLeft: () => performedActions.add(SemanticsAction.scrollLeft),
@@ -347,9 +348,11 @@ void _defineTests() {
         ),
       ),
     ));
-
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
-      ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
+      ..remove(SemanticsAction.moveCursorForwardByWord)
+      ..remove(SemanticsAction.moveCursorBackwardByWord)
+      ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
+      ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
     const int expectedId = 2;
     final TestSemantics expectedSemantics = new TestSemantics.root(
@@ -396,7 +399,7 @@ void _defineTests() {
 
   testWidgets('Supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-
+    // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(new CustomPaint(
       painter: new _PainterWithSemantics(
         semantics: new CustomPainterSemantics(
@@ -415,12 +418,19 @@ void _defineTests() {
             obscured: true,
             scopesRoute: true,
             namesRoute: true,
+            image: true,
+            liveRegion: true,
           ),
         ),
       ),
     ));
-
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.hasToggledState)
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isToggled);
+    TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
             id: 1,
@@ -428,7 +438,7 @@ void _defineTests() {
               new TestSemantics.rootChild(
                 id: 2,
                 rect: TestSemantics.fullScreen,
-                flags: SemanticsFlag.values.values.toList(),
+                flags: flags,
               ),
             ]
         ),
@@ -436,6 +446,52 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
 
+    await tester.pumpWidget(new CustomPaint(
+      painter: new _PainterWithSemantics(
+        semantics: new CustomPainterSemantics(
+          key: const ValueKey<int>(1),
+          rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+          properties: const SemanticsProperties(
+            enabled: true,
+            toggled: true,
+            selected: true,
+            hidden: true,
+            button: true,
+            textField: true,
+            focused: true,
+            inMutuallyExclusiveGroup: true,
+            header: true,
+            obscured: true,
+            scopesRoute: true,
+            namesRoute: true,
+            image: true,
+            liveRegion: true,
+          ),
+        ),
+      ),
+    ));
+    flags = SemanticsFlag.values.values.toList();
+    flags
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.hasCheckedState)
+      ..remove(SemanticsFlag.hasImplicitScrolling)
+      ..remove(SemanticsFlag.isChecked);
+
+    expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+            id: 1,
+            children: <TestSemantics>[
+              new TestSemantics.rootChild(
+                id: 2,
+                rect: TestSemantics.fullScreen,
+                flags: flags,
+              ),
+            ]
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
   });
 

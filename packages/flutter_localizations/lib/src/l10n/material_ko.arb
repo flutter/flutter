@@ -39,5 +39,16 @@
   "popupMenuLabel": "팝업 메뉴",
   "dialogLabel": "대화상자",
   "alertDialogLabel": "경보",
-  "searchFieldLabel": "수색"
+  "searchFieldLabel": "수색",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

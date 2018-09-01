@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'checkbox.dart';
 import 'list_tile.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
 ///
@@ -173,6 +174,7 @@ class CheckboxListTile extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
     switch (controlAffinity) {

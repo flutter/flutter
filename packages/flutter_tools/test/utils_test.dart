@@ -6,7 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 void main() {
   group('SettingsFile', () {
@@ -119,7 +120,7 @@ baz=qux
   });
 
   group('Poller', () {
-    const Duration kShortDelay = const Duration(milliseconds: 100);
+    const Duration kShortDelay = Duration(milliseconds: 100);
 
     Poller poller;
 
@@ -129,7 +130,7 @@ baz=qux
 
     test('fires at start', () async {
       bool called = false;
-      poller = new Poller(() {
+      poller = new Poller(() async {
         called = true;
       }, const Duration(seconds: 1));
       expect(called, false);
@@ -140,7 +141,7 @@ baz=qux
     test('runs periodically', () async {
       // Ensure we get the first (no-delay) callback, and one of the periodic callbacks.
       int callCount = 0;
-      poller = new Poller(() {
+      poller = new Poller(() async {
         callCount++;
       }, new Duration(milliseconds: kShortDelay.inMilliseconds ~/ 2));
       expect(callCount, 0);
@@ -163,6 +164,19 @@ baz=qux
       }, kShortDelay);
       final Duration duration = await completer.future;
       expect(duration, greaterThanOrEqualTo(new Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
+    });
+  });
+
+  group('Misc', () {
+    test('snakeCase', () async {
+      expect(snakeCase('abc'), equals('abc'));
+      expect(snakeCase('abC'), equals('ab_c'));
+      expect(snakeCase('aBc'), equals('a_bc'));
+      expect(snakeCase('aBC'), equals('a_b_c'));
+      expect(snakeCase('Abc'), equals('abc'));
+      expect(snakeCase('AbC'), equals('ab_c'));
+      expect(snakeCase('ABc'), equals('a_bc'));
+      expect(snakeCase('ABC'), equals('a_b_c'));
     });
   });
 }

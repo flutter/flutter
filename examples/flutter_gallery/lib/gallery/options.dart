@@ -84,7 +84,7 @@ class GalleryOptions {
 }
 
 const double _kItemHeight = 48.0;
-const EdgeInsetsDirectional _kItemPadding = const EdgeInsetsDirectional.only(start: 56.0);
+const EdgeInsetsDirectional _kItemPadding = EdgeInsetsDirectional.only(start: 56.0);
 
 class _OptionsItem extends StatelessWidget {
   const _OptionsItem({ Key key, this.child }) : super(key: key);
@@ -115,11 +115,13 @@ class _OptionsItem extends StatelessWidget {
 }
 
 class _BooleanItem extends StatelessWidget {
-  const _BooleanItem(this.title, this.value, this.onChanged);
+  const _BooleanItem(this.title, this.value, this.onChanged, { this.switchKey });
 
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
+  // [switchKey] is used for accessing the switch from driver tests.
+  final Key switchKey;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +131,7 @@ class _BooleanItem extends StatelessWidget {
         children: <Widget>[
           new Expanded(child: new Text(title)),
           new Switch(
+            key: switchKey,
             value: value,
             onChanged: onChanged,
             activeColor: const Color(0xFF39CEFD),
@@ -217,6 +220,7 @@ class _ThemeItem extends StatelessWidget {
           ),
         );
       },
+      switchKey: const Key('dark_theme'),
     );
   }
 }
@@ -285,6 +289,7 @@ class _TextDirectionItem extends StatelessWidget {
           ),
         );
       },
+      switchKey: const Key('text_direction'),
     );
   }
 }
@@ -307,6 +312,7 @@ class _TimeDilationItem extends StatelessWidget {
           ),
         );
       },
+      switchKey: const Key('slow_motion'),
     );
   }
 }

@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -24,7 +23,6 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
 import 'common.dart';
 
@@ -50,13 +48,16 @@ void testUsingContext(String description, dynamic testMethod(), {
   // leak a sticky $HOME/.flutter_settings behind!
   Directory configDir;
   tearDown(() {
-    configDir?.deleteSync(recursive: true);
-    configDir = null;
+    if (configDir != null) {
+      tryToDelete(configDir);
+      configDir = null;
+    }
   });
   Config buildConfig(FileSystem fs) {
-    configDir = fs.systemTempDirectory.createTempSync('config-dir');
+    configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     final File settingsFile = fs.file(
-        fs.path.join(configDir.path, '.flutter_settings'));
+      fs.path.join(configDir.path, '.flutter_settings')
+    );
     return new Config(settingsFile);
   }
 
@@ -77,7 +78,6 @@ void testUsingContext(String description, dynamic testMethod(), {
           },
           Logger: () => new BufferLogger(),
           OperatingSystemUtils: () => new MockOperatingSystemUtils(),
-          PortScanner: () => new MockPortScanner(),
           SimControl: () => new MockSimControl(),
           Usage: () => new MockUsage(),
           XcodeProjectInterpreter: () => new MockXcodeProjectInterpreter(),
@@ -115,7 +115,8 @@ void testUsingContext(String description, dynamic testMethod(), {
         },
       );
     });
-  }, timeout: timeout, testOn: testOn, skip: skip);
+  }, timeout: timeout != null ? timeout : const Timeout(Duration(seconds: 60)),
+      testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -125,16 +126,6 @@ void _printBufferedErrors(AppContext testContext) {
       print(bufferLogger.errorText);
     bufferLogger.clear();
   }
-}
-
-class MockPortScanner extends PortScanner {
-  static int _nextAvailablePort = 12345;
-
-  @override
-  Future<bool> isPortAvailable(int port) async => true;
-
-  @override
-  Future<int> findAvailablePort() async => _nextAvailablePort++;
 }
 
 class MockDeviceManager implements DeviceManager {

@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -67,6 +66,7 @@ void main() {
 
   group('devfs local', () {
     final MockDevFSOperations devFSOperations = new MockDevFSOperations();
+    final MockResidentCompiler residentCompiler = new MockResidentCompiler();
 
     setUpAll(() {
       tempDir = _newTempDir(fs);
@@ -89,22 +89,17 @@ void main() {
       devFSOperations.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final int bytes = await devFS.update();
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
-        'writeFile test .packages',
-        'writeFile test lib/foo.txt',
-        'writeFile test packages/somepkg/somefile.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final List<String> packageSpecOnDevice = LineSplitter.split(utf8.decode(
-          await devFSOperations.devicePathToContent[fs.path.toUri('.packages')].contentsAsBytes()
-      )).toList();
-      expect(packageSpecOnDevice,
-          unorderedEquals(<String>['my_project:lib/', 'somepkg:packages/somepkg/'])
-      );
-
-      expect(bytes, 48);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -113,48 +108,57 @@ void main() {
       final File file = fs.file(fs.path.join(basePath, filePath2));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
-      final int bytes = await devFS.update();
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
-        'writeFile test foo/bar.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 7);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-    });
-
-    testUsingContext('add new file to local file system and preserve unusual file name casing', () async {
-      final String filePathWithUnusualCasing = fs.path.join('FooBar', 'TEST.txt');
-      final File file = fs.file(fs.path.join(basePath, filePathWithUnusualCasing));
-      await file.parent.create(recursive: true);
-      file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
-      final int bytes = await devFS.update();
-      devFSOperations.expectMessages(<String>[
-        'writeFile test FooBar/TEST.txt',
-      ]);
-      expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 7);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('modify existing file on local file system', () async {
-      await devFS.update();
+      int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
+      devFSOperations.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 22);
+
       final File file = fs.file(fs.path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, new DateTime.now(), -5);
-      int bytes = await devFS.update();
-      devFSOperations.expectMessages(<String>[]);
-      expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 0);
-
-      await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
-      bytes = await devFS.update();
+      bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
-        'writeFile test lib/foo.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 6);
+      expect(bytes, 22);
+
+      await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
+      bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
+      devFSOperations.expectMessages(<String>[
+        'writeFile test lib/foo.txt.dill',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -162,25 +166,33 @@ void main() {
     testUsingContext('delete a file from the local file system', () async {
       final File file = fs.file(fs.path.join(basePath, filePath));
       await file.delete();
-      final int bytes = await devFS.update();
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
         'deleteFile test lib/foo.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 0);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add new package', () async {
       await _createPackage(fs, 'newpkg', 'anotherfile.txt');
-      final int bytes = await devFS.update();
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
-        'writeFile test .packages',
-        'writeFile test packages/newpkg/anotherfile.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 69);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -197,89 +209,126 @@ void main() {
         }
         fileFilter.addAll(fs.directory(pkgUri)
             .listSync(recursive: true)
-            .where((FileSystemEntity file) => file is File)
-            .map((FileSystemEntity file) => canonicalizePath(file.path))
+            .whereType<File>()
+            .map<String>((File file) => canonicalizePath(file.path))
             .toList());
       }
-      final int bytes = await devFS.update(fileFilter: fileFilter);
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        fileFilter: fileFilter,
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
-        'writeFile test .packages',
-        'writeFile test packages/doubleslashpkg/somefile.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 109);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add an asset bundle', () async {
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
-      final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        bundle: assetBundle,
+        bundleDirty: true,
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 3);
+      expect(bytes, 25);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add a file to the asset bundle - bundleDirty', () async {
       assetBundle.entries['b.txt'] = new DevFSStringContent('abcd');
-      final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        bundle: assetBundle,
+        bundleDirty: true,
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       // Expect entire asset bundle written because bundleDirty is true
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
         'writeFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 7);
+      expect(bytes, 29);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('add a file to the asset bundle', () async {
       assetBundle.entries['c.txt'] = new DevFSStringContent('12');
-      final int bytes = await devFS.update(bundle: assetBundle);
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        bundle: assetBundle,
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
         'writeFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'c.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 2);
+      expect(bytes, 24);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('delete a file from the asset bundle', () async {
       assetBundle.entries.remove('c.txt');
-      final int bytes = await devFS.update(bundle: assetBundle);
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        bundle: assetBundle,
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
         'deleteFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['c.txt']));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 0);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('delete all files from the asset bundle', () async {
       assetBundle.entries.clear();
-      final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        bundle: assetBundle,
+        bundleDirty: true,
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       devFSOperations.expectMessages(<String>[
         'deleteFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
         'deleteFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt'
       ]));
       devFS.assetPathsToEvict.clear();
-      expect(bytes, 0);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -295,6 +344,7 @@ void main() {
 
   group('devfs remote', () {
     MockVMService vmService;
+    final MockResidentCompiler residentCompiler = new MockResidentCompiler();
 
     setUpAll(() async {
       tempDir = _newTempDir(fs);
@@ -321,14 +371,16 @@ void main() {
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final int bytes = await devFS.update();
+      final int bytes = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+      );
       vmService.expectMessages(<String>[
-        'writeFile test .packages',
-        'writeFile test lib/foo.txt',
-        'writeFile test packages/somepkg/somefile.txt',
+        'writeFile test lib/foo.txt.dill',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 48);
+      expect(bytes, 22);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -388,11 +440,11 @@ class MockVMService extends BasicMock implements VMService {
 
   Future<Null> setUp() async {
     try {
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0); // ignore: deprecated_member_use
+      _server = await HttpServer.bind(InternetAddress.loopbackIPv6, 0);
       _httpAddress = Uri.parse('http://[::1]:${_server.port}');
     } on SocketException {
       // Fall back to IPv4 if the host doesn't support binding to IPv6 localhost
-      _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0); // ignore: deprecated_member_use
+      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
     }
     _server.listen((HttpRequest request) {
@@ -460,15 +512,14 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('devfs${_tempDirs.length}');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.isNotEmpty) {
-    _tempDirs.removeLast().deleteSync(recursive: true);
-  }
+  while (_tempDirs.isNotEmpty)
+    tryToDelete(_tempDirs.removeLast());
 }
 
 Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -36,7 +36,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minWidth: double.nan, maxWidth: double.nan, minHeight: 2.0, maxHeight: double.nan);
+      const BoxConstraints constraints = BoxConstraints(minWidth: double.nan, maxWidth: double.nan, minHeight: 2.0, maxHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -49,7 +49,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minHeight: double.nan);
+      const BoxConstraints constraints = BoxConstraints(minHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -62,7 +62,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minHeight: double.nan, maxWidth: 0.0/0.0);
+      const BoxConstraints constraints = BoxConstraints(minHeight: double.nan, maxWidth: 0.0/0.0);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';

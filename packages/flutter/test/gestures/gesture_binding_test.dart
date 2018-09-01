@@ -6,7 +6,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
+
+import '../flutter_test_alternative.dart';
 
 typedef void HandleEventCallback(PointerEvent event);
 
@@ -32,10 +33,10 @@ void main() {
   setUp(ensureTestGestureBinding);
 
   test('Pointer tap events', () {
-    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(change: ui.PointerChange.down),
-        const ui.PointerData(change: ui.PointerChange.up),
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
@@ -49,11 +50,11 @@ void main() {
   });
 
   test('Pointer move events', () {
-    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(change: ui.PointerChange.down),
-        const ui.PointerData(change: ui.PointerChange.move),
-        const ui.PointerData(change: ui.PointerChange.up),
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(change: ui.PointerChange.move),
+        ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
@@ -95,10 +96,10 @@ void main() {
   });
 
   test('Pointer cancel events', () {
-    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(change: ui.PointerChange.down),
-        const ui.PointerData(change: ui.PointerChange.cancel),
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(change: ui.PointerChange.cancel),
       ]
     );
 
@@ -112,10 +113,10 @@ void main() {
   });
 
   test('Can cancel pointers', () {
-    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(change: ui.PointerChange.down),
-        const ui.PointerData(change: ui.PointerChange.up),
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.down),
+        ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
@@ -133,12 +134,12 @@ void main() {
   });
 
   test('Can expand add and hover pointers', () {
-    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(change: ui.PointerChange.add, device: 24),
-        const ui.PointerData(change: ui.PointerChange.hover, device: 24),
-        const ui.PointerData(change: ui.PointerChange.remove, device: 24),
-        const ui.PointerData(change: ui.PointerChange.hover, device: 24),
+    const ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, device: 24),
+        ui.PointerData(change: ui.PointerChange.hover, device: 24),
+        ui.PointerData(change: ui.PointerChange.remove, device: 24),
+        ui.PointerData(change: ui.PointerChange.hover, device: 24),
       ]
     );
 

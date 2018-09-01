@@ -17,8 +17,8 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
@@ -164,7 +164,6 @@ void main() {
       expect(genSnapshot.snapshotType.platform, isNull);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, 'output.snapshot.d');
       expect(genSnapshot.additionalArgs, <String>[
         '--snapshot_kind=script',
         '--script_snapshot=output.snapshot',
@@ -381,7 +380,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -408,6 +407,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
@@ -427,7 +427,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -454,6 +454,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -474,7 +475,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -500,6 +501,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -525,7 +527,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -551,6 +553,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -571,7 +574,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -598,6 +601,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-sim-use-hardfp',
@@ -617,7 +621,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -644,6 +648,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-assembly',
         '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         'main.dill',
@@ -683,7 +688,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -709,6 +714,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -734,7 +740,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''));
+      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
 
@@ -760,6 +766,7 @@ void main() {
         '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -805,6 +812,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -828,6 +836,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -838,6 +847,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--enable_asserts',
         '--snapshot_kind=core-jit',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
@@ -871,6 +881,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -881,6 +892,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--enable_asserts',
         '--snapshot_kind=core-jit',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
@@ -900,6 +912,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -923,6 +936,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -933,6 +947,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=core-jit',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -965,6 +980,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -975,6 +991,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=core-jit',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -993,6 +1010,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -1016,6 +1034,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -1026,6 +1045,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=core-jit',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
@@ -1058,6 +1078,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        compilationTraceFilePath: kTrace,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -1068,6 +1089,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--reify-generic-functions',
         '--strong',
+        '--sync-async',
         '--snapshot_kind=core-jit',
         '--vm_snapshot_data=build/foo/vm_snapshot_data',
         '--isolate_snapshot_data=build/foo/isolate_snapshot_data',

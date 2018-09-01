@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('list body and paragraph intrinsics', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(
-        style: const TextStyle(height: 1.0),
+        style: TextStyle(height: 1.0),
         text: 'Hello World',
       ),
       textDirection: TextDirection.ltr,

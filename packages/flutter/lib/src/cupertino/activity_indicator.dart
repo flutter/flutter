@@ -92,7 +92,7 @@ const double _kTwoPI = math.pi * 2.0;
 const int _kTickCount = 12;
 const int _kHalfTickCount = _kTickCount ~/ 2;
 const Color _kTickColor = CupertinoColors.lightBackgroundGray;
-const Color _kActiveTickColor = const Color(0xFF9D9D9D);
+const Color _kActiveTickColor = Color(0xFF9D9D9D);
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({

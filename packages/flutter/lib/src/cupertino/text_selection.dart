@@ -17,19 +17,19 @@ const double _kHandlesPadding = 18.0;
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 36.0;
 
-const Color _kToolbarBackgroundColor = const Color(0xFF2E2E2E);
-const Color _kToolbarDividerColor = const Color(0xFFB9B9B9);
-const Color _kHandlesColor = const Color(0xFF146DDE);
+const Color _kToolbarBackgroundColor = Color(0xFF2E2E2E);
+const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
+const Color _kHandlesColor = Color(0xFF146DDE);
 
 // This offset is used to determine the center of the selection during a drag.
 // It's slightly below the center of the text so the finger isn't entirely
 // covering the text being selected.
-const Size _kSelectionOffset = const Size(20.0, 30.0);
-const Size _kToolbarTriangleSize = const Size(18.0, 9.0);
-const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
-const BorderRadius _kToolbarBorderRadius = const BorderRadius.all(const Radius.circular(7.5));
+const Size _kSelectionOffset = Size(20.0, 30.0);
+const Size _kToolbarTriangleSize = Size(18.0, 9.0);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
+const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
 
-const TextStyle _kToolbarButtonFontStyle = const TextStyle(
+const TextStyle _kToolbarButtonFontStyle = TextStyle(
   fontSize: 14.0,
   letterSpacing: -0.11,
   fontWeight: FontWeight.w300,
@@ -115,9 +115,9 @@ class _TextSelectionToolbar extends StatelessWidget {
             child: new Row(mainAxisSize: MainAxisSize.min, children: items),
           ),
         ),
-        // TODO(https://github.com/flutter/flutter/issues/11274):
-        // Position the triangle based on the layout delegate.
-        // And avoid letting the triangle line up with any dividers.
+        // TODO(xster): Position the triangle based on the layout delegate, and
+        // avoid letting the triangle line up with any dividers.
+        // https://github.com/flutter/flutter/issues/11274
         triangle,
       ],
     );

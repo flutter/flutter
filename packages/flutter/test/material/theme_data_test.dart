@@ -57,7 +57,7 @@ void main() {
   });
 
   test('Default slider indicator style gets a default body2 if accentTextTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = const TextTheme(body2: null);
+    const TextTheme noBody2TextTheme = TextTheme(body2: null);
     final ThemeData lightTheme = new ThemeData(brightness: Brightness.light, accentTextTheme: noBody2TextTheme);
     final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark, accentTextTheme: noBody2TextTheme);
     final Typography typography = new Typography(platform: lightTheme.platform);
@@ -67,7 +67,7 @@ void main() {
   });
 
   test('Default chip label style gets a default body2 if textTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = const TextTheme(body2: null);
+    const TextTheme noBody2TextTheme = TextTheme(body2: null);
     final ThemeData lightTheme = new ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);
     final ThemeData darkTheme = new ThemeData(brightness: Brightness.dark, textTheme: noBody2TextTheme);
     final Typography typography = new Typography(platform: lightTheme.platform);
@@ -101,6 +101,12 @@ void main() {
 
     expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
+  });
+
+  test('Defaults to MaterialTapTargetBehavior.expanded', () {
+    final ThemeData themeData = new ThemeData();
+
+    expect(themeData.materialTapTargetSize, MaterialTapTargetSize.padded);
   });
 
   test('Can control fontFamily', () {

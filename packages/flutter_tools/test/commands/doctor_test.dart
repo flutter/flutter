@@ -8,8 +8,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -325,7 +325,7 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition}) 
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
     : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>

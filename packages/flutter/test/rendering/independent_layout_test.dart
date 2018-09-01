@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -31,8 +31,8 @@ class TestLayout {
 }
 
 void main() {
-  const ViewConfiguration testConfiguration = const ViewConfiguration(
-    size: const Size(800.0, 600.0),
+  const ViewConfiguration testConfiguration = ViewConfiguration(
+    size: Size(800.0, 600.0),
     devicePixelRatio: 1.0
   );
 

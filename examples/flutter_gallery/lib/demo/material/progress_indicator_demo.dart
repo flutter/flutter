@@ -21,6 +21,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
+      animationBehavior: AnimationBehavior.preserve,
     )..forward();
 
     _animation = new CurvedAnimation(
@@ -65,7 +66,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
-        child: const LinearProgressIndicator()
+        child: LinearProgressIndicator()
       ),
       const LinearProgressIndicator(),
       const LinearProgressIndicator(),

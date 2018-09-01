@@ -42,7 +42,7 @@ void main() {
         child: new CustomScrollView(
           controller: controller,
           slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 100.0)),
+            const SliverToBoxAdapter(child: SizedBox(height: 100.0)),
             new SliverFillRemaining(child: new Container()),
           ],
         ),

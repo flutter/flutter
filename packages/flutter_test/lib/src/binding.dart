@@ -74,7 +74,7 @@ enum TestBindingEventSource {
   device,
 }
 
-const Size _kDefaultTestViewportSize = const Size(800.0, 600.0);
+const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 
 /// Base class for bindings used by widgets library tests.
 ///
@@ -86,6 +86,7 @@ const Size _kDefaultTestViewportSize = const Size(800.0, 600.0);
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        GestureBinding,
+       SemanticsBinding,
        RendererBinding,
        ServicesBinding,
        PaintingBinding,
@@ -152,7 +153,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
     HttpOverrides.global = new _MockHttpOverrides();
-    _testTextInput = new TestTextInput()..register();
+    _testTextInput = new TestTextInput(onCleared: _resetFocusedEditable)..register();
     super.initInstances();
   }
 
@@ -235,6 +236,33 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
+  Size _surfaceSize;
+
+  /// Artificially changes the surface size to `size` on the Widget binding,
+  /// then flushes microtasks.
+  ///
+  /// Set to null to use the default surface size.
+  Future<Null> setSurfaceSize(Size size) {
+    return TestAsyncUtils.guard(() async {
+      assert(inTest);
+      if (_surfaceSize == size)
+        return null;
+      _surfaceSize = size;
+      handleMetricsChanged();
+      return null;
+    });
+  }
+
+  @override
+  ViewConfiguration createViewConfiguration() {
+    final double devicePixelRatio = ui.window.devicePixelRatio;
+    final Size size = _surfaceSize ?? ui.window.physicalSize / devicePixelRatio;
+    return new ViewConfiguration(
+      size: size,
+      devicePixelRatio: devicePixelRatio,
+    );
+  }
+
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
@@ -280,10 +308,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The current client of the onscreen keyboard. Callers must pump
   /// an additional frame after setting this property to complete the
   /// the focus change.
+  ///
+  /// Instead of setting this directly, consider using
+  /// [WidgetTester.showKeyboard].
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
   set focusedEditable(EditableTextState value) {
-    _focusedEditable = value..requestKeyboard();
+    if (_focusedEditable != value) {
+      _focusedEditable = value;
+      value?.requestKeyboard();
+    }
+  }
+
+  void _resetFocusedEditable() {
+    _focusedEditable = null;
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -309,21 +347,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   FlutterExceptionHandler _oldExceptionHandler;
   FlutterErrorDetails _pendingExceptionDetails;
 
-  static const TextStyle _messageStyle = const TextStyle(
-    color: const Color(0xFF917FFF),
+  static const TextStyle _messageStyle = TextStyle(
+    color: Color(0xFF917FFF),
     fontSize: 40.0,
   );
 
-  static const Widget _preTestMessage = const Center(
-    child: const Text(
+  static const Widget _preTestMessage = Center(
+    child: Text(
       'Test starting...',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
     )
   );
 
-  static const Widget _postTestMessage = const Center(
-    child: const Text(
+  static const Widget _postTestMessage = Center(
+    child: Text(
       'Test finished.',
       style: _messageStyle,
       textDirection: TextDirection.ltr,
@@ -641,7 +679,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   // The timeout here is absurdly high because we do our own timeout logic and
   // this is just a backstop.
   @override
-  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(minutes: 5));
+  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(Duration(minutes: 5));
 
   @override
   bool get inTest => _currentFakeAsync != null;
@@ -658,7 +696,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _currentFakeAsync.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
-        addTime(const Duration(milliseconds: 100));
+        addTime(const Duration(milliseconds: 500));
         _currentFakeAsync.flushMicrotasks();
         handleBeginFrame(new Duration(
           milliseconds: _clock.now().millisecondsSinceEpoch,
@@ -673,7 +711,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) {
     assert(additionalTime != null);
     assert(() {
@@ -992,9 +1030,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   int get microtaskCount {
-    // Unsupported until we have a wrapper around the real async API
-    // https://github.com/flutter/flutter/issues/4637
-    assert(false);
+    // The Dart SDK doesn't report this number.
+    assert(false, 'microtaskCount cannot be reported when running in real time');
     return -1;
   }
 
@@ -1240,7 +1277,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   ViewConfiguration createViewConfiguration() {
-    return new TestViewConfiguration();
+    return new TestViewConfiguration(size: _surfaceSize ?? _kDefaultTestViewportSize);
   }
 
   @override
@@ -1343,7 +1380,7 @@ class _LiveTestRenderView extends RenderView {
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 
   TextPainter _label;
-  static const TextStyle _labelStyle = const TextStyle(
+  static const TextStyle _labelStyle = TextStyle(
     fontFamily: 'sans-serif',
     fontSize: 10.0,
   );
@@ -1430,6 +1467,9 @@ class _MockHttpOverrides extends HttpOverrides {
 class _MockHttpClient implements HttpClient {
   @override
   bool autoUncompress;
+
+  @override
+  Duration connectionTimeout;
 
   @override
   Duration idleTimeout;

@@ -193,22 +193,31 @@ ArgParser _createArgsParser() {
   return parser;
 }
 
+final RegExp gitBranchRegexp = new RegExp(r'^## (.*)');
+
 void createFooter(String footerPath) {
   const int kGitRevisionLength = 10;
 
-  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0)
-    throw 'git exit with non-zero exit code: ${gitResult.exitCode}';
+    throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
   String gitRevision = gitResult.stdout.trim();
+
+  gitResult = Process.runSync('git', <String>['status', '-b', '--porcelain']);
+   if (gitResult.exitCode != 0)
+    throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
+  final Match gitBranchMatch = gitBranchRegexp.firstMatch(
+      gitResult.stdout.trim().split('\n').first);
+  final String gitBranchOut = gitBranchMatch == null ? '' : '• </span class="no-break">${gitBranchMatch.group(1).split('...').first}</span>';
 
   gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
   final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
-  new File(footerPath).writeAsStringSync(
-    '• </span class="no-break">$timestamp<span> '
-    '• </span class="no-break">$gitRevision</span>'
-  );
+  new File(footerPath).writeAsStringSync(<String>[
+    '• </span class="no-break">$timestamp<span>',
+    '• </span class="no-break">$gitRevision</span>',
+    gitBranchOut].join(' '));
 }
 
 void sanityCheckDocs() {
@@ -244,7 +253,7 @@ void createIndexAndCleanup() {
 void removeOldFlutterDocsDir() {
   try {
     new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
-  } catch (e) {
+  } on FileSystemException {
     // If the directory does not exist, that's OK.
   }
 }
@@ -293,11 +302,11 @@ void putRedirectInOldIndexLocation() {
 }
 
 List<String> findPackageNames() {
-  return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
+  return findPackages().map((FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
-List<Directory> findPackages() {
+List<FileSystemEntity> findPackages() {
   return new Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {
@@ -307,6 +316,7 @@ List<Directory> findPackages() {
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })
+    .cast<Directory>()
     .toList();
 }
 

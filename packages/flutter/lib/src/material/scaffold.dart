@@ -27,24 +27,6 @@ import 'theme.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
-/// Returns a path for a notch in the outline of a shape.
-///
-/// The path makes a notch in the host shape that can contain the guest shape.
-///
-/// The `host` is the bounding rectangle for the shape into which the notch will
-/// be applied. The `guest` is the bounding rectangle of the shape for which we
-/// are creating a notch in the host.
-///
-/// The `start` and `end` arguments are points on the outline of the host shape
-/// that will be connected by the returned path.
-///
-/// The returned path may pass anywhere, including inside the guest bounds area,
-/// and may contain multiple subpaths. The returned path ends at `end` and does
-/// not end with a [Path.close]. The returned [Path] is built under the
-/// assumption it will be added to an existing path that is at the `start`
-/// coordinates using [Path.addPath].
-typedef Path ComputeNotch(Rect host, Rect guest, Offset start, Offset end);
-
 enum _ScaffoldSlot {
   body,
   appBar,
@@ -203,7 +185,6 @@ class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonArea,
-    this.floatingActionButtonNotch,
   });
 
   /// The distance from the [Scaffold]'s top edge to the top edge of the
@@ -217,12 +198,6 @@ class ScaffoldGeometry {
   /// This is null when there is no floating action button showing.
   final Rect floatingActionButtonArea;
 
-  /// A [ComputeNotch] for the floating action button.
-  ///
-  /// The contract for this [ComputeNotch] is described in [ComputeNotch] and
-  /// [Scaffold.setFloatingActionButtonNotchFor].
-  final ComputeNotch floatingActionButtonNotch;
-
   ScaffoldGeometry _scaleFloatingActionButton(double scaleFactor) {
     if (scaleFactor == 1.0)
       return this;
@@ -230,7 +205,6 @@ class ScaffoldGeometry {
     if (scaleFactor == 0.0) {
       return new ScaffoldGeometry(
         bottomNavigationBarTop: bottomNavigationBarTop,
-        floatingActionButtonNotch: floatingActionButtonNotch,
       );
     }
 
@@ -247,27 +221,11 @@ class ScaffoldGeometry {
   ScaffoldGeometry copyWith({
     double bottomNavigationBarTop,
     Rect floatingActionButtonArea,
-    ComputeNotch floatingActionButtonNotch,
   }) {
     return new ScaffoldGeometry(
       bottomNavigationBarTop: bottomNavigationBarTop ?? this.bottomNavigationBarTop,
       floatingActionButtonArea: floatingActionButtonArea ?? this.floatingActionButtonArea,
-      floatingActionButtonNotch: floatingActionButtonNotch ?? this.floatingActionButtonNotch,
     );
-  }
-}
-
-
-class _Closeable {
-  _Closeable(this.closeCallback) : assert(closeCallback != null);
-
-  VoidCallback closeCallback;
-
-  void close() {
-    if (closeCallback == null)
-      return;
-    closeCallback();
-    closeCallback = null;
   }
 }
 
@@ -278,7 +236,6 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
   final BuildContext context;
   double floatingActionButtonScale;
   ScaffoldGeometry geometry;
-  _Closeable computeNotchCloseable;
 
   @override
   ScaffoldGeometry get value {
@@ -299,29 +256,11 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
     double bottomNavigationBarTop,
     Rect floatingActionButtonArea,
     double floatingActionButtonScale,
-    ComputeNotch floatingActionButtonNotch,
   }) {
     this.floatingActionButtonScale = floatingActionButtonScale ?? this.floatingActionButtonScale;
     geometry = geometry.copyWith(
       bottomNavigationBarTop: bottomNavigationBarTop,
       floatingActionButtonArea: floatingActionButtonArea,
-      floatingActionButtonNotch: floatingActionButtonNotch,
-    );
-    notifyListeners();
-  }
-
-  VoidCallback _updateFloatingActionButtonNotch(ComputeNotch fabComputeNotch) {
-    computeNotchCloseable?.close();
-    _setFloatingActionButtonNotchAndNotify(fabComputeNotch);
-    computeNotchCloseable = new _Closeable(() { _setFloatingActionButtonNotchAndNotify(null); });
-    return computeNotchCloseable.close;
-  }
-
-  void _setFloatingActionButtonNotchAndNotify(ComputeNotch fabComputeNotch) {
-    geometry = new ScaffoldGeometry(
-      bottomNavigationBarTop: geometry.bottomNavigationBarTop,
-      floatingActionButtonArea: geometry.floatingActionButtonArea,
-      floatingActionButtonNotch: fabComputeNotch,
     );
     notifyListeners();
   }
@@ -1036,32 +975,6 @@ class Scaffold extends StatefulWidget {
     return scaffoldScope.geometryNotifier;
   }
 
-  /// Sets the [ScaffoldGeometry.floatingActionButtonNotch] for the closest
-  /// [Scaffold] ancestor of the given context, if one exists.
-  ///
-  /// It is guaranteed that `computeNotch` will only be used for making notches
-  /// in the top edge of the [bottomNavigationBar], the start and end offsets given to
-  /// it will always be on the top edge of the [bottomNavigationBar], the start offset
-  /// will be to the left of the floating action button's bounds, and the end
-  /// offset will be to the right of the floating action button's bounds.
-  ///
-  /// Returns null if there was no [Scaffold] ancestor.
-  /// Otherwise, returns a [VoidCallback] that clears the notch maker that was
-  /// set.
-  ///
-  /// Callers must invoke the callback when the notch is no longer required.
-  /// This method is typically called from [State.didChangeDependencies] and the
-  /// callback should then be invoked from [State.deactivate].
-  ///
-  /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotch]
-  /// it will be overridden.
-  static VoidCallback setFloatingActionButtonNotchFor(BuildContext context, ComputeNotch computeNotch) {
-    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
-    if (scaffoldScope == null)
-      return null;
-    return scaffoldScope.geometryNotifier._updateFloatingActionButtonNotch(computeNotch);
-  }
-
   /// Whether the Scaffold that most tightly encloses the given context has a
   /// drawer.
   ///
@@ -1106,6 +1019,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
 
+  bool _drawerOpened = false;
+  bool _endDrawerOpened = false;
+
+  void _drawerOpenedCallback(bool isOpened) {
+    setState(() {
+      _drawerOpened = isOpened;
+    });
+  }
+
+  void _endDrawerOpenedCallback(bool isOpened) {
+    setState(() {
+      _endDrawerOpened = isOpened;
+    });
+  }
+
   /// Opens the [Drawer] (if any).
   ///
   /// If the scaffold has a non-null [Scaffold.drawer], this function will cause
@@ -1119,6 +1047,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
+    if (_endDrawerKey.currentState != null && _endDrawerOpened)
+      _endDrawerKey.currentState.close();
     _drawerKey.currentState?.open();
   }
 
@@ -1135,6 +1065,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
+    if (_drawerKey.currentState != null && _drawerOpened)
+      _drawerKey.currentState.close();
     _endDrawerKey.currentState?.open();
   }
 
@@ -1143,6 +1075,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   final Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
   AnimationController _snackBarController;
   Timer _snackBarTimer;
+  bool _accessibleNavigation;
 
   /// Shows a [SnackBar] at the bottom of the scaffold.
   ///
@@ -1230,12 +1163,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    _snackBarController.reverse().then<void>((Null _) {
-      assert(mounted);
-      if (!completer.isCompleted)
-        completer.complete(reason);
-    });
+    if (mediaQuery.accessibleNavigation) {
+      _snackBarController.value = 0.0;
+      completer.complete(reason);
+    } else {
+      _snackBarController.reverse().then<void>((Null _) {
+        assert(mounted);
+        if (!completer.isCompleted)
+          completer.complete(reason);
+      });
+    }
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }
@@ -1459,6 +1398,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    // If we transition from accessible navigation to non-accessible navigation
+    // and there is a SnackBar that would have timed out that has already
+    // completed its timer, dismiss that SnackBar. If the timer hasn't finished
+    // yet, let it timeout as normal.
+    if (_accessibleNavigation == true
+      && !mediaQuery.accessibleNavigation
+      && _snackBarTimer != null
+      && !_snackBarTimer.isActive) {
+      hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
+    }
+    _accessibleNavigation = mediaQuery.accessibleNavigation;
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _snackBarController?.dispose();
     _snackBarTimer?.cancel();
@@ -1495,6 +1451,48 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
+  void _buildEndDrawer(List<LayoutId> children, TextDirection textDirection) {
+    if (widget.endDrawer != null) {
+      assert(hasEndDrawer);
+      _addIfNonNull(
+        children,
+        new DrawerController(
+          key: _endDrawerKey,
+          alignment: DrawerAlignment.end,
+          child: widget.endDrawer,
+          drawerCallback: _endDrawerOpenedCallback,
+        ),
+        _ScaffoldSlot.endDrawer,
+        // remove the side padding from the side we're not touching
+        removeLeftPadding: textDirection == TextDirection.ltr,
+        removeTopPadding: false,
+        removeRightPadding: textDirection == TextDirection.rtl,
+        removeBottomPadding: false,
+      );
+    }
+  }
+
+  void _buildDrawer(List<LayoutId> children, TextDirection textDirection) {
+    if (widget.drawer != null) {
+      assert(hasDrawer);
+      _addIfNonNull(
+        children,
+        new DrawerController(
+          key: _drawerKey,
+          alignment: DrawerAlignment.start,
+          child: widget.drawer,
+          drawerCallback: _drawerOpenedCallback,
+        ),
+        _ScaffoldSlot.drawer,
+        // remove the side padding from the side we're not touching
+        removeLeftPadding: textDirection == TextDirection.rtl,
+        removeTopPadding: false,
+        removeRightPadding: textDirection == TextDirection.ltr,
+        removeBottomPadding: false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
@@ -1502,16 +1500,23 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
+    _accessibleNavigation = mediaQuery.accessibleNavigation;
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route == null || route.isCurrent) {
-        if (_snackBarController.isCompleted && _snackBarTimer == null)
-          _snackBarTimer = new Timer(_snackBars.first._widget.duration, () {
+        if (_snackBarController.isCompleted && _snackBarTimer == null) {
+          final SnackBar snackBar = _snackBars.first._widget;
+          _snackBarTimer = new Timer(snackBar.duration, () {
             assert(_snackBarController.status == AnimationStatus.forward ||
                    _snackBarController.status == AnimationStatus.completed);
+            // Look up MediaQuery again in case the setting changed.
+            final MediaQueryData mediaQuery = MediaQuery.of(context);
+            if (mediaQuery.accessibleNavigation && snackBar.action != null)
+              return;
             hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
           });
+        }
       } else {
         _snackBarTimer?.cancel();
         _snackBarTimer = null;
@@ -1527,7 +1532,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
-      removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
+      removeBottomPadding: widget.bottomNavigationBar != null ||
+        widget.persistentFooterButtons != null,
     );
 
     if (widget.appBar != null) {
@@ -1552,7 +1558,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     if (_snackBars.isNotEmpty) {
-      final bool removeBottomPadding = widget.persistentFooterButtons != null || widget.bottomNavigationBar != null;
+      final bool removeBottomPadding = widget.persistentFooterButtons != null ||
+        widget.bottomNavigationBar != null;
       _addIfNonNull(
         children,
         _snackBars.first._widget,
@@ -1657,40 +1664,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    if (widget.drawer != null) {
-      assert(hasDrawer);
-      _addIfNonNull(
-        children,
-        new DrawerController(
-          key: _drawerKey,
-          alignment: DrawerAlignment.start,
-          child: widget.drawer,
-        ),
-        _ScaffoldSlot.drawer,
-        // remove the side padding from the side we're not touching
-        removeLeftPadding: textDirection == TextDirection.rtl,
-        removeTopPadding: false,
-        removeRightPadding: textDirection == TextDirection.ltr,
-        removeBottomPadding: false,
-      );
-    }
-
-    if (widget.endDrawer != null) {
-      assert(hasEndDrawer);
-      _addIfNonNull(
-        children,
-        new DrawerController(
-          key: _endDrawerKey,
-          alignment: DrawerAlignment.end,
-          child: widget.endDrawer,
-        ),
-        _ScaffoldSlot.endDrawer,
-        // remove the side padding from the side we're not touching
-        removeLeftPadding: textDirection == TextDirection.ltr,
-        removeTopPadding: false,
-        removeRightPadding: textDirection == TextDirection.rtl,
-        removeBottomPadding: false,
-      );
+    if (_endDrawerOpened) {
+      _buildDrawer(children, textDirection);
+      _buildEndDrawer(children, textDirection);
+    } else {
+      _buildEndDrawer(children, textDirection);
+      _buildDrawer(children, textDirection);
     }
 
     // The minimum insets for contents of the Scaffold to keep visible.
@@ -1800,6 +1779,10 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       },
       child: new Semantics(
         container: true,
+        onDismiss: () {
+          close();
+          widget.onClosing();
+        },
         child: new BottomSheet(
           animationController: widget.animationController,
           enableDrag: widget.enableDrag,

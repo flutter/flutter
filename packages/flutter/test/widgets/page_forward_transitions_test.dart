@@ -50,8 +50,8 @@ class TestRoute<T> extends PageRoute<T> {
 }
 
 void main() {
-  const Duration kTwoTenthsOfTheTransitionDuration = const Duration(milliseconds: 30);
-  const Duration kFourTenthsOfTheTransitionDuration = const Duration(milliseconds: 60);
+  const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
+  const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 
@@ -108,6 +108,7 @@ void main() {
             case '/3': return new TestRoute<Null>(settings: settings, child: const Text('F'));
             case '/4': return new TestRoute<Null>(settings: settings, child: const Text('G'));
           }
+          return null;
         }
       )
     );
@@ -192,6 +193,7 @@ void main() {
             case '/': return new TestRoute<Null>(settings: settings, child: const Text('A'));
             case '/1': return new TestRoute<Null>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));
           }
+          return null;
         }
       )
     );

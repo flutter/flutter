@@ -7,10 +7,8 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'globals.dart';
@@ -131,8 +129,8 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingInterval = const Duration(seconds: 4);
-  static const Duration _pollingTimeout = const Duration(seconds: 30);
+  static const Duration _pollingInterval = Duration(seconds: 4);
+  static const Duration _pollingTimeout = Duration(seconds: 30);
 
   final String name;
   ItemListNotifier<Device> _items;
@@ -279,10 +277,6 @@ abstract class Device {
 
   Future<void> takeScreenshot(File outputFile) => new Future<Null>.error('unimplemented');
 
-  /// Find the apps that are currently running on this device.
-  Future<List<DiscoveredApp>> discoverApps() =>
-      new Future<List<DiscoveredApp>>.value(<DiscoveredApp>[]);
-
   @override
   int get hashCode => id.hashCode;
 
@@ -367,14 +361,6 @@ class DebuggingOptions {
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
-
-  /// Return the user specified observatory port. If that isn't available,
-  /// return [kDefaultObservatoryPort], or a port close to that one.
-  Future<int> findBestObservatoryPort() {
-    if (hasObservatoryPort)
-      return new Future<int>.value(observatoryPort);
-    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
-  }
 }
 
 class LaunchResult {
@@ -414,9 +400,9 @@ abstract class DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts;
 
   /// Forward [hostPort] on the host to [devicePort] on the device.
-  /// If [hostPort] is null, will auto select a host port.
+  /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
   Future<Null> unforward(ForwardedPort forwardedPort);

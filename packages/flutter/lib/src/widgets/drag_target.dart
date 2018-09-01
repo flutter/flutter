@@ -101,8 +101,10 @@ class Draggable<T> extends StatefulWidget {
     this.onDragStarted,
     this.onDraggableCanceled,
     this.onDragCompleted,
+    this.ignoringFeedbackSemantics = true,
   }) : assert(child != null),
        assert(feedback != null),
+       assert(ignoringFeedbackSemantics != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
        super(key: key);
 
@@ -163,6 +165,17 @@ class Draggable<T> extends StatefulWidget {
 
   /// Where this widget should be anchored during a drag.
   final DragAnchor dragAnchor;
+
+  /// Whether the semantics of the [feedback] widget is ignored when building
+  /// the semantics tree.
+  ///
+  /// This value should be set to false when the [feedback] widget is intended
+  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// widget will ensure semantic focus is kept on the element as it moves in
+  /// and out of the feedback position.
+  ///
+  /// Defaults to true.
+  final bool ignoringFeedbackSemantics;
 
   /// Controls how this widget competes with other gestures to initiate a drag.
   ///
@@ -253,7 +266,9 @@ class LongPressDraggable<T> extends Draggable<T> {
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
-    VoidCallback onDragCompleted
+    VoidCallback onDragCompleted,
+    this.hapticFeedbackOnStart = true,
+    bool ignoringFeedbackSemantics = true,
   }) : super(
     key: key,
     child: child,
@@ -266,16 +281,20 @@ class LongPressDraggable<T> extends Draggable<T> {
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
     onDraggableCanceled: onDraggableCanceled,
-    onDragCompleted: onDragCompleted
+    onDragCompleted: onDragCompleted,
+    ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
+
+  /// Whether haptic feedback should be triggered on drag start.
+  final bool hapticFeedbackOnStart;
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Offset position) {
         final Drag result = onStart(position);
-        if (result != null)
-          HapticFeedback.vibrate();
+        if (result != null && hapticFeedbackOnStart)
+          HapticFeedback.selectionClick();
         return result;
       };
   }
@@ -343,6 +362,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
       dragStartPoint: dragStartPoint,
       feedback: widget.feedback,
       feedbackOffset: widget.feedbackOffset,
+      ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       onDragEnd: (Velocity velocity, Offset offset, bool wasAccepted) {
         if (mounted) {
           setState(() {
@@ -496,8 +516,10 @@ class _DragAvatar<T> extends Drag {
     this.dragStartPoint = Offset.zero,
     this.feedback,
     this.feedbackOffset = Offset.zero,
-    this.onDragEnd
+    this.onDragEnd,
+    @required this.ignoringFeedbackSemantics,
   }) : assert(overlayState != null),
+       assert(ignoringFeedbackSemantics != null),
        assert(dragStartPoint != null),
        assert(feedbackOffset != null) {
     _entry = new OverlayEntry(builder: _build);
@@ -513,6 +535,7 @@ class _DragAvatar<T> extends Drag {
   final Offset feedbackOffset;
   final _OnDragEnd onDragEnd;
   final OverlayState overlayState;
+  final bool ignoringFeedbackSemantics;
 
   _DragTargetState<T> _activeTarget;
   final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
@@ -619,7 +642,8 @@ class _DragAvatar<T> extends Drag {
       left: _lastOffset.dx - overlayTopLeft.dx,
       top: _lastOffset.dy - overlayTopLeft.dy,
       child: new IgnorePointer(
-        child: feedback
+        child: feedback,
+        ignoringSemantics: ignoringFeedbackSemantics,
       )
     );
   }
@@ -636,7 +660,7 @@ class _DragAvatar<T> extends Drag {
   Offset _restrictAxis(Offset offset) {
     if (axis == null) {
       return offset;
-    } 
+    }
     if (axis == Axis.horizontal) {
       return new Offset(offset.dx, 0.0);
     }

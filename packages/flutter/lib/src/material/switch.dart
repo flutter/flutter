@@ -12,7 +12,16 @@ import 'constants.dart';
 import 'debug.dart';
 import 'shadows.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'toggleable.dart';
+
+const double _kTrackHeight = 14.0;
+const double _kTrackWidth = 33.0;
+const double _kTrackRadius = _kTrackHeight / 2.0;
+const double _kThumbRadius = 10.0;
+const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
+const double _kSwitchHeight = 2 * kRadialReactionRadius + 8.0;
+const double _kSwitchHeightCollapsed = 2 * kRadialReactionRadius;
 
 /// A material design switch.
 ///
@@ -54,7 +63,8 @@ class Switch extends StatefulWidget {
     this.inactiveThumbColor,
     this.inactiveTrackColor,
     this.activeThumbImage,
-    this.inactiveThumbImage
+    this.inactiveThumbImage,
+    this.materialTapTargetSize,
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -112,6 +122,15 @@ class Switch extends StatefulWidget {
   /// An image to use on the thumb of this switch when the switch is off.
   final ImageProvider inactiveThumbImage;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   @override
   _SwitchState createState() => new _SwitchState();
 
@@ -142,6 +161,16 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
+    Size size;
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        size = const Size(_kSwitchWidth, _kSwitchHeight);
+        break;
+      case MaterialTapTargetSize.shrinkWrap:
+        size = const Size(_kSwitchWidth, _kSwitchHeightCollapsed);
+        break;
+    }
+    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
 
     return new _SwitchRenderObjectWidget(
       value: widget.value,
@@ -153,6 +182,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor: inactiveTrackColor,
       configuration: createLocalImageConfiguration(context),
       onChanged: widget.onChanged,
+      additionalConstraints: additionalConstraints,
       vsync: this,
     );
   }
@@ -171,6 +201,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.configuration,
     this.onChanged,
     this.vsync,
+    this.additionalConstraints,
   }) : super(key: key);
 
   final bool value;
@@ -183,6 +214,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final ImageConfiguration configuration;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
+  final BoxConstraints additionalConstraints;
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) {
@@ -197,6 +229,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       configuration: configuration,
       onChanged: onChanged,
       textDirection: Directionality.of(context),
+      additionalConstraints: additionalConstraints,
       vsync: vsync,
     );
   }
@@ -214,16 +247,10 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..configuration = configuration
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
+      ..additionalConstraints = additionalConstraints
       ..vsync = vsync;
   }
 }
-
-const double _kTrackHeight = 14.0;
-const double _kTrackWidth = 33.0;
-const double _kTrackRadius = _kTrackHeight / 2.0;
-const double _kThumbRadius = 10.0;
-const double _kSwitchWidth = _kTrackWidth - 2 * _kTrackRadius + 2 * kRadialReactionRadius;
-const double _kSwitchHeight = 2 * kRadialReactionRadius;
 
 class _RenderSwitch extends RenderToggleable {
   _RenderSwitch({
@@ -235,6 +262,7 @@ class _RenderSwitch extends RenderToggleable {
     Color activeTrackColor,
     Color inactiveTrackColor,
     ImageConfiguration configuration,
+    BoxConstraints additionalConstraints,
     @required TextDirection textDirection,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
@@ -251,7 +279,7 @@ class _RenderSwitch extends RenderToggleable {
          activeColor: activeColor,
          inactiveColor: inactiveColor,
          onChanged: onChanged,
-         size: const Size(_kSwitchWidth, _kSwitchHeight),
+         additionalConstraints: additionalConstraints,
          vsync: vsync,
        ) {
     _drag = new HorizontalDragGestureRecognizer()
@@ -389,6 +417,12 @@ class _RenderSwitch extends RenderToggleable {
     // an assert).
     if (!_isPainting)
       markNeedsPaint();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isToggled = value == true;
   }
 
   @override

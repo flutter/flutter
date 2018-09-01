@@ -225,8 +225,6 @@ class TestSemantics {
       DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
     }
   ) {
-    final SemanticsData nodeData = node.getSemanticsData();
-
     bool fail(String message) {
       matchState[TestSemantics] = '$message';
       return false;
@@ -236,6 +234,8 @@ class TestSemantics {
       return fail('could not find node with id $id.');
     if (!ignoreId && id != node.id)
       return fail('expected node id $id but found id ${node.id}.');
+
+    final SemanticsData nodeData = node.getSemanticsData();
 
     final int flagsBitmask = flags is int
       ? flags
@@ -372,7 +372,7 @@ class SemanticsTester {
   }
 
   @override
-  String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode}';
+  String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode}';
 
   /// Returns all semantics nodes in the current semantics tree whose properties
   /// match the non-null arguments.
@@ -384,6 +384,7 @@ class SemanticsTester {
   Iterable<SemanticsNode> nodesWith({
     String label,
     String value,
+    String hint,
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlag> flags,
@@ -396,6 +397,8 @@ class SemanticsTester {
       if (label != null && node.label != label)
         return false;
       if (value != null && node.value != value)
+        return false;
+      if (hint != null && node.hint != hint)
         return false;
       if (textDirection != null && node.textDirection != textDirection)
         return false;
@@ -484,7 +487,7 @@ class SemanticsTester {
   /// over-test. Prefer breaking your widgets into smaller widgets and test them
   /// individually.
   String generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-    final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode;
     return _generateSemanticsTestForNode(node, 0, childOrder);
   }
 
@@ -517,6 +520,8 @@ class SemanticsTester {
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
   static String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount, DebugSemanticsDumpOrder childOrder) {
+    if (node == null)
+      return 'null';
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
@@ -587,7 +592,7 @@ class _HasSemantics extends Matcher {
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     final bool doesMatch = _semantics._matches(
-      item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode,
+      item.tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode,
       matchState,
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
@@ -597,6 +602,9 @@ class _HasSemantics extends Matcher {
     if (!doesMatch) {
       matchState['would-match'] = item.generateTestSemanticsExpressionForCurrentSemanticsTree(childOrder);
     }
+    if (item.tester.binding.pipelineOwner.semanticsOwner == null) {
+      matchState['additional-notes'] = '(Check that the SemanticsTester has not been disposed early.)';
+    }
     return doesMatch;
   }
 
@@ -605,14 +613,25 @@ class _HasSemantics extends Matcher {
     return description.add('semantics node matching:\n$_semantics');
   }
 
+  String _indent(String text) {
+    return text.toString().trimRight().split('\n').map((String line) => '  $line').join('\n');
+  }
+
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription
-        .add('${matchState[TestSemantics]}\n')
-        .add('Current SemanticsNode tree:\n')
-        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder))
-        .add('The semantics tree would have matched the following configuration:\n')
-        .add(matchState['would-match']);
+    Description result = mismatchDescription
+      .add('${matchState[TestSemantics]}\n')
+      .add('Current SemanticsNode tree:\n')
+      .add(_indent(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder)))
+      .add('\n')
+      .add('The semantics tree would have matched the following configuration:\n')
+      .add(_indent(matchState['would-match']));
+    if (matchState.containsKey('additional-notes')) {
+      result = result
+        .add('\n')
+        .add(matchState['additional-notes']);
+    }
+    return result;
   }
 }
 
@@ -636,6 +655,7 @@ class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
     this.label,
     this.value,
+    this.hint,
     this.textDirection,
     this.actions,
     this.flags,
@@ -646,6 +666,7 @@ class _IncludesNodeWith extends Matcher {
 
   final String label;
   final String value;
+  final String hint;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
@@ -658,6 +679,7 @@ class _IncludesNodeWith extends Matcher {
     return item.nodesWith(
       label: label,
       value: value,
+      hint: hint,
       textDirection: textDirection,
       actions: actions,
       flags: flags,
@@ -683,6 +705,8 @@ class _IncludesNodeWith extends Matcher {
       strings.add('label "$label"');
     if (value != null)
       strings.add('value "$value"');
+    if (hint != null)
+      strings.add('hint "$hint"');
     if (textDirection != null)
       strings.add(' (${describeEnum(textDirection)})');
     if (actions != null)
@@ -706,6 +730,7 @@ class _IncludesNodeWith extends Matcher {
 Matcher includesNodeWith({
   String label,
   String value,
+  String hint,
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlag> flags,
@@ -716,6 +741,7 @@ Matcher includesNodeWith({
   return new _IncludesNodeWith(
     label: label,
     value: value,
+    hint: hint,
     textDirection: textDirection,
     actions: actions,
     flags: flags,

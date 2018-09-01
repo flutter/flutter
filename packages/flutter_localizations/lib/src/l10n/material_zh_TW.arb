@@ -39,5 +39,16 @@
   "popupMenuLabel": "彈出式選單",
   "dialogLabel": "對話方塊",
   "alertDialogLabel": "警报",
-  "searchFieldLabel": "搜索"
+  "searchFieldLabel": "搜索",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

@@ -112,7 +112,7 @@ void main() {
   });
 
   testWidgets('Open/close animations', (WidgetTester tester) async {
-    const Duration kSizeAnimationDuration = const Duration(milliseconds: 1000);
+    const Duration kSizeAnimationDuration = Duration(milliseconds: 1000);
     // The MaterialGaps animate in using kThemeAnimationDuration (hardcoded),
     // which should be less than our test size animation length. So we can assume that they
     // appear immediately. Here we just verify that our assumption is true.
@@ -129,7 +129,7 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(height: 100.0, child: const Placeholder(
+                  body: const SizedBox(height: 100.0, child: Placeholder(
                     fallbackHeight: 12.0,
                   )),
                   isExpanded: a,
@@ -138,14 +138,14 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(height: 100.0, child: const Placeholder()),
+                  body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: b,
                 ),
                 new ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
-                  body: const SizedBox(height: 100.0, child: const Placeholder()),
+                  body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: c,
                 ),
               ],
@@ -203,5 +203,203 @@ void main() {
     expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), new Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), new Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
+  });
+
+  testWidgets('Single Panel Open Test',  (WidgetTester tester) async {
+
+    final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
+      new ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return new Text(isExpanded ? 'B' : 'A');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 0,
+      ),
+      new ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return new Text(isExpanded ? 'D' : 'C');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 1,
+      ),
+      new ExpansionPanelRadio(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return new Text(isExpanded ? 'F' : 'E');
+        },
+        body: const SizedBox(height: 100.0),
+        value: 2,
+      ),
+    ];
+
+    final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
+      children: _demoItemsRadio,
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: _expansionListRadio,
+        ),
+      ),
+    );
+
+    // Initializes with all panels closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
+    double oldHeight = box.size.height;
+
+    expect(find.byType(ExpandIcon), findsNWidgets(3));
+
+    await tester.tap(find.byType(ExpandIcon).at(0));
+
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+    expect(box.size.height, equals(oldHeight));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
+
+    // Now the first panel is open
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+    expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
+
+    await tester.tap(find.byType(ExpandIcon).at(1));
+
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+    oldHeight = box.size.height;
+
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Now the first panel is closed and the second should be opened
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+    expect(box.size.height, greaterThanOrEqualTo(oldHeight));
+
+    _demoItemsRadio.removeAt(0);
+
+    await tester.pumpAndSettle();
+
+    // Now the first panel should be opened
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+
+
+    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return new Text(isExpanded ? 'B' : 'A');
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: false,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return new Text(isExpanded ? 'D' : 'C');
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: false,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return new Text(isExpanded ? 'F' : 'E');
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: false,
+      ),
+    ];
+
+    final ExpansionPanelList _expansionList = new ExpansionPanelList(
+      children: _demoItems,
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: _expansionList,
+        ),
+      ),
+    );
+
+    // We've reinitialized with a regular expansion panel so they should all be closed again
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+    expect(find.text('E'), findsOneWidget);
+    expect(find.text('F'), findsNothing);
+  });
+
+  testWidgets('Panel header has semantics', (WidgetTester tester) async {
+    const Key expandedKey = Key('expanded');
+    const Key collapsedKey = Key('collapsed');
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return const Text('Expanded', key: expandedKey);
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: true,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return const Text('Collapsed', key: collapsedKey);
+        },
+        body: const SizedBox(height: 100.0),
+        isExpanded: false,
+      ),
+    ];
+
+    final ExpansionPanelList _expansionList = new ExpansionPanelList(
+      children: _demoItems,
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: _expansionList,
+        ),
+      ),
+    );
+
+    expect(tester.getSemanticsData(find.byKey(expandedKey)), matchesSemanticsData(
+      label: 'Expanded',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      onTapHint: localizations.expandedIconTapHint,
+    ));
+
+    expect(tester.getSemanticsData(find.byKey(collapsedKey)), matchesSemanticsData(
+      label: 'Collapsed',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+      onTapHint: localizations.collapsedIconTapHint,
+    ));
+
+    handle.dispose();
   });
 }

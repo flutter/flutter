@@ -2073,7 +2073,20 @@ class BuildOwner {
 
   final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
-  bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
+
+  /// Whether [_dirtyElements] need to be sorted again as a result of more
+  /// elements becoming dirty during the build.
+  ///
+  /// This is necessary to preserve the sort order defined by [Element._sort].
+  ///
+  /// This field is set to null when [buildScope] is not actively rebuilding
+  /// the widget tree.
+  bool _dirtyElementsNeedsResorting;
+
+  /// Whether [buildScope] is actively rebuilding the widget tree.
+  ///
+  /// [scheduleBuildFor] should only be called when this value is true.
+  bool get _debugIsInBuildScope => _dirtyElementsNeedsResorting != null;
 
   /// The object in charge of the focus tree.
   ///
@@ -2108,11 +2121,11 @@ class BuildOwner {
     if (element._inDirtyList) {
       assert(() {
         if (debugPrintScheduleBuildForStacks)
-          debugPrintStack(label: 'markNeedsToResortDirtyElements() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
-        if (_dirtyElementsNeedsResorting == null) {
+          debugPrintStack(label: 'BuildOwner.scheduleBuildFor() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
+        if (!_debugIsInBuildScope) {
           throw new FlutterError(
-            'markNeedsToResortDirtyElements() called inappropriately.\n'
-            'The markNeedsToResortDirtyElements() method should only be called while the '
+            'BuildOwner.scheduleBuildFor() called inappropriately.\n'
+            'The BuildOwner.scheduleBuildFor() method should only be called while the '
             'buildScope() method is actively rebuilding the widget tree.'
           );
         }
@@ -2668,11 +2681,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   ///
   /// The following table summarizes the above:
   ///
-  /// <table>
-  /// <tr><th><th>`newWidget == null`<th>`newWidget != null`
-  /// <tr><th>`child == null`<td>Returns null.<td>Returns new [Element].
-  /// <tr><th>`child != null`<td>Old child is removed, returns null.<td>Old child updated if possible, returns child or new [Element].
-  /// </table>
+  /// |                     | **newWidget == null**  | **newWidget != null**   |
+  /// | :-----------------: | :--------------------- | :---------------------- |
+  /// |  **child == null**  |  Returns null.         |  Returns new [Element]. |
+  /// |  **child != null**  |  Old child is removed, returns null. | Old child updated if possible, returns child or new [Element]. |
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
     assert(() {
@@ -3632,7 +3644,7 @@ abstract class ComponentElement extends Element {
   void performRebuild() {
     assert(() {
       if (debugProfileBuildsEnabled)
-        Timeline.startSync('${widget.runtimeType}');
+        Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
       return true;
     }());
 
@@ -4012,7 +4024,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   }
 }
 
-/// An [Element] that uses a [InheritedWidget] as its configuration.
+/// An [Element] that uses an [InheritedWidget] as its configuration.
 class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);

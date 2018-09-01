@@ -57,13 +57,13 @@ enum TimelineStream {
   vm,
 }
 
-const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
+const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all];
 
 /// Default timeout for short-running RPCs.
-const Duration _kShortTimeout = const Duration(seconds: 5);
+const Duration _kShortTimeout = Duration(seconds: 5);
 
 /// Default timeout for awaiting an Isolate to become runnable.
-const Duration _kIsolateLoadRunnableTimeout = const Duration(minutes: 1);
+const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
 
 /// Default timeout for long-running RPCs.
 final Duration _kLongTimeout = _kShortTimeout * 6;
@@ -104,7 +104,7 @@ final Logger _log = new Logger('FlutterDriver');
 ///
 ///     driver.tap(find.text('Save'));
 ///     driver.scroll(find.byValueKey(42));
-const CommonFinders find = const CommonFinders._();
+const CommonFinders find = CommonFinders._();
 
 /// Computes a value.
 ///
@@ -373,7 +373,7 @@ class FlutterDriver {
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
-      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true); // ignore: deprecated_member_use
+      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
     }
   }
 
@@ -447,19 +447,19 @@ class FlutterDriver {
   /// ensure the item's final position matches [alignment].
   ///
   /// The [scrollable] must locate the scrolling widget that contains [item].
-  /// Typically `find.byType('ListView') or `find.byType('CustomScrollView')`.
+  /// Typically `find.byType('ListView')` or `find.byType('CustomScrollView')`.
   ///
-  /// Atleast one of [dxScroll] and [dyScroll] must be non-zero.
+  /// At least one of [dxScroll] and [dyScroll] must be non-zero.
   ///
   /// If [item] is below the currently visible items, then specify a negative
   /// value for [dyScroll] that's a small enough increment to expose [item]
   /// without potentially scrolling it up and completely out of view. Similarly
-  /// if [item] is above, then specify a positve value for [dyScroll].
+  /// if [item] is above, then specify a positive value for [dyScroll].
   ///
-  /// If [item] is to the right of the the currently visible items, then
+  /// If [item] is to the right of the currently visible items, then
   /// specify a negative value for [dxScroll] that's a small enough increment to
   /// expose [item] without potentially scrolling it up and completely out of
-  /// view. Similarly if [item] is to the left, then specify a positve value
+  /// view. Similarly if [item] is to the left, then specify a positive value
   /// for [dyScroll].
   ///
   /// The [timeout] value should be long enough to accommodate as many scrolls
@@ -483,7 +483,7 @@ class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
+    waitFor(item, timeout: timeout).then((Null value) { isVisible = true; });
     await new Future<Null>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
@@ -569,6 +569,20 @@ class FlutterDriver {
   Future<bool> setSemantics(bool enabled, { Duration timeout = _kShortTimeout }) async {
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(new SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
+  }
+
+  /// Retrieves the semantics node id for the object returned by `finder`, or
+  /// the nearest ancestor with a semantics node.
+  ///
+  /// Throws an error if `finder` returns multiple elements or a semantics
+  /// node is not found.
+  ///
+  /// Semantics must be enabled to use this method, either using a platform
+  /// specific shell command or [setSemantics].
+  Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
+    final Map<String, dynamic> jsonResponse = await _sendCommand(new GetSemanticsId(finder, timeout: timeout));
+    final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
+    return result.id;
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.

@@ -42,5 +42,16 @@
   "popupMenuLabel": "Всплывающее меню",
   "dialogLabel": "Диалоговое окно",
   "alertDialogLabel": "бдительный",
-  "searchFieldLabel": "Поиск"
+  "searchFieldLabel": "Поиск",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

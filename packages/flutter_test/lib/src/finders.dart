@@ -15,7 +15,7 @@ typedef bool WidgetPredicate(Widget widget);
 typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.
-const CommonFinders find = const CommonFinders._();
+const CommonFinders find = CommonFinders._();
 
 /// Provides lightweight syntax for getting frequently used widget [Finder]s.
 ///
@@ -375,38 +375,55 @@ abstract class Finder {
   }
 }
 
-class _FirstFinder extends Finder {
-  _FirstFinder(this.parent);
+/// Applies additional filtering against a [parent] [Finder].
+abstract class ChainedFinder extends Finder {
+  /// Create a Finder chained against the candidates of another [Finder].
+  ChainedFinder(this.parent) : assert(parent != null);
 
+  /// Another [Finder] that will run first.
   final Finder parent;
+
+  /// Return another [Iterable] when given an [Iterable] of candidates from a
+  /// parent [Finder].
+  ///
+  /// This is the method to implement when subclassing [ChainedFinder].
+  Iterable<Element> filter(Iterable<Element> parentCandidates);
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return filter(parent.apply(candidates));
+  }
+
+  @override
+  Iterable<Element> get allCandidates => parent.allCandidates;
+}
+
+class _FirstFinder extends ChainedFinder {
+  _FirstFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but first)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).first;
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.first;
   }
 }
 
-class _LastFinder extends Finder {
-  _LastFinder(this.parent);
-
-  final Finder parent;
+class _LastFinder extends ChainedFinder {
+  _LastFinder(Finder parent) : super(parent);
 
   @override
   String get description => '${parent.description} (ignoring all but last)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).last;
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.last;
   }
 }
 
-class _IndexFinder extends Finder {
-  _IndexFinder(this.parent, this.index);
-
-  final Finder parent;
+class _IndexFinder extends ChainedFinder {
+  _IndexFinder(Finder parent, this.index) : super(parent);
 
   final int index;
 
@@ -414,23 +431,22 @@ class _IndexFinder extends Finder {
   String get description => '${parent.description} (ignoring all but index $index)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    yield parent.apply(candidates).elementAt(index);
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    yield parentCandidates.elementAt(index);
   }
 }
 
-class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.alignment);
+class _HitTestableFinder extends ChainedFinder {
+  _HitTestableFinder(Finder parent, this.alignment) : super(parent);
 
-  final Finder parent;
   final Alignment alignment;
 
   @override
   String get description => '${parent.description} (considering only hit-testable ones)';
 
   @override
-  Iterable<Element> apply(Iterable<Element> candidates) sync* {
-    for (final Element candidate in parent.apply(candidates)) {
+  Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
+    for (final Element candidate in parentCandidates) {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
@@ -476,7 +492,9 @@ class _TextFinder extends MatchFinder {
   bool matches(Element candidate) {
     if (candidate.widget is Text) {
       final Text textWidget = candidate.widget;
-      return textWidget.data == text;
+      if (textWidget.data != null)
+        return textWidget.data == text;
+      return textWidget.textSpan.toPlainText() == text;
     } else if (candidate.widget is EditableText) {
       final EditableText editable = candidate.widget;
       return editable.controller.text == text;

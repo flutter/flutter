@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' show TestVSync;
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -43,6 +43,7 @@ void main() {
   test('RenderOpacity and children and semantics', () {
     final AnimationController controller = new AnimationController(vsync: const TestVSync());
     final RenderAnimatedOpacity box = new RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
       opacity: controller,
       child: new RenderParagraph(
         const TextSpan(),

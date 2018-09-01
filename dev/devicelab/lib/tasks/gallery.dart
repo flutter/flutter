@@ -50,12 +50,13 @@ class GalleryTransitionTest {
 
     // Route paths contains slashes, which Firebase doesn't accept in keys, so we
     // remove them.
-    final Map<String, List<int>> original = json.decode(file(
-            '${galleryDirectory.path}/build/transition_durations.timeline.json')
-        .readAsStringSync());
+    final Map<String, dynamic> original = Map<String, dynamic>.from(
+        json.decode(
+            file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync()
+        ));
     final Map<String, List<int>> transitions = <String, List<int>>{};
     for (String key in original.keys) {
-      transitions[key.replaceAll('/', '')] = original[key];
+      transitions[key.replaceAll('/', '')] = List<int>.from(original[key]);
     }
 
     final Map<String, dynamic> summary = json.decode(file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync());
@@ -73,7 +74,8 @@ class GalleryTransitionTest {
       'missed_frame_build_budget_count',
       'average_frame_rasterizer_time_millis',
       'worst_frame_rasterizer_time_millis',
-      'missed_frame_rasterizer_budget_count',
+      '90th_percentile_frame_rasterizer_time_millis',
+      '99th_percentile_frame_rasterizer_time_millis',
     ]);
   }
 }

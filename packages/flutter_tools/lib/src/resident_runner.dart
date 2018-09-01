@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'android/gradle.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
@@ -24,6 +23,7 @@ import 'dependency_checker.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'project.dart';
 import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
@@ -47,9 +47,10 @@ class FlutterDevice {
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    ResidentCompiler generator,
   }) {
     if (previewDart2) {
-      generator = new ResidentCompiler(
+      this.generator = generator ?? new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -276,7 +277,7 @@ class FlutterDevice {
 
     if (package == null) {
       String message = 'No application found for $targetPlatform.';
-      final String hint = getMissingPackageHintForPlatform(targetPlatform);
+      final String hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
@@ -335,7 +336,7 @@ class FlutterDevice {
 
     if (package == null) {
       String message = 'No application found for $targetPlatform.';
-      final String hint = getMissingPackageHintForPlatform(targetPlatform);
+      final String hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
@@ -381,10 +382,11 @@ class FlutterDevice {
     Set<String> fileFilter,
     bool fullRestart = false,
     String projectRootPath,
+    String pathToReload,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
-      expectSlowOperation: true
+      expectSlowOperation: true,
     );
     int bytes = 0;
     try {
@@ -400,6 +402,7 @@ class FlutterDevice {
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
         projectRootPath: projectRootPath,
+        pathToReload: pathToReload
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -450,6 +453,10 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
+  String getReloadPath({bool fullRestart}) =>
+      debuggingOptions.buildInfo.previewDart2
+          ? mainPath + (fullRestart? '' : '.incremental') + '.dill'
+          : mainPath;
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
@@ -461,7 +468,7 @@ abstract class ResidentRunner {
   /// Start the app and keep the process running during its lifetime.
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
+    Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true
   });
@@ -548,8 +555,9 @@ abstract class ResidentRunner {
           for (FlutterView view in device.views)
             await view.uiIsolate.flutterDebugAllowBanner(false);
         } catch (error) {
-          status.stop();
+          status.cancel();
           printError('Error communicating with Flutter on the device: $error');
+          return;
         }
       }
       try {
@@ -560,8 +568,9 @@ abstract class ResidentRunner {
             for (FlutterView view in device.views)
               await view.uiIsolate.flutterDebugAllowBanner(true);
           } catch (error) {
-            status.stop();
+            status.cancel();
             printError('Error communicating with Flutter on the device: $error');
+            return;
           }
         }
       }
@@ -569,7 +578,7 @@ abstract class ResidentRunner {
       status.stop();
       printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
-      status.stop();
+      status.cancel();
       printError('Error taking screenshot: $error');
     }
   }
@@ -636,7 +645,7 @@ abstract class ResidentRunner {
           compileExpression: compileExpression);
       await device.getVMs();
       await device.waitForViews();
-      if (device.views == null)
+      if (device.views.isEmpty)
         printStatus('No Flutter views available on ${device.device.name}');
       else
         viewFound = true;
@@ -754,7 +763,7 @@ abstract class ResidentRunner {
         await handleTerminalCommand(command);
     } catch (error, st) {
       printError('$error\n$st');
-      _cleanUpAndExit(null);
+      await _cleanUpAndExit(null);
     } finally {
       _processingUserRequest = false;
     }
@@ -808,15 +817,11 @@ abstract class ResidentRunner {
         new DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =
         new DependencyChecker(dartDependencySetBuilder, assetBundle);
-    final String path = device.package.packagePath;
-    if (path == null)
+    if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
-    final FileStat stat = fs.file(path).statSync();
-    if (stat.type != FileSystemEntityType.FILE) // ignore: deprecated_member_use
-      return true;
-    if (!fs.file(path).existsSync())
-      return true;
-    final DateTime lastBuildTime = stat.modified;
+    }
+    final DateTime lastBuildTime = device.package.packagesFile.statSync().modified;
+
     return dependencyChecker.check(lastBuildTime);
   }
 
@@ -894,17 +899,15 @@ String findMainDartFile([String target]) {
     return targetPath;
 }
 
-String getMissingPackageHintForPlatform(TargetPlatform platform) {
+Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      String manifest = 'android/AndroidManifest.xml';
-      if (isProjectUsingGradle()) {
-        manifest = gradleManifestPath;
-      }
-      return 'Is your project missing an $manifest?\nConsider running "flutter create ." to create one.';
+      final FlutterProject project = await FlutterProject.current();
+      final String manifestPath = fs.path.relative(project.android.appManifestFile.path);
+      return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     default:

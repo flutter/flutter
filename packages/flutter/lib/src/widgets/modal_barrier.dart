@@ -33,6 +33,7 @@ class ModalBarrier extends StatelessWidget {
     this.color,
     this.dismissible = true,
     this.semanticsLabel,
+    this.barrierSemanticsDismissible = true,
   }) : super(key: key);
 
   /// If non-null, fill the barrier with this color.
@@ -51,6 +52,13 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// Whether the modal barrier semantics are included in the semantics tree.
+  ///
+  /// See also:
+  ///  * [ModalRoute.semanticsDismissible], which controls this property for
+  ///    the [ModalBarrier] built by [ModalRoute] pages.
+  final bool barrierSemanticsDismissible;
+
   /// Semantics label used for the barrier if it is [dismissable].
   ///
   /// The semantics label is read out by accessibility tools (e.g. TalkBack
@@ -66,10 +74,12 @@ class ModalBarrier extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
     final bool semanticsDismissible = dismissible && defaultTargetPlatform != TargetPlatform.android;
+    final bool modalBarrierSemanticsDismissible = barrierSemanticsDismissible ?? semanticsDismissible;
     return new BlockSemantics(
       child: new ExcludeSemantics(
-        // On Android, the back button is used to dismiss a modal.
-        excluding: !semanticsDismissible,
+        // On Android, the back button is used to dismiss a modal. On iOS, some
+        // modal barriers are not dismissible in accessibility mode.
+        excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: new GestureDetector(
           onTapDown: (TapDownDetails details) {
             if (dismissible)
@@ -83,7 +93,7 @@ class ModalBarrier extends StatelessWidget {
               constraints: const BoxConstraints.expand(),
               child: color == null ? null : new DecoratedBox(
                 decoration: new BoxDecoration(
-                  color: color
+                  color: color,
                 )
               )
             )
@@ -117,6 +127,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
     Animation<Color> color,
     this.dismissible = true,
     this.semanticsLabel,
+    this.barrierSemanticsDismissible,
   }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -145,12 +156,20 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final String semanticsLabel;
 
+  /// Whether the modal barrier semantics are included in the semantics tree.
+  ///
+  /// See also:
+  ///  * [ModalRoute.semanticsDismissible], which controls this property for
+  ///    the [ModalBarrier] built by [ModalRoute] pages.
+  final bool barrierSemanticsDismissible;
+
   @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
       color: color?.value,
       dismissible: dismissible,
       semanticsLabel: semanticsLabel,
+      barrierSemanticsDismissible: barrierSemanticsDismissible,
     );
   }
 }

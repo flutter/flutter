@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'toggleable.dart';
 
 const double _kOuterRadius = 8.0;
@@ -54,7 +55,8 @@ class Radio<T> extends StatefulWidget {
     @required this.value,
     @required this.groupValue,
     @required this.onChanged,
-    this.activeColor
+    this.activeColor,
+    this.materialTapTargetSize,
   }) : super(key: key);
 
   /// The value represented by this radio button.
@@ -96,6 +98,15 @@ class Radio<T> extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   @override
   _RadioState<T> createState() => new _RadioState<T>();
 }
@@ -116,11 +127,22 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
+    Size size;
+    switch (widget.materialTapTargetSize ?? themeData.materialTapTargetSize) {
+      case MaterialTapTargetSize.padded:
+        size = const Size(2 * kRadialReactionRadius + 8.0, 2 * kRadialReactionRadius + 8.0);
+        break;
+      case MaterialTapTargetSize.shrinkWrap:
+        size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
+        break;
+    }
+    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
     return new _RadioRenderObjectWidget(
       selected: widget.value == widget.groupValue,
       activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
       inactiveColor: _getInactiveColor(themeData),
       onChanged: _enabled ? _handleChanged : null,
+      additionalConstraints: additionalConstraints,
       vsync: this,
     );
   }
@@ -132,6 +154,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.selected,
     @required this.activeColor,
     @required this.inactiveColor,
+    @required this.additionalConstraints,
     this.onChanged,
     @required this.vsync,
   }) : assert(selected != null),
@@ -145,6 +168,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final Color activeColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
+  final BoxConstraints additionalConstraints;
 
   @override
   _RenderRadio createRenderObject(BuildContext context) => new _RenderRadio(
@@ -153,6 +177,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
     inactiveColor: inactiveColor,
     onChanged: onChanged,
     vsync: vsync,
+    additionalConstraints: additionalConstraints,
   );
 
   @override
@@ -162,6 +187,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
       ..onChanged = onChanged
+      ..additionalConstraints = additionalConstraints
       ..vsync = vsync;
   }
 }
@@ -172,6 +198,7 @@ class _RenderRadio extends RenderToggleable {
     Color activeColor,
     Color inactiveColor,
     ValueChanged<bool> onChanged,
+    BoxConstraints additionalConstraints,
     @required TickerProvider vsync,
   }): super(
     value: value,
@@ -179,7 +206,7 @@ class _RenderRadio extends RenderToggleable {
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,
-    size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
+    additionalConstraints: additionalConstraints,
     vsync: vsync,
   );
 
@@ -209,6 +236,8 @@ class _RenderRadio extends RenderToggleable {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isInMutuallyExclusiveGroup = true;
+    config
+      ..isInMutuallyExclusiveGroup = true
+      ..isChecked = value == true;
   }
 }

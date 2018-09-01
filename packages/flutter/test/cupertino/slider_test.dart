@@ -117,7 +117,7 @@ void main() {
     ));
 
     await _dragSlider(tester, sliderKey);
-    
+
     expect(numberOfTimesOnChangeStartIsCalled, equals(1));
 
     await tester.pump(); // No animation should start.
@@ -154,9 +154,9 @@ void main() {
         },
       ),
     ));
-    
+
     await _dragSlider(tester, sliderKey);
-    
+
     expect(numberOfTimesOnChangeEndIsCalled, equals(1));
 
     await tester.pump(); // No animation should start.
@@ -199,7 +199,7 @@ void main() {
     ));
 
     expect(value, equals(0.0));
-    
+
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
@@ -210,7 +210,7 @@ void main() {
     expect(startValue, equals(0.0));
     expect(value, equals(finalValue));
     expect(endValue, equals(finalValue));
-    
+
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
@@ -222,7 +222,7 @@ void main() {
     double value = 0.0;
     double startValue;
     double endValue;
-    
+
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.rtl,
       child: new StatefulBuilder(
@@ -255,18 +255,18 @@ void main() {
     ));
 
     expect(value, equals(0.0));
-    
+
     final Offset bottomRight = tester.getBottomRight(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
     await tester.dragFrom(bottomRight - const Offset(unit, unit), const Offset(-delta, 0.0));
-    
+
     final Size size = tester.getSize(find.byKey(sliderKey));
     final double finalValue = delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius));
     expect(startValue, equals(0.0));
     expect(value, equals(finalValue));
     expect(endValue, equals(finalValue));
-    
+
     await tester.pump(); // No animation should start.
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
@@ -289,6 +289,10 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
+            value: '50%',
+            increasedValue: '60%',
+            decreasedValue: '40%',
+            textDirection: TextDirection.ltr,
             actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
           ),
         ]
@@ -300,7 +304,7 @@ void main() {
     // Disable slider
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: const CupertinoSlider(
+      child: CupertinoSlider(
         value: 0.5,
         onChanged: null,
       ),
@@ -313,5 +317,46 @@ void main() {
     ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    double value = 0.5;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new CupertinoSlider(
+        value: value,
+        onChanged: (double v) { },
+      ),
+    ));
+
+    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+      hasIncreaseAction: true,
+      hasDecreaseAction: true,
+      value: '50%',
+      increasedValue: '60%',
+      decreasedValue: '40%',
+      textDirection: TextDirection.ltr,
+    ));
+
+    value = 0.6;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new CupertinoSlider(
+        value: value,
+        onChanged: (double v) { },
+      ),
+    ));
+
+    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+      hasIncreaseAction: true,
+      hasDecreaseAction: true,
+      value: '60%',
+      increasedValue: '70%',
+      decreasedValue: '50%',
+      textDirection: TextDirection.ltr,
+    ));
+
+    handle.dispose();
   });
 }

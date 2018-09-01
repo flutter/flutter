@@ -52,7 +52,11 @@ class _SearchDemoState extends State<SearchDemo> {
           ),
           new IconButton(
             tooltip: 'More (not implemented)',
-            icon: const Icon(Icons.more_vert),
+            icon: new Icon(
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
+            ),
             onPressed: () {},
           ),
         ],
@@ -68,15 +72,15 @@ class _SearchDemoState extends State<SearchDemo> {
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const <Widget>[
-                      const Text('Press the '),
-                      const Tooltip(
+                      Text('Press the '),
+                      Tooltip(
                         message: 'search',
-                        child: const Icon(
+                        child: Icon(
                           Icons.search,
                           size: 18.0,
                         ),
                       ),
-                      const Text(' icon in the AppBar'),
+                      Text(' icon in the AppBar'),
                     ],
                   ),
                   const Text('and search for an integer between 0 and 100,000.'),
@@ -100,10 +104,10 @@ class _SearchDemoState extends State<SearchDemo> {
         child: new Column(
           children: <Widget>[
             const UserAccountsDrawerHeader(
-              accountName: const Text('Peter Widget'),
-              accountEmail: const Text('peter.widget@example.com'),
-              currentAccountPicture: const CircleAvatar(
-                backgroundImage: const AssetImage(
+              accountName: Text('Peter Widget'),
+              accountEmail: Text('peter.widget@example.com'),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage(
                   'people/square/peter.png',
                   package: 'flutter_gallery_assets',
                 ),
@@ -115,8 +119,8 @@ class _SearchDemoState extends State<SearchDemo> {
               // DrawerHeader consumes top MediaQuery padding.
               removeTop: true,
               child: const ListTile(
-                leading: const Icon(Icons.payment),
-                title: const Text('Placeholder'),
+                leading: Icon(Icons.payment),
+                title: Text('Placeholder'),
               ),
             ),
           ],

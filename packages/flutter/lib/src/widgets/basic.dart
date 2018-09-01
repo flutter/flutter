@@ -145,15 +145,15 @@ class Directionality extends InheritedWidget {
 ///
 /// ## Opacity Animation
 ///
-/// [Opacity] animations should be built using [AnimatedOpacity] rather than
-/// manually rebuilding the [Opacity] widget.
-///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
 /// an [AnimatedOpacity] instead.
 ///
 /// See also:
 ///
+///  * [Visibility], which can hide a child more efficiently (albeit less
+///    subtly, because it is either visible or hidden, rather than allowing
+///    fractional opacity values).
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
@@ -169,8 +169,10 @@ class Opacity extends SingleChildRenderObjectWidget {
   const Opacity({
     Key key,
     @required this.opacity,
+    this.alwaysIncludeSemantics = false,
     Widget child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
        super(key: key, child: child);
 
   /// The fraction to scale the child's alpha value.
@@ -185,18 +187,36 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// expensive.
   final double opacity;
 
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
   @override
-  RenderOpacity createRenderObject(BuildContext context) => new RenderOpacity(opacity: opacity);
+  RenderOpacity createRenderObject(BuildContext context) {
+    return new RenderOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderOpacity renderObject) {
-    renderObject.opacity = opacity;
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DoubleProperty('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -476,13 +496,16 @@ class ClipRect extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the clip will match the layout size and position of
   /// the child.
-  const ClipRect({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+  const ClipRect({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipRect createRenderObject(BuildContext context) => new RenderClipRect(clipper: clipper);
+  RenderClipRect createRenderObject(BuildContext context) => new RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
@@ -524,8 +547,10 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     Key key,
     this.borderRadius,
     this.clipper,
+    this.clipBehavior = Clip.antiAlias,
     Widget child,
   }) : assert(borderRadius != null || clipper != null),
+       assert(clipBehavior != null),
        super(key: key, child: child);
 
   /// The border radius of the rounded corners.
@@ -539,8 +564,11 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(borderRadius: borderRadius, clipper: clipper);
+  RenderClipRRect createRenderObject(BuildContext context) => new RenderClipRRect(borderRadius: borderRadius, clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
@@ -575,7 +603,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
   ///
   /// If [clipper] is null, the oval will be inscribed into the layout size and
   /// position of the child.
-  const ClipOval({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+  const ClipOval({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -588,8 +616,11 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// object) instead.
   final CustomClipper<Rect> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipOval createRenderObject(BuildContext context) => new RenderClipOval(clipper: clipper);
+  RenderClipOval createRenderObject(BuildContext context) => new RenderClipOval(clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
@@ -627,7 +658,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// size and location of the child. However, rather than use this default,
   /// consider using a [ClipRect], which can achieve the same effect more
   /// efficiently.
-  const ClipPath({ Key key, this.clipper, Widget child }) : super(key: key, child: child);
+  const ClipPath({ Key key, this.clipper, this.clipBehavior = Clip.antiAlias, Widget child }) : super(key: key, child: child);
 
   /// If non-null, determines which clip to use.
   ///
@@ -636,8 +667,11 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// efficient way of obtaining that effect.
   final CustomClipper<Path> clipper;
 
+  /// {@macro flutter.widget.clipper.clipBehavior}
+  final Clip clipBehavior;
+
   @override
-  RenderClipPath createRenderObject(BuildContext context) => new RenderClipPath(clipper: clipper);
+  RenderClipPath createRenderObject(BuildContext context) => new RenderClipPath(clipper: clipper, clipBehavior: clipBehavior);
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
@@ -677,6 +711,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
+    this.clipBehavior = Clip.none,
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,
@@ -690,6 +725,9 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 
   /// The type of shape.
   final BoxShape shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The border radius of the rounded corners.
   ///
@@ -712,6 +750,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   RenderPhysicalModel createRenderObject(BuildContext context) {
     return new RenderPhysicalModel(
       shape: shape,
+      clipBehavior: clipBehavior,
       borderRadius: borderRadius,
       elevation: elevation, color: color,
       shadowColor: shadowColor,
@@ -760,11 +799,13 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   const PhysicalShape({
     Key key,
     @required this.clipper,
+    this.clipBehavior = Clip.none,
     this.elevation = 0.0,
     @required this.color,
     this.shadowColor = const Color(0xFF000000),
     Widget child,
   }) : assert(clipper != null),
+       assert(clipBehavior != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
@@ -776,6 +817,9 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// consider using the [ShapeBorderClipper] delegate class to adapt the
   /// shape for use with this widget.
   final CustomClipper<Path> clipper;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The z-coordinate at which to place this physical object.
   final double elevation;
@@ -790,6 +834,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   RenderPhysicalShape createRenderObject(BuildContext context) {
     return new RenderPhysicalShape(
       clipper: clipper,
+      clipBehavior: clipBehavior,
       elevation: elevation,
       color: color,
       shadowColor: shadowColor
@@ -1685,6 +1730,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = double.infinity,
       super(key: key, child: child);
 
+  /// Creates a box that will become as small as its parent allows.
+  const SizedBox.shrink({ Key key, Widget child })
+    : width = 0.0,
+      height = 0.0,
+      super(key: key, child: child);
+
   /// Creates a box with the specified size.
   SizedBox.fromSize({ Key key, Widget child, Size size })
     : width = size?.width,
@@ -1715,17 +1766,27 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    final String type = (width == double.infinity && height == double.infinity) ?
-                  '$runtimeType.expand' : '$runtimeType';
+    String type;
+    if (width == double.infinity && height == double.infinity) {
+      type = '$runtimeType.expand';
+    } else if (width == 0.0 && height == 0.0) {
+      type = '$runtimeType.shrink';
+    } else {
+      type = '$runtimeType';
+    }
     return key == null ? '$type' : '$type-$key';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final DiagnosticLevel level = (width == double.infinity && height == double.infinity)
-        ? DiagnosticLevel.hidden
-        : DiagnosticLevel.info;
+    DiagnosticLevel level;
+    if ((width == double.infinity && height == double.infinity) ||
+        (width == 0.0 && height == 0.0)) {
+      level = DiagnosticLevel.hidden;
+    } else {
+      level = DiagnosticLevel.info;
+    }
     properties.add(new DoubleProperty('width', width, defaultValue: null, level: level));
     properties.add(new DoubleProperty('height', height, defaultValue: null, level: level));
   }
@@ -2212,9 +2273,9 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that lays the child out as if it was in the tree, but without painting anything,
-/// without making the child available for hit testing, and without taking any
-/// room in the parent.
+/// A widget that lays the child out as if it was in the tree, but without
+/// painting anything, without making the child available for hit testing, and
+/// without taking any room in the parent.
 ///
 /// Animations continue to run in offstage children, and therefore use battery
 /// and CPU time, regardless of whether the animations end up being visible.
@@ -2226,8 +2287,10 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [Visibility], which can hide a child more efficiently (albeit less
+///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage = true, Widget child })
@@ -4259,8 +4322,8 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Consider using the [Text] widget to integrate with the [DefaultTextStyle]
 /// automatically. When all the text uses the same style, the default constructor
-/// is less verbose. The [Text.rich] constructor allows you to style multiple 
-/// spans with the default text style while still allowing specified styles per 
+/// is less verbose. The [Text.rich] constructor allows you to style multiple
+/// spans with the default text style while still allowing specified styles per
 /// span.
 ///
 /// ## Sample code
@@ -4949,7 +5012,8 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   const AbsorbPointer({
     Key key,
     this.absorbing = true,
-    Widget child
+    Widget child,
+    this.ignoringSemantics,
   }) : assert(absorbing != null),
        super(key: key, child: child);
 
@@ -4960,12 +5024,34 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// painting.
   final bool absorbing;
 
+  /// Whether the semantics of this render object is ignored when compiling the
+  /// semantics tree.
+  ///
+  /// If null, defaults to the value of [absorbing].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  final bool ignoringSemantics;
+
   @override
-  RenderAbsorbPointer createRenderObject(BuildContext context) => new RenderAbsorbPointer(absorbing: absorbing);
+  RenderAbsorbPointer createRenderObject(BuildContext context) {
+    return new RenderAbsorbPointer(
+      absorbing: absorbing,
+      ignoringSemantics: ignoringSemantics,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderAbsorbPointer renderObject) {
-    renderObject.absorbing = absorbing;
+    renderObject
+      ..absorbing = absorbing
+      ..ignoringSemantics = ignoringSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('absorbing', absorbing));
+    properties.add(new DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
   }
 }
 
@@ -5054,9 +5140,11 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     bool container = false,
     bool explicitChildNodes = false,
+    bool excludeSemantics = false,
     bool enabled,
     bool checked,
     bool selected,
+    bool toggled,
     bool button,
     bool header,
     bool textField,
@@ -5066,11 +5154,15 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
+    bool image,
+    bool liveRegion,
     String label,
     String value,
     String increasedValue,
     String decreasedValue,
     String hint,
+    String onTapHint,
+    String onLongPressHint,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -5084,19 +5176,23 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onCopy,
     VoidCallback onCut,
     VoidCallback onPaste,
+    VoidCallback onDismiss,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
     VoidCallback onDidGainAccessibilityFocus,
     VoidCallback onDidLoseAccessibilityFocus,
+    Map<CustomSemanticsAction, VoidCallback> customSemanticsActions,
   }) : this.fromProperties(
     key: key,
     child: child,
     container: container,
     explicitChildNodes: explicitChildNodes,
+    excludeSemantics: excludeSemantics,
     properties: new SemanticsProperties(
       enabled: enabled,
       checked: checked,
+      toggled: toggled,
       selected: selected,
       button: button,
       header: header,
@@ -5107,6 +5203,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
       hidden: hidden,
+      image: image,
+      liveRegion: liveRegion,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5129,7 +5227,15 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
       onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
-    onSetSelection: onSetSelection,),
+      onDismiss: onDismiss,
+      onSetSelection: onSetSelection,
+      customSemanticsActions: customSemanticsActions,
+      hintOverrides: onTapHint != null || onLongPressHint != null ?
+        new SemanticsHintOverrides(
+          onTapHint: onTapHint,
+          onLongPressHint: onLongPressHint,
+        ) : null,
+    ),
   );
 
   /// Creates a semantic annotation using [SemanticsProperties].
@@ -5140,6 +5246,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     this.container = false,
     this.explicitChildNodes = false,
+    this.excludeSemantics = false,
     @required this.properties,
   }) : assert(container != null),
        assert(properties != null),
@@ -5176,28 +5283,42 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// to create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
 
+  /// Whether to replace all child semantics with this node.
+  ///
+  /// Defaults to false.
+  ///
+  /// When this flag is set to true, all child semantics nodes are ignored.
+  /// This can be used as a convenience for cases where a child is wrapped in
+  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
+  final bool excludeSemantics;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
       enabled: properties.enabled,
       checked: properties.checked,
+      toggled: properties.toggled,
       selected: properties.selected,
       button: properties.button,
       header: properties.header,
       textField: properties.textField,
       focused: properties.focused,
+      liveRegion: properties.liveRegion,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
+      image: properties.image,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
       decreasedValue: properties.decreasedValue,
       hint: properties.hint,
+      hintOverrides: properties.hintOverrides,
       textDirection: _getTextDirection(context),
       sortKey: properties.sortKey,
       onTap: properties.onTap,
@@ -5209,13 +5330,17 @@ class Semantics extends SingleChildRenderObjectWidget {
       onIncrease: properties.onIncrease,
       onDecrease: properties.onDecrease,
       onCopy: properties.onCopy,
+      onDismiss: properties.onDismiss,
       onCut: properties.onCut,
       onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
+      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
+      customSemanticsActions: properties.customSemanticsActions,
     );
   }
 
@@ -5235,10 +5360,12 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
-      ..scopesRoute = properties.scopesRoute
       ..explicitChildNodes = explicitChildNodes
+      ..excludeSemantics = excludeSemantics
+      ..scopesRoute = properties.scopesRoute
       ..enabled = properties.enabled
       ..checked = properties.checked
+      ..toggled = properties.toggled
       ..selected = properties.selected
       ..button = properties.button
       ..header = properties.header
@@ -5247,11 +5374,14 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
       ..hidden = properties.hidden
+      ..image = properties.image
+      ..liveRegion = properties.liveRegion
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
+      ..hintOverrides = properties.hintOverrides
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
@@ -5262,15 +5392,19 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onScrollUp = properties.onScrollUp
       ..onScrollDown = properties.onScrollDown
       ..onIncrease = properties.onIncrease
+      ..onDismiss = properties.onDismiss
       ..onDecrease = properties.onDecrease
       ..onCopy = properties.onCopy
       ..onCut = properties.onCut
       ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
+      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
-      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
+      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus
+      ..customSemanticsActions = properties.customSemanticsActions;
   }
 
   @override

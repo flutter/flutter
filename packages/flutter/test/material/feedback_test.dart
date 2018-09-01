@@ -12,7 +12,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main () {
-  const Duration kWaitDuration = const Duration(seconds: 1);
+  const Duration kWaitDuration = Duration(seconds: 1);
 
   FeedbackTester feedback;
 
@@ -29,7 +29,7 @@ void main () {
 
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
-      SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
         final Map<dynamic, dynamic> typedMessage = message;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });

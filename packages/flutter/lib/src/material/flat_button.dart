@@ -9,6 +9,7 @@ import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// A material design "flat button".
 ///
@@ -37,6 +38,8 @@ import 'theme.dart';
 /// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
+/// The [clipBehavior] argument must not be null.
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled button whose material elevates when pressed.
@@ -62,8 +65,10 @@ class FlatButton extends StatelessWidget {
     this.colorBrightness,
     this.padding,
     this.shape,
+    this.clipBehavior = Clip.none,
+    this.materialTapTargetSize,
     @required this.child,
-  }) : super(key: key);
+  }) : assert(clipBehavior != null), super(key: key);
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -71,7 +76,7 @@ class FlatButton extends StatelessWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [icon] and [label] arguments must not be null.
+  /// The [icon], [label], and [clipBehavior] arguments must not be null.
   FlatButton.icon({
     Key key,
     @required this.onPressed,
@@ -85,10 +90,13 @@ class FlatButton extends StatelessWidget {
     this.splashColor,
     this.colorBrightness,
     this.shape,
+    this.clipBehavior = Clip.none,
+    this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
        assert(label != null),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,
@@ -185,6 +193,15 @@ class FlatButton extends StatelessWidget {
   /// Defaults to the theme's brightness, [ThemeData.brightness].
   final Brightness colorBrightness;
 
+  /// Configures the minimum size of the tap target.
+  ///
+  /// Defaults to [ThemeData.materialTapTargetSize].
+  ///
+  /// See also:
+  ///
+  ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget in all caps.
@@ -208,6 +225,9 @@ class FlatButton extends StatelessWidget {
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
@@ -290,9 +310,11 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       elevation: 0.0,
       highlightElevation: 0.0,
+      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
+      clipBehavior: clipBehavior,
       child: child,
     );
   }
@@ -311,5 +333,6 @@ class FlatButton extends StatelessWidget {
     properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }

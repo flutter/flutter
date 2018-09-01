@@ -37,7 +37,18 @@
   "modalBarrierDismissLabel": "برخاست کریں",
   "drawerLabel": "نیویگیشن مینو",
   "popupMenuLabel": "پاپ اپ مینو",
-  "dialogLabel": "ڈائیلاگ",
+  "dialogLabel": "ڈائلاگ",
   "alertDialogLabel": "انتباہ",
-  "searchFieldLabel": "تلاش کریں"
+  "searchFieldLabel": "تلاش کریں",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

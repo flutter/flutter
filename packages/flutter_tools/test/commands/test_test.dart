@@ -9,8 +9,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
@@ -105,6 +105,8 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   expect(exec.exitCode, exitCode);
   final List<String> output = exec.stdout.split('\n');
   if (output.first == 'Waiting for another flutter command to release the startup lock...')
+    output.removeAt(0);
+  if (output.first.startsWith('Running "flutter packages get" in'))
     output.removeAt(0);
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));

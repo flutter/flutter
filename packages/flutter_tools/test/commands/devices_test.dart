@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -48,8 +47,8 @@ class MockProcessManager extends Mock implements ProcessManager {
         Map<String, String> environment,
         bool includeParentEnvironment = true,
         bool runInShell = false,
-        Encoding stdoutEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-        Encoding stderrEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
+        Encoding stdoutEncoding = systemEncoding,
+        Encoding stderrEncoding = systemEncoding,
       }) async {
     return new ProcessResult(0, 0, '', '');
   }
@@ -61,8 +60,8 @@ class MockProcessManager extends Mock implements ProcessManager {
         Map<String, String> environment,
         bool includeParentEnvironment = true,
         bool runInShell = false,
-        Encoding stdoutEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
-        Encoding stderrEncoding = SYSTEM_ENCODING, // ignore: deprecated_member_use
+        Encoding stdoutEncoding = systemEncoding,
+        Encoding stderrEncoding = systemEncoding,
       }) {
     return new ProcessResult(0, 0, '', '');
   }

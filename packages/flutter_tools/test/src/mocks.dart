@@ -12,26 +12,26 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
+
+import 'common.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: new AndroidApk(
       id: 'io.flutter.android.mock',
-      apkPath: '/mock/path/to/android/SkyShell.apk',
+      file: fs.file('/mock/path/to/android/SkyShell.apk'),
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
-    iOS: new BuildableIOSApp(
-      appDirectory: '/mock/path/to/iOS/SkyShell.app',
-      projectBundleId: 'io.flutter.ios.mock'
-    )
+    iOS: new BuildableIOSApp(new MockIosProject())
   );
 }
 
@@ -43,7 +43,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     bool withNdkSysroot = false,
     bool withSdkManager = true,
   }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
+    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
 
     _createSdkFile(dir, 'platform-tools/adb');
 
@@ -65,18 +65,23 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
 
     if (withNdkDir != null) {
       final String ndkCompiler = fs.path.join(
-          'ndk-bundle',
-          'toolchains',
-          'arm-linux-androideabi-4.9',
-          'prebuilt',
-          withNdkDir,
-          'bin',
-          'arm-linux-androideabi-gcc');
+        'ndk-bundle',
+        'toolchains',
+        'arm-linux-androideabi-4.9',
+        'prebuilt',
+        withNdkDir,
+        'bin',
+        'arm-linux-androideabi-gcc',
+      );
       _createSdkFile(dir, ndkCompiler);
     }
     if (withNdkSysroot) {
-      final String armPlatform =
-          fs.path.join('ndk-bundle', 'platforms', 'android-9', 'arch-arm');
+      final String armPlatform = fs.path.join(
+        'ndk-bundle',
+        'platforms',
+        'android-9',
+        'arch-arm',
+      );
       _createDir(dir, armPlatform);
     }
 
@@ -122,7 +127,7 @@ class MockProcessManager implements ProcessManager {
     Map<String, String> environment,
     bool includeParentEnvironment = true,
     bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+    ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     if (!succeed) {
       final String executable = command[0];
@@ -329,6 +334,14 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   Stream<Device> get onRemoved => _onRemovedController.stream;
 }
 
+class MockIosProject extends Mock implements IosProject {
+  @override
+  String get productBundleIdentifier => 'com.example.test';
+
+  @override
+  String get hostAppBundleName => 'Runner.app';
+}
+
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
@@ -417,5 +430,37 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
     messages.add('deleteFile $fsName $deviceUri');
     devicePathToContent.remove(deviceUri);
+  }
+}
+
+class MockResidentCompiler extends BasicMock implements ResidentCompiler {
+  @override
+  void accept() {}
+
+  @override
+  void reject() {}
+
+  @override
+  void reset() {}
+
+  @override
+  Future<dynamic> shutdown() async {}
+
+  @override
+  Future<CompilerOutput> compileExpression(
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic
+  ) async {
+    return null;
+  }
+  @override
+  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+    fs.file(outputPath).createSync(recursive: true);
+    fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
+    return new CompilerOutput(outputPath, 0);
   }
 }

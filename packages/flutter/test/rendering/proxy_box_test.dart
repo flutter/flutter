@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-
 import 'dart:ui' as ui show Image;
+
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter/src/scheduler/ticker.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -103,24 +105,24 @@ void main() {
     test('shape change triggers repaint', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: const CircleBorder()),
+        clipper: const ShapeBorderClipper(shape: CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.debugNeedsPaint, isFalse);
 
       // Same shape, no repaint.
-      root.clipper = const ShapeBorderClipper(shape: const CircleBorder());
+      root.clipper = const ShapeBorderClipper(shape: CircleBorder());
       expect(root.debugNeedsPaint, isFalse);
 
       // Different shape triggers repaint.
-      root.clipper = const ShapeBorderClipper(shape: const StadiumBorder());
+      root.clipper = const ShapeBorderClipper(shape: StadiumBorder());
       expect(root.debugNeedsPaint, isTrue);
     });
 
     test('compositing on non-Fuchsia', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shape: const CircleBorder()),
+        clipper: const ShapeBorderClipper(shape: CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.needsCompositing, isFalse);
@@ -158,7 +160,7 @@ void main() {
     boundary = new RenderRepaintBoundary();
     final RenderStack stack = new RenderStack()..alignment = Alignment.topLeft;
     final RenderDecoratedBox blackBox = new RenderDecoratedBox(
-        decoration: const BoxDecoration(color: const Color(0xff000000)),
+        decoration: const BoxDecoration(color: Color(0xff000000)),
         child: new RenderConstrainedBox(
           additionalConstraints: new BoxConstraints.tight(const Size.square(20.0)),
         ));
@@ -166,7 +168,7 @@ void main() {
       ..opacity = 0.5
       ..child = blackBox);
     final RenderDecoratedBox whiteBox = new RenderDecoratedBox(
-        decoration: const BoxDecoration(color: const Color(0xffffffff)),
+        decoration: const BoxDecoration(color: Color(0xffffffff)),
         child: new RenderConstrainedBox(
           additionalConstraints: new BoxConstraints.tight(const Size.square(10.0)),
         ));
@@ -190,4 +192,104 @@ void main() {
     expect(data.getUint32(0), equals(0x00000080));
     expect(data.getUint32(stride - 4), equals(0xffffffff));
   });
+
+  test('RenderOpacity does not composite if it is transparent', () {
+    final RenderOpacity renderOpacity = new RenderOpacity(
+      opacity: 0.0,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderOpacity, phase: EnginePhase.composite);
+    expect(renderOpacity.needsCompositing, false);
+  });
+
+  test('RenderOpacity does not composite if it is opaque', () {
+    final RenderOpacity renderOpacity = new RenderOpacity(
+      opacity: 1.0,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderOpacity, phase: EnginePhase.composite);
+    expect(renderOpacity.needsCompositing, false);
+  });
+
+  test('RenderAnimatedOpacity does not composite if it is transparent', () async {
+    final Animation<double> opacityAnimation = new AnimationController(
+      vsync: new _FakeTickerProvider(),
+    )..value = 0.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
+      opacity: opacityAnimation,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
+  });
+
+  test('RenderAnimatedOpacity does not composite if it is opaque', () {
+    final Animation<double> opacityAnimation = new AnimationController(
+      vsync: new _FakeTickerProvider(),
+    )..value = 1.0;
+
+    final RenderAnimatedOpacity renderAnimatedOpacity = new RenderAnimatedOpacity(
+      alwaysIncludeSemantics: false,
+      opacity: opacityAnimation,
+      child: new RenderSizedBox(const Size(1.0, 1.0)), // size doesn't matter
+    );
+
+    layout(renderAnimatedOpacity, phase: EnginePhase.composite);
+    expect(renderAnimatedOpacity.needsCompositing, false);
+  });
+}
+
+class _FakeTickerProvider implements TickerProvider {
+  @override
+  Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
+    return new _FakeTicker();
+  }
+}
+
+class _FakeTicker implements Ticker {
+  @override
+  bool muted;
+
+  @override
+  void absorbTicker(Ticker originalTicker) {}
+
+  @override
+  String get debugLabel => null;
+
+  @override
+  bool get isActive => null;
+
+  @override
+  bool get isTicking => null;
+
+  @override
+  bool get scheduled => null;
+
+  @override
+  bool get shouldScheduleTick => null;
+
+  @override
+  bool disableAnimations = false;
+
+  @override
+  void dispose() {}
+
+  @override
+  void scheduleTick({bool rescheduling = false}) {}
+
+  @override
+  TickerFuture start() {
+    return null;
+  }
+
+  @override
+  void stop({bool canceled = false}) {}
+
+  @override
+  void unscheduleTick() {}
 }

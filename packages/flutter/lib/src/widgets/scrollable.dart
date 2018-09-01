@@ -328,7 +328,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // SEMANTICS
 
-  final GlobalKey _excludableScrollSemanticsKey = new GlobalKey();
+  final GlobalKey _scrollSemanticsKey = new GlobalKey();
 
   @override
   @protected
@@ -504,10 +504,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     );
 
     if (!widget.excludeFromSemantics) {
-      result = new _ExcludableScrollSemantics(
-        key: _excludableScrollSemanticsKey,
+      result = new _ScrollSemantics(
+        key: _scrollSemanticsKey,
         child: result,
         position: position,
+        allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
       );
     }
 
@@ -521,7 +522,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 }
 
-/// With [_ExcludableScrollSemantics] certain child [SemanticsNode]s can be
+/// With [_ScrollSemantics] certain child [SemanticsNode]s can be
 /// excluded from the scrollable area for semantics purposes.
 ///
 /// Nodes, that are to be excluded, have to be tagged with
@@ -535,29 +536,41 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 /// node will contain all children, that are excluded from scrolling. The inner
 /// node, which is annotated with the scrolling actions, will house the
 /// scrollable children.
-class _ExcludableScrollSemantics extends SingleChildRenderObjectWidget {
-  const _ExcludableScrollSemantics({
+class _ScrollSemantics extends SingleChildRenderObjectWidget {
+  const _ScrollSemantics({
     Key key,
     @required this.position,
+    @required this.allowImplicitScrolling,
     Widget child
   }) : assert(position != null), super(key: key, child: child);
 
   final ScrollPosition position;
+  final bool allowImplicitScrolling;
 
   @override
-  _RenderExcludableScrollSemantics createRenderObject(BuildContext context) => new _RenderExcludableScrollSemantics(position: position);
+  _RenderScrollSemantics createRenderObject(BuildContext context) {
+    return new _RenderScrollSemantics(
+      position: position,
+      allowImplicitScrolling: allowImplicitScrolling,
+    );
+  }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderExcludableScrollSemantics renderObject) {
-    renderObject.position = position;
+  void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
+    renderObject
+      ..allowImplicitScrolling = allowImplicitScrolling
+      ..position = position;
   }
 }
 
-class _RenderExcludableScrollSemantics extends RenderProxyBox {
-  _RenderExcludableScrollSemantics({
+class _RenderScrollSemantics extends RenderProxyBox {
+  _RenderScrollSemantics({
     @required ScrollPosition position,
+    @required bool allowImplicitScrolling,
     RenderBox child,
-  }) : _position = position, assert(position != null), super(child) {
+  }) : _position = position,
+       _allowImplicitScrolling = allowImplicitScrolling,
+       assert(position != null), super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
 
@@ -574,12 +587,23 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// Whether this node can be scrolled implicitly.
+  bool get allowImplicitScrolling => _allowImplicitScrolling;
+  bool _allowImplicitScrolling;
+  set allowImplicitScrolling(bool value) {
+    if (value == _allowImplicitScrolling)
+      return;
+    _allowImplicitScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     if (position.haveDimensions) {
       config
+          ..hasImplicitScrolling = allowImplicitScrolling
           ..scrollPosition = _position.pixels
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent;

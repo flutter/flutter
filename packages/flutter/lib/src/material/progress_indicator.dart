@@ -71,25 +71,25 @@ abstract class ProgressIndicator extends StatefulWidget {
 class _LinearProgressIndicatorPainter extends CustomPainter {
   // The indeterminate progress animation displays two lines whose leading (head)
   // and trailing (tail) endpoints are defined by the following four curves.
-  static const Curve line1Head = const Interval(
+  static const Curve line1Head = Interval(
     0.0,
     750.0 / _kIndeterminateLinearDuration,
-    curve: const Cubic(0.2, 0.0, 0.8, 1.0),
+    curve: Cubic(0.2, 0.0, 0.8, 1.0),
   );
-  static const Curve line1Tail = const Interval(
+  static const Curve line1Tail = Interval(
     333.0 / _kIndeterminateLinearDuration,
     (333.0 + 750.0) / _kIndeterminateLinearDuration,
-    curve: const Cubic(0.4, 0.0, 1.0, 1.0),
+    curve: Cubic(0.4, 0.0, 1.0, 1.0),
   );
-  static const Curve line2Head = const Interval(
+  static const Curve line2Head = Interval(
     1000.0 / _kIndeterminateLinearDuration,
     (1000.0 + 567.0) / _kIndeterminateLinearDuration,
-    curve: const Cubic(0.0, 0.0, 0.65, 1.0),
+    curve: Cubic(0.0, 0.0, 0.65, 1.0),
   );
-  static const Curve line2Tail = const Interval(
+  static const Curve line2Tail = Interval(
     1267.0 / _kIndeterminateLinearDuration,
     (1267.0 + 533.0) / _kIndeterminateLinearDuration,
-    curve: const Cubic(0.10, 0.0, 0.45, 1.0),
+    curve: Cubic(0.10, 0.0, 0.45, 1.0),
   );
 
   const _LinearProgressIndicatorPainter({

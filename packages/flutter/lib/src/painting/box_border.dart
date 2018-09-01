@@ -38,7 +38,7 @@ enum BoxShape {
   // Don't add more, instead create a new ShapeBorder.
 }
 
-/// Base class for box borders that can paint as rectangle, circles, or rounded
+/// Base class for box borders that can paint as rectangles, circles, or rounded
 /// rectangles.
 ///
 /// This class is extended by [Border] and [BorderDirectional] to provide

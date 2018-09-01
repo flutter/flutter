@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -25,7 +24,7 @@ const String frameworkChannel = 'omega';
 
 void main() {
   group('create', () {
-    Directory temp;
+    Directory tempDir;
     Directory projectDir;
     FlutterVersion mockFlutterVersion;
     LoggingProcessManager loggingProcessManager;
@@ -36,18 +35,13 @@ void main() {
 
     setUp(() {
       loggingProcessManager = new LoggingProcessManager();
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
-      projectDir = temp.childDirectory('flutter_project');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+      projectDir = tempDir.childDirectory('flutter_project');
       mockFlutterVersion = new MockFlutterVersion();
     });
 
     tearDown(() {
-      try {
-        temp.deleteSync(recursive: true);
-      } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
-      }
+      tryToDelete(tempDir);
     });
 
     // Verify that we create a project that is well-formed.
@@ -186,6 +180,59 @@ void main() {
       );
     }, timeout: allowForRemotePubInvocation);
 
+    testUsingContext('module', () async {
+      return _createProject(
+        projectDir,
+        <String>['--no-pub', '--template=module'],
+        <String>[
+          '.gitignore',
+          '.metadata',
+          'lib/main.dart',
+          'pubspec.yaml',
+          'README.md',
+        ],
+        unexpectedPaths: <String>[
+          '.android/',
+          'android/',
+          'ios/',
+        ]
+      );
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('module with pub', () async {
+      return _createProject(
+          projectDir,
+          <String>['-t', 'module'],
+          <String>[
+            '.gitignore',
+            '.metadata',
+            'lib/main.dart',
+            'pubspec.lock',
+            'pubspec.yaml',
+            'README.md',
+            '.packages',
+            '.android/build.gradle',
+            '.android/Flutter/build.gradle',
+            '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
+            '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
+            '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+            '.android/Flutter/src/main/AndroidManifest.xml',
+            '.android/gradle.properties',
+            '.android/gradle/wrapper/gradle-wrapper.jar',
+            '.android/gradle/wrapper/gradle-wrapper.properties',
+            '.android/gradlew',
+            '.android/gradlew.bat',
+            '.android/local.properties',
+            '.android/include_flutter.groovy',
+            '.android/settings.gradle',
+          ],
+          unexpectedPaths: <String>[
+            'android/',
+            'ios/',
+          ]
+      );
+    }, timeout: allowForRemotePubInvocation);
+
     // Verify content and formatting
     testUsingContext('content', () async {
       Cache.flutterRoot = '../..';
@@ -291,8 +338,9 @@ void main() {
       );
       projectDir.childDirectory('ios').deleteSync(recursive: true);
       await _createProject(projectDir, <String>['--no-pub'], <String>[]);
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await new FlutterProject(projectDir).ios.productBundleIdentifier(),
+        project.ios.productBundleIdentifier,
         'com.bar.foo.flutterProject',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -317,8 +365,9 @@ void main() {
           'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
         ],
       );
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await new FlutterProject(projectDir).example.ios.productBundleIdentifier(),
+        project.example.ios.productBundleIdentifier,
         'com.bar.foo.flutterProjectExample',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -423,11 +472,16 @@ Future<Null> _createProject(
   args.add(dir.path);
   await runner.run(args);
 
+  bool pathExists(String path) {
+    final String fullPath = fs.path.join(dir.path, path);
+    return fs.typeSync(fullPath) != FileSystemEntityType.notFound;
+  }
+
   for (String path in expectedPaths) {
-    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), true, reason: '$path does not exist');
+    expect(pathExists(path), true, reason: '$path does not exist');
   }
   for (String path in unexpectedPaths) {
-    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
+    expect(pathExists(path), false, reason: '$path exists');
   }
 }
 
@@ -505,7 +559,7 @@ class LoggingProcessManager extends LocalProcessManager {
       Map<String, String> environment,
       bool includeParentEnvironment = true,
       bool runInShell = false,
-      ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+      ProcessStartMode mode = ProcessStartMode.normal,
     }) {
     commands.add(command);
     return super.start(

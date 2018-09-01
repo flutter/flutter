@@ -7,15 +7,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SizedBox constructors', (WidgetTester tester) async {
-    const SizedBox a = const SizedBox();
+    const SizedBox a = SizedBox();
     expect(a.width, isNull);
     expect(a.height, isNull);
 
-    const SizedBox b = const SizedBox(width: 10.0);
+    const SizedBox b = SizedBox(width: 10.0);
     expect(b.width, 10.0);
     expect(b.height, isNull);
 
-    const SizedBox c = const SizedBox(width: 10.0, height: 20.0);
+    const SizedBox c = SizedBox(width: 10.0, height: 20.0);
     expect(c.width, 10.0);
     expect(c.height, 20.0);
 
@@ -27,9 +27,13 @@ void main() {
     expect(e.width, 1.0);
     expect(e.height, 2.0);
 
-    const SizedBox f = const SizedBox.expand();
+    const SizedBox f = SizedBox.expand();
     expect(f.width, double.infinity);
     expect(f.height, double.infinity);
+
+    const SizedBox g = SizedBox.shrink();
+    expect(g.width, 0.0);
+    expect(g.height, 0.0);
   });
 
   testWidgets('SizedBox - no child', (WidgetTester tester) async {
@@ -95,6 +99,15 @@ void main() {
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox.shrink(
+          key: patient,
+        )
+      )
+    );
+    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
@@ -166,5 +179,15 @@ void main() {
       )
     );
     expect(patient.currentContext.size, equals(const Size(800.0, 600.0)));
+
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox.shrink(
+          key: patient,
+          child: new Container(),
+        )
+      )
+    );
+    expect(patient.currentContext.size, equals(const Size(0.0, 0.0)));
   });
 }

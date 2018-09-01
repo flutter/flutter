@@ -29,6 +29,48 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
+  testWidgets('Passes textInputAction to underlying TextField', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(
+              textInputAction: TextInputAction.next,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.textInputAction, TextInputAction.next);
+  });
+
+  testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
+    final VoidCallback onEditingComplete = () {};
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(
+              onEditingComplete: onEditingComplete,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.onEditingComplete, onEditingComplete);
+  });
+
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
     bool _called = false;
 
@@ -45,11 +87,11 @@ void main() {
     );
 
     await tester.showKeyboard(find.byType(TextField));
-    tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(_called, true);
   });
-  
+
   testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 

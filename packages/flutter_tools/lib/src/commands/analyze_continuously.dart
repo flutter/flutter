@@ -19,13 +19,10 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages, {
-    this.previewDart2 = false,
-  }) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages) : super(argResults);
 
   final List<String> repoRoots;
   final List<Directory> repoPackages;
-  final bool previewDart2;
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -38,9 +35,6 @@ class AnalyzeContinuously extends AnalyzeBase {
   @override
   Future<Null> analyze() async {
     List<String> directories;
-
-    if (argResults['dartdocs'])
-      throwToolExit('The --dartdocs option is currently not supported when using --watch.');
 
     if (argResults['flutter-repo']) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
@@ -60,7 +54,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(sdkPath, directories, previewDart2: previewDart2);
+    final AnalysisServer server = new AnalysisServer(sdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -99,6 +93,17 @@ class AnalyzeContinuously extends AnalyzeBase {
         }
       }
 
+      int issueCount = errors.length;
+
+      // count missing dartdocs
+      final int undocumentedMembers = errors.where((AnalysisError error) {
+        return error.code == 'public_member_api_docs';
+      }).length;
+      if (!argResults['dartdocs']) {
+        errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
+        issueCount -= undocumentedMembers;
+      }
+
       errors.sort();
 
       for (AnalysisError error in errors) {
@@ -111,14 +116,8 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       // Print an analysis summary.
       String errorsMessage;
-
-      int issueCount = errors.length;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
-
-      final int undocumentedCount = errors.where((AnalysisError issue) {
-        return issue.code == 'public_member_api_docs';
-      }).length;
 
       if (firstAnalysis)
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
@@ -131,15 +130,23 @@ class AnalyzeContinuously extends AnalyzeBase {
       else
         errorsMessage = 'no issues found';
 
+      String dartdocMessage;
+      if (undocumentedMembers == 1) {
+        dartdocMessage = 'one public member lacks documentation';
+      } else {
+        dartdocMessage = '$undocumentedMembers public members lack documentation';
+      }
+
       final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
       final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
-      printStatus('$errorsMessage • analyzed $files in $seconds seconds');
+      if (undocumentedMembers > 0) {
+        printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
+      } else {
+        printStatus('$errorsMessage • analyzed $files in $seconds seconds');
+      }
 
       if (firstAnalysis && isBenchmarking) {
-        // We don't want to return a failing exit code based on missing documentation.
-        issueCount -= undocumentedCount;
-
-        writeBenchmark(analysisTimer, issueCount, undocumentedCount);
+        writeBenchmark(analysisTimer, issueCount, undocumentedMembers);
         server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
       }
 

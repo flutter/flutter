@@ -41,7 +41,7 @@ class _AlwaysCompleteAnimation extends Animation<double> {
 /// Using this constant involves less overhead than building an
 /// [AnimationController] with an initial value of 1.0. This is useful when an
 /// API expects an animation but you don't actually want to animate anything.
-const Animation<double> kAlwaysCompleteAnimation = const _AlwaysCompleteAnimation();
+const Animation<double> kAlwaysCompleteAnimation = _AlwaysCompleteAnimation();
 
 class _AlwaysDismissedAnimation extends Animation<double> {
   const _AlwaysDismissedAnimation();
@@ -73,7 +73,7 @@ class _AlwaysDismissedAnimation extends Animation<double> {
 /// Using this constant involves less overhead than building an
 /// [AnimationController] with an initial value of 0.0. This is useful when an
 /// API expects an animation but you don't actually want to animate anything.
-const Animation<double> kAlwaysDismissedAnimation = const _AlwaysDismissedAnimation();
+const Animation<double> kAlwaysDismissedAnimation = _AlwaysDismissedAnimation();
 
 /// An animation that is always stopped at a given value.
 ///
@@ -369,7 +369,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// The curve direction is only reset when we hit the beginning or the end of
   /// the timeline to avoid discontinuities in the value of any variables this
-  /// a animation is used to animate.
+  /// animation is used to animate.
   AnimationStatus _curveDirection;
 
   void _updateCurveDirection(AnimationStatus status) {

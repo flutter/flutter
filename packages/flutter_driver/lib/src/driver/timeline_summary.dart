@@ -12,11 +12,11 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'timeline.dart';
 
-const JsonEncoder _prettyEncoder = const JsonEncoder.withIndent('  ');
+const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
-const Duration kBuildBudget = const Duration(milliseconds: 8);
+const Duration kBuildBudget = Duration(milliseconds: 8);
 
 /// Extracts statistics from a [Timeline].
 class TimelineSummary {
@@ -60,6 +60,13 @@ class TimelineSummary {
     return _maxInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
   }
 
+  /// The [p]-th percentile frame rasterization time in milliseconds.
+  ///
+  /// Returns null if no frames were recorded.
+  double computePercentileFrameRasterizerTimeMillis(double p) {
+    return _percentileInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()), p);
+  }
+
   /// The number of frames that missed the [kBuildBudget] on the GPU and
   /// therefore are in the danger of missing frames.
   int computeMissedFrameRasterizerBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractGpuRasterizerDrawEvents()
@@ -76,6 +83,8 @@ class TimelineSummary {
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
+      '90th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(90.0),
+      '99th_percentile_frame_rasterizer_time_millis': computePercentileFrameRasterizerTimeMillis(99.0),
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
@@ -83,8 +92,8 @@ class TimelineSummary {
         .map((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
-          .map((TimedEvent event) => event.duration.inMicroseconds)
-          .toList(),
+        .map((TimedEvent event) => event.duration.inMicroseconds)
+        .toList(),
     };
   }
 
@@ -142,8 +151,8 @@ class TimelineSummary {
       if (events.moveNext()) {
         final TimelineEvent endEvent = events.current;
         result.add(new TimedEvent(
-            beginEvent.timestampMicros,
-            endEvent.timestampMicros
+          beginEvent.timestampMicros,
+          endEvent.timestampMicros,
         ));
       }
     }
@@ -153,18 +162,26 @@ class TimelineSummary {
 
   double _averageInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      return null;
-
-    final int total = durations.fold<int>(0, (int t, Duration duration) => t + duration.inMilliseconds);
+      throw new ArgumentError('durations is empty!');
+    final double total = durations.fold<double>(0.0, (double t, Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
     return total / durations.length;
+  }
+
+  double _percentileInMillis(Iterable<Duration> durations, double percentile) {
+    if (durations.isEmpty)
+      throw new ArgumentError('durations is empty!');
+    assert(percentile >= 0.0 && percentile <= 100.0);
+    final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
+    doubles.sort();
+    return doubles[((doubles.length - 1) * (percentile / 100)).round()];
+
   }
 
   double _maxInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      return null;
-
+      throw new ArgumentError('durations is empty!');
     return durations
-        .map<double>((Duration duration) => duration.inMilliseconds.toDouble())
+        .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);
   }
 
@@ -180,14 +197,8 @@ class TimelineSummary {
 /// Timing information about an event that happened in the event loop.
 class TimedEvent {
   /// Creates a timed event given begin and end timestamps in microseconds.
-  TimedEvent(this.beginTimeMicros, this.endTimeMicros)
+  TimedEvent(int beginTimeMicros, int endTimeMicros)
     : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
-
-  /// The timestamp when the event began.
-  final int beginTimeMicros;
-
-  /// The timestamp when the event ended.
-  final int endTimeMicros;
 
   /// The duration of the event.
   final Duration duration;

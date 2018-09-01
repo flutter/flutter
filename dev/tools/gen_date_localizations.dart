@@ -6,7 +6,8 @@
 /// package for the subset of locales supported by the flutter_localizations
 /// package.
 ///
-/// The extracted data is written into packages/flutter_localizations/lib/src/l10n/date_localizations.dart.
+/// The extracted data is written into:
+///   packages/flutter_localizations/lib/src/l10n/date_localizations.dart
 ///
 /// ## Usage
 ///
@@ -18,11 +19,11 @@
 /// dart dev/tools/gen_date_localizations.dart
 /// ```
 ///
-/// If the data looks good, use the `-w` option to overwrite the
+/// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
 /// ```
-/// dart dev/tools/gen_date_localizations.dart -w
+/// dart dev/tools/gen_date_localizations.dart --overwrite
 /// ```
 
 import 'dart:async';
@@ -57,6 +58,7 @@ Future<Null> main(List<String> rawArgs) async {
       (String line) => line.startsWith('intl:'),
       orElse: () {
         exitWithError('intl dependency not found in ${dotPackagesFile.path}');
+        return null; // unreachable
       },
     )
     .split(':')
@@ -76,26 +78,26 @@ Future<Null> main(List<String> rawArgs) async {
 // found in the LICENSE file.
 
 // This file has been automatically generated. Please do not edit it manually.
-// To regenerate run (omit -w to print to console instead of the file):
+// To regenerate run (omit --overwrite to print to console instead of the file):
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
 // ignore_for_file: public_member_api_docs
 '''
 );
-  buffer.writeln('const Map<String, dynamic> dateSymbols = const <String, dynamic> {');
+  buffer.writeln('const Map<String, dynamic> dateSymbols = <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale))
       buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
   buffer.writeln('};');
 
-  // Note: code that uses datePatterns expects it to contain values of type
+  // Code that uses datePatterns expects it to contain values of type
   // Map<String, String> not Map<String, dynamic>.
-  buffer.writeln('const Map<String, Map<String, String>> datePatterns = const <String, Map<String, String>> {');
+  buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale)) {
       final Map<String, dynamic> patterns = json.decode(data.readAsStringSync());
-      buffer.writeln("'$locale': const <String, String>{");
+      buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);
         buffer.writeln(_jsonToMapEntry(key, value));
@@ -133,10 +135,10 @@ String _jsonToMap(dynamic json) {
   }
 
   if (json is Iterable)
-    return 'const <dynamic>[${json.map(_jsonToMap).join(',')}]';
+    return '<dynamic>[${json.map(_jsonToMap).join(',')}]';
 
   if (json is Map<String, dynamic>) {
-    final StringBuffer buffer = new StringBuffer('const <String, dynamic>{');
+    final StringBuffer buffer = new StringBuffer('<String, dynamic>{');
     json.forEach((String key, dynamic value) {
       buffer.writeln(_jsonToMapEntry(key, value));
     });
@@ -148,7 +150,7 @@ String _jsonToMap(dynamic json) {
 }
 
 Iterable<String> _materialLocales() sync* {
-  final RegExp filenameRE = new RegExp(r'.*_(\w+)\.arb$');
+  final RegExp filenameRE = new RegExp(r'material_(\w+)\.arb$');
   final Directory materialLocalizationsDirectory = new Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   for (FileSystemEntity entity in materialLocalizationsDirectory.listSync()) {
     final String filePath = entity.path;

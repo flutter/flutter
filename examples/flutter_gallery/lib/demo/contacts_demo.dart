@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class _ContactCategory extends StatelessWidget {
   const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
@@ -124,7 +125,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   tooltip: 'Edit',
                   onPressed: () {
                     _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                      content: const Text("Editing isn't supported in this screen.")
+                      content: Text("Editing isn't supported in this screen.")
                     ));
                   },
                 ),
@@ -137,19 +138,19 @@ class ContactsDemoState extends State<ContactsDemo> {
                   itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
-                      child: const Text('App bar scrolls away')
+                      child: Text('App bar scrolls away')
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.pinned,
-                      child: const Text('App bar stays put')
+                      child: Text('App bar stays put')
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.floating,
-                      child: const Text('App bar floats')
+                      child: Text('App bar floats')
                     ),
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.snapping,
-                      child: const Text('App bar snaps')
+                      child: Text('App bar snaps')
                     ),
                   ],
                 ),
@@ -168,11 +169,11 @@ class ContactsDemoState extends State<ContactsDemo> {
                     // This gradient ensures that the toolbar icons are distinct
                     // against the background image.
                     const DecoratedBox(
-                      decoration: const BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: const Alignment(0.0, -1.0),
-                          end: const Alignment(0.0, -0.4),
-                          colors: const <Color>[const Color(0x60000000), const Color(0x00000000)],
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment(0.0, -1.0),
+                          end: Alignment(0.0, -0.4),
+                          colors: <Color>[Color(0x60000000), Color(0x00000000)],
                         ),
                       ),
                     ),
@@ -182,49 +183,52 @@ class ContactsDemoState extends State<ContactsDemo> {
             ),
             new SliverList(
               delegate: new SliverChildListDelegate(<Widget>[
-                new _ContactCategory(
-                  icon: Icons.call,
-                  children: <Widget>[
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Pretend that this opened your SMS application.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(650) 555-1234',
-                        'Mobile',
-                      ],
-                    ),
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('A messaging app appears.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(323) 555-6789',
-                        'Work',
-                      ],
-                    ),
-                    new _ContactItem(
-                      icon: Icons.message,
-                      tooltip: 'Send message',
-                      onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Imagine if you will, a messaging application.')
-                        ));
-                      },
-                      lines: const <String>[
-                        '(650) 555-6789',
-                        'Home',
-                      ],
-                    ),
-                  ],
+                new AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: SystemUiOverlayStyle.dark,
+                  child: new _ContactCategory(
+                    icon: Icons.call,
+                    children: <Widget>[
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: Text('Pretend that this opened your SMS application.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(650) 555-1234',
+                          'Mobile',
+                        ],
+                      ),
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: Text('A messaging app appears.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(323) 555-6789',
+                          'Work',
+                        ],
+                      ),
+                      new _ContactItem(
+                        icon: Icons.message,
+                        tooltip: 'Send message',
+                        onPressed: () {
+                          _scaffoldKey.currentState.showSnackBar(const SnackBar(
+                            content: Text('Imagine if you will, a messaging application.')
+                          ));
+                        },
+                        lines: const <String>[
+                          '(650) 555-6789',
+                          'Home',
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 new _ContactCategory(
                   icon: Icons.contact_mail,
@@ -234,7 +238,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send personal e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Here, your e-mail application would open.')
+                          content: Text('Here, your e-mail application would open.')
                         ));
                       },
                       lines: const <String>[
@@ -247,7 +251,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send work e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('Summon your favorite e-mail application here.')
+                          content: Text('Summon your favorite e-mail application here.')
                         ));
                       },
                       lines: const <String>[
@@ -265,7 +269,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This would show a map of San Francisco.')
+                          content: Text('This would show a map of San Francisco.')
                         ));
                       },
                       lines: const <String>[
@@ -279,7 +283,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This would show a map of Mountain View.')
+                          content: Text('This would show a map of Mountain View.')
                         ));
                       },
                       lines: const <String>[
@@ -293,7 +297,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(const SnackBar(
-                          content: const Text('This would also show a map, if this was not a demo.')
+                          content: Text('This would also show a map, if this was not a demo.')
                         ));
                       },
                       lines: const <String>[

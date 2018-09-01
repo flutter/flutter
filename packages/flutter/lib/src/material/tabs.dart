@@ -61,7 +61,7 @@ class Tab extends StatelessWidget {
     this.icon,
     this.child,
   }) : assert(text != null || child != null || icon != null),
-       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/31140
+       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/34180
        super(key: key);
 
   /// The text to display as the tab's label.
@@ -744,6 +744,7 @@ class _TabBarState extends State<TabBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(debugCheckHasMaterial(context));
     _updateTabController();
     _initIndicatorPainter();
   }
@@ -1150,10 +1151,7 @@ class _TabBarViewState extends State<TabBarView> {
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
-      final ScrollPosition position = _pageController.position;
-      final double pageTolerance = position.physics.tolerance.distance
-          / (position.viewportDimension * _pageController.viewportFraction);
-      _controller.index = (_pageController.page + pageTolerance).floor();
+      _controller.index = _pageController.page.round();
       _currentIndex = _controller.index;
     }
     _warpUnderwayCount -= 1;

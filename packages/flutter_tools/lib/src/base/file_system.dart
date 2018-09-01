@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
+import 'package:meta/meta.dart';
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
@@ -16,7 +17,7 @@ export 'package:file/file.dart';
 export 'package:file/local.dart';
 
 const String _kRecordingType = 'file';
-const FileSystem _kLocalFs = const LocalFileSystem();
+const FileSystem _kLocalFs = LocalFileSystem();
 
 /// Currently active implementation of the file system.
 ///
@@ -104,15 +105,15 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
 Directory getRecordingSink(String dirname, String basename) {
   final String location = _kLocalFs.path.join(dirname, basename);
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
-    case FileSystemEntityType.FILE: // ignore: deprecated_member_use
-    case FileSystemEntityType.LINK: // ignore: deprecated_member_use
+    case FileSystemEntityType.file:
+    case FileSystemEntityType.link:
       throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
-    case FileSystemEntityType.DIRECTORY: // ignore: deprecated_member_use
+    case FileSystemEntityType.directory:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
         throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
-    case FileSystemEntityType.NOT_FOUND: // ignore: deprecated_member_use
+    case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
   }
   return _kLocalFs.directory(location);
@@ -145,3 +146,16 @@ String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path)
 /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
 /// path unchanged.
 String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
+
+/// Returns true if the file system [entity] has not been modified since the
+/// latest modification to [referenceFile].
+///
+/// Returns true, if [entity] does not exist.
+///
+/// Returns false, if [entity] exists, but [referenceFile] does not.
+bool isOlderThanReference({@required FileSystemEntity entity, @required File referenceFile}) {
+  if (!entity.existsSync())
+    return true;
+  return referenceFile.existsSync()
+      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+}

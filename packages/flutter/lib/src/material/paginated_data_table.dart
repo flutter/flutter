@@ -15,6 +15,7 @@ import 'data_table_source.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
@@ -239,13 +240,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
-        return const DataCell(const CircularProgressIndicator());
+        return const DataCell(CircularProgressIndicator());
       }
       return DataCell.empty;
     }).toList();
     if (!haveProgressIndicator) {
       haveProgressIndicator = true;
-      cells[0] = const DataCell(const CircularProgressIndicator());
+      cells[0] = const DataCell(CircularProgressIndicator());
     }
     return new DataRow.byIndex(
       index: index,
@@ -380,34 +381,37 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
 
     // CARD
     return new Card(
+      semanticContainer: false,
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          new DefaultTextStyle(
-            // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
-            // list and then tweak them appropriately.
-            // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
-            style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
-                                         : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-            child: IconTheme.merge(
-              data: const IconThemeData(
-                opacity: 0.54
+          new Semantics(
+            container: true,
+            child: new DefaultTextStyle(
+              // These typographic styles aren't quite the regular ones. We pick the closest ones from the regular
+              // list and then tweak them appropriately.
+              // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
+              style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
+                                           : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
+              child: IconTheme.merge(
+                data: const IconThemeData(
+                  opacity: 0.54
+                ),
+                child: new ButtonTheme.bar(
+                  child: new Ink(
+                    height: 64.0,
+                    color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                    child: new Padding(
+                      padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: headerWidgets
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              child: new ButtonTheme.bar(
-                child: new Container(
-                  height: 64.0,
-                  padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                  // TODO(ianh): This decoration will prevent ink splashes from being visible.
-                  // Instead, we should have a widget that prints the decoration on the material.
-                  // See https://github.com/flutter/flutter/issues/3782
-                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                  child: new Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: headerWidgets
-                  )
-                )
-              )
-            )
+            ),
           ),
           new SingleChildScrollView(
             scrollDirection: Axis.horizontal,

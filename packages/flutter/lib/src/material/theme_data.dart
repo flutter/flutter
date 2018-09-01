@@ -24,17 +24,53 @@ export 'package:flutter/services.dart' show Brightness;
 // spec show that buttons have a composited highlight of #E1E1E1 on a background
 // of #FAFAFA. Assuming that the highlight really has an opacity of 0x66, we can
 // solve for the actual color of the highlight:
-const Color _kLightThemeHighlightColor = const Color(0x66BCBCBC);
+const Color _kLightThemeHighlightColor = Color(0x66BCBCBC);
 
 // The same video shows the splash compositing to #D7D7D7 on a background of
 // #E1E1E1. Again, assuming the splash has an opacity of 0x66, we can solve for
 // the actual color of the splash:
-const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
+const Color _kLightThemeSplashColor = Color(0x66C8C8C8);
 
 // Unfortunately, a similar video isn't available for the dark theme, which
 // means we assume the values in the spec are actually correct.
-const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
-const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
+const Color _kDarkThemeHighlightColor = Color(0x40CCCCCC);
+const Color _kDarkThemeSplashColor = Color(0x40CCCCCC);
+
+/// Configures the tap target and layout size of certain Material widgets.
+///
+/// Changing the value in [ThemeData.materialTapTargetSize] will affect the
+/// accessibility experience.
+///
+/// Some of the impacted widgets include:
+///
+///   * [FloatingActionButton], only the mini tap target size is increased.
+///   * [MaterialButton]
+///   * [OutlineButton]
+///   * [FlatButton]
+///   * [RaisedButton]
+///   * [TimePicker]
+///   * [SnackBar]
+///   * [Chip]
+///   * [RawChip]
+///   * [InputChip]
+///   * [ChoiceChip]
+///   * [FilterChip]
+///   * [ActionChip]
+///   * [Radio]
+///   * [Switch]
+///   * [Checkbox]
+enum MaterialTapTargetSize {
+  /// Expands the minimum tap target size to 48px by 48px.
+  ///
+  /// This is the default value of [ThemeData.materialHitTestSize] and the
+  /// recommended size to conform to Android accessibility scanner
+  /// recommendations.
+  padded,
+
+  /// Shrinks the tap target size to the minimum provided by the Material
+  /// specification.
+  shrinkWrap,
+}
 
 /// Holds the color and typography values for a material design theme.
 ///
@@ -87,6 +123,7 @@ class ThemeData extends Diagnosticable {
     ButtonThemeData buttonTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
+    Color cursorColor,
     Color textSelectionHandleColor,
     Color backgroundColor,
     Color dialogBackgroundColor,
@@ -105,7 +142,9 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    MaterialTapTargetSize materialTapTargetSize,
   }) {
+    materialTapTargetSize ??= MaterialTapTargetSize.padded;
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
@@ -134,6 +173,8 @@ class ThemeData extends Diagnosticable {
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
+    // todo (sandrasandeep): change to color provided by Material Design team
+    cursorColor = const Color.fromRGBO(66, 133, 244, 1.0);
     textSelectionHandleColor ??= isDark ? Colors.tealAccent[400] : primarySwatch[300];
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
@@ -192,6 +233,7 @@ class ThemeData extends Diagnosticable {
       buttonTheme: buttonTheme,
       secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
+      cursorColor: cursorColor,
       textSelectionHandleColor: textSelectionHandleColor,
       backgroundColor: backgroundColor,
       dialogBackgroundColor: dialogBackgroundColor,
@@ -208,6 +250,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme,
       chipTheme: chipTheme,
       platform: platform,
+      materialTapTargetSize: materialTapTargetSize,
     );
   }
 
@@ -240,6 +283,7 @@ class ThemeData extends Diagnosticable {
     @required this.buttonTheme,
     @required this.secondaryHeaderColor,
     @required this.textSelectionColor,
+    @required this.cursorColor,
     @required this.textSelectionHandleColor,
     @required this.backgroundColor,
     @required this.dialogBackgroundColor,
@@ -257,6 +301,7 @@ class ThemeData extends Diagnosticable {
     @required this.sliderTheme,
     @required this.chipTheme,
     @required this.platform,
+    @required this.materialTapTargetSize,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -279,6 +324,7 @@ class ThemeData extends Diagnosticable {
        assert(buttonTheme != null),
        assert(secondaryHeaderColor != null),
        assert(textSelectionColor != null),
+       assert(cursorColor != null),
        assert(textSelectionHandleColor != null),
        assert(backgroundColor != null),
        assert(dialogBackgroundColor != null),
@@ -294,7 +340,8 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(chipTheme != null),
-       assert(platform != null);
+       assert(platform != null),
+       assert(materialTapTargetSize != null);
 
   /// A default light blue theme.
   ///
@@ -424,6 +471,9 @@ class ThemeData extends Diagnosticable {
   /// The color of text selections in text fields, such as [TextField].
   final Color textSelectionColor;
 
+  /// The color of cursors in Material-style text fields, such as [TextField].
+  final Color cursorColor;
+
   /// The color of the handles used to adjust what part of the text is currently selected.
   final Color textSelectionHandleColor;
 
@@ -483,6 +533,9 @@ class ThemeData extends Diagnosticable {
   /// Defaults to the current platform.
   final TargetPlatform platform;
 
+  /// Configures the hit test size of certain Material widgets.
+  final MaterialTapTargetSize materialTapTargetSize;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -507,6 +560,7 @@ class ThemeData extends Diagnosticable {
     ButtonThemeData buttonTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
+    Color cursorColor,
     Color textSelectionHandleColor,
     Color backgroundColor,
     Color dialogBackgroundColor,
@@ -524,6 +578,7 @@ class ThemeData extends Diagnosticable {
     SliderThemeData sliderTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
+    MaterialTapTargetSize materialTapTargetSize,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -548,6 +603,7 @@ class ThemeData extends Diagnosticable {
       buttonTheme: buttonTheme ?? this.buttonTheme,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
+      cursorColor: cursorColor ?? this.cursorColor,
       textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
@@ -565,6 +621,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
+      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
     );
   }
 
@@ -673,6 +730,7 @@ class ThemeData extends Diagnosticable {
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t),
+      cursorColor: Color.lerp(a.cursorColor, b.cursorColor, t),
       textSelectionHandleColor: Color.lerp(a.textSelectionHandleColor, b.textSelectionHandleColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t),
@@ -692,6 +750,7 @@ class ThemeData extends Diagnosticable {
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
+      materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
     );
   }
 
@@ -719,6 +778,7 @@ class ThemeData extends Diagnosticable {
            (otherData.buttonTheme == buttonTheme) &&
            (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
+           (otherData.cursorColor == cursorColor) &&
            (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
            (otherData.backgroundColor == backgroundColor) &&
            (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
@@ -736,7 +796,8 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform);
+           (otherData.platform == platform) &&
+           (otherData.materialTapTargetSize == materialTapTargetSize);
   }
 
   @override
@@ -780,6 +841,8 @@ class ThemeData extends Diagnosticable {
         sliderTheme,
         chipTheme,
         platform,
+        materialTapTargetSize,
+        cursorColor
       ),
     );
   }
@@ -807,6 +870,7 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<Color>('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
     properties.add(new DiagnosticsProperty<Color>('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
     properties.add(new DiagnosticsProperty<Color>('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
+    properties.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: defaultData.cursorColor));
     properties.add(new DiagnosticsProperty<Color>('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
     properties.add(new DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(new DiagnosticsProperty<Color>('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
@@ -824,6 +888,7 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
+    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
   }
 }
 

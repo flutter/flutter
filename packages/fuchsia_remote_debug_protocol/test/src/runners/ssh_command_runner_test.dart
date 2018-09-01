@@ -5,10 +5,11 @@
 import 'dart:async';
 import 'dart:io' show ProcessResult;
 
-import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:fuchsia_remote_debug_protocol/src/runners/ssh_command_runner.dart';
+
+import '../../common.dart';
 
 void main() {
   group('SshCommandRunner.constructors', () {
@@ -40,7 +41,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       mockProcessResult = new MockProcessResult();
-      when(mockProcessManager.run(typed(any))).thenAnswer(
+      when(mockProcessManager.run(any)).thenAnswer(
           (_) => new Future<MockProcessResult>.value(mockProcessResult));
     });
 
@@ -57,7 +58,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand, contains('$ipV6Addr%$interface'));
     });
 
@@ -72,7 +73,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand, contains(ipV6Addr));
     });
 
@@ -99,7 +100,7 @@ void main() {
         await runner.run('oihaw');
       }
 
-      expect(failingFunction, throwsA(const isInstanceOf<SshCommandError>()));
+      expect(failingFunction, throwsA(isInstanceOf<SshCommandError>()));
     });
 
     test('verify correct args with config', () async {
@@ -114,7 +115,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String passedConfig = passedCommand[indexOfFlag + 1];
@@ -131,7 +132,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(typed(captureAny))).captured.single;
+          verify(mockProcessManager.run(captureAny)).captured.single;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));
     });

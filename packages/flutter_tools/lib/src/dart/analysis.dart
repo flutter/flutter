@@ -10,14 +10,15 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../globals.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2 = false});
+  AnalysisServer(this.sdkPath, this.directories, { this.useCfe });
 
   final String sdkPath;
   final List<String> directories;
-  final bool previewDart2;
+  final bool useCfe;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -37,17 +38,14 @@ class AnalysisServer {
       sdkPath,
     ];
 
-    if (previewDart2) {
-      command.add('--preview-dart-2');
-    } else {
-      command.add('--no-preview-dart-2');
+    if (useCfe != null) {
+      command.add(useCfe ? '--use-cfe' : '--no-use-cfe');
     }
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
     // This callback hookup can't throw.
-    _process.exitCode
-        .whenComplete(() => _process = null); // ignore: unawaited_futures
+    _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
     final Stream<String> errorStream =
         _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
@@ -136,8 +134,10 @@ class AnalysisServer {
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'];
-    final List<AnalysisError> errors = issueInfo['errors']
-        .map((Map<String, dynamic> json) => new AnalysisError(json))
+    final List<dynamic> errorsList = issueInfo['errors'];
+    final List<AnalysisError> errors = errorsList
+        .map<Map<String, dynamic>>(castStringKeyedMap)
+        .map<AnalysisError>((Map<String, dynamic> json) => new AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed)
       _errorsController.add(new FileAnalysisErrors(file, errors));
@@ -205,7 +205,8 @@ class AnalysisError implements Comparable<AnalysisError> {
   String toString() {
     return '${severity.toLowerCase().padLeft(7)} $_separator '
         '$messageSentenceFragment $_separator '
-        '${fs.path.relative(file)}:$startLine:$startColumn';
+        '${fs.path.relative(file)}:$startLine:$startColumn $_separator '
+        '$code';
   }
 
   String toLegacyString() {

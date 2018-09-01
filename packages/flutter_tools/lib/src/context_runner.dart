@@ -19,7 +19,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -38,7 +37,7 @@ import 'version.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> runner(), {
-  Map<Type, dynamic> overrides,
+  Map<Type, Generator> overrides,
 }) async {
   return await context.run<T>(
     name: 'global fallbacks',
@@ -70,7 +69,6 @@ Future<T> runInContext<T>(
       KernelCompiler: () => const KernelCompiler(),
       Logger: () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger(),
       OperatingSystemUtils: () => new OperatingSystemUtils(),
-      PortScanner: () => const HostPortScanner(),
       SimControl: () => new SimControl(),
       Stdio: () => const Stdio(),
       Usage: () => new Usage(),

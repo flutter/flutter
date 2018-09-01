@@ -116,8 +116,8 @@ void main() {
               const SliverAppBar(
                 pinned: true,
                 expandedHeight: kExpandedAppBarHeight,
-                flexibleSpace: const FlexibleSpaceBar(
-                  title: const Text('App Bar'),
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('App Bar'),
                 ),
               ),
               new SliverList(
@@ -178,8 +178,8 @@ void main() {
                 const SliverAppBar(
                   pinned: true,
                   expandedHeight: kExpandedAppBarHeight,
-                  flexibleSpace: const FlexibleSpaceBar(
-                    title: const Text('App Bar'),
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: Text('App Bar'),
                   ),
                 ),
               ]..addAll(slivers),
@@ -342,6 +342,9 @@ void main() {
         new TestSemantics.rootChild(
           children: <TestSemantics>[
             new TestSemantics(
+              flags: <SemanticsFlag>[
+                SemanticsFlag.hasImplicitScrolling,
+              ],
               actions: <SemanticsAction>[SemanticsAction.scrollUp],
               children: <TestSemantics>[
                 new TestSemantics(

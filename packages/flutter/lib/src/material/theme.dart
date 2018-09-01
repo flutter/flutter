@@ -12,7 +12,7 @@ import 'typography.dart';
 export 'theme_data.dart' show Brightness, ThemeData;
 
 /// The duration over which theme changes animate by default.
-const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
+const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 
 /// Applies a theme to descendant widgets.
 ///
@@ -190,6 +190,10 @@ class ThemeDataTween extends Tween<ThemeData> {
 
 /// Animated version of [Theme] which automatically transitions the colors,
 /// etc, over a given duration whenever the given theme changes.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.elasticInOut].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_theme.mp4}
 ///
 /// See also:
 ///

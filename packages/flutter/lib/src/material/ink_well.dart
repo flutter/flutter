@@ -95,6 +95,7 @@ abstract class InteractiveInkFeatureFactory {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   });
@@ -201,6 +202,7 @@ class InkResponse extends StatefulWidget {
     this.highlightShape = BoxShape.circle,
     this.radius,
     this.borderRadius,
+    this.customBorder,
     this.highlightColor,
     this.splashColor,
     this.splashFactory,
@@ -285,10 +287,14 @@ class InkResponse extends StatefulWidget {
   ///  * [splashFactory], which defines the appearance of the splash.
   final double radius;
 
-  /// The clipping radius of the containing rect.
+  /// The clipping radius of the containing rect. This is effective only if
+  /// [customBorder] is null.
   ///
   /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius borderRadius;
+
+  /// The custom clip border which overrides [borderRadius].
+  final ShapeBorder customBorder;
 
   /// The highlight color of the ink response. If this property is null then the
   /// highlight color of the theme, [ThemeData.highlightColor], will be used.
@@ -417,6 +423,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
           color: widget.highlightColor ?? Theme.of(context).highlightColor,
           shape: widget.highlightShape,
           borderRadius: widget.borderRadius,
+          customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: _handleInkHighlightRemoval,
         );
@@ -445,6 +452,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     final Color color = widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
     final BorderRadius borderRadius = widget.borderRadius;
+    final ShapeBorder customBorder = widget.customBorder;
 
     InteractiveInkFeature splash;
     void onRemoved() {
@@ -466,6 +474,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       rectCallback: rectCallback,
       radius: widget.radius,
       borderRadius: borderRadius,
+      customBorder: customBorder,
       onRemoved: onRemoved,
     );
 
@@ -626,6 +635,7 @@ class InkWell extends InkResponse {
     InteractiveInkFeatureFactory splashFactory,
     double radius,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     bool enableFeedback = true,
     bool excludeFromSemantics = false,
   }) : super(
@@ -644,6 +654,7 @@ class InkWell extends InkResponse {
     splashFactory: splashFactory,
     radius: radius,
     borderRadius: borderRadius,
+    customBorder: customBorder,
     enableFeedback: enableFeedback,
     excludeFromSemantics: excludeFromSemantics,
   );

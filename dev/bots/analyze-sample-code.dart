@@ -99,15 +99,21 @@ class Section {
 const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
-Future<Null> main() async {
-  final Directory temp = Directory.systemTemp.createTempSync('analyze_sample_code_');
+Future<Null> main(List<String> arguments) async {
+  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
   int exitCode = 1;
   bool keepMain = false;
   final List<String> buffer = <String>[];
   try {
-    final File mainDart = new File(path.join(temp.path, 'main.dart'));
-    final File pubSpec = new File(path.join(temp.path, 'pubspec.yaml'));
-    final Directory flutterPackage = new Directory(path.join(_flutterRoot, 'packages', 'flutter', 'lib'));
+    final File mainDart = new File(path.join(tempDir.path, 'main.dart'));
+    final File pubSpec = new File(path.join(tempDir.path, 'pubspec.yaml'));
+    Directory flutterPackage;
+    if (arguments.length == 1) {
+      // Used for testing.
+      flutterPackage = new Directory(arguments.single);
+    } else {
+      flutterPackage = new Directory(path.join(_flutterRoot, 'packages', 'flutter', 'lib'));
+    }
     final List<Section> sections = <Section>[];
     int sampleCodeSections = 0;
     for (FileSystemEntity file in flutterPackage.listSync(recursive: true, followLinks: false)) {
@@ -159,17 +165,20 @@ Future<Null> main() async {
                 foundDart = true;
               }
             }
-          } else if (line == '// Examples can assume:') {
-            assert(block.isEmpty);
-            startLine = new Line(file.path, lineNumber + 1, 3);
-            inPreamble = true;
-          } else if (trimmedLine == '/// ## Sample code' ||
-                     trimmedLine.startsWith('/// ## Sample code:') ||
-                     trimmedLine == '/// ### Sample code' ||
-                     trimmedLine.startsWith('/// ### Sample code:')) {
-            inSampleSection = true;
-            foundDart = false;
-            sampleCodeSections += 1;
+          }
+          if (!inSampleSection) {
+            if (line == '// Examples can assume:') {
+              assert(block.isEmpty);
+              startLine = new Line(file.path, lineNumber + 1, 3);
+              inPreamble = true;
+            } else if (trimmedLine == '/// ## Sample code' ||
+                       trimmedLine.startsWith('/// ## Sample code:') ||
+                       trimmedLine == '/// ### Sample code' ||
+                       trimmedLine.startsWith('/// ### Sample code:')) {
+              inSampleSection = true;
+              foundDart = false;
+              sampleCodeSections += 1;
+            }
           }
         }
       }
@@ -188,8 +197,6 @@ Future<Null> main() async {
         buffer.add('import \'package:flutter/${path.basename(file.path)}\';');
       }
     }
-    buffer.add('');
-    buffer.add('// ignore_for_file: unused_element');
     buffer.add('');
     final List<Line> lines = new List<Line>.filled(buffer.length, null, growable: true);
     for (Section section in sections) {
@@ -210,52 +217,49 @@ dependencies:
     final Process process = await Process.start(
       _flutter,
       <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
-      workingDirectory: temp.path,
+      workingDirectory: tempDir.path,
     );
-    stderr.addStream(process.stderr);
-    final List<String> errors = await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
-    if (errors.first == 'Building flutter tool...')
+    final List<String> errors = <String>[];
+    errors.addAll(await process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
+    errors.add(null);
+    errors.addAll(await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList());
+    // top is stderr
+    if (errors.isNotEmpty && (errors.first.contains(' issues found. (ran in ') || errors.first.contains(' issue found. (ran in '))) {
+      errors.removeAt(0); // the "23 issues found" message goes onto stderr, which is concatenated first
+      if (errors.isNotEmpty && errors.last.isEmpty)
+        errors.removeLast(); // if there's an "issues found" message, we put a blank line on stdout before it
+    }
+    // null separates stderr from stdout
+    if (errors.first != null)
+      throw 'cannot analyze dartdocs; unexpected error output: $errors';
+    errors.removeAt(0);
+    // rest is stdout
+    if (errors.isNotEmpty && errors.first == 'Building flutter tool...')
       errors.removeAt(0);
-    if (errors.first.startsWith('Running "flutter packages get" in '))
+    if (errors.isNotEmpty && errors.first.startsWith('Running "flutter packages get" in '))
       errors.removeAt(0);
     int errorCount = 0;
+    final String kBullet = Platform.isWindows ? ' - ' : ' • ';
+    final RegExp errorPattern = new RegExp('^ +([a-z]+)$kBullet(.+)$kBullet(.+):([0-9]+):([0-9]+)$kBullet([-a-z_]+)\$', caseSensitive: false);
     for (String error in errors) {
-      final String kBullet = Platform.isWindows ? ' - ' : ' • ';
-      const String kColon = ':';
-      final RegExp atRegExp = new RegExp(r' at .*main.dart:');
-      final int start = error.indexOf(kBullet);
-      final int end = error.indexOf(atRegExp);
-      if (start >= 0 && end >= 0) {
-        final String message = error.substring(start + kBullet.length, end);
-        final String atMatch = atRegExp.firstMatch(error)[0];
-        final int colon2 = error.indexOf(kColon, end + atMatch.length);
-        if (colon2 < 0) {
+      final Match parts = errorPattern.matchAsPrefix(error);
+      if (parts != null) {
+        final String message = parts[2];
+        final String file = parts[3];
+        final String line = parts[4];
+        final String column = parts[5];
+        final String errorCode = parts[6];
+        final int lineNumber = int.parse(line, radix: 10);
+        final int columnNumber = int.parse(column, radix: 10);
+        if (file != 'main.dart') {
           keepMain = true;
-          throw 'failed to parse error message: $error';
-        }
-        final String line = error.substring(end + atMatch.length, colon2);
-        final int bullet2 = error.indexOf(kBullet, colon2);
-        if (bullet2 < 0) {
-          keepMain = true;
-          throw 'failed to parse error message: $error';
-        }
-        final String column = error.substring(colon2 + kColon.length, bullet2);
-        // ignore: deprecated_member_use
-        final int lineNumber = int.parse(line, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
-        // ignore: deprecated_member_use
-        final int columnNumber = int.parse(column, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
-        if (lineNumber == null) {
-          throw 'failed to parse error message: $error';
-        }
-        if (columnNumber == null) {
-          throw 'failed to parse error message: $error';
+          throw 'cannot analyze dartdocs; analysis errors exist in $file: $error';
         }
         if (lineNumber < 1 || lineNumber > lines.length) {
           keepMain = true;
           throw 'failed to parse error message (read line number as $lineNumber; total number of lines is ${lines.length}): $error';
         }
         final Line actualLine = lines[lineNumber - 1];
-        final String errorCode = error.substring(bullet2 + kBullet.length);
         if (errorCode == 'unused_element') {
           // We don't really care if sample code isn't used!
         } else if (actualLine == null) {
@@ -285,7 +289,7 @@ dependencies:
       print('No errors!');
   } finally {
     if (keepMain) {
-      print('Kept ${temp.path} because it had errors (see above).');
+      print('Kept ${tempDir.path} because it had errors (see above).');
       print('-------8<-------');
       int number = 1;
       for (String line in buffer) {
@@ -295,10 +299,9 @@ dependencies:
       print('-------8<-------');
     } else {
       try {
-        temp.deleteSync(recursive: true);
+        tempDir.deleteSync(recursive: true);
       } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
+        print('Failed to delete ${tempDir.path}: $e');
       }
     }
   }

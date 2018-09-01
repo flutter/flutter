@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -31,8 +30,10 @@ void main() {
     Directory sdkDir;
 
     tearDown(() {
-      sdkDir?.deleteSync(recursive: true);
-      sdkDir = null;
+      if (sdkDir != null) {
+        tryToDelete(sdkDir);
+        sdkDir = null;
+      }
     });
 
     testUsingContext('parse sdk', () {
@@ -74,7 +75,7 @@ void main() {
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
       when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
-          environment: typedArgThat(isNotNull,  named: 'environment')))
+          environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(new ProcessResult(1, 0, '26.1.1\n', ''));
       expect(sdk.sdkManagerVersion, '26.1.1');
     }, overrides: <Type, Generator>{
@@ -89,7 +90,7 @@ void main() {
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
       when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
-          environment: typedArgThat(isNotNull,  named: 'environment')))
+          environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(new ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
       expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{

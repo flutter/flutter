@@ -16,7 +16,7 @@ import 'utils.dart';
 /// Maximum amount of time a single task is allowed to take to run.
 ///
 /// If exceeded the task is considered to have failed.
-const Duration _kDefaultTaskTimeout = const Duration(minutes: 15);
+const Duration _kDefaultTaskTimeout = Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -37,7 +37,7 @@ Future<TaskResult> task(TaskFunction task) {
 
   _isTaskRegistered = true;
 
-  // TODO: allow overriding logging.
+  // TODO(ianh): allow overriding logging.
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((LogRecord rec) {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
@@ -53,7 +53,7 @@ class _TaskRunner {
 
   final TaskFunction task;
 
-  // TODO: workaround for https://github.com/dart-lang/sdk/issues/23797
+  // TODO(ianh): workaround for https://github.com/dart-lang/sdk/issues/23797
   RawReceivePort _keepAlivePort;
   Timer _startTaskTimeout;
   bool _taskStarted = false;
@@ -81,12 +81,15 @@ class _TaskRunner {
   Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
+      print('Running task.');
       final TaskResult result = await _performTask().timeout(taskTimeout);
       _completer.complete(result);
       return result;
     } on TimeoutException catch (_) {
+      print('Task timed out in framework.dart after $taskTimeout.');
       return new TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
+      print('Cleaning up after task...');
       await forceQuitRunningProcesses();
       _closeKeepAlivePort();
     }
@@ -103,7 +106,7 @@ class _TaskRunner {
     _keepAlivePort = new RawReceivePort();
 
     // Timeout if nothing bothers to connect and ask us to run the task.
-    const Duration taskStartTimeout = const Duration(seconds: 10);
+    const Duration taskStartTimeout = Duration(seconds: 60);
     _startTaskTimeout = new Timer(taskStartTimeout, () {
       if (!_taskStarted) {
         logger.severe('Task did not start in $taskStartTimeout.');
@@ -147,7 +150,7 @@ class TaskResult {
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
       : this.succeeded = true,
         this.message = 'success' {
-    const JsonEncoder prettyJson = const JsonEncoder.withIndent('  ');
+    const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (String key in benchmarkScoreKeys) {
         if (!data.containsKey(key)) {

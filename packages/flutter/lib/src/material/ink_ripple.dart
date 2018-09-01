@@ -10,11 +10,11 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart';
 import 'material.dart';
 
-const Duration _kUnconfirmedRippleDuration = const Duration(seconds: 1);
-const Duration _kFadeInDuration = const Duration(milliseconds: 75);
-const Duration _kRadiusDuration = const Duration(milliseconds: 225);
-const Duration _kFadeOutDuration = const Duration(milliseconds: 375);
-const Duration _kCancelDuration = const Duration(milliseconds: 75);
+const Duration _kUnconfirmedRippleDuration = Duration(seconds: 1);
+const Duration _kFadeInDuration = Duration(milliseconds: 75);
+const Duration _kRadiusDuration = Duration(milliseconds: 225);
+const Duration _kFadeOutDuration = Duration(milliseconds: 375);
+const Duration _kCancelDuration = Duration(milliseconds: 75);
 
 // The fade out begins 225ms after the _fadeOutController starts. See confirm().
 const double _kFadeOutIntervalStart = 225.0 / 375.0;
@@ -48,6 +48,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   }) {
@@ -59,6 +60,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
+      customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
     );
@@ -90,7 +92,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 class InkRipple extends InteractiveInkFeature {
   /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
   /// or material [Theme].
-  static const InteractiveInkFeatureFactory splashFactory = const _InkRippleFactory();
+  static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
   /// Begin a ripple, centered at [position] relative to [referenceBox].
   ///
@@ -115,12 +117,14 @@ class InkRipple extends InteractiveInkFeature {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(position != null),
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
@@ -172,6 +176,7 @@ class InkRipple extends InteractiveInkFeature {
 
   final Offset _position;
   final BorderRadius _borderRadius;
+  final ShapeBorder _customBorder;
   final double _targetRadius;
   final RectCallback _clipCallback;
 
@@ -220,26 +225,6 @@ class InkRipple extends InteractiveInkFeature {
     super.dispose();
   }
 
-  RRect _clipRRectFromRect(Rect rect) {
-    return new RRect.fromRectAndCorners(
-      rect,
-      topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-      bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
-    );
-  }
-
-  void _clipCanvasWithRect(Canvas canvas, Rect rect, {Offset offset}) {
-    Rect clipRect = rect;
-    if (offset != null) {
-      clipRect = clipRect.shift(offset);
-    }
-    if (_borderRadius != BorderRadius.zero) {
-      canvas.clipRRect(_clipRRectFromRect(clipRect));
-    } else {
-      canvas.clipRect(clipRect);
-    }
-  }
-
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
@@ -251,22 +236,27 @@ class InkRipple extends InteractiveInkFeature {
       Curves.ease.transform(_radiusController.value),
     );
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
+    canvas.save();
     if (originOffset == null) {
-      canvas.save();
       canvas.transform(transform.storage);
-      if (_clipCallback != null) {
-        _clipCanvasWithRect(canvas, _clipCallback());
-      }
-      canvas.drawCircle(center, _radius.value, paint);
-      canvas.restore();
     } else {
-      if (_clipCallback != null) {
-        canvas.save();
-        _clipCanvasWithRect(canvas, _clipCallback(), offset: originOffset);
-      }
-      canvas.drawCircle(center + originOffset, _radius.value, paint);
-      if (_clipCallback != null)
-        canvas.restore();
+      canvas.translate(originOffset.dx, originOffset.dy);
     }
+    if (_clipCallback != null) {
+      final Rect rect = _clipCallback();
+      if (_customBorder != null) {
+        canvas.clipPath(_customBorder.getOuterPath(rect));
+      } else if (_borderRadius != BorderRadius.zero) {
+        canvas.clipRRect(new RRect.fromRectAndCorners(
+          rect,
+          topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+          bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+        ));
+      } else {
+        canvas.clipRect(rect);
+      }
+    }
+    canvas.drawCircle(center, _radius.value, paint);
+    canvas.restore();
   }
 }

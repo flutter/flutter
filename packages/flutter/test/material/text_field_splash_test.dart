@@ -19,6 +19,7 @@ class TestInkSplash extends InkSplash {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   }) : super(
@@ -29,6 +30,7 @@ class TestInkSplash extends InkSplash {
     containedInkWell: containedInkWell,
     rectCallback: rectCallback,
     borderRadius: borderRadius,
+    customBorder: customBorder,
     radius: radius,
     onRemoved: onRemoved,
   );
@@ -58,6 +60,7 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
   }) {
@@ -69,6 +72,7 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
       containedInkWell: containedInkWell,
       rectCallback: rectCallback,
       borderRadius: borderRadius,
+      customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
     );
@@ -152,12 +156,12 @@ void main() {
             child: new ListView(
               children: <Widget>[
                 const TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'label1',
                   ),
                 ),
                 const TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'label2',
                   ),
                 ),

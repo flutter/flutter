@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart' show lowerBound;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 enum LeaveBehindDemoAction {
   reset,
@@ -85,52 +86,55 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
-  Widget buildItem(LeaveBehindItem item) {
-    final ThemeData theme = Theme.of(context);
-    return new Dismissible(
-      key: new ObjectKey(item),
-      direction: _dismissDirection,
-      onDismissed: (DismissDirection direction) {
-        setState(() {
-          leaveBehindItems.remove(item);
-        });
-        final String action = (direction == DismissDirection.endToStart) ? 'archived' : 'deleted';
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          content: new Text('You $action item ${item.index}'),
-          action: new SnackBarAction(
-            label: 'UNDO',
-            onPressed: () { handleUndo(item); }
-          )
-        ));
-      },
-      background: new Container(
-        color: theme.primaryColor,
-        child: const ListTile(
-          leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
-        )
-      ),
-      secondaryBackground: new Container(
-        color: theme.primaryColor,
-        child: const ListTile(
-          trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
-        )
-      ),
-      child: new Container(
-        decoration: new BoxDecoration(
-          color: theme.canvasColor,
-          border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-        ),
-        child: new ListTile(
-          title: new Text(item.name),
-          subtitle: new Text('${item.subject}\n${item.body}'),
-          isThreeLine: true
-        )
+  void _handleArchive(LeaveBehindItem item) {
+    setState(() {
+      leaveBehindItems.remove(item);
+    });
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text('You archived item ${item.index}'),
+      action: new SnackBarAction(
+        label: 'UNDO',
+        onPressed: () { handleUndo(item); }
       )
-    );
+    ));
+  }
+
+  void _handleDelete(LeaveBehindItem item) {
+    setState(() {
+      leaveBehindItems.remove(item);
+    });
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text('You deleted item ${item.index}'),
+      action: new SnackBarAction(
+        label: 'UNDO',
+        onPressed: () { handleUndo(item); }
+      )
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget body;
+    if (leaveBehindItems.isEmpty) {
+      body = new Center(
+        child: new RaisedButton(
+          onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
+          child: const Text('Reset the list'),
+        ),
+      );
+    } else {
+      body = new ListView(
+        children: leaveBehindItems.map((LeaveBehindItem item) {
+          return new _LeaveBehindListItem(
+            item: item,
+            onArchive: _handleArchive,
+            onDelete: _handleDelete,
+            dismissDirection: _dismissDirection,
+          );
+        }).toList()
+      );
+    }
+
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
@@ -141,9 +145,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               const PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
-                child: const Text('Reset the list')
+                child: Text('Reset the list')
               ),
-              const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+              const PopupMenuDivider(),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,
@@ -163,16 +167,74 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           )
         ]
       ),
-      body: leaveBehindItems.isEmpty
-          ? new Center(
-              child: new RaisedButton(
-                onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
-                child: const Text('Reset the list'),
-              ),
-            )
-          : new ListView(
-             children: leaveBehindItems.map(buildItem).toList()
-            ),
+      body: body,
+    );
+  }
+}
+
+class _LeaveBehindListItem extends StatelessWidget {
+  const _LeaveBehindListItem({
+    Key key,
+    @required this.item,
+    @required this.onArchive,
+    @required this.onDelete,
+    @required this.dismissDirection,
+  }) : super(key: key);
+
+  final LeaveBehindItem item;
+  final DismissDirection dismissDirection;
+  final void Function(LeaveBehindItem) onArchive;
+  final void Function(LeaveBehindItem) onDelete;
+
+  void _handleArchive() {
+    onArchive(item);
+  }
+
+  void _handleDelete() {
+    onDelete(item);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return new Semantics(
+      customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+        const CustomSemanticsAction(label: 'Archive'): _handleArchive,
+        const CustomSemanticsAction(label: 'Delete'): _handleDelete,
+      },
+      child: new Dismissible(
+        key: new ObjectKey(item),
+        direction: dismissDirection,
+        onDismissed: (DismissDirection direction) {
+          if (direction == DismissDirection.endToStart)
+            _handleArchive();
+          else
+            _handleDelete();
+        },
+        background: new Container(
+          color: theme.primaryColor,
+          child: const ListTile(
+            leading: Icon(Icons.delete, color: Colors.white, size: 36.0)
+          )
+        ),
+        secondaryBackground: new Container(
+          color: theme.primaryColor,
+          child: const ListTile(
+            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0)
+          )
+        ),
+        child: new Container(
+          decoration: new BoxDecoration(
+            color: theme.canvasColor,
+            border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+          ),
+          child: new ListTile(
+            title: new Text(item.name),
+            subtitle: new Text('${item.subject}\n${item.body}'),
+            isThreeLine: true
+          ),
+        ),
+      ),
     );
   }
 }

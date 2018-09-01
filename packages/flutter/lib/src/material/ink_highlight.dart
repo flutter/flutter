@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
+const Duration _kHighlightFadeDuration = Duration(milliseconds: 200);
 
 /// A visual emphasis on a part of a [Material] receiving user interaction.
 ///
@@ -41,12 +41,14 @@ class InkHighlight extends InteractiveInkFeature {
     @required Color color,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
+    ShapeBorder customBorder,
     RectCallback rectCallback,
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
+       _customBorder = customBorder,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
@@ -63,6 +65,7 @@ class InkHighlight extends InteractiveInkFeature {
 
   final BoxShape _shape;
   final BorderRadius _borderRadius;
+  final ShapeBorder _customBorder;
   final RectCallback _rectCallback;
 
   Animation<int> _alpha;
@@ -97,6 +100,10 @@ class InkHighlight extends InteractiveInkFeature {
 
   void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
     assert(_shape != null);
+    canvas.save();
+    if (_customBorder != null) {
+      canvas.clipPath(_customBorder.getOuterPath(rect));
+    }
     switch (_shape) {
       case BoxShape.circle:
         canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
@@ -114,6 +121,7 @@ class InkHighlight extends InteractiveInkFeature {
         }
         break;
     }
+    canvas.restore();
   }
 
   @override

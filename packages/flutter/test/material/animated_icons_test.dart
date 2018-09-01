@@ -17,12 +17,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -31,20 +31,20 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verify(canvas.drawPath(typed(any), typed(argThat(hasColor(0xFF666666)))));
+    verify(canvas.drawPath(any, argThat(hasColor(0xFF666666))));
   });
 
   testWidgets('IconTheme opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             opacity: 0.5,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -53,21 +53,21 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verify(canvas.drawPath(typed(any), typed(argThat(hasColor(0x80666666)))));
+    verify(canvas.drawPath(any, argThat(hasColor(0x80666666))));
   });
 
   testWidgets('color overrides IconTheme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
-            color: const Color(0xFF0000FF),
+            color: Color(0xFF0000FF),
           )
         ),
       ),
@@ -75,20 +75,20 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verify(canvas.drawPath(typed(any), typed(argThat(hasColor(0xFF0000FF)))));
+    verify(canvas.drawPath(any, argThat(hasColor(0xFF0000FF))));
   });
 
   testWidgets('IconTheme size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             size: 12.0,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -105,13 +105,13 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
             size: 12.0,
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             size: 96.0,
           )
@@ -131,8 +131,8 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const AnimatedIcon(
-          progress: const AlwaysStoppedAnimation<double>(0.0),
+        child: AnimatedIcon(
+          progress: AlwaysStoppedAnimation<double>(0.0),
           icon: AnimatedIcons.arrow_menu,
           size: 96.0,
           semanticLabel: 'a label',
@@ -149,12 +149,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -173,12 +173,12 @@ void main() {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
           )
         ),
@@ -187,20 +187,20 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verifyNever(canvas.rotate(typed(any)));
-    verifyNever(canvas.translate(typed(any), typed(any)));
+    verifyNever(canvas.rotate(any));
+    verifyNever(canvas.translate(any, any));
   });
 
   testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
-        child: const IconTheme(
-          data: const IconThemeData(
-            color: const Color(0xFF666666),
+        child: IconTheme(
+          data: IconThemeData(
+            color: Color(0xFF666666),
           ),
-          child: const AnimatedIcon(
-            progress: const AlwaysStoppedAnimation<double>(0.0),
+          child: AnimatedIcon(
+            progress: AlwaysStoppedAnimation<double>(0.0),
             icon: AnimatedIcons.arrow_menu,
             textDirection: TextDirection.rtl,
           )

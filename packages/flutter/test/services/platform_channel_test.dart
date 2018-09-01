@@ -6,12 +6,12 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('BasicMessageChannel', () {
-    const MessageCodec<String> string = const StringCodec();
-    const BasicMessageChannel<String> channel = const BasicMessageChannel<String>('ch', string);
+    const MessageCodec<String> string = StringCodec();
+    const BasicMessageChannel<String> channel = BasicMessageChannel<String>('ch', string);
     test('can send string message and get reply', () async {
       BinaryMessages.setMockMessageHandler(
         'ch',
@@ -35,9 +35,9 @@ void main() {
   });
 
   group('MethodChannel', () {
-    const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
-    const MethodCodec jsonMethod = const JSONMethodCodec();
-    const MethodChannel channel = const MethodChannel('ch7', jsonMethod);
+    const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+    const MethodCodec jsonMethod = JSONMethodCodec();
+    const MethodChannel channel = MethodChannel('ch7', jsonMethod);
     test('can invoke method and get result', () async {
       BinaryMessages.setMockMessageHandler(
         'ch7',
@@ -158,9 +158,9 @@ void main() {
     });
   });
   group('EventChannel', () {
-    const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
-    const MethodCodec jsonMethod = const JSONMethodCodec();
-    const EventChannel channel = const EventChannel('ch', jsonMethod);
+    const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+    const MethodCodec jsonMethod = JSONMethodCodec();
+    const EventChannel channel = EventChannel('ch', jsonMethod);
     void emitEvent(dynamic event) {
       BinaryMessages.handlePlatformMessage(
         'ch',
@@ -215,7 +215,7 @@ void main() {
       await new Future<Null>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
-      expect(errors[0], const isInstanceOf<PlatformException>());
+      expect(errors[0], isInstanceOf<PlatformException>());
       final PlatformException error = errors[0];
       expect(error.code, '404');
       expect(error.message, 'Not Found.');

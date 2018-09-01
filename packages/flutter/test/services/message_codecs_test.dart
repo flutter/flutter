@@ -5,11 +5,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('Binary codec', () {
-    const MessageCodec<ByteData> binary = const BinaryCodec();
+    const MessageCodec<ByteData> binary = BinaryCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<ByteData>(binary, null);
       _checkEncodeDecode<ByteData>(binary, new ByteData(0));
@@ -17,16 +17,29 @@ void main() {
     });
   });
   group('String codec', () {
-    const MessageCodec<String> string = const StringCodec();
+    const MessageCodec<String> string = StringCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<String>(string, null);
       _checkEncodeDecode<String>(string, '');
       _checkEncodeDecode<String>(string, 'hello');
       _checkEncodeDecode<String>(string, 'special chars >\u263A\u{1F602}<');
     });
+    test('ByteData with offset', () {
+      const MessageCodec<String> string = StringCodec();
+      final ByteData helloWorldByteData = string.encodeMessage('hello world');
+      final ByteData helloByteData = string.encodeMessage('hello');
+
+      final ByteData offsetByteData = new ByteData.view(
+          helloWorldByteData.buffer,
+          helloByteData.lengthInBytes,
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes
+      );
+
+      expect(string.decodeMessage(offsetByteData), ' world');
+    });
   });
   group('JSON message codec', () {
-    const MessageCodec<dynamic> json = const JSONMessageCodec();
+    const MessageCodec<dynamic> json = JSONMessageCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<dynamic>(json, null);
       _checkEncodeDecode<dynamic>(json, true);
@@ -61,7 +74,7 @@ void main() {
     });
   });
   group('Standard message codec', () {
-    const MessageCodec<dynamic> standard = const StandardMessageCodec();
+    const MessageCodec<dynamic> standard = StandardMessageCodec();
     test('should encode integers correctly at boundary cases', () {
       _checkEncoding<dynamic>(
         standard,

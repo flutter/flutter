@@ -3,18 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('BackButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: const Material(child: const Text('Home')),
+        home: const Material(child: Text('Home')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Material(
-              child: const Center(
-                child: const BackButton(),
+              child: Center(
+                child: BackButton(),
               )
             );
           },
@@ -58,5 +59,36 @@ void main() {
     final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
     final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
     expect(iOSIcon == androidIcon, false);
+  });
+
+  testWidgets('BackButton semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Material(child: Text('Home')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(
+              child: Center(
+                child: BackButton(),
+              ),
+            );
+          },
+        },
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getSemanticsData(find.byType(BackButton)), matchesSemanticsData(
+      label: 'Back',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+    ));
+    handle.dispose();
   });
 }

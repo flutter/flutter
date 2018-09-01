@@ -39,5 +39,16 @@
   "popupMenuLabel": "Popup menü",
   "dialogLabel": "İletişim kutusu",
   "alertDialogLabel": "Alarm",
-  "searchFieldLabel": "Arama"
+  "searchFieldLabel": "Arama",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

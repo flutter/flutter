@@ -229,7 +229,7 @@ void main() {
   testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ClipRect(
-        child: const Placeholder(),
+        child: Placeholder(),
       ),
     );
     expect(tester.renderObject(find.byType(ClipRect)).paint, paints
@@ -306,10 +306,10 @@ void main() {
                   angle: 1.0, // radians
                   child: new ClipRRect(
                     borderRadius: const BorderRadius.only(
-                      topLeft: const Radius.elliptical(10.0, 20.0),
-                      topRight: const Radius.elliptical(5.0, 30.0),
-                      bottomLeft: const Radius.elliptical(2.5, 12.0),
-                      bottomRight: const Radius.elliptical(15.0, 6.0),
+                      topLeft: Radius.elliptical(10.0, 20.0),
+                      topRight: Radius.elliptical(5.0, 30.0),
+                      bottomLeft: Radius.elliptical(2.5, 12.0),
+                      bottomRight: Radius.elliptical(15.0, 6.0),
                     ),
                     child: new Container(
                       color: Colors.red,
@@ -431,7 +431,70 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalModel painting', (WidgetTester tester) async {
+  Center genPhysicalModel(Clip clipBehavior) {
+    return new Center(
+      child: new RepaintBoundary(
+        child: new Container(
+          color: Colors.white,
+          child: new Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: new SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: new Transform.rotate(
+                angle: 1.0, // radians
+                child: new PhysicalModel(
+                  borderRadius: new BorderRadius.circular(20.0),
+                  color: Colors.red,
+                  clipBehavior: clipBehavior,
+                  child: new Container(
+                    color: Colors.white,
+                    child: new RepaintBoundary(
+                      child: new Center(
+                        child: new Container(
+                          color: Colors.black,
+                          height: 10.0,
+                          width: 10.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.antiAlias.png'),
+    );
+  });
+
+  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.hardEdge.png'),
+    );
+  });
+
+  // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
+  // round corners.
+  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
+    );
+  });
+
+  testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
         child: new RepaintBoundary(
@@ -469,7 +532,72 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.1.png'),
+      matchesGoldenFile('clip.PhysicalModel.default.png'),
+    );
+  });
+
+  Center genPhysicalShape(Clip clipBehavior) {
+    return new Center(
+      child: new RepaintBoundary(
+        child: new Container(
+          color: Colors.white,
+          child: new Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: new SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: new Transform.rotate(
+                angle: 1.0, // radians
+                child: new PhysicalShape(
+                  clipper: new ShapeBorderClipper(
+                    shape: new BeveledRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  clipBehavior: clipBehavior,
+                  color: Colors.red,
+                  child: new Container(
+                    color: Colors.white,
+                    child: new RepaintBoundary(
+                      child: new Center(
+                        child: new Container(
+                          color: Colors.black,
+                          height: 10.0,
+                          width: 10.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.antiAlias.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.hardEdge.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
     );
   });
 
@@ -515,7 +643,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.1.png'),
+      matchesGoldenFile('clip.PhysicalShape.default.png'),
     );
   });
 }

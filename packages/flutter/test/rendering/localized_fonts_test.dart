@@ -18,9 +18,9 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           supportedLocales: const <Locale>[
-            const Locale('en', 'US'),
-            const Locale('ja'),
-            const Locale('zh'),
+            Locale('en', 'US'),
+            Locale('ja'),
+            Locale('zh'),
           ],
           home: new Builder(
             builder: (BuildContext context) {
@@ -52,7 +52,6 @@ void main() {
       await expectLater(
         find.byType(RichText),
         matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
-        skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,
@@ -64,9 +63,9 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           supportedLocales: const <Locale>[
-            const Locale('en', 'US'),
-            const Locale('ja'),
-            const Locale('zh'),
+            Locale('en', 'US'),
+            Locale('ja'),
+            Locale('zh'),
           ],
           home: new Builder(
             builder: (BuildContext context) {
@@ -105,7 +104,6 @@ void main() {
       await expectLater(
         find.byType(Row),
         matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
-        skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,
@@ -117,9 +115,9 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           supportedLocales: const <Locale>[
-            const Locale('en', 'US'),
-            const Locale('ja'),
-            const Locale('zh'),
+            Locale('en', 'US'),
+            Locale('ja'),
+            Locale('zh'),
           ],
           home: new Builder(
             builder: (BuildContext context) {
@@ -150,7 +148,6 @@ void main() {
       await expectLater(
         find.byType(Row),
         matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
-        skip: !Platform.isLinux,
       );
     },
     skip: !Platform.isLinux,

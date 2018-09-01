@@ -41,7 +41,8 @@ class AnimatedIcon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
   }) : assert(progress != null),
-       assert(icon != null);
+       assert(icon != null),
+       super(key: key);
 
   /// The animation progress for the animated icon.
   ///

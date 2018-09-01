@@ -41,5 +41,16 @@
   "popupMenuLabel": "תפריט קופץ",
   "dialogLabel": "תיבת דו-שיח",
   "alertDialogLabel": "עֵרָנִי",
-  "searchFieldLabel": "לחפש"
+  "searchFieldLabel": "לחפש",
+  "reorderItemToStart": "TBD",
+  "reorderItemToEnd": "TBD",
+  "reorderItemUp": "TBD",
+  "reorderItemDown": "TBD",
+  "reorderItemLeft": "TBD",
+  "reorderItemRight": "TBD",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

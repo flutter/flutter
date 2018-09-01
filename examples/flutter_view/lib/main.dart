@@ -1,3 +1,7 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _pong = 'pong';
   static const String _emptyMessage = '';
   static const BasicMessageChannel<String> platform =
-      const BasicMessageChannel<String>(_channel, const StringCodec());
+      BasicMessageChannel<String>(_channel, StringCodec());
 
   int _counter = 0;
 
@@ -69,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: new Row(
               children: <Widget>[
                 new Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
+                const Text('Flutter', style: TextStyle(fontSize: 30.0)),
               ],
             ),
           ),

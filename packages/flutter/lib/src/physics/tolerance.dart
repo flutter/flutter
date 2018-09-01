@@ -18,7 +18,7 @@ class Tolerance {
   static const double _epsilonDefault = 1e-3;
 
   /// A default tolerance of 0.001 for all three values.
-  static const Tolerance defaultTolerance = const Tolerance();
+  static const Tolerance defaultTolerance = Tolerance();
 
   /// The magnitude of the maximum distance between two points for them to be
   /// considered within tolerance.

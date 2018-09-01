@@ -109,8 +109,10 @@ Future<Null> pubGet({
         failureMessage: 'pub $command failed',
         retry: true,
       );
-    } finally {
       status.stop();
+    } catch (exception) {
+      status.cancel();
+      rethrow;
     }
   }
 
@@ -174,6 +176,7 @@ Future<Null> pub(List<String> arguments, {
 Future<Null> pubInteractively(List<String> arguments, {
   String directory,
 }) async {
+  Cache.releaseLockEarly();
   final int code = await runInteractively(
     _pubCommand(arguments),
     workingDirectory: directory,

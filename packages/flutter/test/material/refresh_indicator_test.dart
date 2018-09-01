@@ -10,14 +10,14 @@ import 'package:flutter/material.dart';
 
 bool refreshCalled = false;
 
-Future<Null> refresh() {
+Future<void> refresh() {
   refreshCalled = true;
-  return new Future<Null>.value();
+  return new Future<void>.value();
 }
 
-Future<Null> holdRefresh() {
+Future<void> holdRefresh() {
   refreshCalled = true;
-  return new Completer<Null>().future;
+  return new Completer<void>().future;
 }
 
 void main() {
@@ -100,9 +100,9 @@ void main() {
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -127,9 +127,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -154,9 +154,9 @@ void main() {
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -180,9 +180,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -208,9 +208,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -235,9 +235,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -248,7 +248,7 @@ void main() {
     bool completed = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -260,7 +260,7 @@ void main() {
     refreshCalled = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -278,9 +278,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -291,7 +291,7 @@ void main() {
     bool completed = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -303,7 +303,7 @@ void main() {
     refreshCalled = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -322,9 +322,9 @@ void main() {
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -335,11 +335,11 @@ void main() {
     bool completed1 = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed1 = true; });
+      .then<void>((void value) { completed1 = true; });
     bool completed2 = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed2 = true; });
+      .then<void>((void value) { completed2 = true; });
     await tester.pump();
     expect(completed1, false);
     expect(completed2, false);
@@ -358,7 +358,7 @@ void main() {
         home: new RefreshIndicator(
           onRefresh: () {
             refreshCalled = true;
-            // Missing a returned Future value here.
+            return null; // Missing a returned Future value here, should cause framework to throw.
           },
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),

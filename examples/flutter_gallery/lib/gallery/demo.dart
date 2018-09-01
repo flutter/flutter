@@ -64,7 +64,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               new Builder(
                 builder: (BuildContext context) {
                   return new IconButton(
-                    icon: const Icon(Icons.description),
+                    icon: const Icon(Icons.code),
                     tooltip: 'Show example code',
                     onPressed: () {
                       _showExampleCode(context);
@@ -137,7 +137,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     Widget body;
     if (_exampleCode == null) {
       body = const Center(
-        child: const CircularProgressIndicator()
+        child: CircularProgressIndicator()
       );
     } else {
       body = new SingleChildScrollView(

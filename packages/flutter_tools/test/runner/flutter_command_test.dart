@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -61,7 +61,7 @@ void main() {
 
       expect(
         verify(usage.sendTiming(
-                typed(captureAny), typed(captureAny), typed(captureAny),
+                captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
       );
@@ -80,8 +80,8 @@ void main() {
       await flutterCommand.run();
       verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(
-                   typed(captureAny), typed(captureAny), typed(captureAny),
-                   label: captureAnyNamed('label')));
+                   any, any, any,
+                   label: anyNamed('label')));
     },
     overrides: <Type, Generator>{
       Clock: () => clock,
@@ -106,7 +106,7 @@ void main() {
       verify(clock.now()).called(2);
       expect(
         verify(usage.sendTiming(
-                typed(captureAny), typed(captureAny), typed(captureAny),
+                captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
         <dynamic>[
           'flutter',
@@ -125,8 +125,12 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand =
-          new DummyFlutterCommand(commandFunction: () async { throwToolExit('fail'); });
+      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        },
+      );
 
       try {
         await flutterCommand.run();
@@ -137,7 +141,7 @@ void main() {
 
         expect(
           verify(usage.sendTiming(
-                  typed(captureAny), typed(captureAny), typed(captureAny),
+                  captureAny, captureAny, captureAny,
                   label: captureAnyNamed('label'))).captured,
           <dynamic>[
             'flutter',
