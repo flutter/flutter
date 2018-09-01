@@ -4,6 +4,10 @@
 
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace shell {
 
 PlatformViewEmbedder::PlatformViewEmbedder(
