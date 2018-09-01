@@ -290,7 +290,6 @@ Information about project "Runner":
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -308,7 +307,6 @@ Information about project "Runner":
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -326,7 +324,6 @@ Information about project "Runner":
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -345,7 +342,6 @@ Information about project "Runner":
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -383,7 +379,6 @@ Information about project "Runner":
       await updateGeneratedXcodeProperties(
         project: await FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');

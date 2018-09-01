@@ -230,7 +230,6 @@ class IosProject {
         project: parent,
         buildInfo: BuildInfo.debug,
         targetOverride: bundle.defaultMainPath,
-        previewDart2: true,
       );
     }
   }

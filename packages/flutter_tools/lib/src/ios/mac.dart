@@ -236,7 +236,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   await updateGeneratedXcodeProperties(
     project: project,
     targetOverride: targetOverride,
-    previewDart2: true,
     buildInfo: buildInfo,
   );
 
