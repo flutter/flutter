@@ -118,6 +118,7 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
+  const Duration doubleTapTimeout = const Duration(milliseconds: 300);
   const String kThreeLines =
     'First line of text is '
     'Second line goes until '
@@ -398,13 +399,13 @@ void main() {
     final int tapIndex = testValue.indexOf('e');
     final Offset ePos = textOffsetToPosition(tester, tapIndex);
     await tester.tapAt(ePos);
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(controller.selection.baseOffset, tapIndex);
     expect(controller.selection.extentOffset, tapIndex);
   });
 
-  testWidgets('Can long press to select', (WidgetTester tester) async {
+  testWidgets('Can long press to select a word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -427,6 +428,40 @@ void main() {
     final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
+    await tester.pump();
+
+    // 'def' is selected.
+    expect(controller.selection.baseOffset, testValue.indexOf('d'));
+    expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
+  });
+
+  testWidgets('Can double tap to select a word', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+        ),
+      )
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press the 'e' to select 'def'.
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final TestGesture firstTapGesture = await tester.startGesture(ePos);
+    await tester.pump(Duration(milliseconds: 100));
+    await firstTapGesture.up();
+    await tester.pump();
+    final TestGesture secondTapGesture = await tester.startGesture(ePos);
+    await tester.pump();
+    await secondTapGesture.up();
     await tester.pump();
 
     // 'def' is selected.
@@ -512,7 +547,7 @@ void main() {
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     RenderEditable renderEditable = findRenderEditable(tester);
     List<TextSelectionPoint> endpoints = globalize(
@@ -520,7 +555,7 @@ void main() {
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // SELECT ALL should select all the text.
@@ -536,7 +571,7 @@ void main() {
 
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     renderEditable = findRenderEditable(tester);
     endpoints = globalize(
@@ -544,7 +579,7 @@ void main() {
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // PASTE right before the 'e'.
@@ -570,7 +605,7 @@ void main() {
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -578,7 +613,7 @@ void main() {
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     // Toolbar should fade in. Starting at 0% opacity.
     final Element target = tester.element(find.text('SELECT ALL'));
@@ -1062,7 +1097,7 @@ void main() {
 
     // Focus the Input. The prefix should still display.
     await tester.tap(find.byKey(secondKey));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(find.text('Prefix'), findsOneWidget);
     expect(find.text('Suffix'), findsOneWidget);
@@ -1114,7 +1149,7 @@ void main() {
     expect(getOpacity(tester, find.text('Hint')), 1.0);
 
     await tester.tap(find.byKey(secondKey));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     // Focus the Input. The hint, prefix, and suffix should appear
     expect(getOpacity(tester, find.text('Prefix')), 1.0);
@@ -1180,7 +1215,7 @@ void main() {
 
     // Focus the input. The label, prefix, and suffix should appear.
     await tester.tap(find.byKey(secondKey));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     expect(getOpacity(tester, find.text('Prefix')), 1.0);
     expect(getOpacity(tester, find.text('Suffix')), 1.0);
@@ -1229,7 +1264,7 @@ void main() {
     // Focus the Input. The label should start animating upwards.
     await tester.tap(find.byKey(secondKey));
     await tester.idle();
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 50));
 
     Offset newPos = tester.getTopLeft(find.text('Second'));
@@ -1364,7 +1399,7 @@ void main() {
 
     // Initial state with null controller.
     await tester.tap(find.byType(TextField));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     expect(tester.testTextInput.editingState['text'], isEmpty);
 
     // Update the controller from null to controller1.
@@ -1502,7 +1537,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
@@ -1510,7 +1545,7 @@ void main() {
       renderEditable,
     );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
@@ -1606,7 +1641,7 @@ void main() {
     expect(controller1.selection, isNot(equals(TextRange.empty)));
 
     await tester.tap(find.byKey(key2));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     expect(controller1.selection, equals(TextRange.empty));
   });
 
@@ -2343,7 +2378,7 @@ void main() {
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, 0));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is
 
     // Confirm that the selection was updated.
@@ -2450,7 +2485,7 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
 
     await tester.tap(find.byKey(key));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
@@ -2563,7 +2598,7 @@ void main() {
 
     // Focus the text field
     await tester.tap(find.byKey(key));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
@@ -2637,7 +2672,7 @@ void main() {
 
     // Focus the text field
     await tester.tap(find.byKey(key));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     const int inputFieldId = 1;
 
@@ -2864,7 +2899,7 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
 
     await tester.tap(find.byType(TextField));
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
