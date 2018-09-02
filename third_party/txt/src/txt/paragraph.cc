@@ -871,6 +871,9 @@ Paragraph::GetMinikinFontCollectionForStyle(const TextStyle& style) {
 sk_sp<SkTypeface> Paragraph::GetDefaultSkiaTypeface(const TextStyle& style) {
   std::shared_ptr<minikin::FontCollection> collection =
       GetMinikinFontCollectionForStyle(style);
+  if (!collection) {
+    return nullptr;
+  }
   minikin::FakedFont faked_font =
       collection->baseFontFaked(GetMinikinFontStyle(style));
   return static_cast<FontSkia*>(faked_font.font)->GetSkTypeface();
