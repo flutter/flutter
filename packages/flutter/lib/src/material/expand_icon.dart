@@ -5,7 +5,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
