@@ -118,7 +118,7 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
-  const Duration doubleTapTimeout = const Duration(milliseconds: 300);
+  const Duration doubleTapTimeout = Duration(milliseconds: 300);
   const String kThreeLines =
     'First line of text is '
     'Second line goes until '
@@ -456,7 +456,7 @@ void main() {
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     final TestGesture firstTapGesture = await tester.startGesture(ePos);
-    await tester.pump(Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
     await firstTapGesture.up();
     await tester.pump();
     final TestGesture secondTapGesture = await tester.startGesture(ePos);
