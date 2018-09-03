@@ -116,6 +116,7 @@ class ScrollStartNotification extends ScrollNotification {
     @required ScrollMetrics metrics,
     @required BuildContext context,
     this.dragDetails,
+    this.pointerScrollDetails,
   }) : super(metrics: metrics, context: context);
 
   /// If the [Scrollable] started scrolling because of a drag, the details about
@@ -123,6 +124,12 @@ class ScrollStartNotification extends ScrollNotification {
   ///
   /// Otherwise, null.
   final DragStartDetails dragDetails;
+
+  /// If the [Scrollable] started scrolling because of a pointer scroll gesture,
+  /// the details about that scroll start.
+  ///
+  /// Otherwise, null.
+  final PointerScrollStartDetails pointerScrollDetails;
 
   @override
   void debugFillDescription(List<String> description) {
@@ -147,6 +154,7 @@ class ScrollUpdateNotification extends ScrollNotification {
     @required ScrollMetrics metrics,
     @required BuildContext context,
     this.dragDetails,
+    this.pointerScrollDetails,
     this.scrollDelta,
   }) : super(metrics: metrics, context: context);
 
@@ -155,6 +163,12 @@ class ScrollUpdateNotification extends ScrollNotification {
   ///
   /// Otherwise, null.
   final DragUpdateDetails dragDetails;
+
+  /// If the [Scrollable] changed its scroll position because of a pointer
+  /// scroll gesture, the details about that scroll update.
+  ///
+  /// Otherwise, null.
+  final PointerScrollUpdateDetails pointerScrollDetails;
 
   /// The distance by which the [Scrollable] was scrolled, in logical pixels.
   final double scrollDelta;
@@ -184,6 +198,7 @@ class OverscrollNotification extends ScrollNotification {
     @required ScrollMetrics metrics,
     @required BuildContext context,
     this.dragDetails,
+    this.pointerScrollDetails,
     @required this.overscroll,
     this.velocity = 0.0,
   }) : assert(overscroll != null),
@@ -197,6 +212,12 @@ class OverscrollNotification extends ScrollNotification {
   ///
   /// Otherwise, null.
   final DragUpdateDetails dragDetails;
+
+  /// If the [Scrollable] changed its scroll position because of a pointer
+  /// scroll gesture, the details about that scroll update.
+  ///
+  /// Otherwise, null.
+  final PointerScrollUpdateDetails pointerScrollDetails;
 
   /// The number of logical pixels that the [Scrollable] avoided scrolling.
   ///
@@ -234,6 +255,7 @@ class ScrollEndNotification extends ScrollNotification {
     @required ScrollMetrics metrics,
     @required BuildContext context,
     this.dragDetails,
+    this.pointerScrollDetails,
   }) : super(metrics: metrics, context: context);
 
   /// If the [Scrollable] stopped scrolling because of a drag, the details about
@@ -248,6 +270,12 @@ class ScrollEndNotification extends ScrollNotification {
   /// scrolling, then the [ScrollEndNotification] will be dispatched immediately
   /// and [dragDetails] will be non-null.
   final DragEndDetails dragDetails;
+
+  /// If the [Scrollable] stopped scrolling because of a pointer scroll, the
+  /// details about that drag end.
+  ///
+  /// Otherwise, null.
+  final PointerScrollEndDetails pointerScrollDetails;
 
   @override
   void debugFillDescription(List<String> description) {

@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset, PointerDeviceKind;
+import 'dart:ui' show Offset, PointerDeviceKind, PointerChange;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show Offset, PointerDeviceKind;
+export 'dart:ui' show Offset, PointerDeviceKind, PointerChange;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
@@ -114,7 +114,7 @@ abstract class PointerEvent {
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
-    this.scrollDelta = Offset.zero,
+    this.gestureChange,
     this.synthesized = false,
   });
 
@@ -237,10 +237,12 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
-  /// For PointerChange.scroll:
+  /// For PointerDeviceKind.gesture events:
   ///
-  /// The amount to scroll in the x direction, in logical pixels.
-  final Offset scrollDelta;
+  /// The change type for the pointer gesture. For instance, a pointer scroll
+  /// gesture would start with a PointerChange.down, followed by
+  /// some number of PointerChange.move events, finishing with PointerChange.up.
+  final PointerChange gestureChange;
 
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
@@ -259,6 +261,10 @@ abstract class PointerEvent {
 
   /// Returns a complete textual description of this event.
   String toStringFull() {
+    String extraDescription = addedFieldDescriptions();
+    if (extraDescription.isNotEmpty()) {
+      extraDescription = ', $extraDescription';
+    }
     return '$runtimeType('
              'timeStamp: $timeStamp, '
              'pointer: $pointer, '
@@ -281,10 +287,15 @@ abstract class PointerEvent {
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
-             'scrollDelta: $scrollDelta, '
              'synthesized: $synthesized'
+             '$extraDescription'
            ')';
   }
+}
+
+/// Overridden to add information about fields to toStringFull.
+String addedFieldDescriptions() {
+  return '';
 }
 
 /// The device has started tracking the pointer.
@@ -562,26 +573,38 @@ class PointerUpEvent extends PointerEvent {
 
 /// The pointer issued a scroll event.
 ///
-/// For example, the scroll wheel on a mouse was scrolled.
+/// For example, the scroll wheel on a mouse was scrolled, or an event was
+/// triggered by a trackpad scroll gesture.
 class PointerScrollEvent extends PointerEvent {
   /// Creates a pointer scroll event.
   ///
-  /// All of the argument must be non-null.
+  /// All of the arguments other than [change] must be non-null. A null [change]
+  /// indicates that the scroll event is discrete rather than part of a
+  /// continuous gesture.
   const PointerScrollEvent({
     Duration timeStamp = Duration.zero,
     int pointer = 0,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    PointerChange gestureChange,
     int device = 0,
     Offset position = Offset.zero,
-    Offset scrollDelta = Offset.zero
+    this.scrollDelta = Offset.zero,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
     device: device,
     position: position,
-    scrollDelta: scrollDelta
+    gestureChange: gestureChange,
   );
+
+  /// The amount to scroll, in logical pixels.
+  final Offset scrollDelta;
+
+  @override
+  String addedFieldDescriptions() {
+    return 'scrollDelta: $scrollDelta';
+  }
 }
 
 /// The input from the pointer is no longer directed towards this receiver.

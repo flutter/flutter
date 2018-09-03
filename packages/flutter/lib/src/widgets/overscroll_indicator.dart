@@ -181,13 +181,20 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
           controller.absorbImpact(notification.velocity.abs());
         } else {
           assert(notification.overscroll != 0.0);
+          Offset scrollPosition;
           if (notification.dragDetails != null) {
-            assert(notification.dragDetails.globalPosition != null);
+            scrollPosition = notification.dragDetails.globalPosition;
+            assert(scrollPosition != null);
+          } else if (notification.pointerScrollDetails != null) {
+            scrollPosition = notification.pointerScrollDetails.globalPosition;
+            assert(scrollPosition != null);
+          }
+          if (scrollPosition != null) {
             final RenderBox renderer = notification.context.findRenderObject();
             assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;
-            final Offset position = renderer.globalToLocal(notification.dragDetails.globalPosition);
+            final Offset position = renderer.globalToLocal(scrollPosition);
             switch (notification.metrics.axis) {
               case Axis.horizontal:
                 controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
@@ -200,7 +207,8 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         }
       }
     } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
-      if ((notification as dynamic).dragDetails != null) {
+      if ((notification as dynamic).dragDetails != null ||
+          (notification as dynamic).pointerScrollDetails != null) {
         _leadingController.scrollEnd();
         _trailingController.scrollEnd();
       }

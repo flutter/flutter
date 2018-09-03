@@ -376,6 +376,19 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..maxFlingVelocity = _physics?.maxFlingVelocity;
               },
             ),
+            VerticalPointerScrollGestureRecognizer: new GestureRecognizerFactoryWithHandlers<VerticalPointerScrollGestureRecognizer>(
+              () => new VerticalPointerScrollGestureRecognizer(),
+              (VerticalPointerScrollGestureRecognizer instance) {
+                instance
+                  ..onStart = _handlePointerScrollStart
+                  ..onUpdate = _handlePointerScrollUpdate
+                  ..onEnd = _handlePointerScrollEnd
+                  ..onCancel = _handlePointerScrollCancel
+                  ..minFlingDistance = _physics?.minFlingDistance
+                  ..minFlingVelocity = _physics?.minFlingVelocity
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+              },
+            ),
           };
           break;
         case Axis.horizontal:
@@ -389,6 +402,19 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onUpdate = _handleDragUpdate
                   ..onEnd = _handleDragEnd
                   ..onCancel = _handleDragCancel
+                  ..minFlingDistance = _physics?.minFlingDistance
+                  ..minFlingVelocity = _physics?.minFlingVelocity
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+              },
+            ),
+            HorizontalPointerScrollGestureRecognizer: new GestureRecognizerFactoryWithHandlers<HorizontalPointerScrollGestureRecognizer>(
+              () => new HorizontalPointerScrollGestureRecognizer(),
+              (HorizontalPointerScrollGestureRecognizer instance) {
+                instance
+                  ..onStart = _handlePointerScrollStart
+                  ..onUpdate = _handlePointerScrollUpdate
+                  ..onEnd = _handlePointerScrollEnd
+                  ..onCancel = _handlePointerScrollCancel
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity;
@@ -429,6 +455,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   Drag _drag;
   ScrollHoldController _hold;
+  PointerScroll _pointerScroll;
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
@@ -477,10 +504,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _drag = null;
   }
 
+  // SCROLL WHEEL/GESTURE
 
-  // SCROLL WHEEL
+  /// Callback for discrete scroll events, such as a scroll wheel.
+  bool _handleDiscretePointerScroll(PointerScrollEvent event) {
+    // The gesture detector will handle gesture-based scrolls, so ignore
+    // anything that's not a discrete scroll event.
+    if (event.gestureChange != null)
+      return false;
 
-  bool _handlePointerScroll(PointerScrollEvent event) {
     final double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
@@ -497,6 +529,36 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     return false;
   }
 
+  void _handlePointerScrollStart(PointerScrollStartDetails details) {
+    assert(_pointerScroll == null);
+    _pointerScroll = position.pointerScroll(details, _disposePointerScroll);
+    assert(_pointerScroll != null);
+  }
+
+  void _handlePointerScrollUpdate(PointerScrollUpdateDetails details) {
+    // _pointerScroll might be null if the scroll activity ended and called
+    // _disposePointerScroll.
+    _pointerScroll?.update(details);
+  }
+
+  void _handlePointerScrollEnd(PointerScrollEndDetails details) {
+    // _pointerScroll might be null if the scroll activity ended and called
+    // _disposePointerScroll.
+    _pointerScroll?.end(details);
+    assert(_pointerScroll == null);
+  }
+
+  void _handlePointerScrollCancel() {
+    // _pointerScroll might be null if the scroll activity ended and called
+    // _disposePointerScroll.
+    _pointerScroll?.cancel();
+    assert(_pointerScroll == null);
+  }
+
+  void _disposePointerScroll() {
+    _pointerScroll = null;
+  }
+
   // DESCRIPTION
 
   @override
@@ -504,7 +566,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
     Widget result = new Listener(
-      onPointerScroll: _handlePointerScroll,
+      onPointerScroll: _handleDiscretePointerScroll,
       child: new RawGestureDetector(
         key: _gestureDetectorKey,
         gestures: _gestureRecognizers,

@@ -100,6 +100,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       _currentDrag.updateDelegate(this);
       typedOther._currentDrag = null;
     }
+    assert(_currentPointerScroll == null);
+    if (typedOther._currentPointerScroll != null) {
+      _currentPointerScroll = typedOther._currentPointerScroll;
+      _currentPointerScroll.updateDelegate(this);
+      typedOther._currentPointerScroll = null;
+    }
   }
 
   @override
@@ -117,6 +123,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
     _currentDrag = null;
+    _currentPointerScroll?.dispose();
+    _currentPointerScroll = null;
     if (!activity.isScrolling)
       updateUserScrollDirection(ScrollDirection.idle);
   }
@@ -232,6 +240,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   ScrollDragController _currentDrag;
+  PointerScrollController _currentPointerScroll;
 
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
@@ -249,9 +258,24 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
+  PointerScroll pointerScroll(PointerScrollStartDetails details, VoidCallback pointerScrollCancelCallback) {
+    final PointerScrollController pointerScroll = new PointerScrollController(
+      delegate: this,
+      details: details,
+      onScrollCanceled: pointerScrollCancelCallback,
+    );
+    beginActivity(new PointerScrollActivity(this, pointerScroll));
+    assert(_currentPointerScroll == null);
+    _currentPointerScroll = pointerScroll;
+    return pointerScroll;
+  }
+
+  @override
   void dispose() {
     _currentDrag?.dispose();
     _currentDrag = null;
+    _currentPointerScroll?.dispose();
+    _currentPointerScroll = null;
     super.dispose();
   }
 

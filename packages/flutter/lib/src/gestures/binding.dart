@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show window, PointerDataPacket;
+import 'dart:ui' as ui show window, PointerDataPacket, PointerChange;
 
 import 'package:flutter/foundation.dart';
 
@@ -95,9 +95,11 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
       result = _hitTests.remove(event.pointer);
     } else if (event is PointerScrollEvent) {
       result = new HitTestResult();
-      // Pointer scroll events are instantaneous, not gesture-based, so use
-      // the propagating dispatch model.
-      propagating = true;
+      if (event.gestureChange == null) {
+        // For instantaneous pointer scroll events, use the propagating dispatch
+        // model.
+        propagating = true;
+      }
       hitTest(result, event.position);
     } else if (event.down) {
       result = _hitTests[event.pointer];
@@ -154,9 +156,9 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   @override // from HitTestTarget
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     pointerRouter.route(event);
-    if (event is PointerDownEvent) {
+    if (event is PointerDownEvent || event.gestureChange == ui.PointerChange.down) {
       gestureArena.close(event.pointer);
-    } else if (event is PointerUpEvent) {
+    } else if (event is PointerUpEvent || event.gestureChange == ui.PointerChange.up) {
       gestureArena.sweep(event.pointer);
     }
   }

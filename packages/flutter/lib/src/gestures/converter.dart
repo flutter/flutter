@@ -107,12 +107,21 @@ class PointerEventConverter {
         }
         final Offset scrollDelta =
             new Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+        // A gesture state of hover indicates that the gesture is immediate
+        // (e.g., a scroll wheel tick) rather than an actual gesture, so don't
+        // set a gestureChange.
+        final PointerChange gestureChange = datum.change == ui.PointerChange.hover ?
+            null : datum.change;
+        if (gestureChange == ui.PointerChange.down) {
+          state.startNewPointer();
+        }
         yield new PointerScrollEvent(
           timeStamp: timeStamp,
           pointer: state.pointer,
           kind: kind,
           device: datum.device,
           position: position,
+          gestureChange: gestureChange,
           scrollDelta: scrollDelta,
         );
         break;

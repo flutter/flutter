@@ -579,6 +579,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// [ScrollDragController.onDragCanceled] for details.
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback);
 
+  /// Start a pointer scroll activity corresponding to the given
+  /// [PointerScrollStartDetails].
+  ///
+  /// The `pointerScrollCancelCallback` argument will be invoked if the scroll is
+  /// ended prematurely. See [ScrollPointerController.onScrollCanceled] for details.
+  PointerScroll pointerScroll(PointerScrollStartDetails details, VoidCallback pointerScrollCancelCallback);
+
   /// The currently operative [ScrollActivity].
   ///
   /// If the scroll position is not performing any more specific activity, the

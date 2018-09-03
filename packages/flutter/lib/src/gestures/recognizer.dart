@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' show Offset;
+import 'dart:ui' show Offset, PointerChange;
 
 import 'package:flutter/foundation.dart';
 
@@ -52,15 +52,15 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// detector.
   ///
   /// The owner of this gesture recognizer calls addPointer() with the
-  /// PointerDownEvent of each pointer that should be considered for
-  /// this gesture.
+  /// PointerDownEvent (or pointer gesture start event if acceptsPointerGestures
+  /// is true) of each pointer that should be considered for this gesture.
   ///
   /// It's the GestureRecognizer's responsibility to then add itself
   /// to the global pointer router (see [PointerRouter]) to receive
   /// subsequent events for this pointer, and to add the pointer to
   /// the global gesture arena manager (see [GestureArenaManager]) to track
   /// that pointer.
-  void addPointer(PointerDownEvent event);
+  void addPointer(covariant PointerEvent event);
 
   /// Releases any resources used by the object.
   ///
@@ -115,6 +115,10 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     }
     return result;
   }
+
+  /// True if `addPointer` can be called with start events for pointer gestures
+  /// in addition to [PointerDownEvent] for touch-based gestures.
+  bool get acceptsPointerGestures => false;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -236,7 +240,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// a [PointerUpEvent] or a [PointerCancelEvent] event.
   @protected
   void stopTrackingIfPointerNoLongerDown(PointerEvent event) {
-    if (event is PointerUpEvent || event is PointerCancelEvent)
+    if (event is PointerUpEvent || event is PointerCancelEvent ||
+        (acceptsPointerGestures && (event.gestureChange == PointerChange.up ||
+                                    event.gestureChange == PointerChange.cancel)))
       stopTrackingPointer(event.pointer);
   }
 }

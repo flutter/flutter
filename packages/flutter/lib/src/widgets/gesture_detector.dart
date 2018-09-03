@@ -613,6 +613,17 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       recognizer.addPointer(event);
   }
 
+  bool _handlePointerScroll(PointerScrollEvent event) {
+    if (event.gestureChange != PointerChange.down)
+      return false;
+    assert(_recognizers != null);
+    for (GestureRecognizer recognizer in _recognizers.values) {
+      if (recognizer.acceptsPointerGestures)
+        recognizer.addPointer(event);
+    }
+    return false;
+  }
+
   HitTestBehavior get _defaultBehavior {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
@@ -701,6 +712,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   Widget build(BuildContext context) {
     Widget result = new Listener(
       onPointerDown: _handlePointerDown,
+      onPointerScroll: _handlePointerScroll,
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child
     );

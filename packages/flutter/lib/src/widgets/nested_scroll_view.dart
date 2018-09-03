@@ -1118,6 +1118,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
+  PointerScroll pointerScroll(PointerScrollStartDetails details, VoidCallback pointerScrollCancelCallback) {
+    // TODO: Implement pointer scroll support for nested scroll views.
+    return null;
+  }
+
+  @override
   void dispose() {
     _parent?.detach(this);
     super.dispose();
