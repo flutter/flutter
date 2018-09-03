@@ -540,7 +540,7 @@ $assetsSection
       return schemaFile.readAsStringSync();
     }
 
-    
+
 
     void testUsingContextAndFs(String description, dynamic testMethod(),) {
       final FileSystem windowsFs = new MemoryFileSystem(
