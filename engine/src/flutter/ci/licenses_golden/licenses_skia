@@ -1,4 +1,4 @@
-Signature: ecc4c4296d5e72c4a659b2314c956030
+Signature: d597c0bbb66b374bfc814fd9cf95ccf8
 
 UNUSED LICENSES:
 
@@ -1325,6 +1325,7 @@ FILE: ../../../third_party/skia/gm/scaledemoji_rendering.cpp
 FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/gm/skinning.cpp
+FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
@@ -1469,6 +1470,10 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCSTLList.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
