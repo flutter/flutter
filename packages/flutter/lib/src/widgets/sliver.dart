@@ -769,11 +769,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         final Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject?.parentData;
-          if (parentData != null &&
-              (parentData.keepAlive != true || parentData.nextSibling != null || parentData.previousSibling != null)) {
-            _currentBeforeChild = newChild.renderObject;
-          }
+          _currentBeforeChild = newChild.renderObject;
         } else {
           _childElements.remove(index);
         }

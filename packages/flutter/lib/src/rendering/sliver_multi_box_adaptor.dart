@@ -206,6 +206,27 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
+    // `after` might be coming in from a caller that didn't realize it was in the
+    // _keepAliveBucket, in which case it needs to be re-inserted to know its new siblings.
+    if (after != null) {
+      final SliverMultiBoxAdaptorParentData afterParentData = after.parentData;
+      final int index = afterParentData.index;
+      if (_keepAliveBucket.containsKey(index)) {
+        RenderBox anchor = firstChild;
+        assert(after == _keepAliveBucket[index]);
+        dropChild(after);
+        after.parentData = afterParentData;
+        if (indexOf(anchor) > afterParentData.index) {
+          anchor = null;
+        } else {
+          while (indexOf(anchor) < indexOf(after) - 1) {
+            anchor = childAfter(anchor);
+          }
+        }
+        insert(after, after: anchor);
+        afterParentData._keptAlive = false;
+      }
+    }
     super.insert(child, after: after);
     assert(firstChild != null);
     assert(() {
