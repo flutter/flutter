@@ -162,7 +162,7 @@ void bar() {
       }
     });
 
-    testUsingContext('analyze', () async {
+    testUsingContext('returns no issues when source is error-free', () async {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';

@@ -44,14 +44,12 @@ class TestRunner extends ResidentRunner {
 
 void main() {
   TestRunner createTestRunner() {
-    // TODO(jacobr): make these tests run with `previewDart2: true` and
-    // `trackWidgetCreation: true` as well as the default flags.
-    // Currently the TestRunner is not properly configured to be able to run
-    // with `previewDart2: true` due to missing resources.
+    // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
+    // well as the default flags.
     return new TestRunner(
       <FlutterDevice>[new FlutterDevice(
         new MockDevice(),
-        previewDart2: false,
+        previewDart2: true,
         trackWidgetCreation: false,
       )],
     );

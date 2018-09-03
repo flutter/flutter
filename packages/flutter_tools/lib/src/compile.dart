@@ -311,19 +311,19 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
 
   void _handleCompilationRequest(_CompilationRequest request) async {
-    final bool isEmpty = compilationQueue.isEmpty;
-    compilationQueue.add(request);
+    final bool isEmpty = _compilationQueue.isEmpty;
+    _compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests
     // are currently being processed. This effectively enforces "one
     // compilation request at a time".
     if (isEmpty) {
-      while (compilationQueue.isNotEmpty) {
-        final _CompilationRequest request = compilationQueue.first;
+      while (_compilationQueue.isNotEmpty) {
+        final _CompilationRequest request = _compilationQueue.first;
         await request.run(this);
-        compilationQueue.removeAt(0);
+        _compilationQueue.removeAt(0);
       }
     }
   }
