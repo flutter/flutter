@@ -45,7 +45,5 @@ void main() {
       await new Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-    // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
-    // https://github.com/flutter/flutter/issues/17833.
-  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
+  }, timeout: const Timeout.factor(6));
 }
