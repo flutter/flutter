@@ -392,4 +392,34 @@ void main() {
 
     expect(find.text('!'), findsOneWidget);
   });
+
+  ///https://github.com/flutter/flutter/issues/16920
+  testWidgets('Stepper icons size test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: Material(
+          child: new Stepper(
+            steps: const <Step>[
+              const Step(
+                title: const Text('A'),
+                state: StepState.editing,
+                content: const SizedBox(width: 100.0, height: 100.0),
+              ),
+              const Step(
+                title: const Text('B'),
+                state: StepState.complete,
+                content: const SizedBox(width: 100.0, height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    RenderBox renderObject = tester.renderObject(find.byIcon(Icons.edit));
+    expect(renderObject.size, equals(const Size.square(18.0)));
+
+    renderObject = tester.renderObject(find.byIcon(Icons.check));
+    expect(renderObject.size, equals(const Size.square(18.0)));
+  });
 }
