@@ -453,10 +453,7 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
-  String getReloadPath({bool fullRestart}) =>
-      debuggingOptions.buildInfo.previewDart2
-          ? mainPath + (fullRestart? '' : '.incremental') + '.dill'
-          : mainPath;
+  String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
