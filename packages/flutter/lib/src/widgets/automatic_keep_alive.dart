@@ -89,13 +89,12 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-          final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
-//          assert(childElement != null);
-          if (childElement == null) {
-            _keepingAlive = false;
-          } else {
-            _updateParentDataOfChild(childElement);
+          // The element is no longer alive
+          if (context == null) {
+            return;
           }
+          final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+          _updateParentDataOfChild(childElement);
         });
       }
     }
@@ -107,6 +106,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   /// While this widget is guaranteed to have a child, this may return null if
   /// the first build of that child has not completed yet.
   ParentDataElement<SliverMultiBoxAdaptorWidget> _getChildElement() {
+    assert(context != null);
     final Element element = context;
     Element childElement;
     // We use Element.visitChildren rather than context.visitChildElements
@@ -128,7 +128,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     // completes. It's the caller's responsibility to deal with this case.
     //
     // (We're only going down one level, to get our direct child.)
-    element?.visitChildren((Element child) {
+    element.visitChildren((Element child) {
       childElement = child;
     });
     assert(childElement == null || childElement is ParentDataElement<SliverMultiBoxAdaptorWidget>);
