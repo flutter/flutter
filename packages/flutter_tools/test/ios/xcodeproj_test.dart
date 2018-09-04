@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -18,6 +17,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/pubspec_schema.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
@@ -377,16 +377,6 @@ Information about project "Runner":
       return properties.isEmpty ? null : properties.first;
     }
 
-    void writeSchemaFile(FileSystem filesystem, String schemaData) {
-      final String schemaPath = buildSchemaPath(filesystem);
-      final File schemaFile = filesystem.file(schemaPath);
-
-      final String schemaDir = buildSchemaDir(filesystem);
-
-      filesystem.directory(schemaDir).createSync(recursive: true);
-      filesystem.file(schemaFile).writeAsStringSync(schemaData);
-    }
-
     Future<void> checkBuildVersion({
       String manifestString,
       BuildInfo buildInfo,
@@ -401,8 +391,7 @@ Information about project "Runner":
       manifestFile.writeAsStringSync(manifestString);
 
       // write schemaData otherwise pubspec.yaml file can't be loaded
-      const String schemaData = '{}';
-      writeSchemaFile(fs, schemaData);
+      writeEmptySchemaFile(fs);
 
       await updateGeneratedXcodeProperties(
         project: await FlutterProject.fromPath('path/to/project'),
