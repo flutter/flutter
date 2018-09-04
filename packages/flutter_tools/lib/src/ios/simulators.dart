@@ -386,12 +386,10 @@ class IOSSimulator extends Device {
   }
 
   Future<void> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
-    // When running in previewDart2 mode, we still need to run compiler to
-    // produce kernel file for the application.
+    // Run compiler to produce kernel file for the application.
     return bundle.build(
       mainPath: mainPath,
-      precompiledSnapshot: !buildInfo.previewDart2,
-      previewDart2: buildInfo.previewDart2,
+      precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
   }

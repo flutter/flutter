@@ -90,7 +90,6 @@ class BuildBundleCommand extends BuildSubCommand {
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],
-      previewDart2: true,
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
