@@ -167,7 +167,6 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
-      previewDart2: true,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
