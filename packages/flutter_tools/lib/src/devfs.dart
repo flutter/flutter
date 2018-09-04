@@ -470,10 +470,9 @@ class DevFS {
       String archivePath;
       if (deviceUri.path.startsWith(assetBuildDirPrefix))
         archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-      // When doing full restart in preview-dart-2 mode, copy content so
-      // that isModified does not reset last check timestamp because we
-      // want to report all modified files to incremental compiler next time
-      // user does hot reload.
+      // When doing full restart, copy content so that isModified does not
+      // reset last check timestamp because we want to report all modified
+      // files to incremental compiler next time user does hot reload.
       if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
