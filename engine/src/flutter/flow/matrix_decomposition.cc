@@ -28,12 +28,13 @@ static inline SkVector3 SkVector3Cross(const SkVector3& a, const SkVector3& b) {
 MatrixDecomposition::MatrixDecomposition(const SkMatrix& matrix)
     : MatrixDecomposition(SkMatrix44{matrix}) {}
 
-// TODO(garyq): use skia row[x].normalize() when skia fixes it
+// Use custom normalize to avoid skia precision loss/normalize() privatization.
 static inline void SkVector3Normalize(SkVector3& v) {
-  float mag = sqrt(v.fX * v.fX + v.fY * v.fY + v.fZ * v.fZ);
-  v.fX /= mag;
-  v.fY /= mag;
-  v.fZ /= mag;
+  double mag = sqrt(v.fX * v.fX + v.fY * v.fY + v.fZ * v.fZ);
+  double scale = 1.0 / mag;
+  v.fX *= scale;
+  v.fY *= scale;
+  v.fZ *= scale;
 }
 
 MatrixDecomposition::MatrixDecomposition(SkMatrix44 matrix) : valid_(false) {
