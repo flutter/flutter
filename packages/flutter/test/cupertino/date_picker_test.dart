@@ -425,6 +425,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(date, new DateTime(2018, 1, 1, 11, 59));
+
+      await tester.drag(find.text('11'), const Offset(0.0, -32.0));
+      await tester.drag(find.text('12'), const Offset(0.0, 32.0));
+      
+      expect(date, new DateTime(2018, 1, 1, 11, 59));
     });
   });
 }
