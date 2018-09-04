@@ -110,5 +110,6 @@ void main() {
     });
     // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
     // https://github.com/flutter/flutter/issues/17833.
+    // https://github.com/flutter/flutter/issues/21348.
   }, timeout: const Timeout.factor(6), skip: platform.isWindows);
 }
