@@ -151,8 +151,8 @@ The Flutter codelabs build test ensures that the final version of
 [Material Components for Flutter Codelabs](https://github.com/material-components/material-components-flutter-codelabs)
 can be built. This test serves as a smoke test for the Flutter framework and should not fail. Please
 address the issue from within your PR and rerun the test. If you feel that the test failing is not a
-direct result of changes made in your PR, 
-[submit an issue](https://github.com/material-components/material-components-flutter-codelabs/issues/new?title=%5BURGENT%5D%20Flutter%20Framework%20breaking%20PR)
+direct result of changes made in your PR or that breaking this test is absolutely necessary, escalate this issue by
+[submitting an issue](https://github.com/material-components/material-components-flutter-codelabs/issues/new?title=%5BURGENT%5D%20Flutter%20Framework%20breaking%20PR)
 to the MDC-Flutter Team.
 
 
