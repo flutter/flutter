@@ -42,20 +42,17 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
-    @required bool previewDart2,
     @required bool trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
     ResidentCompiler generator,
   }) {
-    if (previewDart2) {
-      this.generator = generator ?? new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
-      );
-    }
+    this.generator = generator ?? new ResidentCompiler(
+      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      trackWidgetCreation: trackWidgetCreation,
+      fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+    );
   }
 
   String viewFilter;
