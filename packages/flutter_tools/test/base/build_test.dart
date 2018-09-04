@@ -146,7 +146,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -159,7 +158,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -172,7 +170,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -198,7 +195,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
         iosArch: IOSArch.armv7,
       );
 
@@ -245,7 +241,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
         iosArch: IOSArch.arm64,
       );
 
@@ -293,7 +288,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -345,7 +339,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -392,7 +385,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
         iosArch: IOSArch.armv7,
       );
 
@@ -439,7 +431,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
         iosArch: IOSArch.arm64,
       );
 
@@ -474,7 +465,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: true,
-        previewDart2: true,
       );
 
       expect(genSnapshotExitCode, isNot(0));
@@ -506,7 +496,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -558,7 +547,6 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         buildSharedLibrary: false,
-        previewDart2: true,
       );
 
       expect(genSnapshotExitCode, 0);
