@@ -133,9 +133,6 @@ class PaintingContext extends ClipContext {
   /// context that can record the results of the painting operation in addition
   /// to performing the regular paint of the child.
   ///
-  /// The custom painting context must generate identical content to a regular
-  /// painting context.
-  ///
   /// See also:
   ///
   ///  * [repaintCompositedChild], for repainting a composited child without
