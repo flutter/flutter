@@ -62,10 +62,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildColorPicker() {
+  Widget _buildColorPicker(BuildContext context) {
     final FixedExtentScrollController scrollController =
-      FixedExtentScrollController(initialItem: _selectedColorIndex);
-    return CupertinoPicker(
+        FixedExtentScrollController(initialItem: _selectedColorIndex);
+
+    final Widget colorPicker = new CupertinoPicker(
       scrollController: scrollController,
       itemExtent: _kPickerItemHeight,
       backgroundColor: CupertinoColors.white,
@@ -79,6 +80,28 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         Text(coolColorNames[index]),
         );
       }),
+    );
+
+    return new GestureDetector(
+      onTap: () async {
+        await showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(colorPicker);
+          },
+        );
+      },
+      child: _buildMenu(
+          <Widget>[
+            const Text('Favorite Color'),
+            new Text(
+              coolColorNames[_selectedColorIndex],
+              style: const TextStyle(
+                  color: CupertinoColors.inactiveGray
+              ),
+            ),
+          ]
+      ),
     );
   }
 
@@ -250,27 +273,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           child: ListView(
             children: <Widget>[
               const Padding(padding: EdgeInsets.only(top: 32.0)),
-              GestureDetector(
-                onTap: () async {
-                  await showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return _buildBottomPicker(_buildColorPicker());
-                    },
-                  );
-                },
-                child: _buildMenu(
-                    <Widget>[
-                      const Text('Favorite Color'),
-                      Text(
-                        coolColorNames[_selectedColorIndex],
-                        style: const TextStyle(
-                            color: CupertinoColors.inactiveGray
-                        ),
-                      ),
-                    ]
-                ),
-              ),
+              _buildColorPicker(context),
               _buildCountdownTimerPicker(context),
               _buildDatePicker(context),
               _buildTimePicker(context),
