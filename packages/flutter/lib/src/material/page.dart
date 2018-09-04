@@ -93,7 +93,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// low-end phones. Eventually these issues will be resolved and this flag
   /// will be removed.
   @Deprecated('This flag will eventually be removed once the performance issues are resolved. See: https://github.com/flutter/flutter/issues/13736')
-  static bool debugEnableFadingRoutes = false;
+  static bool debugEnableFadingRoutes = true;
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
