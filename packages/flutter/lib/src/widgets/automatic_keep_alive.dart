@@ -90,8 +90,12 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // the child when the child is guaranteed to be present.
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
-          assert(childElement != null);
-          _updateParentDataOfChild(childElement);
+//          assert(childElement != null);
+          if (childElement == null) {
+            _keepingAlive = false;
+          } else {
+            _updateParentDataOfChild(childElement);
+          }
         });
       }
     }
@@ -124,7 +128,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     // completes. It's the caller's responsibility to deal with this case.
     //
     // (We're only going down one level, to get our direct child.)
-    element.visitChildren((Element child) {
+    element?.visitChildren((Element child) {
       childElement = child;
     });
     assert(childElement == null || childElement is ParentDataElement<SliverMultiBoxAdaptorWidget>);
