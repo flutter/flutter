@@ -17,7 +17,7 @@ import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildAotCommand extends BuildSubCommand {
-  BuildAotCommand({bool verboseHelp = false}) {
+  BuildAotCommand() {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -28,11 +28,6 @@ class BuildAotCommand extends BuildSubCommand {
         allowed: <String>['android-arm', 'android-arm64', 'ios']
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('build-shared-library',
         negatable: false,
         defaultsTo: false,
@@ -81,23 +76,20 @@ class BuildAotCommand extends BuildSubCommand {
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
     try {
-      final bool previewDart2 = argResults['preview-dart-2'];
       String mainPath = findMainDartFile(targetFile);
       final AOTSnapshotter snapshotter = new AOTSnapshotter();
 
-      // Compile to kernel, if Dart 2.
-      if (previewDart2) {
-        mainPath = await snapshotter.compileKernel(
-          platform: platform,
-          buildMode: buildMode,
-          mainPath: mainPath,
-          outputPath: outputPath,
-          extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-        );
-        if (mainPath == null) {
-          throwToolExit('Compiler terminated unexpectedly.');
-          return;
-        }
+      // Compile to kernel.
+      mainPath = await snapshotter.compileKernel(
+        platform: platform,
+        buildMode: buildMode,
+        mainPath: mainPath,
+        outputPath: outputPath,
+        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+      );
+      if (mainPath == null) {
+        throwToolExit('Compiler terminated unexpectedly.');
+        return;
       }
 
       // Build AOT snapshot.
@@ -118,7 +110,7 @@ class BuildAotCommand extends BuildSubCommand {
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            previewDart2: previewDart2,
+            previewDart2: true,
             buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
           ).then((int buildExitCode) {
@@ -149,7 +141,7 @@ class BuildAotCommand extends BuildSubCommand {
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          previewDart2: previewDart2,
+          previewDart2: true,
           buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
