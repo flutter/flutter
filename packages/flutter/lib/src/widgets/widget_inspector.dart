@@ -31,6 +31,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'app.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'icon_data.dart';
@@ -671,7 +672,7 @@ class _InspectorReferenceData {
 /// JSON mainly focused on if and how children are included in the JSON.
 class _SerializeConfig {
   _SerializeConfig({
-    @required this.groupName,
+    this.groupName,
     this.summaryTree = false,
     this.subtreeDepth  = 1,
     this.pathToInclude,
@@ -691,6 +692,12 @@ class _SerializeConfig {
     includeProperties = base.includeProperties,
     expandPropertyValues = base.expandPropertyValues;
 
+  /// Optional object group name used to manage manage lifetimes of object
+  /// references in the returned JSON.
+  ///
+  /// A call to `ext.flutter.inspector.disposeGroup` is required before objects
+  /// in the tree are garbage collected unless [groupName] is `null` in
+  /// which case no object references are included in the JSON payload.
   final String groupName;
 
   /// Whether to only include children that would exist in the summary tree.
@@ -710,6 +717,13 @@ class _SerializeConfig {
   /// Expand children of properties that have values that are themselves
   /// Diagnosticable objects.
   final bool expandPropertyValues;
+
+  /// Whether to include object references to the [DiagnosticsNode] and
+  /// [DiagnosticsNode.value] objects in the JSON payload.
+  ///
+  /// If [interactive] is `true`, a call to `ext.flutter.inspector.disposeGroup`
+  /// is required before objects in the tree will ever be garbage collected.
+  bool get interactive => groupName != null;
 }
 
 // Production implementation of [WidgetInspectorService].
@@ -774,6 +788,9 @@ mixin WidgetInspectorService {
 
   List<String> _pubRootDirectories;
 
+  bool _trackRebuildDirtyWidgets = false;
+  bool _trackRepaintWidgets = false;
+
   _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
@@ -809,9 +826,11 @@ mixin WidgetInspectorService {
   }
 
   /// Registers a service extension method with the given name (full
-  /// name "ext.flutter.inspector.name"), which takes a single required argument
+  /// name "ext.flutter.inspector.name"), which takes a single optional argument
   /// "objectGroup" specifying what group is used to manage lifetimes of
   /// object references in the returned JSON (see [disposeGroup]).
+  /// If "objectGroup" is omitted, the returned JSON will not include any object
+  /// references to avoid leaking memory.
   void _registerObjectGroupServiceExtension({
     @required String name,
     @required FutureOr<Object> callback(String objectGroup),
@@ -819,7 +838,6 @@ mixin WidgetInspectorService {
     registerServiceExtension(
       name: name,
       callback: (Map<String, String> parameters) async {
-        assert(parameters.containsKey('objectGroup'));
         return <String, Object>{'result': await callback(parameters['objectGroup'])};
       },
     );
@@ -928,6 +946,8 @@ mixin WidgetInspectorService {
     assert(!_debugServiceExtensionsRegistered);
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 
+    WidgetsBinding.instance.addPersistentFrameCallback(_onFrameStart);
+
     _registerBoolServiceExtension(
       name: 'show',
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
@@ -939,6 +959,60 @@ mixin WidgetInspectorService {
         return forceRebuild();
       },
     );
+
+    if (isWidgetCreationTracked()) {
+      // Service extensions that are only supported if widget creation locations
+      // are tracked.
+      _registerBoolServiceExtension(
+        name: 'trackRebuildDirtyWidgets',
+        getter: () async => _trackRebuildDirtyWidgets,
+        setter: (bool value) async {
+          if (value == _trackRebuildDirtyWidgets) {
+            return null;
+          }
+          _rebuildStats.resetCounts();
+          _trackRebuildDirtyWidgets = value;
+          if (value) {
+            assert(debugOnRebuildDirtyWidget == null);
+            debugOnRebuildDirtyWidget = _onRebuildWidget;
+            // Trigger a rebuild so there are baseline stats for rebuilds
+            // performed by the app.
+            return forceRebuild();
+          } else {
+            debugOnRebuildDirtyWidget = null;
+            return null;
+          }
+        },
+      );
+
+      _registerBoolServiceExtension(
+        name: 'trackRepaintWidgets',
+        getter: () async => _trackRepaintWidgets,
+        setter: (bool value) async {
+          if (value == _trackRepaintWidgets) {
+            return;
+          }
+          _repaintStats.resetCounts();
+          _trackRepaintWidgets = value;
+          if (value) {
+            assert(debugOnProfilePaint == null);
+            debugOnProfilePaint = _onPaint;
+            // Trigger an immediate paint so the user has some baseline painting
+            // stats to view.
+            void markTreeNeedsPaint(RenderObject renderObject) {
+              renderObject.markNeedsPaint();
+              renderObject.visitChildren(markTreeNeedsPaint);
+            }
+            final RenderObject root = WidgetsBinding.instance.renderViewElement?.renderObject;
+            if (root != null) {
+              markTreeNeedsPaint(root);
+            }
+          } else {
+            debugOnProfilePaint = null;
+          }
+        },
+      );
+    }
 
     _registerSignalServiceExtension(
       name: 'disposeAllGroups',
@@ -999,7 +1073,6 @@ mixin WidgetInspectorService {
       name: 'getRootWidgetSummaryTree',
       callback: _getRootWidgetSummaryTree,
     );
-
     _registerServiceExtensionWithArg(
       name: 'getDetailsSubtree',
       callback: _getDetailsSubtree,
@@ -1048,6 +1121,11 @@ mixin WidgetInspectorService {
         };
       },
     );
+  }
+
+  void _clearStats() {
+    _rebuildStats.resetCounts();
+    _repaintStats.resetCounts();
   }
 
   /// Clear all InspectorService object references.
@@ -1308,9 +1386,18 @@ mixin WidgetInspectorService {
       return null;
     final Map<String, Object> json = node.toJsonMap();
 
-    json['objectId'] = toId(node, config.groupName);
     final Object value = node.value;
-    json['valueId'] = toId(value, config.groupName);
+    if (config.interactive) {
+      json['objectId'] = toId(node, config.groupName);
+      json['valueId'] = toId(value, config.groupName);
+    }
+
+    if (value  is Element) {
+      if (value is StatefulElement) {
+        json['stateful'] = true;
+      }
+      json['widgetRuntimeType'] = value.widget?.runtimeType.toString();
+    }
 
     if (config.summaryTree) {
       json['summaryTree'] = true;
@@ -1319,6 +1406,7 @@ mixin WidgetInspectorService {
     final _Location creationLocation = _getCreationLocation(value);
     bool createdByLocalProject = false;
     if (creationLocation != null) {
+      json['locationId'] = _toLocationId(creationLocation);
       json['creationLocation'] = creationLocation.toJsonMap();
       if (_isLocalCreationLocation(creationLocation)) {
         createdByLocalProject = true;
@@ -1382,6 +1470,7 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null || location == null || location.file == null) {
       return false;
     }
+
     final String file = Uri.parse(location.file).path;
     for (String directory in _pubRootDirectories) {
       if (file.startsWith(directory)) {
@@ -1734,13 +1823,237 @@ mixin WidgetInspectorService {
   /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0
   /// is required as injecting creation locations requires a
   /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
-  @protected
   bool isWidgetCreationTracked() {
     _widgetCreationTracked ??= _WidgetForTypeTests() is _HasCreationLocation;
     return _widgetCreationTracked;
   }
 
   bool _widgetCreationTracked;
+
+  Duration _frameStart;
+
+  void _onFrameStart(Duration timeStamp) {
+    _frameStart = timeStamp;
+    WidgetsBinding.instance.addPostFrameCallback(_onFrameEnd);
+  }
+
+  void _onFrameEnd(Duration timeStamp) {
+    if (_trackRebuildDirtyWidgets) {
+      _postStatsEvent('Flutter.RebuiltWidgets', _rebuildStats);
+    }
+    if (_trackRepaintWidgets) {
+      _postStatsEvent('Flutter.RepaintWidgets', _repaintStats);
+    }
+  }
+
+  void _postStatsEvent(String eventName, _ElementLocationStatsTracker stats) {
+    postEvent(eventName, stats.exportToJson(_frameStart));
+  }
+
+  /// All events dispatched by a [WidgetInspectorService] use this method
+  /// instead of calling [developer.postEvent] directly  so that tests for
+  /// [WidgetInspectorService] can track which events were dispatched by
+  /// overriding this method.
+  @protected
+  void postEvent(String eventKind, Map<Object, Object> eventData) {
+    developer.postEvent(eventKind, eventData);
+  }
+
+  final _ElementLocationStatsTracker _rebuildStats = _ElementLocationStatsTracker();
+  final _ElementLocationStatsTracker _repaintStats = _ElementLocationStatsTracker();
+
+  void _onRebuildWidget(Element element, bool builtOnce) {
+    _rebuildStats.add(element);
+  }
+
+  void _onPaint(RenderObject renderObject) {
+    try {
+      final Element element = renderObject.debugCreator?.element;
+      assert(element is RenderObjectElement);
+      _repaintStats.add(element);
+
+      element.visitAncestorElements((Element ancestor) {
+        if (ancestor is RenderObjectElement) {
+          // This ancestor has its onw RenderObject. Don't conflate it.
+          return false;
+        }
+        _repaintStats.add(ancestor);
+        return true;
+      });
+    }
+    catch (exception, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+        ),
+      );
+    }
+  }
+
+  /// This method is called by [WidgetBinding.performReassemble] to flush caches
+  /// of obsolete values after a hot reload.
+  ///
+  /// Do not call this method directly. Instead, use
+  /// [BindingBase.reassembleApplication].
+  void performReassemble() {
+    _clearStats();
+  }
+}
+
+/// Accumulator for a count associated with a specific source location.
+///
+/// The accumulator stores whether the source location is [local] and what its
+/// [id] for efficiency encoding terse JSON payloads describing counts.
+class _LocationCount {
+  _LocationCount({
+    @required this.location,
+    @required this.id,
+    @required this.local,
+  });
+
+  /// Location id.
+  final int id;
+
+  /// Whether the location is local to the current project.
+  final bool local;
+
+  final _Location location;
+
+  int get count => _count;
+  int _count = 0;
+
+  /// Reset the count.
+  void reset() {
+    _count = 0;
+  }
+
+  /// Increment the count.
+  void increment() {
+    _count++;
+  }
+}
+
+/// A stat tracker that aggregates a performance metric for [Element] objects at
+/// the granularity of creation locations in source code.
+///
+/// This class is optimized to minimize the size of the JSON payloads describing
+/// the aggregate statistics, for stable memory usage, and low CPU usage at the
+/// expense of somewhat higher overall memory usage. Stable memory usage is more
+/// important than peak memory usage to avoid the false impression that the
+/// user's app is leaking memory each frame.
+///
+/// The number of unique widget creation locations tends to be at most in the
+/// low thousands for regular flutter apps so the peak memory usage for this
+/// class is not an issue.
+class _ElementLocationStatsTracker {
+  // All known creation location tracked.
+  //
+  // This could also be stored as a `Map<int, _LocationCount>` but this
+  // representation is more efficient as all location ids from 0 to n are
+  // typically present.
+  //
+  // All logic in this class assumes that if `_stats[i]` is not `null`
+  // `_stats[i].id` equals `i`.
+  final List<_LocationCount> _stats = <_LocationCount>[];
+
+  /// Locations with a non-zero count.
+  final List<_LocationCount> active = <_LocationCount>[];
+
+  /// Locations that were added since stats were last exported.
+  ///
+  /// Only locations local to the current project are included as a performance
+  /// optimization.
+  final List<_LocationCount> newLocations = <_LocationCount>[];
+
+  /// Increments the count associated with the creation location of [element] if
+  /// the creation location is local to the current project.
+  void add(Element element) {
+    final Object widget = element.widget;
+    if (widget is _HasCreationLocation) {
+      final _Location location = widget._location;
+      final int id = _toLocationId(location);
+
+      _LocationCount entry;
+      if (id >= _stats.length || _stats[id] == null) {
+        // After the first frame, almost all creation ids will already be in
+        // _stats so this slow path will rarely be hit.
+        while (id >= _stats.length) {
+          _stats.add(null);
+        }
+        entry = _LocationCount(
+          location: location,
+          id: id,
+          local: WidgetInspectorService.instance._isLocalCreationLocation(location),
+        );
+        if (entry.local) {
+          newLocations.add(entry);
+        }
+        _stats[id] = entry;
+      } else {
+        entry = _stats[id];
+      }
+
+      // We could in the future add an option to track stats for all widgets but
+      // that would significantly increase the size of the events posted using
+      // [developer.postEvent] and current use cases for this feature focus on
+      // helping users find problems with their widgets not the platform
+      // widgets.
+      if (entry.local) {
+        if (entry.count == 0) {
+          active.add(entry);
+        }
+        entry.increment();
+      }
+    }
+  }
+
+  /// Clear all aggregated statistics.
+  void resetCounts() {
+    // We chose to only reset the active counts instead of clearing all data
+    // to reduce the number memory allocations performed after the first frame.
+    // Once an app has warmed up, location stats tracking should not
+    // trigger significant additional memory allocations. Avoiding memory
+    // allocations is important to minimize the impact this class has on cpu
+    // and memory performance of the running app.
+    for (_LocationCount entry in active) {
+      entry.reset();
+    }
+    active.clear();
+  }
+
+  /// Exports the current counts and then resets the stats to prepare to track
+  /// the next frame of data.
+  Map<String, dynamic> exportToJson(Duration startTime) {
+    final List<int> events = List<int>.filled(active.length * 2, 0);
+    int j = 0;
+    for (_LocationCount stat in active) {
+      events[j++] = stat.id;
+      events[j++] = stat.count;
+    }
+
+    final Map<String, dynamic> json = <String, dynamic>{
+      'startTime': startTime.inMicroseconds,
+      'events': events,
+    };
+
+    if (newLocations.isNotEmpty) {
+      // Add all newly used location ids to the JSON.
+      final Map<String, List<int>> locationsJson = <String, List<int>>{};
+      for (_LocationCount entry in newLocations) {
+        final _Location location = entry.location;
+        final List<int> jsonForFile = locationsJson.putIfAbsent(
+          location.file,
+          () => <int>[],
+        );
+        jsonForFile..add(entry.id)..add(location.line)..add(location.column);
+      }
+      json['newLocations'] = locationsJson;
+    }
+    resetCounts();
+    newLocations.clear();
+    return json;
+  }
 }
 
 class _WidgetForTypeTests extends Widget {
@@ -2456,4 +2769,21 @@ class _Location {
 _Location _getCreationLocation(Object object) {
   final Object candidate =  object is Element ? object.widget : object;
   return candidate is _HasCreationLocation ? candidate._location : null;
+}
+
+// _Location objects are always const so we don't need to worry about the GC
+// issues that are a concern for other object ids tracked by
+// [WidgetInspectorService].
+final Map<_Location, int> _locationToId = <_Location, int>{};
+final List<_Location> _locations = <_Location>[];
+
+int _toLocationId(_Location location) {
+  int id = _locationToId[location];
+  if (id != null) {
+    return id;
+  }
+  id = _locations.length;
+  _locations.add(location);
+  _locationToId[location] = id;
+  return id;
 }
