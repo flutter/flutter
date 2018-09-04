@@ -25,11 +25,6 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'android-arm64', 'ios']
@@ -95,7 +90,7 @@ class BuildBundleCommand extends BuildSubCommand {
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       assetDirPath: argResults['asset-dir'],
-      previewDart2: argResults['preview-dart-2'],
+      previewDart2: true,
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],

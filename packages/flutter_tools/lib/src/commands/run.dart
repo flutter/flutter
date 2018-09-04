@@ -120,11 +120,6 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addOption('precompile',
         hide: !verboseHelp,
         help: 'Precompile functions specified in input file. This flag is only\n'
@@ -344,7 +339,7 @@ class RunCommand extends RunCommandBase {
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
       return new FlutterDevice(
         device,
-        previewDart2: argResults['preview-dart-2'],
+        previewDart2: true,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],

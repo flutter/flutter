@@ -68,7 +68,7 @@ void installHook({
   bool enableObservatory = false,
   bool machine = false,
   bool startPaused = false,
-  bool previewDart2 = false,
+  bool previewDart2 = true,
   int port = 0,
   String precompiledDillPath,
   bool trackWidgetCreation = false,
@@ -445,7 +445,7 @@ class _FlutterPlatform extends PlatformPlugin {
         cancelOnError: true,
       );
 
-      printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
+      printTrace('test $ourTestCount: starting shell process');
 
       // [precompiledDillPath] can be set only if [previewDart2] is [true].
       assert(precompiledDillPath == null || previewDart2);
