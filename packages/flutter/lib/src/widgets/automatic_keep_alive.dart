@@ -94,6 +94,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
             return;
           }
           final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+          assert(childElement != null);
           _updateParentDataOfChild(childElement);
         });
       }
