@@ -120,6 +120,7 @@ class Doctor {
 
       if (currentCategory.isGrouped) {
         if (finishedGroups.contains(currentCategory)) {
+          // We already handled this category while examining a previous validator.
           continue;
         }
         final List<ValidationResult> results = <ValidationResult>[];
