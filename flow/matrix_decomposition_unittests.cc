@@ -95,8 +95,7 @@ TEST(MatrixDecomposition, Combination) {
 }
 
 TEST(MatrixDecomposition, ScaleFloatError) {
-  // Strange behavior under 0.000245 due to underflow issues.
-  for (float scale = 0.000245f; scale < 2.0f; scale += 0.000001f) {
+  for (float scale = 0.0001f; scale < 2.0f; scale += 0.000001f) {
     SkMatrix44 matrix = SkMatrix44::I();
     matrix.setScale(scale, scale, 1.0f);
 
