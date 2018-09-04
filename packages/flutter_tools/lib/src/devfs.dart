@@ -426,10 +426,9 @@ class DevFS {
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
-    final bool previewDart2 = generator != null;
     if (fs.isFileSync(_packagesFilePath)) {
       printTrace('Scanning package files');
-      await _scanPackages(fileFilter, previewDart2);
+      await _scanPackages(fileFilter);
     }
     if (bundle != null) {
       printTrace('Scanning asset files');
@@ -480,45 +479,46 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
       }
     });
-    if (previewDart2) {
-      // We run generator even if [dirtyEntries] was empty because we want
-      // to keep logic of accepting/rejecting generator's output simple:
-      // we must accept/reject generator's output after every [update] call.
-      // Incremental run with no changes is supposed to be fast (considering
-      // that it is initiated by user key press).
-      final List<String> invalidatedFiles = <String>[];
-      final Set<Uri> filesUris = new Set<Uri>();
-      for (Uri uri in dirtyEntries.keys.toList()) {
-        if (!uri.path.startsWith(assetBuildDirPrefix)) {
-          final DevFSContent content = dirtyEntries[uri];
-          if (content is DevFSFileContent) {
-            filesUris.add(uri);
-            invalidatedFiles.add(content.file.uri.toString());
-            numBytes -= content.size;
-          }
+    // We run generator even if [dirtyEntries] was empty because we want to
+    // keep logic of accepting/rejecting generator's output simple: we must
+    // accept/reject generator's output after every [update] call.  Incremental
+    // run with no changes is supposed to be fast (considering that it is
+    // initiated by user key press).
+    final List<String> invalidatedFiles = <String>[];
+    final Set<Uri> filesUris = new Set<Uri>();
+    for (Uri uri in dirtyEntries.keys.toList()) {
+      if (!uri.path.startsWith(assetBuildDirPrefix)) {
+        final DevFSContent content = dirtyEntries[uri];
+        if (content is DevFSFileContent) {
+          filesUris.add(uri);
+          invalidatedFiles.add(content.file.uri.toString());
+          numBytes -= content.size;
         }
       }
-      // No need to send source files because all compilation is done on the
-      // host and result of compilation is single kernel file.
-      filesUris.forEach(dirtyEntries.remove);
-      printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-      if (fullRestart) {
-        generator.reset();
-      }
-      final CompilerOutput compilerOutput =
-          await generator.recompile(mainPath, invalidatedFiles,
-              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
-              packagesFilePath : _packagesFilePath);
-      final String compiledBinary = compilerOutput?.outputFilename;
-      if (compiledBinary != null && compiledBinary.isNotEmpty) {
-        final Uri entryUri = fs.path.toUri(projectRootPath != null ?
-            fs.path.relative(pathToReload, from: projectRootPath):
-            pathToReload);
-        if (!dirtyEntries.containsKey(entryUri)) {
-          final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
-          dirtyEntries[entryUri] = content;
-          numBytes += content.size;
-        }
+    }
+    // No need to send source files because all compilation is done on the
+    // host and result of compilation is single kernel file.
+    filesUris.forEach(dirtyEntries.remove);
+    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    if (fullRestart) {
+      generator.reset();
+    }
+    final CompilerOutput compilerOutput = await generator.recompile(
+      mainPath,
+      invalidatedFiles,
+      outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+      packagesFilePath : _packagesFilePath,
+    );
+    final String compiledBinary = compilerOutput?.outputFilename;
+    if (compiledBinary != null && compiledBinary.isNotEmpty) {
+      final Uri entryUri = fs.path.toUri(projectRootPath != null
+        ? fs.path.relative(pathToReload, from: projectRootPath)
+        : pathToReload,
+      );
+      if (!dirtyEntries.containsKey(entryUri)) {
+        final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
+        dirtyEntries[entryUri] = content;
+        numBytes += content.size;
       }
     }
     if (dirtyEntries.isNotEmpty) {
@@ -697,7 +697,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter, bool previewDart2) async {
+  Future<Null> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
     final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
@@ -729,22 +729,6 @@ class DevFS {
         sb ??= new StringBuffer();
         sb.writeln('$packageName:$directoryUriOnDevice');
       }
-    }
-    if (previewDart2) {
-      // When in previewDart2 mode we don't update .packages-file entry
-      // so actual file will get invalidated in frontend.
-      // We don't need to synthesize device-correct .packages file because
-      // it is not going to be used on the device anyway - compilation
-      // is done on the host.
-      return;
-    }
-    if (sb != null) {
-      final DevFSContent content = _entries[fs.path.toUri('.packages')];
-      if (content is DevFSStringContent && content.string == sb.toString()) {
-        content._exists = true;
-        return;
-      }
-      _entries[fs.path.toUri('.packages')] = new DevFSStringContent(sb.toString());
     }
   }
 }
