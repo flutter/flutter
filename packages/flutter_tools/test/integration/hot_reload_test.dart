@@ -13,7 +13,7 @@ import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
 void main() {
-  group('hot reload', () {
+  group('hot', () {
     Directory tempDir;
     final BasicProject _project = new BasicProject();
     FlutterTestDriver _flutter;
@@ -29,12 +29,19 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    test('works without error', () async {
+    test('reload works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
     });
 
-    test('hits breakpoints with file:// prefixes after reload', () async {
+    test('restart works without error', () async {
+      await _flutter.run();
+      await _flutter.hotRestart();
+      // TODO(dantup): Unskip after flutter-tester restart issue is fixed on Windows:
+      // https://github.com/flutter/flutter/issues/21348.
+    }, skip: platform.isWindows);
+
+    test('reload hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
       // Hit breakpoint using a file:// URI.
