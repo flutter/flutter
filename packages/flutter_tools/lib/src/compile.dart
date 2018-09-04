@@ -248,14 +248,16 @@ class _CompileExpressionRequest extends _CompilationRequest {
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
       String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
-      CompilerMessageConsumer compilerMessageConsumer = printError})
+      CompilerMessageConsumer compilerMessageConsumer = printError,
+      String initializeFromDill})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
       _fileSystemScheme = fileSystemScheme,
       _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer),
-      _controller = new StreamController<_CompilationRequest>() {
+      _controller = new StreamController<_CompilationRequest>(),
+      _initializeFromDill = initializeFromDill {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -268,6 +270,7 @@ class ResidentCompiler {
   String _sdkRoot;
   Process _server;
   final _StdoutHandler _stdoutHandler;
+  String _initializeFromDill;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -361,6 +364,9 @@ class ResidentCompiler {
     }
     if (_fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
+    }
+    if (_initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', _initializeFromDill]);
     }
     printTrace(command.join(' '));
     _server = await processManager.start(command);

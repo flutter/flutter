@@ -87,6 +87,7 @@ Future<int> runTests(
     precompiledDillPath: precompiledDillPath,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
+    projectRootDirectory: fs.currentDirectory.uri,
   );
 
   // Make the global packages path absolute.
