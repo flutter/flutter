@@ -997,9 +997,19 @@ public class FlutterView extends SurfaceView
             this.surfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
                 @Override
                 public void onFrameAvailable(SurfaceTexture texture) {
+                    if (released) {
+                        // Even though we make sure to unregister the callback before releasing, as of Android O
+                        // SurfaceTexture has a data race when accessing the callback, so the callback may
+                        // still be called by a stale reference after released==true and mNativeView==null.
+                        return;
+                    }
                     nativeMarkTextureFrameAvailable(mNativeView.get(), SurfaceTextureRegistryEntry.this.id);
                 }
-            });
+            },
+            // The callback relies on being executed on the UI thread (unsynchronised read of mNativeView
+            // and also the engine code check for platform thread in Shell::OnPlatformViewMarkTextureFrameAvailable),
+            // so we explicitly pass a Handler for the current thread.
+            new Handler());
         }
 
         @Override
@@ -1019,6 +1029,9 @@ public class FlutterView extends SurfaceView
             }
             released = true;
             nativeUnregisterTexture(mNativeView.get(), id);
+            // Otherwise onFrameAvailableListener might be called after mNativeView==null
+            // (https://github.com/flutter/flutter/issues/20951). See also the check in onFrameAvailable.
+            surfaceTexture.setOnFrameAvailableListener(null);
             surfaceTexture.release();
         }
     }
