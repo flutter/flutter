@@ -1,4 +1,4 @@
-Signature: 8a26acc7786c1e0c403afb52fb28ef0a
+Signature: aaaf2a01cd942fd5b5d2eb792ca3420f
 
 UNUSED LICENSES:
 
@@ -959,8 +959,6 @@ FILE: ../../../third_party/skia/src/core/SkColorSpace.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpacePriv.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXform.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformPriv.h
-FILE: ../../../third_party/skia/src/core/SkColorSpace_XYZ.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpace_XYZ.h
 FILE: ../../../third_party/skia/src/core/SkCpu.cpp
 FILE: ../../../third_party/skia/src/core/SkCpu.h
 FILE: ../../../third_party/skia/src/core/SkDeduper.h
@@ -1495,9 +1493,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMagnifierEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMagnifierEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrMagnifierEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrOverdrawFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrOverdrawFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrOverdrawFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrPremulInputFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrPremulInputFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrPremulInputFragmentProcessor.h
