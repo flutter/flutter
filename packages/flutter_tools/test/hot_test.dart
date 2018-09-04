@@ -102,14 +102,14 @@ void main() {
     });
 
     testUsingContext('no setup', () async {
-      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false, previewDart2: true)];
+      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
       expect((await new HotRunner(devices).restart(fullRestart: true)).isOk, true);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('setup function succeeds', () async {
-      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false, previewDart2: true)];
+      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
       expect((await new HotRunner(devices).restart(fullRestart: true)).isOk, true);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
@@ -117,7 +117,7 @@ void main() {
     });
 
     testUsingContext('setup function fails', () async {
-      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false, previewDart2: true)];
+      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
       expect((await new HotRunner(devices).restart(fullRestart: true)).isOk, false);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,

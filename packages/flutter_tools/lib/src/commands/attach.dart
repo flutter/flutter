@@ -119,7 +119,6 @@ class AttachCommand extends FlutterCommand {
       final FlutterDevice flutterDevice = new FlutterDevice(
         device,
         trackWidgetCreation: false,
-        previewDart2: true,
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],

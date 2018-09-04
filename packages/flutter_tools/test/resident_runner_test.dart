@@ -47,11 +47,7 @@ void main() {
     // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
     // well as the default flags.
     return new TestRunner(
-      <FlutterDevice>[new FlutterDevice(
-        new MockDevice(),
-        previewDart2: true,
-        trackWidgetCreation: false,
-      )],
+      <FlutterDevice>[new FlutterDevice(new MockDevice(), trackWidgetCreation: false)],
     );
   }
 
