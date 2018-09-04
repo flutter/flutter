@@ -50,8 +50,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer _previousSibling;
 
   /// Removes this layer from its parent layer's child list.
-  ///
-  /// This has no effect if the layer's parent is already null.
   @mustCallSuper
   void remove() {
     parent?._removeChild(this);
@@ -590,11 +588,7 @@ class OffsetLayer extends ContainerLayer {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.translationValues(
-      (-bounds.left  - offset.dx) * pixelRatio,
-      (-bounds.top - offset.dy) * pixelRatio,
-      0.0,
-    );
+    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     addToScene(builder, Offset.zero);
