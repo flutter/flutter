@@ -52,6 +52,8 @@ class _StatefulListViewState extends State<_StatefulListView> {
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
+      // force a rebuild - the test(s) using this are verifying that the list is
+      // still correct after rebuild
       onTap: () => setState,
       child: new Directionality(
         textDirection: TextDirection.ltr,
