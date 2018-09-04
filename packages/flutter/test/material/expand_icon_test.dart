@@ -37,7 +37,7 @@ void main() {
     );
 
     final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.black26));
+    expect(iconTheme.data.color, equals(Colors.black38));
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {

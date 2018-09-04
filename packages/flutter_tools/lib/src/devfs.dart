@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show base64, utf8;
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:meta/meta.dart';
 
 import 'asset.dart';
 import 'base/context.dart';
@@ -401,18 +402,18 @@ class DevFS {
   ///
   /// Returns the number of bytes synced.
   Future<int> update({
-    String mainPath,
+    @required String mainPath,
     String target,
     AssetBundle bundle,
     DateTime firstBuildTime,
     bool bundleFirstUpload = false,
     bool bundleDirty = false,
     Set<String> fileFilter,
-    ResidentCompiler generator,
+    @required ResidentCompiler generator,
     String dillOutputPath,
     bool fullRestart = false,
     String projectRootPath,
-    String pathToReload,
+    @required String pathToReload,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -469,10 +470,9 @@ class DevFS {
       String archivePath;
       if (deviceUri.path.startsWith(assetBuildDirPrefix))
         archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-      // When doing full restart in preview-dart-2 mode, copy content so
-      // that isModified does not reset last check timestamp because we
-      // want to report all modified files to incremental compiler next time
-      // user does hot reload.
+      // When doing full restart, copy content so that isModified does not
+      // reset last check timestamp because we want to report all modified
+      // files to incremental compiler next time user does hot reload.
       if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;

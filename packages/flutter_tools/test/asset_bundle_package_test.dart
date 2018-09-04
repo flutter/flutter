@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/pubspec_schema.dart';
 
 void main() {
   void writePubspecFile(String path, String name, {List<String> assets}) {
@@ -539,16 +540,7 @@ $assetsSection
       return schemaFile.readAsStringSync();
     }
 
-    void writeSchema(String schema, FileSystem filesystem) {
-      final String schemaPath = buildSchemaPath(filesystem);
-      final File schemaFile = filesystem.file(schemaPath);
 
-      final Directory schemaDir = filesystem.directory(
-          buildSchemaDir(filesystem));
-
-      schemaDir.createSync(recursive: true);
-      schemaFile.writeAsStringSync(schema);
-    }
 
     void testUsingContextAndFs(String description, dynamic testMethod(),) {
       final FileSystem windowsFs = new MemoryFileSystem(
@@ -564,7 +556,7 @@ $assetsSection
 
       testUsingContext('$description - on windows FS', () async {
         establishFlutterRoot();
-        writeSchema(schema, windowsFs);
+        writeSchemaFile(windowsFs, schema);
         await testMethod();
       }, overrides: <Type, Generator>{
         FileSystem: () => windowsFs,
@@ -576,7 +568,7 @@ $assetsSection
 
       testUsingContext('$description - on posix FS', () async {
         establishFlutterRoot();
-        writeSchema(schema, posixFs);
+        writeSchemaFile(posixFs, schema);
         await testMethod();
       }, overrides: <Type, Generator>{
         FileSystem: () => posixFs,

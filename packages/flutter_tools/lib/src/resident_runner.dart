@@ -42,19 +42,17 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
-    @required bool previewDart2,
     @required bool trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    ResidentCompiler generator,
   }) {
-    if (previewDart2) {
-      generator = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
-      );
-    }
+    this.generator = generator ?? new ResidentCompiler(
+      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      trackWidgetCreation: trackWidgetCreation,
+      fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+    );
   }
 
   String viewFilter;
@@ -452,10 +450,7 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
-  String getReloadPath({bool fullRestart}) =>
-      debuggingOptions.buildInfo.previewDart2
-          ? mainPath + (fullRestart? '' : '.incremental') + '.dill'
-          : mainPath;
+  String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
