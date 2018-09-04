@@ -75,7 +75,6 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool previewDart2,
     @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
@@ -130,13 +129,11 @@ class AOTSnapshotter {
       '--embedder_entry_points_manifest=$vmEntryPoints',
       '--embedder_entry_points_manifest=$ioEntryPoints',
     ];
-    if (previewDart2) {
-      genSnapshotArgs.addAll(<String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
-      ]);
-    }
+    genSnapshotArgs.addAll(<String>[
+      '--reify-generic-functions',
+      '--strong',
+      '--sync-async',
+    ]);
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
@@ -191,7 +188,6 @@ class AOTSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'dart2': previewDart2.toString(),
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
