@@ -36,7 +36,7 @@ void main() {
       )
     );
 
-    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
+    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.black38));
   });
 
