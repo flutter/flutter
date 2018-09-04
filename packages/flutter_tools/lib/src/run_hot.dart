@@ -436,10 +436,7 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    final String launchPath = debuggingOptions.buildInfo.previewDart2
-        ? mainPath + '.dill'
-        : mainPath;
-    await _launchFromDevFS(launchPath);
+    await _launchFromDevFS(mainPath + '.dill');
     restartTimer.stop();
     printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     // We are now running from sources.
@@ -529,14 +526,6 @@ class HotRunner extends ResidentRunner {
     }
   }
 
-  String _uriToRelativePath(Uri uri) {
-    final String path = uri.toString();
-    final String base = new Uri.file(projectRootPath).toString();
-    if (path.startsWith(base))
-      return path.substring(base.length + 1);
-    return path;
-  }
-
   Future<OperationResult> _reloadSources({ bool pause = false }) async {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
@@ -556,7 +545,6 @@ class HotRunner extends ResidentRunner {
     // change from host path to a device path). Subsequent reloads will
     // not be affected, so we resume reporting reload times on the second
     // reload.
-    final bool reportUnused = !debuggingOptions.buildInfo.previewDart2;
     final bool shouldReportReloadTime = !_runningFromSnapshot;
     final Stopwatch reloadTimer = new Stopwatch()..start();
 
@@ -726,36 +714,9 @@ class HotRunner extends ResidentRunner {
         shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
 
-    String unusedElementMessage;
-    if (reportUnused && !reassembleAndScheduleErrors && !reassembleTimedOut) {
-      final List<Future<List<ProgramElement>>> unusedReports =
-        <Future<List<ProgramElement>>>[];
-      for (FlutterDevice device in flutterDevices)
-        unusedReports.add(device.unusedChangesInLastReload());
-      final List<ProgramElement> unusedElements = <ProgramElement>[];
-      for (Future<List<ProgramElement>> unusedReport in unusedReports)
-        unusedElements.addAll(await unusedReport);
-
-      if (unusedElements.isNotEmpty) {
-        final String restartCommand = hostIsIde ? '' : ' (by pressing "R")';
-        unusedElementMessage =
-          'Some program elements were changed during reload but did not run when the view was reassembled;\n'
-          'you may need to restart the app$restartCommand for the changes to have an effect.';
-        for (ProgramElement unusedElement in unusedElements) {
-          final String name = unusedElement.qualifiedName;
-          final String path = _uriToRelativePath(unusedElement.uri);
-          final int line = unusedElement.line;
-          final String description = line == null ? '$name ($path)' : '$name ($path:$line)';
-          unusedElementMessage += '\n  • $description';
-        }
-      }
-    }
-
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
-      hintMessage: unusedElementMessage,
-      hintId: unusedElementMessage != null ? 'restartRecommended' : null,
     );
   }
 
