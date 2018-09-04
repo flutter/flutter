@@ -408,7 +408,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             selectedHour = index % 12;
             amPmController.animateToItem(
               1 - amPmController.selectedItem,
-              duration: const Duration(milliseconds: 500), // Set by comparing with iOS version.
+              duration: const Duration(milliseconds: 300), // Set by comparing with iOS version.
               curve: Curves.easeOut); // Set by comparing with iOS version.
           }
           else {
@@ -640,8 +640,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     alignCenterLeft = textDirectionFactor == 1 ? Alignment.centerLeft : Alignment.centerRight;
     alignCenterRight = textDirectionFactor == 1 ? Alignment.centerRight : Alignment.centerLeft;
 
-    print('vdx: ' + _pickerColumnType.dayOfMonth.index.toString());
-
     estimatedColumnWidths[_pickerColumnType.dayOfMonth.index] = _getColumnWidth(_pickerColumnType.dayOfMonth);
     estimatedColumnWidths[_pickerColumnType.month.index] = _getColumnWidth(_pickerColumnType.month);
     estimatedColumnWidths[_pickerColumnType.year.index] = _getColumnWidth(_pickerColumnType.year);
@@ -741,13 +739,16 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         estimatedColumnWidths[_pickerColumnType.year.index],
         estimatedColumnWidths[_pickerColumnType.month.index],
         estimatedColumnWidths[_pickerColumnType.dayOfMonth.index]];
-    } else {
+    } else if (localizations.datePickerDateOrder == DatePickerDateOrder.ydm) {
       pickerBuilders = <Function>[_buildYearPicker, _buildDayPicker, _buildMonthPicker];
       columnWidths = <double>[
         estimatedColumnWidths[_pickerColumnType.year.index],
         estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
         estimatedColumnWidths[_pickerColumnType.month.index]];
     }
+    else
+      assert(false, 'date order is not specified');
+
     final List<Widget> pickers = <Widget>[];
 
     for (int i = 0; i < columnWidths.length; i++) {
@@ -790,10 +791,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             // ScrollEndNotification at the same scroll position and therefore
             // leads to an infinite loop.
             // Animates at super speed is used instead.
+
+            // animateToItem() is not working properly also.
             dayController.animateToItem(
               dayController.selectedItem - 1,
               duration: const Duration(milliseconds: 1),
-              curve: Curves.linear);
+              curve: Curves.easeOut);
           }
         },
         child: new CustomMultiChildLayout(
