@@ -56,7 +56,6 @@ class _StatefulListViewState extends State<_StatefulListView> {
       child: new Directionality(
         textDirection: TextDirection.ltr,
         child: new ListView(
-          itemExtent: null,
           children: new List<Widget>.generate(200, (int i) {
             return new Builder(
               builder: (BuildContext context) {
@@ -140,12 +139,12 @@ void main() {
           itemExtent: 200.0,
           children: new List<Widget>.generate(20, (int i) {
             return new Builder(
-                builder: (BuildContext context) {
-                  log.add(i);
-                  return new Container(
-                    child: new Text('$i'),
-                  );
-                }
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              },
             );
           }),
         ),
@@ -174,7 +173,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ListView large scroll jump and keepAlive (first child not keepAlive', (WidgetTester tester) async {
+  testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
     Future<Null> checkAndScroll([String zero = '0:false']) async {
       expect(find.text(zero), findsOneWidget);
       expect(find.text('1:false'), findsOneWidget);
@@ -316,11 +315,14 @@ void main() {
 
   testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
     final TestSliverChildListDelegate delegate = new TestSliverChildListDelegate(
-        new List<Widget>.generate(20, (int i) {
+      new List<Widget>.generate(
+        20,
+        (int i) {
           return new Container(
             child: new Text('$i', textDirection: TextDirection.ltr),
           );
-        })
+        },
+      )
     );
 
     await tester.pumpWidget(

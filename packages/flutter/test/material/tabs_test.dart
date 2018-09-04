@@ -1815,10 +1815,12 @@ void main() {
       ),
     );
     expect(find.text(AlwaysKeepAliveWidget.text), findsOneWidget);
+    expect(find.text('4'), findsNothing);
     await tester.tap(find.text('Tab4'));
     await tester.pumpAndSettle();
     await tester.pump();
     expect(controller.index, 3);
+    expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
     expect(find.text('4'), findsOneWidget);
   });
 }
