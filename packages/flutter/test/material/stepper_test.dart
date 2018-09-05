@@ -400,15 +400,15 @@ void main() {
         home: Material(
           child: new Stepper(
             steps: const <Step>[
-              const Step(
-                title: const Text('A'),
+              Step(
+                title: Text('A'),
                 state: StepState.editing,
-                content: const SizedBox(width: 100.0, height: 100.0),
+                content: SizedBox(width: 100.0, height: 100.0),
               ),
-              const Step(
-                title: const Text('B'),
+              Step(
+                title: Text('B'),
                 state: StepState.complete,
-                content: const SizedBox(width: 100.0, height: 100.0),
+                content: SizedBox(width: 100.0, height: 100.0),
               ),
             ],
           ),
