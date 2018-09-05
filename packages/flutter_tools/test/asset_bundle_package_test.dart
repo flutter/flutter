@@ -93,7 +93,7 @@ $assetsSection
 
   void writeAssets(String path, List<String> assets) {
     for (String asset in assets) {
-      final String fullPath = fs.path.join(fixPath(path), asset);
+      final String fullPath = fixPath(fs.path.join(path, asset));
 
       fs.file(fullPath)
         ..createSync(recursive: true)
