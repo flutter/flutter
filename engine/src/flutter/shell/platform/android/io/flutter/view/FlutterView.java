@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.graphics.PixelFormat;
 import android.provider.Settings;
 import android.net.Uri;
 import android.os.Handler;
@@ -274,6 +275,26 @@ public class FlutterView extends SurfaceView
      */
     public void removeFirstFrameListener(FirstFrameListener listener) {
         mFirstFrameListeners.remove(listener);
+    }
+
+    /**
+     * Updates this to support rendering as a transparent {@link SurfaceView}.
+     *
+     * Sets it on top of its window. The background color still needs to be
+     * controlled from within the Flutter UI itself.
+     */
+    public void enableTransparentBackground() {
+        setZOrderOnTop(true);
+        getHolder().setFormat(PixelFormat.TRANSPARENT);
+    }
+
+    /**
+     * Reverts this back to the {@link SurfaceView} defaults, at the back of its
+     * window and opaque.
+     */
+    public void disableTransparentBackground() {
+        setZOrderOnTop(false);
+        getHolder().setFormat(PixelFormat.OPAQUE);
     }
 
     public void setInitialRoute(String route) {
