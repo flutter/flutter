@@ -41,9 +41,8 @@ class FlutterTesterApp extends ApplicationPackage {
 
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(String deviceId, { this.workingDirectory }) : super(deviceId);
+  FlutterTesterDevice(String deviceId) : super(deviceId);
 
-  final String workingDirectory;
   Process _process;
   final DevicePortForwarder _portForwarder = new _NoopPortForwarder();
 
@@ -152,7 +151,6 @@ class FlutterTesterDevice extends Device {
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
         },
-        workingDirectory: workingDirectory,
       );
       // Setting a bool can't fail in the callback.
       _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
