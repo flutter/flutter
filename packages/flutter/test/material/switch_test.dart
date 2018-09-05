@@ -201,7 +201,7 @@ void main() {
         Material.of(tester.element(find.byType(Switch))),
         paints
           ..rrect(
-              color: const Color(0x20000000), // Black with 32% opacity
+              color: const Color(0x52000000), // Black with 32% opacity
               rrect: new RRect.fromLTRBR(
                   383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))

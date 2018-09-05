@@ -155,7 +155,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     Color inactiveThumbColor;
     Color inactiveTrackColor;
     if (widget.onChanged != null) {
-      const Color black32 = Color(0x20000000); // Black with 32% opacity
+      const Color black32 = Color(0x52000000); // Black with 32% opacity
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : black32);
     } else {
