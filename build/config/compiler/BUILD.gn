@@ -416,25 +416,21 @@ config("compiler") {
     # to say that it does. Define them here instead.
     defines += [ "HAVE_SYS_UIO_H" ]
 
-    # Use gold for Android for most CPU architectures.
-    if (current_cpu == "x86" || current_cpu == "x64" || current_cpu == "arm" ||
-        current_cpu == "arm64") {
-      ldflags += [ "-fuse-ld=gold" ]
-      if (is_clang) {
-        # Let clang find the ld.gold in the NDK.
-        ldflags += [ "--gcc-toolchain=" +
-                     rebase_path(android_toolchain_root, root_build_dir) ]
-      }
+    if (is_clang) {
+      # Let clang find libgcc.
+      ldflags += [ "--gcc-toolchain=" +
+                   rebase_path(android_toolchain_root, root_build_dir) ]
     }
 
     ldflags += [
       "-Wl,--no-undefined",
       "-Wl,--exclude-libs,ALL",
+      "-fuse-ld=lld",
     ]
     if (current_cpu == "arm") {
       ldflags += [
         # Enable identical code folding to reduce size.
-        "-Wl,--icf=safe",
+        "-Wl,--icf=all",
       ]
     }
 
