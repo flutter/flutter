@@ -120,8 +120,10 @@ class Doctor {
 
       if (currentCategory.isGrouped) {
         if (finishedGroups.contains(currentCategory)) {
+          // We already handled this category via a previous validator.
           continue;
         }
+        // Skip ahead and get results for the other validators in this category.
         final List<ValidationResult> results = <ValidationResult>[];
         for (DoctorValidator subValidator in validators.where(
                 (DoctorValidator v) => v.category == currentCategory)) {
