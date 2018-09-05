@@ -12,13 +12,20 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
 import 'src/pubspec_schema.dart';
 
 void main() {
+  String fixPath(String path) {
+    // The in-memory file system is strict about slashes on Windows being the
+    // correct way so until https://github.com/google/file.dart/issues/112 is
+    // fixed we fix them here.
+    // TODO(dantup): Remove this function once the above issue is fixed and
+    // rolls into Flutter.
+    return path?.replaceAll('/', fs.path.separator);
+  }
   void writePubspecFile(String path, String name, {List<String> assets}) {
     String assetsSection;
     if (assets == null) {
@@ -38,9 +45,7 @@ flutter:
       assetsSection = buffer.toString();
     }
 
-    final Uri uri = new Uri.file(path, windows: platform.isWindows);
-
-    fs.file(uri)
+    fs.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: $name
@@ -88,38 +93,29 @@ $assetsSection
 
   void writeAssets(String path, List<String> assets) {
     for (String asset in assets) {
-      final String fullPath = fs.path.join(path, asset); // posix compatible
+      final String fullPath = fixPath(fs.path.join(path, asset));
 
-      final String normalizedFullPath = // posix and windows compatible over MemoryFileSystem
-      new Uri.file(
-          fullPath, windows: platform.isWindows)
-          .toFilePath(windows: platform.isWindows);
-
-      fs.file(normalizedFullPath)
+      fs.file(fullPath)
         ..createSync(recursive: true)
         ..writeAsStringSync(asset);
     }
   }
 
-  // These tests do not use a memory file system because we want to ensure that
-  // asset bundles work correctly on Windows and Posix systems.
-  Directory tempDir;
-  Directory oldCurrentDir;
+  FileSystem testFileSystem;
 
   setUp(() async {
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
-    oldCurrentDir = fs.currentDirectory;
-    fs.currentDirectory = tempDir;
-  });
-
-  tearDown(() {
-    fs.currentDirectory = oldCurrentDir;
-    tryToDelete(tempDir);
+    testFileSystem = new MemoryFileSystem(
+      style: platform.isWindows
+        ? FileSystemStyle.windows
+        : FileSystemStyle.posix,
+    );
+    testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
   });
 
   group('AssetBundle assets from packages', () {
     testUsingContext('No assets are bundled when the package has no assets', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -137,10 +133,13 @@ $assetsSection
         utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
         '[]',
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -161,10 +160,13 @@ $assetsSection
         utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
         '[]',
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -185,10 +187,13 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext("One asset is bundled when the package has one asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       final List<String> assetEntries = <String>['packages/test_package/a/foo'];
       writePubspecFile(
@@ -209,10 +214,13 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and lists the asset in its pubspec', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -233,10 +241,13 @@ $assetsSection
         <String>['test_package'],
         expectedManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and the app lists the asset in its pubspec', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile(
         'pubspec.yaml',
@@ -260,10 +271,13 @@ $assetsSection
         <String>['test_package'],
         expectedManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('Two assets are bundled when the package has and lists two assets in its pubspec', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -285,10 +299,13 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       final List<String> assetEntries = <String>[
         'packages/test_package/a/foo',
@@ -317,10 +334,13 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('Two assets are bundled when two packages each have and list an asset their pubspec', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile(
         'pubspec.yaml',
@@ -353,10 +373,13 @@ $assetsSection
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       final List<String> assetEntries = <String>[
         'packages/test_package/a/foo',
@@ -392,10 +415,13 @@ $assetsSection
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('One asset is bundled when the app depends on a package, listing in its pubspec an asset from another package', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
       writePubspecFile(
         'pubspec.yaml',
         'test',
@@ -423,11 +449,14 @@ $assetsSection
         <String>['test_package2'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
   });
 
   testUsingContext('Asset paths can contain URL reserved characters', () async {
     establishFlutterRoot();
+    writeEmptySchemaFile(fs);
 
     writePubspecFile('pubspec.yaml', 'test');
     writePackagesFile('test_package:p/p/lib/');
@@ -449,12 +478,15 @@ $assetsSection
       <String>['test_package'],
       expectedAssetManifest,
     );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => testFileSystem,
   });
 
   group('AssetBundle assets from scanned paths', () {
     testUsingContext(
         'Two assets are bundled when scanning their directory', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -478,11 +510,14 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext(
         'Two assets are bundled when listing one and scanning second directory', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -506,11 +541,14 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext(
         'One asset is bundled with variant, scanning wrong directory', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -529,64 +567,16 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       assert(bundle.entries['AssetManifest.json'] == null,'Invalid pubspec.yaml should not generate AssetManifest.json'  );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
   });
 
   group('AssetBundle assets from scanned paths with MemoryFileSystem', () {
-    String readSchemaPath(FileSystem fs) {
-      final String schemaPath = buildSchemaPath(fs);
-      final File schemaFile = fs.file(schemaPath);
-
-      return schemaFile.readAsStringSync();
-    }
-
-
-
-    void testUsingContextAndFs(String description, dynamic testMethod(),) {
-      final FileSystem windowsFs = new MemoryFileSystem(
-          style: FileSystemStyle.windows);
-
-      final FileSystem posixFs = new MemoryFileSystem(
-          style: FileSystemStyle.posix);
-
-      const String _kFlutterRoot = '/flutter/flutter';
-      establishFlutterRoot();
-
-      final String schema = readSchemaPath(fs);
-
-      testUsingContext('$description - on windows FS', () async {
-        establishFlutterRoot();
-        writeSchemaFile(windowsFs, schema);
-        await testMethod();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => windowsFs,
-        Platform: () =>
-        new FakePlatform(
-            environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot,},
-            operatingSystem: 'windows')
-      });
-
-      testUsingContext('$description - on posix FS', () async {
-        establishFlutterRoot();
-        writeSchemaFile(posixFs, schema);
-        await testMethod();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => posixFs,
-        Platform: () =>
-        new FakePlatform(
-            environment: <String, String>{ 'FLUTTER_ROOT': _kFlutterRoot,},
-            operatingSystem: 'linux')
-      });
-
-      testUsingContext('$description - on original FS', () async {
-        establishFlutterRoot();
-        await testMethod();
-      });
-    }
-
-    testUsingContextAndFs(
+    testUsingContext(
         'One asset is bundled with variant, scanning directory', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -609,11 +599,14 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
-    testUsingContextAndFs(
+    testUsingContext(
         'No asset is bundled with variant, no assets or directories are listed', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -635,11 +628,14 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
-    testUsingContextAndFs(
+    testUsingContext(
         'Expect error generating manifest, wrong non-existing directory is listed', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -666,6 +662,8 @@ $assetsSection
       } catch (e) {
         // Test successful
       }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
   });
