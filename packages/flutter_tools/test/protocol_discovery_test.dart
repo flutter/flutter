@@ -215,7 +215,7 @@ void main() {
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
     });
