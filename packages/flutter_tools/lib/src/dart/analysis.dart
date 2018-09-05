@@ -14,11 +14,10 @@ import '../base/utils.dart';
 import '../globals.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdkPath, this.directories, { this.useCfe });
+  AnalysisServer(this.sdkPath, this.directories);
 
   final String sdkPath;
   final List<String> directories;
-  final bool useCfe;
 
   Process _process;
   final StreamController<bool> _analyzingController =
@@ -37,10 +36,6 @@ class AnalysisServer {
       '--sdk',
       sdkPath,
     ];
-
-    if (useCfe != null) {
-      command.add(useCfe ? '--use-cfe' : '--no-use-cfe');
-    }
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
