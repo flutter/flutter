@@ -18,6 +18,7 @@ import '../globals.dart';
 import 'android_sdk.dart';
 
 AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
+AndroidValidator get androidValidator => context[AndroidValidator];
 
 enum LicensesAccepted {
   none,
@@ -30,9 +31,7 @@ final RegExp licenseCounts = new RegExp(r'(\d+) of (\d+) SDK package licenses? n
 final RegExp licenseNotAccepted = new RegExp(r'licenses? not accepted', caseSensitive: false);
 final RegExp licenseAccepted = new RegExp(r'All SDK package licenses accepted.');
 
-class AndroidWorkflow extends DoctorValidator implements Workflow {
-  AndroidWorkflow() : super('Android toolchain - develop for Android devices');
-
+class AndroidWorkflow implements Workflow {
   @override
   bool get appliesToHostPlatform => true;
 
@@ -44,6 +43,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
   @override
   bool get canListEmulators => getEmulatorPath(androidSdk) != null && getAvdPath() != null;
+}
+
+class AndroidValidator extends DoctorValidator {
+  AndroidValidator(): super('Android toolchain - develop for Android devices',
+                            ValidatorCategory.androidToolchain);
 
   static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
