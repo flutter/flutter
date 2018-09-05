@@ -11,13 +11,13 @@ void main() {
       (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(MediaQuery(
-      data: const MediaQueryData(padding: const EdgeInsets.all(8.0)),
+      data: const MediaQueryData(padding: EdgeInsets.all(8.0)),
       child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new StatefulBuilder(
+          child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new SwitchListTile(
+            return Material(
+              child: SwitchListTile(
                 value: value,
                 onChanged: (bool newValue) {
                   setState(() {
