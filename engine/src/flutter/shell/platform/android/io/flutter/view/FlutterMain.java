@@ -262,15 +262,7 @@ public class FlutterMain {
 
         sResourceExtractor = new ResourceExtractor(context);
 
-        // Search for the icudtl.dat file at the old and new locations.
-        // TODO(jsimmons): remove the old location when all tools have been updated.
-        Set<String> sharedAssets = listAssets(applicationContext, SHARED_ASSET_DIR);
-        String icuAssetPath;
-        if (sharedAssets.contains(SHARED_ASSET_ICU_DATA)) {
-          icuAssetPath = SHARED_ASSET_DIR + File.separator + SHARED_ASSET_ICU_DATA;
-        } else {
-          icuAssetPath = SHARED_ASSET_ICU_DATA;
-        }
+        String icuAssetPath = SHARED_ASSET_DIR + File.separator + SHARED_ASSET_ICU_DATA;
         sResourceExtractor.addResource(icuAssetPath);
         sIcuDataPath = PathUtils.getDataDirectory(applicationContext) + File.separator + icuAssetPath;
 
