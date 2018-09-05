@@ -70,7 +70,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows {
-    _workflows ??= <Workflow>[iosWorkflow, androidWorkflow];
+    if (_workflows == null) {
+      _workflows = <Workflow>[];
+
+      if (iosWorkflow.appliesToHostPlatform)
+        _workflows.add(iosWorkflow);
+
+      if (androidWorkflow.appliesToHostPlatform)
+        _workflows.add(androidWorkflow);
+    }
     return _workflows;
   }
 
