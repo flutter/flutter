@@ -426,10 +426,15 @@ void main() {
 
       expect(date, new DateTime(2018, 1, 1, 11, 59));
 
-      await tester.drag(find.text('11'), const Offset(0.0, -32.0));
-      await tester.drag(find.text('12'), const Offset(0.0, 32.0));
-      
-      expect(date, new DateTime(2018, 1, 1, 11, 59));
+      await tester.drag(find.text('11'), const Offset(0.0, 64.0));
+      await tester.pumpAndSettle();
+
+      expect(date, new DateTime(2018, 1, 1, 9, 59));
+
+      await tester.drag(find.text('09'), const Offset(0.0, -192.0));
+      await tester.pumpAndSettle();
+
+      expect(date, new DateTime(2018, 1, 1, 15, 59));
     });
   });
 }

@@ -16,9 +16,6 @@ const double _kMagnification = 1.1;
 const double _kDatePickerPadSize = 12.0;
 /// Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
-/// The total types of columns in the date picker. 7 types of columns are
-/// date, hour, minute, day period, day of month, month, year.
-const int _kColumnTypes = 7;
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -259,7 +256,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   FixedExtentScrollController amPmController;
 
   // Estimated width of columns.
-  List<double> estimatedColumnWidths = new List<double>(_kColumnTypes);
+  final Map<int, double> estimatedColumnWidths = <int, double>{};
 
   @override
   void initState() {
@@ -283,34 +280,40 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   double _getColumnWidth(_pickerColumnType columnType) {
     String longestText = '';
 
-    if (columnType == _pickerColumnType.date) {
-      // Measuring the length of all possible date is impossible, so here
-      // just some dates are measured.
-      for (int i = 1; i <= 12; i++) {
-        final String date = localizations.datePickerMediumDate(
-          new DateTime(widget.initialDateTime.year, i, 25));
-        if (longestText.length < date.length)
-          longestText = date;
-      }
-    } else if (columnType == _pickerColumnType.hour) {
-      for (int i = 0 ; i < 24; i++) {
-        final String hour = localizations.datePickerHour(i);
-        if (longestText.length < hour.length)
-          longestText = hour;
-      }
-    } else if (columnType == _pickerColumnType.minute) {
-      for (int i = 0 ; i < 60; i++) {
-        final String minute = localizations.datePickerMinute(i);
-        if (longestText.length < minute.length)
-          longestText = minute;
-      }
-    } else if (columnType == _pickerColumnType.dayPeriod)
-      longestText =
-        localizations.anteMeridiemAbbreviation.length > localizations.postMeridiemAbbreviation.length
-          ? localizations.anteMeridiemAbbreviation
-          : localizations.postMeridiemAbbreviation;
-    else
-      assert(false, 'column type is not appropriate');
+    switch (columnType) {
+      case _pickerColumnType.date:
+        // Measuring the length of all possible date is impossible, so here
+        // just some dates are measured.
+        for (int i = 1; i <= 12; i++) {
+          final String date = localizations.datePickerMediumDate(
+            new DateTime(widget.initialDateTime.year, i, 25));
+          if (longestText.length < date.length)
+            longestText = date;
+        }
+        break;
+      case _pickerColumnType.hour:
+        for (int i = 0 ; i < 24; i++) {
+          final String hour = localizations.datePickerHour(i);
+          if (longestText.length < hour.length)
+            longestText = hour;
+        }
+        break;
+      case _pickerColumnType.minute:
+        for (int i = 0 ; i < 60; i++) {
+          final String minute = localizations.datePickerMinute(i);
+          if (longestText.length < minute.length)
+            longestText = minute;
+        }
+        break;
+      case _pickerColumnType.dayPeriod:
+        longestText =
+          localizations.anteMeridiemAbbreviation.length > localizations.postMeridiemAbbreviation.length
+            ? localizations.anteMeridiemAbbreviation
+            : localizations.postMeridiemAbbreviation;
+        break;
+      default:
+        assert(false, 'column type is not appropriate');
+    }
 
     final TextPainter painter = new TextPainter(
       text: TextSpan(
@@ -319,6 +322,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       ),
       textDirection: Directionality.of(context),
     );
+
+    // This operation is expensive and should be avoided. It is called here only
+    // because there's no other way to get the information we want without
+    // laying out the text.
     painter.layout();
 
     return painter.maxIntrinsicWidth;
@@ -586,7 +593,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   FixedExtentScrollController dayController;
 
   // Estimated width of columns.
-  List<double> estimatedColumnWidths = new List<double>(_kColumnTypes);
+  Map<int, double> estimatedColumnWidths = <int, double>{};
 
   @override
   void initState() {
@@ -602,22 +609,27 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   double _getColumnWidth(_pickerColumnType columnType) {
     String longestText = '';
 
-    if (columnType == _pickerColumnType.dayOfMonth) {
-      for (int i = 1 ; i <=31; i++) {
-        final String dayOfMonth = localizations.datePickerDayOfMonth(i);
-        if (longestText.length < dayOfMonth.length)
-          longestText = dayOfMonth;
-      }
-    } else if (columnType == _pickerColumnType.month) {
-      for (int i = 1 ; i <=12; i++) {
-        final String month = localizations.datePickerMonth(i);
-        if (longestText.length < month.length)
-          longestText = month;
-      }
-    } else if(columnType == _pickerColumnType.year)
-      longestText = localizations.datePickerYear(2018);
-    else
-      assert(false, 'column type is not appropriate');
+    switch (columnType) {
+      case _pickerColumnType.dayOfMonth:
+        for (int i = 1 ; i <=31; i++) {
+          final String dayOfMonth = localizations.datePickerDayOfMonth(i);
+          if (longestText.length < dayOfMonth.length)
+            longestText = dayOfMonth;
+        }
+        break;
+      case _pickerColumnType.month:
+        for (int i = 1 ; i <=12; i++) {
+          final String month = localizations.datePickerMonth(i);
+          if (longestText.length < month.length)
+            longestText = month;
+        }
+        break;
+      case _pickerColumnType.year:
+        longestText = localizations.datePickerYear(2018);
+        break;
+      default:
+        assert(false, 'column type is not specified');
+    }
 
     final TextPainter painter = new TextPainter(
       text: TextSpan(
@@ -626,6 +638,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       ),
       textDirection: Directionality.of(context),
     );
+
+    // This operation is expensive and should be avoided. It is called here only
+    // because there's no other way to get the information we want without
+    // laying out the text.
     painter.layout();
 
     return painter.maxIntrinsicWidth;
@@ -722,33 +738,38 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     List<Function> pickerBuilders = <Function>[];
     List<double> columnWidths = <double>[];
 
-    if (localizations.datePickerDateOrder == DatePickerDateOrder.mdy) {
-      pickerBuilders = <Function>[_buildMonthPicker, _buildDayPicker, _buildYearPicker];
-      columnWidths = <double>[
-        estimatedColumnWidths[_pickerColumnType.month.index],
-        estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
-        estimatedColumnWidths[_pickerColumnType.year.index]];
-    } else if (localizations.datePickerDateOrder == DatePickerDateOrder.dmy) {
-      pickerBuilders = <Function>[_buildDayPicker, _buildMonthPicker, _buildYearPicker];
-      columnWidths = <double>[
-        estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
-        estimatedColumnWidths[_pickerColumnType.month.index],
-        estimatedColumnWidths[_pickerColumnType.year.index]];
-    } else if (localizations.datePickerDateOrder == DatePickerDateOrder.ymd) {
-      pickerBuilders = <Function>[_buildYearPicker, _buildMonthPicker, _buildDayPicker];
-      columnWidths = <double>[
-        estimatedColumnWidths[_pickerColumnType.year.index],
-        estimatedColumnWidths[_pickerColumnType.month.index],
-        estimatedColumnWidths[_pickerColumnType.dayOfMonth.index]];
-    } else if (localizations.datePickerDateOrder == DatePickerDateOrder.ydm) {
-      pickerBuilders = <Function>[_buildYearPicker, _buildDayPicker, _buildMonthPicker];
-      columnWidths = <double>[
-        estimatedColumnWidths[_pickerColumnType.year.index],
-        estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
-        estimatedColumnWidths[_pickerColumnType.month.index]];
+    switch (localizations.datePickerDateOrder) {
+      case DatePickerDateOrder.mdy:
+        pickerBuilders = <Function>[_buildMonthPicker, _buildDayPicker, _buildYearPicker];
+        columnWidths = <double>[
+          estimatedColumnWidths[_pickerColumnType.month.index],
+          estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
+          estimatedColumnWidths[_pickerColumnType.year.index]];
+        break;
+      case DatePickerDateOrder.dmy:
+        pickerBuilders = <Function>[_buildDayPicker, _buildMonthPicker, _buildYearPicker];
+        columnWidths = <double>[
+          estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
+          estimatedColumnWidths[_pickerColumnType.month.index],
+          estimatedColumnWidths[_pickerColumnType.year.index]];
+        break;
+      case DatePickerDateOrder.ymd:
+        pickerBuilders = <Function>[_buildYearPicker, _buildMonthPicker, _buildDayPicker];
+        columnWidths = <double>[
+          estimatedColumnWidths[_pickerColumnType.year.index],
+          estimatedColumnWidths[_pickerColumnType.month.index],
+          estimatedColumnWidths[_pickerColumnType.dayOfMonth.index]];
+        break;
+      case DatePickerDateOrder.ydm:
+        pickerBuilders = <Function>[_buildYearPicker, _buildDayPicker, _buildMonthPicker];
+        columnWidths = <double>[
+          estimatedColumnWidths[_pickerColumnType.year.index],
+          estimatedColumnWidths[_pickerColumnType.dayOfMonth.index],
+          estimatedColumnWidths[_pickerColumnType.month.index]];
+        break;
+      default:
+        assert(false, 'date order is not specified');
     }
-    else
-      assert(false, 'date order is not specified');
 
     final List<Widget> pickers = <Widget>[];
 
