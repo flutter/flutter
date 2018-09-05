@@ -68,7 +68,8 @@ class AndroidSemanticsNode  {
   /// The contentDescription of the semantics node.
   ///
   /// This field is used for controls like switches, radios, and checkboxes
-  /// instead of [text].
+  /// instead of [text]. If the text property is used for these, TalkBack
+  /// will not read out the "checked" or "not checked" label by default.
   ///
   /// This is produced by combining the value, label, and hint fields from
   /// the Flutter [SemanticsNode].
