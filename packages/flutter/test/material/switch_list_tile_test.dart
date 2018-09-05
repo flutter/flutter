@@ -46,7 +46,7 @@ void main() {
           ..circle(color: const Color(0x1f000000))
           ..circle(color: Colors.yellow[500]));
     await tester.tap(find.byType(Switch));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(
         Material.of(tester.element(find.byType(Switch))),
