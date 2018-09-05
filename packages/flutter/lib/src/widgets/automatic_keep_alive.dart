@@ -90,7 +90,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // the child when the child is guaranteed to be present.
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           // The element is no longer alive
-          if (context == null) {
+          if (!mounted) {
             return;
           }
           final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
