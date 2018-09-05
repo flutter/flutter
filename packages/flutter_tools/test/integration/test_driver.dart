@@ -23,9 +23,11 @@ const Duration appStartTimeout = Duration(seconds: 120);
 const Duration quitTimeout = Duration(seconds: 10);
 
 class FlutterTestDriver {
-  FlutterTestDriver(this._projectFolder);
+  FlutterTestDriver(this._projectFolder, {String logPrefix}):
+    this._logPrefix = logPrefix != null ? '$logPrefix: ' : '';
 
   final Directory _projectFolder;
+  final String _logPrefix;
   Process _proc;
   int _procPid;
   final StreamController<String> _stdout = new StreamController<String>.broadcast();
@@ -49,7 +51,7 @@ class FlutterTestDriver {
         msg.length > maxLength ? msg.substring(0, maxLength) + '...' : msg;
     _allMessages.add(truncatedMsg);
     if (_printJsonAndStderr) {
-      print(truncatedMsg);
+      print('$_logPrefix$truncatedMsg');
     }
     return msg;
   }
@@ -160,6 +162,31 @@ class FlutterTestDriver {
 
     if (hotReloadResp == null || hotReloadResp['code'] != 0)
       _throwErrorResponse('Hot ${fullRestart ? 'restart' : 'reload'} request failed');
+  }
+
+  Future<int> detach() async {
+    if (vmService != null) {
+      _debugPrint('Closing VM service');
+      await vmService.close()
+          .timeout(quitTimeout,
+              onTimeout: () { _debugPrint('VM Service did not quit within $quitTimeout'); });
+    }
+    if (_currentRunningAppId != null) {
+      _debugPrint('Detaching from app');
+      await Future.any<void>(<Future<void>>[
+        _proc.exitCode,
+        _sendRequest(
+          'app.detach',
+          <String, dynamic>{'appId': _currentRunningAppId}
+        ),
+      ]).timeout(
+        quitTimeout,
+        onTimeout: () { _debugPrint('app.detach did not return within $quitTimeout'); }
+      );
+      _currentRunningAppId = null;
+    }
+    _debugPrint('Waiting for process to end');
+    return _proc.exitCode.timeout(quitTimeout, onTimeout: _killGracefully);
   }
 
   Future<int> stop() async {

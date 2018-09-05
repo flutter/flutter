@@ -66,6 +66,7 @@ class HotRunner extends ResidentRunner {
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
+  bool _didAttach = false;
   Set<String> _dartDependencies;
   final String dillOutputPath;
 
@@ -152,6 +153,7 @@ class HotRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String viewFilter,
   }) async {
+    _didAttach = true;
     try {
       await connectToServiceProtocol(viewFilter: viewFilter,
           reloadSources: _reloadSourcesService,
@@ -751,18 +753,25 @@ class HotRunner extends ResidentRunner {
       for (Uri uri in device.observatoryUris)
         printStatus('An Observatory debugger and profiler on $dname is available at: $uri');
     }
+    final String quitMessage = _didAttach
+        ? 'To detach, press "d"; to quit, press "q".'
+        : 'To quit, press "q".';
     if (details) {
       printHelpDetails();
-      printStatus('To repeat this help message, press "h". To quit, press "q".');
+      printStatus('To repeat this help message, press "h". $quitMessage');
     } else {
-      printStatus('For a more detailed help message, press "h". To quit, press "q".');
+      printStatus('For a more detailed help message, press "h". $quitMessage');
     }
   }
 
   @override
   Future<Null> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
-    await stopApp();
+    if (_didAttach) {
+      appFinished();
+    } else {
+      await stopApp();
+    }
   }
 
   @override
