@@ -433,7 +433,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           widget.onDateTimeChanged(_getDateTime());
         }
         else {
-          int currentHourIn24h = selectedHour + selectedAmPm * 12;
+          final int currentHourIn24h = selectedHour + selectedAmPm * 12;
           // Automatically scrolls the am/pm column when the hour column value
           // goes far enough. This behavior is similar to
           // iOS picker version.
@@ -655,11 +655,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
-        setState(() {
-          selectedDay = index + 1;
-          if (new DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
-            widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
-        });
+        selectedDay = index + 1;
+        if (new DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
+          widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
       },
       children: new List<Widget>.generate(daysInCurrentMonth, (int index) {
         return childPositioning(new Text(localizations.datePickerDayOfMonth(index + 1)));
@@ -677,11 +675,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
-        setState(() {
-          selectedMonth = index + 1;
-          if (new DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
-            widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
-        });
+        selectedMonth = index + 1;
+        if (new DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
+          widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
       },
       children: new List<Widget>.generate(12, (int index) {
         return childPositioning(new Text(localizations.datePickerMonth(index + 1)));
@@ -699,11 +695,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
-        setState(() {
-          selectedYear = index;
-          if (new DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
-            widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
-        });
+        selectedYear = index;
+        if (new DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
+          widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
       },
       itemBuilder: (BuildContext context, int index) {
         if (index < widget.minimumYear)
