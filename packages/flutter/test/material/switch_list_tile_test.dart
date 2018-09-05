@@ -14,10 +14,8 @@ void main() {
               child: Directionality(
           textDirection: TextDirection.ltr,
           child: new StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: ListView(
-                children: <Widget>[
-                  new SwitchListTile(
+            return new Material(
+              child: new SwitchListTile(
                     value: value,
                     onChanged: (bool newValue) {
                       setState(() {
@@ -29,22 +27,19 @@ void main() {
                     inactiveThumbColor: Colors.yellow[500],
                     inactiveTrackColor: Colors.blue[500],
                   ),
-                ],
-              ),
             );
           })),
       ));
-      
+
     expect(
         find.byType(Switch),
         paints
-          ..rrect(
-              color: Colors.blue[500],)
-              
+          ..rrect(color: Colors.blue[500])
           ..circle(color: const Color(0x33000000))
           ..circle(color: const Color(0x24000000))
           ..circle(color: const Color(0x1f000000))
           ..circle(color: Colors.yellow[500]));
+
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
