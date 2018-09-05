@@ -793,7 +793,7 @@ class HotRunner extends ResidentRunner {
         printStatus('An Observatory debugger and profiler on $dname is available at: $uri');
     }
     final String quitMessage = _didAttach
-        ? 'To detach, press "d" or to quit, press "q".'
+        ? 'To detach, press "d"; to quit, press "q".'
         : 'To quit, press "q".';
     if (details) {
       printHelpDetails();
