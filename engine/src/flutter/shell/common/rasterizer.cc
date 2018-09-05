@@ -13,6 +13,10 @@
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace shell {
 
 Rasterizer::Rasterizer(blink::TaskRunners task_runners)
