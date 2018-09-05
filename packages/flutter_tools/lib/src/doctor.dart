@@ -34,10 +34,12 @@ abstract class DoctorValidatorsProvider {
   static final DoctorValidatorsProvider defaultInstance = new _DefaultDoctorValidatorsProvider();
 
   List<DoctorValidator> get validators;
+  List<Workflow> get workflows;
 }
 
 class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
+  List<Workflow> _workflows;
 
   @override
   List<DoctorValidator> get validators {
@@ -46,10 +48,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(new _FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(androidWorkflow);
+        _validators.add(androidValidator);
 
       if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(iosWorkflow);
+        _validators.add(iosValidator);
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -65,6 +67,13 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
     }
     return _validators;
   }
+
+  @override
+  List<Workflow> get workflows {
+    _workflows ??= <Workflow>[iosWorkflow, androidWorkflow];
+    return _workflows;
+  }
+
 }
 
 class ValidatorTask {
@@ -91,7 +100,7 @@ class Doctor {
   }
 
   List<Workflow> get workflows {
-    return validators.whereType<Workflow>().toList();
+    return DoctorValidatorsProvider.instance.workflows;
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
@@ -104,8 +113,28 @@ class Doctor {
 
     bool allGood = true;
 
+    final Set<ValidatorCategory> finishedGroups = new Set<ValidatorCategory>();
     for (DoctorValidator validator in validators) {
-      final ValidationResult result = await validator.validate();
+      final ValidatorCategory currentCategory = validator.category;
+      ValidationResult result;
+
+      if (currentCategory.isGrouped) {
+        if (finishedGroups.contains(currentCategory)) {
+          // We already handled this category via a previous validator.
+          continue;
+        }
+        // Skip ahead and get results for the other validators in this category.
+        final List<ValidationResult> results = <ValidationResult>[];
+        for (DoctorValidator subValidator in validators.where(
+                (DoctorValidator v) => v.category == currentCategory)) {
+          results.add(await subValidator.validate());
+        }
+        result = _mergeValidationResults(results);
+        finishedGroups.add(currentCategory);
+      } else {
+        result = await validator.validate();
+      }
+
       buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
         buffer.write('not installed.');
@@ -121,6 +150,7 @@ class Doctor {
 
       if (result.type != ValidationType.installed)
         allGood = false;
+
     }
 
     if (!allGood) {
@@ -134,7 +164,7 @@ class Doctor {
   /// Print information about the state of installed tooling.
   Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
-      return AndroidWorkflow.runLicenseManager();
+      return AndroidValidator.runLicenseManager();
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
@@ -142,18 +172,42 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (ValidatorTask validatorTask in startValidatorTasks()) {
+    final List<ValidatorTask> taskList = startValidatorTasks();
+
+    final Set<ValidatorCategory> finishedGroups = new Set<ValidatorCategory>();
+    for (ValidatorTask validatorTask in taskList) {
       final DoctorValidator validator = validatorTask.validator;
+      final ValidatorCategory currentCategory = validator.category;
       final Status status = new Status.withSpinner();
-      try {
-        await validatorTask.result;
-      } catch (exception) {
-        status.cancel();
-        rethrow;
+      ValidationResult result;
+
+      if (currentCategory.isGrouped) {
+        if (finishedGroups.contains(currentCategory)) {
+          continue;
+        }
+
+        final List<ValidationResult> results = <ValidationResult>[];
+        for (ValidatorTask subValidator in taskList.where(
+                (ValidatorTask t) => t.validator.category == currentCategory)) {
+          try {
+            results.add(await subValidator.result);
+          } catch (exception) {
+            status.cancel();
+            rethrow;
+          }
+        }
+        result = _mergeValidationResults(results);
+        finishedGroups.add(currentCategory);
+      } else {
+        try {
+          result = await validatorTask.result;
+        } catch (exception) {
+          status.cancel();
+          rethrow;
+        }
       }
       status.stop();
 
-      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -194,6 +248,35 @@ class Doctor {
     return doctorResult;
   }
 
+  ValidationResult _mergeValidationResults(List<ValidationResult> results) {
+    ValidationType mergedType = results[0].type;
+    final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
+
+    for (ValidationResult result in results) {
+      switch (result.type) {
+        case ValidationType.installed:
+          if (mergedType == ValidationType.missing) {
+            mergedType = ValidationType.partial;
+          }
+          break;
+        case ValidationType.partial:
+          mergedType = ValidationType.partial;
+          break;
+        case ValidationType.missing:
+          if (mergedType == ValidationType.installed) {
+            mergedType = ValidationType.partial;
+          }
+          break;
+        default:
+          throw 'Unrecognized validation type: ' + result.type.toString();
+      }
+      mergedMessages.addAll(result.messages);
+    }
+
+    return new ValidationResult(mergedType, mergedMessages,
+        statusInfo: results[0].statusInfo);
+  }
+
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
   bool get canLaunchAnything {
@@ -201,7 +284,10 @@ class Doctor {
       return true;
     return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
   }
+
+
 }
+
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
 abstract class Workflow {
@@ -224,10 +310,28 @@ enum ValidationType {
   installed
 }
 
+/// Validator output is grouped by category.
+class ValidatorCategory {
+  final String name;
+  // Whether we should bundle results for validators sharing this cateogry,
+  // or let each stand alone.
+  final bool isGrouped;
+  const ValidatorCategory(this.name, this.isGrouped);
+
+  static const ValidatorCategory androidToolchain = ValidatorCategory('androidToolchain', true);
+  static const ValidatorCategory androidStudio = ValidatorCategory('androidStudio', false);
+  static const ValidatorCategory ios = ValidatorCategory('ios', true);
+  static const ValidatorCategory flutter = ValidatorCategory('flutter', false);
+  static const ValidatorCategory ide = ValidatorCategory('ide', false);
+  static const ValidatorCategory device = ValidatorCategory('device', false);
+  static const ValidatorCategory other = ValidatorCategory('other', false);
+}
+
 abstract class DoctorValidator {
-  const DoctorValidator(this.title);
+  const DoctorValidator(this.title, [this.category = ValidatorCategory.other]);
 
   final String title;
+  final ValidatorCategory category;
 
   Future<ValidationResult> validate();
 }
@@ -271,7 +375,7 @@ class ValidationMessage {
 }
 
 class _FlutterValidator extends DoctorValidator {
-  _FlutterValidator() : super('Flutter');
+  _FlutterValidator() : super('Flutter', ValidatorCategory.flutter);
 
   @override
   Future<ValidationResult> validate() async {
@@ -320,7 +424,7 @@ bool _genSnapshotRuns(String genSnapshotPath) {
 }
 
 class NoIdeValidator extends DoctorValidator {
-  NoIdeValidator() : super('Flutter IDE Support');
+  NoIdeValidator() : super('Flutter IDE Support',ValidatorCategory.ide);
 
   @override
   Future<ValidationResult> validate() async {
@@ -333,7 +437,7 @@ class NoIdeValidator extends DoctorValidator {
 abstract class IntelliJValidator extends DoctorValidator {
   final String installPath;
 
-  IntelliJValidator(String title, this.installPath) : super(title);
+  IntelliJValidator(String title, this.installPath) : super(title, ValidatorCategory.ide);
 
   String get version;
   String get pluginsPath;
@@ -498,7 +602,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       validators.add(new ValidatorWithResult(
           'Cannot determine if IntelliJ is installed',
           new ValidationResult(ValidationType.missing, <ValidationMessage>[
-             new ValidationMessage.error(e.message),
+              new ValidationMessage.error(e.message),
           ]),
       ));
     }
@@ -528,7 +632,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator() : super('Connected devices');
+  DeviceValidator() : super('Connected devices', ValidatorCategory.device);
 
   @override
   Future<ValidationResult> validate() async {

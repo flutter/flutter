@@ -178,7 +178,7 @@ class MockDeviceManager implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
-class MockAndroidWorkflowValidator extends AndroidWorkflow {
+class MockAndroidWorkflowValidator extends AndroidValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
@@ -199,7 +199,7 @@ class MockDoctor extends Doctor {
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
     return superValidators.map((DoctorValidator v) {
-      if (v is AndroidWorkflow) {
+      if (v is AndroidValidator) {
         return new MockAndroidWorkflowValidator();
       }
       return v;
