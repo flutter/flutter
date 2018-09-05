@@ -7,29 +7,31 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('SwitchListTile has the right colors', (WidgetTester tester) async {
+  testWidgets('SwitchListTile has the right colors',
+      (WidgetTester tester) async {
     bool value = false;
-    await tester.pumpWidget(
-      MediaQuery(data: const MediaQueryData(padding: const EdgeInsets.all(8.0)),
-              child: Directionality(
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(padding: const EdgeInsets.all(8.0)),
+      child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          child: new StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
             return new Material(
               child: new SwitchListTile(
-                    value: value,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                    activeColor: Colors.red[500],
-                    activeTrackColor: Colors.green[500],
-                    inactiveThumbColor: Colors.yellow[500],
-                    inactiveTrackColor: Colors.blue[500],
-                  ),
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+                activeColor: Colors.red[500],
+                activeTrackColor: Colors.green[500],
+                inactiveThumbColor: Colors.yellow[500],
+                inactiveTrackColor: Colors.blue[500],
+              ),
             );
           })),
-      ));
+    ));
 
     expect(
         find.byType(Switch),
@@ -46,9 +48,7 @@ void main() {
     expect(
         Material.of(tester.element(find.byType(Switch))),
         paints
-          ..rrect(
-              color: Colors.green[500],
-             )
+          ..rrect(color: Colors.green[500])
           ..circle(color: const Color(0x33000000))
           ..circle(color: const Color(0x24000000))
           ..circle(color: const Color(0x1f000000))
