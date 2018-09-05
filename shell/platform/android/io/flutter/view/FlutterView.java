@@ -128,20 +128,11 @@ public class FlutterView extends SurfaceView
         }
         mNativeView.attachViewAndActivity(this, activity);
 
-        int color = 0xFF000000;
-        TypedValue typedValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);
-        if (typedValue.type >= TypedValue.TYPE_FIRST_COLOR_INT && typedValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-            color = typedValue.data;
-        }
-        // TODO(abarth): Consider letting the developer override this color.
-        final int backgroundColor = color;
-
         mSurfaceCallback = new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 assertAttached();
-                nativeSurfaceCreated(mNativeView.get(), holder.getSurface(), backgroundColor);
+                nativeSurfaceCreated(mNativeView.get(), holder.getSurface());
             }
 
             @Override
@@ -634,8 +625,7 @@ public class FlutterView extends SurfaceView
         return nativeGetBitmap(mNativeView.get());
     }
 
-    private static native void nativeSurfaceCreated(long nativePlatformViewAndroid, Surface surface,
-            int backgroundColor);
+    private static native void nativeSurfaceCreated(long nativePlatformViewAndroid, Surface surface);
 
     private static native void nativeSurfaceChanged(long nativePlatformViewAndroid, int width, int height);
 

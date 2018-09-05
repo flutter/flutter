@@ -118,7 +118,7 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
       surface_->GetContext(), canvas, surface_->GetRootTransformation(), true);
 
   if (canvas) {
-    canvas->clear(SK_ColorBLACK);
+    canvas->clear(SK_ColorTRANSPARENT);
   }
 
   if (compositor_frame && compositor_frame->Raster(layer_tree, false)) {
@@ -191,7 +191,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
 
   auto frame = compositor_context.AcquireFrame(
       surface_context, canvas, root_surface_transformation, false);
-  canvas->clear(SK_ColorBLACK);
+  canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true);
   canvas->flush();
 
