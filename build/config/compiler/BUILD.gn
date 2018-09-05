@@ -397,6 +397,7 @@ config("compiler") {
       "-ffunction-sections",
       "-funwind-tables",
       "-fno-short-enums",
+      "-nostdinc++"
     ]
     if (!is_clang) {
       # Clang doesn't support these flags.
