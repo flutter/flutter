@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../gallery/demo.dart';
 
-enum _Location {
+@visibleForTesting
+enum Location {
   Barbados,
   Bahamas,
   Bermuda
@@ -225,12 +226,12 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           );
         },
       ),
-      DemoItem<_Location>(
+      DemoItem<Location>(
         name: 'Location',
-        value: _Location.Bahamas,
+        value: Location.Bahamas,
         hint: 'Select location',
-        valueToString: (_Location location) => location.toString().split('.')[1],
-        builder: (DemoItem<_Location> item) {
+        valueToString: (Location location) => location.toString().split('.')[1],
+        builder: (DemoItem<Location> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -242,28 +243,28 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 return CollapsibleBody(
                   onSave: () { Form.of(context).save(); close(); },
                   onCancel: () { Form.of(context).reset(); close(); },
-                  child: FormField<_Location>(
+                  child: FormField<Location>(
                     initialValue: item.value,
-                    onSaved: (_Location result) { item.value = result; },
-                    builder: (FormFieldState<_Location> field) {
+                    onSaved: (Location result) { item.value = result; },
+                    builder: (FormFieldState<Location> field) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          RadioListTile<_Location>(
-                            value: _Location.Bahamas,
+                          RadioListTile<Location>(
+                            value: Location.Bahamas,
                             title: const Text('Bahamas'),
                             groupValue: field.value,
                             onChanged: field.didChange,
                           ),
-                          RadioListTile<_Location>(
-                            value: _Location.Barbados,
+                          RadioListTile<Location>(
+                            value: Location.Barbados,
                             title: const Text('Barbados'),
                             groupValue: field.value,
                             onChanged: field.didChange,
                           ),
-                          RadioListTile<_Location>(
-                            value: _Location.Bermuda,
+                          RadioListTile<Location>(
+                            value: Location.Bermuda,
                             title: const Text('Bermuda'),
                             groupValue: field.value,
                             onChanged: field.didChange,
