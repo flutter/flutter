@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -87,6 +88,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   /// be null.
   CupertinoPageRoute({
     @required this.builder,
+    this.title,
     RouteSettings settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
@@ -95,12 +97,56 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
-    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
+    // ignore: prefer_asserts_in_initializer_lists, https://github.com/dart-lang/sdk/issues/31223
     assert(opaque); // PageRoute makes it return true.
   }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+
+  /// A title string for this route.
+  ///
+  /// Used to autopopulate [CupertinoNavigationBar] and
+  /// [CupertinoSliverNavigationBar]'s `middle`/`largeTitle` widgets when
+  /// one is not manually supplied.
+  final String title;
+
+  ValueNotifier<String> _previousTitle;
+
+  /// The title string of the previous [CupertinoPageRoute].
+  ///
+  /// The [ValueListenable]'s value is readable after the route is installed
+  /// onto a [Navigator]. The [ValueListenable] will also notify its listeners
+  /// if the value changes (such as by replacing the previous route).
+  ///
+  /// The [ValueListenable] itself will be null before the route is installed.
+  /// Its content value will be null if the previous route has no title or
+  /// is not a [CupertinoPageRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [ValueListenableBuilder], which can be used to listen and rebuild
+  ///    widgets based on a ValueListenable.
+  ValueListenable<String> get previousTitle {
+    assert(
+      _previousTitle != null,
+      'Cannot read the previousTitle for a route that has not yet been installed',
+    );
+    return _previousTitle;
+  }
+
+  @override
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    final String previousTitleString = previousRoute is CupertinoPageRoute
+        ? previousRoute.title
+        : null;
+    if (_previousTitle == null) {
+      _previousTitle = new ValueNotifier<String>(previousTitleString);
+    } else {
+      _previousTitle.value = previousTitleString;
+    }
+    super.didChangePrevious(previousRoute);
+  }
 
   @override
   final bool maintainState;
@@ -510,7 +556,6 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     );
   }
 }
-
 
 /// A controller for an iOS-style back gesture.
 ///

@@ -127,6 +127,24 @@ class BorderRadiusTween extends Tween<BorderRadius> {
   BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
+/// An interpolation between two [Border]s.
+///
+/// This class specializes the interpolation of [Tween<Border>] to use
+/// [Border.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
+class BorderTween extends Tween<Border> {
+  /// Creates a [Border] tween.
+  ///
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as having no border.
+  BorderTween({ Border begin, Border end }) : super(begin: begin, end: end);
+
+  /// Returns the value this variable has at the given animation clock value.
+  @override
+  Border lerp(double t) => Border.lerp(begin, end, t);
+}
+
 /// An interpolation between two [Matrix4]s.
 ///
 /// This class specializes the interpolation of [Tween<Matrix4>] to be
@@ -386,11 +404,20 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
 /// [AnimationController].
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only
 ///    supports animating the [padding].
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
+///  * [AnimatedAlign], which automatically transitions its child's
+///    position over a given duration whenever the given [alignment] changes.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -546,9 +573,15 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// Animated version of [Padding] which automatically transitions the
 /// indentation over a given duration whenever the given inset changes.
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_padding.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
+///  * [AnimatedAlign], which automatically transitions its child's
+///    position over a given duration whenever the given [alignment] changes.
 class AnimatedPadding extends ImplicitlyAnimatedWidget {
   /// Creates a widget that insets its child by a value that animates
   /// implicitly.
@@ -608,9 +641,18 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// Animated version of [Align] which automatically transitions the child's
 /// position over a given duration whenever the given [alignment] changes.
 ///
+/// Here's an illustration of what this can look like, using a [curve] of
+/// [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_align.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedContainer], which can transition more values at once.
+///  * [AnimatedPadding], which can animate the padding instead of the
+///    alignment.
+///  * [AnimatedPositioned], which, as a child of a [Stack], automatically
+///    transitions its child's position over a given duration whenever the given
+///    position changes.
 class AnimatedAlign extends ImplicitlyAnimatedWidget {
   /// Creates a widget that positions its child by an alignment that animates
   /// implicitly.
@@ -692,6 +734,10 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// [SlideTransition] instead. [SlideTransition] only triggers a repaint each
 /// frame of the animation, whereas [AnimatedPositioned] will trigger a relayout
 /// as well.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned.mp4}
 ///
 /// See also:
 ///
@@ -842,6 +888,10 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 /// frame of the animation, whereas [AnimatedPositionedDirectional] will trigger
 /// a relayout as well. ([SlideTransition] is also text-direction-aware.)
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned_directional.mp4}
+///
 /// See also:
 ///
 ///  * [AnimatedPositioned], which specifies the widget's position visually (the
@@ -964,6 +1014,10 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// Animating an opacity is relatively expensive because it requires painting
 /// the child into an intermediate buffer.
 ///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
+///
 /// ## Sample code
 ///
 /// ```dart
@@ -998,6 +1052,11 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///   }
 /// }
 /// ```
+///
+/// See also:
+///
+///  * [FadeTransition], an explicitly animated version of this widget, where
+///    an [Animation] is provided by the caller instead of being built in.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
   ///
@@ -1065,6 +1124,10 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 ///
 /// The [textAlign], [softWrap], [textOverflow], and [maxLines] properties are
 /// not animated and take effect immediately when changed.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.elasticInOut].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
@@ -1168,6 +1231,10 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 /// because it is being driven by an [AnimatedTheme]).
 ///
 /// The [shape] is not animated.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_physical_model.mp4}
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///

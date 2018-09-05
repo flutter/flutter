@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -49,6 +51,47 @@ void main() {
     expect(find.byTooltip('Add'), findsOneWidget);
   });
 
+  // Regression test for: https://github.com/flutter/flutter/pull/21084
+  testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+            child: Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+    await tester.longPressAt(_rightEdgeOfFab(tester));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
+  // Regression test for: https://github.com/flutter/flutter/pull/21084
+  testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+    await tester.longPressAt(_rightEdgeOfFab(tester));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
@@ -61,10 +104,10 @@ void main() {
       ),
     );
 
-    expect(find.byType(Text), findsNothing);
+    expect(find.text('Add'), findsNothing);
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    expect(find.byType(Text), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
   });
 
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -408,4 +451,56 @@ void main() {
     expect(shortFAB, findsNothing);
     expect(helloWorld, findsOneWidget);
   });
+
+  // This test prevents https://github.com/flutter/flutter/issues/20483
+  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Center(
+            child: new RepaintBoundary(
+              key: key,
+              child: new FloatingActionButton(
+                onPressed: () {},
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.press(find.byKey(key));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1000));
+    await expectLater(
+      find.byKey(key),
+      matchesGoldenFile('floating_action_button_test.clip.1.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+    await tester.pumpWidget(
+      new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new FloatingActionButton(
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byType(FloatingActionButton)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
+  });
+}
+
+Offset _rightEdgeOfFab(WidgetTester tester) {
+  final Finder fab = find.byType(FloatingActionButton);
+  return tester.getRect(fab).centerRight - const Offset(1.0, 0.0);
 }

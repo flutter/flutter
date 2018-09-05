@@ -35,25 +35,28 @@ final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
 /// As soon as a new observatory is detected the command attaches to it and
 /// enables hot reloading.
 class AttachCommand extends FlutterCommand {
-  AttachCommand({bool verboseHelp = false}) {
+  AttachCommand({bool verboseHelp = false, this.hotRunnerFactory}) {
     addBuildModeFlags(defaultToRelease: false);
+    usesTargetOption();
+    usesFilesystemOptions(hide: !verboseHelp);
     argParser
       ..addOption(
         'debug-port',
         help: 'Local port where the observatory is listening.',
-      )
-      ..addFlag(
-        'preview-dart-2',
-        defaultsTo: true,
+      )..addOption(
+        'project-root',
         hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
+        help: 'Normally used only in run target',
       )..addFlag('machine',
           hide: !verboseHelp,
           negatable: false,
           help: 'Handle machine structured JSON command input and provide output\n'
                 'and progress in machine friendly format.',
       );
+    hotRunnerFactory ??= new HotRunnerFactory();
   }
+
+  HotRunnerFactory hotRunnerFactory;
 
   @override
   final String name = 'attach';
@@ -74,7 +77,7 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<Null> validateCommand() async {
-    super.validateCommand();
+    await super.validateCommand();
     if (await findTargetDevice() == null)
       throwToolExit(null);
     observatoryPort;
@@ -113,14 +116,22 @@ class AttachCommand extends FlutterCommand {
       observatoryUri = Uri.parse('http://$ipv4Loopback:$localPort/');
     }
     try {
-      final FlutterDevice flutterDevice = new FlutterDevice(device,
-          trackWidgetCreation: false, previewDart2: argResults['preview-dart-2']);
+      final FlutterDevice flutterDevice = new FlutterDevice(
+        device,
+        trackWidgetCreation: false,
+        dillOutputPath: argResults['output-dill'],
+        fileSystemRoots: argResults['filesystem-root'],
+        fileSystemScheme: argResults['filesystem-scheme'],
+      );
       flutterDevice.observatoryUris = <Uri>[ observatoryUri ];
-      final HotRunner hotRunner = new HotRunner(
+      final HotRunner hotRunner = hotRunnerFactory.build(
         <FlutterDevice>[flutterDevice],
+        target: targetFile,
         debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
         packagesFilePath: globalResults['packages'],
         usesTerminalUI: daemon == null,
+        projectRootPath: argResults['project-root'],
+        dillOutputPath: argResults['output-dill'],
       );
 
       if (daemon != null) {
@@ -144,4 +155,33 @@ class AttachCommand extends FlutterCommand {
   }
 
   Future<void> _validateArguments() async {}
+}
+
+class HotRunnerFactory {
+  HotRunner build(List<FlutterDevice> devices, {
+      String target,
+      DebuggingOptions debuggingOptions,
+      bool usesTerminalUI = true,
+      bool benchmarkMode = false,
+      File applicationBinary,
+      bool hostIsIde = false,
+      String projectRootPath,
+      String packagesFilePath,
+      String dillOutputPath,
+      bool stayResident = true,
+      bool ipv6 = false,
+  }) => new HotRunner(
+    devices,
+    target: target,
+    debuggingOptions: debuggingOptions,
+    usesTerminalUI: usesTerminalUI,
+    benchmarkMode: benchmarkMode,
+    applicationBinary: applicationBinary,
+    hostIsIde: hostIsIde,
+    projectRootPath: projectRootPath,
+    packagesFilePath: packagesFilePath,
+    dillOutputPath: dillOutputPath,
+    stayResident: stayResident,
+    ipv6: ipv6,
+  );
 }

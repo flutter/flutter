@@ -10,9 +10,10 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 class MockFile extends Mock implements File {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
@@ -291,9 +292,11 @@ void main() {
 
   group('log reader', () {
     MockProcessManager mockProcessManager;
+    MockIosProject mockIosProject;
 
     setUp(() {
       mockProcessManager = new MockProcessManager();
+      mockIosProject = new MockIosProject();
     });
 
     testUsingContext('simulator can output `)`', () async {
@@ -316,7 +319,7 @@ void main() {
 
       final IOSSimulator device = new IOSSimulator('123456', category: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
-        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+        app: new BuildableIOSApp(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();

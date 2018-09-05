@@ -9,10 +9,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/pubspec_schema.dart';
 
 void main() {
   setUpAll(() {
@@ -516,23 +516,11 @@ flutter:
       expect(flutterManifest.isEmpty, false);
     }
 
-    void writeSchemaFile(FileSystem filesystem, String schemaData) {
-      final String schemaPath = buildSchemaPath(filesystem);
-      final File schemaFile = filesystem.file(schemaPath);
-
-      final String schemaDir = buildSchemaDir(filesystem);
-
-      filesystem.directory(schemaDir).createSync(recursive: true);
-      filesystem.file(schemaFile).writeAsStringSync(schemaData);
-    }
-
     void testUsingContextAndFs(String description, FileSystem filesystem,
         dynamic testMethod()) {
-      const String schemaData = '{}';
-
       testUsingContext(description,
               () async {
-            writeSchemaFile( filesystem, schemaData);
+            writeEmptySchemaFile(filesystem);
             testMethod();
       },
           overrides: <Type, Generator>{

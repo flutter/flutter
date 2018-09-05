@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/scheduler/ticker.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
 
@@ -246,7 +246,7 @@ void main() {
 
 class _FakeTickerProvider implements TickerProvider {
   @override
-  Ticker createTicker(TickerCallback onTick) {
+  Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
     return new _FakeTicker();
   }
 }
@@ -272,6 +272,9 @@ class _FakeTicker implements Ticker {
 
   @override
   bool get shouldScheduleTick => null;
+
+  @override
+  bool disableAnimations = false;
 
   @override
   void dispose() {}

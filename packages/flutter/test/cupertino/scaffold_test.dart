@@ -25,6 +25,55 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
+  testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Opaque'),
+            backgroundColor: Color(0xFFF8F8F8),
+          ),
+          child: Container(),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(Container)).height, 600.0 - 44.0 - 100.0);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Transparent'),
+          ),
+          child: Container(),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(Container)).height, 600.0 - 100.0);
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+        child: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+          ),
+          resizeToAvoidBottomInset: false,
+          child: Container(),
+        ),
+      ),
+    ));
+
+    expect(tester.getSize(find.byType(Container)).height, 600.0);
+  });
+
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
     const Center page1Center = Center();
 
@@ -190,7 +239,7 @@ void main() {
     // Navigate in tab 2.
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Page 2 of tab 2'), isOnstage);
     expect(find.text('Page 1 of tab 1', skipOffstage: false), isOffstage);
@@ -205,7 +254,7 @@ void main() {
     // Navigate in tab 1.
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Page 2 of tab 1'), isOnstage);
     expect(find.text('Page 2 of tab 2', skipOffstage: false), isOffstage);
@@ -219,7 +268,7 @@ void main() {
     // Pop in tab 2
     await tester.tap(find.text('Back'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Page 1 of tab 2'), isOnstage);
     expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);

@@ -44,7 +44,6 @@ class GenSnapshot {
   Future<int> run({
     @required SnapshotType snapshotType,
     @required String packagesPath,
-    @required String depfilePath,
     IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
@@ -68,70 +67,6 @@ class GenSnapshot {
   }
 }
 
-/// Dart snapshot builder.
-///
-/// Builds Dart snapshots in one of three modes:
-///   * Script snapshot: architecture-independent snapshot of a Dart script
-///     and core libraries.
-///   * AOT snapshot: architecture-specific ahead-of-time compiled snapshot
-///     suitable for loading with `mmap`.
-///   * Assembly AOT snapshot: architecture-specific ahead-of-time compile to
-///     assembly suitable for compilation as a static or dynamic library.
-class ScriptSnapshotter {
-  /// Builds an architecture-independent snapshot of the specified script.
-  Future<int> build({
-    @required String mainPath,
-    @required String snapshotPath,
-    @required String depfilePath,
-    @required String packagesPath
-  }) async {
-    final SnapshotType snapshotType = new SnapshotType(null, BuildMode.debug);
-    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
-    final List<String> args = <String>[
-      '--snapshot_kind=script',
-      '--script_snapshot=$snapshotPath',
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
-      '--enable-mirrors=false',
-      mainPath,
-    ];
-
-    final Fingerprinter fingerprinter = new Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[
-        mainPath,
-        snapshotPath,
-        vmSnapshotData,
-        isolateSnapshotData,
-      ],
-      properties: <String, String>{
-        'buildMode': snapshotType.mode.toString(),
-        'targetPlatform': snapshotType.platform?.toString() ?? '',
-        'entryPoint': mainPath,
-      },
-      depfilePaths: <String>[depfilePath],
-    );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping script snapshot build. Fingerprints match.');
-      return 0;
-    }
-
-    // Build the snapshot.
-    final int exitCode = await genSnapshot.run(
-      snapshotType: snapshotType,
-      packagesPath: packagesPath,
-      depfilePath: depfilePath,
-      additionalArgs: args,
-    );
-
-    if (exitCode != 0)
-      return exitCode;
-    await fingerprinter.writeFingerprint();
-    return exitCode;
-  }
-}
-
 class AOTSnapshotter {
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
@@ -140,7 +75,6 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool previewDart2,
     @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
@@ -195,13 +129,11 @@ class AOTSnapshotter {
       '--embedder_entry_points_manifest=$vmEntryPoints',
       '--embedder_entry_points_manifest=$ioEntryPoints',
     ];
-    if (previewDart2) {
-      genSnapshotArgs.addAll(<String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
-      ]);
-    }
+    genSnapshotArgs.addAll(<String>[
+      '--reify-generic-functions',
+      '--strong',
+      '--sync-async',
+    ]);
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
@@ -232,7 +164,7 @@ class AOTSnapshotter {
     if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
       // Use softfp for Android armv7 devices.
       // Note that this is the default for armv7 iOS builds, but harmless to set.
-      // TODO(cbracken) eliminate this when we fix https://github.com/flutter/flutter/issues/17489
+      // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 
       // Not supported by the Pixel in 32-bit mode.
@@ -256,11 +188,10 @@ class AOTSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'dart2': previewDart2.toString(),
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
-      depfilePaths: <String>[depfilePath],
+      depfilePaths: <String>[],
     );
     if (await fingerprinter.doesFingerprintMatch()) {
       printTrace('Skipping AOT snapshot build. Fingerprint match.');
@@ -271,7 +202,6 @@ class AOTSnapshotter {
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packageMap.packagesPath,
-      depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
     );
@@ -283,7 +213,7 @@ class AOTSnapshotter {
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
-    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshotPath\n');
+    await outputDir.childFile('gen_snapshot.d').writeAsString('gen_snapshot.d: $genSnapshotPath\n');
 
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
@@ -427,6 +357,7 @@ class CoreJITSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
+    @required String compilationTraceFilePath,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
     if (!_isValidCoreJitPlatform(platform)) {
@@ -437,7 +368,7 @@ class CoreJITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final List<String> inputPaths = <String>[mainPath];
+    final List<String> inputPaths = <String>[mainPath, compilationTraceFilePath];
     final Set<String> outputPaths = new Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
@@ -466,12 +397,12 @@ class CoreJITSnapshotter {
       '--isolate_snapshot_data=$isolateSnapshotData',
       '--vm_snapshot_instructions=$vmSnapshotInstructions',
       '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-      '--load_compilation_trace=trace.txt',
+      '--load_compilation_trace=$compilationTraceFilePath',
     ]);
 
     if (platform == TargetPlatform.android_arm) {
       // Use softfp for Android armv7 devices.
-      // TODO(cbracken) eliminate this when we fix https://github.com/flutter/flutter/issues/17489
+      // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 
       // Not supported by the Pixel in 32-bit mode.
@@ -497,7 +428,7 @@ class CoreJITSnapshotter {
         'entryPoint': mainPath,
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
-      depfilePaths: <String>[depfilePath],
+      depfilePaths: <String>[],
     );
     if (await fingerprinter.doesFingerprintMatch()) {
       printTrace('Skipping Core JIT snapshot build. Fingerprint match.');
@@ -508,7 +439,6 @@ class CoreJITSnapshotter {
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packagesPath,
-      depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {
@@ -519,7 +449,7 @@ class CoreJITSnapshotter {
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
-    await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshotPath\n');
+    await outputDir.childFile('gen_snapshot.d').writeAsString('gen_snapshot.d: $genSnapshotPath\n');
 
     // Compute and record build fingerprint.
     await fingerprinter.writeFingerprint();

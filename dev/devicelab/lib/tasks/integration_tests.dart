@@ -45,6 +45,13 @@ TaskFunction createPlatformChannelSampleTest() {
   );
 }
 
+TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_views',
+    'lib/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(

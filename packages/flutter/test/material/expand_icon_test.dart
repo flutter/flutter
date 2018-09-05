@@ -36,8 +36,8 @@ void main() {
       )
     );
 
-    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
-    expect(iconTheme.data.color, equals(Colors.black26));
+    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.black38));
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
@@ -84,12 +84,46 @@ void main() {
     final RotationTransition rotation = tester.firstWidget(find.byType(RotationTransition));
     expect(rotation.turns.value, 0.5);
   });
+
+  testWidgets('ExpandIcon has correct semantic hints', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(wrap(
+        child: new ExpandIcon(
+          isExpanded: true,
+          onPressed: (bool _) {},
+        )
+    ));
+
+    expect(tester.getSemanticsData(find.byType(ExpandIcon)), matchesSemanticsData(
+      hasTapAction: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isButton: true,
+      onTapHint: localizations.expandedIconTapHint,
+    ));
+
+    await tester.pumpWidget(wrap(
+      child: new ExpandIcon(
+        isExpanded: false,
+        onPressed: (bool _) {},
+      )
+    ));
+
+    expect(tester.getSemanticsData(find.byType(ExpandIcon)), matchesSemanticsData(
+      hasTapAction: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      isButton: true,
+      onTapHint: localizations.collapsedIconTapHint,
+    ));
+    handle.dispose();
+  });
 }
 
 Widget wrap({ Widget child }) {
-  return new Directionality(
-    textDirection: TextDirection.ltr,
-    child: new Center(
+  return new MaterialApp(
+    home: new Center(
       child: new Material(child: child),
     ),
   );

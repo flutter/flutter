@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';

@@ -188,6 +188,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           onTap: widget.onPressed,
+          customBorder: widget.shape,
           child: IconTheme.merge(
             data: new IconThemeData(color: widget.textStyle?.color),
             child: new Container(
@@ -410,11 +411,11 @@ class MaterialButton extends StatelessWidget {
       case ButtonTextTheme.normal:
         return enabled
           ? (themeIsDark ? Colors.white : Colors.black87)
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.accent:
         return enabled
           ? theme.accentColor
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.primary:
         return enabled
           ? (fillIsDark ? Colors.white : Colors.black)
@@ -496,28 +497,28 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicWidth(height), minSize.width);
+      return math.max(child.getMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicHeight(width), minSize.height);
+      return math.max(child.getMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicWidth(height), minSize.width);
+      return math.max(child.getMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicHeight(width), minSize.height);
+      return math.max(child.getMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 

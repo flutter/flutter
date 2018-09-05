@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'capture_output.dart';
 

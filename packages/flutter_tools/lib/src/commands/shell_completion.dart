@@ -12,7 +12,7 @@ import '../base/io.dart';
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
-  ShellCompletionCommand({bool verboseHelp = false}) {
+  ShellCompletionCommand() {
     argParser.addFlag(
       'overwrite',
       defaultsTo: false,

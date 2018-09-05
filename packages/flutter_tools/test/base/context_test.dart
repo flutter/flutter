@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:test/test.dart';
+
+import '../src/common.dart';
 
 void main() {
   group('AppContext', () {

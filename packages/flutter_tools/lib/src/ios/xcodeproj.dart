@@ -20,7 +20,7 @@ import '../globals.dart';
 import '../project.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
+final RegExp _varExpr = new RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
@@ -34,7 +34,6 @@ Future<void> updateGeneratedXcodeProperties({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   String targetOverride,
-  @required bool previewDart2,
 }) async {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -87,10 +86,6 @@ Future<void> updateGeneratedXcodeProperties({
     // paths ending in _arm, 64-bit builds are not.
     final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
     localsBuffer.writeln('ARCHS=$arch');
-  }
-
-  if (previewDart2) {
-    localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
   if (buildInfo.trackWidgetCreation) {

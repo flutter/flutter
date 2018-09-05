@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {

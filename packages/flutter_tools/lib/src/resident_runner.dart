@@ -42,19 +42,17 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
-    @required bool previewDart2,
     @required bool trackWidgetCreation,
     this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    ResidentCompiler generator,
   }) {
-    if (previewDart2) {
-      generator = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
-      );
-    }
+    this.generator = generator ?? new ResidentCompiler(
+      artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      trackWidgetCreation: trackWidgetCreation,
+      fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
+    );
   }
 
   String viewFilter;
@@ -452,10 +450,7 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
-  String getReloadPath({bool fullRestart}) =>
-      debuggingOptions.buildInfo.previewDart2
-          ? mainPath + (fullRestart? '' : '.incremental') + '.dill'
-          : mainPath;
+  String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
@@ -762,7 +757,7 @@ abstract class ResidentRunner {
         await handleTerminalCommand(command);
     } catch (error, st) {
       printError('$error\n$st');
-      _cleanUpAndExit(null);
+      await _cleanUpAndExit(null);
     } finally {
       _processingUserRequest = false;
     }
@@ -905,7 +900,7 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       final FlutterProject project = await FlutterProject.current();
-      final String manifestPath = fs.path.relative(project.android.gradleManifestFile.path);
+      final String manifestPath = fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';

@@ -126,7 +126,12 @@ class ChannelCommand extends FlutterCommand {
         );
       }
     }
-    if (result != 0)
+    if (result != 0) {
       throwToolExit('Switching channels failed with error code $result.', exitCode: result);
+    } else {
+      // Remove the version check stamp, since it could contain out-of-date
+      // information that pertains to the previous channel.
+      await FlutterVersion.resetFlutterVersionFreshnessCheck();
+    }
   }
 }
