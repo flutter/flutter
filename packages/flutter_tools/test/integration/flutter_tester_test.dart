@@ -15,18 +15,25 @@ import '../src/context.dart';
 import 'test_utils.dart';
 
 void main() {
+  Directory tempDir;
+  Directory oldCurrentDir;
+
+  setUp(() async {
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tester_device_test.');
+    oldCurrentDir = fs.currentDirectory;
+    fs.currentDirectory = tempDir;
+  });
+
+  tearDown(() {
+    fs.currentDirectory = oldCurrentDir;
+    tryToDelete(tempDir);
+  });
 
   group('FlutterTesterDevice', () {
-    Directory tempDir;
     FlutterTesterDevice device;
 
-    setUp(() async {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tester_device_test.');
-      device = new FlutterTesterDevice('flutter-tester', workingDirectory: tempDir.path);
-    });
-
-    tearDown(() {
-      tryToDelete(tempDir);
+    setUp(() {
+      device = new FlutterTesterDevice('flutter-tester');
     });
 
     Future<LaunchResult> start(String mainPath) async {
@@ -43,7 +50,7 @@ void main() {
       writePubspec(tempDir.path);
       writePackages(tempDir.path);
 
-      final String mainPath = fs.path.join(tempDir.path, 'lib', 'main.dart');
+      final String mainPath = fs.path.join('lib', 'main.dart');
       writeFile(mainPath, r'''
 import 'dart:async';
 void main() {
