@@ -40,6 +40,11 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
   }
 
   @override
+  Future<Null> rejectLastDelta() async {
+    return _compiler.rejectLastDelta();
+  }
+
+  @override
   void invalidate(Uri uri) {
     _compiler.invalidate(uri);
   }
