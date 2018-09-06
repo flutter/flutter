@@ -160,14 +160,16 @@ class CupertinoDatePicker extends StatefulWidget {
   CupertinoDatePicker({
     this.mode = CupertinoDatePickerMode.dateAndTime,
     @required this.onDateTimeChanged,
-    @required this.initialDateTime,
+    // ignore: always_require_non_null_named_parameters
+    DateTime initialDateTime,
     this.minimumDate,
     this.maximumDate,
     this.minimumYear = 1,
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-  }) : assert(mode != null),
+  }) : this.initialDateTime = initialDateTime ?? DateTime.now(),
+       assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(initialDateTime != null),
        assert(
@@ -827,11 +829,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             // leads to an infinite loop.
             // Animates at super speed is used instead.
 
-            // animateToItem() is also not working properly currently.
+            // animateToItem() is not working properly.
             dayController.animateToItem(
               dayController.selectedItem - 1,
               duration: const Duration(milliseconds: 1),
               curve: Curves.easeOut);
+
           }
         },
         child: new CustomMultiChildLayout(
