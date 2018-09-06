@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show PointerDeviceKind;
-import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'constants.dart';
