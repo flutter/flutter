@@ -669,4 +669,40 @@ void main() {
       ]),
     );
   });
+
+  testWidgets('Android view with eager gesture recognizer', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+    await tester.pumpWidget(
+      new Align(
+        alignment: Alignment.topLeft,
+        child: GestureDetector(
+          onVerticalDragStart: (DragStartDetails d) {},
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: AndroidView(
+              viewType: 'webview',
+              gestureRecognizers: <OneSequenceGestureRecognizer>[ new EagerGestureRecognizer() ],
+              layoutDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.startGesture(const Offset(50.0, 50.0));
+
+    // Normally (without the eager gesture recognizer) after just the pointer down event
+    // no gesture arena member will claim the arena (so no motion events will be dispatched to
+    // the Android view). Here we assert that with the eager recognizer in the gesture team the
+    // pointer down event is immediately dispatched.
+    expect(
+      viewsController.motionEvents[currentViewId + 1],
+      orderedEquals(<FakeMotionEvent> [
+        const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
+      ]),
+    );
+  });
 }
