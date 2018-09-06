@@ -172,7 +172,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
                   child: new Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget> [
-                      new Expanded(child: new Center(child: items[index].icon)),
+                      new Expanded(child: new Center(child: active ? items[index].activeIcon : items[index].icon)),
                       items[index].title,
                     ],
                   ),
