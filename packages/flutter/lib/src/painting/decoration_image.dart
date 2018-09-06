@@ -254,6 +254,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
+      scale: _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -303,6 +304,8 @@ class DecorationImagePainter {
 ///
 ///  * `image`: The image to paint onto the canvas.
 ///
+///  * `scale`: The number of image pixels for each logical pixel.
+///
 ///  * `colorFilter`: If non-null, the color filter to apply when painting the
 ///    image.
 ///
@@ -339,7 +342,7 @@ class DecorationImagePainter {
 ///    when using this, to not flip images with integral shadows, text, or other
 ///    effects that will look incorrect when flipped.
 ///
-/// The `canvas`, `rect`, `image`, `alignment`, `repeat`, and `flipHorizontally`
+/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
 /// arguments must not be null.
 ///
 /// See also:
@@ -351,6 +354,7 @@ void paintImage({
   @required Canvas canvas,
   @required Rect rect,
   @required ui.Image image,
+  double scale = 1.0,
   ColorFilter colorFilter,
   BoxFit fit,
   Alignment alignment = Alignment.center,
@@ -378,8 +382,8 @@ void paintImage({
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
-  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize, outputSize);
-  final Size sourceSize = fittedSizes.source;
+  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize / scale, outputSize);
+  final Size sourceSize = fittedSizes.source * scale;
   Size destinationSize = fittedSizes.destination;
   if (centerSlice != null) {
     outputSize += sliceBorder;
@@ -421,7 +425,7 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = alignment.inscribe(
-      fittedSizes.source, Offset.zero & inputSize
+      sourceSize, Offset.zero & inputSize
     );
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageRect(image, sourceRect, tileRect, paint);
