@@ -252,7 +252,7 @@ void main() {
     expect(find.text('bar2'), findsNothing);
     await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
     await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
-    await tester.pump(); // bar1 dismissed, bar2 begins animating
+    await tester.pumpAndSettle(const Duration(seconds: 1)); // bar1 dismissed, bar2 begins animating
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
   });
@@ -340,11 +340,59 @@ void main() {
     final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
-    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 39.0 + 10.0); // margin + left padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0 + 40.0); // margin + bottom padding
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 39.0 + 30.0); // margin + right padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0 + 40.0); // margin + bottom padding
+  });
+
+  testWidgets('SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: new Scaffold(
+          floatingActionButton: new FloatingActionButton(
+            child: const Icon(Icons.send),
+            onPressed: () {}
+          ),
+          body: new Builder(
+              builder: (BuildContext context) {
+                return new GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).showSnackBar(new SnackBar(
+                          content: const Text('I am a snack bar.'),
+                          duration: const Duration(seconds: 2),
+                          action: new SnackBarAction(label: 'ACTION', onPressed: () {})
+                      ));
+                    },
+                    child: const Text('X')
+                );
+              }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
+    final RenderBox floatingActionButtonBox = tester.firstRenderObject(find.byType(FloatingActionButton));
+
+    final Offset snackBarBottomCenter = snackBarBox.localToGlobal(snackBarBox.size.bottomCenter(Offset.zero));
+    final Offset floatingActionButtonTopCenter = floatingActionButtonBox.localToGlobal(floatingActionButtonBox.size.topCenter(Offset.zero));
+
+    // Since padding and margin is handled inside snackBarBox,
+    // the bottom offset of snackbar should equal with top offset of FAB
+    expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
   });
 
   testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
@@ -397,11 +445,11 @@ void main() {
     final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
-    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
-    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 39.0 + 10.0); // margin + left padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
-    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
-    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 39.0 + 30.0); // margin + right padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {

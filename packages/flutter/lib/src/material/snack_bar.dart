@@ -24,8 +24,10 @@ const Color _kSnackBackground = Color(0xFF323232);
 
 const Duration _kSnackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _kSnackBarDisplayDuration = Duration(milliseconds: 4000);
-const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
-const Curve _snackBarFadeCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeInCurve =
+    Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
+const Curve _snackBarFadeOutCurve =
+    Interval(0.72, 1.0, curve: Curves.fastOutSlowIn);
 
 /// Specify how a [SnackBar] was closed.
 ///
@@ -83,9 +85,9 @@ class SnackBarAction extends StatefulWidget {
     Key key,
     @required this.label,
     @required this.onPressed,
-  }) : assert(label != null),
-       assert(onPressed != null),
-       super(key: key);
+  })  : assert(label != null),
+        assert(onPressed != null),
+        super(key: key);
 
   /// The button label.
   final String label;
@@ -104,13 +106,13 @@ class _SnackBarActionState extends State<SnackBarAction> {
   bool _haveTriggeredAction = false;
 
   void _handlePressed() {
-    if (_haveTriggeredAction)
-      return;
+    if (_haveTriggeredAction) return;
     setState(() {
       _haveTriggeredAction = true;
     });
     widget.onPressed();
-    Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+    Scaffold.of(context)
+        .hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
   @override
@@ -154,8 +156,8 @@ class SnackBar extends StatelessWidget {
     this.action,
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
-  }) : assert(content != null),
-       super(key: key);
+  })  : assert(content != null),
+        super(key: key);
 
   /// The primary content of the snack bar.
   ///
@@ -202,7 +204,8 @@ class SnackBar extends StatelessWidget {
       const SizedBox(width: _kSnackBarPadding),
       Expanded(
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
+          padding:
+              const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
           child: DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             child: content,
@@ -220,8 +223,13 @@ class SnackBar extends StatelessWidget {
     } else {
       children.add(const SizedBox(width: _kSnackBarPadding));
     }
-    final CurvedAnimation heightAnimation = CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
-    final CurvedAnimation fadeAnimation = CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
+    final CurvedAnimation fadeInAnimation =
+        CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
+    final CurvedAnimation fadeOutAnimation = CurvedAnimation(
+        parent: animation,
+        curve: _snackBarFadeOutCurve,
+        reverseCurve: const Threshold(0.0));
+
     Widget snackbar = SafeArea(
       top: false,
       child: Row(
@@ -233,47 +241,52 @@ class SnackBar extends StatelessWidget {
       container: true,
       liveRegion: true,
       onDismiss: () {
-        Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+        Scaffold.of(context)
+            .removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
       child: Dismissible(
-        key: const Key('dismissible'),
-        direction: DismissDirection.down,
-        resizeDuration: null,
-        onDismissed: (DismissDirection direction) {
-          Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
-        },
-        child: Material(
-          elevation: 6.0,
-          color: backgroundColor ?? _kSnackBackground,
-          child: Theme(
-            data: darkTheme,
-            child: mediaQueryData.accessibleNavigation ? snackbar : FadeTransition(
-              opacity: fadeAnimation,
+          key: const Key('dismissible'),
+          direction: DismissDirection.down,
+          resizeDuration: null,
+          onDismissed: (DismissDirection direction) {
+            Scaffold.of(context)
+                .removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
+          },
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
+            child: Material(
+              borderRadius: BorderRadius.circular(2.0),
+              elevation: 3.0,
+              color: backgroundColor ?? _kSnackBackground,
+              child: Theme(
+                data: darkTheme,
+                child: mediaQueryData.accessibleNavigation
+                    ? snackbar
+                    : FadeTransition(
+                        opacity: fadeOutAnimation,
+                        child: snackbar,
+                      ),
+              ),
+            ),
+          )),
+    );
+
+    return ClipRect(
+      child: mediaQueryData.accessibleNavigation
+          ? snackbar
+          : FadeTransition(
+              opacity: fadeInAnimation,
               child: snackbar,
             ),
-          ),
-        ),
-      ),
-    );
-    return ClipRect(
-      child: mediaQueryData.accessibleNavigation ? snackbar : AnimatedBuilder(
-        animation: heightAnimation,
-        builder: (BuildContext context, Widget child) {
-          return Align(
-            alignment: AlignmentDirectional.topStart,
-            heightFactor: heightAnimation.value,
-            child: child,
-          );
-        },
-        child: snackbar,
-      ),
     );
   }
 
   // API for Scaffold.addSnackBar():
 
-  /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ @required TickerProvider vsync }) {
+  /// Creates an animation controller useful for driving a snack bar's entrance
+  /// and exit animation.
+  static AnimationController createAnimationController(
+      {@required TickerProvider vsync}) {
     return AnimationController(
       duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar',
@@ -281,11 +294,12 @@ class SnackBar extends StatelessWidget {
     );
   }
 
-  /// Creates a copy of this snack bar but with the animation replaced with the given animation.
+  /// Creates a copy of this snack bar but with the animation replaced with
+  /// the given animation.
   ///
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
-  SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
+  SnackBar withAnimation(Animation<double> newAnimation, {Key fallbackKey}) {
     return SnackBar(
       key: key ?? fallbackKey,
       content: content,
