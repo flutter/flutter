@@ -327,7 +327,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [Typography.white], which uses this color for its text styles.
+  ///  * [ExpandIcon], which uses this color for dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
   ///  * [white, white30, white12, white10], which are variants on this color
