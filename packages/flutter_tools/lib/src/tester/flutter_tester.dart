@@ -127,24 +127,20 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath = bundle.defaultApplicationKernelPath;
+    final String applicationKernelFilePath =
+        fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill');
     await bundle.build(
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      precompiledSnapshot: !buildInfo.previewDart2,
-      previewDart2: buildInfo.previewDart2,
+      precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
-    if (buildInfo.previewDart2) {
-      mainPath = applicationKernelFilePath;
-    }
-
     command.add('--flutter-assets-dir=$assetDirPath');
 
     // TODO(scheglov): Either remove the check, or make it fail earlier.
-    if (mainPath != null) {
-      command.add(mainPath);
+    if (applicationKernelFilePath != null) {
+      command.add(applicationKernelFilePath);
     }
 
     try {
@@ -156,7 +152,8 @@ class FlutterTesterDevice extends Device {
           'FLUTTER_TEST': 'true',
         },
       );
-      _process.exitCode.then((_) => _isRunning = false);
+      // Setting a bool can't fail in the callback.
+      _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
       _process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())

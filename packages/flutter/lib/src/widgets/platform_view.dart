@@ -13,6 +13,8 @@ import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
 ///
+/// Requires Android API level 20 or greater.
+///
 /// Embedding Android views is an expensive operation and should be avoided when a Flutter
 /// equivalent is possible.
 ///
@@ -50,7 +52,8 @@ class AndroidView extends StatefulWidget {
   ///
   /// The `viewType`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
-  AndroidView({
+  AndroidView({ // ignore: prefer_const_constructors_in_immutables
+                // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,

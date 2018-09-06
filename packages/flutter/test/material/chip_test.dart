@@ -1442,4 +1442,55 @@ void main() {
 
     expect(find.byType(InputChip).hitTestable(at: Alignment.center), findsOneWidget);
   });
+
+  void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+    final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+    expect(materials.length, 2);
+    expect(materials.last.clipBehavior, clipBehavior);
+  }
+
+  testWidgets('Chip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+     const Text label = Text('label');
+     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
+     checkChipMaterialClipBehavior(tester, Clip.none);
+
+     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
+     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+    const Text label = Text('label');
+    await tester.pumpWidget(_wrapForChip(child: const ChoiceChip(label: label, selected: false)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
+
+    await tester.pumpWidget(_wrapForChip(child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias)));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+    const Text label = Text('label');
+    await tester.pumpWidget(_wrapForChip(child: new FilterChip(label: label, onSelected: (bool b){},)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
+
+    await tester.pumpWidget(_wrapForChip(child: new FilterChip(label: label, onSelected: (bool b){}, clipBehavior: Clip.antiAlias)));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+    const Text label = Text('label');
+    await tester.pumpWidget(_wrapForChip(child: new ActionChip(label: label, onPressed: (){},)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
+
+    await tester.pumpWidget(_wrapForChip(child: new ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: (){})));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets('InputChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+    const Text label = Text('label');
+    await tester.pumpWidget(_wrapForChip(child: const InputChip(label: label)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
+
+    await tester.pumpWidget(_wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
 }

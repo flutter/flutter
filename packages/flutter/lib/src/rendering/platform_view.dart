@@ -38,6 +38,8 @@ enum _PlatformViewState {
 
 /// A render object for an Android view.
 ///
+/// Requires Android API level 20 or greater.
+///
 /// [RenderAndroidView] is responsible for sizing, displaying and passing touch events to an
 /// Android [View](https://developer.android.com/reference/android/view/View).
 ///
@@ -251,9 +253,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'Android view';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
-    resolve(GestureDisposition.rejected);
-  }
+  void didStopTrackingLastPointer(int pointer) {}
 
   @override
   void handleEvent(PointerEvent event) {

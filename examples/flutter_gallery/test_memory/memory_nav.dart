@@ -23,7 +23,6 @@ Rect boundsFor(WidgetController controller, Finder item) {
 }
 
 Future<void> main() async {
-  MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   final Completer<void> ready = new Completer<void>();
   runApp(new GestureDetector(
     onTap: () {

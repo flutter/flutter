@@ -183,7 +183,8 @@ import 'scrollable.dart';
 /// * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
-  SingleChildScrollView({
+  SingleChildScrollView({ // ignore: prefer_const_constructors_in_immutables
+                          // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,

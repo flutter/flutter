@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 
 import 'gesture_tester.dart';
 
@@ -329,5 +330,77 @@ void main() {
     expect(new DragStartDetails(), hasOneLineDescription);
     expect(new DragUpdateDetails(globalPosition: Offset.zero), hasOneLineDescription);
     expect(new DragEndDetails(), hasOneLineDescription);
+  });
+
+  testGesture('Should recognize drag', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    bool didStartDrag = false;
+    drag.onStart = (_) {
+      didStartDrag = true;
+    };
+
+    double updatedDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedDelta = details.primaryDelta;
+    };
+
+    bool didEndDrag = false;
+    drag.onEnd = (DragEndDetails details) {
+      didEndDrag = true;
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(down);
+    expect(didStartDrag, isTrue);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isTrue);
+    didStartDrag = false;
+    expect(updatedDelta, 10.0);
+    updatedDelta = null;
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, 0.0);
+    updatedDelta = null;
+    expect(didEndDrag, isFalse);
+
+    tester.route(pointer.up());
+    expect(didStartDrag, isFalse);
+    expect(updatedDelta, isNull);
+    expect(didEndDrag, isTrue);
+    didEndDrag = false;
+
+    drag.dispose();
+  });
+
+  testGesture('Should recognize drag', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Offset newGlobalPosition;
+    drag.onUpdate = (DragUpdateDetails details) {
+      newGlobalPosition = details.globalPosition;
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
+    tester.closeArena(5);
+    tester.route(down);
+    expect(newGlobalPosition, const Offset(20.0, 10.0));
+    tester.route(pointer.up());
+    drag.dispose();
   });
 }

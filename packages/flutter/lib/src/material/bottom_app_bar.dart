@@ -41,16 +41,18 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [color] and [elevation] arguments must not be null.
+  /// The [color], [elevation], and [clipBehavior] arguments must not be null.
   const BottomAppBar({
     Key key,
     this.color,
     this.elevation = 8.0,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.notchMargin = 4.0,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -76,6 +78,9 @@ class BottomAppBar extends StatefulWidget {
   ///
   /// If null the bottom app bar will be rectangular with no notch.
   final NotchedShape shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
   /// notch.
@@ -109,6 +114,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
       clipper: clipper,
       elevation: widget.elevation,
       color: widget.color ?? Theme.of(context).bottomAppBarColor,
+      clipBehavior: widget.clipBehavior,
       child: new Material(
         type: MaterialType.transparency,
         child: widget.child == null

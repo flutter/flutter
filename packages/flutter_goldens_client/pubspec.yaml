@@ -6,7 +6,7 @@ environment:
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  file: 5.0.4
+  file: 5.0.6
   platform: 2.2.0
   process: 3.0.5
 
@@ -18,4 +18,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: bb2b
+# PUBSPEC CHECKSUM: ba2d
