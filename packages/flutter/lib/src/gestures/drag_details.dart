@@ -20,7 +20,7 @@ class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragDownDetails({ this.globalPosition = Offset.zero, this.deviceKind = PointerDeviceKind.touch})
+  DragDownDetails({ this.globalPosition = Offset.zero, this.deviceKind = PointerDeviceKind.touch })
     : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
