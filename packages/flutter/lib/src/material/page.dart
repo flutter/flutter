@@ -87,14 +87,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     assert(opaque);
   }
 
-  /// Turns on the fading of routes during page transitions.
-  ///
-  /// This is currently disabled by default because of performance issues on
-  /// low-end phones. Eventually these issues will be resolved and this flag
-  /// will be removed.
-  @Deprecated('This flag will eventually be removed once the performance issues are resolved. See: https://github.com/flutter/flutter/issues/13736')
-  static bool debugEnableFadingRoutes = false;
-
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
@@ -175,7 +167,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       return new _MountainViewPageTransition(
         routeAnimation: animation,
         child: child,
-        fade: debugEnableFadingRoutes, // ignore: deprecated_member_use
+        fade: true,
       );
     }
   }

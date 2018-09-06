@@ -14,8 +14,5 @@ void main() {
   // Temporary debugging hook for https://github.com/flutter/flutter/issues/17888
   debugInstrumentationEnabled = true;
 
-  // Overriding https://github.com/flutter/flutter/issues/13736 for better
-  // visual effect at the cost of performance.
-  MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   runApp(const GalleryApp());
 }
