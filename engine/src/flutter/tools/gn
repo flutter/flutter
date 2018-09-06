@@ -89,7 +89,7 @@ def to_gn_args(args):
     gn_args['is_debug'] = args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
     gn_args['is_clang'] = not sys.platform.startswith(('cygwin', 'win'))
-    
+
     gn_args['embedder_for_target'] = args.embedder_for_target
 
     enable_lto = args.lto
@@ -248,9 +248,9 @@ def main(argv):
   if sys.platform.startswith(('cygwin', 'win')):
     subdir = 'win'
   elif sys.platform == 'darwin':
-    subdir = 'mac'
+    subdir = 'mac-x64'
   elif sys.platform.startswith('linux'):
-     subdir = 'linux64'
+     subdir = 'linux-x64'
   else:
     raise Error('Unknown platform: ' + sys.platform)
 

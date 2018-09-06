@@ -102,7 +102,7 @@ vars = {
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
-  'buildtools_revision': 'ae85410691b10aa2469695c2421b1fe751843e64',
+  'buildtools_revision': 'c1408453246f0475547b6fe634c2f3dad71c6457',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -115,7 +115,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '7aadfaf196f9cd8a299f9ad78fab63362800466d',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'be483cb1cd3a9c4313b2e534034d23a05c3d849e',
 
    # Fuchsia compatibility
    #

@@ -28,6 +28,7 @@ source_set("flutter_channels") {
     "ios/framework/Headers/FlutterBinaryMessenger.h",
     "ios/framework/Headers/FlutterChannels.h",
     "ios/framework/Headers/FlutterCodecs.h",
+    "ios/framework/Headers/FlutterMacros.h",
     "ios/framework/Source/FlutterChannels.mm",
     "ios/framework/Source/FlutterCodecs.mm",
     "ios/framework/Source/FlutterStandardCodec.mm",

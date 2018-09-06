@@ -29,6 +29,16 @@
 #define ALLOW_SELF_MOVE(code_line) code_line;
 #endif
 
+#if defined(__clang__)
+#define ALLOW_SELF_ASSIGN_OVERLOADED(code_line)                        \
+  _Pragma("clang diagnostic push")                                     \
+      _Pragma("clang diagnostic ignored \"-Wself-assign-overloaded\"") \
+          code_line;                                                   \
+  _Pragma("clang diagnostic pop")
+#else
+#define ALLOW_SELF_ASSIGN_OVERLOADED(code_line) code_line;
+#endif
+
 namespace fml {
 namespace {
 
@@ -425,7 +435,7 @@ TEST(RefCountedTest, SelfAssignment) {
     was_destroyed = false;
     RefPtr<MyClass> r(MakeRefCounted<MyClass>(&created, &was_destroyed));
     // Copy.
-    r = r;
+    ALLOW_SELF_ASSIGN_OVERLOADED(r = r);
     EXPECT_EQ(created, r.get());
     EXPECT_FALSE(was_destroyed);
   }
