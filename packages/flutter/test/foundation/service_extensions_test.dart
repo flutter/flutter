@@ -298,6 +298,29 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - debugProfileBuilds', () async {
+    Map<String, dynamic> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(debugProfileBuildsEnabled, false);
+    result = await binding.testExtension('debugProfileBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+    result = await binding.testExtension('debugProfileBuilds', <String, String>{ 'enabled': 'false' });
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+    result = await binding.testExtension('debugProfileBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugProfileBuildsEnabled, false);
+    result = await binding.testExtension('debugProfileBuilds', <String, String>{ 'enabled': 'true' });
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+    result = await binding.testExtension('debugProfileBuilds', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugProfileBuildsEnabled, true);
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - evict', () async {
     Map<String, dynamic> result;
     bool completed;

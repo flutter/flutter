@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'widget_inspector.dart';
@@ -268,7 +269,10 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
 
     registerSignalServiceExtension(
       name: 'debugDumpApp',
-      callback: () { debugDumpApp(); return debugPrintDone; }
+      callback: () {
+        debugDumpApp();
+        return debugPrintDone;
+      }
     );
 
     registerBoolServiceExtension(
@@ -290,6 +294,15 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
           return new Future<Null>.value();
         WidgetsApp.debugAllowBannerOverride = value;
         return _forceRebuild();
+      }
+    );
+
+    registerBoolServiceExtension(
+      name: 'debugProfileBuilds',
+      getter: () => new Future<bool>.value(debugProfileBuildsEnabled),
+      setter: (bool value) async {
+        if (debugProfileBuildsEnabled != value)
+          debugProfileBuildsEnabled = value;
       }
     );
 
