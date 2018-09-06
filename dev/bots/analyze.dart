@@ -46,7 +46,7 @@ Future<Null> main(List<String> args) async {
 
   // Analyze all the sample code in the repo
   await runCommand(dart,
-    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -66,7 +66,6 @@ Future<Null> main(List<String> args) async {
   try {
     await runCommand(dart,
       <String>[
-        '--preview-dart-2',
         path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
         '--out',
         outDir.path,
@@ -89,7 +88,6 @@ Future<Null> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
-      '--preview-dart-2',
       path.join('dev', 'tools', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
