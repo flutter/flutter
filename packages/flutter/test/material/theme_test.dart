@@ -460,6 +460,10 @@ class _TextStyleProxy implements TextStyle {
   @override double get wordSpacing => _delegate.wordSpacing;
 
   @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) =>
+      super.toString();
+
+  @override
   DiagnosticsNode toDiagnosticsNode({String name, DiagnosticsTreeStyle style}) {
     throw new UnimplementedError();
   }
