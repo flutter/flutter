@@ -834,7 +834,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
               dayController.selectedItem - 1,
               duration: const Duration(milliseconds: 1),
               curve: Curves.easeOut);
-
           }
         },
         child: new CustomMultiChildLayout(
