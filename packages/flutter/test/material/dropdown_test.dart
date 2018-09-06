@@ -23,6 +23,7 @@ Widget buildFrame({
   String value = 'two',
   ValueChanged<String> onChanged,
   bool isDense = false,
+  bool isExpanded = false,
   Widget hint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
@@ -39,6 +40,7 @@ Widget buildFrame({
           hint: hint,
           onChanged: onChanged,
           isDense: isDense,
+          isExpanded: isExpanded,
           items: items.map((String item) {
             return new DropdownMenuItem<String>(
               key: new ValueKey<String>(item),
@@ -336,6 +338,23 @@ void main() {
       await tester.pumpWidget(new Container()); // reset test
     });
   }
+
+  testWidgets('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
+    final Key buttonKey = new UniqueKey();
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    final RenderBox arrowIcon = tester.renderObject(find.byIcon(Icons.arrow_drop_down));
+    assert(arrowIcon.attached);
+
+    // Arrow icon should be aligned with far right of button when expanded
+    expect(arrowIcon.localToGlobal(Offset.zero).dx,
+        buttonBox.size.centerRight(new Offset(-arrowIcon.size.width, 0.0)).dx);
+  });
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = new UniqueKey();
