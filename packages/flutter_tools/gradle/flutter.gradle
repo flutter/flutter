@@ -152,7 +152,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             // Add x86/x86_64 native library. Debug mode only, for now.
             flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-            project.tasks.create("flutterBuildX86Jar", Jar) {
+            Task flutterX86JarTask = project.tasks.create("flutterBuildX86Jar", Jar) {
                 destinationDir flutterX86Jar.parentFile
                 archiveName flutterX86Jar.name
                 from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
@@ -164,8 +164,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
             // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
             // added after applying the Flutter plugin.
-            project.android.buildTypes.each { addFlutterJarApiDependency(project, it) }
-            project.android.buildTypes.whenObjectAdded { addFlutterJarApiDependency(project, it) }
+            project.android.buildTypes.each { addFlutterJarApiDependency(project, it, flutterX86JarTask) }
+            project.android.buildTypes.whenObjectAdded { addFlutterJarApiDependency(project, it, flutterX86JarTask) }
         }
 
         project.extensions.create("flutter", FlutterExtension)
@@ -219,7 +219,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      */
-    private void addFlutterJarApiDependency(Project project, buildType) {
+    private void addFlutterJarApiDependency(Project project, buildType, Task flutterX86JarTask) {
         project.dependencies {
             String configuration;
             if (project.getConfigurations().findByName("api")) {
@@ -230,7 +230,7 @@ class FlutterPlugin implements Plugin<Project> {
             add(configuration, project.files {
                 String buildMode = buildModeFor(buildType)
                 if (buildMode == "debug") {
-                    [flutterX86Jar, debugFlutterJar]
+                    [flutterX86JarTask, debugFlutterJar]
                 } else if (buildMode == "profile") {
                     profileFlutterJar
                 } else if (buildMode == "dynamicProfile") {
