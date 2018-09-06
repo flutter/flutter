@@ -96,6 +96,37 @@ class AndroidView extends StatefulWidget {
   /// that was put down on the widget. If any of the recognizers on this list wins the
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the Android
+  /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   child: AndroidView(
+  ///     viewType: 'webview',
+  ///     gestureRecognizers: <OneSequenceGestureRecognizer>[],
+  ///   ),
+  /// )
+  /// ```
+  /// To get the [AndroidView] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer in [gestureRecognizers] e.g:
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails d) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: AndroidView(
+  ///       viewType: 'webview',
+  ///       gestureRecognizers: <OneSequenceGestureRecognizer>[ new VerticalDragGestureRecognizer() ],
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// An [AndroidView] can be configured to consume all pointers that were put down in its bounds
+  /// by passing an [EagerGestureRecognizer] in [gestureRecognizers]. [EagerGestureRecognizer] is a
+  /// special gesture recognizer that immediately claims the gesture after a pointer down event.
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
