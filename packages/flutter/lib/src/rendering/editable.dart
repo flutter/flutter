@@ -1036,7 +1036,7 @@ class RenderEditable extends RenderBox {
 
   void _handleDragDown(DragDownDetails details) {
     assert(!ignorePointer);
-    _handleDragDown(details);
+    handleDragDown(details);
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -1063,7 +1063,7 @@ class RenderEditable extends RenderBox {
 
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(!ignorePointer);
-    _handleDragUpdate(details);
+    handleDragUpdate(details);
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
