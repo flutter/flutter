@@ -8,13 +8,13 @@ import 'colors.dart';
 import 'localizations.dart';
 import 'picker.dart';
 
-/// Default aesthetic values obtained by comparing with iOS pickers.
+// Default aesthetic values obtained by comparing with iOS pickers.
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
 const double _kMagnification = 1.1;
 const double _kDatePickerPadSize = 12.0;
-/// Considers setting the default background color from the theme, in the future.
+// Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
 
 // Lays out the date picker based on how much space each single column needs.
@@ -73,7 +73,7 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
 ///  of the iOS-style date picker.
-///  * [CupertinoTimerPicker], the class that implements the iOS-style timer picker.
+///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 enum CupertinoDatePickerMode {
   /// Mode that shows the date in hour, minute, and (optional) an AM/PM designation.
   /// The AM/PM designation is shown only if [CupertinoDatPicker] does not use 24h format.
@@ -125,6 +125,11 @@ enum _pickerColumnType {
 ///
 ///  * US-English: [July | 13 | 2012]
 ///  * Vietnamese: [13 | Tháng 7 | 2012]
+///
+/// See also:
+///
+///  * [CupertinoTimerPicker], the class that implements the iOS-style timer picker.
+///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 class CupertinoDatePicker extends StatefulWidget {
   /// Constructs an iOS style date picker.
   ///
@@ -286,6 +291,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         // just some dates are measured.
         for (int i = 1; i <= 12; i++) {
           final String date = localizations.datePickerMediumDate(
+            // 25 is just an arbitrary day of month.
             new DateTime(widget.initialDateTime.year, i, 25));
           if (longestText.length < date.length)
             longestText = date;
@@ -311,9 +317,12 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
             ? localizations.anteMeridiemAbbreviation
             : localizations.postMeridiemAbbreviation;
         break;
-      default:
-        assert(false, 'column type is not appropriate');
+      case _pickerColumnType.dayOfMonth:
+      case _pickerColumnType.month:
+      case _pickerColumnType.year:
     }
+
+    assert(longestText != '', 'column type is not appropriate');
 
     final TextPainter painter = new TextPainter(
       text: TextSpan(
@@ -610,6 +619,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     String longestText = '';
 
     switch (columnType) {
+      case _pickerColumnType.date:
+      case _pickerColumnType.hour:
+      case _pickerColumnType.minute:
+      case _pickerColumnType.dayPeriod:
       case _pickerColumnType.dayOfMonth:
         for (int i = 1 ; i <=31; i++) {
           final String dayOfMonth = localizations.datePickerDayOfMonth(i);
@@ -627,9 +640,9 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       case _pickerColumnType.year:
         longestText = localizations.datePickerYear(2018);
         break;
-      default:
-        assert(false, 'column type is not specified');
     }
+
+    assert(longestText != '', 'column type is not appropriate');
 
     final TextPainter painter = new TextPainter(
       text: TextSpan(
@@ -846,6 +859,11 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
 
 /// Different modes of [CupertinoTimerPicker].
+///
+/// See also:
+///
+///  * [CupertinoTimerPicker], the class that implements the iOS-style timer picker.
+///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 enum CupertinoTimerPickerMode {
   /// Mode that shows the timer duration in hour and minute.
   ///
@@ -867,6 +885,12 @@ enum CupertinoTimerPickerMode {
 /// The duration is bound between 0 and 23 hours 59 minutes 59 seconds.
 ///
 /// There are several modes of the timer picker listed in [CupertinoTimerPickerMode].
+///
+/// See also:
+///
+///  * [CupertinoDatePicker], the class that implements different display modes
+///  of the iOS-style date picker.
+///  * [CupertinoPicker], the class that implements a content agnostic spinner UI.
 class CupertinoTimerPicker extends StatefulWidget {
   /// Constructs an iOS style countdown timer picker.
   ///
