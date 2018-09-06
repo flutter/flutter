@@ -138,6 +138,8 @@ class FlutterTesterDevice extends Device {
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
+      depfilePath: inWorkingDir(bundle.defaultDepfilePath),
+      snapshotPath: inWorkingDir(bundle.defaultSnapshotPath),
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
