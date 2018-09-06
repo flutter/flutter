@@ -235,7 +235,7 @@ class RenderEditable extends RenderBox {
   static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-  void _handleKeyEvent(RawKeyEvent keyEvent) async {
+  void _handleKeyEvent(RawKeyEvent keyEvent) {
     if (defaultTargetPlatform != TargetPlatform.android)
       return;
 
