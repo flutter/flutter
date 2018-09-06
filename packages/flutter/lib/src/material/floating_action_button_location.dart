@@ -80,6 +80,8 @@ abstract class FloatingActionButtonLocation {
   /// navigation bar.
   static const FloatingActionButtonLocation centerDocked = _CenterDockedFloatingActionButtonLocation();
 
+  static const FloatingActionButtonLocation offstage = _OffstageFloatingActionButtonLocation();
+
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
   /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
@@ -91,6 +93,15 @@ abstract class FloatingActionButtonLocation {
 
   @override
   String toString() => '$runtimeType';
+}
+
+class _OffstageFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _OffstageFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+
+  }
 }
 
 class _CenterFloatFabLocation extends FloatingActionButtonLocation {

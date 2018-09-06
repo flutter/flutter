@@ -440,14 +440,17 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     @required this.child,
     @required this.fabMoveAnimation,
     @required this.fabMotionAnimator,
+    @required this.fabHideAnimation,
     @required this.geometryNotifier,
   }) : assert(fabMoveAnimation != null),
        assert(fabMotionAnimator != null),
+       assert(fabHideAnimation != null),
        super(key: key);
 
   final Widget child;
   final Animation<double> fabMoveAnimation;
   final FloatingActionButtonAnimator fabMotionAnimator;
+  final Animation<double> fabHideAnimation;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
@@ -1014,11 +1017,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
   final GlobalKey<DrawerControllerState> _endDrawerKey = new GlobalKey<DrawerControllerState>();
 
+  /// Whether this scaffold has a non-null [Scaffold.appBar].
+  bool get hasAppBar => widget.appBar != null;
+  /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
+  bool get hasFloatingActionButton => widget.floatingActionButton != null;
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
 
+  double _appBarMaxHeight;
+  /// The max height the [Scaffold.appBar] uses.
+  double get appBarMaxHeight => _appBarMaxHeight;
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
 
@@ -1306,6 +1316,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // Floating Action Button API
   AnimationController _floatingActionButtonMoveController;
+  AnimationController _floatingActionButtonHideController;
   FloatingActionButtonAnimator _floatingActionButtonAnimator;
   FloatingActionButtonLocation _previousFloatingActionButtonLocation;
   FloatingActionButtonLocation _floatingActionButtonLocation;
@@ -1367,6 +1378,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
+    _floatingActionButtonHideController = new AnimationController(
+      vsync: this,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      value: 1.0,
+      duration: kFloatingActionButtonSegue,
+    );
     _maybeBuildCurrentBottomSheet();
   }
 
@@ -1425,6 +1443,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
     _floatingActionButtonMoveController.dispose();
+    _floatingActionButtonHideController.dispose();
     super.dispose();
   }
 
@@ -1538,14 +1557,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
-      final double extent = widget.appBar.preferredSize.height + topPadding;
-      assert(extent >= 0.0 && extent.isFinite);
+      _appBarMaxHeight = widget.appBar.preferredSize.height + topPadding;
+      assert(_appBarMaxHeight >= 0.0 && _appBarMaxHeight.isFinite);
       _addIfNonNull(
         children,
         new ConstrainedBox(
-          constraints: new BoxConstraints(maxHeight: extent),
+          constraints: new BoxConstraints(maxHeight: _appBarMaxHeight),
           child: FlexibleSpaceBar.createSettings(
-            currentExtent: extent,
+            currentExtent: _appBarMaxHeight,
             child: widget.appBar,
           ),
         ),
@@ -1638,6 +1657,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
+        fabHideAnimation: _floatingActionButtonHideController,
         geometryNotifier: _geometryNotifier,
       ),
       _ScaffoldSlot.floatingActionButton,

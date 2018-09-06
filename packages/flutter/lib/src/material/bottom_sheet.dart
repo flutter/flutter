@@ -3,11 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'floating_action_button_location.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
@@ -33,6 +35,9 @@ const double _kCloseProgressThreshold = 0.5;
 ///    sheets can be created and displayed with the [showModalBottomSheet]
 ///    function.
 ///
+/// The `initialHeight` must be a minimum of 56.0 and should not exceed 50% of
+/// the screen height.
+///
 /// The [BottomSheet] widget itself is rarely used directly. Instead, prefer to
 /// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] or
 /// [Scaffold.bottomSheet], and a modal bottom sheet with [showModalBottomSheet].
@@ -52,11 +57,13 @@ class BottomSheet extends StatefulWidget {
     Key key,
     this.animationController,
     this.enableDrag = true,
+    this.initialHeight = 56.0,
     @required this.onClosing,
     @required this.builder
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
+       assert(initialHeight != null && initialHeight >= 56.0),
        super(key: key);
 
   /// The animation that controls the bottom sheet's position.
@@ -84,8 +91,14 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
+  /// The initial height of the bottom sheet.
+  ///
+  /// For Modal Bottom Sheets, this should be 50% of the screen height.
+  /// For Modeless Bottom Sheets, this should be a minimum of 56dp.
+  final double initialHeight;
+
   @override
-  _BottomSheetState createState() => new _BottomSheetState();
+  _BottomSheetState createState() => new _BottomSheetState(initialHeight);
 
   /// Creates an animation controller suitable for controlling a [BottomSheet].
   static AnimationController createAnimationController(TickerProvider vsync) {
@@ -98,31 +111,40 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet> {
+  _BottomSheetState(this._renderedHeight);
 
-  final GlobalKey _childKey = new GlobalKey(debugLabel: 'BottomSheet child');
-
-  double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
-    return renderBox.size.height;
-  }
+  double _renderedHeight;
 
   bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway)
       return;
-    widget.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
+
+
+    final MediaQueryData mediaData = MediaQuery.of(context);
+    final bool snapToFullScreen = mediaData.size.height * .66 <= _renderedHeight;
+    setState(() {
+      _renderedHeight = snapToFullScreen
+          ? mediaData.size.height
+          : _renderedHeight - details.primaryDelta;
+    });
   }
 
   void _handleDragEnd(DragEndDetails details) {
     if (_dismissUnderway)
       return;
+
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
-      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / widget.initialHeight;
       if (widget.animationController.value > 0.0)
         widget.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
         widget.onClosing();
+    } else if (details.velocity.pixelsPerSecond.dy < -_kMinFlingVelocity) {
+      setState(() {
+        _renderedHeight = double.infinity;
+      });
     } else if (widget.animationController.value < _kCloseProgressThreshold) {
       if (widget.animationController.value > 0.0)
         widget.animationController.fling(velocity: -1.0);
@@ -134,16 +156,58 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget bottomSheet = new Material(
-      key: _childKey,
-      child: widget.builder(context),
+    final MediaQueryData mediaData = MediaQuery.of(context);
+    final ScaffoldState scaffold = Scaffold.of(context);
+print('${mediaData.size.height * .75}, $_renderedHeight');
+    final bool snapToFullScreen = mediaData.size.height * .75 <= _renderedHeight;
+//    if (isFullscreen) {
+//      scaffold.moveFloatingActionButton(FloatingActionButtonLocation.offstage);
+//    } else {
+//      scaffold.moveFloatingActionButton(FloatingActionButtonLocation.endFloat);
+//    }
+
+    return new Material(
+      child: !widget.enableDrag
+        ? widget.builder(context)
+        : new SizedBox(
+        height: _renderedHeight,
+        child: new Stack(
+          children: <Widget>[
+            new CustomSingleChildLayout(
+              delegate: new _StandardBottomSheetLayout(_renderedHeight),
+              child: widget.builder(context),
+            ),
+            new GestureDetector(
+              onVerticalDragUpdate: _handleDragUpdate,
+              onVerticalDragEnd: _handleDragEnd,
+              child: snapToFullScreen ? const LimitedBox() : null,
+            ),
+          ],
+        ),
+      ),
     );
-    return !widget.enableDrag ? bottomSheet : new GestureDetector(
-      onVerticalDragUpdate: _handleDragUpdate,
-      onVerticalDragEnd: _handleDragEnd,
-      child: bottomSheet,
-      excludeFromSemantics: true,
-    );
+  }
+}
+
+class _StandardBottomSheetLayout extends SingleChildLayoutDelegate {
+  _StandardBottomSheetLayout(this.renderHeight);
+
+  final double renderHeight;
+
+//  @override
+//  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+//    print(constraints.maxHeight);
+//    return new BoxConstraints(
+//      minWidth: constraints.maxWidth,
+//      maxWidth: constraints.maxWidth,
+//      minHeight: 56.0,
+//      maxHeight: math.min(56.0, constraints.maxHeight),
+//    );
+//  }
+
+  @override
+  bool shouldRelayout(_StandardBottomSheetLayout oldDelegate) {
+    return renderHeight != oldDelegate.renderHeight;
   }
 }
 
@@ -165,7 +229,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       minHeight: 0.0,
-      maxHeight: constraints.maxHeight * 9.0 / 16.0
+      maxHeight: constraints.maxHeight * .5,
     );
   }
 
