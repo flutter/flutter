@@ -255,7 +255,7 @@ class FixedExtentScrollController extends ScrollController {
     @required Curve curve,
   }) async {
     if (!hasClients) {
-      return new Future<void>.value();
+      return;
     }
 
     final List<Future<void>> futures = <Future<void>>[];
@@ -266,7 +266,7 @@ class FixedExtentScrollController extends ScrollController {
         curve: curve,
       ));
     }
-    return await Future.wait(futures);
+    await Future.wait(futures);
   }
 
   /// Changes which item index is centered in the controlled scroll view.
