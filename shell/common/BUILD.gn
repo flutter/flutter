@@ -67,8 +67,6 @@ source_set("common") {
     "io_manager.h",
     "isolate_configuration.cc",
     "isolate_configuration.h",
-    "picture_serializer.cc",
-    "picture_serializer.h",
     "platform_view.cc",
     "platform_view.h",
     "rasterizer.cc",

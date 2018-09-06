@@ -819,8 +819,6 @@ FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
 FILE: ../../../flutter/shell/common/engine.cc
 FILE: ../../../flutter/shell/common/engine.h
-FILE: ../../../flutter/shell/common/picture_serializer.cc
-FILE: ../../../flutter/shell/common/picture_serializer.h
 FILE: ../../../flutter/shell/common/platform_view.cc
 FILE: ../../../flutter/shell/common/platform_view.h
 FILE: ../../../flutter/shell/common/rasterizer.cc
