@@ -409,11 +409,6 @@ abstract class BaseFlutterTask extends DefaultTask {
         // first stage of AOT build in this mode, and it includes all the Dart
         // sources.
         depfiles += project.files("${intermediateDir}/kernel_compile.d")
-
-        // Include Core JIT kernel compiler depfile, since kernel compile is
-        // the first stage of JIT builds in this mode, and it includes all the
-        // Dart sources.
-        depfiles += project.files("${intermediateDir}/snapshot_blob.bin.d")
         return depfiles
     }
 
@@ -495,8 +490,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (buildMode == "release" || buildMode == "profile") {
                 args "--precompiled"
-            } else {
-                args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
             }
             args "--asset-dir", "${intermediateDir}/flutter_assets"
             if (buildMode == "debug") {
