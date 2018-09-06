@@ -1132,7 +1132,9 @@ void Layout::appendLayout(Layout* src, size_t start, float extraAdvance) {
     int font_ix = findFace(src->mFaces[i], NULL);
     fontMap[i] = font_ix;
   }
-  int x0 = mAdvance;
+  // LibTxt: Changed x0 from int to float to prevent rounding that causes text
+  // jitter.
+  float x0 = mAdvance;
   for (size_t i = 0; i < src->mGlyphs.size(); i++) {
     LayoutGlyph& srcGlyph = src->mGlyphs[i];
     int font_ix = fontMap[srcGlyph.font_ix];
