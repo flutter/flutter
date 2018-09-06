@@ -135,7 +135,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
-    this.textSelectionDelegate,
+    @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -143,7 +143,8 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
-       _textPainter = new TextPainter(
+       assert(textSelectionDelegate != null),
+  _textPainter = new TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -196,13 +197,12 @@ class RenderEditable extends RenderBox {
     _obscureText = value;
     markNeedsSemanticsUpdate();
   }
-  /// Primarily used for updating the text in a field with cut, copy and paste.
+
+  /// The object that controls the text selection, used by this render object
+  /// for implementing cut, copy, and paste keyboard shortcuts.
   ///
-  /// This is used for updating the text in the text field in the event
-  /// of cut or paste. It must not be null, when set dynamically, it will
-  /// make cut, copy and paste functionality work with the most set
-  /// [TextSelectionDelegate]. It should be used only to update the
-  /// text in the text field.
+  /// It must not be null. It will make cut, copy and paste functionality work
+  /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
 
   Rect _lastCaretRect;
@@ -282,7 +282,7 @@ class RenderEditable extends RenderBox {
 
       _extentOffset = newOffset;
     } else if (ctrl && (xKey || vKey || cKey || aKey)) {
-      // Do not await this method
+      // _handleShortcuts depends on being started in the same stack invocation as the _handleKeyEvent method
       _handleShortcuts(pressedKeyCode);
     }
     if (del)
@@ -405,7 +405,7 @@ class RenderEditable extends RenderBox {
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control + (X, C, V, A).
   void _handleShortcuts(int pressedKeyCode) async {
-    switch(pressedKeyCode) {
+    switch (pressedKeyCode) {
       case _kCKeyCode:
         if (!selection.isCollapsed) {
           Clipboard.setData(

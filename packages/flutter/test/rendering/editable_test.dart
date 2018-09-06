@@ -4,9 +4,25 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
+
+class FakeEditableTextState extends TextSelectionDelegate {
+  @override
+  TextEditingValue get textEditingValue {}
+
+  @override
+  set textEditingValue(TextEditingValue value) {}
+
+  @override
+  void hideToolbar() {}
+
+  @override
+  void bringIntoView(TextPosition position) {}
+}
 
 void main() {
   test('editable intrinsics', () {
+    final TextSelectionDelegate delegate = new FakeEditableTextState();
     final RenderEditable editable = new RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
@@ -16,6 +32,7 @@ void main() {
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
       offset: new ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     expect(editable.getMaxIntrinsicWidth(double.infinity), 50.0);
