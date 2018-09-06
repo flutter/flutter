@@ -15,4 +15,6 @@ source_set("version") {
     "SHELL_SKIA_VERSION=\"$shell_skia_version\"",
     "SHELL_DART_VERSION=\"$shell_dart_version\"",
   ]
+
+  public_configs = [ "$flutter_root:config" ]
 }
