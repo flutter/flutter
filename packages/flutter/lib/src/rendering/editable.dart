@@ -196,7 +196,8 @@ class RenderEditable extends RenderBox {
     _obscureText = value;
     markNeedsSemanticsUpdate();
   }
-
+  /// Primarily used for updating the text in a field with cut, copy and paste.
+  ///
   /// This is used for updating the text in the text field in the event
   /// of cut or paste. It must not be null, when set dynamically, it will
   /// make cut, copy and paste functionality work with the most set
