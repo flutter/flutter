@@ -321,6 +321,19 @@ class Colors {
   ///    but with different opacities.
   static const Color white70 = Color(0xB3FFFFFF);
 
+  /// White with 54% opacity.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
+  ///
+  /// See also:
+  ///
+  ///  * [ExpandIcon], which uses this color for dark themes.
+  ///  * [Theme.of], which allows you to select colors from the current theme
+  ///    rather than hard-coding colors in your build methods.
+  ///  * [white, white30, white12, white10], which are variants on this color
+  ///    but with different opacities.
+  static const Color white54 = Color(0x8AFFFFFF);
+
   /// White with 32% opacity.
   ///
   /// Used for disabled radio buttons and the text of disabled flat buttons in dark themes.

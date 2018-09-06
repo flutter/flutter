@@ -37,6 +37,7 @@ class AndroidSemanticsNode  {
   ///         "isLongClickable": bool,
   ///       },
   ///       "text": String,
+  ///       "contentDescription": String,
   ///       "className": String,
   ///       "id": int,
   ///       "rect": {
@@ -63,6 +64,16 @@ class AndroidSemanticsNode  {
   /// This is produced by combining the value, label, and hint fields from
   /// the Flutter [SemanticsNode].
   String get text => _values['text'];
+
+  /// The contentDescription of the semantics node.
+  ///
+  /// This field is used for the Switch, Radio, and Checkbox widgets
+  /// instead of [text]. If the text property is used for these, TalkBack
+  /// will not read out the "checked" or "not checked" label by default.
+  ///
+  /// This is produced by combining the value, label, and hint fields from
+  /// the Flutter [SemanticsNode].
+  String get contentDescription => _values['contentDescription'];
 
   /// The className of the semantics node.
   ///

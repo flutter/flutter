@@ -21,6 +21,9 @@ class AndroidClassName {
 
   /// The class name used for read only text fields.
   static const String textView = 'android.widget.TextView';
+
+  /// The class name used for toggle switches.
+  static const String toggleSwitch = 'android.widget.Switch';
 }
 
 /// Action constants which correspond to `AccessibilityAction` in Android.

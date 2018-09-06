@@ -5,14 +5,10 @@
 // Thanks for checking out Flutter!
 // Like what you see? Tweet us @flutterio
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'gallery/app.dart';
 
 void main() {
-  // Temporary debugging hook for https://github.com/flutter/flutter/issues/17888
-  debugInstrumentationEnabled = true;
-
   runApp(const GalleryApp());
 }
