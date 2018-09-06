@@ -63,7 +63,7 @@ class PaintRecord {
 
   size_t line() const { return line_; }
 
-  size_t GetRunWidth() const { return run_width_; }
+  double GetRunWidth() const { return run_width_; }
 
  private:
   TextStyle style_;

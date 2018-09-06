@@ -184,6 +184,7 @@ class Paragraph {
   FRIEND_TEST(ParagraphTest, HyphenBreakParagraph);
   FRIEND_TEST(ParagraphTest, RepeatLayoutParagraph);
   FRIEND_TEST(ParagraphTest, Ellipsize);
+  FRIEND_TEST(ParagraphTest, UnderlineShiftParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;

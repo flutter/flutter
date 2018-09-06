@@ -1007,7 +1007,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 56.835938);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 177.44922);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 177.97266);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
   paint.setColor(SK_ColorGREEN);
@@ -1016,9 +1016,9 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 177);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 177.97266);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 506.08984);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 507.02344);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
   paint.setColor(SK_ColorRED);
@@ -1027,9 +1027,9 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 4ull);
-  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 210.83594);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 211.375);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 59.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 463.44922);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 463.61719);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 118);
 
   // TODO(garyq): The following set of vals are definetly wrong and
@@ -1045,9 +1045,9 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   EXPECT_EQ(boxes.size(), 1ull);
-  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 449.25391);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 450.1875);
   EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
-  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 519.44922);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 519.47266);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
   paint.setColor(SK_ColorRED);
@@ -1567,6 +1567,84 @@ TEST_F(ParagraphTest, Ellipsize) {
   // Check that the ellipsizer limited the text to one line and did not wrap
   // to a second line.
   ASSERT_EQ(paragraph->records_.size(), 1ull);
+}
+
+// Test for shifting when identical runs of text are built as multiple runs.
+TEST_F(ParagraphTest, UnderlineShiftParagraph) {
+  const char* text1 = "fluttser ";
+  auto icu_text1 = icu::UnicodeString::fromUTF8(text1);
+  std::u16string u16_text1(icu_text1.getBuffer(),
+                           icu_text1.getBuffer() + icu_text1.length());
+  const char* text2 = "mdje";
+  auto icu_text2 = icu::UnicodeString::fromUTF8(text2);
+  std::u16string u16_text2(icu_text2.getBuffer(),
+                           icu_text2.getBuffer() + icu_text2.length());
+  const char* text3 = "fluttser mdje";
+  auto icu_text3 = icu::UnicodeString::fromUTF8(text3);
+  std::u16string u16_text3(icu_text3.getBuffer(),
+                           icu_text3.getBuffer() + icu_text3.length());
+
+  // Construct multi-run paragraph.
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 2;
+  paragraph_style.text_align = TextAlign::left;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style1;
+  text_style1.color = SK_ColorBLACK;
+  text_style1.font_family = "Roboto";
+  builder.PushStyle(text_style1);
+
+  builder.AddText(u16_text1);
+
+  txt::TextStyle text_style2;
+  text_style2.color = SK_ColorBLACK;
+  text_style2.font_family = "Roboto";
+  text_style2.decoration = TextDecoration::kUnderline;
+  text_style2.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style2);
+
+  builder.AddText(u16_text2);
+
+  builder.Pop();
+
+  // Construct single run paragraph.
+  txt::ParagraphBuilder builder2(paragraph_style, GetTestFontCollection());
+
+  builder2.PushStyle(text_style1);
+
+  builder2.AddText(u16_text3);
+
+  builder2.Pop();
+
+  // Build multi-run paragraph
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth());
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  // Build single-run paragraph
+  auto paragraph2 = builder2.Build();
+  paragraph2->Layout(GetTestCanvasWidth());
+
+  paragraph2->Paint(GetCanvas(), 0, 25);
+
+  ASSERT_TRUE(Snapshot());
+
+  ASSERT_EQ(paragraph->records_[0].GetRunWidth() +
+                paragraph->records_[1].GetRunWidth(),
+            paragraph2->records_[0].GetRunWidth());
+
+  auto rects1 = paragraph->GetRectsForRange(0, 12);
+  auto rects2 = paragraph2->GetRectsForRange(0, 12);
+
+  for (size_t i = 0; i < 12; ++i) {
+    auto r1 = GetCoordinatesForGlyphPosition(*paragraph, i);
+    auto r2 = GetCoordinatesForGlyphPosition(*paragraph2, i);
+
+    ASSERT_EQ(r1.fLeft, r2.fLeft);
+    ASSERT_EQ(r1.fRight, r2.fRight);
+  }
 }
 
 }  // namespace txt
