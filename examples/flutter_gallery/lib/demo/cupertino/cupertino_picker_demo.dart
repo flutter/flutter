@@ -62,6 +62,26 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
+  Widget _buildBottomPicker(Widget picker) {
+    return new Container(
+      height: _kPickerSheetHeight,
+      color: CupertinoColors.white,
+      child: new DefaultTextStyle(
+        style: const TextStyle(
+          color: CupertinoColors.black,
+          fontSize: 22.0,
+        ),
+        child: new GestureDetector(
+          // Blocks taps from propagating to the modal sheet and popping.
+          onTap: () {},
+          child: new SafeArea(
+            child: picker,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildColorPicker(BuildContext context) {
     final FixedExtentScrollController scrollController =
         FixedExtentScrollController(initialItem: _selectedColorIndex);
@@ -101,28 +121,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               ),
             ),
           ]
-      ),
-    );
-  }
-
-  Widget _buildBottomPicker(Widget picker) {
-    return Container(
-      height: _kPickerSheetHeight,
-      padding: const EdgeInsets.only(top: 8.0),
-      color: CupertinoColors.white,
-      child: DefaultTextStyle(
-        style: const TextStyle(
-          color: CupertinoColors.black,
-          fontSize: 22.0,
-        ),
-        child: GestureDetector(
-          // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () {},
-          child: SafeArea(
-            top: false,
-            child: picker,
-          ),
-        ),
       ),
     );
   }
