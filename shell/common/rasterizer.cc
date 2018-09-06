@@ -9,6 +9,7 @@
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
+#include "third_party/skia/include/core/SkSerialProcs.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/include/utils/SkBase64.h"
@@ -130,7 +131,11 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
   return false;
 }
 
-static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(
+static sk_sp<SkData> SerializeTypeface(SkTypeface* typeface, void* ctx) {
+  return typeface->serialize(SkTypeface::SerializeBehavior::kDoIncludeData);
+}
+
+static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
     flow::LayerTree* tree,
     flow::CompositorContext& compositor_context) {
   FML_DCHECK(tree != nullptr);
@@ -147,7 +152,10 @@ static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(
 
   frame->Raster(*tree, true);
 
-  return recorder.finishRecordingAsPicture();
+  SkSerialProcs procs = {0};
+  procs.fTypefaceProc = SerializeTypeface;
+
+  return recorder.finishRecordingAsPicture()->serialize(&procs);
 }
 
 static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
@@ -240,8 +248,7 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
 
   switch (type) {
     case ScreenshotType::SkiaPicture:
-      data = ScreenshotLayerTreeAsPicture(layer_tree, *compositor_context_)
-                 ->serialize();
+      data = ScreenshotLayerTreeAsPicture(layer_tree, *compositor_context_);
       break;
     case ScreenshotType::UncompressedImage:
       data = ScreenshotLayerTreeAsImage(layer_tree, *compositor_context_,
