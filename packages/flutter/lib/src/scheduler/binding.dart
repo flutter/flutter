@@ -11,6 +11,7 @@ import 'dart:ui' show AppLifecycleState;
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/logging/logging.dart';
 
 import 'debug.dart';
 import 'priority.dart';
@@ -214,6 +215,8 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
         timeDilation = value;
       }
     );
+
+    LoggingService.instance.initServiceExtensions(registerServiceExtension);
   }
 
   /// Whether the application is visible, and if so, whether it is currently
