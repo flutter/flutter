@@ -684,7 +684,7 @@ void main() {
             height: 100.0,
             child: AndroidView(
               viewType: 'webview',
-              gestureRecognizers: <OneSequenceGestureRecognizer> [ new EagerGestureRecognizer() ],
+              gestureRecognizers: <OneSequenceGestureRecognizer>[ new EagerGestureRecognizer() ],
               layoutDirection: TextDirection.ltr,
             ),
           ),
