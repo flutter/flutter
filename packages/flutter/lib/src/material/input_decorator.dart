@@ -847,12 +847,9 @@ class _RenderDecoration extends RenderBox {
 
     if (label != null) {
       // floatingLabelHeight includes the vertical gap between the inline
-      // elements and the floating label. This value breaks down for the
-      // very large font sizes available on iOS, so the approximation below
-      // is used instead.
-      final double overflowHeight = label.size.height > 30.0 ? label.size.height / 2 : 0.0;
-      containerHeight += math.max(decoration.floatingLabelHeight, overflowHeight);
-      inputBaseline += math.max(decoration.floatingLabelHeight, overflowHeight);
+      // elements and the floating label.
+      containerHeight += decoration.floatingLabelHeight;
+      inputBaseline += decoration.floatingLabelHeight;
     }
 
     containerHeight = math.max(
@@ -1838,7 +1835,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
+      floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize * MediaQuery.textScaleFactor(context);
       if (decoration.filled == true) { // filled == null same as filled == false
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
