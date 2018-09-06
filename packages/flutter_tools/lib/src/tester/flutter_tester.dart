@@ -41,8 +41,9 @@ class FlutterTesterApp extends ApplicationPackage {
 
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(String deviceId) : super(deviceId);
+  FlutterTesterDevice(String deviceId, { this.workingDirectory }) : super(deviceId);
 
+  final String workingDirectory;
   Process _process;
   final DevicePortForwarder _portForwarder = new _NoopPortForwarder();
 
@@ -126,13 +127,19 @@ class FlutterTesterDevice extends Device {
     }
 
     // Build assets and perform initial compilation.
-    final String assetDirPath = getAssetBuildDirectory();
+    String inWorkingDir(String path) =>
+      workingDirectory != null && !fs.path.isAbsolute(path)
+        ? fs.path.join(workingDirectory, path)
+        : path;
+    final String assetDirPath = inWorkingDir(getAssetBuildDirectory());
     final String applicationKernelFilePath =
-        fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill');
+        inWorkingDir(fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'));
     await bundle.build(
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,
+      depfilePath: inWorkingDir(bundle.defaultDepfilePath),
+      snapshotPath: inWorkingDir(bundle.defaultSnapshotPath),
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
@@ -151,6 +158,7 @@ class FlutterTesterDevice extends Device {
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
         },
+        workingDirectory: workingDirectory,
       );
       // Setting a bool can't fail in the callback.
       _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
