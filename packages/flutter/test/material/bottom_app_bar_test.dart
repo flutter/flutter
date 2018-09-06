@@ -284,6 +284,41 @@ void main() {
       const Offset(50.0, 550.0),
     );
   });
+
+  testWidgets('clipBehavior is propagated', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar:
+              BottomAppBar(
+                child: SizedBox(height: 100.0),
+                shape: RectangularNotch(),
+                notchMargin: 0.0,
+              ),
+        ),
+      ),
+    );
+
+    PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape));
+    expect(physicalShape.clipBehavior, Clip.none);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar:
+          BottomAppBar(
+            child: SizedBox(height: 100.0),
+            shape: RectangularNotch(),
+            notchMargin: 0.0,
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+          ),
+        ),
+      ),
+    );
+
+    physicalShape = tester.widget(find.byType(PhysicalShape));
+    expect(physicalShape.clipBehavior, Clip.antiAliasWithSaveLayer);
+  });
 }
 
 // The bottom app bar clip path computation is only available at paint time.
