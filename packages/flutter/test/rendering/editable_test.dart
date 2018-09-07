@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 class FakeEditableTextState extends TextSelectionDelegate {
   @override
-  TextEditingValue get textEditingValue {}
+  TextEditingValue get textEditingValue { return const TextEditingValue(); }
 
   @override
   set textEditingValue(TextEditingValue value) {}
