@@ -179,6 +179,7 @@ class _BottomNavigationTile extends StatelessWidget {
       heightFactor: 1.0,
       child: new Container(
         margin: new EdgeInsets.only(
+          bottom: 3.0,
           top: new Tween<double>(
             begin: tweenStart,
             end: _kTopMargin,
@@ -197,7 +198,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
   Widget _buildFixedLabel() {
     return new Align(
-      alignment: Alignment.bottomCenter,
+      alignment: Alignment.topCenter,
       heightFactor: 1.0,
       child: new Container(
         margin: const EdgeInsets.only(bottom: _kBottomMargin),
@@ -218,7 +219,7 @@ class _BottomNavigationTile extends StatelessWidget {
                 ).evaluate(animation),
               ),
             ),
-            alignment: Alignment.bottomCenter,
+            alignment: Alignment.topCenter,
             child: item.title,
           ),
         ),
