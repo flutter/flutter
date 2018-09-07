@@ -144,7 +144,7 @@ class MethodChannel {
   ///
   /// ```dart
   /// class Music {
-  ///   static const MethodChannel _channel = const MethodChannel('music');
+  ///   static const MethodChannel _channel = MethodChannel('music');
   ///
   ///   static Future<bool> isLicensed() async {
   ///     // invokeMethod returns a Future<dynamic>, and we cannot pass that for

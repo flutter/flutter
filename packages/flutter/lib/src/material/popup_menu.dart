@@ -137,7 +137,7 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 /// ```dart
 /// const PopupMenuItem<WhyFarther>(
 ///   value: WhyFarther.harder,
-///   child: const Text('Working a lot harder'),
+///   child: Text('Working a lot harder'),
 /// )
 /// ```
 ///
@@ -312,7 +312,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 ///     const PopupMenuDivider(),
 ///     const PopupMenuItem<Commands>(
 ///       value: Commands.hurricaneCame,
-///       child: const ListTile(leading: const Icon(null), title: const Text('Bring hurricane')),
+///       child: ListTile(leading: Icon(null), title: Text('Bring hurricane')),
 ///     ),
 ///     // ...other items listed here
 ///   ],
@@ -779,19 +779,19 @@ typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 ///   itemBuilder: (BuildContext context) => <PopupMenuEntry<WhyFarther>>[
 ///     const PopupMenuItem<WhyFarther>(
 ///       value: WhyFarther.harder,
-///       child: const Text('Working a lot harder'),
+///       child: Text('Working a lot harder'),
 ///     ),
 ///     const PopupMenuItem<WhyFarther>(
 ///       value: WhyFarther.smarter,
-///       child: const Text('Being a lot smarter'),
+///       child: Text('Being a lot smarter'),
 ///     ),
 ///     const PopupMenuItem<WhyFarther>(
 ///       value: WhyFarther.selfStarter,
-///       child: const Text('Being a self-starter'),
+///       child: Text('Being a self-starter'),
 ///     ),
 ///     const PopupMenuItem<WhyFarther>(
 ///       value: WhyFarther.tradingCharter,
-///       child: const Text('Placed in charge of trading charter'),
+///       child: Text('Placed in charge of trading charter'),
 ///     ),
 ///   ],
 /// )
