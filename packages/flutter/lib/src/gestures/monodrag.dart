@@ -4,8 +4,6 @@
 
 import 'dart:ui' show PointerDeviceKind;
 
-import 'package:flutter/foundation.dart';
-
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
@@ -106,7 +104,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// clicks and drags or not.
   bool enableForMouse = true;
 
-  bool mouseOnlyGestures = false;
+  /// Whether the recognizer should only recognize mouse gestures. With this true
+  /// touch drag events won't be recognized.
+  bool recognizeOnlyMouseGestures = false;
 
   _DragState _state = _DragState.ready;
   Offset _initialPosition;
@@ -125,7 +125,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void addPointer(PointerEvent event) {
     if (!enableForMouse && (event.kind == PointerDeviceKind.mouse))
       return;
-    if (mouseOnlyGestures && event.kind != PointerDeviceKind.mouse) {
+    if (recognizeOnlyMouseGestures && event.kind != PointerDeviceKind.mouse) {
       rejectGesture(event.pointer);
       return;
     }
@@ -147,11 +147,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    debugPrint(event.kind.toString() + 'a nd ' + mouseOnlyGestures.toString());
-
     if (!enableForMouse && (event.kind == PointerDeviceKind.mouse))
       return;
-    if (mouseOnlyGestures && event.kind != PointerDeviceKind.mouse) {
+    if (recognizeOnlyMouseGestures && event.kind != PointerDeviceKind.mouse) {
       rejectGesture(event.pointer);
       return;
     }
@@ -190,6 +188,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     if (!enableForMouse && (_deviceKind == PointerDeviceKind.mouse))
       return;
+    if (recognizeOnlyMouseGestures && _deviceKind != PointerDeviceKind.mouse)
+      return;
+
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
       final Offset delta = _pendingDragOffset;
@@ -223,6 +224,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void didStopTrackingLastPointer(int pointer) {
+    if (recognizeOnlyMouseGestures && _deviceKind != PointerDeviceKind.mouse)
+      return;
+
     if (_state == _DragState.possible) {
       resolve(GestureDisposition.rejected);
       _state = _DragState.ready;
@@ -409,5 +413,5 @@ class MousePanGestureRecognizer extends DragGestureRecognizer {
   String get debugDescription => 'mouse pan';
 
   @override
-  bool get mouseOnlyGestures => true;
+  bool get recognizeOnlyMouseGestures => true;
 }
