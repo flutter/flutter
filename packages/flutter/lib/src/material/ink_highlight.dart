@@ -47,6 +47,7 @@ class InkHighlight extends InteractiveInkFeature {
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
+       assert(textDirection != null),
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
