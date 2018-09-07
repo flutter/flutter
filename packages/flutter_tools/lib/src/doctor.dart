@@ -50,9 +50,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow.appliesToHostPlatform)
         _validators.add(androidValidator);
 
-      if (iosWorkflow.appliesToHostPlatform) {
+      if (iosWorkflow.appliesToHostPlatform)
         _validators.add(new GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
-      }
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
