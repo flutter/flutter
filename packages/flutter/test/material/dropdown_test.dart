@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -34,20 +35,22 @@ Widget buildFrame({
     child: new Material(
       child: new Align(
         alignment: alignment,
-        child: new DropdownButton<String>(
-          key: buttonKey,
-          value: value,
-          hint: hint,
-          onChanged: onChanged,
-          isDense: isDense,
-          isExpanded: isExpanded,
-          items: items.map((String item) {
-            return new DropdownMenuItem<String>(
-              key: new ValueKey<String>(item),
-              value: item,
-              child: new Text(item, key: new ValueKey<String>(item + 'Text')),
-            );
-          }).toList(),
+        child: new RepaintBoundary(
+          child: new DropdownButton<String>(
+            key: buttonKey,
+            value: value,
+            hint: hint,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            items: items.map((String item) {
+              return new DropdownMenuItem<String>(
+                key: new ValueKey<String>(item),
+                value: item,
+                child: new Text(item, key: new ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          )
         ),
       ),
     ),
@@ -110,6 +113,32 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
 }
 
 void main() {
+  testWidgets('Default dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = new UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two');
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.default.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = new UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.expanded.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
     void didChangeValue(String newValue) {
