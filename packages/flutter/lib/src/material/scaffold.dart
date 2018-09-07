@@ -1018,6 +1018,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   bool get hasDrawer => widget.drawer != null;
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
+  /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
+  bool get hasFloatingActionButton => widget.floatingActionButton != null;
 
   bool _drawerOpened = false;
   bool _endDrawerOpened = false;
@@ -1309,6 +1311,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FloatingActionButtonAnimator _floatingActionButtonAnimator;
   FloatingActionButtonLocation _previousFloatingActionButtonLocation;
   FloatingActionButtonLocation _floatingActionButtonLocation;
+  AnimationController _floatingActionButtonHideController;
+
+  /// Hides the [Scaffold.floatingActionButton].
+  TickerFuture hideFloatingActionButton() {
+    return _floatingActionButtonHideController.reverse();
+  }
+
+  /// Shows the [Scaffold.floatingActionButton].
+  TickerFuture showFloatingActionButton() {
+    return _floatingActionButtonHideController.forward();
+  }
 
   // Moves the Floating Action Button to the new Floating Action Button Location.
   void _moveFloatingActionButton(final FloatingActionButtonLocation newLocation) {
@@ -1362,10 +1375,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _previousFloatingActionButtonLocation = _floatingActionButtonLocation;
     _floatingActionButtonMoveController = new AnimationController(
       vsync: this,
-      lowerBound: 0.0,
-      upperBound: 1.0,
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
+    );
+    _floatingActionButtonHideController = new AnimationController(
+      vsync: this,
+      value: 1.0,
+      duration: kFloatingActionButtonSegue,
     );
     _maybeBuildCurrentBottomSheet();
   }
@@ -1635,7 +1651,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _addIfNonNull(
       children,
       new _FloatingActionButtonTransition(
-        child: widget.floatingActionButton,
+        child: widget.floatingActionButton != null
+          ? new ScaleTransition(
+              scale: _floatingActionButtonHideController,
+              child: widget.floatingActionButton,
+            )
+          : null,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
         geometryNotifier: _geometryNotifier,
