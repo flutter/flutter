@@ -142,4 +142,8 @@ void main() {
     expect(new ThemeData(primaryColor: Colors.teal).primaryColorBrightness, equals(Brightness.dark));
     expect(new ThemeData(primaryColor: Colors.indigo).primaryColorBrightness, equals(Brightness.dark));
   });
+
+  test('cursorColor', () {
+    expect(ThemeData(cursorColor: Colors.red).cursorColor, Colors.red);
+  });
 }
