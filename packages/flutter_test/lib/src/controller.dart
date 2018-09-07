@@ -431,7 +431,7 @@ abstract class WidgetController {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer, isTouch: isTouch);
       assert(gesture != null);
-      await gesture.moveBy(offset);
+      await gesture.moveBy(offset, isTouch: isTouch);
       await gesture.up();
       return null;
     });

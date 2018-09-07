@@ -65,7 +65,7 @@ class TestPointer {
   /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerMoveEvent move(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  PointerMoveEvent move(Offset newLocation, { Duration timeStamp = Duration.zero, bool isTouch = true }) {
     assert(isDown);
     final Offset delta = newLocation - location;
     _location = newLocation;
@@ -73,7 +73,8 @@ class TestPointer {
       timeStamp: timeStamp,
       pointer: pointer,
       position: newLocation,
-      delta: delta
+      delta: delta,
+      kind: isTouch ? PointerDeviceKind.touch : PointerDeviceKind.mouse,
     );
   }
 
@@ -148,6 +149,7 @@ class TestGesture {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
       final TestPointer testPointer = new TestPointer(pointer);
+      debugPrint(isTouch.toString());
       await dispatcher(testPointer.down(downLocation, isTouch: isTouch), hitTestResult);
 
       // create a TestGesture
@@ -165,16 +167,16 @@ class TestGesture {
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  Future<Null> moveBy(Offset offset, { Duration timeStamp = Duration.zero }) {
+  Future<Null> moveBy(Offset offset, { Duration timeStamp = Duration.zero, bool isTouch = true }) {
     assert(_pointer._isDown);
-    return moveTo(_pointer.location + offset, timeStamp: timeStamp);
+    return moveTo(_pointer.location + offset, timeStamp: timeStamp, isTouch: isTouch);
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<Null> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
+  Future<Null> moveTo(Offset location, { Duration timeStamp = Duration.zero, bool isTouch = true }) {
     return TestAsyncUtils.guard(() {
       assert(_pointer._isDown);
-      return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
+      return _dispatcher(_pointer.move(location, timeStamp: timeStamp, isTouch: isTouch), _result);
     });
   }
 
