@@ -459,7 +459,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   // Controls the previous widget.child as it exits
   AnimationController _previousController;
   Animation<double> _previousScaleAnimation;
-  Animation<double> _previousRotationAnimation;
   // Controls the current child widget.child as it exits
   AnimationController _currentController;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
@@ -541,12 +540,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: _previousController,
       curve: Curves.easeIn,
     );
-    final Animation<double> previousExitRotationAnimation = new Tween<double>(begin: 1.0, end: 1.0).animate(
-      new CurvedAnimation(
-        parent: _previousController,
-        curve: Curves.easeIn,
-      ),
-    );
 
     final CurvedAnimation currentEntranceScaleAnimation = new CurvedAnimation(
       parent: _currentController,
@@ -574,7 +567,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       curve: const Interval(0.0, 0.1),
     );
 
-    _previousRotationAnimation = new TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
     _currentRotationAnimation = new TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
 
     _currentScaleAnimation.addListener(_onProgressChanged);
@@ -611,10 +603,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       } else {
         children.add(new ScaleTransition(
           scale: _previousScaleAnimation,
-          child: new RotationTransition(
-            turns: _previousRotationAnimation,
-            child: _previousChild,
-          ),
+          child: _previousChild,
         ));
       }
     }
