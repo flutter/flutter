@@ -865,24 +865,28 @@ bool Shell::OnServiceProtocolRunInView(
     return false;
   }
 
-  auto main_script_file =
-      fml::paths::AbsolutePath(params.at("mainScript").ToString());
+  std::string main_script_path =
+      fml::paths::FromURI(params.at("mainScript").ToString());
+  std::string packages_path =
+      fml::paths::FromURI(params.at("packagesFile").ToString());
+  std::string asset_directory_path =
+      fml::paths::FromURI(params.at("assetDirectory").ToString());
 
   auto main_script_file_mapping =
-      std::make_unique<fml::FileMapping>(main_script_file, false);
+      std::make_unique<fml::FileMapping>(main_script_path, false);
 
   auto isolate_configuration =
       blink::DartVM::IsKernelMapping(main_script_file_mapping.get())
           ? IsolateConfiguration::CreateForSnapshot(
                 std::move(main_script_file_mapping))
-          : IsolateConfiguration::CreateForSource(
-                main_script_file, params.at("packagesFile").ToString());
+          : IsolateConfiguration::CreateForSource(main_script_path,
+                                                  packages_path);
 
   RunConfiguration configuration(std::move(isolate_configuration));
 
-  configuration.AddAssetResolver(std::make_unique<blink::DirectoryAssetBundle>(
-      fml::OpenFile(params.at("assetDirectory").ToString().c_str(),
-                    fml::OpenPermission::kRead, true)));
+  configuration.AddAssetResolver(
+      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenFile(
+          asset_directory_path.c_str(), fml::OpenPermission::kRead, true)));
 
   auto& allocator = response.GetAllocator();
   response.SetObject();
