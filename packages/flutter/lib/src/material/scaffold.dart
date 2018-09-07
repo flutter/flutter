@@ -441,6 +441,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     @required this.fabMoveAnimation,
     @required this.fabMotionAnimator,
     @required this.geometryNotifier,
+    this.fabHideAnimation,
   }) : assert(fabMoveAnimation != null),
        assert(fabMotionAnimator != null),
        super(key: key);
@@ -448,6 +449,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   final Widget child;
   final Animation<double> fabMoveAnimation;
   final FloatingActionButtonAnimator fabMotionAnimator;
+  final Animation<double> fabHideAnimation;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
@@ -637,10 +639,14 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       ));
     }
 
-    return new Stack(
+    final Widget stack = new Stack(
       alignment: Alignment.centerRight,
       children: children,
     );
+
+    return widget.fabHideAnimation != null
+      ? new ScaleTransition(scale: widget.fabHideAnimation, child: stack)
+      : stack;
   }
 
   void _onProgressChanged() {
@@ -1375,11 +1381,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _previousFloatingActionButtonLocation = _floatingActionButtonLocation;
     _floatingActionButtonMoveController = new AnimationController(
       vsync: this,
+      lowerBound: 0.0,
+      upperBound: 1.0,
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
     _floatingActionButtonHideController = new AnimationController(
       vsync: this,
+      lowerBound: 0.0,
+      upperBound: 1.0,
       value: 1.0,
       duration: kFloatingActionButtonSegue,
     );
@@ -1651,14 +1661,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _addIfNonNull(
       children,
       new _FloatingActionButtonTransition(
-        child: widget.floatingActionButton != null
-          ? new ScaleTransition(
-              scale: _floatingActionButtonHideController,
-              child: widget.floatingActionButton,
-            )
-          : null,
+        child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
+        fabHideAnimation: _floatingActionButtonHideController,
         geometryNotifier: _geometryNotifier,
       ),
       _ScaffoldSlot.floatingActionButton,
