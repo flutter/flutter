@@ -120,10 +120,8 @@ class Doctor {
 
       if (currentCategory.isGrouped) {
         if (finishedGroups.contains(currentCategory)) {
-          // We already handled this category via a previous validator.
           continue;
         }
-        // Skip ahead and get results for the other validators in this category.
         final List<ValidationResult> results = <ValidationResult>[];
         for (DoctorValidator subValidator in validators.where(
                 (DoctorValidator v) => v.category == currentCategory)) {
@@ -251,8 +249,10 @@ class Doctor {
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
     ValidationType mergedType = results[0].type;
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
+    String statusInfo;
 
     for (ValidationResult result in results) {
+      statusInfo ??= result.statusInfo;
       switch (result.type) {
         case ValidationType.installed:
           if (mergedType == ValidationType.missing) {
@@ -274,7 +274,7 @@ class Doctor {
     }
 
     return new ValidationResult(mergedType, mergedMessages,
-        statusInfo: results[0].statusInfo);
+        statusInfo: statusInfo);
   }
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);

@@ -210,6 +210,18 @@ void main() {
 
       ));
     });
+
+    testUsingContext('validate merging assigns statusInfo', () async {
+      // There are two validators, and only the second contains statusInfo.
+      expect(await new FakeGroupedDoctorWithStatus().diagnose(), isTrue);
+      expect(testLogger.statusText, equals(
+          '[✓] Category 1 (A status message)\n'
+              '    • A helpful message\n'
+              '    • A different message\n'
+              '\n'
+              '• No issues found!\n'
+      ));
+    });
   });
 
 
@@ -442,6 +454,17 @@ class PartialGroupedValidator extends DoctorValidator {
   }
 }
 
+class PassingGroupedValidatorWithStatus extends DoctorValidator {
+  PassingGroupedValidatorWithStatus(String name, ValidatorCategory group) : super(name, group);
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage('A different message'));
+    return new ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+  }
+}
+
 /// A doctor that has two category groups of two validators each.
 class FakeGroupedDoctor extends Doctor {
   List<DoctorValidator> _validators;
@@ -453,6 +476,19 @@ class FakeGroupedDoctor extends Doctor {
       _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
       _validators.add(new PassingGroupedValidator('Category 2', groupedCategory2));
       _validators.add(new MissingGroupedValidator('Category 2', groupedCategory2));
+    }
+    return _validators;
+  }
+}
+
+class FakeGroupedDoctorWithStatus extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
+      _validators.add(new PassingGroupedValidatorWithStatus('Category 1', groupedCategory1));
     }
     return _validators;
   }
