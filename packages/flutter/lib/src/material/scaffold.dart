@@ -1451,6 +1451,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
     _floatingActionButtonMoveController.dispose();
+    _floatingActionButtonHideController.dispose();
     super.dispose();
   }
 
