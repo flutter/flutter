@@ -175,7 +175,6 @@ class IOSValidator extends DoctorValidator {
         }
       }
 
-
     } else {
       brewStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
@@ -248,9 +247,5 @@ class CocoaPodsValidator extends DoctorValidator {
       status = ValidationType.missing;
     }
     return new ValidationResult(status, messages);
-  }
-
-  ValidationType _mergeValidationTypes(ValidationType t1, ValidationType t2) {
-    return t1 == t2 ? t1 : ValidationType.partial;
   }
 }

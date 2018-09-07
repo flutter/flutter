@@ -212,59 +212,6 @@ void main() {
     });
   });
 
-
-  group('doctor merging validator results', () {
-    final PassingGroupedValidator installed = new PassingGroupedValidator('Category');
-    final PartialGroupedValidator partial = new PartialGroupedValidator('Category');
-    final MissingGroupedValidator missing = new MissingGroupedValidator('Category');
-
-    testUsingContext('validate installed + installed = installed', () async {
-      expect(await new FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[✓]'));
-    });
-
-    testUsingContext('validate installed + partial = partial', () async {
-      expect(await new FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate installed + missing = partial', () async {
-      expect(await new FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate partial + installed = partial', () async {
-      expect(await new FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate partial + partial = partial', () async {
-      expect(await new FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate partial + missing = partial', () async {
-      expect(await new FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate missing + installed = partial', () async {
-      expect(await new FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate missing + partial = partial', () async {
-      expect(await new FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
-      expect(testLogger.statusText, startsWith('[!]'));
-    });
-
-    testUsingContext('validate missing + missing = missing', () async {
-      expect(await new FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
-      expect(testLogger.statusText, startsWith('[✗]'));
-    });
-  });
-
-
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
       expect(await new FakeGroupedDoctor().diagnose(), isTrue);
