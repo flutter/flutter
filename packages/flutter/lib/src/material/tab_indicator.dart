@@ -90,6 +90,7 @@ class _UnderlinePainter extends BoxPainter {
     final Rect rect = offset & configuration.size;
     final TextDirection textDirection = configuration.textDirection;
     final Rect indicator = _indicatorRectFor(rect, textDirection).deflate(borderSide.width / 2.0);
-    canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, borderSide.toPaint());
+    final Paint paint = borderSide.toPaint()..strokeCap = StrokeCap.square;
+    canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
   }
 }

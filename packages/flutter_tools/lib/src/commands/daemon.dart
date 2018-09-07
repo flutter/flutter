@@ -28,7 +28,7 @@ import '../runner/flutter_command.dart';
 import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.4.1';
+const String protocolVersion = '0.4.2';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -316,6 +316,7 @@ class AppDomain extends Domain {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
+    registerHandler('detach', detach);
   }
 
   static final Uuid _uuidGenerator = new Uuid();
@@ -344,7 +345,6 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
-      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
     );
@@ -508,6 +508,23 @@ class AppDomain extends Domain {
       throw "app '$appId' not found";
 
     return app.stop().timeout(const Duration(seconds: 5)).then<bool>((_) {
+      return true;
+    }).catchError((dynamic error) {
+      _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
+      app.closeLogger();
+      _apps.remove(app);
+      return false;
+    });
+  }
+
+  Future<bool> detach(Map<String, dynamic> args) async {
+    final String appId = _getStringArg(args, 'appId', required: true);
+
+    final AppInstance app = _getApp(appId);
+    if (app == null)
+      throw "app '$appId' not found";
+
+    return app.detach().timeout(const Duration(seconds: 5)).then<bool>((_) {
       return true;
     }).catchError((dynamic error) {
       _sendAppEvent(app, 'log', <String, dynamic>{ 'log': '$error', 'error': true });
@@ -770,6 +787,7 @@ class AppInstance {
   }
 
   Future<Null> stop() => runner.stop();
+  Future<Null> detach() => runner.detach();
 
   void closeLogger() {
     _logger.close();
@@ -831,9 +849,9 @@ class EmulatorDomain extends Domain {
 /// This class can either:
 ///   1) Send stdout messages and progress events to the client IDE
 ///   1) Log messages to stdout and send progress events to the client IDE
-///
-/// TODO(devoncarew): To simplify this code a bit, we could choose to specialize
-/// this class into two, one for each of the above use cases.
+//
+// TODO(devoncarew): To simplify this code a bit, we could choose to specialize
+// this class into two, one for each of the above use cases.
 class _AppRunLogger extends Logger {
   _AppRunLogger(this.domain, this.app, { this.parent });
 
@@ -908,7 +926,7 @@ class _AppRunLogger extends Logger {
         'progressId': progressId,
         'finished': true
       });
-    });
+    })..start();
     return _status;
   }
 

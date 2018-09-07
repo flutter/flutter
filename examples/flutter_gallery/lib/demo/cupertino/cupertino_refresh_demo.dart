@@ -50,11 +50,16 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
                 largeTitle: Text('Cupertino Refresh'),
+                previousPageTitle: 'Cupertino',
               ),
               new CupertinoSliverRefreshControl(
                 onRefresh: () {
                   return new Future<void>.delayed(const Duration(seconds: 2))
-                      ..then((_) => setState(() => repopulateList()));
+                      ..then((_) {
+                        if (mounted) {
+                          setState(() => repopulateList());
+                        }
+                      });
                 },
               ),
               new SliverSafeArea(

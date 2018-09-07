@@ -788,7 +788,7 @@ void main() {
 
     // Verify TextInput.setEditingState is fired with updated text when controller is replaced.
     final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) {
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
     setState(() {

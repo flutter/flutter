@@ -10,6 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Matrix4;
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
+import 'text.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
 
@@ -19,9 +20,8 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
 ///
-/// [AnimatedWidget] is most useful for widgets widgets that are otherwise
-/// stateless. To use [AnimatedWidget], simply subclass it and implement the
-/// build function.
+/// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
+/// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
@@ -672,6 +672,64 @@ class AlignTransition extends AnimatedWidget {
   }
 }
 
+/// Animated version of a [DefaultTextStyle] that animates the different properties
+/// of its [TextStyle].
+///
+/// See also:
+///
+/// * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
+///   but is not animated.
+class DefaultTextStyleTransition extends AnimatedWidget {
+  /// Creates an animated [DefaultTextStyle] whose [TextStyle] animation updates
+  /// the widget.
+  const DefaultTextStyleTransition({
+    Key key,
+    @required Animation<TextStyle> style,
+    @required this.child,
+    this.textAlign,
+    this.softWrap = true,
+    this.overflow = TextOverflow.clip,
+    this.maxLines,
+  }) : super(key: key, listenable: style);
+
+  /// The animation that controls the descendants' text style.
+  Animation<TextStyle> get style => listenable;
+
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// Whether the text should break at soft line breaks.
+  ///
+  /// See [DefaultTextStyle.softWrap] for more details.
+  final bool softWrap;
+
+  /// How visual overflow should be handled.
+  ///
+  final TextOverflow overflow;
+
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  ///
+  /// See [DefaultTextStyle.maxLines] for more details.
+  final int maxLines;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new DefaultTextStyle(
+      style: style.value,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: overflow,
+      maxLines: maxLines,
+      child: child,
+    );
+  }
+}
+
 /// A general-purpose widget for building animations.
 ///
 /// AnimatedBuilder is useful for more complex widgets that wish to include
@@ -703,7 +761,7 @@ class AlignTransition extends AnimatedWidget {
 /// ```dart
 /// class Spinner extends StatefulWidget {
 ///   @override
-///   _SpinnerState createState() => new _SpinnerState();
+///   _SpinnerState createState() => _SpinnerState();
 /// }
 ///
 /// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
@@ -712,7 +770,7 @@ class AlignTransition extends AnimatedWidget {
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     _controller = new AnimationController(
+///     _controller = AnimationController(
 ///       duration: const Duration(seconds: 10),
 ///       vsync: this,
 ///     )..repeat();
@@ -726,11 +784,11 @@ class AlignTransition extends AnimatedWidget {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new AnimatedBuilder(
+///     return AnimatedBuilder(
 ///       animation: _controller,
-///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
+///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
 ///       builder: (BuildContext context, Widget child) {
-///         return new Transform.rotate(
+///         return Transform.rotate(
 ///           angle: _controller.value * 2.0 * math.pi,
 ///           child: child,
 ///         );

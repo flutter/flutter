@@ -172,18 +172,6 @@ fi
 
 (upgrade_flutter) 3< "$PROG_NAME"
 
-set +e
 # FLUTTER_TOOL_ARGS isn't quoted below, because it is meant to be considered as
 # separate space-separated args.
-"$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
-
-# The VM exits with code 253 if the snapshot version is out-of-date.
-# If it is, we need to snapshot it again.
-EXIT_CODE=$?
-if [[ $EXIT_CODE != 253 ]]; then
-  exit $EXIT_CODE
-fi
-
-set -e
-"$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
 "$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"

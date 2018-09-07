@@ -157,4 +157,11 @@ void main() {
     expect(tester.getSize(find.byKey(contentsKey)), const Size(100.0, 100.0));
   });
 
+  testWidgets('Card clipBehavior property passes through to the Material', (WidgetTester tester) async {
+    await tester.pumpWidget(const Card());
+    expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.none);
+
+    await tester.pumpWidget(const Card(clipBehavior: Clip.antiAlias));
+    expect(tester.widget<Material>(find.byType(Material)).clipBehavior, Clip.antiAlias);
+  });
 }

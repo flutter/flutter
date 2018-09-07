@@ -1813,10 +1813,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final Widget counter = decoration.counterText == null ? null :
-      new Text(
-        decoration.counterText,
-        style: _getHelperStyle(themeData).merge(decoration.counterStyle),
-        overflow: TextOverflow.ellipsis,
+      new Semantics(
+        container: true,
+        child: new Text(
+          decoration.counterText,
+          style: _getHelperStyle(themeData).merge(decoration.counterStyle),
+          overflow: TextOverflow.ellipsis,
+          semanticsLabel: decoration.semanticCounterText,
+        ),
       );
 
     // The _Decoration widget and _RenderDecoration assume that contentPadding
@@ -1940,6 +1944,7 @@ class InputDecoration {
     this.enabledBorder,
     this.border,
     this.enabled = true,
+    this.semanticCounterText,
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not allowed'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not allowed'),
@@ -1983,7 +1988,8 @@ class InputDecoration {
        focusedBorder = null,
        focusedErrorBorder = null,
        disabledBorder = null,
-       enabledBorder = null;
+       enabledBorder = null,
+       semanticCounterText = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -2113,7 +2119,7 @@ class InputDecoration {
   /// To pad the leading edge of the prefix icon:
   ///
   /// ```dart
-  /// prefixIcon: new Padding(
+  /// prefixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
   ///   child: myIcon, // icon is 48px widget.
   /// )
@@ -2160,7 +2166,7 @@ class InputDecoration {
   /// To pad the trailing edge of the suffix icon:
   ///
   /// ```dart
-  /// suffixIcon: new Padding(
+  /// suffixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
   ///   child: myIcon, // icon is 48px widget.
   /// )
@@ -2197,6 +2203,8 @@ class InputDecoration {
   ///
   /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
   /// null.
+  ///
+  /// The semantic label can be replaced by providing a [semanticCounterText].
   final String counterText;
 
   /// The style to use for the [counterText].
@@ -2380,6 +2388,13 @@ class InputDecoration {
   /// This property is true by default.
   final bool enabled;
 
+  /// A semantic label for the [counterText].
+  ///
+  /// Defaults to null.
+  ///
+  /// If provided, this replaces the semantic label of the [counterText].
+  final String semanticCounterText;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   ///
@@ -2416,6 +2431,7 @@ class InputDecoration {
     InputBorder enabledBorder,
     InputBorder border,
     bool enabled,
+    String semanticCounterText,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -2449,6 +2465,7 @@ class InputDecoration {
       enabledBorder: enabledBorder ?? this.enabledBorder,
       border: border ?? this.border,
       enabled: enabled ?? this.enabled,
+      semanticCounterText: semanticCounterText ?? this.semanticCounterText,
     );
   }
 
@@ -2518,7 +2535,8 @@ class InputDecoration {
         && typedOther.disabledBorder == disabledBorder
         && typedOther.enabledBorder == enabledBorder
         && typedOther.border == border
-        && typedOther.enabled == enabled;
+        && typedOther.enabled == enabled
+        && typedOther.semanticCounterText == semanticCounterText;
   }
 
   @override
@@ -2565,6 +2583,7 @@ class InputDecoration {
         enabledBorder,
         border,
         enabled,
+        semanticCounterText,
       ),
     );
   }
@@ -2630,6 +2649,8 @@ class InputDecoration {
       description.add('border: $border');
     if (!enabled)
       description.add('enabled: false');
+    if (semanticCounterText != null)
+      description.add('semanticCounterText: $semanticCounterText');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -2931,7 +2952,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
     properties.add(new DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
     properties.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
-    properties.add(new DiagnosticsProperty<EdgeInsetsDirectional>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
     properties.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
     properties.add(new DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));

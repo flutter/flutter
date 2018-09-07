@@ -41,7 +41,7 @@ import 'theme_data.dart';
 /// member field called `_lights`.
 ///
 /// ```dart
-/// new SwitchListTile(
+/// SwitchListTile(
 ///   title: const Text('Lights'),
 ///   value: _lights,
 ///   onChanged: (bool value) { setState(() { _lights = value; }); },
@@ -106,14 +106,14 @@ class SwitchListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new SwitchListTile(
+  /// SwitchListTile(
   ///   value: _lights,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
   ///       _lights = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Lights'),
+  ///   title: Text('Lights'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;

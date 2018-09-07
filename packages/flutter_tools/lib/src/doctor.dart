@@ -71,7 +71,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
   @override
   List<Workflow> get workflows {
-    _workflows ??= <Workflow>[iosWorkflow, androidWorkflow];
+    if (_workflows == null) {
+      _workflows = <Workflow>[];
+
+      if (iosWorkflow.appliesToHostPlatform)
+        _workflows.add(iosWorkflow);
+
+      if (androidWorkflow.appliesToHostPlatform)
+        _workflows.add(androidWorkflow);
+    }
     return _workflows;
   }
 
@@ -131,7 +139,6 @@ class Doctor {
 
       if (result.type != ValidationType.installed)
         allGood = false;
-
     }
 
     if (!allGood) {
@@ -153,23 +160,18 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    final List<ValidatorTask> taskList = startValidatorTasks();
-
-    for (ValidatorTask validatorTask in taskList) {
+    for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-
       final Status status = new Status.withSpinner();
-      ValidationResult result;
-
       try {
-        result = await validatorTask.result;
+        await validatorTask.result;
       } catch (exception) {
         status.cancel();
         rethrow;
       }
-
       status.stop();
 
+      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -210,8 +212,6 @@ class Doctor {
     return doctorResult;
   }
 
-
-
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
   bool get canLaunchAnything {
@@ -219,10 +219,7 @@ class Doctor {
       return true;
     return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
   }
-
-
 }
-
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
 abstract class Workflow {

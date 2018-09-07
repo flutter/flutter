@@ -281,7 +281,7 @@ void main() {
       });
 
       test('without clearing timeline', () async {
-        final Timeline timeline = await driver.traceAction(() {
+        final Timeline timeline = await driver.traceAction(() async {
           log.add('action');
         }, retainPriorEvents: true);
 
@@ -295,7 +295,7 @@ void main() {
       });
 
       test('with clearing timeline', () async {
-        final Timeline timeline = await driver.traceAction(() {
+        final Timeline timeline = await driver.traceAction(() async {
           log.add('action');
         });
 
@@ -338,7 +338,7 @@ void main() {
           };
         });
 
-        final Timeline timeline = await driver.traceAction(() {
+        final Timeline timeline = await driver.traceAction(() async {
           actionCalled = true;
         },
         streams: const <TimelineStream>[

@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder, defaultClipBehavior; // ignore: deprecated_member_use
+import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -50,6 +50,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer _previousSibling;
 
   /// Removes this layer from its parent layer's child list.
+  ///
+  /// This has no effect if the layer's parent is already null.
   @mustCallSuper
   void remove() {
     parent?._removeChild(this);
@@ -588,7 +590,11 @@ class OffsetLayer extends ContainerLayer {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
+    final Matrix4 transform = new Matrix4.translationValues(
+      (-bounds.left  - offset.dx) * pixelRatio,
+      (-bounds.top - offset.dy) * pixelRatio,
+      0.0,
+    );
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     addToScene(builder, Offset.zero);
@@ -970,7 +976,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,

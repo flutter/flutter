@@ -74,7 +74,7 @@ void main() {
 
     // check the colour of the icon - light mode
     checkIconColor(tester, 'Stock List', Colors.purple); // theme primary color
-    checkIconColor(tester, 'Account Balance', Colors.black26); // disabled
+    checkIconColor(tester, 'Account Balance', Colors.black38); // disabled
     checkIconColor(tester, 'About', Colors.black45); // enabled
 
     // switch to dark mode

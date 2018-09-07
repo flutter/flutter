@@ -40,8 +40,7 @@ class AnalysisServer {
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
     // This callback hookup can't throw.
-    _process.exitCode
-        .whenComplete(() => _process = null); // ignore: unawaited_futures
+    _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
     final Stream<String> errorStream =
         _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
@@ -201,7 +200,8 @@ class AnalysisError implements Comparable<AnalysisError> {
   String toString() {
     return '${severity.toLowerCase().padLeft(7)} $_separator '
         '$messageSentenceFragment $_separator '
-        '${fs.path.relative(file)}:$startLine:$startColumn';
+        '${fs.path.relative(file)}:$startLine:$startColumn $_separator '
+        '$code';
   }
 
   String toLegacyString() {

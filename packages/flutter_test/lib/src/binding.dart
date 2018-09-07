@@ -86,6 +86,7 @@ const Size _kDefaultTestViewportSize = Size(800.0, 600.0);
 abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        GestureBinding,
+       SemanticsBinding,
        RendererBinding,
        ServicesBinding,
        PaintingBinding,

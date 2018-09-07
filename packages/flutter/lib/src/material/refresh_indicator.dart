@@ -58,7 +58,7 @@ enum _RefreshIndicatorMode {
 /// settings its `physics` property to [AlwaysScrollableScrollPhysics]:
 ///
 /// ```dart
-/// new ListView(
+/// ListView(
 ///   physics: const AlwaysScrollableScrollPhysics(),
 ///   children: ...
 //  )
@@ -153,7 +153,6 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   @override
   void initState() {
     super.initState();
-
     _positionController = new AnimationController(vsync: this);
     _positionFactor = new Tween<double>(
       begin: 0.0,
