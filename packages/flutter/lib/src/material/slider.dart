@@ -148,7 +148,7 @@ class Slider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Slider(
+  /// Slider(
   ///   value: _duelCommandment.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
@@ -182,7 +182,7 @@ class Slider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Slider(
+  /// Slider(
   ///   value: _duelCommandment.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
@@ -214,7 +214,7 @@ class Slider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Slider(
+  /// Slider(
   ///   value: _duelCommandment.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
@@ -310,7 +310,7 @@ class Slider extends StatefulWidget {
   /// announce a value with a currency label.
   ///
   /// ```dart
-  /// new Slider(
+  /// Slider(
   ///   value: _dollars.toDouble(),
   ///   min: 20.0,
   ///   max: 330.0,

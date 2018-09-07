@@ -2586,11 +2586,11 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///   PngHome({Key key}) : super(key: key);
   ///
   ///   @override
-  ///   _PngHomeState createState() => new _PngHomeState();
+  ///   _PngHomeState createState() => _PngHomeState();
   /// }
   ///
   /// class _PngHomeState extends State<PngHome> {
-  ///   GlobalKey globalKey = new GlobalKey();
+  ///   GlobalKey globalKey = GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
   ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();

@@ -170,10 +170,10 @@ class RaisedButton extends StatelessWidget {
   /// for example:
   ///
   /// ```dart
-  ///  new RaisedButton(
+  ///  RaisedButton(
   ///    color: Colors.blue,
   ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
+  ///    child: Text('DEMO'),
   ///  ),
   /// ```
   ///

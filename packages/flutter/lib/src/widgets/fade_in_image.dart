@@ -52,10 +52,10 @@ import 'ticker_provider.dart';
 /// ## Sample code
 ///
 /// ```dart
-/// new FadeInImage(
+/// FadeInImage(
 ///   // here `bytes` is a Uint8List containing the bytes for the in-memory image
-///   placeholder: new MemoryImage(bytes),
-///   image: new NetworkImage('https://backend.example.com/image.png'),
+///   placeholder: MemoryImage(bytes),
+///   image: NetworkImage('https://backend.example.com/image.png'),
 /// )
 /// ```
 class FadeInImage extends StatefulWidget {

@@ -50,17 +50,17 @@ import 'material.dart';
 /// on it using [Ink], while still having ink effects over the yellow rectangle:
 ///
 /// ```dart
-/// new Material(
+/// Material(
 ///   color: Colors.teal[900],
-///   child: new Center(
-///     child: new Ink(
+///   child: Center(
+///     child: Ink(
 ///       color: Colors.yellow,
 ///       width: 200.0,
 ///       height: 100.0,
-///       child: new InkWell(
+///       child: InkWell(
 ///         onTap: () { /* ... */ },
-///         child: new Center(
-///           child: new Text('YELLOW'),
+///         child: Center(
+///           child: Text('YELLOW'),
 ///         )
 ///       ),
 ///     ),
@@ -72,21 +72,21 @@ import 'material.dart';
 /// widget with an [InkWell] above it:
 ///
 /// ```dart
-/// new Material(
+/// Material(
 ///   color: Colors.grey[800],
-///   child: new Center(
-///     child: new Ink.image(
-///       image: new AssetImage('cat.jpeg'),
+///   child: Center(
+///     child: Ink.image(
+///       image: AssetImage('cat.jpeg'),
 ///       fit: BoxFit.cover,
 ///       width: 300.0,
 ///       height: 200.0,
-///       child: new InkWell(
+///       child: InkWell(
 ///         onTap: () { /* ... */ },
-///         child: new Align(
+///         child: Align(
 ///           alignment: Alignment.topLeft,
-///           child: new Padding(
+///           child: Padding(
 ///             padding: const EdgeInsets.all(10.0),
-///             child: new Text('KITTEN', style: new TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+///             child: Text('KITTEN', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
 ///           ),
 ///         )
 ///       ),

@@ -22,12 +22,12 @@ import 'theme.dart';
 /// ## Sample code
 ///
 /// ```dart
-/// new Scaffold(
-///   bottomNavigationBar: new BottomAppBar(
+/// Scaffold(
+///   bottomNavigationBar: BottomAppBar(
 ///     color: Colors.white,
 ///     child: bottomAppBarContents,
 ///   ),
-///   floatingActionButton: new FloatingActionButton(onPressed: null),
+///   floatingActionButton: FloatingActionButton(onPressed: null),
 /// )
 /// ```
 ///

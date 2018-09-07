@@ -43,8 +43,8 @@ class RecordedInvocation {
 ///
 /// ```dart
 /// RenderBox box = tester.renderObject(find.text('ABC'));
-/// TestRecordingCanvas canvas = new TestRecordingCanvas();
-/// TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+/// TestRecordingCanvas canvas = TestRecordingCanvas();
+/// TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
 /// box.paint(context, Offset.zero);
 /// // Now test the expected canvas.invocations.
 /// ```

@@ -114,13 +114,13 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// `_lights` field:
 ///
 /// ```dart
-/// new GestureDetector(
+/// GestureDetector(
 ///   onTap: () {
 ///     setState(() { _lights = true; });
 ///   },
-///   child: new Container(
+///   child: Container(
 ///     color: Colors.yellow,
-///     child: new Text('TURN LIGHTS ON'),
+///     child: Text('TURN LIGHTS ON'),
 ///   ),
 /// )
 /// ```
@@ -450,10 +450,10 @@ class GestureDetector extends StatelessWidget {
 /// then displayed as the child of the gesture detector.
 ///
 /// ```dart
-/// new RawGestureDetector(
+/// RawGestureDetector(
 ///   gestures: <Type, GestureRecognizerFactory>{
-///     TapGestureRecognizer: new GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-///       () => new TapGestureRecognizer(),
+///     TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+///       () => TapGestureRecognizer(),
 ///       (TapGestureRecognizer instance) {
 ///         instance
 ///           ..onTapDown = (TapDownDetails details) { setState(() { _last = 'down'; }); }
@@ -463,7 +463,7 @@ class GestureDetector extends StatelessWidget {
 ///       },
 ///     ),
 ///   },
-///   child: new Container(width: 300.0, height: 300.0, color: Colors.yellow, child: new Text(_last)),
+///   child: Container(width: 300.0, height: 300.0, color: Colors.yellow, child: Text(_last)),
 /// )
 /// ```
 ///

@@ -24,9 +24,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// [Text] widget.
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'No, we need bold strokes. We need this plan.',
-///   style: new TextStyle(fontWeight: FontWeight.bold),
+///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 ///
@@ -36,9 +36,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// override which is implicitly mixed with the ambient [DefaultTextStyle].
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'Welcome to the present, we\'re running a real nation.',
-///   style: new TextStyle(fontStyle: FontStyle.italic),
+///   style: TextStyle(fontStyle: FontStyle.italic),
 /// )
 /// ```
 ///
@@ -52,24 +52,24 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// implicitly mixed with the parent [TextSpan]'s [TextSpan.style].
 ///
 /// If [color] is specified, [foreground] must be null and vice versa. [color] is
-/// treated as a shorthand for `new Paint()..color = color`.
+/// treated as a shorthand for `Paint()..color = color`.
 ///
 /// ```dart
-/// new RichText(
-///   text: new TextSpan(
+/// RichText(
+///   text: TextSpan(
 ///     style: DefaultTextStyle.of(context).style,
 ///     children: <TextSpan>[
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'You don\'t have the votes.\n',
-///         style: new TextStyle(color: Colors.black.withOpacity(0.6)),
+///         style: TextStyle(color: Colors.black.withOpacity(0.6)),
 ///       ),
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'You don\'t have the votes!\n',
-///         style: new TextStyle(color: Colors.black.withOpacity(0.8)),
+///         style: TextStyle(color: Colors.black.withOpacity(0.8)),
 ///       ),
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'You\'re gonna need congressional approval and you don\'t have the votes!\n',
-///         style: new TextStyle(color: Colors.black.withOpacity(1.0)),
+///         style: TextStyle(color: Colors.black.withOpacity(1.0)),
 ///       ),
 ///     ],
 ///   ),
@@ -82,7 +82,7 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// obtain a [TextStyle] that doubles the default font size.
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'These are wise words, enterprising men quote \'em.',
 ///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
 /// )
@@ -94,9 +94,9 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// height is set to 100 logical pixels, so that the text is very spaced out.
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: new TextStyle(height: 100.0),
+///   style: TextStyle(height: 100.0),
 /// )
 /// ```
 ///
@@ -109,20 +109,20 @@ const String _kColorForegroundWarning = 'Cannot provide both a color and a foreg
 /// does not automatically use the ambient [DefaultTextStyle].)
 ///
 /// ```dart
-/// new RichText(
-///   text: new TextSpan(
+/// RichText(
+///   text: TextSpan(
 ///     text: 'Don\'t tax the South ',
 ///     children: <TextSpan>[
-///       new TextSpan(
+///       TextSpan(
 ///         text: 'cuz',
-///         style: new TextStyle(
+///         style: TextStyle(
 ///           color: Colors.black,
 ///           decoration: TextDecoration.underline,
 ///           decorationColor: Colors.red,
 ///           decorationStyle: TextDecorationStyle.wavy,
 ///         ),
 ///       ),
-///       new TextSpan(
+///       TextSpan(
 ///         text: ' we got it made in the shade',
 ///       ),
 ///     ],
@@ -262,7 +262,7 @@ class TextStyle extends Diagnosticable {
   /// The color to use when painting the text.
   ///
   /// If [foreground] is specified, this value must be null. The [color] property
-  /// is shorthand for `new Paint()..color = color`.
+  /// is shorthand for `Paint()..color = color`.
   ///
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is
@@ -333,7 +333,7 @@ class TextStyle extends Diagnosticable {
   /// updates all the way through the framework.
   ///
   /// If [color] is specified, this value must be null. The [color] property
-  /// is shorthand for `new Paint()..color = color`.
+  /// is shorthand for `Paint()..color = color`.
   ///
   /// In [merge], [apply], and [lerp], conflicts between [color] and [foreground]
   /// specification are resolved in [foreground]'s favor - i.e. if [foreground] is

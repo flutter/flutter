@@ -196,9 +196,9 @@ class AnimatedList extends StatefulWidget {
 /// can refer to the [AnimatedList]'s state with a global key:
 ///
 /// ```dart
-/// GlobalKey<AnimatedListState> listKey = new GlobalKey<AnimatedListState>();
+/// GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 /// ...
-/// new AnimatedList(key: listKey, ...);
+/// AnimatedList(key: listKey, ...);
 /// ...
 /// listKey.currentState.insert(123);
 /// ```

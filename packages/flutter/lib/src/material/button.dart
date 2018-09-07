@@ -293,11 +293,11 @@ class MaterialButton extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  new MaterialButton(
-  ///    color: Colors.blue[500],
-  ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
-  ///  ),
+  /// MaterialButton(
+  ///   color: Colors.blue[500],
+  ///   onPressed: _handleTap,
+  ///   child: Text('DEMO'),
+  /// ),
   /// ```
   final Color color;
 

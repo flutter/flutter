@@ -19,7 +19,7 @@ part of material_animated_icons;
 /// ### Sample code
 ///
 /// ```dart
-/// new AnimatedIcon(
+/// AnimatedIcon(
 ///   icon: AnimatedIcons.menu_arrow,
 ///   progress: controller,
 ///   semanticLabel: 'Show menu',
