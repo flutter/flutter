@@ -289,4 +289,7 @@ class _FakeTicker implements Ticker {
 
   @override
   void unscheduleTick() {}
+
+  @override
+  String toString({bool debugIncludeStack = false}) => super.toString();
 }
