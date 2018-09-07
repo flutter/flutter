@@ -106,7 +106,7 @@ void main() {
     test('verify correct args with config', () async {
       const String addr = 'fe80::8eae:4cff:fef4:9247';
       const String config = '/this/that/this/and/uh';
-      runner = new SshCommandRunner.withProcessManager(
+      runner = SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: addr,
         sshConfigPath: config,

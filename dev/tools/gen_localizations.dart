@@ -201,7 +201,7 @@ String generateTranslationBundles() {
 /// See also:
 ///
 ///  * [getTranslation], whose documentation describes these values.
-final Set<String> kSupportedLanguages = new HashSet<String>.from(const <String>[
+final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ${languageCodes.map((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
@@ -234,7 +234,7 @@ GlobalMaterialLocalizations getTranslation(
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case '$language':
-      return new MaterialLocalization${camelCase(languageToLocales[language][0])}($arguments);''');
+      return MaterialLocalization${camelCase(languageToLocales[language][0])}($arguments);''');
     } else {
       output.writeln('''
     case '$language': {
@@ -246,11 +246,11 @@ GlobalMaterialLocalizations getTranslation(
         final String countryCode = localeName.substring(localeName.indexOf('_') + 1);
         output.writeln('''
         case '$countryCode':
-          return new MaterialLocalization${camelCase(localeName)}($arguments);''');
+          return MaterialLocalization${camelCase(localeName)}($arguments);''');
       }
       output.writeln('''
       }
-      return new MaterialLocalization${camelCase(language)}($arguments);
+      return MaterialLocalization${camelCase(language)}($arguments);
     }''');
     }
   }
