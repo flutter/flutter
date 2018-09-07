@@ -378,16 +378,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
 }
 
 /// Recognizes movement both horizontally and vertically.
-///
-/// See also:
-///
-///  * [ImmediateMultiDragGestureRecognizer], for a similar recognizer that
-///    tracks each touch point independently.
-///  * [DelayedMultiDragGestureRecognizer], for a similar recognizer that
-///    tracks each touch point independently, but that doesn't start until
-///    some time has passed.
 class MousePanGestureRecognizer extends DragGestureRecognizer {
-  /// Create a gesture recognizer for tracking movement on a plane.
+  /// Create a gesture recognizer for tracking mouse movement.
   MousePanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
@@ -400,7 +392,7 @@ class MousePanGestureRecognizer extends DragGestureRecognizer {
 
   @override
   bool get _hasSufficientPendingDragDeltaToAccept {
-    return _pendingDragOffset.distance > kPanSlop;
+    return _pendingDragOffset.distance > kMouseSlop;
   }
 
   @override

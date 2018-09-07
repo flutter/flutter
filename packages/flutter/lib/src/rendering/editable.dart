@@ -41,7 +41,7 @@ enum SelectionChangedCause {
   /// by accessibility tools (e.g. TalkBack on Android).
   keyboard,
 
-  ///
+  /// The user used the mouse to select text or change the location of the cursor
   mouse,
 }
 
@@ -348,8 +348,8 @@ class RenderEditable extends RenderBox {
       if (_baseOffset < newOffset) {
         onSelectionChanged(
           new TextSelection(
-              baseOffset: _baseOffset,
-              extentOffset: newOffset
+            baseOffset: _baseOffset,
+            extentOffset: newOffset
           ),
           this,
           SelectionChangedCause.keyboard,
@@ -357,8 +357,8 @@ class RenderEditable extends RenderBox {
       } else {
         onSelectionChanged(
           new TextSelection(
-              baseOffset: newOffset,
-              extentOffset: _baseOffset
+            baseOffset: newOffset,
+            extentOffset: _baseOffset
           ),
           this,
           SelectionChangedCause.keyboard,
@@ -375,9 +375,9 @@ class RenderEditable extends RenderBox {
       }
       onSelectionChanged(
         new TextSelection.fromPosition(
-            new TextPosition(
-                offset: newOffset
-            )
+          new TextPosition(
+            offset: newOffset
+          )
         ),
         this,
         SelectionChangedCause.keyboard,
