@@ -69,6 +69,7 @@ bool CompositorContext::ScopedFrame::Raster(flow::LayerTree& layer_tree,
 
 void CompositorContext::OnGrContextCreated() {
   texture_registry_.OnGrContextCreated();
+  raster_cache_.Clear();
 }
 
 void CompositorContext::OnGrContextDestroyed() {
