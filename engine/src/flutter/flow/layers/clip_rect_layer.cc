@@ -41,8 +41,8 @@ void ClipRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRectLayer::Paint");
   FML_DCHECK(needs_painting());
 
-  SkAutoCanvasRestore save(&context.canvas, clip_behavior_ != Clip::hardEdge);
-  context.canvas.clipRect(paint_bounds());
+  SkAutoCanvasRestore save(&context.canvas, true);
+  context.canvas.clipRect(paint_bounds(), clip_behavior_ != Clip::hardEdge);
   if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
     context.canvas.saveLayer(paint_bounds(), nullptr);
   }
