@@ -101,7 +101,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       }
       // skip node if it is touching the edge of the screen, since it might
       // be partially scrolled offscreen.
-      const delta = 0.001;
+      const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
         || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
