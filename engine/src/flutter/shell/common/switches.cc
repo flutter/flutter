@@ -170,9 +170,6 @@ blink::Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
                               &settings.assets_path);
 
-  command_line.GetOptionValue(FlagForSwitch(Switch::Snapshot),
-                              &settings.script_snapshot_path);
-
   command_line.GetOptionValue(FlagForSwitch(Switch::MainDartFile),
                               &settings.main_dart_file_path);
 
