@@ -1,4 +1,4 @@
-Signature: da77c336d1e2756b2cca2e2d00f2d741
+Signature: fbcaf0eca04aa4bfacf6dcc71a919be3
 
 UNUSED LICENSES:
 
@@ -5455,12 +5455,14 @@ FILE: ../../../third_party/dart/runtime/include/dart_embedder_api.h
 FILE: ../../../third_party/dart/runtime/vm/base64.cc
 FILE: ../../../third_party/dart/runtime/vm/base64.h
 FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
+FILE: ../../../third_party/dart/runtime/vm/code_patcher_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
@@ -5478,8 +5480,11 @@ FILE: ../../../third_party/dart/runtime/vm/constants_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
 FILE: ../../../third_party/dart/runtime/vm/hash.h
+FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.cc
+FILE: ../../../third_party/dart/runtime/vm/instructions_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/interpreter.cc
 FILE: ../../../third_party/dart/runtime/vm/interpreter.h
+FILE: ../../../third_party/dart/runtime/vm/interpreter_unsupported.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_frame_kbc.h
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
