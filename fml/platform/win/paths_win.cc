@@ -5,6 +5,7 @@
 #include "flutter/fml/paths.h"
 
 #include <windows.h>
+#include <algorithm>
 
 #include "flutter/fml/paths.h"
 
@@ -12,6 +13,9 @@ namespace fml {
 namespace paths {
 
 namespace {
+
+constexpr char kFileURLPrefix[] = "file:///";
+constexpr size_t kFileURLPrefixLength = sizeof(kFileURLPrefix) - 1;
 
 size_t RootLength(const std::string& path) {
   if (path.size() == 0)
@@ -75,6 +79,15 @@ std::string GetDirectoryName(const std::string& path) {
   if (separator == std::string::npos)
     return std::string();
   return path.substr(0, separator);
+}
+
+std::string FromURI(const std::string& uri) {
+  if (uri.substr(0, kFileURLPrefixLength) != kFileURLPrefix)
+    return uri;
+
+  std::string file_path = uri.substr(kFileURLPrefixLength);
+  std::replace(file_path.begin(), file_path.end(), '/', '\\');
+  return SanitizeURIEscapedCharacters(file_path);
 }
 
 }  // namespace paths

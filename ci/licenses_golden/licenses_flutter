@@ -481,6 +481,7 @@ LIBRARY: engine
 ORIGIN: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
+FILE: ../../../flutter/fml/paths_unittests.cc
 FILE: ../../../flutter/lib/ui/isolate_name_server.dart
 FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
 FILE: ../../../flutter/lib/ui/painting/image_encoding.h

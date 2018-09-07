@@ -166,6 +166,7 @@ executable("fml_unittests") {
     "memory/weak_ptr_unittest.cc",
     "message_loop_unittests.cc",
     "message_unittests.cc",
+    "paths_unittests.cc",
     "string_view_unittest.cc",
     "synchronization/thread_annotations_unittest.cc",
     "synchronization/thread_checker_unittest.cc",
