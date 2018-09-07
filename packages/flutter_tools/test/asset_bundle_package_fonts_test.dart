@@ -6,15 +6,26 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/pubspec_schema.dart';
 
 void main() {
+  String fixPath(String path) {
+    // The in-memory file system is strict about slashes on Windows being the
+    // correct way so until https://github.com/google/file.dart/issues/112 is
+    // fixed we fix them here.
+    // TODO(dantup): Remove this function once the above issue is fixed and
+    // rolls into Flutter.
+    return path?.replaceAll('/', fs.path.separator);
+  }
   void writePubspecFile(String path, String name, {String fontsSection}) {
     if (fontsSection == null) {
       fontsSection = '';
@@ -26,7 +37,7 @@ $fontsSection
 ''';
     }
 
-    fs.file(path)
+    fs.file(fixPath(path))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: $name
@@ -84,30 +95,26 @@ $fontsSection
   }
 
   void writeFontAsset(String path, String font) {
-    fs.file('$path$font')
+    fs.file(fixPath('$path$font'))
       ..createSync(recursive: true)
       ..writeAsStringSync(font);
   }
 
-  // These tests do not use a memory file system because we want to ensure that
-  // asset bundles work correctly on Windows and Posix systems.
-  Directory tempDir;
-  Directory oldCurrentDir;
-
-  setUp(() async {
-    tempDir = fs.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
-    oldCurrentDir = fs.currentDirectory;
-    fs.currentDirectory = tempDir;
-  });
-
-  tearDown(() {
-    fs.currentDirectory = oldCurrentDir;
-    tryToDelete(tempDir);
-  });
-
   group('AssetBundle fonts from packages', () {
+    FileSystem testFileSystem;
+
+    setUp(() async {
+      testFileSystem = new MemoryFileSystem(
+        style: platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
+      );
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+    });
+
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -117,10 +124,13 @@ $fontsSection
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       expect(bundle.entries.containsKey('FontManifest.json'), isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('App font uses font file from package', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -142,10 +152,13 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -171,10 +184,13 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('App uses package font with own font file', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -201,10 +217,13 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('App uses package font with font file from another package', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
@@ -232,10 +251,13 @@ $fontsSection
         <String>['test_package2'],
         expectedFontManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('App uses package font with properties and own font file', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -264,10 +286,13 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
 
     testUsingContext('App uses local font and package font with own font file.', () async {
       establishFlutterRoot();
+      writeEmptySchemaFile(fs);
 
       const String fontsSection = '''
        - family: foo
@@ -300,6 +325,8 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
     });
   });
 }

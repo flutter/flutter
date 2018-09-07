@@ -28,7 +28,6 @@ class LifecycleObserver extends WidgetsBindingObserver {
 }
 
 Future<void> main() async {
-  MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   runApp(const GalleryApp());
   await endOfAnimation();
   await new Future<Null>.delayed(const Duration(milliseconds: 50));

@@ -241,8 +241,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'name': p.name,
     'prefix': p.iosPrefix,
     'class': p.pluginClass,
-  }).
-  toList();
+  }).toList();
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': iosPlugins,
   };
@@ -279,23 +278,34 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   }
 }
 
-/// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
-Future<void> injectPlugins(FlutterProject project) async {
+/// Rewrites the `.flutter-plugins` file of [project] based on the plugin
+/// dependencies declared in `pubspec.yaml`.
+///
+/// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
+void refreshPluginsList(FlutterProject project) {
   final List<Plugin> plugins = findPlugins(project);
   final bool changed = _writeFlutterPluginsList(project, plugins);
+  if (changed)
+    cocoaPods.invalidatePodInstallOutput(project.ios);
+}
+
+/// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
+///
+/// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
+Future<void> injectPlugins(FlutterProject project) async {
+  final List<Plugin> plugins = findPlugins(project);
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
-
-  if (project.ios.directory.existsSync()) {
+  if (!project.isModule && project.ios.directory.existsSync()) {
     final CocoaPods cocoaPods = new CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(project.ios);
-    if (changed)
-      cocoaPods.invalidatePodInstallOutput(project.ios);
   }
 }
 
 /// Returns whether the specified Flutter [project] has any plugin dependencies.
+///
+/// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
   return _readFlutterPluginsList(project) != null;
 }

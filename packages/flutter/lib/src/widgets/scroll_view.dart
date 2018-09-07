@@ -50,7 +50,8 @@ abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  ScrollView({
+  ScrollView({ // ignore: prefer_const_constructors_in_immutables
+               // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -227,8 +228,8 @@ abstract class ScrollView extends StatelessWidget {
     final AxisDirection axisDirection = getDirection(context);
 
     final ScrollController scrollController = primary
-        ? PrimaryScrollController.of(context)
-        : controller;
+      ? PrimaryScrollController.of(context)
+      : controller;
     final Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
@@ -856,7 +857,7 @@ class ListView extends BoxScrollView {
          physics: physics,
          shrinkWrap: shrinkWrap,
          padding: padding,
-        cacheExtent: cacheExtent,
+         cacheExtent: cacheExtent,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll

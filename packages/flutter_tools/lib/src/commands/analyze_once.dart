@@ -73,7 +73,10 @@ class AnalyzeOnce extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(sdkPath, directories.toList());
+    final AnalysisServer server = new AnalysisServer(
+      sdkPath,
+      directories.toList(),
+    );
 
     StreamSubscription<bool> subscription;
     subscription = server.onAnalyzing.listen((bool isAnalyzing) {
@@ -88,7 +91,8 @@ class AnalyzeOnce extends AnalyzeBase {
     });
 
     await server.start();
-    server.onExit.then((int exitCode) {
+    // Completing the future in the callback can't fail.
+    server.onExit.then((int exitCode) { // ignore: unawaited_futures
       if (!analysisCompleter.isCompleted) {
         analysisCompleter.completeError('analysis server exited: $exitCode');
       }

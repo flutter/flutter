@@ -27,6 +27,7 @@ const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
   _kOptionAssetManifestOut,
+  _kOptionComponentName,
 ];
 
 Future<Null> main(List<String> args) {
@@ -89,10 +90,7 @@ Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String 
   final libfs.IOSink outFile = destFile.openWrite();
 
   for (String path in assets.entries.keys) {
-    outFile.write('data/$path=$outputBase/$path\n');
-    if (componentName != null && componentName.isNotEmpty) {
-      outFile.write('data/$componentName/$path=$outputBase/$path\n');
-    }
+    outFile.write('data/$componentName/$path=$outputBase/$path\n');
   }
   await outFile.flush();
   await outFile.close();

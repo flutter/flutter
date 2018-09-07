@@ -133,7 +133,7 @@ class CreateCommand extends FlutterCommand {
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
-      final Set<String> existingOrganizations = await project.organizationNames();
+      final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
       } else if (1 < existingOrganizations.length) {

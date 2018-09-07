@@ -13,8 +13,6 @@ import '../base/version.dart';
 const bool _includeInsiders = false;
 
 class VsCode {
-  static const String extensionIdentifier = 'Dart-Code.flutter';
-
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
       : this.version = version ?? Version.unknown {
 
@@ -51,6 +49,8 @@ class VsCode {
   final String extensionDirectory;
   final Version version;
   final String edition;
+
+  static const String extensionIdentifier = 'Dart-Code.flutter';
 
   bool _isValid = false;
   Version _extensionVersion;
@@ -118,7 +118,10 @@ class VsCode {
   // Windows:
   //   $programfiles(x86)\Microsoft VS Code
   //   $programfiles(x86)\Microsoft VS Code Insiders
-  // TODO: Confirm these are correct for 64bit
+  // User install:
+  //   $localappdata\Programs\Microsoft VS Code
+  //   $localappdata\Programs\Microsoft VS Code Insiders
+  // TODO(dantup): Confirm these are correct for 64bit
   //   $programfiles\Microsoft VS Code
   //   $programfiles\Microsoft VS Code Insiders
   // Windows Extensions:
@@ -127,12 +130,16 @@ class VsCode {
   static List<VsCode> _installedWindows() {
     final String progFiles86 = platform.environment['programfiles(x86)'];
     final String progFiles = platform.environment['programfiles'];
+    final String localAppData = platform.environment['localappdata'];
 
     return _findInstalled(<_VsCodeInstallLocation>[
+      new _VsCodeInstallLocation(fs.path.join(localAppData, 'Programs\\Microsoft VS Code'), '.vscode'),
       new _VsCodeInstallLocation(fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
           edition: '32-bit edition'),
       new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
           edition: '64-bit edition'),
+      new _VsCodeInstallLocation(fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'), '.vscode-insiders',
+          isInsiders: true),
       new _VsCodeInstallLocation(fs.path.join(progFiles86 , 'Microsoft VS Code Insiders'), '.vscode-insiders',
           edition: '32-bit edition', isInsiders: true),
       new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode-insiders',
@@ -187,10 +194,10 @@ class VsCode {
 }
 
 class _VsCodeInstallLocation {
+  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
+    : this.isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;
   final bool isInsiders;
-  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : this.isInsiders = isInsiders ?? false;
 }

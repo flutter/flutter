@@ -578,4 +578,77 @@ void main() {
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
   });
+
+  group('AnimationBehavior', () {
+    test('Default values for constructor', () {
+      final AnimationController controller = new AnimationController(vsync: const TestVSync(disableAnimations: true));
+      expect(controller.animationBehavior, AnimationBehavior.normal);
+
+      final AnimationController repeating = new AnimationController.unbounded(vsync: const TestVSync(disableAnimations: true));
+      expect(repeating.animationBehavior, AnimationBehavior.preserve);
+    });
+
+    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () async {
+      final AnimationController controller = new AnimationController(
+        vsync: const TestVSync(disableAnimations: true),
+        animationBehavior: AnimationBehavior.preserve,
+      );
+
+      expect(controller.value, 0.0);
+      expect(controller.status, AnimationStatus.dismissed);
+
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 50));
+
+      expect(controller.value, 0.5);
+      expect(controller.status, AnimationStatus.forward);
+
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 150));
+
+      expect(controller.value, 1.0);
+      expect(controller.status, AnimationStatus.completed);
+    });
+
+    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () async {
+      final AnimationController controller = new AnimationController(
+        vsync: const TestVSync(disableAnimations: true),
+        animationBehavior: AnimationBehavior.normal,
+      );
+
+      expect(controller.value, 0.0);
+      expect(controller.status, AnimationStatus.dismissed);
+
+      controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(microseconds: 2500));
+
+      expect(controller.value, 0.5);
+      expect(controller.status, AnimationStatus.forward);
+
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 5, microseconds: 1000));
+
+      expect(controller.value, 1.0);
+      expect(controller.status, AnimationStatus.completed);
+    });
+
+    test('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', () {
+      final AnimationController controller = new AnimationController(
+        vsync: const TestVSync(disableAnimations: true),
+      );
+      final AnimationController fastController = new AnimationController(
+        vsync: const TestVSync(disableAnimations: true),
+      );
+
+      controller.fling(velocity: 1.0, animationBehavior: AnimationBehavior.preserve);
+      fastController.fling(velocity: 1.0, animationBehavior: AnimationBehavior.normal);
+      tick(const Duration(milliseconds: 0));
+      tick(const Duration(milliseconds: 50));
+
+      // We don't assert a specific faction that normal animation.
+      expect(controller.value < fastController.value, true);
+    });
+  });
 }

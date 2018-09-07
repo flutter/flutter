@@ -20,6 +20,7 @@ class TestServiceExtensionsBinding extends BindingBase
        GestureBinding,
        SchedulerBinding,
        PaintingBinding,
+       SemanticsBinding,
        RendererBinding,
        WidgetsBinding {
 

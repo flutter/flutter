@@ -188,6 +188,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void performRebuild() {
+    super.performRebuild();
     renderObject.triggerRebuild();
   }
 

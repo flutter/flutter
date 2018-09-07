@@ -46,6 +46,7 @@ void main() {
     expect(data.accessibleNavigation, false);
     expect(data.invertColors, false);
     expect(data.disableAnimations, false);
+    expect(data.boldText, false);
   });
 
   testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
@@ -60,6 +61,7 @@ void main() {
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
     expect(copied.disableAnimations, data.disableAnimations);
+    expect(copied.boldText, data.boldText);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -74,6 +76,7 @@ void main() {
       accessibleNavigation: true,
       invertColors: true,
       disableAnimations: true,
+      boldText: true,
     );
     expect(copied.size, const Size(3.14, 2.72));
     expect(copied.devicePixelRatio, 1.41);
@@ -84,6 +87,7 @@ void main() {
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);
     expect(copied.disableAnimations, true);
+    expect(copied.boldText, true);
   });
 
  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
@@ -106,6 +110,7 @@ void main() {
          accessibleNavigation: true,
          invertColors: true,
          disableAnimations: true,
+         boldText: true,
        ),
        child: new Builder(
          builder: (BuildContext context) {
@@ -136,6 +141,7 @@ void main() {
    expect(unpadded.accessibleNavigation, true);
    expect(unpadded.invertColors, true);
    expect(unpadded.disableAnimations, true);
+   expect(unpadded.boldText, true);
   });
 
   testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
@@ -158,6 +164,7 @@ void main() {
           accessibleNavigation: true,
           invertColors: true,
           disableAnimations: true,
+          boldText: true,
         ),
         child: new Builder(
           builder: (BuildContext context) {
@@ -188,6 +195,7 @@ void main() {
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);
     expect(unpadded.disableAnimations, true);
+    expect(unpadded.boldText, true);
   });
 
  testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
@@ -216,4 +224,31 @@ void main() {
    expect(outsideTextScaleFactor, 1.0);
    expect(insideTextScaleFactor, 4.0);
  });
+
+  testWidgets('MediaQuery.boldTextOverride', (WidgetTester tester) async {
+    bool outsideBoldTextOverride;
+    bool insideBoldTextOverride;
+
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          outsideBoldTextOverride = MediaQuery.boldTextOverride(context);
+          return new MediaQuery(
+            data: const MediaQueryData(
+              boldText: true,
+            ),
+            child: new Builder(
+              builder: (BuildContext context) {
+                insideBoldTextOverride = MediaQuery.boldTextOverride(context);
+                return new Container();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(outsideBoldTextOverride, false);
+    expect(insideBoldTextOverride, true);
+  });
 }

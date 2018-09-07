@@ -282,11 +282,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             ),
           ),
           new Expanded(
-            child: new _TappableWhileStatusIs(
-              AnimationStatus.dismissed,
-              controller: _controller,
+            child: new Visibility(
               child: widget.backLayer,
-            ),
+              visible: _controller.status != AnimationStatus.completed,
+              maintainState: true,
+            )
           ),
         ],
       ),
@@ -304,6 +304,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                   borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
                 ),
               ),
+              clipBehavior: Clip.antiAlias,
               child: child,
             );
           },

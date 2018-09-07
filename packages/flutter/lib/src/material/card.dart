@@ -60,12 +60,15 @@ import 'theme.dart';
 ///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
+  ///
+  /// The [clipBehavior] argument must not be null.
   const Card({
     Key key,
     this.color,
     this.elevation,
     this.shape,
     this.margin = const EdgeInsets.all(4.0),
+    this.clipBehavior = Clip.none,
     this.child,
     this.semanticContainer = true,
   }) : super(key: key);
@@ -92,6 +95,9 @@ class Card extends StatelessWidget {
   /// The default shape is a [RoundedRectangleBorder] with a circular corner
   /// radius of 4.0.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
@@ -133,6 +139,7 @@ class Card extends StatelessWidget {
           shape: shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
+          clipBehavior: clipBehavior,
           child: child,
         ),
       ),
