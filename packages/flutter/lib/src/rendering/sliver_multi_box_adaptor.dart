@@ -212,15 +212,15 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     if (after != null) {
       final SliverMultiBoxAdaptorParentData afterParentData = after.parentData;
       final int index = afterParentData.index;
-      if (_keepAliveBucket.containsKey(index)) {
-        RenderBox anchor = firstChild;
+      if (afterParentData._keptAlive) {
         assert(after == _keepAliveBucket[index]);
+        RenderBox anchor = firstChild;
         dropChild(after);
         after.parentData = afterParentData;
         if (indexOf(anchor) > afterParentData.index) {
           anchor = null;
         } else {
-          while (indexOf(anchor) < indexOf(after) - 1) {
+          while (indexOf(anchor) < afterParentData.index - 1) {
             anchor = childAfter(anchor);
           }
         }
