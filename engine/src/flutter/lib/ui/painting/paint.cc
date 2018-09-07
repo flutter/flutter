@@ -30,6 +30,7 @@ constexpr int kColorFilterBlendModeIndex = 11;
 constexpr int kMaskFilterIndex = 12;
 constexpr int kMaskFilterBlurStyleIndex = 13;
 constexpr int kMaskFilterSigmaIndex = 14;
+constexpr int kInvertColorIndex = 15;
 constexpr size_t kDataByteCount = 75;  // 4 * (last index + 1)
 
 // Indices for objects.
@@ -46,6 +47,16 @@ constexpr uint32_t kBlendModeDefault =
 // Must be kept in sync with the default in painting.dart, and also with the
 // default SkPaintDefaults_MiterLimit in Skia (which is not in a public header).
 constexpr double kStrokeMiterLimitDefault = 4.0;
+
+// A color matrix which inverts colors.
+// clang-format off
+constexpr SkScalar invert_colors[20] = {
+  -1.0,    0,    0, 1.0, 0,
+     0, -1.0,    0, 1.0, 0,
+     0,    0, -1.0, 1.0, 0,
+   1.0,  1.0,  1.0, 1.0, 0
+};
+// clang-format on
 
 // Must be kept in sync with the MaskFilter private constants in painting.dart.
 enum MaskFilterType { Null, Blur };
@@ -116,7 +127,19 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
   if (filter_quality)
     paint_.setFilterQuality(static_cast<SkFilterQuality>(filter_quality));
 
-  if (uint_data[kColorFilterIndex]) {
+  if (uint_data[kColorFilterIndex] && uint_data[kInvertColorIndex]) {
+    SkColor color = uint_data[kColorFilterColorIndex];
+    SkBlendMode blend_mode =
+        static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);
+    sk_sp<SkColorFilter> color_filter =
+        SkColorFilter::MakeModeFilter(color, blend_mode);
+    sk_sp<SkColorFilter> invert_filter =
+        SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors);
+    paint_.setColorFilter(invert_filter->makeComposed(color_filter));
+  } else if (uint_data[kInvertColorIndex]) {
+    paint_.setColorFilter(
+        SkColorFilter::MakeMatrixFilterRowMajor255(invert_colors));
+  } else if (uint_data[kColorFilterIndex]) {
     SkColor color = uint_data[kColorFilterColorIndex];
     SkBlendMode blend_mode =
         static_cast<SkBlendMode>(uint_data[kColorFilterBlendModeIndex]);

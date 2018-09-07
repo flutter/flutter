@@ -1065,6 +1065,7 @@ class Paint {
   static const int _kMaskFilterIndex = 12;
   static const int _kMaskFilterBlurStyleIndex = 13;
   static const int _kMaskFilterSigmaIndex = 14;
+  static const int _kInvertColorIndex = 15;
 
   static const int _kIsAntiAliasOffset = _kIsAntiAliasIndex << 2;
   static const int _kColorOffset = _kColorIndex << 2;
@@ -1081,6 +1082,7 @@ class Paint {
   static const int _kMaskFilterOffset = _kMaskFilterIndex << 2;
   static const int _kMaskFilterBlurStyleOffset = _kMaskFilterBlurStyleIndex << 2;
   static const int _kMaskFilterSigmaOffset = _kMaskFilterSigmaIndex << 2;
+  static const int _kInvertColorOffset = _kInvertColorIndex << 2;
   // If you add more fields, remember to update _kDataByteCount.
   static const int _kDataByteCount = 75;
 
@@ -1363,6 +1365,18 @@ class Paint {
     }
   }
 
+  /// Whether the colors of the image are inverted when drawn.
+  ///
+  /// inverting the colors of an image applies a new color filter that will
+  /// be composed with any user provided color filters. This is primarily
+  /// used for implementing smart invert on iOS.
+  bool get invertColors {
+    return _data.getInt32(_kInvertColorOffset, _kFakeHostEndian) == 1;
+  }
+  set invertColors(bool value) {
+    _data.setInt32(_kInvertColorOffset, value ? 1 : 0, _kFakeHostEndian);
+  }
+
   @override
   String toString() {
     final StringBuffer result = new StringBuffer();
@@ -1411,8 +1425,12 @@ class Paint {
       result.write('${semicolon}filterQuality: $filterQuality');
       semicolon = '; ';
     }
-    if (shader != null)
+    if (shader != null) {
       result.write('${semicolon}shader: $shader');
+      semicolon = '; ';
+    }
+    if (invertColors)
+      result.write('${semicolon}invert: $invertColors');
     result.write(')');
     return result.toString();
   }
