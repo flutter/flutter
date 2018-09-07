@@ -83,7 +83,7 @@ class CupertinoSlider extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CupertinoSlider(
+  /// CupertinoSlider(
   ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
@@ -116,7 +116,7 @@ class CupertinoSlider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new CupertinoSlider(
+  /// CupertinoSlider(
   ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,
@@ -147,7 +147,7 @@ class CupertinoSlider extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new CupertinoSlider(
+  /// CupertinoSlider(
   ///   value: _cupertinoSliderValue.toDouble(),
   ///   min: 1.0,
   ///   max: 10.0,

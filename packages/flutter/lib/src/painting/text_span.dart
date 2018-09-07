@@ -32,9 +32,9 @@ import 'text_style.dart';
 /// The text "Hello world!", in black:
 ///
 /// ```dart
-/// new TextSpan(
+/// TextSpan(
 ///   text: 'Hello world!',
-///   style: new TextStyle(color: Colors.black),
+///   style: TextStyle(color: Colors.black),
 /// )
 /// ```
 ///
@@ -104,7 +104,7 @@ class TextSpan extends DiagnosticableTree {
   /// ```dart
   /// class BuzzingText extends StatefulWidget {
   ///   @override
-  ///   _BuzzingTextState createState() => new _BuzzingTextState();
+  ///   _BuzzingTextState createState() => _BuzzingTextState();
   /// }
   ///
   /// class _BuzzingTextState extends State<BuzzingText> {
@@ -113,7 +113,7 @@ class TextSpan extends DiagnosticableTree {
   ///   @override
   ///   void initState() {
   ///     super.initState();
-  ///     _longPressRecognizer = new LongPressGestureRecognizer()
+  ///     _longPressRecognizer = LongPressGestureRecognizer()
   ///       ..onLongPress = _handlePress;
   ///   }
   ///
@@ -129,21 +129,21 @@ class TextSpan extends DiagnosticableTree {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new RichText(
-  ///       text: new TextSpan(
+  ///     return RichText(
+  ///       text: TextSpan(
   ///         text: 'Can you ',
-  ///         style: new TextStyle(color: Colors.black),
+  ///         style: TextStyle(color: Colors.black),
   ///         children: <TextSpan>[
-  ///           new TextSpan(
+  ///           TextSpan(
   ///             text: 'find the',
-  ///             style: new TextStyle(
+  ///             style: TextStyle(
   ///               color: Colors.green,
   ///               decoration: TextDecoration.underline,
   ///               decorationStyle: TextDecorationStyle.wavy,
   ///             ),
   ///             recognizer: _longPressRecognizer,
   ///           ),
-  ///           new TextSpan(
+  ///           TextSpan(
   ///             text: ' secret?',
   ///           ),
   ///         ],

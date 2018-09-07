@@ -508,7 +508,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Container(color: const Color(0xFF2DBD3A));
+///     return Container(color: const Color(0xFF2DBD3A));
 ///   }
 /// }
 /// ```
@@ -531,7 +531,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Container(color: color, child: child);
+///     return Container(color: color, child: child);
 ///   }
 /// }
 /// ```
@@ -714,13 +714,13 @@ abstract class StatelessWidget extends Widget {
 ///   const YellowBird({ Key key }) : super(key: key);
 ///
 ///   @override
-///   _YellowBirdState createState() => new _YellowBirdState();
+///   _YellowBirdState createState() => _YellowBirdState();
 /// }
 ///
 /// class _YellowBirdState extends State<YellowBird> {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Container(color: const Color(0xFFFFE306));
+///     return Container(color: const Color(0xFFFFE306));
 ///   }
 /// }
 /// ```
@@ -745,7 +745,7 @@ abstract class StatelessWidget extends Widget {
 ///
 ///   final Widget child;
 ///
-///   _BirdState createState() => new _BirdState();
+///   _BirdState createState() => _BirdState();
 /// }
 ///
 /// class _BirdState extends State<Bird> {
@@ -757,9 +757,9 @@ abstract class StatelessWidget extends Widget {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Container(
+///     return Container(
 ///       color: widget.color,
-///       transform: new Matrix4.diagonal3Values(_size, _size, 1.0),
+///       transform: Matrix4.diagonal3Values(_size, _size, 1.0),
 ///       child: widget.child,
 ///     );
 ///   }
@@ -795,7 +795,7 @@ abstract class StatefulWidget extends Widget {
   ///
   /// ```dart
   /// @override
-  /// _MyState createState() => new _MyState();
+  /// _MyState createState() => _MyState();
   /// ```
   ///
   /// The framework can call this method multiple times over the lifetime of
@@ -1082,7 +1082,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///   });
   ///   Directory directory = await getApplicationDocumentsDirectory();
   ///   final String dirName = directory.path;
-  ///   await new File('$dir/counter.txt').writeAsString('$_counter');
+  ///   await File('$dir/counter.txt').writeAsString('$_counter');
   ///   return null;
   /// }
   /// ```
@@ -1790,16 +1790,16 @@ typedef void ElementVisitor(Element element);
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     // here, Scaffold.of(context) returns null
-///     return new Scaffold(
-///       appBar: new AppBar(title: new Text('Demo')),
-///       body: new Builder(
+///     return Scaffold(
+///       appBar: AppBar(title: Text('Demo')),
+///       body: Builder(
 ///         builder: (BuildContext context) {
-///           return new FlatButton(
-///             child: new Text('BUTTON'),
+///           return FlatButton(
+///             child: Text('BUTTON'),
 ///             onPressed: () {
 ///               // here, Scaffold.of(context) returns the locally created Scaffold
-///               Scaffold.of(context).showSnackBar(new SnackBar(
-///                 content: new Text('Hello.')
+///               Scaffold.of(context).showSnackBar(SnackBar(
+///                 content: Text('Hello.')
 ///               ));
 ///             }
 ///           );

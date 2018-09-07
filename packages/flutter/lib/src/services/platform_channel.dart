@@ -184,7 +184,7 @@ class MethodChannel {
   ///   final String artist;
   ///
   ///   static Song fromJson(dynamic json) {
-  ///     return new Song(json['id'], json['title'], json['artist']);
+  ///     return Song(json['id'], json['title'], json['artist']);
   ///   }
   /// }
   /// ```
@@ -200,7 +200,7 @@ class MethodChannel {
   ///         break;
   ///       case "getSongs":
   ///         final List<MusicApi.Track> tracks = MusicApi.getTracks();
-  ///         final List<Object> json = new ArrayList<>(tracks.size());
+  ///         final List<Object> json = ArrayList<>(tracks.size());
   ///         for (MusicApi.Track track : tracks) {
   ///           json.add(track.toJson()); // Map<String, Object> entries
   ///         }

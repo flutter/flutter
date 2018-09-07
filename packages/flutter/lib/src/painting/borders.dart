@@ -34,15 +34,15 @@ enum BorderStyle {
 /// it that is a darker shade of blue.
 ///
 /// ```dart
-/// new Container(
-///   padding: new EdgeInsets.all(8.0),
-///   decoration: new BoxDecoration(
-///     border: new Border(
-///       top: new BorderSide(width: 16.0, color: Colors.lightBlue.shade50),
-///       bottom: new BorderSide(width: 16.0, color: Colors.lightBlue.shade900),
+/// Container(
+///   padding: EdgeInsets.all(8.0),
+///   decoration: BoxDecoration(
+///     border: Border(
+///       top: BorderSide(width: 16.0, color: Colors.lightBlue.shade50),
+///       bottom: BorderSide(width: 16.0, color: Colors.lightBlue.shade900),
 ///     ),
 ///   ),
-///   child: new Text('Flutter in the sky', textAlign: TextAlign.center),
+///   child: Text('Flutter in the sky', textAlign: TextAlign.center),
 /// )
 /// ```
 ///

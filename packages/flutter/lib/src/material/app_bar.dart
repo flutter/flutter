@@ -91,21 +91,21 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// ## Sample code
 ///
 /// ```dart
-/// new AppBar(
-///   title: new Text('My Fancy Dress'),
+/// AppBar(
+///   title: Text('My Fancy Dress'),
 ///   actions: <Widget>[
-///     new IconButton(
-///       icon: new Icon(Icons.playlist_play),
+///     IconButton(
+///       icon: Icon(Icons.playlist_play),
 ///       tooltip: 'Air it',
 ///       onPressed: _airDress,
 ///     ),
-///     new IconButton(
-///       icon: new Icon(Icons.playlist_add),
+///     IconButton(
+///       icon: Icon(Icons.playlist_add),
 ///       tooltip: 'Restitch it',
 ///       onPressed: _restitchDress,
 ///     ),
-///     new IconButton(
-///       icon: new Icon(Icons.playlist_add_check),
+///     IconButton(
+///       icon: Icon(Icons.playlist_add_check),
 ///       tooltip: 'Repair it',
 ///       onPressed: _repairDress,
 ///     ),
@@ -191,12 +191,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Scaffold(
-  ///   appBar: new AppBar(
-  ///     title: new Text('Hello World'),
+  /// Scaffold(
+  ///   appBar: AppBar(
+  ///     title: Text('Hello World'),
   ///     actions: <Widget>[
-  ///       new IconButton(
-  ///         icon: new Icon(Icons.shopping_cart),
+  ///       IconButton(
+  ///         icon: Icon(Icons.shopping_cart),
   ///         tooltip: 'Open shopping cart',
   ///         onPressed: () {
   ///           // ...
@@ -693,13 +693,13 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [CustomScrollView.slivers] list:
 ///
 /// ```dart
-/// new SliverAppBar(
+/// SliverAppBar(
 ///   expandedHeight: 150.0,
 ///   flexibleSpace: const FlexibleSpaceBar(
 ///     title: Text('Available seats'),
 ///   ),
 ///   actions: <Widget>[
-///     new IconButton(
+///     IconButton(
 ///       icon: const Icon(Icons.add_circle),
 ///       tooltip: 'Add new entry',
 ///       onPressed: () { /* ... */ },
@@ -788,15 +788,15 @@ class SliverAppBar extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Scaffold(
-  ///   body: new CustomScrollView(
+  /// Scaffold(
+  ///   body: CustomScrollView(
   ///     primary: true,
   ///     slivers: <Widget>[
-  ///       new SliverAppBar(
-  ///         title: new Text('Hello World'),
+  ///       SliverAppBar(
+  ///         title: Text('Hello World'),
   ///         actions: <Widget>[
-  ///           new IconButton(
-  ///             icon: new Icon(Icons.shopping_cart),
+  ///           IconButton(
+  ///             icon: Icon(Icons.shopping_cart),
   ///             tooltip: 'Open shopping cart',
   ///             onPressed: () {
   ///               // handle the press

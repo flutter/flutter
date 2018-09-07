@@ -72,7 +72,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   @override
 ///   void paint(Canvas canvas, Size size) {
 ///     var rect = Offset.zero & size;
-///     var gradient = new RadialGradient(
+///     var gradient = RadialGradient(
 ///       center: const Alignment(0.7, -0.6),
 ///       radius: 0.2,
 ///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
@@ -80,7 +80,7 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///     );
 ///     canvas.drawRect(
 ///       rect,
-///       new Paint()..shader = gradient.createShader(rect),
+///       Paint()..shader = gradient.createShader(rect),
 ///     );
 ///   }
 ///
@@ -93,11 +93,11 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///       // touch.
 ///       var rect = Offset.zero & size;
 ///       var width = size.shortestSide * 0.4;
-///       rect = const Alignment(0.8, -0.9).inscribe(new Size(width, width), rect);
+///       rect = const Alignment(0.8, -0.9).inscribe(Size(width, width), rect);
 ///       return [
-///         new CustomPainterSemantics(
+///         CustomPainterSemantics(
 ///           rect: rect,
-///           properties: new SemanticsProperties(
+///           properties: SemanticsProperties(
 ///             label: 'Sun',
 ///             textDirection: TextDirection.ltr,
 ///           ),

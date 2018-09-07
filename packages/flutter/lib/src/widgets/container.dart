@@ -22,9 +22,9 @@ import 'image.dart';
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
 /// ```dart
-/// new DecoratedBox(
-///   decoration: new BoxDecoration(
-///     gradient: new RadialGradient(
+/// DecoratedBox(
+///   decoration: BoxDecoration(
+///     gradient: RadialGradient(
 ///       center: const Alignment(-0.5, -0.6),
 ///       radius: 0.15,
 ///       colors: <Color>[
@@ -183,8 +183,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// neighboring widgets:
 ///
 /// ```dart
-/// new Center(
-///   child: new Container(
+/// Center(
+///   child: Container(
 ///     margin: const EdgeInsets.all(10.0),
 ///     color: const Color(0xFF00FF00),
 ///     width: 48.0,
@@ -203,21 +203,21 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// entire contraption to complete the effect.
 ///
 /// ```dart
-/// new Container(
-///   constraints: new BoxConstraints.expand(
+/// Container(
+///   constraints: BoxConstraints.expand(
 ///     height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.teal.shade700,
 ///   alignment: Alignment.center,
-///   child: new Text('Hello World', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
-///   foregroundDecoration: new BoxDecoration(
-///     image: new DecorationImage(
-///       image: new NetworkImage('https://www.example.com/images/frame.png'),
-///       centerSlice: new Rect.fromLTRB(270.0, 180.0, 1360.0, 730.0),
+///   child: Text('Hello World', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
+///   foregroundDecoration: BoxDecoration(
+///     image: DecorationImage(
+///       image: NetworkImage('https://www.example.com/images/frame.png'),
+///       centerSlice: Rect.fromLTRB(270.0, 180.0, 1360.0, 730.0),
 ///     ),
 ///   ),
-///   transform: new Matrix4.rotationZ(0.1),
+///   transform: Matrix4.rotationZ(0.1),
 /// )
 /// ```
 ///

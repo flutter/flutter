@@ -388,7 +388,7 @@ class NavigatorObserver {
 ///
 /// ```dart
 /// void main() {
-///   runApp(new MaterialApp(home: new MyAppHome()));
+///   runApp(MaterialApp(home: MyAppHome()));
 /// }
 /// ```
 ///
@@ -397,13 +397,13 @@ class NavigatorObserver {
 /// want to appear on the screen. For example:
 ///
 /// ```dart
-/// Navigator.push(context, new MaterialPageRoute<void>(
+/// Navigator.push(context, MaterialPageRoute<void>(
 ///   builder: (BuildContext context) {
-///     return new Scaffold(
-///       appBar: new AppBar(title: new Text('My Page')),
-///       body: new Center(
-///         child: new FlatButton(
-///           child: new Text('POP'),
+///     return Scaffold(
+///       appBar: AppBar(title: Text('My Page')),
+///       body: Center(
+///         child: FlatButton(
+///           child: Text('POP'),
 ///           onPressed: () {
 ///             Navigator.pop(context);
 ///           },
@@ -445,12 +445,12 @@ class NavigatorObserver {
 ///
 /// ```dart
 /// void main() {
-///   runApp(new MaterialApp(
-///     home: new MyAppHome(), // becomes the route named '/'
+///   runApp(MaterialApp(
+///     home: MyAppHome(), // becomes the route named '/'
 ///     routes: <String, WidgetBuilder> {
-///       '/a': (BuildContext context) => new MyPage(title: 'page A'),
-///       '/b': (BuildContext context) => new MyPage(title: 'page B'),
-///       '/c': (BuildContext context) => new MyPage(title: 'page C'),
+///       '/a': (BuildContext context) => MyPage(title: 'page A'),
+///       '/b': (BuildContext context) => MyPage(title: 'page B'),
+///       '/c': (BuildContext context) => MyPage(title: 'page C'),
 ///     },
 ///   ));
 /// }
@@ -475,11 +475,11 @@ class NavigatorObserver {
 /// operation we could `await` the result of [Navigator.push]:
 ///
 /// ```dart
-/// bool value = await Navigator.push(context, new MaterialPageRoute<bool>(
+/// bool value = await Navigator.push(context, MaterialPageRoute<bool>(
 ///   builder: (BuildContext context) {
-///     return new Center(
-///       child: new GestureDetector(
-///         child: new Text('OK'),
+///     return Center(
+///       child: GestureDetector(
+///         child: Text('OK'),
 ///         onTap: () { Navigator.pop(context, true); }
 ///       ),
 ///     );
@@ -527,16 +527,16 @@ class NavigatorObserver {
 /// screen because it specifies `opaque: false`, just as a popup route does.
 ///
 /// ```dart
-/// Navigator.push(context, new PageRouteBuilder(
+/// Navigator.push(context, PageRouteBuilder(
 ///   opaque: false,
 ///   pageBuilder: (BuildContext context, _, __) {
-///     return new Center(child: new Text('My PageRoute'));
+///     return Center(child: Text('My PageRoute'));
 ///   },
 ///   transitionsBuilder: (___, Animation<double> animation, ____, Widget child) {
-///     return new FadeTransition(
+///     return FadeTransition(
 ///       opacity: animation,
-///       child: new RotationTransition(
-///         turns: new Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+///       child: RotationTransition(
+///         turns: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
 ///         child: child,
 ///       ),
 ///     );
@@ -588,13 +588,13 @@ class NavigatorObserver {
 /// class MyApp extends StatelessWidget {
 ///  @override
 ///  Widget build(BuildContext context) {
-///    return new MaterialApp(
+///    return MaterialApp(
 ///      // ...some parameters omitted...
 ///      // MaterialApp contains our top-level Navigator
 ///      initialRoute: '/',
 ///      routes: {
-///        '/': (BuildContext context) => new HomePage(),
-///        '/signup': (BuildContext context) => new SignUpPage(),
+///        '/': (BuildContext context) => HomePage(),
+///        '/signup': (BuildContext context) => SignUpPage(),
 ///      },
 ///    );
 ///  }
@@ -605,7 +605,7 @@ class NavigatorObserver {
 ///  Widget build(BuildContext context) {
 ///    // SignUpPage builds its own Navigator which ends up being a nested
 ///    // Navigator in our app.
-///    return new Navigator(
+///    return Navigator(
 ///      initialRoute: 'signup/personal_info',
 ///      onGenerateRoute: (RouteSettings settings) {
 ///        WidgetBuilder builder;
@@ -613,12 +613,12 @@ class NavigatorObserver {
 ///          case 'signup/personal_info':
 ///            // Assume CollectPersonalInfoPage collects personal info and then
 ///            // navigates to 'signup/choose_credentials'.
-///            builder = (BuildContext _) => new CollectPersonalInfoPage();
+///            builder = (BuildContext _) => CollectPersonalInfoPage();
 ///            break;
 ///          case 'signup/choose_credentials':
 ///            // Assume ChooseCredentialsPage collects new credentials and then
 ///            // invokes 'onSignupComplete()'.
-///            builder = (BuildContext _) => new ChooseCredentialsPage(
+///            builder = (BuildContext _) => ChooseCredentialsPage(
 ///              onSignupComplete: () {
 ///                // Referencing Navigator.of(context) from here refers to the
 ///                // top level Navigator because SignUpPage is above the
@@ -630,9 +630,9 @@ class NavigatorObserver {
 ///            );
 ///            break;
 ///          default:
-///            throw new Exception('Invalid route: ${settings.name}');
+///            throw Exception('Invalid route: ${settings.name}');
 ///        }
-///        return new MaterialPageRoute(builder: builder, settings: settings);
+///        return MaterialPageRoute(builder: builder, settings: settings);
 ///      },
 ///    );
 ///  }
@@ -901,7 +901,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _openMyPage() {
-  ///   Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) => new MyPage()));
+  ///   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -944,7 +944,7 @@ class Navigator extends StatefulWidget {
   /// ```dart
   /// void _completeLogin() {
   ///   Navigator.pushReplacement(
-  ///       context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///       context, MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -995,7 +995,7 @@ class Navigator extends StatefulWidget {
   /// void _finishAccountCreation() {
   ///   Navigator.pushAndRemoveUntil(
   ///     context,
-  ///     new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()),
+  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
@@ -1523,7 +1523,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _openPage() {
-  ///   navigator.push(new MaterialPageRoute(builder: (BuildContext context) => new MyPage()));
+  ///   navigator.push(MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1562,7 +1562,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// void _doOpenPage() {
   ///   navigator.pushReplacement(
-  ///       new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///       MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1613,7 +1613,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// void _resetAndOpenPage() {
   ///   navigator.pushAndRemoveUntil(
-  ///     new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()),
+  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }

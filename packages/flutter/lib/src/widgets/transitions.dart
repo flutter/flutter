@@ -761,7 +761,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// ```dart
 /// class Spinner extends StatefulWidget {
 ///   @override
-///   _SpinnerState createState() => new _SpinnerState();
+///   _SpinnerState createState() => _SpinnerState();
 /// }
 ///
 /// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
@@ -770,7 +770,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     _controller = new AnimationController(
+///     _controller = AnimationController(
 ///       duration: const Duration(seconds: 10),
 ///       vsync: this,
 ///     )..repeat();
@@ -784,11 +784,11 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new AnimatedBuilder(
+///     return AnimatedBuilder(
 ///       animation: _controller,
-///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
+///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
 ///       builder: (BuildContext context, Widget child) {
-///         return new Transform.rotate(
+///         return Transform.rotate(
 ///           angle: _controller.value * 2.0 * math.pi,
 ///           child: child,
 ///         );

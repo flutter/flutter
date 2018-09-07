@@ -17,8 +17,8 @@ import 'theme.dart';
 /// Here is an example of using a [Card] widget.
 ///
 /// ```dart
-/// new Card(
-///   child: new Column(
+/// Card(
+///   child: Column(
 ///     mainAxisSize: MainAxisSize.min,
 ///     children: <Widget>[
 ///       const ListTile(
@@ -26,14 +26,14 @@ import 'theme.dart';
 ///         title: Text('The Enchanted Nightingale'),
 ///         subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///       ),
-///       new ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///         child: new ButtonBar(
+///       ButtonTheme.bar( // make buttons use the appropriate styles for cards
+///         child: ButtonBar(
 ///           children: <Widget>[
-///             new FlatButton(
+///             FlatButton(
 ///               child: const Text('BUY TICKETS'),
 ///               onPressed: () { /* ... */ },
 ///             ),
-///             new FlatButton(
+///             FlatButton(
 ///               child: const Text('LISTEN'),
 ///               onPressed: () { /* ... */ },
 ///             ),

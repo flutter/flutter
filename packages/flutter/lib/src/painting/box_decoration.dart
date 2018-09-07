@@ -38,14 +38,14 @@ import 'image_provider.dart';
 /// draw an image with a border:
 ///
 /// ```dart
-/// new Container(
-///   decoration: new BoxDecoration(
+/// Container(
+///   decoration: BoxDecoration(
 ///     color: const Color(0xff7c94b6),
-///     image: new DecorationImage(
-///       image: new ExactAssetImage('images/flowers.jpeg'),
+///     image: DecorationImage(
+///       image: ExactAssetImage('images/flowers.jpeg'),
 ///       fit: BoxFit.cover,
 ///     ),
-///     border: new Border.all(
+///     border: Border.all(
 ///       color: Colors.black,
 ///       width: 8.0,
 ///     ),

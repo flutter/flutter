@@ -251,19 +251,19 @@ abstract class BoxBorder extends ShapeBorder {
 /// All four borders the same, two-pixel wide solid white:
 ///
 /// ```dart
-/// new Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
+/// Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
 ///
 /// The border for a material design divider:
 ///
 /// ```dart
-/// new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
+/// Border(bottom: BorderSide(color: Theme.of(context).dividerColor))
 /// ```
 ///
 /// A 1990s-era "OK" button:
 ///
 /// ```dart
-/// new Container(
+/// Container(
 ///   decoration: const BoxDecoration(
 ///     border: Border(
 ///       top: BorderSide(width: 1.0, color: Color(0xFFFFFFFFFF)),
@@ -272,7 +272,7 @@ abstract class BoxBorder extends ShapeBorder {
 ///       bottom: BorderSide(width: 1.0, color: Color(0xFFFF000000)),
 ///     ),
 ///   ),
-///   child: new Container(
+///   child: Container(
 ///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
 ///     decoration: const BoxDecoration(
 ///       border: Border(

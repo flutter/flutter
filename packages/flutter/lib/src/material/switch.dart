@@ -85,7 +85,7 @@ class Switch extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new Switch(
+  /// Switch(
   ///   value: _giveVerse,
   ///   onChanged: (bool newValue) {
   ///     setState(() {

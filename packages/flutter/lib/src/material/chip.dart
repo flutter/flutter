@@ -156,7 +156,7 @@ abstract class DeletableChipAttributes {
   ///
   /// class CastList extends StatefulWidget {
   ///   @override
-  ///   State createState() => new CastListState();
+  ///   State createState() => CastListState();
   /// }
   ///
   /// class CastListState extends State<CastList> {
@@ -169,11 +169,11 @@ abstract class DeletableChipAttributes {
   ///
   ///   Iterable<Widget> get actorWidgets sync* {
   ///     for (Actor actor in _cast) {
-  ///       yield new Padding(
+  ///       yield Padding(
   ///         padding: const EdgeInsets.all(4.0),
-  ///         child: new Chip(
-  ///           avatar: new CircleAvatar(child: new Text(actor.initials)),
-  ///           label: new Text(actor.name),
+  ///         child: Chip(
+  ///           avatar: CircleAvatar(child: Text(actor.initials)),
+  ///           label: Text(actor.name),
   ///           onDeleted: () {
   ///             setState(() {
   ///               _cast.removeWhere((Actor entry) {
@@ -188,7 +188,7 @@ abstract class DeletableChipAttributes {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Wrap(
+  ///     return Wrap(
   ///       children: actorWidgets.toList(),
   ///     );
   ///   }
@@ -253,7 +253,7 @@ abstract class SelectableChipAttributes {
   /// ```dart
   /// class Wood extends StatefulWidget {
   ///   @override
-  ///   State<StatefulWidget> createState() => new WoodState();
+  ///   State<StatefulWidget> createState() => WoodState();
   /// }
   ///
   /// class WoodState extends State<Wood> {
@@ -261,7 +261,7 @@ abstract class SelectableChipAttributes {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new InputChip(
+  ///     return InputChip(
   ///       label: const Text('Use Chisel'),
   ///       selected: _useChisel,
   ///       onSelected: (bool newValue) {
@@ -369,7 +369,7 @@ abstract class TappableChipAttributes {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new InputChip(
+  ///     return InputChip(
   ///       label: const Text('Apply Hammer'),
   ///       onPressed: startHammering,
   ///     );
@@ -397,12 +397,12 @@ abstract class TappableChipAttributes {
 /// ## Sample code
 ///
 /// ```dart
-/// new Chip(
-///   avatar: new CircleAvatar(
+/// Chip(
+///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
+///     child: Text('AB'),
 ///   ),
-///   label: new Text('Aaron Burr'),
+///   label: Text('Aaron Burr'),
 /// )
 /// ```
 ///
@@ -513,12 +513,12 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 /// ## Sample code
 ///
 /// ```dart
-/// new InputChip(
-///   avatar: new CircleAvatar(
+/// InputChip(
+///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
+///     child: Text('AB'),
 ///   ),
-///   label: new Text('Aaron Burr'),
+///   label: Text('Aaron Burr'),
 ///   onPressed: () {
 ///     print('I am the one thing in life.');
 ///   }
@@ -661,7 +661,7 @@ class InputChip extends StatelessWidget
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
 ///   @override
-///   _MyThreeOptionsState createState() => new _MyThreeOptionsState();
+///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
@@ -669,12 +669,12 @@ class InputChip extends StatelessWidget
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Wrap(
-///       children: new List<Widget>.generate(
+///     return Wrap(
+///       children: List<Widget>.generate(
 ///         3,
 ///         (int index) {
-///           return new ChoiceChip(
-///             label: new Text('Item $index'),
+///           return ChoiceChip(
+///             label: Text('Item $index'),
 ///             selected: _value == index,
 ///             onSelected: (bool selected) {
 ///               _value = selected ? index : null;
@@ -807,7 +807,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// class CastFilter extends StatefulWidget {
 ///   @override
-///   State createState() => new CastFilterState();
+///   State createState() => CastFilterState();
 /// }
 ///
 /// class CastFilterState extends State<CastFilter> {
@@ -821,11 +821,11 @@ class ChoiceChip extends StatelessWidget
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
 ///     for (ActorFilterEntry actor in _cast) {
-///       yield new Padding(
+///       yield Padding(
 ///         padding: const EdgeInsets.all(4.0),
-///         child: new FilterChip(
-///           avatar: new CircleAvatar(child: new Text(actor.initials)),
-///           label: new Text(actor.name),
+///         child: FilterChip(
+///           avatar: CircleAvatar(child: Text(actor.initials)),
+///           label: Text(actor.name),
 ///           selected: _filters.contains(actor.name),
 ///           onSelected: (bool value) {
 ///             setState(() {
@@ -848,10 +848,10 @@ class ChoiceChip extends StatelessWidget
 ///     return Column(
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
-///         new Wrap(
+///         Wrap(
 ///           children: actorWidgets.toList(),
 ///         ),
-///         new Text('Look for: ${_filters.join(', ')}'),
+///         Text('Look for: ${_filters.join(', ')}'),
 ///       ],
 ///     );
 ///   }
@@ -977,12 +977,12 @@ class FilterChip extends StatelessWidget
 /// ## Sample code
 ///
 /// ```dart
-/// new ActionChip(
-///   avatar: new CircleAvatar(
+/// ActionChip(
+///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
+///     child: Text('AB'),
 ///   ),
-///   label: new Text('Aaron Burr'),
+///   label: Text('Aaron Burr'),
 ///   onPressed: () {
 ///     print("If you stand for nothing, Burr, what’ll you fall for?");
 ///   }
