@@ -214,9 +214,9 @@ void main() {
 
 
   group('doctor merging validator results', () {
-    final PassingGroupedValidator installed = new PassingGroupedValidator('Category', groupedCategory1);
-    final PartialGroupedValidator partial = new PartialGroupedValidator('Category', groupedCategory1);
-    final MissingGroupedValidator missing = new MissingGroupedValidator('Category', groupedCategory1);
+    final PassingGroupedValidator installed = new PassingGroupedValidator('Category');
+    final PartialGroupedValidator partial = new PartialGroupedValidator('Category');
+    final MissingGroupedValidator missing = new MissingGroupedValidator('Category');
 
     testUsingContext('validate installed + installed = installed', () async {
       expect(await new FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
@@ -486,73 +486,6 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<Workflow> get workflows => <Workflow>[];
 }
 
-
-ValidatorCategory groupedCategory1 = const ValidatorCategory('group 1', true);
-ValidatorCategory groupedCategory2 = const ValidatorCategory('group 2', true);
-
-class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(String name, ValidatorCategory group) : super(name, group);
-
-  @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage('A helpful message'));
-    return new ValidationResult(ValidationType.installed, messages);
-  }
-
-}
-
-class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name, ValidatorCategory group): super(name, group);
-
-  @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.error('A useful error message'));
-    return new ValidationResult(ValidationType.missing, messages);
-  }
-}
-
-class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name, ValidatorCategory group): super(name, group);
-
-  @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.error('An error message for partial installation'));
-    return new ValidationResult(ValidationType.partial, messages);
-  }
-}
-
-/// A doctor that has two category groups of two validators each.
-class FakeGroupedDoctor extends Doctor {
-  List<DoctorValidator> _validators;
-  @override
-  List<DoctorValidator> get validators {
-    if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidator('Category 2', groupedCategory2));
-      _validators.add(new MissingGroupedValidator('Category 2', groupedCategory2));
-    }
-    return _validators;
-  }
-}
-
-/// A doctor that takes any two validators. Used to check behavior when
-/// merging ValidationTypes (installed, missing, partial).
-class FakeSmallGroupDoctor extends Doctor {
-  List<DoctorValidator> _validators;
-  FakeSmallGroupDoctor(DoctorValidator val1, DoctorValidator val2) {
-    _validators = <DoctorValidator>[val1, val2];
-  }
-  @override
-  List<DoctorValidator> get validators => _validators;
-
-  @override
-  List<Workflow> get workflows => <Workflow>[];
-}
 
 
 class PassingGroupedValidator extends DoctorValidator {
