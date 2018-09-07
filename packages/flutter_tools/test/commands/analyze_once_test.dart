@@ -162,7 +162,7 @@ void bar() {
       }
     });
 
-    testUsingContext('analyze', () async {
+    testUsingContext('returns no issues when source is error-free', () async {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
@@ -176,23 +176,6 @@ StringBuffer bar = StringBuffer('baz');
         );
       } finally {
         tryToDelete(tempDir);
-      }
-    });
-
-    testUsingContext('use-cfe flag is recognized', () async {
-      const String contents = '''
-StringBuffer bar = StringBuffer('baz');
-''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync();
-      tempDir.childFile('main.dart').writeAsStringSync(contents);
-      try {
-        await runCommand(
-          command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze', '--no-use-cfe'],
-          statusTextContains: <String>['No issues found!'],
-        );
-      } finally {
-        tempDir.deleteSync(recursive: true);
       }
     });
   });

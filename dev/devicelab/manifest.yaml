@@ -136,6 +136,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  android_semantics_integration_test:
+    description: >
+      Tests that the Android accessibility bridge produces correct semantics.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   run_release_test:
     description: >
       Checks that `flutter run --release` does not crash.

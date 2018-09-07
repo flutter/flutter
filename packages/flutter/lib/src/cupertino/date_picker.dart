@@ -15,15 +15,14 @@ const double _kPickerWidth = 330.0;
 const Color _kBackgroundColor = CupertinoColors.white;
 
 
-// The iOS date picker and timer picker has their width fixed to 330.0 in all
-// modes.
+// The iOS timer picker has its width fixed to 330.0 in all modes.
 //
 // If the maximum width given to the picker is greater than 330.0, the leftmost
 // and rightmost column will be extended equally so that the widths match, and
 // the picker is in the center.
 //
-// If the maximum width given to the picker is smaller than 330.0, the picker's
-// layout will be broken.
+// If the maximum width given to the picker is smaller than 330.0, the picker is
+// placed in the center and both left side and right side are clipped.
 
 
 /// Different modes of [CupertinoTimerPicker].
@@ -174,6 +173,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
         return new Semantics(
           label: semanticsLabel,
+          excludeSemantics: true,
           child: new Container(
             alignment: alignCenterRight,
             padding: textDirectionFactor == 1
@@ -251,6 +251,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         if (widget.mode == CupertinoTimerPickerMode.ms) {
           return new Semantics(
             label: semanticsLabel,
+            excludeSemantics: true,
             child: new Container(
               alignment: alignCenterRight,
               padding: textDirectionFactor == 1
@@ -267,6 +268,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         else
           return new Semantics(
             label: semanticsLabel,
+            excludeSemantics: true,
             child: new Container(
               alignment: alignCenterLeft,
               child: new Container(
@@ -361,6 +363,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
         return new Semantics(
           label: semanticsLabel,
+          excludeSemantics: true,
           child: new Container(
             alignment: alignCenterLeft,
             child: new Container(

@@ -922,6 +922,43 @@ void main() {
       expect(controller.selectedItem, 0);
     });
 
+    testWidgets('controller animateToItem', (WidgetTester tester) async {
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
+      final List<int> paintedChildren = <int>[];
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: controller,
+            itemExtent: 100.0,
+            children: new List<Widget>.generate(100, (int index) {
+              return new CustomPaint(
+                painter: new TestCallbackPainter(onPaint: () {
+                  paintedChildren.add(index);
+                }),
+              );
+            }),
+          ),
+        ),
+      );
+
+      // Screen is 600px tall. Item 10 is in the center and each item is 100px tall.
+      expect(paintedChildren, <int>[7, 8, 9, 10, 11, 12, 13]);
+
+      paintedChildren.clear();
+      controller.animateToItem(
+        0,
+        duration: const Duration(seconds: 1),
+        curve: Curves.linear,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(paintedChildren, <int>[0, 1, 2, 3]);
+      expect(controller.selectedItem, 0);
+    });
+
     testWidgets('onSelectedItemChanged and controller are in sync', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
       final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
