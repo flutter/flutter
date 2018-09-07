@@ -301,7 +301,7 @@ class TestSemantics {
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
-    buf.writeln('${indent}new $runtimeType(');
+    buf.writeln('$indent$runtimeType(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
     if (flags is int && flags != 0 || flags is List<SemanticsFlag> && flags.isNotEmpty)
@@ -526,7 +526,7 @@ class SemanticsTester {
     final StringBuffer buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
     final bool isRoot = node.id == 0;
-    buf.writeln('new TestSemantics${isRoot ? '.root': ''}(');
+    buf.writeln('TestSemantics${isRoot ? '.root': ''}(');
     if (!isRoot)
       buf.writeln('  id: ${node.id},');
     if (nodeData.tags != null)
