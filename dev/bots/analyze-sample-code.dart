@@ -107,6 +107,7 @@ Future<Null> main(List<String> arguments) async {
   try {
     final File mainDart = new File(path.join(tempDir.path, 'main.dart'));
     final File pubSpec = new File(path.join(tempDir.path, 'pubspec.yaml'));
+    final File analysisOptions = new File(path.join(tempDir.path, 'analysis_options.yaml'));
     Directory flutterPackage;
     if (arguments.length == 1) {
       // Used for testing.
@@ -212,6 +213,11 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+''');
+    analysisOptions.writeAsStringSync('''
+linter:
+  rules:
+    - unnecessary_const
 ''');
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(

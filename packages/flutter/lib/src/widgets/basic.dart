@@ -370,7 +370,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///       style: const TextStyle(
 ///         fontSize: 40.0,
 ///         fontWeight: FontWeight.w900,
-///         color: const Color(0xFFFFFFFF),
+///         color: Color(0xFFFFFFFF),
 ///       ),
 ///     ),
 ///   ),
@@ -1360,7 +1360,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// new Padding(
 ///   padding: new EdgeInsets.all(8.0),
-///   child: const Card(child: const Text('Hello World!')),
+///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
 ///
@@ -1700,7 +1700,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// new SizedBox(
 ///   width: 200.0,
 ///   height: 300.0,
-///   child: const Card(child: const Text('Hello World!')),
+///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
 ///
@@ -1806,7 +1806,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 /// ```dart
 /// new ConstrainedBox(
 ///   constraints: const BoxConstraints.expand(),
-///   child: const Card(child: const Text('Hello World!')),
+///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
 ///

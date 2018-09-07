@@ -22,9 +22,9 @@ import 'theme.dart';
 ///     mainAxisSize: MainAxisSize.min,
 ///     children: <Widget>[
 ///       const ListTile(
-///         leading: const Icon(Icons.album),
-///         title: const Text('The Enchanted Nightingale'),
-///         subtitle: const Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
+///         leading: Icon(Icons.album),
+///         title: Text('The Enchanted Nightingale'),
+///         subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///       ),
 ///       new ButtonTheme.bar( // make buttons use the appropriate styles for cards
 ///         child: new ButtonBar(

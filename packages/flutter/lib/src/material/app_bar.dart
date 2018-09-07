@@ -696,7 +696,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// new SliverAppBar(
 ///   expandedHeight: 150.0,
 ///   flexibleSpace: const FlexibleSpaceBar(
-///     title: const Text('Available seats'),
+///     title: Text('Available seats'),
 ///   ),
 ///   actions: <Widget>[
 ///     new IconButton(
