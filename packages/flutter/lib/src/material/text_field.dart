@@ -473,6 +473,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
       borderRadius: BorderRadius.zero,
       onRemoved: handleRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;

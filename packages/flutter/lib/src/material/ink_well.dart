@@ -98,6 +98,7 @@ abstract class InteractiveInkFeatureFactory {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
+    TextDirection textDirection,
   });
 }
 
@@ -476,6 +477,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       borderRadius: borderRadius,
       customBorder: customBorder,
       onRemoved: onRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;
