@@ -274,9 +274,6 @@ class _FakeTicker implements Ticker {
   bool get shouldScheduleTick => null;
 
   @override
-  bool disableAnimations = false;
-
-  @override
   void dispose() {}
 
   @override

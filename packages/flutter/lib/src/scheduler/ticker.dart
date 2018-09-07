@@ -68,12 +68,6 @@ class Ticker {
 
   TickerFuture _future;
 
-  /// Whether or not the platform is requesting that animations be disabled.
-  ///
-  /// See also:
-  ///   * [AccessibilityFeatures.disableAnimations], for the setting this value comes from.
-  bool disableAnimations = false;
-
   /// Whether this ticker has been silenced.
   ///
   /// While silenced, a ticker's clock can still run, but the callback will not
@@ -279,7 +273,6 @@ class Ticker {
     assert(_startTime == null);
     assert(_animationId == null);
     assert((originalTicker._future == null) == (originalTicker._startTime == null), 'Cannot absorb Ticker after it has been disposed.');
-    disableAnimations = originalTicker.disableAnimations;
     if (originalTicker._future != null) {
       _future = originalTicker._future;
       _startTime = originalTicker._startTime;
