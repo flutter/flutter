@@ -763,6 +763,7 @@ class AccessibilityFeatures {
   static const int _kInvertColorsIndex = 1 << 1;
   static const int _kDisableAnimationsIndex = 1 << 2;
   static const int _kBoldTextIndex = 1 << 3;
+  static const int _kReduceMotionIndex = 1 << 4;
 
   // A bitfield which represents each enabled feature.
   final int _index;
@@ -784,6 +785,12 @@ class AccessibilityFeatures {
   /// Only supported on iOS.
   bool get boldText => _kBoldTextIndex & _index != 0;
 
+  /// The platform is requesting that certain animations be simplified and
+  /// parallax effects removed.
+  ///
+  /// Only supported on iOS.
+  bool get reduceMotion => _kReduceMotionIndex & _index != 0;
+
   @override
   String toString() {
     final List<String> features = <String>[];
@@ -795,6 +802,8 @@ class AccessibilityFeatures {
       features.add('disableAnimations');
     if (boldText)
       features.add('boldText');
+    if (reduceMotion)
+      features.add('reduceMotion');
     return 'AccessibilityFeatures$features';
   }
 
