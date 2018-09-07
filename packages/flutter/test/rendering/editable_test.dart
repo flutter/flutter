@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('editable intrinsics', () {
-    final RenderEditable editable = new RenderEditable(
+    final RenderEditable editable = RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
@@ -15,7 +15,7 @@ void main() {
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
     expect(editable.getMaxIntrinsicWidth(double.infinity), 50.0);

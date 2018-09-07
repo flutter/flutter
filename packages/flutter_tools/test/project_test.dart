@@ -137,7 +137,7 @@ void main() {
 
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
-        final FlutterProject project = new FlutterProject(
+        final FlutterProject project = FlutterProject(
           fs.directory('not_created'),
           FlutterManifest.empty(),
           FlutterManifest.empty(),
@@ -229,9 +229,9 @@ void main() {
       MockIOSWorkflow mockIOSWorkflow;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       setUp(() {
-        fs = new MemoryFileSystem();
-        mockIOSWorkflow = new MockIOSWorkflow();
-        mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
+        fs = MemoryFileSystem();
+        mockIOSWorkflow = MockIOSWorkflow();
+        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       });
 
       void testWithMocks(String description, Future<Null> testMethod()) {
@@ -367,12 +367,12 @@ flutter:
 /// is in memory.
 void testInMemory(String description, Future<Null> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
-  final FileSystem testFileSystem = new MemoryFileSystem(
+  final FileSystem testFileSystem = MemoryFileSystem(
     style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
   );
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
-  transfer(new Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
+  transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
   transfer(fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
@@ -386,7 +386,7 @@ void testInMemory(String description, Future<Null> testMethod()) {
     testMethod,
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      Cache: () => new Cache(),
+      Cache: () => Cache(),
     },
   );
 }

@@ -43,8 +43,8 @@ TaskFunction createHotModeTest() {
               environment: null
           );
 
-          final Completer<Null> stdoutDone = new Completer<Null>();
-          final Completer<Null> stderrDone = new Completer<Null>();
+          final Completer<Null> stdoutDone = Completer<Null>();
+          final Completer<Null> stderrDone = Completer<Null>();
           process.stdout
               .transform(utf8.decoder)
               .transform(const LineSplitter())
@@ -96,8 +96,8 @@ TaskFunction createHotModeTest() {
               <String>['run']..addAll(options),
               environment: null
           );
-          final Completer<Null> stdoutDone = new Completer<Null>();
-          final Completer<Null> stderrDone = new Completer<Null>();
+          final Completer<Null> stdoutDone = Completer<Null>();
+          final Completer<Null> stderrDone = Completer<Null>();
           process.stdout
               .transform(utf8.decoder)
               .transform(const LineSplitter())
@@ -130,7 +130,7 @@ TaskFunction createHotModeTest() {
 
 
 
-    return new TaskResult.success(
+    return TaskResult.success(
       <String, dynamic> {
         'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
         'hotRestartMillisecondsToFrame': twoReloadsData['hotRestartMillisecondsToFrame'][0],

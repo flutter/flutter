@@ -39,12 +39,12 @@ class Evaluation {
   Evaluation operator +(Evaluation other) {
     if (other == null)
       return this;
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if (reason != null)
       buffer.write(reason);
     if (other.reason != null)
       buffer.write(other.reason);
-    return new Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
+    return Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
   }
 }
 
@@ -97,7 +97,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
-        result += new Evaluation.fail(
+        result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
           'See also: $link');
       return result;
@@ -203,13 +203,13 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         current = current.parent;
       }
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
-      final _ContrastReport report = new _ContrastReport(subset);
+      final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       final double targetContrastRatio = (isBold && fontSize > kBoldTextMinimumSize) ?
         kMinimumRatioLargeText : kMinimumRatioNormalText;
       if (contrastRatio >= targetContrastRatio)
         return result + const Evaluation.pass();
-      return result + new Evaluation.fail(
+      return result + Evaluation.fail(
         '$node:\nExpected contrast ratio of at least '
         '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
         'The computed foreground color was: ${report.lightColor}, '
@@ -268,21 +268,21 @@ class _ContrastReport {
     for (int color in colors)
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
     if (colorHistogram.length == 1) {
-      final Color hslColor = new Color(colorHistogram.keys.first);
-      return new _ContrastReport._(hslColor, hslColor);
+      final Color hslColor = Color(colorHistogram.keys.first);
+      return _ContrastReport._(hslColor, hslColor);
     }
     if (colorHistogram.length == 2) {
-      final Color firstColor = new Color(colorHistogram.keys.first);
-      final Color lastColor =  new Color(colorHistogram.keys.last);
+      final Color firstColor = Color(colorHistogram.keys.first);
+      final Color lastColor =  Color(colorHistogram.keys.last);
       if (firstColor.computeLuminance() < lastColor.computeLuminance()) {
-        return new _ContrastReport._(lastColor, firstColor);
+        return _ContrastReport._(lastColor, firstColor);
       }
-      return new _ContrastReport._(firstColor, lastColor);
+      return _ContrastReport._(firstColor, lastColor);
     }
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
     final double averageLightness = colorHistogram.keys.fold(0.0, (double total, int color) {
-      return total + new HSLColor.fromColor(new Color(color)).lightness;
+      return total + HSLColor.fromColor(Color(color)).lightness;
     }) / colorHistogram.length;
     int lightColor = 0;
     int darkColor = 0;
@@ -290,7 +290,7 @@ class _ContrastReport {
     int darkCount = 0;
     // Find the most frequently occurring light and dark color.
     for (MapEntry<int, int> entry in colorHistogram.entries) {
-      final HSLColor color = new HSLColor.fromColor(new Color(entry.key));
+      final HSLColor color = HSLColor.fromColor(Color(entry.key));
       final int count = entry.value;
       if (color.lightness <= averageLightness && count > lightCount) {
         darkColor = entry.key;
@@ -300,7 +300,7 @@ class _ContrastReport {
         lightCount = count;
       }
     }
-    return new _ContrastReport._(new Color(lightColor), new Color(darkColor));
+    return _ContrastReport._(Color(lightColor), Color(darkColor));
   }
 
   const _ContrastReport._(this.lightColor, this.darkColor);

@@ -24,7 +24,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 // Matches the output of the "test" package, e.g.: "00:01 +1 loading foo"
-final RegExp testOutputPattern = new RegExp(r'^[0-9][0-9]:[0-9][0-9] \+[0-9]+: (.+?) *$');
+final RegExp testOutputPattern = RegExp(r'^[0-9][0-9]:[0-9][0-9] \+[0-9]+: (.+?) *$');
 
 enum TestStep {
   starting,
@@ -37,7 +37,7 @@ enum TestStep {
 }
 
 Future<int> runTest() async {
-  final Stopwatch clock = new Stopwatch()..start();
+  final Stopwatch clock = Stopwatch()..start();
   final Process analysis = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     <String>['test', path.join('flutter_test', 'trivial_widget_test.dart')],
@@ -83,18 +83,18 @@ Future<int> runTest() async {
   final int result = await analysis.exitCode;
   clock.stop();
   if (result != 0)
-    throw new Exception('flutter test failed with exit code $result');
+    throw Exception('flutter test failed with exit code $result');
   if (badLines > 0)
-    throw new Exception('flutter test renderered unexpected output ($badLines bad lines)');
+    throw Exception('flutter test renderered unexpected output ($badLines bad lines)');
   if (step != TestStep.testPassed)
-    throw new Exception('flutter test did not finish (only reached step $step)');
+    throw Exception('flutter test did not finish (only reached step $step)');
   print('elapsed time: ${clock.elapsedMilliseconds}ms');
   return clock.elapsedMilliseconds;
 }
 
 void main() {
   task(() async {
-    final File nodeSourceFile = new File(path.join(
+    final File nodeSourceFile = File(path.join(
       flutterDirectory.path, 'packages', 'flutter', 'lib', 'src', 'foundation', 'node.dart',
     ));
     final String originalSource = await nodeSourceFile.readAsString();
@@ -118,7 +118,7 @@ void main() {
         'implementation_change_elapsed_time_ms': implementationChange,
         'interface_change_elapsed_time_ms': interfaceChange,
       };
-      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+      return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     } finally {
       await nodeSourceFile.writeAsString(originalSource);
     }

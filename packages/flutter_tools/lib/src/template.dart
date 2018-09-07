@@ -53,12 +53,12 @@ class Template {
   factory Template.fromName(String name) {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = templateDirectoryInPackage(name);
-    return new Template(templateDir, templateDir);
+    return Template(templateDir, templateDir);
   }
 
   static const String templateExtension = '.tmpl';
   static const String copyTemplateExtension = '.copy.tmpl';
-  final Pattern _kTemplateLanguageVariant = new RegExp(r'(\w+)-(\w+)\.tmpl.*');
+  final Pattern _kTemplateLanguageVariant = RegExp(r'(\w+)-(\w+)\.tmpl.*');
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
@@ -154,7 +154,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = new mustache.Template(templateContents).renderString(context);
+        final String renderedContents = mustache.Template(templateContents).renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 

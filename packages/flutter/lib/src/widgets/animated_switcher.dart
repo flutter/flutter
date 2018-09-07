@@ -194,7 +194,7 @@ class AnimatedSwitcher extends StatefulWidget {
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
   @override
-  _AnimatedSwitcherState createState() => new _AnimatedSwitcherState();
+  _AnimatedSwitcherState createState() => _AnimatedSwitcherState();
 
   /// The transition builder used as the default value of [transitionBuilder].
   ///
@@ -204,7 +204,7 @@ class AnimatedSwitcher extends StatefulWidget {
   ///
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
-    return new FadeTransition(
+    return FadeTransition(
       opacity: animation,
       child: child,
     );
@@ -222,7 +222,7 @@ class AnimatedSwitcher extends StatefulWidget {
     if (currentChild != null) {
       children = children.toList()..add(currentChild);
     }
-    return new Stack(
+    return Stack(
       children: children,
       alignment: Alignment.center,
     );
@@ -230,7 +230,7 @@ class AnimatedSwitcher extends StatefulWidget {
 }
 
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
-  final Set<_AnimatedSwitcherChildEntry> _previousChildren = new Set<_AnimatedSwitcherChildEntry>();
+  final Set<_AnimatedSwitcherChildEntry> _previousChildren = Set<_AnimatedSwitcherChildEntry>();
   _AnimatedSwitcherChildEntry _currentChild;
   List<Widget> _previousChildWidgetCache = const <Widget>[];
   int serialNumber = 0;
@@ -245,9 +245,9 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     @required AnimationController controller,
     @required Animation<double> animation,
   }) {
-    final _AnimatedSwitcherChildEntry entry = new _AnimatedSwitcherChildEntry(
+    final _AnimatedSwitcherChildEntry entry = _AnimatedSwitcherChildEntry(
       widgetChild: widget.child,
-      transition: new KeyedSubtree.wrap(
+      transition: KeyedSubtree.wrap(
         widget.transitionBuilder(
           widget.child,
           animation,
@@ -293,7 +293,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _currentChild = null;
       return;
     }
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: widget.duration,
       vsync: this,
     );
@@ -307,7 +307,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       assert(_previousChildren.isEmpty);
       controller.value = 1.0;
     }
-    final Animation<double> animation = new CurvedAnimation(
+    final Animation<double> animation = CurvedAnimation(
       parent: controller,
       curve: widget.switchInCurve,
       reverseCurve: widget.switchOutCurve,
@@ -331,7 +331,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     super.didUpdateWidget(oldWidget);
 
     void updateTransition(_AnimatedSwitcherChildEntry entry) {
-      entry.transition = new KeyedSubtree(
+      entry.transition = KeyedSubtree(
         key: entry.transition.key,
         child: widget.transitionBuilder(entry.widgetChild, entry.animation),
       );
@@ -365,7 +365,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }
 
   void _rebuildChildWidgetCacheIfNeeded() {
-    _previousChildWidgetCache ??= new List<Widget>.unmodifiable(
+    _previousChildWidgetCache ??= List<Widget>.unmodifiable(
       _previousChildren.map<Widget>((_AnimatedSwitcherChildEntry child) {
         return child.transition;
       }),

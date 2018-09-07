@@ -24,7 +24,7 @@ void main() {
   MemoryFileSystem fs;
 
   setUp(() {
-    fs = new MemoryFileSystem();
+    fs = MemoryFileSystem();
   });
 
   group('FlutterTesterApp', () {
@@ -33,7 +33,7 @@ void main() {
       await fs.directory(projectPath).create(recursive: true);
       fs.currentDirectory = projectPath;
 
-      final FlutterTesterApp app = new FlutterTesterApp.fromCurrentDirectory();
+      final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory();
       expect(app.name, 'my_project');
       expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
@@ -47,7 +47,7 @@ void main() {
     });
 
     testUsingContext('no device', () async {
-      final FlutterTesterDevices discoverer = new FlutterTesterDevices();
+      final FlutterTesterDevices discoverer = FlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices;
       expect(devices, isEmpty);
@@ -55,7 +55,7 @@ void main() {
 
     testUsingContext('has device', () async {
       FlutterTesterDevices.showFlutterTesterDevice = true;
-      final FlutterTesterDevices discoverer = new FlutterTesterDevices();
+      final FlutterTesterDevices discoverer = FlutterTesterDevices();
 
       final List<Device> devices = await discoverer.devices;
       expect(devices, hasLength(1));
@@ -71,7 +71,7 @@ void main() {
     List<String> logLines;
 
     setUp(() {
-      device = new FlutterTesterDevice('flutter-tester');
+      device = FlutterTesterDevice('flutter-tester');
 
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -105,9 +105,9 @@ void main() {
       MockProcess mockProcess;
 
       final Map<Type, Generator> startOverrides = <Type, Generator>{
-        Platform: () => new FakePlatform(operatingSystem: 'linux'),
+        Platform: () => FakePlatform(operatingSystem: 'linux'),
         FileSystem: () => fs,
-        Cache: () => new Cache(rootOverride: fs.directory(flutterRoot)),
+        Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
         KernelCompiler: () => mockKernelCompiler,
         Artifacts: () => mockArtifacts,
@@ -125,22 +125,22 @@ void main() {
         projectPath = fs.path.join('home', 'me', 'hello');
         mainPath = fs.path.join(projectPath, 'lin', 'main.dart');
 
-        mockProcessManager = new MockProcessManager();
+        mockProcessManager = MockProcessManager();
         mockProcessManager.processFactory =
             (List<String> commands) => mockProcess;
 
-        mockArtifacts = new MockArtifacts();
+        mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
         fs.file(artifactPath).createSync(recursive: true);
         when(mockArtifacts.getArtifactPath(any)).thenReturn(artifactPath);
 
-        mockKernelCompiler = new MockKernelCompiler();
+        mockKernelCompiler = MockKernelCompiler();
       });
 
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: new DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
+            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
@@ -149,14 +149,14 @@ void main() {
         expect(() async {
           await device.startApp(null,
               mainPath: mainPath,
-              debuggingOptions: new DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
+              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
         }, throwsToolExit());
       }, overrides: startOverrides);
 
       testUsingContext('start', () async {
         final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
-        mockProcess = new MockProcess(
-            stdout: new Stream<List<int>>.fromIterable(<List<int>>[
+        mockProcess = MockProcess(
+            stdout: Stream<List<int>>.fromIterable(<List<int>>[
           '''
 Observatory listening on $observatoryUri
 Hello!
@@ -177,12 +177,12 @@ Hello!
           packagesPath: anyNamed('packagesPath'),
         )).thenAnswer((_) async {
           fs.file('$mainPath.dill').createSync(recursive: true);
-          return new CompilerOutput('$mainPath.dill', 0);
+          return CompilerOutput('$mainPath.dill', 0);
         });
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: new DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
 

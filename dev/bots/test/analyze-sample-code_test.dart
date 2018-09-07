@@ -15,10 +15,10 @@ void main() {
     );
     final List<String> stdout = await process.stdout.transform(utf8.decoder).transform(const LineSplitter()).toList();
     final List<String> stderr = await process.stderr.transform(utf8.decoder).transform(const LineSplitter()).toList();
-    final Match line = new RegExp(r'^(.+)/main\.dart:[0-9]+:[0-9]+: .+$').matchAsPrefix(stdout[1]);
+    final Match line = RegExp(r'^(.+)/main\.dart:[0-9]+:[0-9]+: .+$').matchAsPrefix(stdout[1]);
     expect(line, isNot(isNull));
     final String directory = line.group(1);
-    new Directory(directory).deleteSync(recursive: true);
+    Directory(directory).deleteSync(recursive: true);
     expect(await process.exitCode, 1);
     expect(stderr, isEmpty);
     expect(stdout, <String>[

@@ -24,7 +24,7 @@ import 'android_sdk.dart';
 import 'android_studio.dart';
 
 const String gradleVersion = '4.4';
-final RegExp _assembleTaskPattern = new RegExp(r'assemble([^:]+): task ');
+final RegExp _assembleTaskPattern = RegExp(r'assemble([^:]+): task ');
 
 GradleProject _cachedGradleProject;
 String _cachedGradleExecutable;
@@ -39,7 +39,7 @@ enum FlutterPluginVersion {
 // Investigation documented in #13975 suggests the filter should be a subset
 // of the impact of -q, but users insist they see the error message sometimes
 // anyway.  If we can prove it really is impossible, delete the filter.
-final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory'
+final RegExp ndkMessageFilter = RegExp(r'^(?!NDK is missing a ".*" directory'
   r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
   r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
 
@@ -57,7 +57,7 @@ FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
       fs.path.join('app', 'build.gradle'));
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
-      if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
+      if (line.contains(RegExp(r'apply from: .*/flutter.gradle'))) {
         return FlutterPluginVersion.managed;
       }
       if (line.contains("def flutterPluginVersion = 'managed'")) {
@@ -103,7 +103,7 @@ Future<GradleProject> _readGradleProject() async {
       environment: _gradleEnv,
     );
     final String properties = runResult.stdout.trim();
-    project = new GradleProject.fromAppProperties(properties);
+    project = GradleProject.fromAppProperties(properties);
   } catch (exception) {
     if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
       status.cancel();
@@ -115,7 +115,7 @@ Future<GradleProject> _readGradleProject() async {
       throwToolExit('Please review your Gradle project setup in the android/ folder.');
     }
     // Fall back to the default
-    project = new GradleProject(
+    project = GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], flutterProject.android.gradleAppOutV1Directory,
     );
@@ -131,7 +131,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   const String matcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
-  final RegExp licenseFailure = new RegExp(matcher, multiLine: true);
+  final RegExp licenseFailure = RegExp(matcher, multiLine: true);
   final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
   if (licenseMatch != null) {
     final String missingLicenses = licenseMatch.group(1);
@@ -219,9 +219,9 @@ void updateLocalProperties({
 
   SettingsFile settings;
   if (localProperties.existsSync()) {
-    settings = new SettingsFile.parseFromFile(localProperties);
+    settings = SettingsFile.parseFromFile(localProperties);
   } else {
-    settings = new SettingsFile();
+    settings = SettingsFile();
     changed = true;
   }
 
@@ -254,7 +254,7 @@ void updateLocalProperties({
 ///
 /// Writes the path to the Android SDK, if known.
 void writeLocalProperties(File properties) {
-  final SettingsFile settings = new SettingsFile();
+  final SettingsFile settings = SettingsFile();
   if (androidSdk != null) {
     settings.values['sdk.dir'] = escapePath(androidSdk.directory);
   }
@@ -424,7 +424,7 @@ File _findApkFile(GradleProject project, BuildInfo buildInfo) {
 }
 
 Map<String, String> get _gradleEnv {
-  final Map<String, String> env = new Map<String, String>.from(platform.environment);
+  final Map<String, String> env = Map<String, String>.from(platform.environment);
   if (javaPath != null) {
     // Use java bundled with Android Studio.
     env['JAVA_HOME'] = javaPath;
@@ -444,7 +444,7 @@ class GradleProject {
         .trim();
 
     // Extract build types and product flavors.
-    final Set<String> variants = new Set<String>();
+    final Set<String> variants = Set<String>();
     for (String s in properties.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
@@ -453,8 +453,8 @@ class GradleProject {
           variants.add(variant);
       }
     }
-    final Set<String> buildTypes = new Set<String>();
-    final Set<String> productFlavors = new Set<String>();
+    final Set<String> buildTypes = Set<String>();
+    final Set<String> productFlavors = Set<String>();
     for (final String variant1 in variants) {
       for (final String variant2 in variants) {
         if (variant2.startsWith(variant1) && variant2 != variant1) {
@@ -468,7 +468,7 @@ class GradleProject {
     }
     if (productFlavors.isEmpty)
       buildTypes.addAll(variants);
-    return new GradleProject(
+    return GradleProject(
       buildTypes.toList(),
       productFlavors.toList(),
       fs.directory(fs.path.join(buildDir, 'outputs', 'apk')),

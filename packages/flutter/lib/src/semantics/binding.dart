@@ -23,7 +23,7 @@ class SemanticsBinding extends BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _accessibilityFeatures = new ValueNotifier<ui.AccessibilityFeatures>(ui.window.accessibilityFeatures);
+    _accessibilityFeatures = ValueNotifier<ui.AccessibilityFeatures>(ui.window.accessibilityFeatures);
   }
 
   /// Called when the platform accessibility features change.

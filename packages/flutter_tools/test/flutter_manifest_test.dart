@@ -534,13 +534,13 @@ flutter:
     });
 
     testUsingContextAndFs('Validate manifest on Posix FS',
-        new MemoryFileSystem(style: FileSystemStyle.posix), () async {
+        MemoryFileSystem(style: FileSystemStyle.posix), () async {
           assertSchemaIsReadable();
         }
     );
 
     testUsingContextAndFs('Validate manifest on Windows FS',
-        new MemoryFileSystem(style: FileSystemStyle.windows), () async {
+        MemoryFileSystem(style: FileSystemStyle.windows), () async {
           assertSchemaIsReadable();
         }
     );

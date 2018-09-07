@@ -58,7 +58,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     final File settingsFile = fs.file(
       fs.path.join(configDir.path, '.flutter_settings')
     );
-    return new Config(settingsFile);
+    return Config(settingsFile);
   }
 
   test(description, () async {
@@ -67,20 +67,20 @@ void testUsingContext(String description, dynamic testMethod(), {
         name: 'mocks',
         overrides: <Type, Generator>{
           Config: () => buildConfig(fs),
-          DeviceManager: () => new MockDeviceManager(),
-          Doctor: () => new MockDoctor(),
-          FlutterVersion: () => new MockFlutterVersion(),
-          HttpClient: () => new MockHttpClient(),
+          DeviceManager: () => MockDeviceManager(),
+          Doctor: () => MockDoctor(),
+          FlutterVersion: () => MockFlutterVersion(),
+          HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
-            final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
+            final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => new BufferLogger(),
-          OperatingSystemUtils: () => new MockOperatingSystemUtils(),
-          SimControl: () => new MockSimControl(),
-          Usage: () => new MockUsage(),
-          XcodeProjectInterpreter: () => new MockXcodeProjectInterpreter(),
+          Logger: () => BufferLogger(),
+          OperatingSystemUtils: () => MockOperatingSystemUtils(),
+          SimControl: () => MockSimControl(),
+          Usage: () => MockUsage(),
+          XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -154,11 +154,11 @@ class MockDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => new Stream<Device>.fromIterable(devices);
+  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
 
   @override
   Stream<Device> getDevicesById(String deviceId) {
-    return new Stream<Device>.fromIterable(
+    return Stream<Device>.fromIterable(
         devices.where((Device device) => device.id == deviceId));
   }
 
@@ -200,7 +200,7 @@ class MockDoctor extends Doctor {
     final List<DoctorValidator> superValidators = super.validators;
     return superValidators.map((DoctorValidator v) {
       if (v is AndroidValidator) {
-        return new MockAndroidWorkflowValidator();
+        return MockAndroidWorkflowValidator();
       }
       return v;
     }).toList();
@@ -261,7 +261,7 @@ class MockUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => null;
 
   @override
-  Future<Null> ensureAnalyticsSent() => new Future<Null>.value();
+  Future<Null> ensureAnalyticsSent() => Future<Null>.value();
 
   @override
   void printWelcome() { }
@@ -287,7 +287,7 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   XcodeProjectInfo getInfo(String projectPath) {
-    return new XcodeProjectInfo(
+    return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
       <String>['Runner'],

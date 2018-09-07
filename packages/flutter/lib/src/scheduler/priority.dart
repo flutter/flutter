@@ -39,7 +39,7 @@ class Priority {
       // Clamp the input offset.
       offset = kMaxOffset * offset.sign;
     }
-    return new Priority._(_value + offset);
+    return Priority._(_value + offset);
   }
 
   /// Returns a priority relative to this priority.

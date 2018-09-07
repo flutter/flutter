@@ -89,9 +89,9 @@ class TwoLevelListItem extends StatelessWidget {
     final TwoLevelList parentList = context.ancestorWidgetOfExactType(TwoLevelList);
     assert(parentList != null);
 
-    return new SizedBox(
+    return SizedBox(
       height: kListTileExtent[parentList.type],
-      child: new ListTile(
+      child: ListTile(
         leading: leading,
         title: title,
         trailing: trailing,
@@ -142,7 +142,7 @@ class TwoLevelSublist extends StatefulWidget {
   final Color backgroundColor;
 
   @override
-  _TwoLevelSublistState createState() => new _TwoLevelSublistState();
+  _TwoLevelSublistState createState() => _TwoLevelSublistState();
 }
 
 @deprecated
@@ -161,14 +161,14 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kExpand, vsync: this);
-    _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _borderColor = new ColorTween(begin: Colors.transparent);
-    _headerColor = new ColorTween();
-    _iconColor = new ColorTween();
-    _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
-    _backgroundColor = new ColorTween();
+    _controller = AnimationController(duration: _kExpand, vsync: this);
+    _easeOutAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _easeInAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _borderColor = ColorTween(begin: Colors.transparent);
+    _headerColor = ColorTween();
+    _iconColor = ColorTween();
+    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
+    _backgroundColor = ColorTween();
 
     _isExpanded = PageStorage.of(context)?.readState(context) ?? false;
     if (_isExpanded)
@@ -195,35 +195,35 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
   }
 
   Widget buildList(BuildContext context, Widget child) {
-    return new Container(
-      decoration: new BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
         color: _backgroundColor.evaluate(_easeOutAnimation),
-        border: new Border(
-          top: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
-          bottom: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation))
+        border: Border(
+          top: BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
+          bottom: BorderSide(color: _borderColor.evaluate(_easeOutAnimation))
         )
       ),
-      child: new Column(
+      child: Column(
         children: <Widget>[
           IconTheme.merge(
-            data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
-            child: new TwoLevelListItem(
+            data: IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
+            child: TwoLevelListItem(
               onTap: _handleOnTap,
               leading: widget.leading,
-              title: new DefaultTextStyle(
+              title: DefaultTextStyle(
                 style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
                 child: widget.title
               ),
-              trailing: new RotationTransition(
+              trailing: RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more)
               )
             )
           ),
-          new ClipRect(
-            child: new Align(
+          ClipRect(
+            child: Align(
               heightFactor: _easeInAnimation.value,
-              child: new Column(children: widget.children)
+              child: Column(children: widget.children)
             )
           )
         ]
@@ -245,7 +245,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
       ..begin = Colors.transparent
       ..end = widget.backgroundColor ?? Colors.transparent;
 
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: _controller.view,
       builder: buildList
     );
@@ -279,7 +279,7 @@ class TwoLevelList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView(
+    return ListView(
       padding: padding,
       shrinkWrap: true,
       children: KeyedSubtree.ensureUniqueKeysForList(children),

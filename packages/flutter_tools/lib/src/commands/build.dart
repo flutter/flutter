@@ -18,11 +18,11 @@ import 'build_ios.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp = false}) {
-    addSubcommand(new BuildApkCommand(verboseHelp: verboseHelp));
-    addSubcommand(new BuildAotCommand());
-    addSubcommand(new BuildIOSCommand());
-    addSubcommand(new BuildFlxCommand());
-    addSubcommand(new BuildBundleCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildAotCommand());
+    addSubcommand(BuildIOSCommand());
+    addSubcommand(BuildFlxCommand());
+    addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
   }
 
   @override

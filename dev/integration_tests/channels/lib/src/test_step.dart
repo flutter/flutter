@@ -72,21 +72,21 @@ class TestStepResult {
   final dynamic error;
 
   Widget asWidget(BuildContext context) {
-    return new Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Text('Step: $name', style: bold),
-        new Text(description),
+        Text('Step: $name', style: bold),
+        Text(description),
         const Text(' '),
-        new Text('Msg sent: ${_toString(messageSent)}'),
-        new Text('Msg rvcd: ${_toString(messageReceived)}'),
-        new Text('Reply echo: ${_toString(replyEcho)}'),
-        new Text('Msg echo: ${_toString(messageEcho)}'),
-        new Text('Error: ${_toString(error)}'),
+        Text('Msg sent: ${_toString(messageSent)}'),
+        Text('Msg rvcd: ${_toString(messageReceived)}'),
+        Text('Reply echo: ${_toString(replyEcho)}'),
+        Text('Msg echo: ${_toString(messageEcho)}'),
+        Text('Error: ${_toString(error)}'),
         const Text(' '),
-        new Text(
+        Text(
           status.toString().substring('TestStatus.'.length),
-          key: new ValueKey<String>(
+          key: ValueKey<String>(
               status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
         ),
@@ -117,7 +117,7 @@ Future<TestStepResult> resultOfHandshake(
   } else {
     status = TestStatus.ok;
   }
-  return new TestStepResult(
+  return TestStepResult(
     name,
     description,
     status,

@@ -10,8 +10,8 @@ import '../runner/flutter_command.dart';
 
 class MaterializeCommand extends FlutterCommand {
   MaterializeCommand() {
-    addSubcommand(new MaterializeAndroidCommand());
-    addSubcommand(new MaterializeIosCommand());
+    addSubcommand(MaterializeAndroidCommand());
+    addSubcommand(MaterializeIosCommand());
   }
 
   @override
@@ -45,7 +45,7 @@ abstract class MaterializeSubCommand extends FlutterCommand {
     await super.validateCommand();
     _project = await FlutterProject.current();
     if (!_project.isModule)
-      throw new ToolExit("Only projects created using 'flutter create -t module' can be materialized.");
+      throw ToolExit("Only projects created using 'flutter create -t module' can be materialized.");
   }
 }
 

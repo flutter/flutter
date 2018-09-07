@@ -65,10 +65,10 @@ class ListTileTheme extends InheritedWidget {
     @required Widget child,
   }) {
     assert(child != null);
-    return new Builder(
+    return Builder(
       builder: (BuildContext context) {
         final ListTileTheme parent = ListTileTheme.of(context);
-        return new ListTileTheme(
+        return ListTileTheme(
           key: key,
           dense: dense ?? parent.dense,
           style: style ?? parent.style,
@@ -310,15 +310,15 @@ class ListTile extends StatelessWidget {
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
 
-    final Decoration decoration = new BoxDecoration(
-      border: new Border(
+    final Decoration decoration = BoxDecoration(
+      border: Border(
         bottom: Divider.createBorderSide(context, color: color),
       ),
     );
 
     Widget tile = iterator.current;
     while (iterator.moveNext()) {
-      yield new DecoratedBox(
+      yield DecoratedBox(
         position: DecorationPosition.foreground,
         decoration: decoration,
         child: tile,
@@ -410,7 +410,7 @@ class ListTile extends StatelessWidget {
 
     IconThemeData iconThemeData;
     if (leading != null || trailing != null)
-      iconThemeData = new IconThemeData(color: _iconColor(theme, tileTheme));
+      iconThemeData = IconThemeData(color: _iconColor(theme, tileTheme));
 
     Widget leadingIcon;
     if (leading != null) {
@@ -421,7 +421,7 @@ class ListTile extends StatelessWidget {
     }
 
     final TextStyle titleStyle = _titleTextStyle(theme, tileTheme);
-    final Widget titleText = new AnimatedDefaultTextStyle(
+    final Widget titleText = AnimatedDefaultTextStyle(
       style: titleStyle,
       duration: kThemeChangeDuration,
       child: title ?? const SizedBox()
@@ -431,7 +431,7 @@ class ListTile extends StatelessWidget {
     TextStyle subtitleStyle;
     if (subtitle != null) {
       subtitleStyle = _subtitleTextStyle(theme, tileTheme);
-      subtitleText = new AnimatedDefaultTextStyle(
+      subtitleText = AnimatedDefaultTextStyle(
         style: subtitleStyle,
         duration: kThemeChangeDuration,
         child: subtitle,
@@ -452,17 +452,17 @@ class ListTile extends StatelessWidget {
       ?? tileTheme?.contentPadding?.resolve(textDirection)
       ?? _defaultContentPadding;
 
-    return new InkWell(
+    return InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      child: new Semantics(
+      child: Semantics(
         selected: selected,
         enabled: enabled,
-        child: new SafeArea(
+        child: SafeArea(
           top: false,
           bottom: false,
           minimum: resolvedContentPadding,
-          child: new _ListTile(
+          child: _ListTile(
             leading: leadingIcon,
             title: titleText,
             subtitle: subtitleText,
@@ -516,11 +516,11 @@ class _ListTile extends RenderObjectWidget {
   final TextBaseline subtitleBaselineType;
 
   @override
-  _ListTileElement createElement() => new _ListTileElement(this);
+  _ListTileElement createElement() => _ListTileElement(this);
 
   @override
   _RenderListTile createRenderObject(BuildContext context) {
-    return new _RenderListTile(
+    return _RenderListTile(
       isThreeLine: isThreeLine,
       isDense: isDense,
       textDirection: textDirection,
@@ -969,28 +969,28 @@ class _RenderListTile extends RenderBox {
     switch (textDirection) {
       case TextDirection.rtl: {
         if (hasLeading)
-          _positionBox(leading, new Offset(tileWidth - leadingSize.width, leadingY));
+          _positionBox(leading, Offset(tileWidth - leadingSize.width, leadingY));
         final double titleX = hasTrailing ? trailingSize.width + _horizontalTitleGap : 0.0;
-        _positionBox(title, new Offset(titleX, titleY));
+        _positionBox(title, Offset(titleX, titleY));
         if (hasSubtitle)
-          _positionBox(subtitle, new Offset(titleX, subtitleY));
+          _positionBox(subtitle, Offset(titleX, subtitleY));
         if (hasTrailing)
-          _positionBox(trailing, new Offset(0.0, trailingY));
+          _positionBox(trailing, Offset(0.0, trailingY));
         break;
       }
       case TextDirection.ltr: {
         if (hasLeading)
-          _positionBox(leading, new Offset(0.0, leadingY));
-        _positionBox(title, new Offset(titleStart, titleY));
+          _positionBox(leading, Offset(0.0, leadingY));
+        _positionBox(title, Offset(titleStart, titleY));
         if (hasSubtitle)
-          _positionBox(subtitle, new Offset(titleStart, subtitleY));
+          _positionBox(subtitle, Offset(titleStart, subtitleY));
         if (hasTrailing)
-          _positionBox(trailing, new Offset(tileWidth - trailingSize.width, trailingY));
+          _positionBox(trailing, Offset(tileWidth - trailingSize.width, trailingY));
         break;
       }
     }
 
-    size = constraints.constrain(new Size(tileWidth, tileHeight));
+    size = constraints.constrain(Size(tileWidth, tileHeight));
     assert(size.width == constraints.constrainWidth(tileWidth));
     assert(size.height == constraints.constrainHeight(tileHeight));
   }

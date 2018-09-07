@@ -33,7 +33,7 @@ void main() {
   });
 
   testWidgets('Navigation with TickerMode', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: const LinearProgressIndicator(),
       routes: <String, WidgetBuilder>{
         '/test': (BuildContext context) => const Text('hello'),
@@ -55,21 +55,21 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    final Widget widget = new BoringTickerTest();
+    final Widget widget = BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     // the test is that this doesn't crash, like it used to...
   });
 }
 
 class BoringTickerTest extends StatefulWidget {
   @override
-  _BoringTickerTestState createState() => new _BoringTickerTestState();
+  _BoringTickerTestState createState() => _BoringTickerTestState();
 }
 
 class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) => new Container();
+  Widget build(BuildContext context) => Container();
 }

@@ -49,7 +49,7 @@ class _StdoutHandler {
       }
       final int spaceDelimiter = string.lastIndexOf(' ');
       compilerOutput.complete(
-        new CompilerOutput(
+        CompilerOutput(
           string.substring(boundaryKey.length + 1, spaceDelimiter),
           int.parse(string.substring(spaceDelimiter + 1).trim())));
     }
@@ -62,7 +62,7 @@ class _StdoutHandler {
   // with its own boundary key and new completer.
   void reset({bool suppressCompilerMessages = false}) {
     boundaryKey = null;
-    compilerOutput = new Completer<CompilerOutput>();
+    compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
   }
 }
@@ -95,7 +95,7 @@ class KernelCompiler {
     // depfile. None of these are available on the local host.
     Fingerprinter fingerprinter;
     if (depFilePath != null) {
-      fingerprinter = new Fingerprinter(
+      fingerprinter = Fingerprinter(
         fingerprintPath: '$depFilePath.fingerprint',
         paths: <String>[mainPath],
         properties: <String, String>{
@@ -109,7 +109,7 @@ class KernelCompiler {
 
       if (await fingerprinter.doesFingerprintMatch()) {
         printTrace('Skipping kernel compilation. Fingerprint match.');
-        return new CompilerOutput(outputFilePath, 0);
+        return CompilerOutput(outputFilePath, 0);
       }
     }
 
@@ -175,7 +175,7 @@ class KernelCompiler {
       printError('Failed to start frontend server $error, $stack');
     });
 
-    final _StdoutHandler _stdoutHandler = new _StdoutHandler();
+    final _StdoutHandler _stdoutHandler = _StdoutHandler();
 
     server.stderr
       .transform(utf8.decoder)
@@ -255,8 +255,8 @@ class ResidentCompiler {
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
       _fileSystemScheme = fileSystemScheme,
-      _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer),
-      _controller = new StreamController<_CompilationRequest>(),
+      _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
+      _controller = StreamController<_CompilationRequest>(),
       _initializeFromDill = initializeFromDill {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
@@ -287,9 +287,9 @@ class ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-        new _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
+        _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
     );
     return completer.future;
   }
@@ -304,7 +304,7 @@ class ResidentCompiler {
           request.outputPath, _mapFilename(request.packagesFilePath));
     }
 
-    final String inputKey = new Uuid().generateV4();
+    final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('recompile ${request.mainPath != null ? _mapFilename(request.mainPath) + " ": ""}$inputKey');
     for (String fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri));
@@ -399,9 +399,9 @@ class ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-        new _CompileExpressionRequest(
+        _CompileExpressionRequest(
             completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
     );
     return completer.future;
@@ -416,7 +416,7 @@ class ResidentCompiler {
     if (_server == null)
       return null;
 
-    final String inputKey = new Uuid().generateV4();
+    final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
     _server.stdin.writeln(request.expression);
     request.definitions?.forEach(_server.stdin.writeln);
@@ -455,7 +455,7 @@ class ResidentCompiler {
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
-          return new Uri(
+          return Uri(
               scheme: _fileSystemScheme, path: filename.substring(root.length))
               .toString();
         }
@@ -469,7 +469,7 @@ class ResidentCompiler {
       final String filename = Uri.parse(fileUri).toFilePath();
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
-          return new Uri(
+          return Uri(
               scheme: _fileSystemScheme, path: filename.substring(root.length))
               .toString();
         }

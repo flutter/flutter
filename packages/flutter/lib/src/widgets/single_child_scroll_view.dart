@@ -269,16 +269,16 @@ class SingleChildScrollView extends StatelessWidget {
     final AxisDirection axisDirection = _getDirection(context);
     Widget contents = child;
     if (padding != null)
-      contents = new Padding(padding: padding, child: contents);
+      contents = Padding(padding: padding, child: contents);
     final ScrollController scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
-    final Scrollable scrollable = new Scrollable(
+    final Scrollable scrollable = Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return new _SingleChildViewport(
+        return _SingleChildViewport(
           axisDirection: axisDirection,
           offset: offset,
           child: contents,
@@ -286,7 +286,7 @@ class SingleChildScrollView extends StatelessWidget {
       },
     );
     return primary && scrollController != null
-      ? new PrimaryScrollController.none(child: scrollable)
+      ? PrimaryScrollController.none(child: scrollable)
       : scrollable;
   }
 }
@@ -305,7 +305,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 
   @override
   _RenderSingleChildViewport createRenderObject(BuildContext context) {
-    return new _RenderSingleChildViewport(
+    return _RenderSingleChildViewport(
       axisDirection: axisDirection,
       offset: offset,
     );
@@ -382,7 +382,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     // We don't actually use the offset argument in BoxParentData, so let's
     // avoid allocating it at all.
     if (child.parentData is! ParentData)
-      child.parentData = new ParentData();
+      child.parentData = ParentData();
   }
 
   @override
@@ -491,13 +491,13 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     assert(axisDirection != null);
     switch (axisDirection) {
       case AxisDirection.up:
-        return new Offset(0.0, position - child.size.height + size.height);
+        return Offset(0.0, position - child.size.height + size.height);
       case AxisDirection.down:
-        return new Offset(0.0, -position);
+        return Offset(0.0, -position);
       case AxisDirection.left:
-        return new Offset(position - child.size.width + size.width, 0.0);
+        return Offset(position - child.size.width + size.width, 0.0);
       case AxisDirection.right:
-        return new Offset(-position, 0.0);
+        return Offset(-position, 0.0);
     }
     return null;
   }
@@ -550,7 +550,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
     rect ??= target.paintBounds;
     if (target is! RenderBox)
-      return new RevealedOffset(offset: offset.pixels, rect: rect);
+      return RevealedOffset(offset: offset.pixels, rect: rect);
 
     final RenderBox targetBox = target;
     final Matrix4 transform = targetBox.getTransformTo(this);
@@ -587,7 +587,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
     final double targetOffset = leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
     final Rect targetRect = bounds.shift(_paintOffsetForPosition(targetOffset));
-    return new RevealedOffset(offset: targetOffset, rect: targetRect);
+    return RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   @override
@@ -626,14 +626,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     assert(axis != null);
     switch (axis) {
       case Axis.vertical:
-        return new Rect.fromLTRB(
+        return Rect.fromLTRB(
           semanticBounds.left,
           semanticBounds.top - cacheExtent,
           semanticBounds.right,
           semanticBounds.bottom + cacheExtent,
         );
       case Axis.horizontal:
-        return new Rect.fromLTRB(
+        return Rect.fromLTRB(
           semanticBounds.left - cacheExtent,
           semanticBounds.top,
           semanticBounds.right + cacheExtent,

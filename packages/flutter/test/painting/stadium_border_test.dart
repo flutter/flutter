@@ -21,15 +21,15 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
 
     const StadiumBorder c1 = StadiumBorder(side: BorderSide(width: 1.0));
-    expect(c1.getOuterPath(new Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
+    expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
     const StadiumBorder c2 = StadiumBorder(side: BorderSide(width: 1.0));
-    expect(c2.getInnerPath(new Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
-    final Rect rect = new Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
+    expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
+    final Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
     expect(
             (Canvas canvas) => c10.paint(canvas, rect),
         paints
           ..rrect(
-            rrect: new RRect.fromRectAndRadius(rect.deflate(5.0), new Radius.circular(rect.shortestSide / 2.0 - 5.0)),
+            rrect: RRect.fromRectAndRadius(rect.deflate(5.0), Radius.circular(rect.shortestSide / 2.0 - 5.0)),
             strokeWidth: 10.0,
           )
     );
@@ -38,7 +38,7 @@ void main() {
   test('StadiumBorder and CircleBorder', () {
     const StadiumBorder stadium = StadiumBorder(side: BorderSide.none);
     const CircleBorder circle = CircleBorder(side: BorderSide.none);
-    final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],
       excludes: const <Offset>[ Offset(1.0, 1.0), Offset(99.0, 19.0), ],
@@ -89,7 +89,7 @@ void main() {
   test('StadiumBorder and RoundedRectBorder', () {
     const StadiumBorder stadium = StadiumBorder(side: BorderSide.none);
     const RoundedRectangleBorder rrect = RoundedRectangleBorder(side: BorderSide.none);
-    final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    final Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[
         Offset(25.0, 25.0),

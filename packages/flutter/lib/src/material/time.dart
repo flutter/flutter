@@ -55,13 +55,13 @@ class TimeOfDay {
   ///
   /// The [hour] is set to the current hour and the [minute] is set to the
   /// current minute in the local time zone.
-  factory TimeOfDay.now() { return new TimeOfDay.fromDateTime(new DateTime.now()); }
+  factory TimeOfDay.now() { return TimeOfDay.fromDateTime(DateTime.now()); }
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
   TimeOfDay replacing({ int hour, int minute }) {
     assert(hour == null || (hour >= 0 && hour < hoursPerDay));
     assert(minute == null || (minute >= 0 && minute < minutesPerHour));
-    return new TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
+    return TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
   }
 
   /// The selected hour, in 24 hour time from 0..23.

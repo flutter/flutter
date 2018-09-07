@@ -151,7 +151,7 @@ class Ticker {
   TickerFuture start() {
     assert(() {
       if (isActive) {
-        throw new FlutterError(
+        throw FlutterError(
           'A ticker was started twice.\n'
           'A ticker that is already active cannot be started again without first stopping it.\n'
           'The affected ticker was: ${ toString(debugIncludeStack: true) }'
@@ -160,7 +160,7 @@ class Ticker {
       return true;
     }());
     assert(_startTime == null);
-    _future = new TickerFuture._();
+    _future = TickerFuture._();
     if (shouldScheduleTick) {
       scheduleTick();
     }
@@ -319,7 +319,7 @@ class Ticker {
 
   @override
   String toString({ bool debugIncludeStack = false }) {
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     buffer.write('$runtimeType(');
     assert(() {
       buffer.write(debugLabel ?? '');
@@ -368,7 +368,7 @@ class TickerFuture implements Future<Null> {
     _complete();
   }
 
-  final Completer<Null> _primaryCompleter = new Completer<Null>();
+  final Completer<Null> _primaryCompleter = Completer<Null>();
   Completer<Null> _secondaryCompleter;
   bool _completed; // null means unresolved, true means complete, false means canceled
 
@@ -382,7 +382,7 @@ class TickerFuture implements Future<Null> {
   void _cancel(Ticker ticker) {
     assert(_completed == null);
     _completed = false;
-    _secondaryCompleter?.completeError(new TickerCanceled(ticker));
+    _secondaryCompleter?.completeError(TickerCanceled(ticker));
   }
 
   /// Calls `callback` either when this future resolves or when the ticker is
@@ -409,7 +409,7 @@ class TickerFuture implements Future<Null> {
   /// will be an uncaught exception in the current zone.
   Future<Null> get orCancel {
     if (_secondaryCompleter == null) {
-      _secondaryCompleter = new Completer<Null>();
+      _secondaryCompleter = Completer<Null>();
       if (_completed != null) {
         if (_completed) {
           _secondaryCompleter.complete(null);

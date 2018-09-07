@@ -26,7 +26,7 @@ Future<String> dataHandler(String message) async {
     });
     return json.encode(result);
   }
-  throw new UnimplementedError();
+  throw UnimplementedError();
 }
 
 const List<String> routes = <String>[
@@ -38,17 +38,17 @@ class TestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       routes: <String, WidgetBuilder>{
-        selectionControlsRoute: (BuildContext context) => new SelectionControlsPage(),
+        selectionControlsRoute: (BuildContext context) => SelectionControlsPage(),
       },
-      home: new Builder(
+      home: Builder(
         builder: (BuildContext context) {
-          return new Scaffold(
-            body: new Column(
+          return Scaffold(
+            body: Column(
               children: routes.map((String value) {
-                return new MaterialButton(
-                  child: new Text(value),
+                return MaterialButton(
+                  child: Text(value),
                   onPressed: () {
                     Navigator.of(context).pushNamed(value);
                   },

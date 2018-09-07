@@ -17,7 +17,7 @@ void main() {
     Future<AndroidSemanticsNode> getSemantics(SerializableFinder finder) async {
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
-      return new AndroidSemanticsNode.deserialize(data);
+      return AndroidSemanticsNode.deserialize(data);
     }
 
     setUpAll(() async {

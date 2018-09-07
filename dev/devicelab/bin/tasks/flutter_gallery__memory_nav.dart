@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<Null> main() async {
-  await task(new MemoryTest(
+  await task(MemoryTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
     'test_memory/memory_nav.dart',
     'io.flutter.demo.gallery',

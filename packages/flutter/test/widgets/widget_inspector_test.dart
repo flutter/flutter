@@ -53,15 +53,15 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
   // These tests need access to protected members of WidgetInspectorService.
   static void runTests() {
-    final TestWidgetInspectorService service = new TestWidgetInspectorService();
+    final TestWidgetInspectorService service = TestWidgetInspectorService();
     WidgetInspectorService.instance = service;
 
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -72,11 +72,11 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       );
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new WidgetInspector(
+          child: WidgetInspector(
             selectButtonBuilder: null,
-            child: new Stack(
+            child: Stack(
               children: const <Widget>[
                 Text('a', textDirection: TextDirection.ltr),
                 Text('b', textDirection: TextDirection.ltr),
@@ -92,34 +92,34 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('WidgetInspector interaction test', (WidgetTester tester) async {
       final List<String> log = <String>[];
-      final GlobalKey selectButtonKey = new GlobalKey();
-      final GlobalKey inspectorKey = new GlobalKey();
-      final GlobalKey topButtonKey = new GlobalKey();
+      final GlobalKey selectButtonKey = GlobalKey();
+      final GlobalKey inspectorKey = GlobalKey();
+      final GlobalKey topButtonKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return new Material(child: new RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
       String paragraphText(RenderParagraph paragraph) => paragraph.text.text;
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new WidgetInspector(
+          child: WidgetInspector(
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
-            child: new Material(
-              child: new ListView(
+            child: Material(
+              child: ListView(
                 children: <Widget>[
-                  new RaisedButton(
+                  RaisedButton(
                     key: topButtonKey,
                     onPressed: () {
                       log.add('top');
                     },
                     child: const Text('TOP'),
                   ),
-                  new RaisedButton(
+                  RaisedButton(
                     onPressed: () {
                       log.add('bottom');
                     },
@@ -165,13 +165,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('WidgetInspector non-invertible transform regression test', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new WidgetInspector(
+          child: WidgetInspector(
             selectButtonBuilder: null,
-            child: new Transform(
-              transform: new Matrix4.identity()..scale(0.0),
-              child: new Stack(
+            child: Transform(
+              transform: Matrix4.identity()..scale(0.0),
+              child: Stack(
                 children: const <Widget>[
                   Text('a', textDirection: TextDirection.ltr),
                   Text('b', textDirection: TextDirection.ltr),
@@ -189,25 +189,25 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     testWidgets('WidgetInspector scroll test', (WidgetTester tester) async {
-      final Key childKey = new UniqueKey();
-      final GlobalKey selectButtonKey = new GlobalKey();
-      final GlobalKey inspectorKey = new GlobalKey();
+      final Key childKey = UniqueKey();
+      final GlobalKey selectButtonKey = GlobalKey();
+      final GlobalKey inspectorKey = GlobalKey();
 
       Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
-        return new Material(child: new RaisedButton(onPressed: onPressed, key: selectButtonKey));
+        return Material(child: RaisedButton(onPressed: onPressed, key: selectButtonKey));
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new WidgetInspector(
+          child: WidgetInspector(
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
-            child: new ListView(
+            child: ListView(
               children: <Widget>[
-                new Container(
+                Container(
                   key: childKey,
                   height: 5000.0,
                 ),
@@ -250,11 +250,11 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       bool didLongPress = false;
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new WidgetInspector(
+          child: WidgetInspector(
             selectButtonBuilder: null,
-            child: new GestureDetector(
+            child: GestureDetector(
               onLongPress: () {
                 expect(didLongPress, isFalse);
                 didLongPress = true;
@@ -271,42 +271,42 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     testWidgets('WidgetInspector offstage', (WidgetTester tester) async {
-      final GlobalKey inspectorKey = new GlobalKey();
-      final GlobalKey clickTarget = new GlobalKey();
+      final GlobalKey inspectorKey = GlobalKey();
+      final GlobalKey clickTarget = GlobalKey();
 
       Widget createSubtree({ double width, Key key }) {
-        return new Stack(
+        return Stack(
           children: <Widget>[
-            new Positioned(
+            Positioned(
               key: key,
               left: 0.0,
               top: 0.0,
               width: width,
               height: 100.0,
-              child: new Text(width.toString(), textDirection: TextDirection.ltr),
+              child: Text(width.toString(), textDirection: TextDirection.ltr),
             ),
           ],
         );
       }
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new WidgetInspector(
+          child: WidgetInspector(
             key: inspectorKey,
             selectButtonBuilder: null,
-            child: new Overlay(
+            child: Overlay(
               initialEntries: <OverlayEntry>[
-                new OverlayEntry(
+                OverlayEntry(
                   opaque: false,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 94.0),
                 ),
-                new OverlayEntry(
+                OverlayEntry(
                   opaque: true,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 95.0),
                 ),
-                new OverlayEntry(
+                OverlayEntry(
                   opaque: false,
                   maintainState: true,
                   builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
@@ -337,7 +337,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     test('WidgetInspectorService dispose group', () {
       service.disposeAllGroups();
-      final Object a = new Object();
+      final Object a = Object();
       const String group1 = 'group-1';
       const String group2 = 'group-2';
       const String group3 = 'group-3';
@@ -353,8 +353,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     test('WidgetInspectorService dispose id', () {
       service.disposeAllGroups();
-      final Object a = new Object();
-      final Object b = new Object();
+      final Object a = Object();
+      final Object b = Object();
       const String group1 = 'group-1';
       const String group2 = 'group-2';
       final String aId = service.toId(a, group1);
@@ -416,9 +416,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('WidgetInspectorService maybeSetSelection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -465,9 +465,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -536,9 +536,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -563,9 +563,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
@@ -623,9 +623,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
@@ -701,7 +701,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     test('ext.flutter.inspector.disposeGroup', () async {
-      final Object a = new Object();
+      final Object a = Object();
       const String group1 = 'group-1';
       const String group2 = 'group-2';
       const String group3 = 'group-3';
@@ -716,8 +716,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     test('ext.flutter.inspector.disposeId', () async {
-      final Object a = new Object();
-      final Object b = new Object();
+      final Object a = Object();
+      final Object b = Object();
       const String group1 = 'group-1';
       const String group2 = 'group-2';
       final String aId = service.toId(a, group1);
@@ -733,9 +733,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.setSelection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -782,9 +782,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -851,9 +851,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -879,9 +879,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -915,9 +915,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -953,9 +953,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -1036,9 +1036,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group = 'test-group';
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a', textDirection: TextDirection.ltr),
               Text('b', textDirection: TextDirection.ltr),
@@ -1089,9 +1089,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),
@@ -1149,9 +1149,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: const <Widget>[
               Text('a'),
               Text('b', textDirection: TextDirection.ltr),

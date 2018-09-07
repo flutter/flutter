@@ -26,13 +26,13 @@ abstract class Animatable<T> {
   /// Returns a new Animation that is driven by the given animation but that
   /// takes on values determined by this object.
   Animation<T> animate(Animation<double> parent) {
-    return new _AnimatedEvaluation<T>(parent, this);
+    return _AnimatedEvaluation<T>(parent, this);
   }
 
   /// Returns a new Animatable whose value is determined by first evaluating
   /// the given parent and then evaluating this object.
   Animatable<T> chain(Animatable<double> parent) {
-    return new _ChainedEvaluation<T>(parent, this);
+    return _ChainedEvaluation<T>(parent, this);
   }
 }
 
@@ -67,7 +67,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
   @override
   T evaluate(Animation<double> animation) {
     final double value = _parent.evaluate(animation);
-    return _evaluatable.evaluate(new AlwaysStoppedAnimation<double>(value));
+    return _evaluatable.evaluate(AlwaysStoppedAnimation<double>(value));
   }
 
   @override
