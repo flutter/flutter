@@ -2104,8 +2104,9 @@ void main() {
     await tester.enterText(find.byType(TextField).first, testValue);
     await tester.pumpAndSettle();
 
+    debugPrint('here');
     await tester.dragFrom(textOffsetToPosition(tester, 0), textOffsetToPosition(tester, 20), isTouch: false);
-
+    debugPrint('here2');
     expect(controller.selection.extentOffset - controller.selection.baseOffset, 20);
   });
 

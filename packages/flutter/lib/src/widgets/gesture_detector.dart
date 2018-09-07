@@ -163,6 +163,9 @@ class GestureDetector extends StatelessWidget {
     this.onPanDown,
     this.onPanStart,
     this.onPanUpdate,
+    this.onMousePanDown,
+    this.onMousePanStart,
+    this.onMousePanUpdate,
     this.onPanEnd,
     this.onPanCancel,
     this.onScaleStart,
@@ -289,6 +292,15 @@ class GestureDetector extends StatelessWidget {
   /// A pointer that is in contact with the screen and moving has moved again.
   final GestureDragUpdateCallback onPanUpdate;
 
+  /// A pointer has contacted the screen and might begin to move.
+  final GestureDragDownCallback onMousePanDown;
+
+  /// A pointer has contacted the screen and has begun to move.
+  final GestureDragStartCallback onMousePanStart;
+
+  /// A pointer that is in contact with the screen and moving has moved again.
+  final GestureDragUpdateCallback onMousePanUpdate;
+
   /// A pointer that was previously in contact with the screen and moving
   /// is no longer in contact with the screen and was moving at a specific
   /// velocity when it stopped contacting the screen.
@@ -408,6 +420,20 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onPanUpdate
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel;
+        },
+      );
+    }
+
+    if (onMousePanDown != null ||
+        onMousePanStart != null ||
+        onMousePanUpdate != null) {
+      gestures[MousePanGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<MousePanGestureRecognizer>(
+            () => new MousePanGestureRecognizer(debugOwner: this),
+            (MousePanGestureRecognizer instance) {
+          instance
+            ..onDown = onMousePanDown
+            ..onStart = onMousePanStart
+            ..onUpdate = onMousePanUpdate;
         },
       );
     }

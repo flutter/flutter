@@ -4,6 +4,8 @@
 
 import 'dart:ui' show PointerDeviceKind;
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'drag_details.dart';
@@ -104,6 +106,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// clicks and drags or not.
   bool enableForMouse = true;
 
+  bool mouseOnlyGestures = false;
+
   _DragState _state = _DragState.ready;
   Offset _initialPosition;
   Offset _pendingDragOffset;
@@ -121,6 +125,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void addPointer(PointerEvent event) {
     if (!enableForMouse && (event.kind == PointerDeviceKind.mouse))
       return;
+    if (mouseOnlyGestures && event.kind != PointerDeviceKind.mouse) {
+      rejectGesture(event.pointer);
+      return;
+    }
+
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = new VelocityTracker();
     if (_state == _DragState.ready) {
@@ -138,8 +147,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
+    debugPrint(event.kind.toString() + 'a nd ' + mouseOnlyGestures.toString());
+
     if (!enableForMouse && (event.kind == PointerDeviceKind.mouse))
       return;
+    if (mouseOnlyGestures && event.kind != PointerDeviceKind.mouse) {
+      rejectGesture(event.pointer);
+      return;
+    }
+
     assert(_state != _DragState.ready);
     if (!event.synthesized
         && (event is PointerDownEvent || event is PointerMoveEvent)) {
@@ -355,4 +371,43 @@ class PanGestureRecognizer extends DragGestureRecognizer {
 
   @override
   String get debugDescription => 'pan';
+}
+
+/// Recognizes movement both horizontally and vertically.
+///
+/// See also:
+///
+///  * [ImmediateMultiDragGestureRecognizer], for a similar recognizer that
+///    tracks each touch point independently.
+///  * [DelayedMultiDragGestureRecognizer], for a similar recognizer that
+///    tracks each touch point independently, but that doesn't start until
+///    some time has passed.
+class MousePanGestureRecognizer extends DragGestureRecognizer {
+  /// Create a gesture recognizer for tracking movement on a plane.
+  MousePanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
+  @override
+  bool _isFlingGesture(VelocityEstimate estimate) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? kTouchSlop;
+    return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity
+        && estimate.offset.distanceSquared > minDistance * minDistance;
+  }
+
+  @override
+  bool get _hasSufficientPendingDragDeltaToAccept {
+    return _pendingDragOffset.distance > kPanSlop;
+  }
+
+  @override
+  Offset _getDeltaForDetails(Offset delta) => delta;
+
+  @override
+  double _getPrimaryValueFromOffset(Offset value) => null;
+
+  @override
+  String get debugDescription => 'mouse pan';
+
+  @override
+  bool get mouseOnlyGestures => true;
 }

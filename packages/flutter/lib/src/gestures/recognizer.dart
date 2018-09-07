@@ -289,7 +289,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// The global location at which the primary pointer contacted the screen.
   Offset initialPosition;
 
-  ///
+  /// The device kind currently being used as the pointer.
   PointerDeviceKind deviceKind;
 
   Timer _timer;
