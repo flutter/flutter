@@ -1319,12 +1319,29 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FloatingActionButtonLocation _floatingActionButtonLocation;
   AnimationController _floatingActionButtonHideController;
 
+  /// Obtains current value of the [floatingActionButton]'s hide/show animation.
+  double get floatingActionButtonVisibilityValue => _floatingActionButtonHideController.value;
+
+  /// Sets the current value of the [floatingActionButton]'s hide/show animation.
+  ///
+  /// To simply animate forward or backward, use [showFloatingActionButton] or
+  /// [hideFloatingActionButton], respectively.
+  set floatingActionButtonVisibilityValue(double newValue) {
+    _floatingActionButtonHideController.value = newValue;
+  }
+
   /// Hides the [Scaffold.floatingActionButton].
+  ///
+  /// This will result in animating from the current
+  /// [floatingActionButtonVisibilityValue] to 0.0.
   TickerFuture hideFloatingActionButton() {
     return _floatingActionButtonHideController.reverse();
   }
 
   /// Shows the [Scaffold.floatingActionButton].
+  ///
+  /// This call will result in animating from the current
+  /// [floatingActionButtonVisibilityValue] to 1.0.
   TickerFuture showFloatingActionButton() {
     return _floatingActionButtonHideController.forward();
   }

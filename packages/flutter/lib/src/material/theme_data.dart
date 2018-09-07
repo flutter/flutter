@@ -72,7 +72,10 @@ enum MaterialTapTargetSize {
   shrinkWrap,
 }
 
-/// Holds the color and typography values for a material design theme.
+/// A callback used to get the animation to apply to a [Scaffold.floatingActionButton].
+typedef Widget FloatingActionButtonAnimationFactory(AnimationController controller, Widget floatingActionButton);
+
+/// Holds color, typography, and animation values for a material design theme.
 ///
 /// Use this class to configure a [Theme] widget.
 ///
@@ -143,6 +146,8 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    FloatingActionButtonAnimationFactory hideFabAnimation,
+    FloatingActionButtonAnimationFactory moveFabAnimation,
   }) {
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
     brightness ??= Brightness.light;
@@ -209,6 +214,11 @@ class ThemeData extends Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
+    hideFabAnimation ??= (AnimationController controller, Widget floatingActionButton) =>
+      new ScaleTransition(scale: controller, child: floatingActionButton);
+    // TODO(dnfield): moveFabAnimation logic.
+    moveFabAnimation ??= (AnimationController controller, Widget floatingActionButton) =>
+    new ScaleTransition(scale: controller, child: floatingActionButton);
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -251,6 +261,8 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
+      hideFabAnimation: hideFabAnimation,
+      moveFabAnimation: moveFabAnimation,
     );
   }
 
@@ -302,6 +314,8 @@ class ThemeData extends Diagnosticable {
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
+    @required this.hideFabAnimation,
+    @required this.moveFabAnimation,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -341,7 +355,9 @@ class ThemeData extends Diagnosticable {
        assert(sliderTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
-       assert(materialTapTargetSize != null);
+       assert(materialTapTargetSize != null),
+       assert(hideFabAnimation != null),
+       assert(moveFabAnimation != null);
 
   /// A default light blue theme.
   ///
@@ -536,6 +552,12 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// Provides the animation to use when hiding or showing the [Scaffold.floatingActionButton].
+  final FloatingActionButtonAnimationFactory hideFabAnimation;
+
+  /// Provides the animation to use when moving the [Scaffold.floatingActionButton].
+  final FloatingActionButtonAnimationFactory moveFabAnimation;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -579,6 +601,8 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    FloatingActionButtonAnimationFactory hideFabAnimation,
+    FloatingActionButtonAnimationFactory moveFabAnimation,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -622,6 +646,8 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
+      hideFabAnimation: hideFabAnimation ?? this.hideFabAnimation,
+      moveFabAnimation: moveFabAnimation ?? this.moveFabAnimation,
     );
   }
 
@@ -751,6 +777,8 @@ class ThemeData extends Diagnosticable {
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
+      hideFabAnimation: t < 0.5 ? a.hideFabAnimation : b.hideFabAnimation,
+      moveFabAnimation: t < 0.5 ? a.moveFabAnimation : b.moveFabAnimation,
     );
   }
 
@@ -797,7 +825,9 @@ class ThemeData extends Diagnosticable {
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
-           (otherData.materialTapTargetSize == materialTapTargetSize);
+           (otherData.materialTapTargetSize == materialTapTargetSize) &&
+           (otherData.hideFabAnimation == hideFabAnimation) &&
+           (otherData.moveFabAnimation == moveFabAnimation);
   }
 
   @override
@@ -842,7 +872,11 @@ class ThemeData extends Diagnosticable {
         chipTheme,
         platform,
         materialTapTargetSize,
-        cursorColor
+        hashValues( // Too many values again.
+          cursorColor,
+          hideFabAnimation,
+          moveFabAnimation,
+        )
       ),
     );
   }
@@ -889,6 +923,8 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
+    properties.add(new DiagnosticsProperty<FloatingActionButtonAnimationFactory>('hideFabAnimation', hideFabAnimation));
+    properties.add(new DiagnosticsProperty<FloatingActionButtonAnimationFactory>('moveFabAnimation', moveFabAnimation));
   }
 }
 
