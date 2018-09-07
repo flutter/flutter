@@ -45,13 +45,13 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
-    TextDirection textDirection,
   }) {
     return new InkRipple(
       controller: controller,
@@ -64,6 +64,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      textDirection: textDirection,
     );
   }
 }
@@ -115,15 +116,16 @@ class InkRipple extends InteractiveInkFeature {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
-    TextDirection textDirection,
   }) : assert(color != null),
        assert(position != null),
+       assert(textDirection != null),
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,

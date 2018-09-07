@@ -428,6 +428,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
           customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: _handleInkHighlightRemoval,
+          textDirection: Directionality.of(context),
         );
         updateKeepAlive();
       } else {

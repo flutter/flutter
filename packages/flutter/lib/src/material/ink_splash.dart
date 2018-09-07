@@ -118,6 +118,7 @@ class InkSplash extends InteractiveInkFeature {
   InkSplash({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
+    @required TextDirection textDirection,
     Offset position,
     Color color,
     bool containedInkWell = false,
@@ -126,8 +127,8 @@ class InkSplash extends InteractiveInkFeature {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
-    TextDirection textDirection,
-  }) : _position = position,
+  }) : assert(textDirection != null),
+       _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),

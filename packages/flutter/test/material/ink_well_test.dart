@@ -14,27 +14,32 @@ void main() {
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new Material(
-      child: new Center(
-        child: new InkWell(
-          onTap: () {
-            log.add('tap');
-          },
-          onDoubleTap: () {
-            log.add('double-tap');
-          },
-          onLongPress: () {
-            log.add('long-press');
-          },
-          onTapDown: (TapDownDetails details) {
-            log.add('tap-down');
-          },
-          onTapCancel: () {
-            log.add('tap-cancel');
-          },
-        ),
-      ),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new InkWell(
+              onTap: () {
+                log.add('tap');
+              },
+              onDoubleTap: () {
+                log.add('double-tap');
+              },
+              onLongPress: () {
+                log.add('long-press');
+              },
+              onTapDown: (TapDownDetails details) {
+                log.add('tap-down');
+              },
+              onTapCancel: () {
+                log.add('tap-cancel');
+              },
+            ),
+          ),
+        )
+      )
+    );
 
     await tester.tap(find.byType(InkWell), pointer: 1);
 
@@ -72,9 +77,12 @@ void main() {
 
   testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
     await tester.pumpWidget(const Material(
-      child: Center(
-        child: InkWell(),
-      ),
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: InkWell(),
+        ),
+      )
     ));
     await tester.tap(find.byType(InkWell), pointer: 1);
     await tester.pump(const Duration(seconds: 1));
@@ -95,10 +103,13 @@ void main() {
 
     testWidgets('enabled (default)', (WidgetTester tester) async {
       await tester.pumpWidget(new Material(
-        child: new Center(
-          child: new InkWell(
-            onTap: () {},
-            onLongPress: () {},
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new InkWell(
+              onTap: () {},
+              onLongPress: () {},
+            ),
           ),
         ),
       ));
@@ -120,13 +131,16 @@ void main() {
 
     testWidgets('disabled', (WidgetTester tester) async {
       await tester.pumpWidget(new Material(
-        child: new Center(
-          child: new InkWell(
-            onTap: () {},
-            onLongPress: () {},
-            enableFeedback: false,
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new InkWell(
+              onTap: () {},
+              onLongPress: () {},
+              enableFeedback: false,
+            ),
           ),
-        ),
+        )
       ));
       await tester.tap(find.byType(InkWell), pointer: 1);
       await tester.pump(const Duration(seconds: 1));
