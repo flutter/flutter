@@ -116,10 +116,8 @@ class _NoInputBorder extends InputBorder {
   }
 }
 
-/// Creates an [InputBorder] that has no painted outline and rounded corners.
-///
-/// The input decorator's "container" is the optionally filled area above the
-/// decorator's helper, error, and counter.
+/// Creates an [InputBorder] that has no painted outline and rounded corners,
+///  This input border is intended for use with a filled background.
 ///
 /// See also:
 ///
@@ -128,8 +126,8 @@ class _NoInputBorder extends InputBorder {
 ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
 ///    rounded rectangle around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
-class UnpaintedInputBorder extends InputBorder {
-  /// Creates an unpainted rounded border for an [InputDecorator].
+class NoStrokeInputBorder extends InputBorder {
+  /// Creates an filled rounded border with no outline for an [InputDecorator].
   ///
   /// The [borderSide] parameter defaults to [BorderSide.none] (it must not be
   /// null). Applications typically do not specify a [borderSide] parameter
@@ -138,7 +136,7 @@ class UnpaintedInputBorder extends InputBorder {
   ///
   /// The [borderRadius] parameter defaults to a value where all corners have a
   /// circular radius of 4.0. The [borderRadius] parameter must not be null.
-  const UnpaintedInputBorder({
+  const NoStrokeInputBorder({
     BorderSide borderSide = BorderSide.none,
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
   }) : assert(borderRadius != null),
@@ -158,8 +156,8 @@ class UnpaintedInputBorder extends InputBorder {
   bool get isOutline => false;
 
   @override
-  UnpaintedInputBorder copyWith({ BorderSide borderSide, BorderRadius borderRadius }) {
-    return new UnpaintedInputBorder(
+  NoStrokeInputBorder copyWith({ BorderSide borderSide, BorderRadius borderRadius }) {
+    return new NoStrokeInputBorder(
       borderSide: borderSide ?? this.borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
     );
@@ -169,8 +167,8 @@ class UnpaintedInputBorder extends InputBorder {
   EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
-  UnpaintedInputBorder scale(double t) {
-    return new UnpaintedInputBorder(borderSide: borderSide.scale(t));
+  NoStrokeInputBorder scale(double t) {
+    return new NoStrokeInputBorder(borderSide: borderSide.scale(t));
   }
 
   @override
@@ -200,7 +198,7 @@ class UnpaintedInputBorder extends InputBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final UnpaintedInputBorder typedOther = other;
+    final NoStrokeInputBorder typedOther = other;
     return typedOther.borderSide == borderSide
         && typedOther.borderRadius == borderRadius;
   }
@@ -219,7 +217,7 @@ class UnpaintedInputBorder extends InputBorder {
 ///
 ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
 ///    rounded rectangle around the input decorator's container.
-///  * [UnpaintedInputBorder], an [InputDecorator] border with rounded corners
+///  * [NoStrokeInputBorder], an [InputDecorator] border with rounded corners
 ///    and no painted outline.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class UnderlineInputBorder extends InputBorder {
@@ -347,7 +345,7 @@ class UnderlineInputBorder extends InputBorder {
 ///
 ///  * [UnderlineInputBorder], the default [InputDecorator] border which
 ///    draws a horizontal line at the bottom of the input decorator's container.
-///  * [UnpaintedInputBorder], an [InputDecorator] border with rounded corners
+///  * [NoStrokeInputBorder], an [InputDecorator] border with rounded corners
 ///    and no painted outline.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 class OutlineInputBorder extends InputBorder {
