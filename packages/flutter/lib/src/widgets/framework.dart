@@ -1870,19 +1870,6 @@ abstract class BuildContext {
   /// render object is usually short.
   Size get size;
 
-  /// Registers this build context with [ancestor] such that when
-  /// [ancestor]'s widget changes this build context is rebuilt.
-  ///
-  /// Returns `ancestor.widget`.
-  ///
-  /// This method is rarely called directly. Most applications should use
-  /// [inheritFromWidgetOfExactType], which calls this method after finding
-  /// the appropriate [InheritedElement] ancestor.
-  ///
-  /// All of the qualifications about when [inheritFromWidgetOfExactType] can
-  /// be called apply to this method as well.
-  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect });
-
   /// Obtains the nearest widget of the given type, which must be the type of a
   /// concrete [InheritedWidget] subclass, and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
@@ -1892,7 +1879,7 @@ abstract class BuildContext {
   /// This is typically called implicitly from `of()` static methods, e.g.
   /// [Theme.of].
   ///
-  /// This method should not be called from widget constructors or from
+  /// This should not be called from widget constructors or from
   /// [State.initState] methods, because those methods would not get called
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
@@ -1905,9 +1892,9 @@ abstract class BuildContext {
   /// It is safe to use this method from [State.deactivate], which is called
   /// whenever the widget is removed from the tree.
   ///
-  /// It is also possible to call this method from interaction event handlers
-  /// (e.g. gesture callbacks) or timers, to obtain a value once, if that value
-  /// is not going to be cached and reused later.
+  /// It is also possible to call this from interaction event handlers (e.g.
+  /// gesture callbacks) or timers, to obtain a value once, if that value is not
+  /// going to be cached and reused later.
   ///
   /// Calling this method is O(1) with a small constant factor, but will lead to
   /// the widget being rebuilt more often.
@@ -1917,12 +1904,7 @@ abstract class BuildContext {
   /// called, whenever changes occur relating to that widget until the next time
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
-  ///
-  /// The [aspect] parameter is only used when [targetType] is an
-  /// [InheritedWidget] subclasses that supports partial updates, like
-  /// [InheritedModel]. It specifies what "aspect" of the inherited
-  /// widget this context depends on.
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect });
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType);
 
   /// Obtains the element corresponding to the nearest widget of the given type,
   /// which must be the type of a concrete [InheritedWidget] subclass.
@@ -3244,31 +3226,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
-    assert(ancestor != null);
-    assert(() {
-      if (_parent == null) {
-        // We're being deactivated, see deactivateChild()
-        return true;
-      }
-      Element element = _parent;
-      while (ancestor != element && element != null)
-        element = element._parent;
-      return ancestor == element;
-    }());
-    _dependencies ??= new HashSet<InheritedElement>();
-    _dependencies.add(ancestor);
-    ancestor.updateDependencies(this, aspect);
-    return ancestor.widget;
-  }
-
-  @override
-  InheritedWidget inheritFromWidgetOfExactType(Type targetType, { Object aspect }) {
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
     assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
-      return inheritFromElement(ancestor, aspect: aspect);
+      _dependencies ??= new HashSet<InheritedElement>();
+      _dependencies.add(ancestor);
+      ancestor._dependents.add(this);
+      return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
     return null;
@@ -3879,13 +3845,11 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  InheritedWidget inheritFromElement(Element ancestor, { Object aspect }) {
-    assert(ancestor != null);
+  InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
     assert(() {
-      final Type targetType = ancestor.widget.runtimeType;
       if (state._debugLifecycleState == _StateLifecycle.created) {
         throw new FlutterError(
-          'inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called before ${_state.runtimeType}.initState() completed.\n'
+          'inheritFromWidgetOfExactType($targetType) was called before ${_state.runtimeType}.initState() completed.\n'
           'When an inherited widget changes, for example if the value of Theme.of() changes, '
           'its dependent widgets are rebuilt. If the dependent widget\'s reference to '
           'the inherited widget is in a constructor or an initState() method, '
@@ -3898,7 +3862,7 @@ class StatefulElement extends ComponentElement {
       }
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         throw new FlutterError(
-          'inheritFromWidgetOfExactType($targetType) or inheritFromElement() was called after dispose(): $this\n'
+          'inheritFromWidgetOfExactType($targetType) called after dispose(): $this\n'
           'This error happens if you call inheritFromWidgetOfExactType() on the '
           'BuildContext for a widget that no longer appears in the widget tree '
           '(e.g., whose parent widget no longer includes the widget in its '
@@ -3918,7 +3882,7 @@ class StatefulElement extends ComponentElement {
       }
       return true;
     }());
-    return super.inheritFromElement(ancestor, aspect: aspect);
+    return super.inheritFromWidgetOfExactType(targetType);
   }
 
   @override
@@ -4068,7 +4032,7 @@ class InheritedElement extends ProxyElement {
   @override
   InheritedWidget get widget => super.widget;
 
-  final Map<Element, Object> _dependents = new HashMap<Element, Object>();
+  final Set<Element> _dependents = new HashSet<Element>();
 
   @override
   void _updateInheritance() {
@@ -4090,110 +4054,6 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
-  /// Returns the dependencies value recorded for [dependent]
-  /// with [setDependencies].
-  ///
-  /// Each dependent element is mapped to a single object value
-  /// which represents how the element depends on this
-  /// [InheritedElement]. This value is null by default and by default
-  /// dependent elements are rebuilt unconditionally.
-  ///
-  /// Subclasses can manage these values with [updateDependencies]
-  /// so that they can selectively rebuild dependents in
-  /// [notifyDependents].
-  ///
-  /// This method is typically only called in overrides of [updateDependencies].
-  ///
-  /// See also:
-  ///
-  ///  * [updateDependencies], which is called each time a dependency is
-  ///    created with [inheritFromWidgetOfExactType].
-  ///  * [setDependencies], which sets dependencies value for a dependent
-  ///    element.
-  ///  * [notifyDependent], which can be overridden to use a dependent's
-  ///    dependencies value to decide if the dependent needs to be rebuilt.
-  ///  * [InheritedModel], which is an example of a class that uses this method
-  ///    to manage dependency values.
-  @protected
-  Object getDependencies(Element dependent) {
-    return _dependents[dependent];
-  }
-
-  /// Sets the value returned by [getDependencies] value for [dependent].
-  ///
-  /// Each dependent element is mapped to a single object value
-  /// which represents how the element depends on this
-  /// [InheritedElement]. The [updateDependencies] method sets this value to
-  /// null by default so that dependent elements are rebuilt unconditionally.
-  ///
-  /// Subclasses can manage these values with [updateDependencies]
-  /// so that they can selectively rebuild dependents in [notifyDependents].
-  ///
-  /// This method is typically only called in overrides of [updateDependencies].
-  ///
-  /// See also:
-  ///
-  ///  * [updateDependencies], which is called each time a dependency is
-  ///    created with [inheritFromWidgetOfExactType].
-  ///  * [getDependencies], which returns the current value for a dependent
-  ///    element.
-  ///  * [notifyDependent], which can be overridden to use a dependent's
-  ///    [getDependencies] value to decide if the dependent needs to be rebuilt.
-  ///  * [InheritedModel], which is an example of a class that uses this method
-  ///    to manage dependency values.
-  @protected
-  void setDependencies(Element dependent, Object value) {
-    _dependents[dependent] = value;
-  }
-
-  /// Called by [inheritFromWidgetOfExactType] when a new [dependent] is added.
-  ///
-  /// Each dependent element can be mapped to a single object value with
-  /// [setDependencies]. This method can lookup the existing dependencies with
-  /// [getDependencies].
-  ///
-  /// By default this method sets the inherited dependencies for [dependent]
-  /// to null. This only serves to record an unconditional dependency on
-  /// [dependent].
-  ///
-  /// Subclasses can manage their own dependencies values so that they
-  /// can selectively rebuild dependents in [notifyDependents].
-  ///
-  /// See also:
-  ///
-  ///  * [getDependencies], which returns the current value for a dependent
-  ///    element.
-  ///  * [setDependencies], which sets the value for a dependent element.
-  ///  * [notifyDependent], which can be overridden to use a dependent's
-  ///    dependencies value to decide if the dependent needs to be rebuilt.
-  ///  * [InheritedModel], which is an example of a class that uses this method
-  ///    to manage dependency values.
-  @protected
-  void updateDependencies(Element dependent, Object aspect) {
-    setDependencies(dependent, null);
-  }
-
-  /// Called by [notifyClients] for each dependent.
-  ///
-  /// Calls `dependent.didChangeDependencies()` by default.
-  ///
-  /// Subclasses can override this method to selectively call
-  /// [didChangeDependencies] based on the value of [getDependencies].
-  ///
-  /// See also:
-  ///
-  ///  * [updateDependencies], which is called each time a dependency is
-  ///    created with [inheritFromWidgetOfExactType].
-  ///  * [getDependencies], which returns the current value for a dependent
-  ///    element.
-  ///  * [setDependencies], which sets the value for a dependent element.
-  ///  * [InheritedModel], which is an example of a class that uses this method
-  ///    to manage dependency values.
-  @protected
-  void notifyDependent(covariant InheritedWidget oldWidget, Element dependent) {
-    dependent.didChangeDependencies();
-  }
-
   /// Calls [Element.didChangeDependencies] of all dependent elements, if
   /// [InheritedWidget.updateShouldNotify] returns true.
   ///
@@ -4210,7 +4070,7 @@ class InheritedElement extends ProxyElement {
     if (!widget.updateShouldNotify(oldWidget))
       return;
     assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
-    for (Element dependent in _dependents.keys) {
+    for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -4220,7 +4080,7 @@ class InheritedElement extends ProxyElement {
       }());
       // check that it really depends on us
       assert(dependent._dependencies.contains(this));
-      notifyDependent(oldWidget, dependent);
+      dependent.didChangeDependencies();
     }
   }
 }
