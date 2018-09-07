@@ -133,6 +133,9 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   /// Whether the widget is currently in the
   /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
   bool _keptAlive = false;
+
+  /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
+  /// to true and is offscreen.
   bool get keptAlive => _keptAlive;
 
   @override
