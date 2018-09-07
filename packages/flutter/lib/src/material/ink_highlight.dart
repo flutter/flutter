@@ -39,6 +39,7 @@ class InkHighlight extends InteractiveInkFeature {
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
     @required Color color,
+    @required TextDirection textDirection,
     BoxShape shape = BoxShape.rectangle,
     BorderRadius borderRadius,
     ShapeBorder customBorder,
@@ -46,9 +47,11 @@ class InkHighlight extends InteractiveInkFeature {
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
+       assert(textDirection != null),
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
+       _textDirection = textDirection,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
@@ -67,6 +70,7 @@ class InkHighlight extends InteractiveInkFeature {
   final BorderRadius _borderRadius;
   final ShapeBorder _customBorder;
   final RectCallback _rectCallback;
+  final TextDirection _textDirection;
 
   Animation<int> _alpha;
   AnimationController _alphaController;
@@ -102,7 +106,7 @@ class InkHighlight extends InteractiveInkFeature {
     assert(_shape != null);
     canvas.save();
     if (_customBorder != null) {
-      canvas.clipPath(_customBorder.getOuterPath(rect));
+      canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
     }
     switch (_shape) {
       case BoxShape.circle:

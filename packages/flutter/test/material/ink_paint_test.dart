@@ -15,16 +15,19 @@ void main() {
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Container(
-            width: 200.0,
-            height: 60.0,
-            child: new InkWell(
-              borderRadius: borderRadius,
-              highlightColor: highlightColor,
-              splashColor: splashColor,
-              onTap: () { },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Container(
+              width: 200.0,
+              height: 60.0,
+              child: new InkWell(
+                borderRadius: borderRadius,
+                highlightColor: highlightColor,
+                splashColor: splashColor,
+                onTap: () { },
+              ),
             ),
           ),
         ),
@@ -61,18 +64,21 @@ void main() {
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Container(
-            width: 100.0,
-            height: 100.0,
-            child: new InkWell(
-              borderRadius: borderRadius,
-              highlightColor: highlightColor,
-              splashColor: splashColor,
-              onTap: () { },
-              radius: 100.0,
-              splashFactory: InkRipple.splashFactory,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new InkWell(
+                borderRadius: borderRadius,
+                highlightColor: highlightColor,
+                splashColor: splashColor,
+                onTap: () { },
+                radius: 100.0,
+                splashFactory: InkRipple.splashFactory,
+              ),
             ),
           ),
         ),
@@ -138,15 +144,18 @@ void main() {
 
   testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Ink(
-            color: Colors.blue,
-            width: 200.0,
-            height: 200.0,
-            child: new InkWell(
-              splashColor: Colors.green,
-              onTap: () { },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Ink(
+              color: Colors.blue,
+              width: 200.0,
+              height: 200.0,
+              child: new InkWell(
+                splashColor: Colors.green,
+                onTap: () { },
+              ),
             ),
           ),
         ),
@@ -167,15 +176,18 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Ink(
-            color: Colors.red,
-            width: 200.0,
-            height: 200.0,
-            child: new InkWell(
-              splashColor: Colors.green,
-              onTap: () { },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Ink(
+              color: Colors.red,
+              width: 200.0,
+              height: 200.0,
+              child: new InkWell(
+                splashColor: Colors.green,
+                onTap: () { },
+              ),
             ),
           ),
         ),
@@ -192,11 +204,14 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new InkWell( // this is at a different depth in the tree so it's now a new InkWell
-            splashColor: Colors.green,
-            onTap: () { },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new InkWell( // this is at a different depth in the tree so it's now a new InkWell
+              splashColor: Colors.green,
+              onTap: () { },
+            ),
           ),
         ),
       ),
@@ -213,15 +228,18 @@ void main() {
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Container(
-            width: 100.0,
-            height: 100.0,
-            child: new InkWell(
-              onTap: () { },
-              radius: 100.0,
-              splashFactory: InkRipple.splashFactory,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new InkWell(
+                onTap: () { },
+                radius: 100.0,
+                splashFactory: InkRipple.splashFactory,
+              ),
             ),
           ),
         ),
@@ -246,17 +264,20 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Container(
-            width: 100.0,
-            height: 100.0,
-            child: new InkWell(
-              splashColor: splashColor,
-              highlightColor: highlightColor,
-              onTap: () { },
-              radius: 100.0,
-              splashFactory: InkRipple.splashFactory,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new InkWell(
+                splashColor: splashColor,
+                highlightColor: highlightColor,
+                onTap: () { },
+                radius: 100.0,
+                splashFactory: InkRipple.splashFactory,
+              ),
             ),
           ),
         ),
