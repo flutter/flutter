@@ -308,7 +308,7 @@ class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockCocoaPods extends Mock implements CocoaPods {}
 
-class IOSWorkflowTestTarget extends IOSWorkflow {
+class IOSWorkflowTestTarget extends IOSValidator {
   IOSWorkflowTestTarget({
     this.hasHomebrew = true,
     bool hasIosDeploy = true,

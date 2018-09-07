@@ -242,11 +242,13 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         return new Icon(
           Icons.edit,
           color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
+          size: 18.0,
         );
       case StepState.complete:
         return new Icon(
           Icons.check,
           color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
+          size: 18.0,
         );
       case StepState.error:
         return const Text('!', style: _kStepStyle);

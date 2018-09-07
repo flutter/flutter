@@ -133,6 +133,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   /// Whether the widget is currently in the
   /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
   bool _keptAlive = false;
+  bool get keptAlive => _keptAlive;
 
   @override
   String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
@@ -206,28 +207,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
-    // `after` might be coming in from a caller that didn't realize it was in the
-    // _keepAliveBucket, in which case it needs to be removed and reinserted
-    // to get connected to its siblings and be useful as an anchor.
-    if (after != null) {
-      final SliverMultiBoxAdaptorParentData afterParentData = after.parentData;
-      final int index = afterParentData.index;
-      if (afterParentData._keptAlive) {
-        assert(after == _keepAliveBucket[index]);
-        RenderBox anchor = firstChild;
-        dropChild(after);
-        after.parentData = afterParentData;
-        if (indexOf(anchor) > afterParentData.index) {
-          anchor = null;
-        } else {
-          while (indexOf(anchor) < afterParentData.index - 1) {
-            anchor = childAfter(anchor);
-          }
-        }
-        insert(after, after: anchor);
-        afterParentData._keptAlive = false;
-      }
-    }
+    assert(!_keepAliveBucket.containsValue(child));
     super.insert(child, after: after);
     assert(firstChild != null);
     assert(() {

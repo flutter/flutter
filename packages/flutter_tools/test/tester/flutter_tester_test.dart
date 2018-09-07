@@ -140,8 +140,7 @@ void main() {
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: new DebuggingOptions.disabled(
-                const BuildInfo(BuildMode.release, null, previewDart2: true)));
+            debuggingOptions: new DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
@@ -150,8 +149,7 @@ void main() {
         expect(() async {
           await device.startApp(null,
               mainPath: mainPath,
-              debuggingOptions: new DebuggingOptions.disabled(
-                  const BuildInfo(BuildMode.debug, null, previewDart2: true)));
+              debuggingOptions: new DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
         }, throwsToolExit());
       }, overrides: startOverrides);
 
@@ -184,8 +182,7 @@ Hello!
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: new DebuggingOptions.enabled(
-                const BuildInfo(BuildMode.debug, null, previewDart2: true)));
+            debuggingOptions: new DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
 

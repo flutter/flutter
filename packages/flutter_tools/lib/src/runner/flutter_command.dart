@@ -239,7 +239,6 @@ abstract class FlutterCommand extends Command<Null> {
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
-      previewDart2: true,
       trackWidgetCreation: trackWidgetCreation,
       compilationTraceFilePath: argParser.options.containsKey('precompile')
           ? argResults['precompile']

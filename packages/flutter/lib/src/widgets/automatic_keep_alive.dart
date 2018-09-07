@@ -107,7 +107,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   /// While this widget is guaranteed to have a child, this may return null if
   /// the first build of that child has not completed yet.
   ParentDataElement<SliverMultiBoxAdaptorWidget> _getChildElement() {
-    assert(context != null);
+    assert(mounted);
     final Element element = context;
     Element childElement;
     // We use Element.visitChildren rather than context.visitChildElements
