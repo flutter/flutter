@@ -15,6 +15,7 @@ void main() {
   group('AccessibilityBridge', () {
     FlutterDriver driver;
     Future<AndroidSemanticsNode> getSemantics(SerializableFinder finder) async {
+      await waitForSemantics();
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
       return new AndroidSemanticsNode.deserialize(data);
