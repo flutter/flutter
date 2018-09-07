@@ -15,7 +15,7 @@ void main() {
         child: new RaisedButton(
           child: const Text('Test'),
           onPressed: () {},
-          shape: Border.all(
+          shape: new Border.all(
             color: Colors.blue,
           ),
         ),

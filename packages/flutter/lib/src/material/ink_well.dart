@@ -373,6 +373,7 @@ class InkResponse extends StatefulWidget {
   @mustCallSuper
   bool debugCheckContext(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasDirectionality(context));
     return true;
   }
 
