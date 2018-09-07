@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show PointerData, PointerChange;
 
+import 'package:flutter/foundation.dart';
+
 import 'events.dart';
 
 class _PointerState {
@@ -73,6 +75,7 @@ class PointerEventConverter {
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
       assert(datum.change != null);
+      debugPrint(datum.kind.toString());
       if (datum.kind == PointerDeviceKind.gesture) {
         // Devices must be added before they send scroll events.
         assert(_pointers.containsKey(datum.device));
@@ -105,8 +108,8 @@ class PointerEventConverter {
           );
           state.lastPosition = position;
         }
-        final Offset scrollDelta =
-            new Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+        final Offset scrollDelta = new Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+        debugPrint(scrollDelta.toString());
         yield new PointerScrollEvent(
           timeStamp: timeStamp,
           pointer: state.pointer,
