@@ -216,7 +216,7 @@ void main() {
     final Key key = new UniqueKey();
     dynamic semanticEvent;
     int radioValue = 2;
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
 

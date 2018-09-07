@@ -120,7 +120,7 @@ class TextTheme extends Diagnosticable {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final ThemeData theme = Theme.of(context);
-  ///     return new Theme(
+  ///     return Theme(
   ///       data: theme.copyWith(
   ///         textTheme: theme.textTheme.copyWith(
   ///           title: theme.textTheme.title.copyWith(
@@ -204,9 +204,9 @@ class TextTheme extends Diagnosticable {
   ///     // set the title, but everything else would be null. This isn't very
   ///     // useful, so merge it with the existing theme to keep all of the
   ///     // preexisting definitions for the other styles.
-  ///     TextTheme partialTheme = new TextTheme(title: new TextStyle(color: titleColor));
+  ///     TextTheme partialTheme = TextTheme(title: TextStyle(color: titleColor));
   ///     theme = theme.copyWith(textTheme: theme.textTheme.merge(partialTheme));
-  ///     return new Theme(data: theme, child: child);
+  ///     return Theme(data: theme, child: child);
   ///   }
   /// }
   /// ```

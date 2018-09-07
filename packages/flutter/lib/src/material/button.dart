@@ -293,11 +293,11 @@ class MaterialButton extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  new MaterialButton(
-  ///    color: Colors.blue[500],
-  ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
-  ///  ),
+  /// MaterialButton(
+  ///   color: Colors.blue[500],
+  ///   onPressed: _handleTap,
+  ///   child: Text('DEMO'),
+  /// ),
   /// ```
   final Color color;
 
@@ -411,11 +411,11 @@ class MaterialButton extends StatelessWidget {
       case ButtonTextTheme.normal:
         return enabled
           ? (themeIsDark ? Colors.white : Colors.black87)
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.accent:
         return enabled
           ? theme.accentColor
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.primary:
         return enabled
           ? (fillIsDark ? Colors.white : Colors.black)

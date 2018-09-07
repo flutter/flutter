@@ -108,6 +108,12 @@ Android SDK at `.../engine/src/third_party/android_tools/sdk`.
 
 You can find where your Android SDK is using `flutter doctor`.
 
+## Warnings
+
+Running devicelab will do things to your environment.
+
+Notably, it will start and stop gradle, for instance.
+
 ## Running all tests
 
 To run all tests defined in `manifest.yaml`, use option `-a` (`--all`):

@@ -393,6 +393,56 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     return timeOfDayFormatRaw;
   }
 
+  /// The "zero" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is required.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountZero;
+
+  /// The "one" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountOne => null;
+
+  /// The "other" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is required.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountOther;
+
+  @override
+  String remainingTextFieldCharacterCount(int remainingCount) {
+    return intl.Intl.pluralLogic(
+      remainingCount,
+      zero: remainingTextFieldCharacterCountZero,
+      one: remainingTextFieldCharacterCountOne,
+      other: remainingTextFieldCharacterCountOther,
+      locale: _localeName,
+    ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
+  }
+
   /// The script category used by [localTextGeometry]. Must be one of the strings
   /// declared in [MaterialTextGeometry].
   //

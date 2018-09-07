@@ -40,7 +40,7 @@ import 'theme_data.dart';
 /// (including the animation of the checkbox itself getting checked!).
 ///
 /// ```dart
-/// new CheckboxListTile(
+/// CheckboxListTile(
 ///   title: const Text('Animate Slowly'),
 ///   value: timeDilation != 1.0,
 ///   onChanged: (bool value) {
@@ -113,14 +113,14 @@ class CheckboxListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CheckboxListTile(
+  /// CheckboxListTile(
   ///   value: _throwShotAway,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Throw away your shot'),
+  ///   title: Text('Throw away your shot'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;

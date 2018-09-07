@@ -41,6 +41,13 @@ void main() {
       expect(localizations.collapsedIconTapHint, isNotNull);
       expect(localizations.expandedIconTapHint, isNotNull);
 
+      expect(localizations.remainingTextFieldCharacterCount(0), isNotNull);
+      expect(localizations.remainingTextFieldCharacterCount(1), isNotNull);
+      expect(localizations.remainingTextFieldCharacterCount(10), isNotNull);
+      expect(localizations.remainingTextFieldCharacterCount(0), isNot(contains(r'$remainingCount')));
+      expect(localizations.remainingTextFieldCharacterCount(1), isNot(contains(r'$remainingCount')));
+      expect(localizations.remainingTextFieldCharacterCount(10), isNot(contains(r'$remainingCount')));
+
       expect(localizations.aboutListTileTitle('FOO'), isNotNull);
       expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
 

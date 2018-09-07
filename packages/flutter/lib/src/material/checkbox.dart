@@ -87,7 +87,7 @@ class Checkbox extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new Checkbox(
+  /// Checkbox(
   ///   value: _throwShotAway,
   ///   onChanged: (bool newValue) {
   ///     setState(() {

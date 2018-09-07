@@ -1654,7 +1654,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///
 /// ```dart
 /// showTimePicker(
-///   initialTime: new TimeOfDay.now(),
+///   initialTime: TimeOfDay.now(),
 ///   context: context,
 /// );
 /// ```

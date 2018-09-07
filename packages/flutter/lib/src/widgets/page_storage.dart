@@ -22,10 +22,10 @@ import 'framework.dart';
 /// tabs' string labels.
 ///
 /// ```dart
-/// new TabBarView(
+/// TabBarView(
 ///   children: myTabs.map((Tab tab) {
-///     new MyScrollableTabView(
-///       key: new PageStorageKey<String>(tab.text), // like 'Tab 1'
+///     MyScrollableTabView(
+///       key: PageStorageKey<String>(tab.text), // like 'Tab 1'
 ///       tab: tab,
 ///    ),
 ///  }),

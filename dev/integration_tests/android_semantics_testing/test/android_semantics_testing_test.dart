@@ -19,6 +19,7 @@ const String source = r'''
     "isLongClickable": false
   },
   "text": "hello",
+  "contentDescription": "other hello",
   "className": "android.view.View",
   "rect": {
     "left": 0,
@@ -43,6 +44,7 @@ void main() {
       expect(node.isPassword, false);
       expect(node.isLongClickable, false);
       expect(node.text, 'hello');
+      expect(node.contentDescription, 'other hello');
       expect(node.id, 23);
       expect(node.getRect(), const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0));
       expect(node.getActions(), <AndroidSemanticsAction>[
@@ -78,6 +80,7 @@ void main() {
         isPassword: false,
         isLongClickable: false,
         text: 'hello',
+        contentDescription: 'other hello',
         className: 'android.view.View',
         id: 23,
         rect:  const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),

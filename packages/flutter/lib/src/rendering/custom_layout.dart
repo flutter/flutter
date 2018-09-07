@@ -65,13 +65,13 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 ///     Size leaderSize = Size.zero;
 ///
 ///     if (hasChild(_Slot.leader)) {
-///       leaderSize = layoutChild(_Slot.leader, new BoxConstraints.loose(size));
+///       leaderSize = layoutChild(_Slot.leader, BoxConstraints.loose(size));
 ///       positionChild(_Slot.leader, Offset.zero);
 ///     }
 ///
 ///     if (hasChild(_Slot.follower)) {
-///       layoutChild(_Slot.follower, new BoxConstraints.tight(leaderSize));
-///       positionChild(_Slot.follower, new Offset(size.width - leaderSize.width,
+///       layoutChild(_Slot.follower, BoxConstraints.tight(leaderSize));
+///       positionChild(_Slot.follower, Offset(size.width - leaderSize.width,
 ///           size.height - leaderSize.height));
 ///     }
 ///   }

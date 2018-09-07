@@ -147,7 +147,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.backgroundColor], which is set to [ThemeData.primaryColor].
-  ///  * [Appbar.iconTheme], which is set to [ThemeData.primaryIconTheme].
+  ///  * [AppBar.iconTheme], which is set to [ThemeData.primaryIconTheme].
   ///  * [AppBar.textTheme], which is set to [ThemeData.primaryTextTheme].
   ///  * [AppBar.brightness], which is set to [ThemeData.primaryColorBrightness].
   ThemeData appBarTheme(BuildContext context) {
@@ -162,7 +162,7 @@ abstract class SearchDelegate<T> {
     );
   }
 
-  /// The current query string shown in the [Appbar].
+  /// The current query string shown in the [AppBar].
   ///
   /// The user manipulates this string via the keyboard.
   ///
@@ -194,7 +194,7 @@ abstract class SearchDelegate<T> {
   /// the suggestions returned by [buildSuggestions].
   ///
   /// Calling this method will also put the input focus back into the search
-  /// field of the ApBar.
+  /// field of the [AppBar].
   ///
   /// If the results are currently shown this method can be used to go back
   /// to showing the search suggestions.

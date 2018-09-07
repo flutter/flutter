@@ -79,7 +79,7 @@ class Icon extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  new Icon(
+  ///  Icon(
   ///    icon: Icons.widgets,
   ///    color: Colors.blue.shade400,
   ///  ),

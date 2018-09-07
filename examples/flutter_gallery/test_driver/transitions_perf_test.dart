@@ -156,7 +156,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
       await driver.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
-        await driver.runUnsynchronized<Future<Null>>(() async {
+        await driver.runUnsynchronized<void>(() async {
           await driver.tap(find.byTooltip('Back'));
         });
       } else {
