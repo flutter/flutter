@@ -54,6 +54,7 @@ Future<T> runInContext<T>(
       Cache: () => new Cache(),
       Clock: () => const Clock(),
       CocoaPods: () => new CocoaPods(),
+      CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => new Config(),
       DevFSConfig: () => new DevFSConfig(),
       DeviceManager: () => new DeviceManager(),

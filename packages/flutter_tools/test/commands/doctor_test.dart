@@ -201,21 +201,11 @@ void main() {
       ));
     });
 
-    testUsingContext('validate summary combines validator output', () async {
-      expect(await new FakeGroupedDoctor().summaryText, equals(
-              '[✓] Category 1 is fully installed.\n'
-              '[!] Category 2 is partially installed; more components are available.\n'
-              '\n'
-              'Run "flutter doctor" for information about installing additional components.\n'
-
-      ));
-    });
-
-    testUsingContext('validate merging assigns statusInfo', () async {
-      // There are two validators, and only the second contains statusInfo.
+    testUsingContext('validate merging assigns statusInfo and title', () async {
+      // There are two subvalidators. Only the second contains statusInfo.
       expect(await new FakeGroupedDoctorWithStatus().diagnose(), isTrue);
       expect(testLogger.statusText, equals(
-          '[✓] Category 1 (A status message)\n'
+          '[✓] First validator title (A status message)\n'
               '    • A helpful message\n'
               '    • A different message\n'
               '\n'
@@ -225,10 +215,10 @@ void main() {
   });
 
 
-  group('doctor merging validator results', () {
-    final PassingGroupedValidator installed = new PassingGroupedValidator('Category', groupedCategory1);
-    final PartialGroupedValidator partial = new PartialGroupedValidator('Category', groupedCategory1);
-    final MissingGroupedValidator missing = new MissingGroupedValidator('Category', groupedCategory1);
+  group('grouped validator merging results', () {
+    final PassingGroupedValidator installed = new PassingGroupedValidator('Category');
+    final PartialGroupedValidator partial = new PartialGroupedValidator('Category');
+    final MissingGroupedValidator missing = new MissingGroupedValidator('Category');
 
     testUsingContext('validate installed + installed = installed', () async {
       expect(await new FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
@@ -417,11 +407,8 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 }
 
 
-ValidatorCategory groupedCategory1 = const ValidatorCategory('group 1', true);
-ValidatorCategory groupedCategory2 = const ValidatorCategory('group 2', true);
-
 class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(String name, ValidatorCategory group) : super(name, group);
+  PassingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -433,7 +420,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name, ValidatorCategory group): super(name, group);
+  MissingGroupedValidator(String name): super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -444,7 +431,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name, ValidatorCategory group): super(name, group);
+  PartialGroupedValidator(String name): super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -455,7 +442,7 @@ class PartialGroupedValidator extends DoctorValidator {
 }
 
 class PassingGroupedValidatorWithStatus extends DoctorValidator {
-  PassingGroupedValidatorWithStatus(String name, ValidatorCategory group) : super(name, group);
+  PassingGroupedValidatorWithStatus(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
@@ -465,17 +452,21 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   }
 }
 
-/// A doctor that has two category groups of two validators each.
+/// A doctor that has two groups of two validators each.
 class FakeGroupedDoctor extends Doctor {
   List<DoctorValidator> _validators;
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidator('Category 2', groupedCategory2));
-      _validators.add(new MissingGroupedValidator('Category 2', groupedCategory2));
+      _validators.add(GroupedValidator(<DoctorValidator>[
+        new PassingGroupedValidator('Category 1'),
+        new PassingGroupedValidator('Category 1')
+      ]));
+      _validators.add(GroupedValidator(<DoctorValidator>[
+        new PassingGroupedValidator('Category 2'),
+        new MissingGroupedValidator('Category 2')
+      ]));
     }
     return _validators;
   }
@@ -485,11 +476,11 @@ class FakeGroupedDoctorWithStatus extends Doctor {
   List<DoctorValidator> _validators;
   @override
   List<DoctorValidator> get validators {
-    if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidatorWithStatus('Category 1', groupedCategory1));
-    }
+    _validators ??= <DoctorValidator>[
+      new GroupedValidator(<DoctorValidator>[
+        new PassingGroupedValidator('First validator title'),
+        new PassingGroupedValidatorWithStatus('Second validator title'),
+    ])];
     return _validators;
   }
 }
@@ -499,7 +490,7 @@ class FakeGroupedDoctorWithStatus extends Doctor {
 class FakeSmallGroupDoctor extends Doctor {
   List<DoctorValidator> _validators;
   FakeSmallGroupDoctor(DoctorValidator val1, DoctorValidator val2) {
-    _validators = <DoctorValidator>[val1, val2];
+    _validators = <DoctorValidator>[new GroupedValidator(<DoctorValidator>[val1, val2])];
   }
   @override
   List<DoctorValidator> get validators => _validators;
