@@ -84,8 +84,13 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         result += traverse(child);
         return true;
       });
+      if (node.isMergedIntoParent)
+        return result;
       final SemanticsData data = node.getSemanticsData();
-      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+      // Skip node if it has no actions, or is marked as hidden.
+      if ((!data.hasAction(ui.SemanticsAction.longPress)
+        && !data.hasAction(ui.SemanticsAction.tap))
+        || data.hasFlag(ui.SemanticsFlag.isHidden))
         return result;
       Rect paintBounds = node.rect;
       SemanticsNode current = node;
@@ -94,6 +99,14 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
           paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
         current = current.parent;
       }
+      // skip node if it is touching the edge of the screen, since it might
+      // be partially scrolled offscreen.
+      const delta = 0.001;
+      if (paintBounds.left <= delta
+        || paintBounds.top <= delta
+        || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
+        || (paintBounds.right - ui.window.physicalSize.width).abs() <= delta)
+        return result;
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
@@ -188,9 +201,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       } else if (elements.length > 1) {
         return const Evaluation.fail('Multiple nodes with the same label');
       } else {
-        // If we can't find the text node, then look up the default text
-        fontSize = 12.0;
-        isBold = false;
+        // If we can't find the text node then assume the label does not
+        // correspond to actual text.
+        return result;
       }
 
       // Transform local coordinate to screen coordinates.
@@ -205,9 +218,13 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
       final _ContrastReport report = new _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
-      final double targetContrastRatio = (isBold && fontSize > kBoldTextMinimumSize) ?
-        kMinimumRatioLargeText : kMinimumRatioNormalText;
-      if (contrastRatio >= targetContrastRatio)
+      const double delta = -0.01;
+      double targetContrastRatio;
+      if ((isBold && fontSize > kBoldTextMinimumSize) || fontSize > kLargeTextMinimumSize)
+        targetContrastRatio = kMinimumRatioLargeText;
+      else
+        targetContrastRatio = kMinimumRatioNormalText;
+      if (contrastRatio - targetContrastRatio >= delta)
         return result + const Evaluation.pass();
       return result + new Evaluation.fail(
         '$node:\nExpected contrast ratio of at least '
