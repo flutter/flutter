@@ -13,9 +13,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// The maximum amount of time a single microbenchmark is allowed to take.
-const Duration _kBenchmarkTimeout = Duration(minutes: 10);
-
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
 TaskFunction createMicrobenchmarkTask() {
@@ -23,7 +20,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Device device = await devices.workingDevice;
     await device.unlock();
 
-    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2 = true}) async {
+    Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(
@@ -38,10 +35,6 @@ TaskFunction createMicrobenchmarkTask() {
             '-d',
             device.deviceId,
           ];
-          if (previewDart2)
-            options.add('--preview-dart-2');
-          else
-            options.add('--no-preview-dart-2');
           setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(
@@ -52,7 +45,7 @@ TaskFunction createMicrobenchmarkTask() {
 
         return await _readJsonResults(flutterProcess);
       }
-      return _run().timeout(_kBenchmarkTimeout);
+      return _run();
     }
 
     final Map<String, double> allResults = <String, double>{};
@@ -144,7 +137,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
-  process.exitCode.then<int>((int code) async {
+  process.exitCode.then<void>((int code) async {
     await Future.wait<void>(<Future<void>>[
       stdoutSub.cancel(),
       stderrSub.cancel(),

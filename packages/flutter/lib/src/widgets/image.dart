@@ -286,7 +286,7 @@ class Image extends StatefulWidget {
   /// render the `images/2x/cat.png` file:
   ///
   /// ```dart
-  /// new Image.asset('images/cat.png')
+  /// Image.asset('images/cat.png')
   /// ```
   ///
   /// This corresponds to the file that is in the project's `images/2x/`
@@ -311,7 +311,7 @@ class Image extends StatefulWidget {
   /// Then to display the image, use:
   ///
   /// ```dart
-  /// new Image.asset('icons/heart.png', package: 'my_icons')
+  /// Image.asset('icons/heart.png', package: 'my_icons')
   /// ```
   ///
   /// Assets used by the package itself should also be displayed using the
@@ -456,8 +456,8 @@ class Image extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while an
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
   /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the

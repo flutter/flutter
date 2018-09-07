@@ -79,7 +79,7 @@ typedef Widget AnimatedSwitcherLayoutBuilder(Widget currentChild, List<Widget> p
 ///   const ClickCounter({Key key}) : super(key: key);
 ///
 ///   @override
-///   _ClickCounterState createState() => new _ClickCounterState();
+///   _ClickCounterState createState() => _ClickCounterState();
 /// }
 ///
 /// class _ClickCounterState extends State<ClickCounter> {
@@ -87,26 +87,26 @@ typedef Widget AnimatedSwitcherLayoutBuilder(Widget currentChild, List<Widget> p
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new MaterialApp(
-///       home: new Material(
+///     return MaterialApp(
+///       home: Material(
 ///         child: Column(
 ///           mainAxisAlignment: MainAxisAlignment.center,
 ///           children: <Widget>[
-///             new AnimatedSwitcher(
+///             AnimatedSwitcher(
 ///               duration: const Duration(milliseconds: 500),
 ///               transitionBuilder: (Widget child, Animation<double> animation) {
-///                 return new ScaleTransition(child: child, scale: animation);
+///                 return ScaleTransition(child: child, scale: animation);
 ///               },
-///               child: new Text(
+///               child: Text(
 ///                 '$_count',
 ///                 // This key causes the AnimatedSwitcher to interpret this as a "new"
 ///                 // child each time the count changes, so that it will begin its animation
 ///                 // when the count changes.
-///                 key: new ValueKey<int>(_count),
+///                 key: ValueKey<int>(_count),
 ///                 style: Theme.of(context).textTheme.display1,
 ///               ),
 ///             ),
-///             new RaisedButton(
+///             RaisedButton(
 ///               child: const Text('Increment'),
 ///               onPressed: () {
 ///                 setState(() {

@@ -1,3 +1,4 @@
+
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -6,8 +7,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/protocol_discovery.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
@@ -66,9 +67,9 @@ void main() {
         expect('$uri', 'http://127.0.0.1:3333');
       });
 
-      testUsingContext('discovers uri even if logs has ESC Ascii', () async {
+      testUsingContext('discovers uri with Ascii Esc code', () async {
         initialize();
-        logReader.addLine('Observatory listening on http://127.0.0.1:3333 \x1b[');
+        logReader.addLine('Observatory listening on http://127.0.0.1:3333\x1b[');
         final Uri uri = await discoverer.uri;
         expect(uri.port, 3333);
         expect('$uri', 'http://127.0.0.1:3333');
@@ -88,7 +89,9 @@ void main() {
         logReader.addLine('Observatory not listening...');
         final Uri timeoutUri = Uri.parse('http://timeout');
         final Uri actualUri = await uriFuture.timeout(
-            const Duration(milliseconds: 100), onTimeout: () => timeoutUri);
+          const Duration(milliseconds: 100),
+          onTimeout: () => timeoutUri,
+        );
         expect(actualUri, timeoutUri);
       });
 
@@ -134,7 +137,7 @@ void main() {
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
 
@@ -153,7 +156,7 @@ void main() {
         expect(uri.port, 1243);
         expect('$uri', 'http://127.0.0.1:1243/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
 
@@ -172,7 +175,7 @@ void main() {
         expect(uri.port, 99);
         expect('$uri', 'http://127.0.0.1:99/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
         logReader.dispose();
       });
 
@@ -192,7 +195,27 @@ void main() {
         expect(uri.port, 54777);
         expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
 
-        discoverer.cancel();
+        await discoverer.cancel();
+        logReader.dispose();
+      });
+
+      testUsingContext('ipv6 with Ascii Escape code', () async {
+        final MockDeviceLogReader logReader = new MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+          logReader,
+          portForwarder: new MockPortForwarder(99),
+          hostPort: 54777,
+          ipv6: true,
+        );
+
+        // Get next port future.
+        final Future<Uri> nextUri = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://[::1]:54777/PTwjm8Ii8qg=/\x1b[');
+        final Uri uri = await nextUri;
+        expect(uri.port, 54777);
+        expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
+
+        await discoverer.cancel();
         logReader.dispose();
       });
     });
@@ -206,8 +229,9 @@ class MockPortForwarder extends DevicePortForwarder {
   @override
   Future<int> forward(int devicePort, {int hostPort}) async {
     hostPort ??= 0;
-    if (hostPort == 0)
+    if (hostPort == 0) {
       return availablePort;
+    }
     return hostPort;
   }
 

@@ -39,5 +39,10 @@
   "popupMenuLabel": "Menú emergente",
   "dialogLabel": "Diálogo",
   "alertDialogLabel": "Alerta",
-  "searchFieldLabel": "Buscar"
+  "searchFieldLabel": "Buscar",
+  "expandedIconTapHint": "TBD",
+  "collapsedIconTapHint": "TBD",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "TBD",
+  "remainingTextFieldCharacterCountOther": "TBD"
 }

@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:platform/platform.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';

@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -125,8 +125,12 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand =
-          new DummyFlutterCommand(commandFunction: () async { throwToolExit('fail'); });
+      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        },
+      );
 
       try {
         await flutterCommand.run();

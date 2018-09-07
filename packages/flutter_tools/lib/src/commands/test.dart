@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../cache.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
@@ -62,11 +64,6 @@ class TestCommand extends FlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('track-widget-creation',
         negatable: false,
         hide: !verboseHelp,
@@ -77,7 +74,12 @@ class TestCommand extends FlutterCommand {
         negatable: false,
         help: 'Whether matchesGoldenFile() calls within your test methods should\n'
               'update the golden files rather than test for an existing match.',
-      );
+      )
+      ..addOption('concurrency',
+        abbr: 'j',
+        defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
+        help: 'The number of concurrent test processes to run.',
+        valueHelp: 'jobs');
   }
 
   @override
@@ -91,10 +93,10 @@ class TestCommand extends FlutterCommand {
     await super.validateCommand();
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
-          'Error: No pubspec.yaml file found in the current working directory.\n'
-              'Run this command from the root of your project. Test files must be\n'
-              'called *_test.dart and must reside in the package\'s \'test\'\n'
-              'directory (or one of its subdirectories).');
+        'Error: No pubspec.yaml file found in the current working directory.\n'
+        'Run this command from the root of your project. Test files must be\n'
+        'called *_test.dart and must reside in the package\'s \'test\'\n'
+        'directory (or one of its subdirectories).');
     }
   }
 
@@ -108,8 +110,16 @@ class TestCommand extends FlutterCommand {
     final bool startPaused = argResults['start-paused'];
     if (startPaused && files.length != 1) {
       throwToolExit(
-          'When using --start-paused, you must specify a single test file to run.',
-          exitCode: 1);
+        'When using --start-paused, you must specify a single test file to run.',
+        exitCode: 1,
+      );
+    }
+
+    final int jobs = int.tryParse(argResults['concurrency']);
+    if (jobs == null || jobs <= 0 || !jobs.isFinite) {
+      throwToolExit(
+        'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
+      );
     }
 
     Directory workDir;
@@ -123,7 +133,7 @@ class TestCommand extends FlutterCommand {
       if (files.isEmpty) {
         throwToolExit(
             'Test directory "${workDir.path}" does not appear to contain any test files.\n'
-                'Test files must be in that directory and end with the pattern "_test.dart".'
+            'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
     }
@@ -135,8 +145,7 @@ class TestCommand extends FlutterCommand {
 
     final bool machine = argResults['machine'];
     if (collector != null && machine) {
-      throwToolExit(
-          "The test command doesn't support --machine and coverage together");
+      throwToolExit("The test command doesn't support --machine and coverage together");
     }
 
     TestWatcher watcher;
@@ -158,9 +167,9 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
-      previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
+      concurrency: jobs,
     );
 
     if (collector != null) {

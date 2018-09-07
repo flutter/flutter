@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as p;
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('semantics performance test', () {

@@ -13,13 +13,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
   with ServicesBinding,
        GestureBinding,
        SchedulerBinding,
        PaintingBinding,
+       SemanticsBinding,
        RendererBinding,
        WidgetsBinding {
 
@@ -511,7 +512,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 37);
+    expect(binding.extensions.length, 38);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

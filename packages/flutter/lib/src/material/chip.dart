@@ -85,12 +85,15 @@ abstract class ChipAttributes {
   /// Defaults to the shape in the ambient [ChipThemeData].
   ShapeBorder get shape;
 
+  /// {@macro flutter.widgets.Clip}
+  Clip get clipBehavior;
+
   /// Color to be used for the unselected, enabled chip's background.
   ///
   /// The default is light grey.
   Color get backgroundColor;
 
-  /// The padding between the contents of the chip and the outside [border].
+  /// The padding between the contents of the chip and the outside [shape].
   ///
   /// Defaults to 4 logical pixels on all sides.
   EdgeInsetsGeometry get padding;
@@ -153,7 +156,7 @@ abstract class DeletableChipAttributes {
   ///
   /// class CastList extends StatefulWidget {
   ///   @override
-  ///   State createState() => new CastListState();
+  ///   State createState() => CastListState();
   /// }
   ///
   /// class CastListState extends State<CastList> {
@@ -166,11 +169,11 @@ abstract class DeletableChipAttributes {
   ///
   ///   Iterable<Widget> get actorWidgets sync* {
   ///     for (Actor actor in _cast) {
-  ///       yield new Padding(
+  ///       yield Padding(
   ///         padding: const EdgeInsets.all(4.0),
-  ///         child: new Chip(
-  ///           avatar: new CircleAvatar(child: new Text(actor.initials)),
-  ///           label: new Text(actor.name),
+  ///         child: Chip(
+  ///           avatar: CircleAvatar(child: Text(actor.initials)),
+  ///           label: Text(actor.name),
   ///           onDeleted: () {
   ///             setState(() {
   ///               _cast.removeWhere((Actor entry) {
@@ -185,7 +188,7 @@ abstract class DeletableChipAttributes {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Wrap(
+  ///     return Wrap(
   ///       children: actorWidgets.toList(),
   ///     );
   ///   }
@@ -250,7 +253,7 @@ abstract class SelectableChipAttributes {
   /// ```dart
   /// class Wood extends StatefulWidget {
   ///   @override
-  ///   State<StatefulWidget> createState() => new WoodState();
+  ///   State<StatefulWidget> createState() => WoodState();
   /// }
   ///
   /// class WoodState extends State<Wood> {
@@ -258,7 +261,7 @@ abstract class SelectableChipAttributes {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new InputChip(
+  ///     return InputChip(
   ///       label: const Text('Use Chisel'),
   ///       selected: _useChisel,
   ///       onSelected: (bool newValue) {
@@ -366,7 +369,7 @@ abstract class TappableChipAttributes {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new InputChip(
+  ///     return InputChip(
   ///       label: const Text('Apply Hammer'),
   ///       onPressed: startHammering,
   ///     );
@@ -388,18 +391,18 @@ abstract class TappableChipAttributes {
 /// Supplying a non-null [onDeleted] callback will cause the chip to include a
 /// button for deleting the chip.
 ///
-/// Requires one of its ancestors to be a [Material] widget. The [label],
-/// [deleteIcon], and [border] arguments must not be null.
+/// Requires one of its ancestors to be a [Material] widget. The [label]
+/// and [clipBehavior] arguments must not be null.
 ///
 /// ## Sample code
 ///
 /// ```dart
-/// new Chip(
-///   avatar: new CircleAvatar(
+/// Chip(
+///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
+///     child: Text('AB'),
 ///   ),
-///   label: new Text('Aaron Burr'),
+///   label: Text('Aaron Burr'),
 /// )
 /// ```
 ///
@@ -419,7 +422,7 @@ abstract class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
-  /// The [label] argument must not be null.
+  /// The [label] and [clipBehavior] arguments must not be null.
   const Chip({
     Key key,
     this.avatar,
@@ -431,10 +434,12 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
   })  : assert(label != null),
+        assert(clipBehavior != null),
         super(key: key);
 
   @override
@@ -447,6 +452,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final EdgeInsetsGeometry labelPadding;
   @override
   final ShapeBorder shape;
+  @override
+  final Clip clipBehavior;
   @override
   final Color backgroundColor;
   @override
@@ -476,6 +483,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       tapEnabled: false,
       shape: shape,
+      clipBehavior: clipBehavior,
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
@@ -505,12 +513,12 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 /// ## Sample code
 ///
 /// ```dart
-/// new InputChip(
-///   avatar: new CircleAvatar(
+/// InputChip(
+///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
+///     child: Text('AB'),
 ///   ),
-///   label: new Text('Aaron Burr'),
+///   label: Text('Aaron Burr'),
 ///   onPressed: () {
 ///     print('I am the one thing in life.');
 ///   }
@@ -540,7 +548,8 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled] and [selected] arguments must not be null.
+  /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
+  /// not be null.
   const InputChip({
     Key key,
     this.avatar,
@@ -559,12 +568,14 @@ class InputChip extends StatelessWidget
     this.selectedColor,
     this.tooltip,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
+        assert(clipBehavior != null),
         super(key: key);
 
   @override
@@ -600,6 +611,8 @@ class InputChip extends StatelessWidget
   @override
   final ShapeBorder shape;
   @override
+  final Clip clipBehavior;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -626,6 +639,7 @@ class InputChip extends StatelessWidget
       selectedColor: selectedColor,
       tooltip: tooltip,
       shape: shape,
+      clipBehavior: clipBehavior,
       backgroundColor: backgroundColor,
       padding: padding,
       materialTapTargetSize: materialTapTargetSize,
@@ -639,15 +653,15 @@ class InputChip extends StatelessWidget
 /// [ChoiceChip]s represent a single choice from a set. Choice chips contain
 /// related descriptive text or categories.
 ///
-/// Requires one of its ancestors to be a [Material] widget. The [selected],
-/// [label], and [border] arguments must not be null.
+/// Requires one of its ancestors to be a [Material] widget. The [selected] and
+/// [label] arguments must not be null.
 ///
 /// ## Sample code
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
 ///   @override
-///   _MyThreeOptionsState createState() => new _MyThreeOptionsState();
+///   _MyThreeOptionsState createState() => _MyThreeOptionsState();
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
@@ -655,12 +669,12 @@ class InputChip extends StatelessWidget
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Wrap(
-///       children: new List<Widget>.generate(
+///     return Wrap(
+///       children: List<Widget>.generate(
 ///         3,
 ///         (int index) {
-///           return new ChoiceChip(
-///             label: new Text('Item $index'),
+///           return ChoiceChip(
+///             label: Text('Item $index'),
 ///             selected: _value == index,
 ///             onSelected: (bool selected) {
 ///               _value = selected ? index : null;
@@ -692,7 +706,7 @@ class ChoiceChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
-  /// The [label] and [selected] attributes must not be null.
+  /// The [label], [selected], and [clipBehavior] attributes must not be null.
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -705,11 +719,13 @@ class ChoiceChip extends StatelessWidget
     this.disabledColor,
     this.tooltip,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(label != null),
+        assert(clipBehavior != null),
         super(key: key);
 
   @override
@@ -732,6 +748,8 @@ class ChoiceChip extends StatelessWidget
   final String tooltip;
   @override
   final ShapeBorder shape;
+  @override
+  final Clip clipBehavior;
   @override
   final Color backgroundColor;
   @override
@@ -757,6 +775,7 @@ class ChoiceChip extends StatelessWidget
       onDeleted: null,
       tooltip: tooltip,
       shape: shape,
+      clipBehavior: clipBehavior,
       disabledColor: disabledColor,
       selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
       backgroundColor: backgroundColor,
@@ -788,7 +807,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// class CastFilter extends StatefulWidget {
 ///   @override
-///   State createState() => new CastFilterState();
+///   State createState() => CastFilterState();
 /// }
 ///
 /// class CastFilterState extends State<CastFilter> {
@@ -802,11 +821,11 @@ class ChoiceChip extends StatelessWidget
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
 ///     for (ActorFilterEntry actor in _cast) {
-///       yield new Padding(
+///       yield Padding(
 ///         padding: const EdgeInsets.all(4.0),
-///         child: new FilterChip(
-///           avatar: new CircleAvatar(child: new Text(actor.initials)),
-///           label: new Text(actor.name),
+///         child: FilterChip(
+///           avatar: CircleAvatar(child: Text(actor.initials)),
+///           label: Text(actor.name),
 ///           selected: _filters.contains(actor.name),
 ///           onSelected: (bool value) {
 ///             setState(() {
@@ -829,10 +848,10 @@ class ChoiceChip extends StatelessWidget
 ///     return Column(
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
-///         new Wrap(
+///         Wrap(
 ///           children: actorWidgets.toList(),
 ///         ),
-///         new Text('Look for: ${_filters.join(', ')}'),
+///         Text('Look for: ${_filters.join(', ')}'),
 ///       ],
 ///     );
 ///   }
@@ -872,11 +891,13 @@ class FilterChip extends StatelessWidget
     this.selectedColor,
     this.tooltip,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
   })  : assert(selected != null),
         assert(label != null),
+        assert(clipBehavior != null),
         super(key: key);
 
   @override
@@ -900,6 +921,8 @@ class FilterChip extends StatelessWidget
   @override
   final ShapeBorder shape;
   @override
+  final Clip clipBehavior;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -921,6 +944,7 @@ class FilterChip extends StatelessWidget
       selected: selected,
       tooltip: tooltip,
       shape: shape,
+      clipBehavior: clipBehavior,
       backgroundColor: backgroundColor,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
@@ -953,12 +977,12 @@ class FilterChip extends StatelessWidget
 /// ## Sample code
 ///
 /// ```dart
-/// new ActionChip(
-///   avatar: new CircleAvatar(
+/// ActionChip(
+///   avatar: CircleAvatar(
 ///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
+///     child: Text('AB'),
 ///   ),
-///   label: new Text('Aaron Burr'),
+///   label: Text('Aaron Burr'),
 ///   onPressed: () {
 ///     print("If you stand for nothing, Burr, what’ll you fall for?");
 ///   }
@@ -980,7 +1004,7 @@ class FilterChip extends StatelessWidget
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label] and [onPressed] arguments must not be null.
+  /// The [label], [onPressed], and [clipBehavior] arguments must not be null.
   const ActionChip({
     Key key,
     this.avatar,
@@ -990,6 +1014,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     @required this.onPressed,
     this.tooltip,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.padding,
     this.materialTapTargetSize,
@@ -1016,6 +1041,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final ShapeBorder shape;
   @override
+  final Clip clipBehavior;
+  @override
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
@@ -1033,6 +1060,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       labelStyle: labelStyle,
       backgroundColor: backgroundColor,
       shape: shape,
+      clipBehavior: clipBehavior,
       padding: padding,
       labelPadding: labelPadding,
       isEnabled: true,
@@ -1083,7 +1111,7 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label] and [isEnabled] arguments must not be null.
+  /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
   const RawChip({
     Key key,
     this.avatar,
@@ -1105,10 +1133,12 @@ class RawChip extends StatefulWidget
     this.selectedColor,
     this.tooltip,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.backgroundColor,
     this.materialTapTargetSize,
   })  : assert(label != null),
         assert(isEnabled != null),
+        assert(clipBehavior != null),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
         super(key: key);
 
@@ -1144,6 +1174,8 @@ class RawChip extends StatefulWidget
   final String tooltip;
   @override
   final ShapeBorder shape;
+  @override
+  final Clip clipBehavior;
   @override
   final Color backgroundColor;
   @override
@@ -1405,6 +1437,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       elevation: isTapping ? _kPressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
       shape: shape,
+      clipBehavior: widget.clipBehavior,
       child: new InkResponse(
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,

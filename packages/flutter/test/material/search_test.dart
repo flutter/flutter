@@ -499,17 +499,6 @@ void main() {
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 8,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Suggestions',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
                     id: 9,
                     children: <TestSemantics>[
                       new TestSemantics(
@@ -540,6 +529,17 @@ void main() {
                         textDirection: TextDirection.ltr,
                       ),
                     ],
+                  ),
+                  new TestSemantics(
+                    id: 8,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Suggestions',
+                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),

@@ -30,16 +30,16 @@ import 'rounded_rectangle_border.dart';
 /// "RGB" inside it:
 ///
 /// ```dart
-/// new Container(
-///   decoration: new ShapeDecoration(
+/// Container(
+///   decoration: ShapeDecoration(
 ///     color: Colors.white,
-///     shape: new Border.all(
+///     shape: Border.all(
 ///       color: Colors.red,
 ///       width: 8.0,
-///     ) + new Border.all(
+///     ) + Border.all(
 ///       color: Colors.green,
 ///       width: 8.0,
-///     ) + new Border.all(
+///     ) + Border.all(
 ///       color: Colors.blue,
 ///       width: 8.0,
 ///     ),

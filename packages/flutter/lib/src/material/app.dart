@@ -336,7 +336,7 @@ class MaterialApp extends StatefulWidget {
   ///   const FooLocalizationsDelegate();
   ///   @override
   ///   Future<FooLocalizations> load(Locale locale) {
-  ///     return new SynchronousFuture(new FooLocalizations(locale));
+  ///     return SynchronousFuture(FooLocalizations(locale));
   ///   }
   ///   @override
   ///   bool shouldReload(FooLocalizationsDelegate old) => false;
@@ -350,7 +350,7 @@ class MaterialApp extends StatefulWidget {
   /// [localizationsDelegates] list.
   ///
   /// ```dart
-  /// new MaterialApp(
+  /// MaterialApp(
   ///   localizationsDelegates: [
   ///     const FooLocalizationsDelegate(),
   ///   ],

@@ -19,7 +19,7 @@ part of material_animated_icons;
 /// ### Sample code
 ///
 /// ```dart
-/// new AnimatedIcon(
+/// AnimatedIcon(
 ///   icon: AnimatedIcons.menu_arrow,
 ///   progress: controller,
 ///   semanticLabel: 'Show menu',
@@ -41,7 +41,8 @@ class AnimatedIcon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
   }) : assert(progress != null),
-       assert(icon != null);
+       assert(icon != null),
+       super(key: key);
 
   /// The animation progress for the animated icon.
   ///

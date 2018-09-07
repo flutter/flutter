@@ -1149,13 +1149,11 @@ class Isolate extends ServiceObjectOwner {
       final Map<String, dynamic> arguments = <String, dynamic>{
         'pause': pause
       };
-      // TODO(goderbauer): Transfer Uri (instead of file path) when remote end supports it.
-      //     Note: Despite the name, `rootLibUri` and `packagesUri` expect file paths.
       if (rootLibUri != null) {
-        arguments['rootLibUri'] = rootLibUri.toFilePath(windows: false);
+        arguments['rootLibUri'] = rootLibUri.toString();
       }
       if (packagesUri != null) {
-        arguments['packagesUri'] = packagesUri.toFilePath(windows: false);
+        arguments['packagesUri'] = packagesUri.toString();
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;

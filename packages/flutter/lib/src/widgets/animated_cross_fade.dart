@@ -39,17 +39,17 @@ enum CrossFadeState {
 ///
 /// ```dart
 /// Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
-///   return new Stack(
+///   return Stack(
 ///     fit: StackFit.loose,
 ///     children: <Widget>[
-///       new Positioned(
+///       Positioned(
 ///         key: bottomChildKey,
 ///         left: 0.0,
 ///         top: 0.0,
 ///         right: 0.0,
 ///         child: bottomChild,
 ///       ),
-///       new Positioned(
+///       Positioned(
 ///         key: topChildKey,
 ///         child: topChild,
 ///       )
@@ -87,7 +87,7 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 /// over three seconds.
 ///
 /// ```dart
-/// new AnimatedCrossFade(
+/// AnimatedCrossFade(
 ///   duration: const Duration(seconds: 3),
 ///   firstChild: const FlutterLogo(style: FlutterLogoStyle.horizontal, size: 100.0),
 ///   secondChild: const FlutterLogo(style: FlutterLogoStyle.stacked, size: 100.0),

@@ -270,7 +270,7 @@ abstract class FloatingActionButtonAnimator {
   ///   @override
   ///   Animation<double> getScaleAnimation({@required Animation<double> parent}) {
   ///     // The animations will cross at value 0, and the train will return to 1.0.
-  ///     return new TrainHoppingAnimation(
+  ///     return TrainHoppingAnimation(
   ///       Tween<double>(begin: 1.0, end: -1.0).animate(parent),
   ///       Tween<double>(begin: -1.0, end: 1.0).animate(parent),
   ///     );
@@ -289,10 +289,10 @@ abstract class FloatingActionButtonAnimator {
   /// [FloatingActionButton] through a full circle:
   ///
   /// ```dart
-  ///   @override
-  ///   Animation<double> getRotationAnimation({@required Animation<double> parent}) {
-  ///     return new Tween<double>(begin: 0.0, end: 1.0).animate(parent);
-  ///   }
+  /// @override
+  /// Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+  ///   return Tween<double>(begin: 0.0, end: 1.0).animate(parent);
+  /// }
   /// ```
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 

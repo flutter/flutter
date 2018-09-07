@@ -9,7 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 const FileSystem _fs = LocalFileSystem();
 
@@ -156,7 +156,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
       await driver.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
-        await driver.runUnsynchronized<Future<Null>>(() async {
+        await driver.runUnsynchronized<void>(() async {
           await driver.tap(find.byTooltip('Back'));
         });
       } else {

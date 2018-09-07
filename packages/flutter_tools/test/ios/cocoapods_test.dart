@@ -14,8 +14,8 @@ import 'package:flutter_tools/src/ios/cocoapods.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 typedef Future<ProcessResult> InvokeProcess();
@@ -46,7 +46,7 @@ void main() {
     mockProcessManager = new MockProcessManager();
     mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
     projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
-    projectUnderTest.ios.directory.createSync(recursive: true);
+    projectUnderTest.ios.directory.childDirectory('Runner.xcodeproj').createSync(recursive: true);
     cocoaPodsUnderTest = new CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
@@ -224,7 +224,7 @@ void main() {
         );
         fail('ToolExit expected');
       } catch(e) {
-        expect(e, const isInstanceOf<ToolExit>());
+        expect(e, isInstanceOf<ToolExit>());
         verifyNever(mockProcessManager.run(
         argThat(containsAllInOrder(<String>['pod', 'install'])),
           workingDirectory: anyNamed('workingDirectory'),
@@ -271,7 +271,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         );
         fail('ToolExit expected');
       } catch (e) {
-        expect(e, const isInstanceOf<ToolExit>());
+        expect(e, isInstanceOf<ToolExit>());
         expect(
           testLogger.errorText,
           contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"),

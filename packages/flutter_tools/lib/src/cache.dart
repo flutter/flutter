@@ -169,17 +169,11 @@ class Cache {
     return fs.file(fs.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
-  /// Returns `true` if either [file] is older than the tools stamp or if
-  /// [file] doesn't exist.
-  bool fileOlderThanToolsStamp(File file) {
-    if (!file.existsSync()) {
-      return true;
-    }
+  /// Returns `true` if either [entity] is older than the tools stamp or if
+  /// [entity] doesn't exist.
+  bool isOlderThanToolsStamp(FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
-    return flutterToolsStamp.existsSync() &&
-        flutterToolsStamp
-            .lastModifiedSync()
-            .isAfter(file.lastModifiedSync());
+    return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
   bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
@@ -403,6 +397,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
     <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
     <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+    <String>['android-arm-dynamic-profile/linux-x64', 'android-arm-dynamic-profile/linux-x64.zip'],
+    <String>['android-arm-dynamic-release/linux-x64', 'android-arm-dynamic-release/linux-x64.zip'],
+    <String>['android-arm64-dynamic-profile/linux-x64', 'android-arm64-dynamic-profile/linux-x64.zip'],
+    <String>['android-arm64-dynamic-release/linux-x64', 'android-arm64-dynamic-release/linux-x64.zip'],
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
@@ -422,6 +420,10 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm64', 'android-arm64/artifacts.zip'],
     <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
     <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
+    <String>['android-arm-dynamic-profile', 'android-arm-dynamic-profile/artifacts.zip'],
+    <String>['android-arm-dynamic-release', 'android-arm-dynamic-release/artifacts.zip'],
+    <String>['android-arm64-dynamic-profile', 'android-arm64-dynamic-profile/artifacts.zip'],
+    <String>['android-arm64-dynamic-release', 'android-arm64-dynamic-release/artifacts.zip'],
   ];
 
   List<List<String>> get _iosBinaryDirs => <List<String>>[

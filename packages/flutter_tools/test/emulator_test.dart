@@ -14,8 +14,8 @@ import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
@@ -62,12 +62,12 @@ void main() {
         expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
       }
 
-      expectEmulator('Nexus_5', <Emulator>[emulator1]);
-      expectEmulator('Nexus_5X', <Emulator>[emulator2]);
-      expectEmulator('Nexus_5X_API_27_x86', <Emulator>[emulator2]);
-      expectEmulator('Nexus', <Emulator>[emulator1, emulator2]);
-      expectEmulator('iOS Simulator', <Emulator>[emulator3]);
-      expectEmulator('ios', <Emulator>[emulator3]);
+      await expectEmulator('Nexus_5', <Emulator>[emulator1]);
+      await expectEmulator('Nexus_5X', <Emulator>[emulator2]);
+      await expectEmulator('Nexus_5X_API_27_x86', <Emulator>[emulator2]);
+      await expectEmulator('Nexus', <Emulator>[emulator1, emulator2]);
+      await expectEmulator('iOS Simulator', <Emulator>[emulator3]);
+      await expectEmulator('ios', <Emulator>[emulator3]);
     });
 
     testUsingContext('create emulator with an empty name does not fail',

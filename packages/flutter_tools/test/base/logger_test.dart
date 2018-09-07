@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
@@ -72,8 +72,8 @@ void main() {
       expect(lines.length, equals(1));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiSpinner.stop(); }, throwsA(const isInstanceOf<AssertionError>()));
-      expect(() { ansiSpinner.cancel(); }, throwsA(const isInstanceOf<AssertionError>()));
+      expect(() { ansiSpinner.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(() { ansiSpinner.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('AnsiStatus works when cancelled', () async {
@@ -95,8 +95,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.cancel(); }, throwsA(const isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.stop(); }, throwsA(const isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('AnsiStatus works when stopped', () async {
@@ -119,8 +119,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.stop(); }, throwsA(const isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.cancel(); }, throwsA(const isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {

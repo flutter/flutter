@@ -534,6 +534,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onPaste,
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
+    this.onMoveCursorForwardByWord,
+    this.onMoveCursorBackwardByWord,
     this.onSetSelection,
     this.onDidGainAccessibilityFocus,
     this.onDidLoseAccessibilityFocus,
@@ -903,6 +905,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  final MoveCursorHandler onMoveCursorForwardByWord;
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  final MoveCursorHandler onMoveCursorBackwardByWord;
 
   /// The handler for [SemanticsAction.setSelection].
   ///
@@ -1981,14 +2001,16 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   List<SemanticsNode> sortedWithinVerticalGroup() {
     final List<_BoxEdge> edges = <_BoxEdge>[];
     for (SemanticsNode child in nodes) {
+      // Using a small delta to shrink child rects removes overlapping cases.
+      final Rect childRect = child.rect.deflate(0.1);
       edges.add(new _BoxEdge(
         isLeadingEdge: true,
-        offset: _pointInParentCoordinates(child, child.rect.topLeft).dx,
+        offset: _pointInParentCoordinates(child, childRect.topLeft).dx,
         node: child,
       ));
       edges.add(new _BoxEdge(
         isLeadingEdge: false,
-        offset: _pointInParentCoordinates(child, child.rect.bottomRight).dx,
+        offset: _pointInParentCoordinates(child, childRect.bottomRight).dx,
         node: child,
       ));
     }
@@ -2125,14 +2147,16 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
   for (SemanticsNode child in children) {
+    // Using a small delta to shrink child rects removes overlapping cases.
+    final Rect childRect = child.rect.deflate(0.1);
     edges.add(new _BoxEdge(
       isLeadingEdge: true,
-      offset: _pointInParentCoordinates(child, child.rect.topLeft).dy,
+      offset: _pointInParentCoordinates(child, childRect.topLeft).dy,
       node: child,
     ));
     edges.add(new _BoxEdge(
       isLeadingEdge: false,
-      offset: _pointInParentCoordinates(child, child.rect.bottomRight).dy,
+      offset: _pointInParentCoordinates(child, childRect.bottomRight).dy,
       node: child,
     ));
   }
@@ -2723,6 +2747,44 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
+  MoveCursorHandler _onMoveCursorForwardByWord;
+  set onMoveCursorForwardByWord(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one word.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
+  MoveCursorHandler _onMoveCursorBackwardByWord;
+  set onMoveCursorBackwardByWord(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);

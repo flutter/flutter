@@ -15,6 +15,7 @@ import 'data_table_source.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'ink_decoration.dart';
 import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
@@ -397,20 +398,19 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   opacity: 0.54
                 ),
                 child: new ButtonTheme.bar(
-                  child: new Container(
+                  child: new Ink(
                     height: 64.0,
-                    padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                    // TODO(ianh): This decoration will prevent ink splashes from being visible.
-                    // Instead, we should have a widget that prints the decoration on the material.
-                    // See https://github.com/flutter/flutter/issues/3782
                     color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: headerWidgets
-                    )
-                  )
-                )
-              )
+                    child: new Padding(
+                      padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: headerWidgets
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
           new SingleChildScrollView(

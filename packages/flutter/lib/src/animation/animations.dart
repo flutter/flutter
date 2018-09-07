@@ -318,11 +318,10 @@ class ReverseAnimation extends Animation<double>
 /// linear animation produced by an [AnimationController]:
 ///
 /// ``` dart
-///     final AnimationController controller =
-///         new AnimationController(duration: const Duration(milliseconds: 500));
-///     final CurvedAnimation animation =
-///         new CurvedAnimation(parent: controller, curve: Curves.ease);
+/// final AnimationController controller = AnimationController(duration: const Duration(milliseconds: 500));
+/// final CurvedAnimation animation = CurvedAnimation(parent: controller, curve: Curves.ease);
 ///```
+///
 /// Depending on the given curve, the output of the [CurvedAnimation] could have
 /// a wider range than its input. For example, elastic curves such as
 /// [Curves.elasticIn] will significantly overshoot or undershoot the default
@@ -369,7 +368,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// The curve direction is only reset when we hit the beginning or the end of
   /// the timeline to avoid discontinuities in the value of any variables this
-  /// a animation is used to animate.
+  /// animation is used to animate.
   AnimationStatus _curveDirection;
 
   void _updateCurveDirection(AnimationStatus status) {

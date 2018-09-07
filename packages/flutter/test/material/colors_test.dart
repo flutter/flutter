@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
-
 import 'package:flutter/material.dart';
+
+import '../flutter_test_alternative.dart';
 
 const List<int> primaryKeys = <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
 const List<int> accentKeys = <int>[100, 200, 400, 700];

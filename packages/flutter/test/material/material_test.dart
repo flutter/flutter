@@ -171,27 +171,42 @@ void main() {
   });
 
   group('Transparency clipping', () {
-    testWidgets('clips to bounding rect by default', (WidgetTester tester) async {
+    testWidgets('No clip by default', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+          new Material(
+            key: materialKey,
+            type: MaterialType.transparency,
+            child: const SizedBox(width: 100.0, height: 100.0),
+          )
+      );
+
+      expect(find.byKey(materialKey), hasNoImmediateClip);
+    });
+
+    testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         )
       );
 
       expect(find.byKey(materialKey), clipsWithBoundingRect);
     });
 
-    testWidgets('clips to rounded rect when borderRadius provided', (WidgetTester tester) async {
+    testWidgets('clips to rounded rect when borderRadius provided given Clip.antiAlias', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.transparency,
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         )
       );
 
@@ -203,14 +218,15 @@ void main() {
       );
     });
 
-    testWidgets('clips to shape when provided', (WidgetTester tester) async {
+    testWidgets('clips to shape when provided given Clip.antiAlias', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.transparency,
           shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         )
       );
 

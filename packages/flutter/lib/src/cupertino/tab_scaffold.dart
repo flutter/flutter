@@ -27,32 +27,32 @@ import 'bottom_tab_bar.dart';
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
 /// ```dart
-/// new CupertinoTabScaffold(
-///   tabBar: new CupertinoTabBar(
+/// CupertinoTabScaffold(
+///   tabBar: CupertinoTabBar(
 ///     items: <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),
 ///   tabBuilder: (BuildContext context, int index) {
-///     return new CupertinoTabView(
+///     return CupertinoTabView(
 ///       builder: (BuildContext context) {
-///         return new CupertinoPageScaffold(
-///           navigationBar: new CupertinoNavigationBar(
-///             middle: new Text('Page 1 of tab $index'),
+///         return CupertinoPageScaffold(
+///           navigationBar: CupertinoNavigationBar(
+///             middle: Text('Page 1 of tab $index'),
 ///           ),
-///           child: new Center(
-///             child: new CupertinoButton(
+///           child: Center(
+///             child: CupertinoButton(
 ///               child: const Text('Next page'),
 ///               onPressed: () {
 ///                 Navigator.of(context).push(
-///                   new CupertinoPageRoute<Null>(
+///                   CupertinoPageRoute<Null>(
 ///                     builder: (BuildContext context) {
-///                       return new CupertinoPageScaffold(
-///                         navigationBar: new CupertinoNavigationBar(
-///                           middle: new Text('Page 2 of tab $index'),
+///                       return CupertinoPageScaffold(
+///                         navigationBar: CupertinoNavigationBar(
+///                           middle: Text('Page 2 of tab $index'),
 ///                         ),
-///                         child: new Center(
-///                           child: new CupertinoButton(
+///                         child: Center(
+///                           child: CupertinoButton(
 ///                             child: const Text('Back'),
 ///                             onPressed: () { Navigator.of(context).pop(); },
 ///                           ),

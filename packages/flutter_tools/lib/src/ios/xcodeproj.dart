@@ -16,12 +16,11 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
+final RegExp _varExpr = new RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
@@ -35,7 +34,6 @@ Future<void> updateGeneratedXcodeProperties({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   String targetOverride,
-  @required bool previewDart2,
 }) async {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -59,20 +57,19 @@ Future<void> updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  final FlutterManifest manifest = project.manifest;
-  if (!manifest.isModule) {
+  if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
   }
 
-  final String buildName = buildInfo?.buildName ?? manifest.buildName;
+  final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+  final int buildNumber = buildInfo?.buildNumber ?? project.manifest.buildNumber;
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
@@ -89,10 +86,6 @@ Future<void> updateGeneratedXcodeProperties({
     // paths ending in _arm, 64-bit builds are not.
     final String arch = localEngineArtifacts.engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
     localsBuffer.writeln('ARCHS=$arch');
-  }
-
-  if (previewDart2) {
-    localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
   if (buildInfo.trackWidgetCreation) {

@@ -4,7 +4,7 @@
 
 import 'package:flutter/painting.dart';
 
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   test('RRect.contains()', () {

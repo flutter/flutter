@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Image, ImageFilter;
-import 'dart:ui' show Clip, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -135,7 +134,7 @@ class Directionality extends InheritedWidget {
 /// hides it when it is false:
 ///
 /// ```dart
-/// new Opacity(
+/// Opacity(
 ///   opacity: _visible ? 1.0 : 0.0,
 ///   child: const Text('Now you see me, now you don\'t!'),
 /// )
@@ -146,15 +145,15 @@ class Directionality extends InheritedWidget {
 ///
 /// ## Opacity Animation
 ///
-/// [Opacity] animations should be built using [AnimatedOpacity] rather than
-/// manually rebuilding the [Opacity] widget.
-///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
 /// an [AnimatedOpacity] instead.
 ///
 /// See also:
 ///
+///  * [Visibility], which can hide a child more efficiently (albeit less
+///    subtly, because it is either visible or hidden, rather than allowing
+///    fractional opacity values).
 ///  * [ShaderMask], which can apply more elaborate effects to its child.
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
@@ -170,8 +169,10 @@ class Opacity extends SingleChildRenderObjectWidget {
   const Opacity({
     Key key,
     @required this.opacity,
+    this.alwaysIncludeSemantics = false,
     Widget child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
        super(key: key, child: child);
 
   /// The fraction to scale the child's alpha value.
@@ -186,18 +187,36 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// expensive.
   final double opacity;
 
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
   @override
-  RenderOpacity createRenderObject(BuildContext context) => new RenderOpacity(opacity: opacity);
+  RenderOpacity createRenderObject(BuildContext context) {
+    return new RenderOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderOpacity renderObject) {
-    renderObject.opacity = opacity;
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DoubleProperty('opacity', opacity));
+    properties.add(new FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -211,9 +230,9 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// This example makes the text look like it is on fire:
 ///
 /// ```dart
-/// new ShaderMask(
+/// ShaderMask(
 ///   shaderCallback: (Rect bounds) {
-///     return new RadialGradient(
+///     return RadialGradient(
 ///       center: Alignment.topLeft,
 ///       radius: 1.0,
 ///       colors: <Color>[Colors.yellow, Colors.deepOrange.shade900],
@@ -343,15 +362,15 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// text.
 ///
 /// ```dart
-/// new CustomPaint(
-///   painter: new Sky(),
-///   child: new Center(
-///     child: new Text(
+/// CustomPaint(
+///   painter: Sky(),
+///   child: Center(
+///     child: Text(
 ///       'Once upon a time...',
 ///       style: const TextStyle(
 ///         fontSize: 40.0,
 ///         fontWeight: FontWeight.w900,
-///         color: const Color(0xFFFFFFFF),
+///         color: Color(0xFFFFFFFF),
 ///       ),
 ///     ),
 ///   ),
@@ -457,11 +476,11 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// the top half of an [Image]:
 ///
 /// ```dart
-/// new ClipRect(
-///   child: new Align(
+/// ClipRect(
+///   child: Align(
 ///     alignment: Alignment.topCenter,
 ///     heightFactor: 0.5,
-///     child: new Image.network(userAvatarUrl),
+///     child: Image.network(userAvatarUrl),
 ///   ),
 /// )
 /// ```
@@ -692,7 +711,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   const PhysicalModel({
     Key key,
     this.shape = BoxShape.rectangle,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     this.borderRadius,
     this.elevation = 0.0,
     @required this.color,
@@ -780,7 +799,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   const PhysicalShape({
     Key key,
     @required this.clipper,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     this.elevation = 0.0,
     @required this.color,
     this.shadowColor = const Color(0xFF000000),
@@ -851,12 +870,12 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 /// top right corner pinned to its original position.
 ///
 /// ```dart
-/// new Container(
+/// Container(
 ///   color: Colors.black,
-///   child: new Transform(
+///   child: Transform(
 ///     alignment: Alignment.topRight,
-///     transform: new Matrix4.skewY(0.3)..rotateZ(-math.pi / 12.0),
-///     child: new Container(
+///     transform: Matrix4.skewY(0.3)..rotateZ(-math.pi / 12.0),
+///     child: Container(
 ///       padding: const EdgeInsets.all(8.0),
 ///       color: const Color(0xFFE8581C),
 ///       child: const Text('Apartment for rent!'),
@@ -899,9 +918,9 @@ class Transform extends SingleChildRenderObjectWidget {
   /// fifteen degrees.
   ///
   /// ```dart
-  /// new Transform.rotate(
+  /// Transform.rotate(
   ///   angle: -math.pi / 12.0,
-  ///   child: new Container(
+  ///   child: Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFFE8581C),
   ///     child: const Text('Apartment for rent!'),
@@ -927,9 +946,9 @@ class Transform extends SingleChildRenderObjectWidget {
   /// This example shifts the silver-colored child down by fifteen pixels.
   ///
   /// ```dart
-  /// new Transform.translate(
+  /// Transform.translate(
   ///   offset: const Offset(0.0, 15.0),
-  ///   child: new Container(
+  ///   child: Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFF7F7F7F),
   ///     child: const Text('Quarter'),
@@ -960,9 +979,9 @@ class Transform extends SingleChildRenderObjectWidget {
   /// is half the size it would otherwise be.
   ///
   /// ```dart
-  /// new Transform.scale(
+  /// Transform.scale(
   ///   scale: 0.5,
-  ///   child: new Container(
+  ///   child: Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFFE8581C),
   ///     child: const Text('Bad Ideas'),
@@ -1291,7 +1310,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// to top, like an axis label on a graph:
 ///
 /// ```dart
-/// new RotatedBox(
+/// RotatedBox(
 ///   quarterTurns: 3,
 ///   child: const Text('Hello World!'),
 /// )
@@ -1339,9 +1358,9 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// in each direction:
 ///
 /// ```dart
-/// new Padding(
-///   padding: new EdgeInsets.all(8.0),
-///   child: const Card(child: const Text('Hello World!')),
+/// Padding(
+///   padding: EdgeInsets.all(8.0),
+///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
 ///
@@ -1678,10 +1697,10 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// exact size 200x300, parental constraints permitting:
 ///
 /// ```dart
-/// new SizedBox(
+/// SizedBox(
 ///   width: 200.0,
 ///   height: 300.0,
-///   child: const Card(child: const Text('Hello World!')),
+///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
 ///
@@ -1709,6 +1728,12 @@ class SizedBox extends SingleChildRenderObjectWidget {
   const SizedBox.expand({ Key key, Widget child })
     : width = double.infinity,
       height = double.infinity,
+      super(key: key, child: child);
+
+  /// Creates a box that will become as small as its parent allows.
+  const SizedBox.shrink({ Key key, Widget child })
+    : width = 0.0,
+      height = 0.0,
       super(key: key, child: child);
 
   /// Creates a box with the specified size.
@@ -1741,17 +1766,27 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    final String type = (width == double.infinity && height == double.infinity) ?
-                  '$runtimeType.expand' : '$runtimeType';
+    String type;
+    if (width == double.infinity && height == double.infinity) {
+      type = '$runtimeType.expand';
+    } else if (width == 0.0 && height == 0.0) {
+      type = '$runtimeType.shrink';
+    } else {
+      type = '$runtimeType';
+    }
     return key == null ? '$type' : '$type-$key';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final DiagnosticLevel level = (width == double.infinity && height == double.infinity)
-        ? DiagnosticLevel.hidden
-        : DiagnosticLevel.info;
+    DiagnosticLevel level;
+    if ((width == double.infinity && height == double.infinity) ||
+        (width == 0.0 && height == 0.0)) {
+      level = DiagnosticLevel.hidden;
+    } else {
+      level = DiagnosticLevel.info;
+    }
     properties.add(new DoubleProperty('width', width, defaultValue: null, level: level));
     properties.add(new DoubleProperty('height', height, defaultValue: null, level: level));
   }
@@ -1769,9 +1804,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
 /// parent, by applying [BoxConstraints.expand] constraints:
 ///
 /// ```dart
-/// new ConstrainedBox(
+/// ConstrainedBox(
 ///   constraints: const BoxConstraints.expand(),
-///   child: const Card(child: const Text('Hello World!')),
+///   child: const Card(child: Text('Hello World!')),
 /// )
 /// ```
 ///
@@ -2238,9 +2273,9 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that lays the child out as if it was in the tree, but without painting anything,
-/// without making the child available for hit testing, and without taking any
-/// room in the parent.
+/// A widget that lays the child out as if it was in the tree, but without
+/// painting anything, without making the child available for hit testing, and
+/// without taking any room in the parent.
 ///
 /// Animations continue to run in offstage children, and therefore use battery
 /// and CPU time, regardless of whether the animations end up being visible.
@@ -2252,8 +2287,10 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [Visibility], which can hide a child more efficiently (albeit less
+///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage = true, Widget child })
@@ -3492,16 +3529,16 @@ class Flex extends MultiChildRenderObjectWidget {
 /// the third:
 ///
 /// ```dart
-/// new Row(
+/// Row(
 ///   children: <Widget>[
-///     new Expanded(
-///       child: new Text('Deliver features faster', textAlign: TextAlign.center),
+///     Expanded(
+///       child: Text('Deliver features faster', textAlign: TextAlign.center),
 ///     ),
-///     new Expanded(
-///       child: new Text('Craft beautiful UIs', textAlign: TextAlign.center),
+///     Expanded(
+///       child: Text('Craft beautiful UIs', textAlign: TextAlign.center),
 ///     ),
-///     new Expanded(
-///       child: new FittedBox(
+///     Expanded(
+///       child: FittedBox(
 ///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: const FlutterLogo(),
 ///       ),
@@ -3527,7 +3564,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// Suppose, for instance, that you had this code:
 ///
 /// ```dart
-/// new Row(
+/// Row(
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
@@ -3552,7 +3589,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// row that the child should be given the remaining room:
 ///
 /// ```dart
-/// new Row(
+/// Row(
 ///   children: <Widget>[
 ///     const FlutterLogo(),
 ///     const Expanded(
@@ -3674,12 +3711,12 @@ class Row extends Flex {
 /// being made to fill all the remaining space.
 ///
 /// ```dart
-/// new Column(
+/// Column(
 ///   children: <Widget>[
-///     new Text('Deliver features faster'),
-///     new Text('Craft beautiful UIs'),
-///     new Expanded(
-///       child: new FittedBox(
+///     Text('Deliver features faster'),
+///     Text('Craft beautiful UIs'),
+///     Expanded(
+///       child: FittedBox(
 ///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: const FlutterLogo(),
 ///       ),
@@ -3695,17 +3732,17 @@ class Row extends Flex {
 /// fit the children.
 ///
 /// ```dart
-/// new Column(
+/// Column(
 ///   crossAxisAlignment: CrossAxisAlignment.start,
 ///   mainAxisSize: MainAxisSize.min,
 ///   children: <Widget>[
-///     new Text('We move under cover and we move as one'),
-///     new Text('Through the night, we have one shot to live another day'),
-///     new Text('We cannot let a stray gunshot give us away'),
-///     new Text('We will fight up close, seize the moment and stay in it'),
-///     new Text('It’s either that or meet the business end of a bayonet'),
-///     new Text('The code word is ‘Rochambeau,’ dig me?'),
-///     new Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
+///     Text('We move under cover and we move as one'),
+///     Text('Through the night, we have one shot to live another day'),
+///     Text('We cannot let a stray gunshot give us away'),
+///     Text('We will fight up close, seize the moment and stay in it'),
+///     Text('It’s either that or meet the business end of a bayonet'),
+///     Text('The code word is ‘Rochambeau,’ dig me?'),
+///     Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
 ///   ],
 /// )
 /// ```
@@ -3968,25 +4005,25 @@ class Expanded extends Flexible {
 /// that they flow across lines as necessary.
 ///
 /// ```dart
-/// new Wrap(
+/// Wrap(
 ///   spacing: 8.0, // gap between adjacent chips
 ///   runSpacing: 4.0, // gap between lines
 ///   children: <Widget>[
-///     new Chip(
-///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('AH')),
-///       label: new Text('Hamilton'),
+///     Chip(
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('AH')),
+///       label: Text('Hamilton'),
 ///     ),
-///     new Chip(
-///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('ML')),
-///       label: new Text('Lafayette'),
+///     Chip(
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('ML')),
+///       label: Text('Lafayette'),
 ///     ),
-///     new Chip(
-///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('HM')),
-///       label: new Text('Mulligan'),
+///     Chip(
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('HM')),
+///       label: Text('Mulligan'),
 ///     ),
-///     new Chip(
-///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('JL')),
-///       label: new Text('Laurens'),
+///     Chip(
+///       avatar: CircleAvatar(backgroundColor: Colors.blue.shade900, child: Text('JL')),
+///       label: Text('Laurens'),
 ///     ),
 ///   ],
 /// )
@@ -4292,13 +4329,13 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ## Sample code
 ///
 /// ```dart
-/// new RichText(
-///   text: new TextSpan(
+/// RichText(
+///   text: TextSpan(
 ///     text: 'Hello ',
 ///     style: DefaultTextStyle.of(context).style,
 ///     children: <TextSpan>[
-///       new TextSpan(text: 'bold', style: new TextStyle(fontWeight: FontWeight.bold)),
-///       new TextSpan(text: ' world!'),
+///       TextSpan(text: 'bold', style: TextStyle(fontWeight: FontWeight.bold)),
+///       TextSpan(text: ' world!'),
 ///     ],
 ///   ),
 /// )
@@ -4628,7 +4665,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   @override
 ///   Future<ByteData> load(String key) async {
 ///     if (key == 'resources/test')
-///       return new ByteData.view(new Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
 ///     return null;
 ///   }
 /// }
@@ -4639,10 +4676,10 @@ class RawImage extends LeafRenderObjectWidget {
 ///
 /// ```dart
 /// await tester.pumpWidget(
-///   new MaterialApp(
-///     home: new DefaultAssetBundle(
-///       bundle: new TestAssetBundle(),
-///       child: new TestWidget(),
+///   MaterialApp(
+///     home: DefaultAssetBundle(
+///       bundle: TestAssetBundle(),
+///       child: TestWidget(),
 ///     ),
 ///   ),
 /// );
@@ -5306,6 +5343,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onMoveCursorForwardByWord: properties.onMoveCursorForwardByWord,
+      onMoveCursorBackwardByWord: properties.onMoveCursorBackwardByWord,
       onSetSelection: properties.onSetSelection,
       onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
       onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
@@ -5368,6 +5407,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord
+      ..onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord
       ..onSetSelection = properties.onSetSelection
       ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
       ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus

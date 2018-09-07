@@ -28,14 +28,6 @@ class FlutterManifest {
     return manifest;
   }
 
-  /// Returns a mock manifest with the given contents.
-  static FlutterManifest mock(Map<String, dynamic> contents) {
-    final FlutterManifest manifest = new FlutterManifest._();
-    manifest._descriptor = contents ?? const <String, dynamic>{};
-    manifest._flutterDescriptor = manifest._descriptor['flutter'] ?? const <String, dynamic>{};
-    return manifest;
-  }
-
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static Future<FlutterManifest> createFromPath(String path) async {
     if (path == null || !fs.isFileSync(path))
@@ -78,8 +70,10 @@ class FlutterManifest {
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
   Map<String, dynamic> _flutterDescriptor;
 
+  /// True if the `pubspec.yaml` file does not exist.
   bool get isEmpty => _descriptor.isEmpty;
 
+  /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] ?? '';
 
   /// The version String from the `pubspec.yaml` file.
@@ -143,6 +137,14 @@ class FlutterManifest {
       return _flutterDescriptor['module']['androidPackage'];
     if (isPlugin)
       return _flutterDescriptor['plugin']['androidPackage'];
+    return null;
+  }
+
+  /// Returns the iOS bundle identifier declared by this manifest in its
+  /// module descriptor. Returns null, if there is no such declaration.
+  String get iosBundleIdentifier {
+    if (isModule)
+      return _flutterDescriptor['module']['iosBundleIdentifier'];
     return null;
   }
 

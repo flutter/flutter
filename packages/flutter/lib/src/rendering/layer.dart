@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
-import 'dart:ui' show Clip, Offset, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -51,6 +50,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer _previousSibling;
 
   /// Removes this layer from its parent layer's child list.
+  ///
+  /// This has no effect if the layer's parent is already null.
   @mustCallSuper
   void remove() {
     parent?._removeChild(this);
@@ -212,7 +213,8 @@ class PictureLayer extends Layer {
 ///   for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
-  /// identified by [textureId].
+  /// identified by [textureId], if [freeze] is true new texture frames will not be
+  /// populated to the texture.
   TextureLayer({
     @required this.rect,
     @required this.textureId,
@@ -225,6 +227,13 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
+  /// When true the texture that will not be updated with new frames.
+  ///
+  /// This is used when resizing an embedded  Android views: When resizing
+  /// there is a short period during which the framework cannot tell
+  /// if the newest texture frame has the previous or new size, to workaround this
+  /// the framework "freezes" the texture just before resizing the Android view and unfreezes
+  /// it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
   @override
@@ -581,7 +590,11 @@ class OffsetLayer extends ContainerLayer {
     assert(bounds != null);
     assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
+    final Matrix4 transform = new Matrix4.translationValues(
+      (-bounds.left  - offset.dx) * pixelRatio,
+      (-bounds.top - offset.dy) * pixelRatio,
+      0.0,
+    );
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     addToScene(builder, Offset.zero);
@@ -618,7 +631,11 @@ class ClipRectLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Rect clipRect;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@template flutter.clipper.clipBehavior}
+  /// Controls how to clip (default to [Clip.antiAlias]).
+  ///
+  /// [Clip.none] is not allowed here.
+  /// {@endtemplate}
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -959,7 +976,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,

@@ -368,9 +368,11 @@ void main() {
       new MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           log.add('onGenerateRoute ${settings.name}');
+          return null;
         },
         onUnknownRoute: (RouteSettings settings) {
           log.add('onUnknownRoute ${settings.name}');
+          return null;
         },
       )
     );

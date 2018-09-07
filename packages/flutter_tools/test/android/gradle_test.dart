@@ -10,16 +10,15 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/pubspec_schema.dart';
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
@@ -34,7 +33,7 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        await updateLocalProperties(project: await FlutterProject.current());
+        updateLocalProperties(project: await FlutterProject.current());
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
@@ -187,11 +186,10 @@ someOtherProperty: someOtherValue
       manifestFile.writeAsStringSync(manifest);
 
       // write schemaData otherwise pubspec.yaml file can't be loaded
-      const String schemaData = '{}';
-      writeSchemaFile(fs, schemaData);
+      writeEmptySchemaFile(fs);
 
       try {
-        await updateLocalProperties(
+        updateLocalProperties(
           project: await FlutterProject.fromPath('path/to/project'),
           buildInfo: buildInfo,
         );
@@ -330,16 +328,6 @@ flutter:
       );
     });
   });
-}
-
-void writeSchemaFile(FileSystem filesystem, String schemaData) {
-  final String schemaPath = buildSchemaPath(filesystem);
-  final File schemaFile = filesystem.file(schemaPath);
-
-  final String schemaDir = buildSchemaDir(filesystem);
-
-  filesystem.directory(schemaDir).createSync(recursive: true);
-  filesystem.file(schemaFile).writeAsStringSync(schemaData);
 }
 
 Platform fakePlatform(String name) {

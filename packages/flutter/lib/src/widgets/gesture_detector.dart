@@ -114,13 +114,13 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// `_lights` field:
 ///
 /// ```dart
-/// new GestureDetector(
+/// GestureDetector(
 ///   onTap: () {
 ///     setState(() { _lights = true; });
 ///   },
-///   child: new Container(
+///   child: Container(
 ///     color: Colors.yellow,
-///     child: new Text('TURN LIGHTS ON'),
+///     child: Text('TURN LIGHTS ON'),
 ///   ),
 /// )
 /// ```
@@ -203,17 +203,35 @@ class GestureDetector extends StatelessWidget {
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.
+  ///
+  /// This is called after a short timeout, even if the winning gesture has not
+  /// yet been selected. If the tap gesture wins, [onTapUp] will be called,
+  /// otherwise [onTapCancel] will be called.
   final GestureTapDownCallback onTapDown;
 
   /// A pointer that will trigger a tap has stopped contacting the screen at a
   /// particular location.
+  ///
+  /// This triggers immediately before [onTap] in the case of the tap gesture
+  /// winning. If the tap gesture did not win, [onTapCancel] is called instead.
   final GestureTapUpCallback onTapUp;
 
   /// A tap has occurred.
+  ///
+  /// This triggers when the tap gesture wins. If the tap gesture did not win,
+  /// [onTapCancel] is called instead.
+  ///
+  /// See also:
+  ///
+  ///  * [onTapUp], which is called at the same time but includes details
+  ///    regarding the pointer position.
   final GestureTapCallback onTap;
 
   /// The pointer that previously triggered [onTapDown] will not end up causing
   /// a tap.
+  ///
+  /// This is called after [onTapDown], and instead of [onTapUp] and [onTap], if
+  /// the tap gesture did not win.
   final GestureTapCancelCallback onTapCancel;
 
   /// The user has tapped the screen at the same location twice in quick
@@ -432,10 +450,10 @@ class GestureDetector extends StatelessWidget {
 /// then displayed as the child of the gesture detector.
 ///
 /// ```dart
-/// new RawGestureDetector(
+/// RawGestureDetector(
 ///   gestures: <Type, GestureRecognizerFactory>{
-///     TapGestureRecognizer: new GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-///       () => new TapGestureRecognizer(),
+///     TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+///       () => TapGestureRecognizer(),
 ///       (TapGestureRecognizer instance) {
 ///         instance
 ///           ..onTapDown = (TapDownDetails details) { setState(() { _last = 'down'; }); }
@@ -445,7 +463,7 @@ class GestureDetector extends StatelessWidget {
 ///       },
 ///     ),
 ///   },
-///   child: new Container(width: 300.0, height: 300.0, color: Colors.yellow, child: new Text(_last)),
+///   child: Container(width: 300.0, height: 300.0, color: Colors.yellow, child: Text(_last)),
 /// )
 /// ```
 ///

@@ -41,7 +41,7 @@ class StringCodec implements MessageCodec<String> {
   String decodeMessage(ByteData message) {
     if (message == null)
       return null;
-    return utf8.decoder.convert(message.buffer.asUint8List());
+    return utf8.decoder.convert(message.buffer.asUint8List(message.offsetInBytes, message.lengthInBytes));
   }
 
   @override

@@ -14,8 +14,8 @@ import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -308,7 +308,7 @@ class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockCocoaPods extends Mock implements CocoaPods {}
 
-class IOSWorkflowTestTarget extends IOSWorkflow {
+class IOSWorkflowTestTarget extends IOSValidator {
   IOSWorkflowTestTarget({
     this.hasHomebrew = true,
     bool hasIosDeploy = true,
