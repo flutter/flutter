@@ -30,8 +30,8 @@ void main() {
       /// This also exists for cases where our initialization requires access to
       /// a `Context` object, which is only set up inside the zone.
       ///
-      /// Note that these issues do not pertain to real code and are a test-only
-      /// concern, since in real code, the zone is set-up in `main()`.
+      /// These issues do not pertain to real code and are a test-only concern,
+      /// because in real code, the zone is set up in `main()`.
       ///
       /// See also: [runZoned]
       void initialize() {
