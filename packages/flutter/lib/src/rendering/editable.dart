@@ -456,7 +456,7 @@ class RenderEditable extends RenderBox {
     }
   }
 
-  int _handleDelete() {
+  void _handleDelete() {
     if (selection.textAfter(text.text).isNotEmpty) {
       textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text)
