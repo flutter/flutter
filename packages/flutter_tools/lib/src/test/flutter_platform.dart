@@ -70,6 +70,7 @@ void installHook({
   bool startPaused = false,
   int port = 0,
   String precompiledDillPath,
+  Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   int observatoryPort,
@@ -89,6 +90,7 @@ void installHook({
       host: _kHosts[serverType],
       port: port,
       precompiledDillPath: precompiledDillPath,
+      precompiledDillFiles: precompiledDillFiles,
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
       projectRootDirectory: projectRootDirectory,
@@ -339,6 +341,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.host,
     this.port,
     this.precompiledDillPath,
+    this.precompiledDillFiles,
     this.trackWidgetCreation,
     this.updateGoldens,
     this.projectRootDirectory,
@@ -353,6 +356,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final InternetAddress host;
   final int port;
   final String precompiledDillPath;
+  final Map<String, String> precompiledDillFiles;
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final Uri projectRootDirectory;
@@ -449,7 +453,7 @@ class _FlutterPlatform extends PlatformPlugin {
           ? precompiledDillPath
           : _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (precompiledDillPath == null) {
+      if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
         compiler ??= new _Compiler(trackWidgetCreation, projectRootDirectory);
         mainDart = await compiler.compile(mainDart);

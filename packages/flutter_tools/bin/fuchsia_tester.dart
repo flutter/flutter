@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:args/args.dart';
@@ -27,17 +28,15 @@ const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
-const String _kOptionTestFile = 'test-file';
-const String _kOptionDillFile = 'dill-file';
 const String _kOptionIcudtl = 'icudtl';
+const String _kOptionPrecompiledDillFiles = 'precompiled-list';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,
   _kOptionSdkRoot,
-  _kOptionTestFile,
-  _kOptionDillFile,
-  _kOptionIcudtl
+  _kOptionIcudtl,
+  _kOptionPrecompiledDillFiles
 ];
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
@@ -54,9 +53,8 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
-    ..addOption(_kOptionTestFile, help: 'Test file to execute')
-    ..addOption(_kOptionDillFile, help: 'Precompiled dill file for test')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
+    ..addOption(_kOptionPrecompiledDillFiles, help: 'Path to json file that maps dart test file ot precompiled dill')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -77,8 +75,6 @@ Future<Null> run(List<String> args) async {
     Cache.flutterRoot = tempDir.path;
     final Directory testDirectory =
         fs.directory(argResults[_kOptionTestDirectory]);
-    final File testFile = fs.file(argResults[_kOptionTestFile]);
-    final File dillFile = fs.file(argResults[_kOptionDillFile]);
 
     final String shellPath = argResults[_kOptionShell];
     if (!fs.isFileSync(shellPath)) {
@@ -115,13 +111,22 @@ Future<Null> run(List<String> args) async {
       collector = new CoverageCollector();
     }
 
+
+    Map<String, String> precompiledDillFiles = {};
+    List<Map<String, dynamic>> json = List<Map<String, dynamic>>.from(
+      jsonDecode(
+        fs.file(argResults[_kOptionPrecompiledDillFiles]).readAsStringSync()));
+    for (Map<String, dynamic> map in json) {
+      precompiledDillFiles[map["source"]] = map["dill"];
+    }
+
     exitCode = await runTests(
-      <String>[testFile.path],
+      precompiledDillFiles.keys.toList(),
       workDir: testDirectory,
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      precompiledDillPath: dillFile.path,
+      precompiledDillFiles: precompiledDillFiles,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
     );
 
