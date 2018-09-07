@@ -764,12 +764,16 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       } else if (_didUnderflow) {
         lastIndex += 1;
       }
-      for (int index = firstIndex; index <= lastIndex; ++index) {
+//      for (int index = firstIndex; index <= lastIndex; ++index) {
+      for(int index in _childElements.keys) {
         _currentlyUpdatingChildIndex = index;
         final Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          _currentBeforeChild = newChild.renderObject;
+          SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData;
+          if (!parentData.keptAlive)
+//          if (parentData.keepAlive != true || parentData.previousSibling != null || parentData.nextSibling != null)
+            _currentBeforeChild = newChild.renderObject;
         } else {
           _childElements.remove(index);
         }
