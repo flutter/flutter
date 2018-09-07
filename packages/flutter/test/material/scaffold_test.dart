@@ -161,7 +161,7 @@ void main() {
     Scaffold.of(one.currentContext).hideFloatingActionButton();
     await tester.pumpAndSettle();
     expect(find.text('1').hitTestable(), findsNothing);
-Scaffold.of(one.currentContext).showFloatingActionButton().orCancel;
+    Scaffold.of(one.currentContext).showFloatingActionButton();
     await tester.pumpAndSettle();
     expect(find.text('1').hitTestable(), findsOneWidget);
   });
