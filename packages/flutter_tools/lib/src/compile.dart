@@ -10,9 +10,11 @@ import 'package:usage/uuid/uuid.dart';
 import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/fingerprint.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
+import 'build_info.dart';
 import 'globals.dart';
 
 KernelCompiler get kernelCompiler => context[KernelCompiler];
@@ -74,7 +76,6 @@ class KernelCompiler {
     String sdkRoot,
     String mainPath,
     String outputFilePath,
-    String depFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
     List<String> entryPointsJsonFiles,
@@ -93,24 +94,22 @@ class KernelCompiler {
     // TODO(cbracken): eliminate pathFilter.
     // Currently the compiler emits buildbot paths for the core libs in the
     // depfile. None of these are available on the local host.
-    Fingerprinter fingerprinter;
-    if (depFilePath != null) {
-      fingerprinter = new Fingerprinter(
-        fingerprintPath: '$depFilePath.fingerprint',
-        paths: <String>[mainPath],
-        properties: <String, String>{
-          'entryPoint': mainPath,
-          'trackWidgetCreation': trackWidgetCreation.toString(),
-          'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
-        },
-        depfilePaths: <String>[depFilePath],
-        pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
-      );
+    final String depfilePath = fs.path.join(getBuildDirectory(), 'kernel_compile.d');
+    final Fingerprinter fingerprinter = new Fingerprinter(
+      fingerprintPath: '$depfilePath.fingerprint',
+      paths: <String>[mainPath],
+      properties: <String, String>{
+        'entryPoint': mainPath,
+        'trackWidgetCreation': trackWidgetCreation.toString(),
+        'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
+      },
+      depfilePaths: <String>[depfilePath],
+      pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
+    );
 
-      if (await fingerprinter.doesFingerprintMatch()) {
-        printTrace('Skipping kernel compilation. Fingerprint match.');
-        return new CompilerOutput(outputFilePath, 0);
-      }
+    if (await fingerprinter.doesFingerprintMatch()) {
+      printTrace('Skipping kernel compilation. Fingerprint match.');
+      return new CompilerOutput(outputFilePath, 0);
     }
 
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
@@ -153,8 +152,8 @@ class KernelCompiler {
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
     }
-    if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
-      command.addAll(<String>['--depfile', depFilePath]);
+    if (fileSystemRoots == null || fileSystemRoots.isEmpty) {
+      command.addAll(<String>['--depfile', depfilePath]);
     }
     if (fileSystemRoots != null) {
       for (String root in fileSystemRoots) {
@@ -186,9 +185,7 @@ class KernelCompiler {
       .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
-      if (fingerprinter != null) {
-        await fingerprinter.writeFingerprint();
-      }
+      await fingerprinter.writeFingerprint();
       return _stdoutHandler.compilerOutput.future;
     }
     return null;

@@ -18,8 +18,6 @@ import 'globals.dart';
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
-String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'app.dill');
 const String defaultPrivateKeyPath = 'privatekey.der';
 
@@ -36,9 +34,7 @@ Future<void> build({
   BuildMode buildMode,
   String mainPath = defaultMainPath,
   String manifestPath = defaultManifestPath,
-  String snapshotPath,
   String applicationKernelFilePath,
-  String depfilePath,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
@@ -51,8 +47,6 @@ Future<void> build({
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
-  snapshotPath ??= defaultSnapshotPath;
-  depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= defaultApplicationKernelPath;
@@ -68,7 +62,6 @@ Future<void> build({
           fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
-      depFilePath: depfilePath,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,

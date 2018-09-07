@@ -311,12 +311,10 @@ class AOTSnapshotter {
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
 
-    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: fs.path.join(outputPath, 'app.dill'),
-      depFilePath: depfilePath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,
