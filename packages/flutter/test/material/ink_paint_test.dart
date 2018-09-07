@@ -176,15 +176,18 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Ink(
-            color: Colors.red,
-            width: 200.0,
-            height: 200.0,
-            child: new InkWell(
-              splashColor: Colors.green,
-              onTap: () { },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Ink(
+              color: Colors.red,
+              width: 200.0,
+              height: 200.0,
+              child: new InkWell(
+                splashColor: Colors.green,
+                onTap: () { },
+              ),
             ),
           ),
         ),
