@@ -149,7 +149,6 @@ class TestGesture {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
       final TestPointer testPointer = new TestPointer(pointer);
-      debugPrint(isTouch.toString());
       await dispatcher(testPointer.down(downLocation, isTouch: isTouch), hitTestResult);
 
       // create a TestGesture

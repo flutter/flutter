@@ -166,6 +166,8 @@ class GestureDetector extends StatelessWidget {
     this.onMousePanDown,
     this.onMousePanStart,
     this.onMousePanUpdate,
+    this.onMousePanCancel,
+    this.onMousePanEnd,
     this.onPanEnd,
     this.onPanCancel,
     this.onScaleStart,
