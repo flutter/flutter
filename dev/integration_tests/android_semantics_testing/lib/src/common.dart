@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -227,4 +228,13 @@ class Size {
 
   @override
   String toString() => 'Size{$width, $height}';
+}
+
+/// Attempt to synchonize with platform semantics by waiting.
+///
+/// Semantics on the platform side can easily end up several frames behind the
+/// semantics of the framework. To resolve this for the integration test we can
+/// work around the issue with a sleep.
+Future<void> waitForSemantics() async {
+  await new Future<void>.delayed(const Duration(seconds: 1));
 }
