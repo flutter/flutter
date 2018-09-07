@@ -251,7 +251,7 @@ abstract class DoctorValidator {
 }
 
 class GroupedValidator extends DoctorValidator {
-  /// This group uses the name of the first validator in the list passed to it.
+  // This group uses the title of the first validator in the list passed to it.
   GroupedValidator(this.subValidators) : super(subValidators[0].title);
 
   final List<DoctorValidator> subValidators;

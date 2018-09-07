@@ -184,34 +184,6 @@ void main() {
     });
   });
 
-
-  group('doctor with grouped validators', () {
-    testUsingContext('validate diagnose combines validator output', () async {
-      expect(await new FakeGroupedDoctor().diagnose(), isTrue);
-      expect(testLogger.statusText, equals(
-              '[✓] Category 1\n'
-              '    • A helpful message\n'
-              '    • A helpful message\n'
-              '\n'
-              '[!] Category 2\n'
-              '    • A helpful message\n'
-              '    ✗ A useful error message\n'
-              '\n'
-              '! Doctor found issues in 1 category.\n'
-      ));
-    });
-
-    testUsingContext('validate summary combines validator output', () async {
-      expect(await new FakeGroupedDoctor().summaryText, equals(
-              '[✓] Category 1 is fully installed.\n'
-              '[!] Category 2 is partially installed; more components are available.\n'
-              '\n'
-              'Run "flutter doctor" for information about installing additional components.\n'
-
-      ));
-    });
-  });
-
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
       expect(await new FakeGroupedDoctor().diagnose(), isTrue);
@@ -232,7 +204,7 @@ void main() {
       // There are two subvalidators. Only the second contains statusInfo.
       expect(await new FakeGroupedDoctorWithStatus().diagnose(), isTrue);
       expect(testLogger.statusText, equals(
-          '[✓] First validator title (A status message)\n'
+              '[✓] First validator title (A status message)\n'
               '    • A helpful message\n'
               '    • A different message\n'
               '\n'

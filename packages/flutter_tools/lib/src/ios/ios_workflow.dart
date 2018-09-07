@@ -202,7 +202,6 @@ class CocoaPodsValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     ValidationType status = ValidationType.installed;
