@@ -461,7 +461,7 @@ class RenderEditable extends RenderBox {
       textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text)
           + selection.textAfter(text.text).substring(1),
-        selection: new TextSelection.collapsed(offset: selection.start));
+        selection: new TextSelection.collapsed(offset: selection.start)); 
     } else {
       textSelectionDelegate.textEditingValue = new TextEditingValue(
         text: selection.textBefore(text.text),
