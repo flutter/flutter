@@ -194,7 +194,7 @@ void main() {
       expect(find.text('3:true', skipOffstage: false), findsOneWidget);
       expect(find.text('116:false'), findsOneWidget);
 
-      await tester.tap(find.text('116:false'));
+      await tester.tapAt(const Offset(100.0, 100.0));
       position.jumpTo(0.0);
       await tester.pump();
       await tester.pump();
