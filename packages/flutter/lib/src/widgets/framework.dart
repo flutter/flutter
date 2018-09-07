@@ -3246,16 +3246,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @override
   InheritedWidget inheritFromElement(InheritedElement ancestor, { Object aspect }) {
     assert(ancestor != null);
-    assert(() {
-      if (_parent == null) {
-        // We're being deactivated, see deactivateChild()
-        return true;
-      }
-      Element element = _parent;
-      while (ancestor != element && element != null)
-        element = element._parent;
-      return ancestor == element;
-    }());
     _dependencies ??= new HashSet<InheritedElement>();
     _dependencies.add(ancestor);
     ancestor.updateDependencies(this, aspect);
