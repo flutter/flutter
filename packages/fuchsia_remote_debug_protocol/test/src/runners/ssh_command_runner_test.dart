@@ -124,7 +124,7 @@ void main() {
 
     test('verify config is excluded correctly', () async {
       const String addr = 'fe80::8eae:4cff:fef4:9247';
-      runner = new SshCommandRunner.withProcessManager(
+      runner = SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: addr,
       );
