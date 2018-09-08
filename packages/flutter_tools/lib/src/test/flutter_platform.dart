@@ -448,10 +448,15 @@ class _FlutterPlatform extends PlatformPlugin {
       printTrace('test $ourTestCount: starting shell process');
 
       // If a kernel file is given, then use that to launch the test.
-      // Otherwise create a "listener" dart that invokes actual test.
-      String mainDart = precompiledDillPath != null
-          ? precompiledDillPath
-          : _createListenerDart(finalizers, ourTestCount, testPath, server);
+      // If mapping is provided, look kernel file from mapping.
+      // If all fails, create a "listener" dart that invokes actual test.
+      String mainDart;
+      if (precompiledDillPath != null) {
+        mainDart = precompiledDillPath;
+      } else if (precompiledDillFiles != null) {
+        mainDart = precompiledDillFiles[testPath];
+      }
+      mainDart ??= _createListenerDart(finalizers, ourTestCount, testPath, server);
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.

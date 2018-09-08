@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' show json;
 import 'dart:math' as math;
 
 import 'package:args/args.dart';
@@ -29,14 +29,14 @@ const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionIcudtl = 'icudtl';
-const String _kOptionPrecompiledDillFiles = 'precompiled-list';
+const String _kOptionTests = 'tests';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,
   _kOptionSdkRoot,
   _kOptionIcudtl,
-  _kOptionPrecompiledDillFiles
+  _kOptionTests,
 ];
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
@@ -54,7 +54,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
-    ..addOption(_kOptionPrecompiledDillFiles, help: 'Path to json file that maps dart test file ot precompiled dill')
+    ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -112,21 +112,20 @@ Future<Null> run(List<String> args) async {
     }
 
 
-    Map<String, String> precompiledDillFiles = {};
-    List<Map<String, dynamic>> json = List<Map<String, dynamic>>.from(
-      jsonDecode(
-        fs.file(argResults[_kOptionPrecompiledDillFiles]).readAsStringSync()));
-    for (Map<String, dynamic> map in json) {
-      precompiledDillFiles[map["source"]] = map["dill"];
+    final Map<String, String> tests = <String, String>{};
+    final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
+      json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
+    for (Map<String, dynamic> map in jsonList) {
+      tests[map['source']] = map['dill'];
     }
 
     exitCode = await runTests(
-      precompiledDillFiles.keys.toList(),
+      tests.keys.toList(),
       workDir: testDirectory,
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      precompiledDillFiles: precompiledDillFiles,
+      precompiledDillFiles: tests,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
     );
 
