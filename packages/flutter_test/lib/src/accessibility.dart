@@ -101,7 +101,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       }
       // skip node if it is touching the edge of the screen, since it might
       // be partially scrolled offscreen.
-      const delta = 0.001;
+      const double delta = 0.001;
       if (paintBounds.left <= delta
         || paintBounds.top <= delta
         || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
@@ -220,10 +220,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
-      if ((isBold && fontSize > kBoldTextMinimumSize) || fontSize > kLargeTextMinimumSize)
+      if ((isBold && fontSize > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
         targetContrastRatio = kMinimumRatioLargeText;
-      else
+      } else {
         targetContrastRatio = kMinimumRatioNormalText;
+      }
       if (contrastRatio - targetContrastRatio >= delta)
         return result + const Evaluation.pass();
       return result + new Evaluation.fail(
