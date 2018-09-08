@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2692,5 +2693,27 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
 
     semantics.dispose();
+  });
+
+  testWidgets('floating label does not overlap with value at large textScaleFactors', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController(text: 'Just some text');
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new MediaQuery(
+            data: new MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
+            child: Center(
+              child: new TextField(
+                decoration: const InputDecoration(labelText: 'Label'),
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final Rect labelRect = tester.getRect(find.text('Label'));
+    final Rect fieldRect = tester.getRect(find.text('Just some text'));
+    expect(labelRect.bottom, greaterThan(fieldRect.top));
   });
 }
