@@ -5,6 +5,7 @@
 #ifndef SHELL_GPU_GPU_SURFACE_GL_H_
 #define SHELL_GPU_GPU_SURFACE_GL_H_
 
+#include <functional>
 #include <memory>
 
 #include "flutter/fml/macros.h"
@@ -33,6 +34,10 @@ class GPUSurfaceGLDelegate {
     matrix.setIdentity();
     return matrix;
   }
+
+  using GLProcResolver =
+      std::function<void* /* proc name */ (const char* /* proc address */)>;
+  virtual GLProcResolver GetGLProcResolver() const { return nullptr; }
 };
 
 class GPUSurfaceGL : public Surface {
@@ -55,6 +60,7 @@ class GPUSurfaceGL : public Surface {
 
  private:
   GPUSurfaceGLDelegate* delegate_;
+  GPUSurfaceGLDelegate::GLProcResolver proc_resolver_;
   sk_sp<GrContext> context_;
   sk_sp<SkSurface> onscreen_surface_;
   sk_sp<SkSurface> offscreen_surface_;

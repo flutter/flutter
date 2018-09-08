@@ -60,6 +60,7 @@ typedef bool (*SoftwareSurfacePresentCallback)(void* /* user data */,
                                                const void* /* allocation */,
                                                size_t /* row bytes */,
                                                size_t /* height */);
+typedef void* (*ProcResolver)(void* /* user data */, const char* /* name */);
 
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterOpenGLRendererConfig).
@@ -77,6 +78,7 @@ typedef struct {
   // The transformation to apply to the render target before any rendering
   // operations. This callback is optional.
   TransformationCallback surface_transformation;
+  ProcResolver gl_proc_resolver;
 } FlutterOpenGLRendererConfig;
 
 typedef struct {
