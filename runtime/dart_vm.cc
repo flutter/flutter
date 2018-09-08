@@ -310,6 +310,8 @@ DartVM::DartVM(const Settings& settings,
       vm_snapshot_(std::move(vm_snapshot)),
       isolate_snapshot_(std::move(isolate_snapshot)),
       shared_snapshot_(std::move(shared_snapshot)),
+      platform_kernel_mapping_(
+          std::make_unique<fml::FileMapping>(settings.platform_kernel_path)),
       weak_factory_(this) {
   TRACE_EVENT0("flutter", "DartVMInitializer");
   FML_DLOG(INFO) << "Attempting Dart VM launch for mode: "
@@ -366,11 +368,17 @@ DartVM::DartVM(const Settings& settings,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
-  const bool is_preview_dart2 =
+  const bool isolate_snapshot_is_dart_2 =
       Dart_IsDart2Snapshot(isolate_snapshot_->GetData()->GetSnapshotPointer());
 
+  const bool is_preview_dart2 =
+      (platform_kernel_mapping_->GetSize() > 0) || isolate_snapshot_is_dart_2;
+
   FML_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? "is" : "is NOT")
-                 << " enabled.";
+                 << " enabled. Platform kernel: "
+                 << static_cast<bool>(platform_kernel_mapping_->GetSize() > 0)
+                 << " Isolate Snapshot is Dart 2: "
+                 << isolate_snapshot_is_dart_2;
 
   if (is_preview_dart2) {
     PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
@@ -475,6 +483,10 @@ DartVM::~DartVM() {
 
 const Settings& DartVM::GetSettings() const {
   return settings_;
+}
+
+const fml::Mapping& DartVM::GetPlatformKernel() const {
+  return *platform_kernel_mapping_.get();
 }
 
 const DartSnapshot& DartVM::GetVMSnapshot() const {

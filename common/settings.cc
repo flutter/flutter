@@ -11,6 +11,7 @@ namespace blink {
 std::string Settings::ToString() const {
   std::stringstream stream;
   stream << "Settings: " << std::endl;
+  stream << "script_snapshot_path: " << script_snapshot_path << std::endl;
   stream << "vm_snapshot_data_path: " << vm_snapshot_data_path << std::endl;
   stream << "vm_snapshot_instr_path: " << vm_snapshot_instr_path << std::endl;
   stream << "isolate_snapshot_data_path: " << isolate_snapshot_data_path
