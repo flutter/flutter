@@ -11,6 +11,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContextOptions.h"
+#include "third_party/skia/include/gpu/gl/GrGLAssembleInterface.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 // These are common defines present on all OpenGL headers. However, we don't
@@ -42,6 +43,8 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     return;
   }
 
+  proc_resolver_ = delegate_->GetGLProcResolver();
+
   GrContextOptions options;
   options.fAvoidStencilBuffers = true;
 
@@ -49,7 +52,18 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   // ES2 shading language when the ES3 external image extension is missing.
   options.fPreferExternalImagesOverES3 = true;
 
-  auto context = GrContext::MakeGL(GrGLMakeNativeInterface(), options);
+  auto interface =
+      proc_resolver_
+          ? GrGLMakeAssembledGLESInterface(
+                this /* context */,
+                [](void* context, const char gl_proc_name[]) -> GrGLFuncPtr {
+                  return reinterpret_cast<GrGLFuncPtr>(
+                      reinterpret_cast<GPUSurfaceGL*>(context)->proc_resolver_(
+                          gl_proc_name));
+                })
+          : GrGLMakeNativeInterface();
+
+  auto context = GrContext::MakeGL(interface, options);
 
   if (context == nullptr) {
     FML_LOG(ERROR) << "Failed to setup Skia Gr context.";

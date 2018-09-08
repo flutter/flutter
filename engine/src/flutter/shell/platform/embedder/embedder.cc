@@ -138,16 +138,25 @@ InferOpenGLPlatformViewCreationCallback(
         };
   }
 
+  shell::GPUSurfaceGLDelegate::GLProcResolver gl_proc_resolver = nullptr;
+  if (SAFE_ACCESS(open_gl_config, gl_proc_resolver, nullptr) != nullptr) {
+    gl_proc_resolver = [ptr = config->open_gl.gl_proc_resolver,
+                        user_data](const char* gl_proc_name) {
+      return ptr(user_data, gl_proc_name);
+    };
+  }
+
   bool fbo_reset_after_present =
       SAFE_ACCESS(open_gl_config, fbo_reset_after_present, false);
 
   shell::EmbedderSurfaceGL::GLDispatchTable gl_dispatch_table = {
-      gl_make_current,                    // gl_make_current_callback
-      gl_clear_current,                   // gl_clear_current_callback
-      gl_present,                         // gl_present_callback
-      gl_fbo_callback,                    // gl_fbo_callback
-      gl_make_resource_current_callback,  // gl_make_resource_current_callback
-      gl_surface_transformation_callback  // gl_surface_transformation_callback
+      gl_make_current,                     // gl_make_current_callback
+      gl_clear_current,                    // gl_clear_current_callback
+      gl_present,                          // gl_present_callback
+      gl_fbo_callback,                     // gl_fbo_callback
+      gl_make_resource_current_callback,   // gl_make_resource_current_callback
+      gl_surface_transformation_callback,  // gl_surface_transformation_callback
+      gl_proc_resolver,                    // gl_proc_resolver
   };
 
   return [gl_dispatch_table, fbo_reset_after_present,

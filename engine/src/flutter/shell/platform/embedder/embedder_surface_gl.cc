@@ -70,6 +70,11 @@ SkMatrix EmbedderSurfaceGL::GLContextSurfaceTransformation() const {
   return callback();
 }
 
+// |shell::GPUSurfaceGLDelegate|
+EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGL::GetGLProcResolver() const {
+  return gl_dispatch_table_.gl_proc_resolver;
+}
+
 // |shell::EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGL::CreateGPUSurface() {
   return std::make_unique<GPUSurfaceGL>(this);
