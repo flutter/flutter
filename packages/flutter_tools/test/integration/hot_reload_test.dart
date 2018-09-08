@@ -13,7 +13,7 @@ import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
 void main() {
-  group('hot reload', () {
+  group('hot', () {
     Directory tempDir;
     final BasicProject _project = new BasicProject();
     FlutterTestDriver _flutter;
@@ -29,13 +29,19 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    test('works without error', () async {
+    test('reload works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
+    });
+
+    test('restart works without error', () async {
+      await _flutter.run();
+      await _flutter.hotRestart();
+      // TODO(dantup): Unskip after flutter-tester restart issue is fixed on Windows:
+      // https://github.com/flutter/flutter/issues/21348.
     }, skip: platform.isWindows);
 
-    test('hits breakpoints with file:// prefixes after reload', () async {
+    test('reload hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
       // Hit breakpoint using a file:// URI.
@@ -43,7 +49,10 @@ void main() {
           new Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
-    }, skip: !platform.isLinux);
+
+      // TODO(dantup): Unskip for Mac when [1] is fixed.
+      // [1] hot reload/breakpoints fail when uris prefixed with file://
+      //     https://github.com/flutter/flutter/issues/18441
+    }, skip: !platform.isLinux && !platform.isWindows);
   }, timeout: const Timeout.factor(6));
 }

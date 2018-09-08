@@ -46,6 +46,7 @@ class MediaQueryData {
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.disableAnimations = false,
+    this.boldText = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -63,6 +64,7 @@ class MediaQueryData {
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.accessibleNavigation,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
+      boldText = window.accessibilityFeatures.boldText,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -149,9 +151,19 @@ class MediaQueryData {
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
+  /// See also:
+  ///
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   ///
   final bool disableAnimations;
+
+  /// Whether the platform is requesting that text be drawn with a bold font
+  /// weight.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool boldText;
 
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
@@ -170,6 +182,7 @@ class MediaQueryData {
     bool disableAnimations,
     bool invertColors,
     bool accessibleNavigation,
+    bool boldText,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
@@ -181,6 +194,7 @@ class MediaQueryData {
       invertColors: invertColors ?? this.invertColors,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
+      boldText: boldText ?? this.boldText,
     );
   }
 
@@ -221,6 +235,7 @@ class MediaQueryData {
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
     );
   }
 
@@ -259,6 +274,7 @@ class MediaQueryData {
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
     );
   }
 
@@ -275,7 +291,8 @@ class MediaQueryData {
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
         && typedOther.disableAnimations == disableAnimations
         && typedOther.invertColors == invertColors
-        && typedOther.accessibleNavigation == accessibleNavigation;
+        && typedOther.accessibleNavigation == accessibleNavigation
+        && typedOther.boldText == boldText;
   }
 
   @override
@@ -290,6 +307,7 @@ class MediaQueryData {
       disableAnimations,
       invertColors,
       accessibleNavigation,
+      boldText,
     );
   }
 
@@ -305,6 +323,7 @@ class MediaQueryData {
              'accessibleNavigation: $accessibleNavigation'
              'disableAnimations: $disableAnimations'
              'invertColors: $invertColors'
+             'boldText: $boldText'
            ')';
   }
 }
@@ -474,6 +493,12 @@ class MediaQuery extends InheritedWidget {
   /// no such ancestor exists.
   static double textScaleFactorOf(BuildContext context) {
     return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+  }
+
+  /// Returns the boldText accessibility setting for the nearest MediaQuery
+  /// ancestor, or false if no such ancestor exists.
+  static bool boldTextOverride(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.boldText ?? false;
   }
 
   @override

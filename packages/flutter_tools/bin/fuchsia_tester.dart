@@ -121,7 +121,6 @@ Future<Null> run(List<String> args) async {
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      previewDart2: true,
       precompiledDillPath: dillFile.path,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
     );

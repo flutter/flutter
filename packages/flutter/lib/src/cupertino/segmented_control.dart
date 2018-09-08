@@ -130,21 +130,21 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {
   ///   @override
-  ///   State createState() => new SegmentedControlExampleState();
+  ///   State createState() => SegmentedControlExampleState();
   /// }
   ///
   /// class SegmentedControlExampleState extends State<SegmentedControlExample> {
   ///   final Map<int, Widget> children = const {
-  ///     0: const Text('Child 1'),
-  ///     1: const Text('Child 2'),
+  ///     0: Text('Child 1'),
+  ///     1: Text('Child 2'),
   ///   };
   ///
   ///   int currentValue;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Container(
-  ///       child: new CupertinoSegmentedControl<int>(
+  ///     return Container(
+  ///       child: CupertinoSegmentedControl<int>(
   ///         children: children,
   ///         onValueChanged: (int newValue) {
   ///           setState(() {

@@ -13,7 +13,7 @@ class VsCodeValidator extends DoctorValidator {
     'https://marketplace.visualstudio.com/items?itemName=${VsCode.extensionIdentifier}';
   final VsCode _vsCode;
 
-  VsCodeValidator(this._vsCode) : super(_vsCode.productName);
+  VsCodeValidator(this._vsCode) : super(_vsCode.productName, ValidatorCategory.ide);
 
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode

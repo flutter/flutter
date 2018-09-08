@@ -310,7 +310,27 @@ void main() {
     );
   });
 
-  testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
+  testWidgets('Disabled MaterialButton has correct default text color', (WidgetTester tester) async {
+    const String testText = 'Disabled';
+    const Widget buttonWidget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: MaterialButton(
+            onPressed: null,
+            child: Text(testText), // button is disabled
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buttonWidget);
+
+    final RichText text = tester.widget<RichText>(find.byType(RichText));
+    expect(text.text.style.color, Colors.black38);
+  });
+
+    testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
@@ -519,5 +539,23 @@ void main() {
     );
 
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
+  });
+
+  testWidgets('RaisedButton has no clip by default', (WidgetTester tester) async{
+    await tester.pumpWidget(
+      new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new RaisedButton(
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          )
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byType(RaisedButton)),
+        paintsExactlyCountTimes(#clipPath, 0)
+    );
   });
 }

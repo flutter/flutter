@@ -1244,4 +1244,95 @@ void main() {
     await tester.pump(duration * 0.1);
     expect(tester.getTopLeft(find.byKey(firstKey)).dx, x0);
   });
+
+  testWidgets('Can override flight shuttle', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new ListView(
+          children: <Widget>[
+            const Hero(tag: 'a', child: Text('foo')),
+            new Builder(builder: (BuildContext context) {
+              return new FlatButton(
+                child: const Text('two'),
+                onPressed: () => Navigator.push<void>(context, new MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return new Material(
+                      child: new Hero(
+                        tag: 'a',
+                        child: const Text('bar'),
+                        flightShuttleBuilder: (
+                          BuildContext flightContext,
+                          Animation<double> animation,
+                          HeroFlightDirection flightDirection,
+                          BuildContext fromHeroContext,
+                          BuildContext toHeroContext,
+                        ) {
+                          return const Text('baz');
+                        },
+                      ),
+                    );
+                  },
+                )),
+              );
+            }),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsNothing);
+    expect(find.text('baz'), findsOneWidget);
+  });
+
+  testWidgets('Can override flight launch pads', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new ListView(
+          children: <Widget>[
+            new Hero(
+              tag: 'a',
+              child: const Text('Batman'),
+              placeholderBuilder: (BuildContext context, Widget child) {
+                return const Text('Venom');
+              },
+            ),
+            new Builder(builder: (BuildContext context) {
+              return new FlatButton(
+                child: const Text('two'),
+                onPressed: () => Navigator.push<void>(context, new MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return new Material(
+                      child: new Hero(
+                        tag: 'a',
+                        child: const Text('Wolverine'),
+                        placeholderBuilder: (BuildContext context, Widget child) {
+                          return const Text('Joker');
+                        },
+                      ),
+                    );
+                  },
+                )),
+              );
+            }),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(find.text('Batman'), findsNothing);
+    // This shows up once but in the Hero because by default, the destination
+    // Hero child is the widget in flight.
+    expect(find.text('Wolverine'), findsOneWidget);
+    expect(find.text('Venom'), findsOneWidget);
+    expect(find.text('Joker'), findsOneWidget);
+  });
 }

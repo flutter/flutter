@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -67,13 +68,13 @@ void installHook({
   bool enableObservatory = false,
   bool machine = false,
   bool startPaused = false,
-  bool previewDart2 = false,
   int port = 0,
   String precompiledDillPath,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
+  Uri projectRootDirectory,
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -86,11 +87,11 @@ void installHook({
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
-      previewDart2: previewDart2,
       port: port,
       precompiledDillPath: precompiledDillPath,
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
+      projectRootDirectory: projectRootDirectory,
     ),
   );
 }
@@ -198,7 +199,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation) {
+  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -223,12 +224,15 @@ class _Compiler {
       printError('$message');
     }
 
+    final String testFilePath = fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill');
+
     ResidentCompiler createCompiler() {
       return new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
+        initializeFromDill: testFilePath
       );
     }
 
@@ -244,7 +248,11 @@ class _Compiler {
           final _CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
           final Stopwatch compilerTime = new Stopwatch()..start();
-          compiler ??= createCompiler();
+          bool firstCompile = false;
+          if (compiler == null) {
+            compiler = createCompiler();
+            firstCompile = true;
+          }
           suppressOutput = false;
           final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
               compiler.recompile(
@@ -262,8 +270,16 @@ class _Compiler {
             request.result.complete(null);
             await _shutdown();
           } else {
-            final File kernelReadyToRun =
-                await fs.file(outputPath).copy('${request.path}.dill');
+            final File outputFile = fs.file(outputPath);
+            final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
+            final File testCache = fs.file(testFilePath);
+            if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+              // The idea is to keep the cache file up-to-date and include as
+              // much as possible in an effort to re-use as many packages as
+              // possible.
+              ensureDirectoryExists(testFilePath);
+              await outputFile.copy(testFilePath);
+            }
             request.result.complete(kernelReadyToRun.path);
             compiler.accept();
             compiler.reset();
@@ -321,11 +337,11 @@ class _FlutterPlatform extends PlatformPlugin {
     this.startPaused,
     this.explicitObservatoryPort,
     this.host,
-    this.previewDart2,
     this.port,
     this.precompiledDillPath,
     this.trackWidgetCreation,
     this.updateGoldens,
+    this.projectRootDirectory,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -335,11 +351,11 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool startPaused;
   final int explicitObservatoryPort;
   final InternetAddress host;
-  final bool previewDart2;
   final int port;
   final String precompiledDillPath;
   final bool trackWidgetCreation;
   final bool updateGoldens;
+  final Uri projectRootDirectory;
 
   Directory fontsDirectory;
   _Compiler compiler;
@@ -367,7 +383,7 @@ class _FlutterPlatform extends PlatformPlugin {
     _testCount += 1;
     final StreamController<dynamic> localController = new StreamController<dynamic>();
     final StreamController<dynamic> remoteController = new StreamController<dynamic>();
-    final Completer<Null> testCompleteCompleter = new Completer<Null>();
+    final Completer<_AsyncError> testCompleteCompleter = new Completer<_AsyncError>();
     final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink = new _FlutterPlatformStreamSinkWrapper<dynamic>(
       remoteController.sink,
       testCompleteCompleter.future,
@@ -384,13 +400,14 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
-  Future<Null> _startTest(
+  Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
-    int ourTestCount) async {
+    int ourTestCount,
+  ) async {
     printTrace('test $ourTestCount: starting test $testPath');
 
-    dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     final List<_Finalizer> finalizers = <_Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
@@ -424,24 +441,21 @@ class _FlutterPlatform extends PlatformPlugin {
         cancelOnError: true,
       );
 
-      printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
+      printTrace('test $ourTestCount: starting shell process');
 
-      // [precompiledDillPath] can be set only if [previewDart2] is [true].
-      assert(precompiledDillPath == null || previewDart2);
       // If a kernel file is given, then use that to launch the test.
       // Otherwise create a "listener" dart that invokes actual test.
       String mainDart = precompiledDillPath != null
           ? precompiledDillPath
           : _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (previewDart2 && precompiledDillPath == null) {
+      if (precompiledDillPath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= new _Compiler(trackWidgetCreation);
+        compiler ??= new _Compiler(trackWidgetCreation, projectRootDirectory);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
-          controller.sink.addError(
-              _getErrorMessage('Compilation failed', testPath, shellPath));
+          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
           return null;
         }
       }
@@ -630,7 +644,7 @@ class _FlutterPlatform extends PlatformPlugin {
         controller.sink.addError(error, stack);
       } else {
         printError('unhandled error during test:\n$testPath\n$error\n$stack');
-        outOfBandError ??= error;
+        outOfBandError ??= new _AsyncError(error, stack);
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
@@ -644,7 +658,7 @@ class _FlutterPlatform extends PlatformPlugin {
             controller.sink.addError(error, stack);
           } else {
             printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
-            outOfBandError ??= error;
+            outOfBandError ??= new _AsyncError(error, stack);
           }
         }
       }
@@ -659,10 +673,10 @@ class _FlutterPlatform extends PlatformPlugin {
     assert(controllerSinkClosed);
     if (outOfBandError != null) {
       printTrace('test $ourTestCount: finished with out-of-band failure');
-      throw outOfBandError;
+    } else {
+      printTrace('test $ourTestCount: finished');
     }
-    printTrace('test $ourTestCount: finished');
-    return null;
+    return outOfBandError;
   }
 
   String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
@@ -685,10 +699,6 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
-    if (!previewDart2) {
-      return null;
-    }
-
     if (precompiledDillPath != null) {
       return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     }
@@ -902,10 +912,24 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 }
 
+// The [_shellProcessClosed] future can't have errors thrown on it because it
+// crosses zones (it's fed in a zone created by the test package, but listened
+// to by a parent zone, the same zone that calls [close] below).
+//
+// This is because Dart won't let errors that were fed into a Future in one zone
+// propagate to listeners in another zone. (Specifically, the zone in which the
+// future was completed with the error, and the zone in which the listener was
+// registered, are what matters.)
+//
+// Because of this, the [_shellProcessClosed] future takes an [_AsyncError]
+// object as a result. If it's null, it's as if it had completed correctly; if
+// it's non-null, it contains the error and stack trace of the actual error, as
+// if it had completed with that error.
 class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   _FlutterPlatformStreamSinkWrapper(this._parent, this._shellProcessClosed);
+
   final StreamSink<S> _parent;
-  final Future<void> _shellProcessClosed;
+  final Future<_AsyncError> _shellProcessClosed;
 
   @override
   Future<void> get done => _done.future;
@@ -913,12 +937,19 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<dynamic> close() {
-   Future.wait<dynamic>(<Future<dynamic>>[
+    Future.wait<dynamic>(<Future<dynamic>>[
       _parent.close(),
       _shellProcessClosed,
     ]).then<void>(
-      (List<dynamic> value) {
-        _done.complete();
+      (List<dynamic> futureResults) {
+        assert(futureResults.length == 2);
+        assert(futureResults.first == null);
+        if (futureResults.last is _AsyncError) {
+          _done.completeError(futureResults.last.error, futureResults.last.stack);
+        } else {
+          assert(futureResults.last == null);
+          _done.complete();
+        }
       },
       onError: _done.completeError,
     );
@@ -931,4 +962,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
+}
+
+@immutable
+class _AsyncError {
+  const _AsyncError(this.error, this.stack);
+  final dynamic error;
+  final StackTrace stack;
 }

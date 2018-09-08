@@ -98,7 +98,7 @@ void main() {
     await tester.pumpWidget(
       new TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.visitAncestorElements((Element element) { });
+        context.visitAncestorElements((Element element) => true);
       }),
     );
     await tester.pumpWidget(new Container());

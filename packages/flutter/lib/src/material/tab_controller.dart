@@ -27,13 +27,13 @@ import 'constants.dart';
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key key }) : super(key: key);
 ///   @override
-///   _MyTabbedPageState createState() => new _MyTabbedPageState();
+///   _MyTabbedPageState createState() => _MyTabbedPageState();
 /// }
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
-///     new Tab(text: 'LEFT'),
-///     new Tab(text: 'RIGHT'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   TabController _tabController;
@@ -41,7 +41,7 @@ import 'constants.dart';
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     _tabController = new TabController(vsync: this, length: myTabs.length);
+///     _tabController = TabController(vsync: this, length: myTabs.length);
 ///   }
 ///
 ///  @override
@@ -52,17 +52,17 @@ import 'constants.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Scaffold(
-///       appBar: new AppBar(
-///         bottom: new TabBar(
+///     return Scaffold(
+///       appBar: AppBar(
+///         bottom: TabBar(
 ///           controller: _tabController,
 ///           tabs: myTabs,
 ///         ),
 ///       ),
-///       body: new TabBarView(
+///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return new Center(child: new Text(tab.text));
+///           return Center(child: Text(tab.text));
 ///         }).toList(),
 ///       ),
 ///     );
@@ -216,23 +216,23 @@ class _TabControllerScope extends InheritedWidget {
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
-///     new Tab(text: 'LEFT'),
-///     new Tab(text: 'RIGHT'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new DefaultTabController(
+///     return DefaultTabController(
 ///       length: myTabs.length,
-///       child: new Scaffold(
-///         appBar: new AppBar(
-///           bottom: new TabBar(
+///       child: Scaffold(
+///         appBar: AppBar(
+///           bottom: TabBar(
 ///             tabs: myTabs,
 ///           ),
 ///         ),
-///         body: new TabBarView(
+///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return new Center(child: new Text(tab.text));
+///             return Center(child: Text(tab.text));
 ///           }).toList(),
 ///         ),
 ///       ),

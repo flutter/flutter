@@ -23,8 +23,8 @@ import 'theme_data.dart';
 /// [backgroundImage] property:
 ///
 /// ```dart
-/// new CircleAvatar(
-///   backgroundImage: new NetworkImage(userAvatarUrl),
+/// CircleAvatar(
+///   backgroundImage: NetworkImage(userAvatarUrl),
 /// )
 /// ```
 ///
@@ -34,9 +34,9 @@ import 'theme_data.dart';
 /// provided using a [Text] widget as the [child] and a [backgroundColor]:
 ///
 /// ```dart
-/// new CircleAvatar(
+/// CircleAvatar(
 ///   backgroundColor: Colors.brown.shade800,
-///   child: new Text('AH'),
+///   child: Text('AH'),
 /// )
 /// ```
 ///

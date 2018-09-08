@@ -190,9 +190,9 @@ class ButtonThemeData extends Diagnosticable {
   /// Simply a convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object:
   /// ```dart
-  /// return new BoxConstraints(
+  /// return BoxConstraints(
   ///   minWidth: minWidth,
-  ///    minHeight: height,
+  ///   minHeight: height,
   /// );
   /// ```
   BoxConstraints get constraints {

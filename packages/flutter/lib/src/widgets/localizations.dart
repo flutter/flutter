@@ -309,7 +309,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   static Future<MyLocalizations> load(Locale locale) {
 ///     return initializeMessages(locale.toString())
 ///       .then((Null _) {
-///         return new MyLocalizations(locale);
+///         return MyLocalizations(locale);
 ///       });
 ///   }
 ///
@@ -354,7 +354,7 @@ class Localizations extends StatefulWidget {
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
-  ///   return new Localizations.override(
+  ///   return Localizations.override(
   ///     context: context,
   ///     locale: const Locale('en', 'US'),
   ///     child: myWidget,

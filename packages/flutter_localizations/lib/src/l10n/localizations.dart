@@ -132,6 +132,15 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'الصفحة السابقة';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -313,6 +322,15 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Предишната страница';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -498,6 +516,15 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prethodna stranica';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -679,6 +706,15 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Pàgina anterior';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -864,6 +900,15 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Předchozí stránka';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -1047,6 +1092,15 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -1228,6 +1282,15 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Vorherige Seite';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -1443,6 +1506,15 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Προηγούμενη σελίδα';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -1624,6 +1696,15 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Previous page';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'1 character remaining';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount characters remaining';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'No characters remaining';
 
   @override
   String get reorderItemDown => r'Move down';
@@ -2068,6 +2149,15 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Página anterior';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -3576,6 +3666,15 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Eelmine leht';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -3757,6 +3856,15 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'صفحه قبل';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -3942,6 +4050,15 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Edellinen sivu';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -4125,6 +4242,15 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -4306,6 +4432,15 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Page précédente';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -4518,6 +4653,15 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Vorherige Seite';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -4699,6 +4843,15 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'הדף הקודם';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -4884,6 +5037,15 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'पिछला पेज';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -5065,6 +5227,15 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Prethodna stranica';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -5250,6 +5421,15 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Előző oldal';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -5431,6 +5611,15 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Halaman sebelumnya';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -5616,6 +5805,15 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina precedente';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -5797,6 +5995,15 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'前のページ';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -6159,6 +6366,15 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'이전 페이지';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -6340,6 +6556,15 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Ankstesnis puslapis';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -6525,6 +6750,15 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Iepriekšējā lapa';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -6706,6 +6940,15 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Halaman sebelumnya';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -6891,6 +7134,15 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Forrige side';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -7072,6 +7324,15 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Vorige pagina';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -7257,6 +7518,15 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Poprzednia strona';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -7440,6 +7710,15 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'مخکینی مخ';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -7621,6 +7900,15 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Página anterior';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -7875,6 +8163,15 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Pagina anterioară';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -8056,6 +8353,15 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Предыдущая страница';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -8241,6 +8547,15 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Predchádzajúca stránka';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -8424,6 +8739,15 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Prejšnja stran';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -8605,6 +8929,15 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Претходна страница';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -8928,6 +9261,15 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Föregående sida';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -9109,6 +9451,15 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'หน้าก่อน';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -9294,6 +9645,15 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Nakaraang page';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -9475,6 +9835,15 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'Önceki sayfa';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -9660,6 +10029,15 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Попередня сторінка';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -9841,6 +10219,15 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'گزشتہ صفحہ';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
@@ -10026,6 +10413,15 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get previousPageTooltip => r'Trang trước';
 
   @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
+
+  @override
   String get reorderItemDown => r'TBD';
 
   @override
@@ -10207,6 +10603,15 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get previousPageTooltip => r'上一页';
+
+  @override
+  String get remainingTextFieldCharacterCountOne => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'TBD';
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'TBD';
 
   @override
   String get reorderItemDown => r'TBD';
