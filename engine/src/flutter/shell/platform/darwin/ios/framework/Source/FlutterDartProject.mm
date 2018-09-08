@@ -15,6 +15,8 @@
 #include "flutter/shell/platform/darwin/common/command_line.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
+static const char* kScriptSnapshotFileName = "snapshot_blob.bin";
+static const char* kVMKernelSnapshotFileName = "platform_strong.dill";
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
 
 static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
@@ -81,8 +83,8 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
     // In case the application bundle is still not specified, look for the App.framework in the
     // Frameworks directory.
     if (settings.application_library_path.size() == 0) {
-      NSString* applicationFrameworkPath = [mainBundle pathForResource:@"Frameworks/App.framework"
-                                                                ofType:@""];
+      NSString* applicationFrameworkPath =
+          [mainBundle pathForResource:@"Frameworks/App.framework" ofType:@""];
       if (applicationFrameworkPath.length > 0) {
         NSString* executablePath =
             [NSBundle bundleWithPath:applicationFrameworkPath].executablePath;
@@ -104,6 +106,25 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
       if (!blink::DartVM::IsRunningPrecompiledCode()) {
         // Looking for the various script and kernel snapshot buffers only makes sense if we have a
         // VM that can use these buffers.
+        {
+          // Check if there is a script snapshot in the assets directory we could potentially use.
+          NSURL* scriptSnapshotURL = [NSURL URLWithString:@(kScriptSnapshotFileName)
+                                            relativeToURL:[NSURL fileURLWithPath:assetsPath]];
+          if ([[NSFileManager defaultManager] fileExistsAtPath:scriptSnapshotURL.path]) {
+            settings.script_snapshot_path = scriptSnapshotURL.path.UTF8String;
+          }
+        }
+
+        {
+          // Check if there is a VM kernel snapshot in the assets directory we could potentially
+          // use.
+          NSURL* vmKernelSnapshotURL = [NSURL URLWithString:@(kVMKernelSnapshotFileName)
+                                              relativeToURL:[NSURL fileURLWithPath:assetsPath]];
+          if ([[NSFileManager defaultManager] fileExistsAtPath:vmKernelSnapshotURL.path]) {
+            settings.platform_kernel_path = vmKernelSnapshotURL.path.UTF8String;
+          }
+        }
+
         {
           // Check if there is an application kernel snapshot in the assets directory we could
           // potentially use.
@@ -175,6 +196,12 @@ static blink::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
     if (flutterAssetsURL != nil &&
         [[NSFileManager defaultManager] fileExistsAtPath:flutterAssetsURL.path]) {
       _settings.assets_path = flutterAssetsURL.path.UTF8String;
+
+      NSURL* scriptSnapshotPath =
+          [NSURL URLWithString:@(kScriptSnapshotFileName) relativeToURL:flutterAssetsURL];
+      if ([[NSFileManager defaultManager] fileExistsAtPath:scriptSnapshotPath.path]) {
+        _settings.script_snapshot_path = scriptSnapshotPath.path.UTF8String;
+      }
     }
   }
 

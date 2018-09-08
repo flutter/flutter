@@ -79,6 +79,8 @@ class Engine final : public blink::RuntimeDelegate {
 
   tonic::DartErrorHandleType GetUIIsolateLastError();
 
+  tonic::DartErrorHandleType GetLoadScriptError();
+
   std::pair<bool, uint32_t> GetUIIsolateReturnCode();
 
   void OnOutputSurfaceCreated();
@@ -109,6 +111,7 @@ class Engine final : public blink::RuntimeDelegate {
   const blink::Settings settings_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<blink::RuntimeController> runtime_controller_;
+  tonic::DartErrorHandleType load_script_error_;
   std::string initial_route_;
   blink::ViewportMetrics viewport_metrics_;
   fml::RefPtr<blink::AssetManager> asset_manager_;

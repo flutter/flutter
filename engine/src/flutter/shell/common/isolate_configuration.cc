@@ -39,23 +39,45 @@ class AppSnapshotIsolateConfiguration final : public IsolateConfiguration {
   FML_DISALLOW_COPY_AND_ASSIGN(AppSnapshotIsolateConfiguration);
 };
 
-class KernelIsolateConfiguration : public IsolateConfiguration {
+class SnapshotIsolateConfiguration : public IsolateConfiguration {
  public:
-  KernelIsolateConfiguration(std::unique_ptr<fml::Mapping> kernel)
-      : kernel_(std::move(kernel)) {}
+  SnapshotIsolateConfiguration(std::unique_ptr<fml::Mapping> snapshot)
+      : snapshot_(std::move(snapshot)) {}
 
   // |shell::IsolateConfiguration|
   bool DoPrepareIsolate(blink::DartIsolate& isolate) override {
     if (blink::DartVM::IsRunningPrecompiledCode()) {
       return false;
     }
-    return isolate.PrepareForRunningFromKernel(std::move(kernel_));
+    return isolate.PrepareForRunningFromSnapshot(std::move(snapshot_));
   }
 
  private:
-  std::unique_ptr<fml::Mapping> kernel_;
+  std::unique_ptr<fml::Mapping> snapshot_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(KernelIsolateConfiguration);
+  FML_DISALLOW_COPY_AND_ASSIGN(SnapshotIsolateConfiguration);
+};
+
+class SourceIsolateConfiguration final : public IsolateConfiguration {
+ public:
+  SourceIsolateConfiguration(std::string main_path, std::string packages_path)
+      : main_path_(std::move(main_path)),
+        packages_path_(std::move(packages_path)) {}
+
+  // |shell::IsolateConfiguration|
+  bool DoPrepareIsolate(blink::DartIsolate& isolate) override {
+    if (blink::DartVM::IsRunningPrecompiledCode()) {
+      return false;
+    }
+    return isolate.PrepareForRunningFromSource(std::move(main_path_),
+                                               std::move(packages_path_));
+  }
+
+ private:
+  std::string main_path_;
+  std::string packages_path_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SourceIsolateConfiguration);
 };
 
 class KernelListIsolateConfiguration final : public IsolateConfiguration {
@@ -72,8 +94,8 @@ class KernelListIsolateConfiguration final : public IsolateConfiguration {
 
     for (size_t i = 0; i < kernel_pieces_.size(); i++) {
       bool last_piece = i + 1 == kernel_pieces_.size();
-      if (!isolate.PrepareForRunningFromKernel(std::move(kernel_pieces_[i]),
-                                               last_piece)) {
+      if (!isolate.PrepareForRunningFromSnapshot(std::move(kernel_pieces_[i]),
+                                                 last_piece)) {
         return false;
       }
     }
@@ -95,12 +117,30 @@ std::unique_ptr<IsolateConfiguration> IsolateConfiguration::InferFromSettings(
     return CreateForAppSnapshot();
   }
 
+  // Run from sources.
+  {
+    const auto& main = settings.main_dart_file_path;
+    const auto& packages = settings.packages_file_path;
+    if (main.size() != 0 && packages.size() != 0) {
+      return CreateForSource(std::move(main), std::move(packages));
+    }
+  }
+
   // Running from kernel snapshot.
   if (asset_manager) {
     std::unique_ptr<fml::Mapping> kernel =
         asset_manager->GetAsMapping(settings.application_kernel_asset);
     if (kernel) {
-      return CreateForKernel(std::move(kernel));
+      return CreateForSnapshot(std::move(kernel));
+    }
+  }
+
+  // Running from script snapshot.
+  if (asset_manager) {
+    std::unique_ptr<fml::Mapping> script_snapshot =
+        asset_manager->GetAsMapping(settings.script_snapshot_path);
+    if (script_snapshot) {
+      return CreateForSnapshot(std::move(script_snapshot));
     }
   }
 
@@ -149,9 +189,16 @@ IsolateConfiguration::CreateForAppSnapshot() {
   return std::make_unique<AppSnapshotIsolateConfiguration>();
 }
 
-std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForKernel(
-    std::unique_ptr<fml::Mapping> kernel) {
-  return std::make_unique<KernelIsolateConfiguration>(std::move(kernel));
+std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForSnapshot(
+    std::unique_ptr<fml::Mapping> snapshot) {
+  return std::make_unique<SnapshotIsolateConfiguration>(std::move(snapshot));
+}
+
+std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForSource(
+    std::string main_path,
+    std::string packages_path) {
+  return std::make_unique<SourceIsolateConfiguration>(std::move(main_path),
+                                                      std::move(packages_path));
 }
 
 std::unique_ptr<IsolateConfiguration> IsolateConfiguration::CreateForKernelList(

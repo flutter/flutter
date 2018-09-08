@@ -282,12 +282,20 @@ bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
   return true;
 }
 
-bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
-                             bool last_piece) {
-  if (!Dart_IsKernel(mapping->GetMapping(), mapping->GetSize())) {
+bool DartIsolate::LoadScriptSnapshot(
+    std::shared_ptr<const fml::Mapping> mapping,
+    bool last_piece) {
+  FML_CHECK(last_piece) << "Script snapshots cannot be divided";
+  if (tonic::LogIfError(Dart_LoadScriptFromSnapshot(mapping->GetMapping(),
+                                                    mapping->GetSize()))) {
     return false;
   }
+  return true;
+}
 
+bool DartIsolate::LoadKernelSnapshot(
+    std::shared_ptr<const fml::Mapping> mapping,
+    bool last_piece) {
   // Mapping must be retained until isolate shutdown.
   kernel_buffers_.push_back(mapping);
 
@@ -309,11 +317,21 @@ bool DartIsolate::LoadKernel(std::shared_ptr<const fml::Mapping> mapping,
   return true;
 }
 
+bool DartIsolate::LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                               bool last_piece) {
+  if (Dart_IsKernel(mapping->GetMapping(), mapping->GetSize())) {
+    return LoadKernelSnapshot(std::move(mapping), last_piece);
+  } else {
+    return LoadScriptSnapshot(std::move(mapping), last_piece);
+  }
+  return false;
+}
+
 FML_WARN_UNUSED_RESULT
-bool DartIsolate::PrepareForRunningFromKernel(
+bool DartIsolate::PrepareForRunningFromSnapshot(
     std::shared_ptr<const fml::Mapping> mapping,
     bool last_piece) {
-  TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromKernel");
+  TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromSnapshot");
   if (phase_ != Phase::LibrariesSetup) {
     return false;
   }
@@ -331,7 +349,7 @@ bool DartIsolate::PrepareForRunningFromKernel(
   // Use root library provided by kernel in favor of one provided by snapshot.
   Dart_SetRootLibrary(Dart_Null());
 
-  if (!LoadKernel(mapping, last_piece)) {
+  if (!LoadSnapshot(mapping, last_piece)) {
     return false;
   }
 
@@ -349,7 +367,61 @@ bool DartIsolate::PrepareForRunningFromKernel(
   }
 
   child_isolate_preparer_ = [mapping](DartIsolate* isolate) {
-    return isolate->PrepareForRunningFromKernel(mapping);
+    return isolate->PrepareForRunningFromSnapshot(mapping);
+  };
+  phase_ = Phase::Ready;
+  return true;
+}
+
+bool DartIsolate::PrepareForRunningFromSource(
+    const std::string& main_source_file,
+    const std::string& packages) {
+  TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromSource");
+  if (phase_ != Phase::LibrariesSetup) {
+    return false;
+  }
+
+  if (DartVM::IsRunningPrecompiledCode()) {
+    return false;
+  }
+
+  if (main_source_file.empty()) {
+    return false;
+  }
+
+  tonic::DartState::Scope scope(this);
+
+  if (!Dart_IsNull(Dart_RootLibrary())) {
+    return false;
+  }
+
+  auto& loader = file_loader();
+
+  if (!packages.empty()) {
+    auto packages_absolute_path = fml::paths::AbsolutePath(packages);
+    FML_DLOG(INFO) << "Loading from packages: " << packages_absolute_path;
+    if (!loader.LoadPackagesMap(packages_absolute_path)) {
+      return false;
+    }
+  }
+
+  auto main_source_absolute_path = fml::paths::AbsolutePath(main_source_file);
+  FML_DLOG(INFO) << "Loading from source: " << main_source_absolute_path;
+
+  if (tonic::LogIfError(loader.LoadScript(main_source_absolute_path))) {
+    return false;
+  }
+
+  if (Dart_IsNull(Dart_RootLibrary())) {
+    return false;
+  }
+
+  if (!MarkIsolateRunnable()) {
+    return false;
+  }
+
+  child_isolate_preparer_ = [main_source_file, packages](DartIsolate* isolate) {
+    return isolate->PrepareForRunningFromSource(main_source_file, packages);
   };
   phase_ = Phase::Ready;
   return true;
@@ -536,11 +608,22 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     return nullptr;
   }
 
+  // The engine never holds a strong reference to the VM service isolate. Since
+  // we are about to lose our last weak reference to it, start the VM service
+  // while we have this reference.
+  const bool isolate_snapshot_is_dart_2 = Dart_IsDart2Snapshot(
+      vm->GetIsolateSnapshot()->GetData()->GetSnapshotPointer());
+  const bool is_preview_dart2 =
+      (vm->GetPlatformKernel().GetSize() > 0) || isolate_snapshot_is_dart_2;
+  const bool running_from_sources =
+      !DartVM::IsRunningPrecompiledCode() && !is_preview_dart2;
+
   tonic::DartState::Scope scope(service_isolate);
   if (!DartServiceIsolate::Startup(
           settings.ipv6 ? "::1" : "127.0.0.1",  // server IP address
           settings.observatory_port,            // server observatory port
           tonic::DartState::HandleLibraryTag,   // embedder library tag handler
+          running_from_sources,                 // running from source code
           false,  //  disable websocket origin check
           error   // error (out)
           )) {
@@ -644,20 +727,39 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     Dart_IsolateFlagsInitialize(&nonnull_flags);
     flags = &nonnull_flags;
   }
-  flags->use_dart_frontend = true;
+  bool dart2 = (vm->GetPlatformKernel().GetSize() > 0) ||
+               Dart_IsDart2Snapshot((*embedder_isolate)
+                                        ->GetIsolateSnapshot()
+                                        ->GetData()
+                                        ->GetSnapshotPointer());
+  flags->use_dart_frontend = dart2;
 
   // Create the Dart VM isolate and give it the embedder object as the baton.
-  Dart_Isolate isolate = Dart_CreateIsolate(
-      advisory_script_uri,         //
-      advisory_script_entrypoint,  //
-      (*embedder_isolate)
-          ->GetIsolateSnapshot()
-          ->GetData()
-          ->GetSnapshotPointer(),
-      (*embedder_isolate)->GetIsolateSnapshot()->GetInstructionsIfPresent(),
-      (*embedder_isolate)->GetSharedSnapshot()->GetDataIfPresent(),
-      (*embedder_isolate)->GetSharedSnapshot()->GetInstructionsIfPresent(),
-      flags, embedder_isolate.get(), error);
+  Dart_Isolate isolate =
+      (vm->GetPlatformKernel().GetSize() > 0)
+          ? Dart_CreateIsolateFromKernel(
+                advisory_script_uri,                   //
+                advisory_script_entrypoint,            //
+                vm->GetPlatformKernel().GetMapping(),  //
+                vm->GetPlatformKernel().GetSize(),     //
+                flags,                                 //
+                embedder_isolate.get(),                //
+                error                                  //
+                )
+          : Dart_CreateIsolate(
+                advisory_script_uri, advisory_script_entrypoint,
+                (*embedder_isolate)
+                    ->GetIsolateSnapshot()
+                    ->GetData()
+                    ->GetSnapshotPointer(),
+                (*embedder_isolate)
+                    ->GetIsolateSnapshot()
+                    ->GetInstructionsIfPresent(),
+                (*embedder_isolate)->GetSharedSnapshot()->GetDataIfPresent(),
+                (*embedder_isolate)
+                    ->GetSharedSnapshot()
+                    ->GetInstructionsIfPresent(),
+                flags, embedder_isolate.get(), error);
 
   if (isolate == nullptr) {
     FML_DLOG(ERROR) << *error;

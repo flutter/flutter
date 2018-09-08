@@ -217,16 +217,19 @@ std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
       return IsolateConfiguration::CreateForKernelList(std::move(kernels));
     }
     if (blob) {
-      return IsolateConfiguration::CreateForKernel(std::move(blob));
+      return IsolateConfiguration::CreateForSnapshot(std::move(blob));
     }
     if (delta) {
-      return IsolateConfiguration::CreateForKernel(std::move(delta));
+      return IsolateConfiguration::CreateForSnapshot(std::move(delta));
     }
     return nullptr;
   };
 
   if (auto kernel = configuration_from_blob("kernel_blob.bin")) {
     return kernel;
+  }
+  if (auto script = configuration_from_blob("snapshot_blob.bin")) {
+    return script;
   }
 
   // This happens when starting isolate directly from CoreJIT snapshot.

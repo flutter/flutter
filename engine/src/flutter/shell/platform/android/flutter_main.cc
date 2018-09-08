@@ -66,11 +66,16 @@ void FlutterMain::Init(JNIEnv* env,
   if (!blink::DartVM::IsRunningPrecompiledCode()) {
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
+    auto platform_kernel_path =
+        fml::paths::JoinPaths({settings.assets_path, "platform_strong.dill"});
     auto application_kernel_path =
         fml::paths::JoinPaths({settings.assets_path, "kernel_blob.bin"});
 
     if (fml::IsFile(application_kernel_path)) {
       settings.application_kernel_asset = application_kernel_path;
+      if (fml::IsFile(platform_kernel_path)) {
+        settings.platform_kernel_path = platform_kernel_path;
+      }
     }
   }
 
