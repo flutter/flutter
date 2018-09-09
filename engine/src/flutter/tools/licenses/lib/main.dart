@@ -2262,123 +2262,6 @@ class RepositoryFlutterTxtThirdPartyDirectory extends RepositoryDirectory {
   }
 }
 
-class RepositoryGarnetDirectory extends RepositoryDirectory {
-  RepositoryGarnetDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'bin'
-        && entry.name != 'docs'
-        && entry.name != 'drivers'
-        && entry.name != 'examples'
-        && entry.name != 'go'
-        && entry.name != 'lib'
-        && entry.name != 'packages'
-        && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'public')
-      return new RepositoryGarnetPublicDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryGarnetPublicDirectory extends RepositoryDirectory {
-  RepositoryGarnetPublicDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'dart-pkg'
-        && entry.name != 'build'
-        && entry.name != 'rust'
-        && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'lib')
-      return new RepositoryGarnetLibDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryGarnetLibDirectory extends RepositoryDirectory {
-  RepositoryGarnetLibDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'app'
-        && entry.name != 'escher'
-        && entry.name != 'url'
-        && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'fidl')
-      return new RepositoryGarnetFidlDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryGarnetFidlDirectory extends RepositoryDirectory {
-  RepositoryGarnetFidlDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'compiler'
-        && entry.name != 'fuzz'
-        && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'public')
-      return new RepositoryGarnetPublicDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryTopazDirectory extends RepositoryDirectory {
-  RepositoryTopazDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-      return entry.name != 'tools'
-          && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'shell')
-      return new RepositoryTopazShellDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryTopazShellDirectory extends RepositoryDirectory {
-  RepositoryTopazShellDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'third_party')
-      return new RepositoryTopazShellThirdPartyDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryTopazShellThirdPartyDirectory extends RepositoryDirectory {
-  RepositoryTopazShellThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-      return entry.name != 'QR-Code-generator'
-          && super.shouldRecurse(entry);
-  }
-}
-
 class RepositoryRoot extends RepositoryDirectory {
   RepositoryRoot(fs.Directory io) : super(null, io);
 
@@ -2413,10 +2296,6 @@ class RepositoryRoot extends RepositoryDirectory {
       return new RepositoryRootThirdPartyDirectory(this, entry);
     if (entry.name == 'flutter')
       return new RepositoryFlutterDirectory(this, entry);
-    if (entry.name == 'garnet')
-      return new RepositoryGarnetDirectory(this, entry);
-    if (entry.name == 'topaz')
-      return new RepositoryTopazDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
 
