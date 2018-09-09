@@ -74,6 +74,7 @@ linter:
     - avoid_types_as_parameter_names
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
     - avoid_unused_constructor_parameters
+    # - avoid_void_async # not yet tested
     - await_only_futures
     - camel_case_types
     - cancel_subscriptions
@@ -82,10 +83,12 @@ linter:
     # - comment_references # blocked on https://github.com/flutter/flutter/issues/20765
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
+    # - curly_braces_in_flow_control_structures # not yet tested
     - directives_ordering
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
+    # - file_names # not yet tested
     - hash_and_equals
     - implementation_imports
     # - invariant_booleans # too many false positives: https://github.com/dart-lang/linter/issues/811
@@ -93,11 +96,13 @@ linter:
     # - join_return_with_assignment # not yet tested
     - library_names
     - library_prefixes
+    # - lines_longer_than_80_chars # not yet tested
     - list_remove_unrelated_type
     # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/sdk/issues/34181
     - no_adjacent_strings_in_list
     - no_duplicate_case_values
     - non_constant_identifier_names
+    # - null_closures  # not yet tested
     # - omit_local_variable_types # opposite of always_specify_types
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
@@ -123,13 +128,15 @@ linter:
     - prefer_final_locals
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
+    # - prefer_generic_function_type_aliases # not yet tested
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested
-    - prefer_iterable_whereType
     - prefer_is_empty
     - prefer_is_not_empty
+    - prefer_iterable_whereType
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
+    # - prefer_void_to_null # not yet tested
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
@@ -145,6 +152,7 @@ linter:
     - unnecessary_const
     - unnecessary_getters_setters
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
+    # - unnecessary_new # not yet tested
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides
