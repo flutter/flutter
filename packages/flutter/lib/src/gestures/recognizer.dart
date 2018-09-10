@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' show Offset;
+import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
@@ -289,6 +289,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// The global location at which the primary pointer contacted the screen.
   Offset initialPosition;
 
+  /// The device kind currently being used as the pointer.
+  PointerDeviceKind deviceKind;
+
   Timer _timer;
 
   @override
@@ -298,7 +301,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       state = GestureRecognizerState.possible;
       primaryPointer = event.pointer;
       initialPosition = event.position;
-      if (deadline != null)
+      deviceKind = event.kind;
+      if (deadline != null && deviceKind != PointerDeviceKind.mouse)
         _timer = new Timer(deadline, didExceedDeadline);
     }
   }
@@ -308,7 +312,10 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     assert(state != GestureRecognizerState.ready);
     if (state == GestureRecognizerState.possible && event.pointer == primaryPointer) {
       // TODO(abarth): Maybe factor the slop handling out into a separate class?
-      if (event is PointerMoveEvent && _getDistance(event) > kTouchSlop) {
+      if (event is PointerMoveEvent && (
+          (event.kind == PointerDeviceKind.touch && _getDistance(event) > kTouchSlop) ||
+          (event.kind == PointerDeviceKind.mouse && _getDistance(event) > kMouseSlop)
+        )) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer);
       } else {

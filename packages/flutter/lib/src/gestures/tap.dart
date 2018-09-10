@@ -19,11 +19,14 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition = Offset.zero })
+  TapDownDetails({ this.globalPosition = Offset.zero, this.deviceKind = PointerDeviceKind.touch })
     : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The device kind currently being used as the pointer.
+  final PointerDeviceKind deviceKind;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -220,7 +223,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<void>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition, deviceKind: deviceKind)); });
       _sentTapDown = true;
     }
   }

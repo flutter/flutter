@@ -370,6 +370,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onUpdate = _handleDragUpdate
                   ..onEnd = _handleDragEnd
                   ..onCancel = _handleDragCancel
+                  ..enableForMouse = false
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity;
@@ -388,6 +389,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                   ..onUpdate = _handleDragUpdate
                   ..onEnd = _handleDragEnd
                   ..onCancel = _handleDragCancel
+                  ..enableForMouse = false
                   ..minFlingDistance = _physics?.minFlingDistance
                   ..minFlingVelocity = _physics?.minFlingVelocity
                   ..maxFlingVelocity = _physics?.maxFlingVelocity;

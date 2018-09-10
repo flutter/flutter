@@ -501,6 +501,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _confirmCurrentSplash();
   }
 
+  void _handleDragUpdate(DragUpdateDetails details ) {
+    _renderEditable.handleDragUpdate(details);
+  }
+
+  void _handleDragDown(DragDownDetails details) {
+    _renderEditable.handleDragDown(details);
+  }
+
   void _startSplash(TapDownDetails details) {
     if (_effectiveFocusNode.hasFocus)
       return;
@@ -613,6 +621,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onTap: _handleTap,
           onTapCancel: _handleTapCancel,
           onLongPress: _handleLongPress,
+          onMousePanUpdate: _handleDragUpdate,
+          onMousePanDown: _handleDragDown,
           excludeFromSemantics: true,
           child: child,
         ),

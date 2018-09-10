@@ -675,7 +675,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         selectionDelegate: this,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
+      if (cause != SelectionChangedCause.keyboard && cause != SelectionChangedCause.mouse && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
       if (longPress)
         _selectionOverlay.showToolbar();
@@ -904,6 +904,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
+              editableTextState: this,
             ),
           ),
         );
@@ -967,6 +968,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
+    this.editableTextState
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -990,6 +992,7 @@ class _Editable extends LeafRenderObjectWidget {
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final Radius cursorRadius;
+  final EditableTextState editableTextState;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
