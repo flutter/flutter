@@ -324,6 +324,7 @@ class RenderImage extends RenderBox {
       canvas: context.canvas,
       rect: offset & size,
       image: _image,
+      scale: _scale,
       colorFilter: _colorFilter,
       fit: _fit,
       alignment: _resolvedAlignment,

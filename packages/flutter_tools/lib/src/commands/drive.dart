@@ -282,14 +282,15 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
-  final List<String> args = testArgs.toList()
-    ..add('--packages=${PackageMap.globalPackagesPath}')
-    ..add('-rexpanded')
-    ..add('--preview-dart-2');
-
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]..addAll(dartVmFlags)..addAll(args),
+    <String>[dartVmPath]
+      ..addAll(dartVmFlags)
+      ..addAll(testArgs)
+      ..addAll(<String>[
+        '--packages=${PackageMap.globalPackagesPath}',
+        '-rexpanded',
+      ]),
     environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }
   );
   if (result != 0)

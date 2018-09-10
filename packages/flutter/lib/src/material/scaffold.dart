@@ -442,9 +442,10 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     @required this.fabMotionAnimator,
     @required this.fabHideAnimation,
     @required this.geometryNotifier,
+    @required this.currentController,
   }) : assert(fabMoveAnimation != null),
        assert(fabMotionAnimator != null),
-       assert(fabHideAnimation != null),
+       assert(currentController != null),
        super(key: key);
 
   final Widget child;
@@ -453,18 +454,20 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   final Animation<double> fabHideAnimation;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
+  /// Controls the current child widget.child as it exits.
+  final AnimationController currentController;
+
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
+
   // The animations applied to the Floating Action Button when it is entering or exiting.
-  // Controls the previous widget.child as it exits
+  /// Controls the previous widget.child as it exits.
   AnimationController _previousController;
   Animation<double> _previousScaleAnimation;
   Animation<double> _previousRotationAnimation;
-  // Controls the current child widget.child as it exits
-  AnimationController _currentController;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
   Animation<double> _currentScaleAnimation;
   Animation<double> _extendedCurrentScaleAnimation;
@@ -479,18 +482,12 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       duration: kFloatingActionButtonSegue,
       vsync: this,
     )..addStatusListener(_handlePreviousAnimationStatusChanged);
-
-    _currentController = new AnimationController(
-      duration: kFloatingActionButtonSegue,
-      vsync: this,
-    );
-
     _updateAnimations();
 
     if (widget.child != null) {
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
-      _currentController.value = 1.0;
+      widget.currentController.value = 1.0;
     }
     else {
       // If we start without a child we update the geometry object with a
@@ -502,7 +499,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   void dispose() {
     _previousController.dispose();
-    _currentController.dispose();
     super.dispose();
   }
 
@@ -518,13 +514,13 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       _updateAnimations();
     }
     if (_previousController.status == AnimationStatus.dismissed) {
-      final double currentValue = _currentController.value;
+      final double currentValue = widget.currentController.value;
       if (currentValue == 0.0 || oldWidget.child == null) {
         // The current child hasn't started its entrance animation yet. We can
         // just skip directly to the new child's entrance.
         _previousChild = null;
         if (widget.child != null)
-          _currentController.forward();
+          widget.currentController.forward();
       } else {
         // Otherwise, we need to copy the state from the current controller to
         // the previous controller and run an exit animation for the previous
@@ -533,7 +529,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
         _previousController
           ..value = currentValue
           ..reverse();
-        _currentController.value = 0.0;
+        widget.currentController.value = 0.0;
       }
     }
   }
@@ -552,7 +548,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     );
 
     final CurvedAnimation currentEntranceScaleAnimation = new CurvedAnimation(
-      parent: _currentController,
+      parent: widget.currentController,
       curve: Curves.easeIn,
     );
     final Animation<double> currentEntranceRotationAnimation = new Tween<double>(
@@ -560,7 +556,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       end: 1.0,
     ).animate(
       new CurvedAnimation(
-        parent: _currentController,
+        parent: widget.currentController,
         curve: Curves.easeIn
       ),
     );
@@ -587,9 +583,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
       if (status == AnimationStatus.dismissed) {
-        assert(_currentController.status == AnimationStatus.dismissed);
+        assert(widget.currentController.status == AnimationStatus.dismissed);
         if (widget.child != null)
-          _currentController.forward();
+          widget.currentController.forward();
       }
     });
   }
@@ -1019,12 +1015,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   /// Whether this scaffold has a non-null [Scaffold.appBar].
   bool get hasAppBar => widget.appBar != null;
-  /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
-  bool get hasFloatingActionButton => widget.floatingActionButton != null;
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
+  /// Whether this scaffold has a non-null [Scaffold.floatingActionButton].
+  bool get hasFloatingActionButton => widget.floatingActionButton != null;
 
   double _appBarMaxHeight;
   /// The max height the [Scaffold.appBar] uses.
@@ -1321,6 +1317,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FloatingActionButtonLocation _previousFloatingActionButtonLocation;
   FloatingActionButtonLocation _floatingActionButtonLocation;
 
+  AnimationController _floatingActionButtonVisibilityController;
+
+  /// Gets the [AnimationController] in charge of hiding or showing the
+  /// [Scaffold.floatingActionButton].
+  AnimationController get floatingActionButtonVisibilityController => _floatingActionButtonVisibilityController;
+
+  /// Hides the [Scaffold.floatingActionButton].
+  TickerFuture hideFloatingActionButton() {
+    return floatingActionButtonVisibilityController.reverse();
+  }
+
+  /// Shows the [Scaffold.floatingActionButton].
+  TickerFuture showFloatingActionButton() {
+    return floatingActionButtonVisibilityController.forward();
+  }
+
   // Moves the Floating Action Button to the new Floating Action Button Location.
   void _moveFloatingActionButton(final FloatingActionButtonLocation newLocation) {
     FloatingActionButtonLocation previousLocation = _floatingActionButtonLocation;
@@ -1378,13 +1390,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
-    _floatingActionButtonHideController = new AnimationController(
-      vsync: this,
-      lowerBound: 0.0,
-      upperBound: 1.0,
-      value: 1.0,
+
+    _floatingActionButtonVisibilityController = new AnimationController(
       duration: kFloatingActionButtonSegue,
+      vsync: this,
     );
+
     _maybeBuildCurrentBottomSheet();
   }
 
@@ -1443,7 +1454,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
     _floatingActionButtonMoveController.dispose();
-    _floatingActionButtonHideController.dispose();
+    _floatingActionButtonVisibilityController.dispose();
     super.dispose();
   }
 
@@ -1659,6 +1670,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         fabMotionAnimator: _floatingActionButtonAnimator,
         fabHideAnimation: _floatingActionButtonHideController,
         geometryNotifier: _geometryNotifier,
+        currentController: _floatingActionButtonVisibilityController,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,

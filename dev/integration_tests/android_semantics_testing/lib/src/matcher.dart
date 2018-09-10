@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-
 import 'common.dart';
 import 'constants.dart';
+import 'flutter_test_alternative.dart';
 
 /// Matches an [AndroidSemanticsNode].
 ///
@@ -16,6 +15,7 @@ import 'constants.dart';
 /// the Flutter framework.
 Matcher hasAndroidSemantics({
   String text,
+  String contentDescription,
   String className,
   int id,
   Rect rect,
@@ -33,6 +33,7 @@ Matcher hasAndroidSemantics({
 }) {
   return new _AndroidSemanticsMatcher(
     text: text,
+    contentDescription: contentDescription,
     className: className,
     rect: rect,
     size: size,
@@ -52,6 +53,7 @@ Matcher hasAndroidSemantics({
 class _AndroidSemanticsMatcher extends Matcher {
   _AndroidSemanticsMatcher({
     this.text,
+    this.contentDescription,
     this.className,
     this.id,
     this.actions,
@@ -69,6 +71,7 @@ class _AndroidSemanticsMatcher extends Matcher {
 
   final String text;
   final String className;
+  final String contentDescription;
   final int id;
   final List<AndroidSemanticsAction> actions;
   final Rect rect;
@@ -87,6 +90,8 @@ class _AndroidSemanticsMatcher extends Matcher {
     description.add('AndroidSemanticsNode');
     if (text != null)
       description.add(' with text: $text');
+    if (contentDescription != null)
+      description.add( 'with contentDescription $contentDescription');
     if (className != null)
       description.add(' with className: $className');
     if (id != null)
@@ -118,6 +123,8 @@ class _AndroidSemanticsMatcher extends Matcher {
   bool matches(covariant AndroidSemanticsNode item, Map<Object, Object> matchState) {
     if (text != null && text != item.text)
       return _failWithMessage('Expected text: $text', matchState);
+    if (contentDescription != null && contentDescription != item.contentDescription)
+      return _failWithMessage('Expected contentDescription: $contentDescription', matchState);
     if (className != null && className != item.className)
       return _failWithMessage('Expected className: $className', matchState);
     if (id != null && id != item.id)
