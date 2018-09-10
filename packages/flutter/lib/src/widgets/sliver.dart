@@ -768,7 +768,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
           _childElements.remove(index);
         }
       }
-      // processElement may the Map - need to do a .toList() here.
+      // processElement may modify the Map - need to do a .toList() here.
       _childElements.keys.toList().forEach(processElement);
       if (_didUnderflow) {
         final int lastKey = _childElements.lastKey() ?? -1;
