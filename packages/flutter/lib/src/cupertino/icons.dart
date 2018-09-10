@@ -478,4 +478,18 @@ class CupertinoIcons {
   ///
   ///  * [play_arrow], which is similar, but not filled in.
   static const IconData play_arrow_solid = IconData(0xf488, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two verticale rectangles. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [pause_solid], which is similar, but filled in.
+  static const IconData pause = IconData(0xf477, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two verticale rectangles. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [pause], which is similar, but not filled in.
+  static const IconData pause_solid = IconData(0xf478, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
