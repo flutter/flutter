@@ -677,7 +677,9 @@ class InputChip extends StatelessWidget
 ///             label: Text('Item $index'),
 ///             selected: _value == index,
 ///             onSelected: (bool selected) {
-///               _value = selected ? index : null;
+///               setState(() {
+///                 _value = selected ? index : null;
+///               });
 ///             },
 ///           );
 ///         },
