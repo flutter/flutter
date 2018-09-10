@@ -556,7 +556,7 @@ class _ImageState extends State<Image> {
   @override
   void didChangeDependencies() {
     _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
-      ?? SemanticsBinding.instance.accessibilityFeatures.value.invertColors;
+      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
     _resolveImage();
 
     if (TickerMode.of(context))
