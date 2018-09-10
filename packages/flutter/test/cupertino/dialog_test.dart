@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Alert dialog control test', (WidgetTester tester) async {
@@ -61,6 +62,68 @@ void main() {
 
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
     expect(widget.style.color.alpha, lessThan(255));
+  });
+
+  testWidgets('Has semantic annotations', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(MaterialApp(home: const Material(
+      child: CupertinoAlertDialog(
+        title: Text('The Title'),
+        content: Text('Content'),
+        actions: <Widget>[
+          CupertinoDialogAction(child: Text('Cancel')),
+          CupertinoDialogAction(child: Text('OK')),
+        ],
+      )
+    )));
+
+    expect(
+      semantics,
+      hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            children: <TestSemantics>[
+              new TestSemantics(
+                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+                    label: 'Alert',
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        children: <TestSemantics>[
+                          new TestSemantics(label: 'The Title'),
+                          new TestSemantics(label: 'Content'),
+                        ],
+                      ),
+                      new TestSemantics(
+                        children: <TestSemantics>[
+                          new TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                            label: 'Cancel',
+                          ),
+                          new TestSemantics(
+                            flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                            label: 'OK',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    )
+  );
+
+    semantics.dispose();
   });
 
   testWidgets('Dialog default action styles', (WidgetTester tester) async {
