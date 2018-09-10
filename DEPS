@@ -351,7 +351,7 @@ deps = {
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
 
   'src/third_party/freetype2':
-   Var('fuchsia_git') + '/third_party/freetype2' + '@' + '3515a77bb83002b69a2957efdbcb764de4de07da',
+   Var('fuchsia_git') + '/third_party/freetype2' + '@' + '6581fd3e9c8645f01c0d51e4f53893f5391f2bf3',
 
   'src/third_party/root_certificates':
    Var('dart_git') + '/root_certificates.git' + '@' + Var('dart_root_certificates_rev'),
