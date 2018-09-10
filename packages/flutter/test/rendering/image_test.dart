@@ -96,7 +96,6 @@ void main() {
       ),
     );
 
-
     image = new RenderImage(image: new WideImage());
     layout(image,
            constraints: const BoxConstraints(
