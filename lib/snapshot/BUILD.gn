@@ -86,6 +86,12 @@ action("generate_snapshot_bin") {
     "--await_is_keyword",
     "--vm_flag",
     "--enable_mirrors=false",
+    "--vm_flag",
+    "--no-strong",
+    "--vm_flag",
+    "--no-sync-async",
+    "--vm_flag",
+    "--no-reify-generic-functions",
     "--vm_output_bin",
     rebase_path(vm_snapshot_data, root_build_dir),
     "--vm_instructions_output_bin",
@@ -289,6 +295,9 @@ template("generate_entry_points_json_with_gen_snapshot") {
       output,
     ]
     args = [
+      "--no-strong",
+      "--no-sync-async",
+      "--no-reify-generic-functions",
       "--print-precompiler-entry-points=" + rebase_path(output),
       "--snapshot-kind=app-aot-blobs",
       "--vm_snapshot_data=" + rebase_path("$target_gen_dir/dummy.vm_data.snapshot"),

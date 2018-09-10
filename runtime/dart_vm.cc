@@ -92,7 +92,15 @@ static const char* kDartCheckedModeArgs[] = {
     // clang-format on
 };
 
-static const char* kDartStrongModeArgs[] = {
+static const char* kDartModeArgs[] = {
+    // clang-format off
+    "--no-strong",
+    "--no-reify_generic_functions",
+    "--no-sync_async",
+    // clang-format on
+};
+
+static const char* kDart2ModeArgs[] = {
     // clang-format off
     "--strong",
     "--reify_generic_functions",
@@ -381,16 +389,19 @@ DartVM::DartVM(const Settings& settings,
                  << isolate_snapshot_is_dart_2;
 
   if (is_preview_dart2) {
-    PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
+    PushBackAll(&args, kDart2ModeArgs, arraysize(kDart2ModeArgs));
     if (use_checked_mode) {
       PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
     }
-  } else if (use_checked_mode) {
-    FML_DLOG(INFO) << "Checked mode is ON";
-    PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
-    PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
   } else {
-    FML_DLOG(INFO) << "Is not Dart 2 and Checked mode is OFF";
+    PushBackAll(&args, kDartModeArgs, arraysize(kDartModeArgs));
+    if (use_checked_mode) {
+      FML_DLOG(INFO) << "Checked mode is ON";
+      PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+      PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
+    } else {
+      FML_DLOG(INFO) << "Is not Dart 2 and Checked mode is OFF";
+    }
   }
 
   if (settings.start_paused) {
