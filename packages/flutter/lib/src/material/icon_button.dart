@@ -40,8 +40,8 @@ const double _kMinButtonSize = 48.0;
 /// ## Sample code
 ///
 /// ```dart
-/// new IconButton(
-///   icon: new Icon(Icons.volume_up),
+/// IconButton(
+///   icon: Icon(Icons.volume_up),
 ///   tooltip: 'Increase volume by 10%',
 ///   onPressed: () { setState(() { _volume *= 1.1; }); },
 /// )
@@ -137,11 +137,11 @@ class IconButton extends StatelessWidget {
   /// See also [disabledColor].
   ///
   /// ```dart
-  ///  new IconButton(
-  ///    color: Colors.blue,
-  ///    onPressed: _handleTap,
-  ///    icon: Icons.widgets,
-  ///  ),
+  /// IconButton(
+  ///   color: Colors.blue,
+  ///   onPressed: _handleTap,
+  ///   icon: Icons.widgets,
+  /// ),
   /// ```
   final Color color;
 

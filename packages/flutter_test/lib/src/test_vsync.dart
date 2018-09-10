@@ -10,16 +10,8 @@ import 'package:flutter/scheduler.dart';
 /// tree.
 class TestVSync implements TickerProvider {
   /// Creates a ticker provider that creates standalone tickers.
-  const TestVSync({this.disableAnimations = false});
-
-  /// Whether to disable the animations of tickers create from this picker.
-  ///
-  /// See also:
-  ///
-  ///   * [AccessibilityFeatures.disableAnimations], for the setting that controls this flag.
-  ///   * [AnimationBehavior], for how animation controllers change when created from tickers with this flag.
-  final bool disableAnimations;
+  const TestVSync();
 
   @override
-  Ticker createTicker(TickerCallback onTick) => new Ticker(onTick)..disableAnimations = disableAnimations;
+  Ticker createTicker(TickerCallback onTick) => new Ticker(onTick);
 }

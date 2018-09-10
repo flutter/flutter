@@ -497,7 +497,7 @@ class _OutlineBorder extends ShapeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        canvas.drawPath(shape.getOuterPath(rect), side.toPaint());
+        canvas.drawPath(shape.getOuterPath(rect, textDirection: textDirection), side.toPaint());
     }
   }
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -23,6 +24,7 @@ Widget buildFrame({
   String value = 'two',
   ValueChanged<String> onChanged,
   bool isDense = false,
+  bool isExpanded = false,
   Widget hint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
@@ -33,19 +35,22 @@ Widget buildFrame({
     child: new Material(
       child: new Align(
         alignment: alignment,
-        child: new DropdownButton<String>(
-          key: buttonKey,
-          value: value,
-          hint: hint,
-          onChanged: onChanged,
-          isDense: isDense,
-          items: items.map((String item) {
-            return new DropdownMenuItem<String>(
-              key: new ValueKey<String>(item),
-              value: item,
-              child: new Text(item, key: new ValueKey<String>(item + 'Text')),
-            );
-          }).toList(),
+        child: new RepaintBoundary(
+          child: new DropdownButton<String>(
+            key: buttonKey,
+            value: value,
+            hint: hint,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            items: items.map((String item) {
+              return new DropdownMenuItem<String>(
+                key: new ValueKey<String>(item),
+                value: item,
+                child: new Text(item, key: new ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          )
         ),
       ),
     ),
@@ -108,6 +113,32 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
 }
 
 void main() {
+  testWidgets('Default dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = new UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two');
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.default.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = new UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.expanded.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
     void didChangeValue(String newValue) {
@@ -336,6 +367,23 @@ void main() {
       await tester.pumpWidget(new Container()); // reset test
     });
   }
+
+  testWidgets('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
+    final Key buttonKey = new UniqueKey();
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    final RenderBox arrowIcon = tester.renderObject(find.byIcon(Icons.arrow_drop_down));
+    assert(arrowIcon.attached);
+
+    // Arrow icon should be aligned with far right of button when expanded
+    expect(arrowIcon.localToGlobal(Offset.zero).dx,
+        buttonBox.size.centerRight(new Offset(-arrowIcon.size.width, 0.0)).dx);
+  });
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = new UniqueKey();

@@ -58,7 +58,7 @@ enum _RefreshIndicatorMode {
 /// settings its `physics` property to [AlwaysScrollableScrollPhysics]:
 ///
 /// ```dart
-/// new ListView(
+/// ListView(
 ///   physics: const AlwaysScrollableScrollPhysics(),
 ///   children: ...
 //  )

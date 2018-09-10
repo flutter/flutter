@@ -60,7 +60,13 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// New [PaintingContext] objects are created automatically when using
 /// [PaintingContext.repaintCompositedChild] and [pushLayer].
 class PaintingContext extends ClipContext {
-  PaintingContext._(this._containerLayer, this.estimatedBounds)
+
+  /// Creates a painting context.
+  ///
+  /// Typically only called by [PaintingContext.repaintCompositedChild]
+  /// and [pushLayer].
+  @protected
+  PaintingContext(this._containerLayer, this.estimatedBounds)
     : assert(_containerLayer != null),
       assert(estimatedBounds != null);
 
@@ -86,8 +92,19 @@ class PaintingContext extends ClipContext {
   ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
   ///    has a composited layer.
   static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false }) {
-    assert(child.isRepaintBoundary);
     assert(child._needsPaint);
+    _repaintCompositedChild(
+      child,
+      debugAlsoPaintedParent: debugAlsoPaintedParent,
+    );
+  }
+
+  static void _repaintCompositedChild(
+    RenderObject child, {
+    bool debugAlsoPaintedParent = false,
+    PaintingContext childContext,
+  }) {
+    assert(child.isRepaintBoundary);
     assert(() {
       // register the call for RepaintBoundary metrics
       child.debugRegisterRepaintBoundaryPaint(
@@ -107,9 +124,32 @@ class PaintingContext extends ClipContext {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
-    final PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
+    childContext ??= new PaintingContext(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
-    childContext._stopRecordingIfNeeded();
+    childContext.stopRecordingIfNeeded();
+  }
+
+  /// In debug mode, repaint the given render object using a custom painting
+  /// context that can record the results of the painting operation in addition
+  /// to performing the regular paint of the child.
+  ///
+  /// See also:
+  ///
+  ///  * [repaintCompositedChild], for repainting a composited child without
+  ///    instrumentation.
+  static void debugInstrumentRepaintCompositedChild(
+    RenderObject child, {
+    bool debugAlsoPaintedParent = false,
+    @required PaintingContext customContext,
+  }) {
+    assert(() {
+      _repaintCompositedChild(
+        child,
+        debugAlsoPaintedParent: debugAlsoPaintedParent,
+        childContext: customContext,
+      );
+      return true;
+    }());
   }
 
   /// Paint a child [RenderObject].
@@ -125,7 +165,7 @@ class PaintingContext extends ClipContext {
     }());
 
     if (child.isRepaintBoundary) {
-      _stopRecordingIfNeeded();
+      stopRecordingIfNeeded();
       _compositeChild(child, offset);
     } else {
       child._paintWithContext(this, offset);
@@ -159,10 +199,20 @@ class PaintingContext extends ClipContext {
       }());
     }
     child._layer.offset = offset;
-    _appendLayer(child._layer);
+    appendLayer(child._layer);
   }
 
-  void _appendLayer(Layer layer) {
+  /// Adds a layer to the recording requiring that the recording is already
+  /// stopped.
+  ///
+  /// Do not call this function directly: call [addLayer] or [pushLayer]
+  /// instead. This function is called internally when all layers not
+  /// generated from the [canvas] are added.
+  ///
+  /// Subclasses that need to customize how layers are added should override
+  /// this method.
+  @protected
+  void appendLayer(Layer layer) {
     assert(!_isRecording);
     layer.remove();
     _containerLayer.append(layer);
@@ -210,7 +260,19 @@ class PaintingContext extends ClipContext {
     _containerLayer.append(_currentLayer);
   }
 
-  void _stopRecordingIfNeeded() {
+  /// Stop recording to a canvas if recording has started.
+  ///
+  /// Do not call this function directly: functions in this class will call
+  /// this method as needed. This function is called internally to ensure that
+  /// recording is stopped before adding layers or finalizing the results of a
+  /// paint.
+  ///
+  /// Subclasses that need to customize how recording to a canvas is performed
+  /// should override this method to save the results of the custom canvas
+  /// recordings.
+  @protected
+  @mustCallSuper
+  void stopRecordingIfNeeded() {
     if (!_isRecording)
       return;
     assert(() {
@@ -271,8 +333,8 @@ class PaintingContext extends ClipContext {
   ///  * [pushLayer], for adding a layer and using its canvas to paint with that
   ///    layer.
   void addLayer(Layer layer) {
-    _stopRecordingIfNeeded();
-    _appendLayer(layer);
+    stopRecordingIfNeeded();
+    appendLayer(layer);
   }
 
   /// Appends the given layer to the recording, and calls the `painter` callback
@@ -295,15 +357,21 @@ class PaintingContext extends ClipContext {
   /// See also:
   ///
   ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+  void pushLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     assert(!childLayer.attached);
     assert(childLayer.parent == null);
     assert(painter != null);
-    _stopRecordingIfNeeded();
-    _appendLayer(childLayer);
-    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? estimatedBounds);
+    stopRecordingIfNeeded();
+    appendLayer(childLayer);
+    final PaintingContext childContext = createChildContext(childLayer, childPaintBounds ?? estimatedBounds);
     painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
+    childContext.stopRecordingIfNeeded();
+  }
+
+  /// Creates a compatible painting context to paint onto [childLayer].
+  @protected
+  PaintingContext createChildContext(ContainerLayer childLayer, Rect bounds) {
+    return new PaintingContext(childLayer, bounds);
   }
 
   /// Clip further painting using a rectangle.
@@ -2036,7 +2104,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
-  @protected
   void debugPaint(PaintingContext context, Offset offset) { }
 
   /// Paint this render object into the given context at the given offset.

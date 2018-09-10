@@ -45,6 +45,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
@@ -63,6 +64,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      textDirection: textDirection,
     );
   }
 }
@@ -114,6 +116,7 @@ class InkRipple extends InteractiveInkFeature {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
@@ -122,9 +125,11 @@ class InkRipple extends InteractiveInkFeature {
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(position != null),
+       assert(textDirection != null),
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
+       _textDirection = textDirection,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
@@ -179,6 +184,7 @@ class InkRipple extends InteractiveInkFeature {
   final ShapeBorder _customBorder;
   final double _targetRadius;
   final RectCallback _clipCallback;
+  final TextDirection _textDirection;
 
   Animation<double> _radius;
   AnimationController _radiusController;
@@ -245,7 +251,7 @@ class InkRipple extends InteractiveInkFeature {
     if (_clipCallback != null) {
       final Rect rect = _clipCallback();
       if (_customBorder != null) {
-        canvas.clipPath(_customBorder.getOuterPath(rect));
+        canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
       } else if (_borderRadius != BorderRadius.zero) {
         canvas.clipRRect(new RRect.fromRectAndCorners(
           rect,

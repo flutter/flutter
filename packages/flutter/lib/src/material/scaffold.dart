@@ -850,11 +850,11 @@ class Scaffold extends StatefulWidget {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return new RaisedButton(
-  ///     child: new Text('SHOW A SNACKBAR'),
+  ///   return RaisedButton(
+  ///     child: Text('SHOW A SNACKBAR'),
   ///     onPressed: () {
-  ///       Scaffold.of(context).showSnackBar(new SnackBar(
-  ///         content: new Text('Hello!'),
+  ///       Scaffold.of(context).showSnackBar(SnackBar(
+  ///         content: Text('Hello!'),
   ///       ));
   ///     },
   ///   );
@@ -870,20 +870,20 @@ class Scaffold extends StatefulWidget {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return new Scaffold(
-  ///     appBar: new AppBar(
-  ///       title: new Text('Demo')
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: Text('Demo')
   ///     ),
-  ///     body: new Builder(
+  ///     body: Builder(
   ///       // Create an inner BuildContext so that the onPressed methods
   ///       // can refer to the Scaffold with Scaffold.of().
   ///       builder: (BuildContext context) {
-  ///         return new Center(
-  ///           child: new RaisedButton(
-  ///             child: new Text('SHOW A SNACKBAR'),
+  ///         return Center(
+  ///           child: RaisedButton(
+  ///             child: Text('SHOW A SNACKBAR'),
   ///             onPressed: () {
-  ///               Scaffold.of(context).showSnackBar(new SnackBar(
-  ///                 content: new Text('Hello!'),
+  ///               Scaffold.of(context).showSnackBar(SnackBar(
+  ///                 content: Text('Hello!'),
   ///               ));
   ///             },
   ///           ),

@@ -83,23 +83,23 @@ import 'scrollable.dart';
 /// more room, in which case they stack vertically and scroll.
 ///
 /// ```dart
-/// new LayoutBuilder(
+/// LayoutBuilder(
 ///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///     return SingleChildScrollView(
-///       child: new ConstrainedBox(
-///         constraints: new BoxConstraints(
+///       child: ConstrainedBox(
+///         constraints: BoxConstraints(
 ///           minHeight: viewportConstraints.maxHeight,
 ///         ),
-///         child: new Column(
+///         child: Column(
 ///           mainAxisSize: MainAxisSize.min,
 ///           mainAxisAlignment: MainAxisAlignment.spaceAround,
 ///           children: <Widget>[
-///             new Container(
+///             Container(
 ///               // A fixed-height child.
 ///               color: Colors.yellow,
 ///               height: 120.0,
 ///             ),
-///             new Container(
+///             Container(
 ///               // Another fixed-height child.
 ///               color: Colors.green,
 ///               height: 120.0,
@@ -135,25 +135,25 @@ import 'scrollable.dart';
 /// in an [Expanded] widget.
 ///
 /// ```dart
-/// new LayoutBuilder(
+/// LayoutBuilder(
 ///   builder: (BuildContext context, BoxConstraints viewportConstraints) {
 ///     return SingleChildScrollView(
-///       child: new ConstrainedBox(
-///         constraints: new BoxConstraints(
+///       child: ConstrainedBox(
+///         constraints: BoxConstraints(
 ///           minHeight: viewportConstraints.maxHeight,
 ///         ),
-///         child: new IntrinsicHeight(
-///           child: new Column(
+///         child: IntrinsicHeight(
+///           child: Column(
 ///             children: <Widget>[
-///               new Container(
+///               Container(
 ///                 // A fixed-height child.
 ///                 color: Colors.yellow,
 ///                 height: 120.0,
 ///               ),
-///               new Expanded(
+///               Expanded(
 ///                 // A flexible child that will grow to fit the viewport but
 ///                 // still be at least as big as necessary to fit its contents.
-///                 child: new Container(
+///                 child: Container(
 ///                   color: Colors.blue,
 ///                   height: 120.0,
 ///                 ),

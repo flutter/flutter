@@ -484,6 +484,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize = 24.0,
     this.isDense = false,
+    this.isExpanded = false,
   }) : assert(items != null),
        assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
       super(key: key);
@@ -528,6 +529,13 @@ class DropdownButton<T> extends StatefulWidget {
   /// can be useful when the button is embedded in a container that adds
   /// its own decorations, like [InputDecorator].
   final bool isDense;
+
+  /// Set the dropdown's inner contents to horizontally fill its parent.
+  ///
+  /// By default this button's inner width is the minimum size of its contents.
+  /// If [isExpanded] is true, the inner width is expanded to fill its
+  /// surrounding container.
+  final bool isExpanded;
 
   @override
   _DropdownButtonState<T> createState() => new _DropdownButtonState<T>();
@@ -643,6 +651,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ? _kAlignedButtonPadding
       : _kUnalignedButtonPadding;
 
+    // If value is null (then _selectedIndex is null) then we display
+    // the hint or nothing at all.
+    final IndexedStack innerItemsWidget = new IndexedStack(
+      index: _selectedIndex ?? hintIndex,
+      alignment: AlignmentDirectional.centerStart,
+      children: items,
+    );
+
     Widget result = new DefaultTextStyle(
       style: _textStyle,
       child: new Container(
@@ -652,13 +668,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // If value is null (then _selectedIndex is null) then we display
-            // the hint or nothing at all.
-            new IndexedStack(
-              index: _selectedIndex ?? hintIndex,
-              alignment: AlignmentDirectional.centerStart,
-              children: items,
-            ),
+            widget.isExpanded ? new Expanded(child: innerItemsWidget) : innerItemsWidget,
             new Icon(Icons.arrow_drop_down,
               size: widget.iconSize,
               // These colors are not defined in the Material Design spec.

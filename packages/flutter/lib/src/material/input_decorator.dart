@@ -2119,7 +2119,7 @@ class InputDecoration {
   /// To pad the leading edge of the prefix icon:
   ///
   /// ```dart
-  /// prefixIcon: new Padding(
+  /// prefixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 12.0),
   ///   child: myIcon, // icon is 48px widget.
   /// )
@@ -2166,7 +2166,7 @@ class InputDecoration {
   /// To pad the trailing edge of the suffix icon:
   ///
   /// ```dart
-  /// suffixIcon: new Padding(
+  /// suffixIcon: Padding(
   ///   padding: const EdgeInsetsDirectional.only(end: 12.0),
   ///   child: myIcon, // icon is 48px widget.
   /// )

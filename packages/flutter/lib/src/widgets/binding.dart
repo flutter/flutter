@@ -40,7 +40,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///   const AppLifecycleReactor({ Key key }) : super(key: key);
 ///
 ///   @override
-///   _AppLifecycleReactorState createState() => new _AppLifecycleReactorState();
+///   _AppLifecycleReactorState createState() => _AppLifecycleReactorState();
 /// }
 ///
 /// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
@@ -65,7 +65,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Text('Last notification: $_notification');
+///     return Text('Last notification: $_notification');
 ///   }
 /// }
 /// ```
@@ -117,7 +117,7 @@ abstract class WidgetsBindingObserver {
   ///   const MetricsReactor({ Key key }) : super(key: key);
   ///
   ///   @override
-  ///   _MetricsReactorState createState() => new _MetricsReactorState();
+  ///   _MetricsReactorState createState() => _MetricsReactorState();
   /// }
   ///
   /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
@@ -142,7 +142,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Current size: $_lastSize');
+  ///     return Text('Current size: $_lastSize');
   ///   }
   /// }
   /// ```
@@ -172,7 +172,7 @@ abstract class WidgetsBindingObserver {
   ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
   ///
   ///   @override
-  ///   _TextScaleFactorReactorState createState() => new _TextScaleFactorReactorState();
+  ///   _TextScaleFactorReactorState createState() => _TextScaleFactorReactorState();
   /// }
   ///
   /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
@@ -197,7 +197,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Current scale factor: $_lastTextScaleFactor');
+  ///     return Text('Current scale factor: $_lastTextScaleFactor');
   ///   }
   /// }
   /// ```

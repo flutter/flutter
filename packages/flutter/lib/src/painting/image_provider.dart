@@ -187,7 +187,7 @@ class ImageConfiguration {
 ///   final ImageProvider imageProvider;
 ///
 ///   @override
-///   _MyImageState createState() => new _MyImageState();
+///   _MyImageState createState() => _MyImageState();
 /// }
 ///
 /// class _MyImageState extends State<MyImage> {
@@ -237,7 +237,7 @@ class ImageConfiguration {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new RawImage(
+///     return RawImage(
 ///       image: _imageInfo?.image, // this is a dart:ui Image object
 ///       scale: _imageInfo?.scale ?? 1.0,
 ///     );
@@ -310,11 +310,11 @@ abstract class ImageProvider<T> {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Image.network(url);
+  ///     return Image.network(url);
   ///   }
   ///
   ///   void evictImage() {
-  ///     final NetworkImage provider = new NetworkImage(url);
+  ///     final NetworkImage provider = NetworkImage(url);
   ///     provider.evict().then<void>((bool success) {
   ///       if (success)
   ///         debugPrint('removed image!');
@@ -659,7 +659,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// Then, to fetch the image and associate it with scale `1.5`, use
 ///
 /// ```dart
-/// new AssetImage('icons/heart.png', scale: 1.5)
+/// AssetImage('icons/heart.png', scale: 1.5)
 /// ```
 ///
 ///## Assets in packages
@@ -669,7 +669,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// `my_icons`. Then to fetch the image, use:
 ///
 /// ```dart
-/// new AssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// AssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
 /// ```
 ///
 /// Assets used by the package itself should also be fetched using the [package]

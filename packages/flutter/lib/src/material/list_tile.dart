@@ -175,7 +175,7 @@ enum ListTileControlAffinity {
 /// Here is a simple tile with an icon and some text.
 ///
 /// ```dart
-/// new ListTile(
+/// ListTile(
 ///   leading: const Icon(Icons.event_seat),
 ///   title: const Text('The seat for the narrator'),
 /// )
@@ -188,7 +188,7 @@ enum ListTileControlAffinity {
 /// ```dart
 /// int _act = 1;
 /// // ...
-/// new ListTile(
+/// ListTile(
 ///   leading: const Icon(Icons.flight_land),
 ///   title: const Text('Trix\'s airplane'),
 ///   subtitle: _act != 2 ? const Text('The airplane is only in Act II.') : null,

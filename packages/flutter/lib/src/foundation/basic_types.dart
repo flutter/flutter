@@ -183,7 +183,7 @@ class CachingIterable<E> extends IterableBase<E> {
   ///     yield index;
   ///  }
   ///
-  /// Iterable<int> i = new CachingIterable<int>(range(1, 5).iterator);
+  /// Iterable<int> i = CachingIterable<int>(range(1, 5).iterator);
   /// print(i.length); // walks the list
   /// print(i.length); // efficient
   /// ```
