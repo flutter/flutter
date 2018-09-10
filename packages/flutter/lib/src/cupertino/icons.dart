@@ -464,4 +464,18 @@ class CupertinoIcons {
 
   /// A symbol representing a single musical note.
   static const IconData music_note = IconData(0xf46b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A triangle facing to the right. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [play_arrow_solid], which is similar, but filled in.
+  static const IconData play_arrow = IconData(0xf487, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A triangle facing to the right. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [play_arrow], which is similar, but not filled in.
+  static const IconData play_arrow_solid = IconData(0xf488, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
