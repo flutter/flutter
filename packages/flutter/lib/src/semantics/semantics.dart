@@ -1125,6 +1125,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
 
+  /// The index of this node with respect to its parent, including any hidden
+  /// siblings.
+  int indexInParent;
+
   /// Whether the node is invisible.
   ///
   /// A node whose [rect] is outside of the bounds of the screen and hence not
@@ -1394,6 +1398,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _scrollExtentMax != config._scrollExtentMax ||
         _scrollExtentMin != config._scrollExtentMin ||
         _actionsAsBits != config._actionsAsBits ||
+        indexInParent != config.indexInParent ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
@@ -1553,6 +1558,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
+    indexInParent = config.indexInParent;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -2450,6 +2456,15 @@ class SemanticsConfiguration {
   /// Paint order as established by [visitChildrenForSemantics] is used to
   /// determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
+
+  /// The index of this semantic node this configuration describes with respect
+  /// to its parent.
+  int get indexInParent => _indexInParent;
+  int _indexInParent;
+  set indexInParent(int value) {
+    _indexInParent = value;
+    _hasBeenAnnotated = true;
+  }
 
   // SEMANTIC ANNOTATIONS
   // These will end up on [SemanticNode]s generated from
@@ -3358,6 +3373,7 @@ class SemanticsConfiguration {
     _scrollExtentMax ??= other._scrollExtentMax;
     _scrollExtentMin ??= other._scrollExtentMin;
     _hintOverrides ??= other._hintOverrides;
+    _indexInParent ??= other.indexInParent;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3406,6 +3422,7 @@ class SemanticsConfiguration {
       .._scrollExtentMax = _scrollExtentMax
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
+      .._indexInParent = indexInParent
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions);
   }

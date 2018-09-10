@@ -5519,6 +5519,39 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that annotated the first child semantics node with an index.
+///
+/// The index is used by certain widgets such as the [CupertinoPicker] that have
+/// specific strategies for assembling semantics nodes.
+class IndexedChildSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a widget that annotated the first child semantics node with an index.
+  ///
+  /// [index] must not be null.
+  const IndexedChildSemantics({
+    Key key,
+    @required this.index,
+    Widget child,
+  }) : assert(index != null),
+       super(key: key, child: child);
+
+  /// The index used to annotated the first child semantics node.
+  final int index;
+
+  @override
+  RenderIndexedChildSemantics createRenderObject(BuildContext context) => new RenderIndexedChildSemantics(index: index);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderIndexedChildSemantics renderObject) {
+    renderObject.index = index;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<int>('index', index));
+  }
+}
+
 /// A widget that builds its child.
 ///
 /// Useful for attaching a key to an existing widget.

@@ -244,16 +244,19 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     Widget result = new Stack(
       children: <Widget>[
         new Positioned.fill(
-          child: new ListWheelScrollView.useDelegate(
-            controller: widget.scrollController,
-            physics: const FixedExtentScrollPhysics(),
-            diameterRatio: widget.diameterRatio,
-            offAxisFraction: widget.offAxisFraction,
-            useMagnifier: widget.useMagnifier,
-            magnification: widget.magnification,
-            itemExtent: widget.itemExtent,
-            onSelectedItemChanged: _handleSelectedItemChanged,
-            childDelegate: widget.childDelegate,
+          child: new _CupertinoPickerSemantics(
+            scrollController: widget.scrollController,
+            child: new ListWheelScrollView.useDelegate(
+              controller: widget.scrollController,
+              physics: const FixedExtentScrollPhysics(),
+              diameterRatio: widget.diameterRatio,
+              offAxisFraction: widget.offAxisFraction,
+              useMagnifier: widget.useMagnifier,
+              magnification: widget.magnification,
+              itemExtent: widget.itemExtent,
+              onSelectedItemChanged: _handleSelectedItemChanged,
+              childDelegate: widget.childDelegate,
+            ),
           ),
         ),
         _buildGradientScreen(),
@@ -269,5 +272,106 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
       );
     }
     return result;
+  }
+}
+
+// Turns the scroll semantics of the ListView into a single adjustable semantics
+// node.
+class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
+  const _CupertinoPickerSemantics({
+    Key key,
+    Widget child,
+    @required this.scrollController,
+  }) : super(key: key, child: child);
+
+  final FixedExtentScrollController scrollController;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => new _RenderCupertinoPickerSemantics(Directionality.of(context), scrollController);
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+    renderObject
+      ..textDirection = Directionality.of(context)
+      ..scrollController = scrollController;
+  }
+}
+
+class _RenderCupertinoPickerSemantics extends RenderProxyBox {
+  _RenderCupertinoPickerSemantics(this._textDirection, FixedExtentScrollController scrollController) {
+    this.scrollController = scrollController;
+  }
+
+  FixedExtentScrollController get scrollController => _scrollController;
+  FixedExtentScrollController _scrollController;
+  set scrollController(FixedExtentScrollController value) {
+    if (value == _scrollController)
+      return;
+    _scrollController?.removeListener(_handleScrollUpdate);
+    _scrollController = value;
+    _scrollController.addListener(_handleScrollUpdate);
+    markNeedsSemanticsUpdate();
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (value == textDirection)
+      return;
+    _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  void _handleScrollUpdate() {
+    markNeedsSemanticsUpdate();
+  }
+
+  void _handleDecrease() {
+    scrollController.jumpToItem(scrollController.selectedItem - 1);
+  }
+
+  void _handleIncrease() {
+    scrollController.jumpToItem(scrollController.selectedItem + 1);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+    config.explicitChildNodes = true;
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    final int index = scrollController.selectedItem;
+    final SemanticsNode scrollRoot = children.first;
+    final List<SemanticsNode> scrollChildren = <SemanticsNode>[];
+    scrollRoot.visitChildren((SemanticsNode child) {
+      scrollChildren.add(child);
+      return true;
+    });
+    String previous;
+    String current;
+    String next;
+    for (SemanticsNode node in scrollChildren) {
+      assert(node.indexInParent != null);
+      if (node.indexInParent == index - 1)
+        previous = node.label;
+      else if (node.indexInParent == index)
+        current = node.label;
+      else if (node.indexInParent == index + 1)
+        next = node.label;
+    }
+    config.value = current;
+    config.textDirection = textDirection;
+    if (previous != null) {
+      config.decreasedValue = previous;
+      config.onDecrease = _handleDecrease;
+    }
+    if (current != null) {
+      config.increasedValue = next;
+      config.onIncrease = _handleIncrease;
+    }
+    super.assembleSemanticsNode(node, config, const <SemanticsNode>[]);
   }
 }
