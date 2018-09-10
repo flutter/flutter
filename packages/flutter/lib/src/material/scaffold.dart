@@ -441,29 +441,33 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     @required this.fabMoveAnimation,
     @required this.fabMotionAnimator,
     @required this.geometryNotifier,
-    this.fabHideAnimation,
+    @required this.previousController,
+    @required this.currentController,
   }) : assert(fabMoveAnimation != null),
        assert(fabMotionAnimator != null),
+       assert(currentController != null),
+       assert(previousController != null),
        super(key: key);
 
   final Widget child;
   final Animation<double> fabMoveAnimation;
   final FloatingActionButtonAnimator fabMotionAnimator;
-  final Animation<double> fabHideAnimation;
   final _ScaffoldGeometryNotifier geometryNotifier;
+
+  /// The animations applied to the Floating Action Button when it is entering or exiting.
+  /// Controls the previous widget.child as it exits
+  final AnimationController previousController;
+  /// Controls the current child widget.child as it exits
+  final AnimationController currentController;
+
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
-  // The animations applied to the Floating Action Button when it is entering or exiting.
-  // Controls the previous widget.child as it exits
-  AnimationController _previousController;
   Animation<double> _previousScaleAnimation;
   Animation<double> _previousRotationAnimation;
-  // Controls the current child widget.child as it exits
-  AnimationController _currentController;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
   Animation<double> _currentScaleAnimation;
   Animation<double> _extendedCurrentScaleAnimation;
@@ -474,35 +478,20 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void initState() {
     super.initState();
 
-    _previousController = new AnimationController(
-      duration: kFloatingActionButtonSegue,
-      vsync: this,
-    )..addStatusListener(_handlePreviousAnimationStatusChanged);
-
-    _currentController = new AnimationController(
-      duration: kFloatingActionButtonSegue,
-      vsync: this,
-    );
-
+    widget.previousController
+      ..addStatusListener(_handlePreviousAnimationStatusChanged);
     _updateAnimations();
 
     if (widget.child != null) {
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
-      _currentController.value = 1.0;
+      widget.currentController.value = 1.0;
     }
     else {
       // If we start without a child we update the geometry object with a
       // floating action button scale of 0, as it is not showing on the screen.
       _updateGeometryScale(0.0);
     }
-  }
-
-  @override
-  void dispose() {
-    _previousController.dispose();
-    _currentController.dispose();
-    super.dispose();
   }
 
   @override
@@ -516,23 +505,23 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // Get the right scale and rotation animations to use for this widget.
       _updateAnimations();
     }
-    if (_previousController.status == AnimationStatus.dismissed) {
-      final double currentValue = _currentController.value;
+    if (widget.previousController.status == AnimationStatus.dismissed) {
+      final double currentValue = widget.currentController.value;
       if (currentValue == 0.0 || oldWidget.child == null) {
         // The current child hasn't started its entrance animation yet. We can
         // just skip directly to the new child's entrance.
         _previousChild = null;
         if (widget.child != null)
-          _currentController.forward();
+          widget.currentController.forward();
       } else {
         // Otherwise, we need to copy the state from the current controller to
         // the previous controller and run an exit animation for the previous
         // widget before running the entrance animation for the new child.
         _previousChild = oldWidget.child;
-        _previousController
+        widget.previousController
           ..value = currentValue
           ..reverse();
-        _currentController.value = 0.0;
+        widget.currentController.value = 0.0;
       }
     }
   }
@@ -540,18 +529,18 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void _updateAnimations() {
     // Get the animations for exit and entrance.
     final CurvedAnimation previousExitScaleAnimation = new CurvedAnimation(
-      parent: _previousController,
+      parent: widget.previousController,
       curve: Curves.easeIn,
     );
     final Animation<double> previousExitRotationAnimation = new Tween<double>(begin: 1.0, end: 1.0).animate(
       new CurvedAnimation(
-        parent: _previousController,
+        parent: widget.previousController,
         curve: Curves.easeIn,
       ),
     );
 
     final CurvedAnimation currentEntranceScaleAnimation = new CurvedAnimation(
-      parent: _currentController,
+      parent: widget.currentController,
       curve: Curves.easeIn,
     );
     final Animation<double> currentEntranceRotationAnimation = new Tween<double>(
@@ -559,7 +548,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       end: 1.0,
     ).animate(
       new CurvedAnimation(
-        parent: _currentController,
+        parent: widget.currentController,
         curve: Curves.easeIn
       ),
     );
@@ -586,9 +575,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
       if (status == AnimationStatus.dismissed) {
-        assert(_currentController.status == AnimationStatus.dismissed);
+        assert(widget.currentController.status == AnimationStatus.dismissed);
         if (widget.child != null)
-          _currentController.forward();
+          widget.currentController.forward();
       }
     });
   }
@@ -604,7 +593,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
 
-    if (_previousController.status != AnimationStatus.dismissed) {
+    if (widget.previousController.status != AnimationStatus.dismissed) {
       if (_isExtendedFloatingActionButton(_previousChild)) {
         children.add(new FadeTransition(
           opacity: _previousScaleAnimation,
@@ -639,14 +628,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       ));
     }
 
-    final Widget stack = new Stack(
+    return new Stack(
       alignment: Alignment.centerRight,
       children: children,
     );
-
-    return widget.fabHideAnimation != null
-      ? new ScaleTransition(scale: widget.fabHideAnimation, child: stack)
-      : stack;
   }
 
   void _onProgressChanged() {
@@ -1317,33 +1302,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FloatingActionButtonAnimator _floatingActionButtonAnimator;
   FloatingActionButtonLocation _previousFloatingActionButtonLocation;
   FloatingActionButtonLocation _floatingActionButtonLocation;
-  AnimationController _floatingActionButtonHideController;
 
-  /// Obtains current value of the [floatingActionButton]'s hide/show animation.
-  double get floatingActionButtonVisibilityValue => _floatingActionButtonHideController.value;
+  AnimationController _currentFloatingActionButtonVisibilityController;
+  AnimationController _previousFloatingActionButtonVisibilityController;
 
-  /// Sets the current value of the [floatingActionButton]'s hide/show animation.
-  ///
-  /// To simply animate forward or backward, use [showFloatingActionButton] or
-  /// [hideFloatingActionButton], respectively.
-  set floatingActionButtonVisibilityValue(double newValue) {
-    _floatingActionButtonHideController.value = newValue;
-  }
+  /// Gets the [AnimationController] in charge of hiding or showing the
+  /// [Scaffold.floatingActionButton].
+  AnimationController get floatingActionButtonVisibilityController => _currentFloatingActionButtonVisibilityController;
 
   /// Hides the [Scaffold.floatingActionButton].
-  ///
-  /// This will result in animating from the current
-  /// [floatingActionButtonVisibilityValue] to 0.0.
   TickerFuture hideFloatingActionButton() {
-    return _floatingActionButtonHideController.reverse();
+    return floatingActionButtonVisibilityController.reverse();
   }
 
   /// Shows the [Scaffold.floatingActionButton].
-  ///
-  /// This call will result in animating from the current
-  /// [floatingActionButtonVisibilityValue] to 1.0.
   TickerFuture showFloatingActionButton() {
-    return _floatingActionButtonHideController.forward();
+    return floatingActionButtonVisibilityController.forward();
   }
 
   // Moves the Floating Action Button to the new Floating Action Button Location.
@@ -1403,13 +1377,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       value: 1.0,
       duration: kFloatingActionButtonSegue * 2,
     );
-    _floatingActionButtonHideController = new AnimationController(
-      vsync: this,
-      lowerBound: 0.0,
-      upperBound: 1.0,
-      value: 1.0,
+    _previousFloatingActionButtonVisibilityController = new AnimationController(
       duration: kFloatingActionButtonSegue,
+      vsync: this,
     );
+
+    _currentFloatingActionButtonVisibilityController = new AnimationController(
+      duration: kFloatingActionButtonSegue,
+      vsync: this,
+    );
+
     _maybeBuildCurrentBottomSheet();
   }
 
@@ -1468,7 +1445,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
     _floatingActionButtonMoveController.dispose();
-    _floatingActionButtonHideController.dispose();
+    _previousFloatingActionButtonVisibilityController.dispose();
+    _currentFloatingActionButtonVisibilityController.dispose();
     super.dispose();
   }
 
@@ -1682,8 +1660,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         child: widget.floatingActionButton,
         fabMoveAnimation: _floatingActionButtonMoveController,
         fabMotionAnimator: _floatingActionButtonAnimator,
-        fabHideAnimation: _floatingActionButtonHideController,
         geometryNotifier: _geometryNotifier,
+        previousController: _previousFloatingActionButtonVisibilityController,
+        currentController: _currentFloatingActionButtonVisibilityController,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
