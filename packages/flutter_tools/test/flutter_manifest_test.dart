@@ -503,7 +503,7 @@ flutter:
   });
 
   group('FlutterManifest with MemoryFileSystem', () {
-    void assertSchemaIsReadable() async {
+    Future<void> assertSchemaIsReadable() async {
       const String manifest = '''
 name: test
 dependencies:
@@ -529,18 +529,18 @@ flutter:
       );
     }
 
-    testUsingContext('Validate manifest on original fs', () async {
+    testUsingContext('Validate manifest on original fs', () {
       assertSchemaIsReadable();
     });
 
     testUsingContextAndFs('Validate manifest on Posix FS',
-        new MemoryFileSystem(style: FileSystemStyle.posix), () async {
+        new MemoryFileSystem(style: FileSystemStyle.posix), () {
           assertSchemaIsReadable();
         }
     );
 
     testUsingContextAndFs('Validate manifest on Windows FS',
-        new MemoryFileSystem(style: FileSystemStyle.windows), () async {
+        new MemoryFileSystem(style: FileSystemStyle.windows), () {
           assertSchemaIsReadable();
         }
     );
