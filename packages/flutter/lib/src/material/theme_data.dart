@@ -72,7 +72,7 @@ enum MaterialTapTargetSize {
   shrinkWrap,
 }
 
-/// Holds color, typography, and animation values for a material design theme.
+/// Holds the color and typography values for a material design theme.
 ///
 /// Use this class to configure a [Theme] widget.
 ///
@@ -842,7 +842,7 @@ class ThemeData extends Diagnosticable {
         chipTheme,
         platform,
         materialTapTargetSize,
-        cursorColor,
+        cursorColor
       ),
     );
   }

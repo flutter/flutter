@@ -452,9 +452,8 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   final FloatingActionButtonAnimator fabMotionAnimator;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
-  /// Controls the current child widget.child as it exits
+  /// Controls the current child widget.child as it exits.
   final AnimationController currentController;
-
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
@@ -462,8 +461,8 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
 
-  /// The animations applied to the Floating Action Button when it is entering or exiting.
-  /// Controls the previous widget.child as it exits
+  // The animations applied to the Floating Action Button when it is entering or exiting.
+  /// Controls the previous widget.child as it exits.
   AnimationController _previousController;
   Animation<double> _previousScaleAnimation;
   Animation<double> _previousRotationAnimation;
