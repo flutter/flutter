@@ -24,6 +24,7 @@ const Color _kSnackBackground = Color(0xFF323232);
 
 const Duration _kSnackBarTransitionDuration = Duration(milliseconds: 250);
 const Duration _kSnackBarDisplayDuration = Duration(milliseconds: 4000);
+const Curve _snackBarHeightCurve = Curves.fastOutSlowIn;
 const Curve _snackBarFadeInCurve =
     Interval(0.45, 1.0, curve: Curves.fastOutSlowIn);
 const Curve _snackBarFadeOutCurve =
@@ -64,6 +65,22 @@ enum SnackBarClosedReason {
 
   /// The snack bar was closed because its timer expired.
   timeout,
+}
+
+/// Configures whether SnackBar should be fixed to the bottom or floating
+/// like described in Material Design spec.
+enum SnackBarBehaviour {
+  /// Fixed the SnackBar position to the bottom of the Scaffold when possible.
+  /// One of the possible scenario where SnackBar will be shown above another
+  /// widget is SnackBar above BottomNavigationBar.
+  /// Other than that SnackBar will caused the other non-fixed widget inside
+  /// Scaffold to be pushed above (e.g. Floating Action Button).
+  fixed,
+  /// Change the design and behaviour of SnackBar to float like described in
+  /// <https://material.io/design/components/snackbars.html>.
+  /// This behaviour will cause SnackBar to be shown on top of other non-fixed
+  /// widget like Floating Action Button rather than pushing it above SnackBar.
+  floating
 }
 
 /// A button for a [SnackBar], known as an "action".
@@ -156,6 +173,7 @@ class SnackBar extends StatelessWidget {
     this.action,
     this.duration = _kSnackBarDisplayDuration,
     this.animation,
+    this.snackBarBehaviour = SnackBarBehaviour.fixed,
   })  : assert(content != null),
         super(key: key);
 
@@ -190,6 +208,9 @@ class SnackBar extends StatelessWidget {
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double> animation;
 
+  /// Configures how SnackBar should be positioned and shown.
+  final SnackBarBehaviour snackBarBehaviour;
+
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
@@ -223,6 +244,8 @@ class SnackBar extends StatelessWidget {
     } else {
       children.add(const SizedBox(width: _kSnackBarPadding));
     }
+    final CurvedAnimation heightAnimation =
+        new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation =
         CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
@@ -230,14 +253,40 @@ class SnackBar extends StatelessWidget {
         curve: _snackBarFadeOutCurve,
         reverseCurve: const Threshold(0.0));
 
-    Widget snackbar = SafeArea(
+    final bool isFloatingSnackBar =
+        snackBarBehaviour == SnackBarBehaviour.floating;
+
+    Widget snackBar = SafeArea(
       top: false,
       child: Row(
         children: children,
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
     );
-    snackbar = Semantics(
+
+    snackBar = Material(
+      borderRadius:
+          isFloatingSnackBar ? BorderRadius.circular(2.0) : BorderRadius.zero,
+      elevation: isFloatingSnackBar ? 3.0 : 6.0,
+      color: backgroundColor ?? _kSnackBackground,
+      child: Theme(
+        data: darkTheme,
+        child: mediaQueryData.accessibleNavigation
+            ? snackBar
+            : FadeTransition(
+                opacity: fadeOutAnimation,
+                child: snackBar,
+              ),
+      ),
+    );
+
+    if (isFloatingSnackBar) {
+      snackBar = Container(
+          margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
+          child: snackBar);
+    }
+
+    snackBar = Semantics(
       container: true,
       liveRegion: true,
       onDismiss: () {
@@ -252,33 +301,32 @@ class SnackBar extends StatelessWidget {
             Scaffold.of(context)
                 .removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
           },
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(15.0, 5.0, 15.0, 10.0),
-            child: Material(
-              borderRadius: BorderRadius.circular(2.0),
-              elevation: 3.0,
-              color: backgroundColor ?? _kSnackBackground,
-              child: Theme(
-                data: darkTheme,
-                child: mediaQueryData.accessibleNavigation
-                    ? snackbar
-                    : FadeTransition(
-                        opacity: fadeOutAnimation,
-                        child: snackbar,
-                      ),
-              ),
-            ),
-          )),
+          child: snackBar),
     );
 
-    return ClipRect(
-      child: mediaQueryData.accessibleNavigation
-          ? snackbar
-          : FadeTransition(
-              opacity: fadeInAnimation,
-              child: snackbar,
-            ),
-    );
+    Widget snackBarTransition;
+    if (mediaQueryData.accessibleNavigation) {
+      snackBarTransition = snackBar;
+    } else if (isFloatingSnackBar) {
+      snackBarTransition = FadeTransition(
+        opacity: fadeInAnimation,
+        child: snackBar,
+      );
+    } else {
+      snackBarTransition = AnimatedBuilder(
+        animation: heightAnimation,
+        builder: (BuildContext context, Widget child) {
+          return Align(
+            alignment: AlignmentDirectional.topStart,
+            heightFactor: heightAnimation.value,
+            child: child,
+          );
+        },
+        child: snackBar,
+      );
+    }
+
+    return ClipRect(child: snackBarTransition);
   }
 
   // API for Scaffold.addSnackBar():
@@ -307,6 +355,7 @@ class SnackBar extends StatelessWidget {
       action: action,
       duration: duration,
       animation: newAnimation,
+      snackBarBehaviour: snackBarBehaviour,
     );
   }
 }
