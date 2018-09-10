@@ -169,6 +169,7 @@ Hello!
           incrementalCompilerByteStorePath: anyNamed('incrementalCompilerByteStorePath'),
           mainPath: anyNamed('mainPath'),
           outputFilePath: anyNamed('outputFilePath'),
+          depFilePath: anyNamed('depFilePath'),
           trackWidgetCreation: anyNamed('trackWidgetCreation'),
           extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
           fileSystemRoots: anyNamed('fileSystemRoots'),

@@ -473,6 +473,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
       borderRadius: BorderRadius.zero,
       onRemoved: handleRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;
@@ -539,6 +540,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasDirectionality(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;

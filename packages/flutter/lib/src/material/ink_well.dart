@@ -92,6 +92,7 @@ abstract class InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
@@ -372,6 +373,7 @@ class InkResponse extends StatefulWidget {
   @mustCallSuper
   bool debugCheckContext(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasDirectionality(context));
     return true;
   }
 
@@ -426,6 +428,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
           customBorder: widget.customBorder,
           rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: _handleInkHighlightRemoval,
+          textDirection: Directionality.of(context),
         );
         updateKeepAlive();
       } else {
@@ -476,6 +479,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       borderRadius: borderRadius,
       customBorder: customBorder,
       onRemoved: onRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;

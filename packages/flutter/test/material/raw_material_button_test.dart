@@ -9,14 +9,19 @@ void main() {
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
     int pressed = 0;
 
-    await tester.pumpWidget(RawMaterialButton(
-      onPressed: () {
-        pressed++;
-      },
-      constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
-      materialTapTargetSize: MaterialTapTargetSize.padded,
-      child: const Text('+', textDirection: TextDirection.ltr),
-    ));
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RawMaterialButton(
+          onPressed: () {
+            pressed++;
+          },
+          constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
+          materialTapTargetSize: MaterialTapTargetSize.padded,
+          child: const Text('+'),
+        ),
+      )
+    );
 
     await tester.tapAt(const Offset(40.0, 400.0));
 
@@ -26,12 +31,15 @@ void main() {
   testWidgets('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      Center(
-        child: RawMaterialButton(
-          onPressed: () {},
-          constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
-          materialTapTargetSize: MaterialTapTargetSize.padded,
-          child: const Text('+', textDirection: TextDirection.ltr),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMaterialButton(
+            onPressed: () {},
+            constraints: BoxConstraints.tight(const Size(10.0, 10.0)),
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            child: const Text('+'),
+          ),
         ),
       ),
     );
@@ -66,14 +74,17 @@ void main() {
     const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      Center(
-        child: RawMaterialButton(
-          materialTapTargetSize: MaterialTapTargetSize.padded,
-          onPressed: () {},
-          fillColor: fillColor,
-          highlightColor: highlightColor,
-          splashColor: splashColor,
-          child: const SizedBox(),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            onPressed: () {},
+            fillColor: fillColor,
+            highlightColor: highlightColor,
+            splashColor: splashColor,
+            child: const SizedBox(),
+          ),
         ),
       ),
     );
@@ -95,14 +106,17 @@ void main() {
     const Color fillColor = Color(0xFFEF5350);
 
     await tester.pumpWidget(
-      Center(
-        child: RawMaterialButton(
-          materialTapTargetSize: MaterialTapTargetSize.padded,
-          onPressed: () {},
-          fillColor: fillColor,
-          highlightColor: highlightColor,
-          splashColor: splashColor,
-          child: const SizedBox(),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RawMaterialButton(
+            materialTapTargetSize: MaterialTapTargetSize.padded,
+            onPressed: () {},
+            fillColor: fillColor,
+            highlightColor: highlightColor,
+            splashColor: splashColor,
+            child: const SizedBox(),
+          ),
         ),
       ),
     );

@@ -145,8 +145,7 @@ class BuildAotCommand extends BuildSubCommand {
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
-          printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-          return;
+          throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
         }
       }
     } on String catch (error) {

@@ -176,7 +176,9 @@ BuildApp() {
     build bundle                                                            \
     --target-platform=ios                                                   \
     --target="${target_path}"                                               \
+    --snapshot="${build_dir}/snapshot_blob.bin"                             \
     --${build_mode}                                                         \
+    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
     --asset-dir="${derived_dir}/flutter_assets"                             \
     ${precompilation_flag}                                                  \
     ${local_engine_flag}                                                    \
