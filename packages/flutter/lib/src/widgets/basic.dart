@@ -4596,11 +4596,15 @@ class RawImage extends LeafRenderObjectWidget {
   /// scope.
   final bool matchTextDirection;
 
-  /// Whether to invert the colors of this image.
+  /// Whether the colors of the image are inverted when drawn.
   ///
-  /// Inverting the colors of an image applies a new color filter that will
-  /// override any user provided color filters. This is primarily intended to
-  /// be used for implementing smart invert on iOS.
+  /// inverting the colors of an image applies a new color filter that will
+  /// be composed with any user provided color filters. This is primarily
+  /// used for implementing smart invert on iOS.
+  ///
+  /// See also:
+  ///
+  ///   * [Paint.invertColors], for the dart:ui implementation.
   final bool invertColors;
 
   @override
