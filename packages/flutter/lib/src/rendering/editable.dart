@@ -135,6 +135,7 @@ class RenderEditable extends RenderBox {
     Locale locale,
     double cursorWidth = 1.0,
     Radius cursorRadius,
+    @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
@@ -142,7 +143,8 @@ class RenderEditable extends RenderBox {
        assert(offset != null),
        assert(ignorePointer != null),
        assert(obscureText != null),
-       _textPainter = new TextPainter(
+       assert(textSelectionDelegate != null),
+  _textPainter = new TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -196,12 +198,24 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// The object that controls the text selection, used by this render object
+  /// for implementing cut, copy, and paste keyboard shortcuts.
+  ///
+  /// It must not be null. It will make cut, copy and paste functionality work
+  /// with the most recently set [TextSelectionDelegate].
+  TextSelectionDelegate textSelectionDelegate;
+
   Rect _lastCaretRect;
 
   static const int _kLeftArrowCode = 21;
   static const int _kRightArrowCode = 22;
   static const int _kUpArrowCode = 19;
   static const int _kDownArrowCode = 20;
+  static const int _kXKeyCode = 52;
+  static const int _kCKeyCode = 31;
+  static const int _kVKeyCode = 50;
+  static const int _kAKeyCode = 29;
+  static const int _kDelKeyCode = 112;
 
   // The extent offset of the current selection
   int _extentOffset = -1;
@@ -221,7 +235,7 @@ class RenderEditable extends RenderBox {
   static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
-  void _handleKeyEvent(RawKeyEvent keyEvent){
+  void _handleKeyEvent(RawKeyEvent keyEvent) {
     if (defaultTargetPlatform != TargetPlatform.android)
       return;
 
@@ -246,6 +260,11 @@ class RenderEditable extends RenderBox {
     final bool upArrow = pressedKeyCode == _kUpArrowCode;
     final bool downArrow = pressedKeyCode == _kDownArrowCode;
     final bool arrow = leftArrow || rightArrow || upArrow || downArrow;
+    final bool aKey = pressedKeyCode == _kAKeyCode;
+    final bool xKey = pressedKeyCode == _kXKeyCode;
+    final bool vKey = pressedKeyCode == _kVKeyCode;
+    final bool cKey = pressedKeyCode == _kCKeyCode;
+    final bool del = pressedKeyCode == _kDelKeyCode;
 
     // We will only move select or more the caret if an arrow is pressed
     if (arrow) {
@@ -262,7 +281,12 @@ class RenderEditable extends RenderBox {
       newOffset = _handleShift(rightArrow, leftArrow, shift, newOffset);
 
       _extentOffset = newOffset;
+    } else if (ctrl && (xKey || vKey || cKey || aKey)) {
+      // _handleShortcuts depends on being started in the same stack invocation as the _handleKeyEvent method
+      _handleShortcuts(pressedKeyCode);
     }
+    if (del)
+      _handleDelete();
   }
 
   // Handles full word traversal using control.
@@ -368,7 +392,7 @@ class RenderEditable extends RenderBox {
       onSelectionChanged(
         new TextSelection.fromPosition(
           new TextPosition(
-              offset: newOffset
+            offset: newOffset
           )
         ),
         this,
@@ -376,6 +400,75 @@ class RenderEditable extends RenderBox {
       );
     }
     return newOffset;
+  }
+
+  // Handles shortcut functionality including cut, copy, paste and select all
+  // using control + (X, C, V, A).
+  void _handleShortcuts(int pressedKeyCode) async {
+    switch (pressedKeyCode) {
+      case _kCKeyCode:
+        if (!selection.isCollapsed) {
+          Clipboard.setData(
+            new ClipboardData(text: selection.textInside(text.text)));
+        }
+        break;
+      case _kXKeyCode:
+        if (!selection.isCollapsed) {
+          Clipboard.setData(
+            new ClipboardData(text: selection.textInside(text.text)));
+          textSelectionDelegate.textEditingValue = new TextEditingValue(
+            text: selection.textBefore(text.text)
+              + selection.textAfter(text.text),
+            selection: new TextSelection.collapsed(offset: selection.start),
+          );
+        }
+        break;
+      case _kVKeyCode:
+        // Snapshot the input before using `await`.
+        // See https://github.com/flutter/flutter/issues/11427
+        final TextEditingValue value = textSelectionDelegate.textEditingValue;
+        final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+        if (data != null) {
+          textSelectionDelegate.textEditingValue = new TextEditingValue(
+            text: value.selection.textBefore(value.text)
+              + data.text
+              + value.selection.textAfter(value.text),
+            selection: new TextSelection.collapsed(
+              offset: value.selection.start + data.text.length
+            ),
+          );
+        }
+        break;
+      case _kAKeyCode:
+        _baseOffset = 0;
+        _extentOffset = textSelectionDelegate.textEditingValue.text.length;
+        onSelectionChanged(
+          new TextSelection(
+            baseOffset: 0,
+            extentOffset: textSelectionDelegate.textEditingValue.text.length,
+          ),
+          this,
+          SelectionChangedCause.keyboard,
+        );
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+  void _handleDelete() {
+    if (selection.textAfter(text.text).isNotEmpty) {
+      textSelectionDelegate.textEditingValue = new TextEditingValue(
+        text: selection.textBefore(text.text)
+          + selection.textAfter(text.text).substring(1),
+        selection: new TextSelection.collapsed(offset: selection.start)
+      );
+    } else {
+      textSelectionDelegate.textEditingValue = new TextEditingValue(
+        text: selection.textBefore(text.text),
+        selection: new TextSelection.collapsed(offset: selection.start)
+      );
+    }
   }
 
   /// Marks the render object as needing to be laid out again and have its text
