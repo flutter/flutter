@@ -76,6 +76,7 @@ enum SnackBarBehaviour {
   /// Other than that SnackBar will caused the other non-fixed widget inside
   /// Scaffold to be pushed above (e.g. Floating Action Button).
   fixed,
+
   /// Change the design and behaviour of SnackBar to float like described in
   /// <https://material.io/design/components/snackbars.html>.
   /// This behaviour will cause SnackBar to be shown on top of other non-fixed
@@ -123,7 +124,8 @@ class _SnackBarActionState extends State<SnackBarAction> {
   bool _haveTriggeredAction = false;
 
   void _handlePressed() {
-    if (_haveTriggeredAction) return;
+    if (_haveTriggeredAction)
+      return;
     setState(() {
       _haveTriggeredAction = true;
     });
