@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -562,7 +563,12 @@ void main() {
             height: 100.0,
             child: AndroidView(
               viewType: 'webview',
-              gestureRecognizers: <OneSequenceGestureRecognizer> [VerticalDragGestureRecognizer()],
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
+                Factory<OneSequenceGestureRecognizer>(
+                  () => VerticalDragGestureRecognizer(),
+                  type: VerticalDragGestureRecognizer,
+                ),
+              ].toSet(),
               layoutDirection: TextDirection.ltr,
             ),
           ),
@@ -684,7 +690,12 @@ void main() {
             height: 100.0,
             child: AndroidView(
               viewType: 'webview',
-              gestureRecognizers: <OneSequenceGestureRecognizer>[ EagerGestureRecognizer() ],
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
+                  type: VerticalDragGestureRecognizer,
+                ),
+              ].toSet(),
               layoutDirection: TextDirection.ltr,
             ),
           ),
@@ -704,5 +715,25 @@ void main() {
         const FakeMotionEvent(AndroidViewController.kActionDown, <int> [0], <Offset> [Offset(50.0, 50.0)]),
       ]),
     );
+  });
+
+  testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
+    final FakePlatformViewsController viewsController = new FakePlatformViewsController(TargetPlatform.android);
+    viewsController.registerViewType('webview');
+
+    final AndroidView androidView = AndroidView(
+      viewType: 'webview',
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>> [
+        new Factory<OneSequenceGestureRecognizer>(
+          () => new EagerGestureRecognizer(),
+          type: VerticalDragGestureRecognizer,
+        ),
+      ].toSet(),
+      layoutDirection: TextDirection.ltr,
+    );
+
+    await tester.pumpWidget(androidView);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(androidView);
   });
 }
