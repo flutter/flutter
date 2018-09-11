@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../buildconfig_generator.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
@@ -40,9 +41,14 @@ abstract class BuildSubCommand extends FlutterCommand {
     requiresPubspecYaml();
   }
 
+  /// Whether this command should generate/update the BuildConfig class.
+  bool get shouldGenerateBuildConfigClass => false;
+
   @override
   @mustCallSuper
   Future<Null> runCommand() async {
+    if (shouldGenerateBuildConfigClass)
+      generateBuildConfigClass(buildInfo: getBuildInfo(), args: argResults);
     if (isRunningOnBot) {
       final File dotPackages = fs.file('.packages');
       printStatus('Contents of .packages:');

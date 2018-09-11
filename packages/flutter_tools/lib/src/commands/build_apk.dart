@@ -38,6 +38,9 @@ class BuildApkCommand extends BuildSubCommand {
     'suitable for deploying to app stores.';
 
   @override
+  bool get shouldGenerateBuildConfigClass => true;
+
+  @override
   Future<Null> runCommand() async {
     await super.runCommand();
     await buildApk(
