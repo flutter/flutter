@@ -105,7 +105,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
       return; // We currently ignore add, remove, and hover move events.
     }
     if (result != null)
-      dispatchEvent(event, result, propagating);
+      dispatchEvent(event, result, propagating: propagating);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -121,14 +121,13 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   /// a handler retruns `true`, and catches exceptions that any of the handlers
   /// might throw. The `result` argument must not be null.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult result, bool propagating) {
+  void dispatchEvent(PointerEvent event, HitTestResult result, {bool propagating = false}) {
     assert(!locked);
     assert(result != null);
     for (HitTestEntry entry in result.path) {
       try {
         if (propagating) {
-          if (entry.target.handlePropagatingEvent(event, entry))
-            return;
+          entry.target.handlePropagatingEvent(event, entry);
         } else {
           entry.target.handleEvent(event, entry);
         }
