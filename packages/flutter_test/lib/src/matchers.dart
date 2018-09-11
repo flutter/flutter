@@ -865,7 +865,7 @@ class _HasGoodToStringDeep extends Matcher {
 ///
 /// This makes it useful for comparing numbers, [Color]s, [Offset]s and other
 /// sets of value for which a metric space is defined.
-typedef num DistanceFunction<T>(T a, T b);
+typedef DistanceFunction<T> = num Function(T a, T b);
 
 /// The type of a union of instances of [DistanceFunction<T>] for various types
 /// T.
@@ -878,7 +878,7 @@ typedef num DistanceFunction<T>(T a, T b);
 ///
 /// Calling an instance of this type must either be done dynamically, or by
 /// first casting it to a [DistanceFunction<T>] for some concrete T.
-typedef num AnyDistanceFunction(Null a, Null b);
+typedef AnyDistanceFunction = num Function(Null a, Null b);
 
 const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,

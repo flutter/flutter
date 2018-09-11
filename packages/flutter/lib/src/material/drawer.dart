@@ -145,7 +145,7 @@ class Drawer extends StatelessWidget {
 
 /// Signature for the callback that's called when a [DrawerController] is
 /// opened or closed.
-typedef void DrawerCallback(bool isOpened);
+typedef DrawerCallback = void Function(bool isOpened);
 
 /// Provides interactive behavior for [Drawer] widgets.
 ///

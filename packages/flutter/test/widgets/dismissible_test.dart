@@ -61,7 +61,7 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
   );
 }
 
-typedef Future<Null> DismissMethod(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
+typedef DismissMethod = Future<Null> Function(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
 
 Future<Null> dismissElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
   Offset downLocation;

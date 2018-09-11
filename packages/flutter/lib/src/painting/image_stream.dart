@@ -66,12 +66,12 @@ class ImageInfo {
 /// frame is requested if the call was asynchronous (after the current frame)
 /// and no rendering frame is requested if the call was synchronous (within the
 /// same stack frame as the call to [ImageStream.addListener]).
-typedef void ImageListener(ImageInfo image, bool synchronousCall);
+typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
 
 /// Signature for reporting errors when resolving images.
 ///
 /// Used by [ImageStream] and [precacheImage] to report errors.
-typedef void ImageErrorListener(dynamic exception, StackTrace stackTrace);
+typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
 
 class _ImageListenerPair {
   _ImageListenerPair(this.listener, this.errorListener);
