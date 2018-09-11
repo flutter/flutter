@@ -265,6 +265,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   ScrollBehavior _configuration;
   ScrollPhysics _physics;
 
+  final double _scrollSpeed = 20.0;
+  final double _flingSpeed = 5.0;
+
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
@@ -447,6 +450,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    debugPrint(details.globalPosition.toString());
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
     _drag?.update(details);
@@ -484,17 +488,32 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     final double delta = widget.axis == Axis.horizontal
         ? event.scrollDelta.dx
         : event.scrollDelta.dy;
-    if (position != null) {
       final double currentScrollOffset = position.pixels;
-      final double targetScrollOffset = math.min(
-          math.max(currentScrollOffset + delta, position.minScrollExtent),
-          position.maxScrollExtent);
-      if (targetScrollOffset != currentScrollOffset) {
-        position.jumpTo(targetScrollOffset);
-        return true;
-      }
-    }
-    return false;
+      final double xPosition = event.position.dx;
+      final DragStartDetails details =
+        new DragStartDetails(
+          sourceTimeStamp: event.timeStamp,
+          globalPosition: new Offset(0.0, currentScrollOffset),
+        );
+      final DragUpdateDetails updateDetails =
+        new DragUpdateDetails(
+          sourceTimeStamp: event.timeStamp,
+          primaryDelta: delta * _scrollSpeed,
+          delta: new Offset(0.0, delta * _scrollSpeed),
+          globalPosition: new Offset(xPosition, currentScrollOffset + delta * _scrollSpeed),
+        );
+      final double endVelocity = -delta * _flingSpeed;
+      final DragEndDetails endDetails =
+        new DragEndDetails(
+          velocity: new Velocity(pixelsPerSecond: new Offset(xPosition, endVelocity)),
+          primaryVelocity: endVelocity,
+        );
+
+      _hold = position.hold(_disposeHold);
+      _drag = position.drag(details, _disposeDrag);
+      _drag.update(updateDetails);
+      _drag?.end(endDetails);
+      return true;
   }
 
   // DESCRIPTION

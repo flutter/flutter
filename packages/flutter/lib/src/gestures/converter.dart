@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show PointerData, PointerChange;
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 
@@ -75,7 +76,6 @@ class PointerEventConverter {
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
       assert(datum.change != null);
-      debugPrint(datum.scrollDeltaY.toString());
       switch (datum.change) {
         case ui.PointerChange.add:
           assert(!_pointers.containsKey(datum.device));
@@ -215,8 +215,26 @@ class PointerEventConverter {
           );
           break;
         case ui.PointerChange.scroll:
-          assert(_pointers.containsKey(datum.device));
+          final bool alreadyAdded = _pointers.containsKey(datum.device);
           final _PointerState state = _ensureStateForPointer(datum, position);
+          if (!alreadyAdded) {
+            assert(state.lastPosition == position);
+            yield new PointerAddedEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
+            );
+          }
           if (state.lastPosition != position) {
             // Synthesize a hover of the pointer to the scroll location before
             // sending the scroll event, if necessary, so that clients don't have
@@ -246,7 +264,6 @@ class PointerEventConverter {
             state.lastPosition = position;
           }
           final Offset scrollDelta = new Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
-          debugPrint(scrollDelta.toString());
           yield new PointerScrollEvent(
             timeStamp: timeStamp,
             pointer: state.pointer,
@@ -407,8 +424,8 @@ class PointerEventConverter {
         }
       }
     }
-  }
-
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
       physicalPixels == null ? null : physicalPixels / devicePixelRatio;
+
 }
+
