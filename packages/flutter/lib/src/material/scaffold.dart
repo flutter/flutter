@@ -1319,18 +1319,25 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   AnimationController _floatingActionButtonVisibilityController;
 
-  /// Gets the [AnimationController] in charge of hiding or showing the
+  /// Gets the current value of the visbility animation for the
   /// [Scaffold.floatingActionButton].
-  AnimationController get floatingActionButtonVisibilityController => _floatingActionButtonVisibilityController;
+  double get floatingActionButtonVisbilityValue => _floatingActionButtonVisibilityController.value;
+
+  /// Sets the current value of the visibility animation for the
+  /// [Scaffold.floatingActionButton].  This value must not be null.
+  set floatingActionButtonVisbilityValue(double newValue) {
+    assert(newValue != null);
+    _floatingActionButtonVisibilityController.value = newValue;
+  }
 
   /// Hides the [Scaffold.floatingActionButton].
   TickerFuture hideFloatingActionButton() {
-    return floatingActionButtonVisibilityController.reverse();
+    return _floatingActionButtonVisibilityController.reverse();
   }
 
   /// Shows the [Scaffold.floatingActionButton].
   TickerFuture showFloatingActionButton() {
-    return floatingActionButtonVisibilityController.forward();
+    return _floatingActionButtonVisibilityController.forward();
   }
 
   // Moves the Floating Action Button to the new Floating Action Button Location.
