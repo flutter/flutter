@@ -1,4 +1,4 @@
-Signature: 188f5a95a3af90dbf8ce1aed1c7a0eb4
+Signature: 5f13f15f6fc5eee125e43ecb575494da
 
 UNUSED LICENSES:
 
@@ -1556,6 +1556,7 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkPipelineLayout.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_Lazy.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
 FILE: ../../../third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
@@ -3609,7 +3610,6 @@ FILE: ../../../third_party/skia/src/core/SkBitmapProvider.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProvider.h
 FILE: ../../../third_party/skia/src/core/SkFindAndPlaceGlyph.h
 FILE: ../../../third_party/skia/src/core/SkFontMgr.cpp
-FILE: ../../../third_party/skia/src/core/SkImageCacherator.h
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.h
 FILE: ../../../third_party/skia/src/core/SkLocalMatrixImageFilter.cpp
