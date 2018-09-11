@@ -342,10 +342,10 @@ class DecorationImagePainter {
 ///    when using this, to not flip images with integral shadows, text, or other
 ///    effects that will look incorrect when flipped.
 ///
-///  * `invertColors`: Whether the colors of the image are inverted when drawn.
-///    this applies a new color filter that will be composed with any user
-///    provided color filters. This is primarily used for implementing smart
-///    invert on iOS.
+///  * `invertColors`: Inverting the colors of an image applies a new color
+///    filter to the paint. If there is another specified color filter, the
+///    invert will be applied after. This is primarily used for implementing
+///    smart invert on iOS.
 ///
 /// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
 /// arguments must not be null.

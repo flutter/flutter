@@ -219,9 +219,9 @@ class RenderImage extends RenderBox {
 
   /// Whether to invert the colors of the image.
   ///
-  /// Inverting the colors of an image applies a new color filter that will
-  /// override any user provided color filters. This is primarily intended to
-  /// be used for implementing smart invert on iOS.
+  /// inverting the colors of an image applies a new color filter to the paint.
+  /// If there is another specified color filter, the invert will be applied
+  /// after. This is primarily used for implementing smart invert on iOS.
   bool get invertColors => _invertColors;
   bool _invertColors;
   set invertColors(bool value) {
