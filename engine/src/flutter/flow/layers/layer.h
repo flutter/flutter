@@ -57,7 +57,6 @@ class Layer {
 
   struct PaintContext {
     SkCanvas& canvas;
-    const SkMatrix& root_surface_transformation;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
     TextureRegistry& texture_registry;

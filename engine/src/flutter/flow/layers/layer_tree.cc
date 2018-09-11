@@ -32,7 +32,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       SkRect::MakeEmpty(),
   };
 
-  root_layer_->Preroll(&context, SkMatrix::I());
+  root_layer_->Preroll(&context, frame.root_surface_transformation());
 }
 
 #if defined(OS_FUCHSIA)
@@ -63,12 +63,11 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame) const {
   TRACE_EVENT0("flutter", "LayerTree::Paint");
   Layer::PaintContext context = {
-      *frame.canvas(),                      //
-      frame.root_surface_transformation(),  //
-      frame.context().frame_time(),         //
-      frame.context().engine_time(),        //
-      frame.context().texture_registry(),   //
-      checkerboard_offscreen_layers_        //
+      *frame.canvas(),                     //
+      frame.context().frame_time(),        //
+      frame.context().engine_time(),       //
+      frame.context().texture_registry(),  //
+      checkerboard_offscreen_layers_       //
   };
 
   if (root_layer_->needs_painting())
@@ -99,18 +98,17 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
   root_surface_transformation.reset();
 
   Layer::PaintContext paint_context = {
-      *canvas,                      // canvas
-      root_surface_transformation,  // root surface transformation
-      unused_stopwatch,             // frame time (dont care)
-      unused_stopwatch,             // engine time (dont care)
-      unused_texture_registry,      // texture registry (not supported)
-      false                         // checkerboard offscreen layers
+      *canvas,                  // canvas
+      unused_stopwatch,         // frame time (dont care)
+      unused_stopwatch,         // engine time (dont care)
+      unused_texture_registry,  // texture registry (not supported)
+      false                     // checkerboard offscreen layers
   };
 
   // Even if we don't have a root layer, we still need to create an empty
   // picture.
   if (root_layer_) {
-    root_layer_->Preroll(&preroll_context, SkMatrix::I());
+    root_layer_->Preroll(&preroll_context, root_surface_transformation);
     // The needs painting flag may be set after the preroll. So check it after.
     if (root_layer_->needs_painting()) {
       root_layer_->Paint(paint_context);

@@ -28,8 +28,7 @@ class RasterCacheResult {
 
   bool is_valid() const { return static_cast<bool>(image_); };
 
-  void draw(SkCanvas& canvas,
-            const SkMatrix& root_surface_transformation) const;
+  void draw(SkCanvas& canvas) const;
 
  private:
   sk_sp<SkImage> image_;

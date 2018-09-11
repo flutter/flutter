@@ -45,8 +45,7 @@ void PictureLayer::Paint(PaintContext& context) const {
 #endif
 
   if (raster_cache_result_.is_valid()) {
-    raster_cache_result_.draw(context.canvas,
-                              context.root_surface_transformation);
+    raster_cache_result_.draw(context.canvas);
   } else {
     context.canvas.drawPicture(picture());
   }
