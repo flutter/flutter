@@ -89,7 +89,6 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
         SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-          // The element is no longer alive
           if (!mounted) {
             return;
           }

@@ -130,13 +130,10 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
 
-  /// Whether the widget is currently in the
-  /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
-  bool _keptAlive = false;
-
   /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
   /// to true and is offscreen.
   bool get keptAlive => _keptAlive;
+  bool _keptAlive = false;
 
   @override
   String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
