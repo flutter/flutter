@@ -133,11 +133,7 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
       fml::paths::AbsolutePath(settings.main_dart_file_path), false);
 
   auto isolate_configuration =
-      blink::DartVM::IsKernelMapping(main_dart_file_mapping.get())
-          ? IsolateConfiguration::CreateForSnapshot(
-                std::move(main_dart_file_mapping))
-          : IsolateConfiguration::CreateForSource(settings.main_dart_file_path,
-                                                  settings.packages_file_path);
+      IsolateConfiguration::CreateForKernel(std::move(main_dart_file_mapping));
 
   if (!isolate_configuration) {
     FML_LOG(ERROR) << "Could create isolate configuration.";
@@ -241,9 +237,6 @@ int main(int argc, char* argv[]) {
   }
 
   settings.icu_data_path = "icudtl.dat";
-
-  settings.platform_kernel_path =
-      fml::paths::JoinPaths({settings.assets_path, "platform_strong.dill"});
 
   // The tools that read logs get confused if there is a log tag specified.
   settings.log_tag = "";
