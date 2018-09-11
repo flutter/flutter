@@ -42,8 +42,7 @@
 /// ```dart
 /// profile(() {
 ///   _xLogger.info('X is starting...');
-///   return true;
-/// }());
+/// });
 /// ```
 ///
 /// In this case, logging is entirely ignored in release mode and no
@@ -62,7 +61,7 @@
 ///
 library logging;
 
-import 'dart:developer' as dev;
+import 'dart:developer' as developer;
 
 import 'package:flutter/src/logging/logging.dart';
 import 'package:logging/logging.dart';
@@ -132,7 +131,7 @@ class Logger {
     if (message is! String) {
       message = message.toString();
     }
-    dev.log(
+    developer.log(
       message,
       level: level.value,
       error: error,

@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/logging.dart';
 
 typedef void _RegisterServiceExtensionCallback(
-    {@required String name, @required ServiceExtensionCallback callback});
+    { @required String name, @required ServiceExtensionCallback callback });
 
 /// Manages [Logger] services.
 class LoggingService {
@@ -61,9 +61,8 @@ class LoggingService {
       } else {
         _subscriptions.remove(logger);
       }
-    } else {
-      // TODO(pq): consider reporting.
     }
+    // TODO(pq): consider subscriptions to unregistered loggers.
   }
 
   Map<String, Map<String, String>> _getLoggers() {
