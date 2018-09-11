@@ -162,15 +162,15 @@ class Doctor {
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = new Status.withSpinner();
+      ValidationResult result;
       try {
-        await validatorTask.result;
+        result = await validatorTask.result;
       } catch (exception) {
         status.cancel();
         rethrow;
       }
       status.stop();
 
-      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -249,8 +249,11 @@ abstract class DoctorValidator {
   Future<ValidationResult> validate();
 }
 
+/// A validator that runs other [DoctorValidator]s and combines their output
+/// into a single [ValidationResult]. It uses the title of the first validator
+/// passed to the constructor and reports the statusInfo of the first validator
+/// that provides one. Other titles and statusInfo strings are discarded.
 class GroupedValidator extends DoctorValidator {
-  // This group uses the title of the first validator in the list passed to it.
   GroupedValidator(this.subValidators) : super(subValidators[0].title);
 
   final List<DoctorValidator> subValidators;
@@ -264,16 +267,13 @@ class GroupedValidator extends DoctorValidator {
 
     final List<ValidationResult> results = <ValidationResult>[];
     for (ValidatorTask subValidator in tasks) {
-      try {
-        results.add(await subValidator.result);
-      } catch (exception) {
-        rethrow;
-      }
+      results.add(await subValidator.result);
     }
     return _mergeValidationResults(results);
   }
 
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
+    assert(results.isNotEmpty, 'Validation results should not be empty');
     ValidationType mergedType = results[0].type;
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String statusInfo;
