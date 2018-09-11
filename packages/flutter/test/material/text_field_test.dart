@@ -2712,6 +2712,7 @@ void main() {
         ),
       ),
     );
+    await tester.tap(find.byType(TextField));
     final Rect labelRect = tester.getRect(find.text('Label'));
     final Rect fieldRect = tester.getRect(find.text('Just some text'));
     expect(labelRect.bottom, greaterThan(fieldRect.top));
