@@ -28,6 +28,8 @@ class Stopwatch {
 
   fml::TimeDelta MaxDelta() const;
 
+  void InitVisualizeSurface(const SkRect& rect) const;
+
   void Visualize(SkCanvas& canvas, const SkRect& rect) const;
 
   void Start();
@@ -40,6 +42,11 @@ class Stopwatch {
   fml::TimePoint start_;
   std::vector<fml::TimeDelta> laps_;
   size_t current_sample_;
+  // Mutable data cache for performance optimization of the graphs. Prevents
+  // expensive redrawing of old data.
+  mutable bool cache_dirty_;
+  mutable sk_sp<SkSurface> visualize_cache_surface_;
+  mutable size_t prev_drawn_sample_index_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
