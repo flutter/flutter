@@ -451,8 +451,8 @@ class SemanticsTester {
   ///
   /// ```dart
   /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
-  ///   var semantics = new SemanticsTester(tester);
-  ///   await tester.pumpWidget(new MyWidget());
+  ///   var semantics = SemanticsTester(tester);
+  ///   await tester.pumpWidget(MyWidget());
   ///   print(semantics.generateTestSemanticsExpressionForCurrentSemanticsTree());
   ///   semantics.dispose();
   /// });
@@ -462,11 +462,11 @@ class SemanticsTester {
   ///
   /// ```dart
   /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
-  ///   var semantics = new SemanticsTester(tester);
-  ///   await tester.pumpWidget(new MyWidget());
+  ///   var semantics = SemanticsTester(tester);
+  ///   await tester.pumpWidget(MyWidget());
   ///   expect(semantics, hasSemantics(
   ///     // Generated code:
-  ///     new TestSemantics(
+  ///     TestSemantics(
   ///       ... properties and child nodes ...
   ///     ),
   ///     ignoreRect: true,

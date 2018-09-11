@@ -13,7 +13,7 @@ import '../ios/mac.dart';
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand({bool verboseHelp = false}) {
+  BuildIOSCommand() {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -38,11 +38,7 @@ class BuildIOSCommand extends BuildSubCommand {
       ..addFlag('codesign',
         defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).',
-      )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.');
+      );
   }
 
   @override
@@ -78,7 +74,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
     final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    printStatus('Building ${app.toString()} for $logTarget ($typeName)...');
+    printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,

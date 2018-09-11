@@ -18,6 +18,61 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
   }
 }
 
+class Alive extends StatefulWidget {
+  const Alive(this.alive, this.index);
+  final bool alive;
+  final int index;
+
+  @override
+  AliveState createState() => new AliveState();
+
+  @override
+  String toString({DiagnosticLevel minLevel}) => '$index $alive';
+}
+
+class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => widget.alive;
+
+  @override
+  Widget build(BuildContext context) =>
+     new Text('${widget.index}:$wantKeepAlive');
+}
+
+typedef WhetherToKeepAlive = bool Function(int);
+class _StatefulListView extends StatefulWidget {
+  const _StatefulListView(this.aliveCallback);
+
+  final WhetherToKeepAlive aliveCallback;
+  @override
+  _StatefulListViewState createState() => new _StatefulListViewState();
+}
+
+class _StatefulListViewState extends State<_StatefulListView> {
+  @override
+  Widget build(BuildContext context) {
+    return new GestureDetector(
+      // force a rebuild - the test(s) using this are verifying that the list is
+      // still correct after rebuild
+      onTap: () => setState,
+      child: new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: new List<Widget>.generate(200, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                return new Container(
+                  child: new Alive(widget.aliveCallback(i), i),
+                );
+              },
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
 void main() {
   testWidgets('ListView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -91,7 +146,7 @@ void main() {
                 return new Container(
                   child: new Text('$i'),
                 );
-              }
+              },
             );
           }),
         ),
@@ -118,6 +173,43 @@ void main() {
 
     expect(log, equals(<int>[7, 6, 5, 4, 3]));
     log.clear();
+  });
+
+  testWidgets('ListView large scroll jump and keepAlive first child not keepAlive', (WidgetTester tester) async {
+    Future<Null> checkAndScroll([String zero = '0:false']) async {
+      expect(find.text(zero), findsOneWidget);
+      expect(find.text('1:false'), findsOneWidget);
+      expect(find.text('2:false'), findsOneWidget);
+      expect(find.text('3:true'), findsOneWidget);
+      expect(find.text('116:false'), findsNothing);
+      final ScrollableState state = tester.state(find.byType(Scrollable));
+      final ScrollPosition position = state.position;
+      position.jumpTo(1025.0);
+
+      await tester.pump();
+
+      expect(find.text(zero), findsNothing);
+      expect(find.text('1:false'), findsNothing);
+      expect(find.text('2:false'), findsNothing);
+      expect(find.text('3:true', skipOffstage: false), findsOneWidget);
+      expect(find.text('116:false'), findsOneWidget);
+
+      await tester.tapAt(const Offset(100.0, 100.0));
+      position.jumpTo(0.0);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text(zero), findsOneWidget);
+      expect(find.text('1:false'), findsOneWidget);
+      expect(find.text('2:false'), findsOneWidget);
+      expect(find.text('3:true'), findsOneWidget);
+    }
+
+    await tester.pumpWidget(new _StatefulListView((int i) => i > 2 && i % 3 == 0));
+    await checkAndScroll();
+
+    await tester.pumpWidget(new _StatefulListView((int i) => i % 3 == 0));
+    await checkAndScroll('0:true');
   });
 
   testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
@@ -225,11 +317,14 @@ void main() {
 
   testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
     final TestSliverChildListDelegate delegate = new TestSliverChildListDelegate(
-      new List<Widget>.generate(20, (int i) {
-        return new Container(
-          child: new Text('$i', textDirection: TextDirection.ltr),
-        );
-      })
+      new List<Widget>.generate(
+        20,
+        (int i) {
+          return new Container(
+            child: new Text('$i', textDirection: TextDirection.ltr),
+          );
+        },
+      )
     );
 
     await tester.pumpWidget(
@@ -345,7 +440,7 @@ void main() {
           ),
         ),
       ),
-  );
+    );
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
   });

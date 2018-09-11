@@ -34,7 +34,7 @@ abstract class ApplicationPackage {
   File get packagesFile => null;
 
   @override
-  String toString() => displayName;
+  String toString() => displayName ?? id;
 }
 
 class AndroidApk extends ApplicationPackage {

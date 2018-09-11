@@ -248,14 +248,16 @@ class _CompileExpressionRequest extends _CompilationRequest {
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
       String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
-      CompilerMessageConsumer compilerMessageConsumer = printError})
+      CompilerMessageConsumer compilerMessageConsumer = printError,
+      String initializeFromDill})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
       _fileSystemScheme = fileSystemScheme,
       _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer),
-      _controller = new StreamController<_CompilationRequest>() {
+      _controller = new StreamController<_CompilationRequest>(),
+      _initializeFromDill = initializeFromDill {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -268,6 +270,7 @@ class ResidentCompiler {
   String _sdkRoot;
   Process _server;
   final _StdoutHandler _stdoutHandler;
+  String _initializeFromDill;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -311,19 +314,19 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
 
-  void _handleCompilationRequest(_CompilationRequest request) async {
-    final bool isEmpty = compilationQueue.isEmpty;
-    compilationQueue.add(request);
+  Future<void> _handleCompilationRequest(_CompilationRequest request) async {
+    final bool isEmpty = _compilationQueue.isEmpty;
+    _compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests
     // are currently being processed. This effectively enforces "one
     // compilation request at a time".
     if (isEmpty) {
-      while (compilationQueue.isNotEmpty) {
-        final _CompilationRequest request = compilationQueue.first;
+      while (_compilationQueue.isNotEmpty) {
+        final _CompilationRequest request = _compilationQueue.first;
         await request.run(this);
-        compilationQueue.removeAt(0);
+        _compilationQueue.removeAt(0);
       }
     }
   }
@@ -361,6 +364,9 @@ class ResidentCompiler {
     }
     if (_fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
+    }
+    if (_initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', _initializeFromDill]);
     }
     printTrace(command.join(' '));
     _server = await processManager.start(command);

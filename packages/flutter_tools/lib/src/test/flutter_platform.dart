@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -67,13 +68,14 @@ void installHook({
   bool enableObservatory = false,
   bool machine = false,
   bool startPaused = false,
-  bool previewDart2 = false,
   int port = 0,
   String precompiledDillPath,
+  Map<String, String> precompiledDillFiles,
   bool trackWidgetCreation = false,
   bool updateGoldens = false,
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
+  Uri projectRootDirectory,
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -86,11 +88,12 @@ void installHook({
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
-      previewDart2: previewDart2,
       port: port,
       precompiledDillPath: precompiledDillPath,
+      precompiledDillFiles: precompiledDillFiles,
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
+      projectRootDirectory: projectRootDirectory,
     ),
   );
 }
@@ -198,7 +201,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation) {
+  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -223,12 +226,15 @@ class _Compiler {
       printError('$message');
     }
 
+    final String testFilePath = fs.path.join(fs.path.fromUri(projectRootDirectory), getBuildDirectory(), 'testfile.dill');
+
     ResidentCompiler createCompiler() {
       return new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
+        initializeFromDill: testFilePath
       );
     }
 
@@ -244,7 +250,11 @@ class _Compiler {
           final _CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
           final Stopwatch compilerTime = new Stopwatch()..start();
-          compiler ??= createCompiler();
+          bool firstCompile = false;
+          if (compiler == null) {
+            compiler = createCompiler();
+            firstCompile = true;
+          }
           suppressOutput = false;
           final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
               compiler.recompile(
@@ -262,8 +272,16 @@ class _Compiler {
             request.result.complete(null);
             await _shutdown();
           } else {
-            final File kernelReadyToRun =
-                await fs.file(outputPath).copy('${request.path}.dill');
+            final File outputFile = fs.file(outputPath);
+            final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
+            final File testCache = fs.file(testFilePath);
+            if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+              // The idea is to keep the cache file up-to-date and include as
+              // much as possible in an effort to re-use as many packages as
+              // possible.
+              ensureDirectoryExists(testFilePath);
+              await outputFile.copy(testFilePath);
+            }
             request.result.complete(kernelReadyToRun.path);
             compiler.accept();
             compiler.reset();
@@ -321,11 +339,12 @@ class _FlutterPlatform extends PlatformPlugin {
     this.startPaused,
     this.explicitObservatoryPort,
     this.host,
-    this.previewDart2,
     this.port,
     this.precompiledDillPath,
+    this.precompiledDillFiles,
     this.trackWidgetCreation,
     this.updateGoldens,
+    this.projectRootDirectory,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -335,11 +354,12 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool startPaused;
   final int explicitObservatoryPort;
   final InternetAddress host;
-  final bool previewDart2;
   final int port;
   final String precompiledDillPath;
+  final Map<String, String> precompiledDillFiles;
   final bool trackWidgetCreation;
   final bool updateGoldens;
+  final Uri projectRootDirectory;
 
   Directory fontsDirectory;
   _Compiler compiler;
@@ -425,19 +445,22 @@ class _FlutterPlatform extends PlatformPlugin {
         cancelOnError: true,
       );
 
-      printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
+      printTrace('test $ourTestCount: starting shell process');
 
-      // [precompiledDillPath] can be set only if [previewDart2] is [true].
-      assert(precompiledDillPath == null || previewDart2);
       // If a kernel file is given, then use that to launch the test.
-      // Otherwise create a "listener" dart that invokes actual test.
-      String mainDart = precompiledDillPath != null
-          ? precompiledDillPath
-          : _createListenerDart(finalizers, ourTestCount, testPath, server);
+      // If mapping is provided, look kernel file from mapping.
+      // If all fails, create a "listener" dart that invokes actual test.
+      String mainDart;
+      if (precompiledDillPath != null) {
+        mainDart = precompiledDillPath;
+      } else if (precompiledDillFiles != null) {
+        mainDart = precompiledDillFiles[testPath];
+      }
+      mainDart ??= _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (previewDart2 && precompiledDillPath == null) {
+      if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= new _Compiler(trackWidgetCreation);
+        compiler ??= new _Compiler(trackWidgetCreation, projectRootDirectory);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -685,10 +708,6 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
-    if (!previewDart2) {
-      return null;
-    }
-
     if (precompiledDillPath != null) {
       return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     }

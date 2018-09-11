@@ -341,11 +341,11 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// class App extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new MaterialApp(
+  ///     return MaterialApp(
   ///       initialRoute: '/',
   ///       routes: {
-  ///         '/': (BuildContext context) => new HomePage(),
-  ///         '/second_page': (BuildContext context) => new SecondPage(),
+  ///         '/': (BuildContext context) => HomePage(),
+  ///         '/second_page': (BuildContext context) => SecondPage(),
   ///       },
   ///     );
   ///   }
@@ -355,21 +355,21 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///   HomePage();
   ///
   ///   @override
-  ///   _HomePageState createState() => new _HomePageState();
+  ///   _HomePageState createState() => _HomePageState();
   /// }
   ///
   /// class _HomePageState extends State<HomePage> {
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Scaffold(
-  ///       body: new Center(
+  ///     return Scaffold(
+  ///       body: Center(
   ///         child: Column(
   ///           mainAxisSize: MainAxisSize.min,
   ///           children: <Widget>[
-  ///             new Text('HomePage'),
+  ///             Text('HomePage'),
   ///             // Press this button to open the SecondPage.
-  ///             new RaisedButton(
-  ///               child: new Text('Second Page >'),
+  ///             RaisedButton(
+  ///               child: Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
   ///               },
@@ -383,7 +383,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///
   /// class SecondPage extends StatefulWidget {
   ///   @override
-  ///   _SecondPageState createState() => new _SecondPageState();
+  ///   _SecondPageState createState() => _SecondPageState();
   /// }
   ///
   /// class _SecondPageState extends State<SecondPage> {
@@ -396,7 +396,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///     // rectangle.
   ///     setState(() => _showRectangle = true);
   ///     ModalRoute.of(context).addLocalHistoryEntry(
-  ///         new LocalHistoryEntry(
+  ///         LocalHistoryEntry(
   ///             onRemove: () {
   ///               // Hide the red rectangle.
   ///               setState(() => _showRectangle = false);
@@ -408,24 +408,24 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final localNavContent = _showRectangle
-  ///       ? new Container(
+  ///       ? Container(
   ///           width: 100.0,
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
-  ///       : new RaisedButton(
-  ///           child: new Text('Show Rectangle'),
+  ///       : RaisedButton(
+  ///           child: Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
   ///
-  ///     return new Scaffold(
+  ///     return Scaffold(
   ///       body: Center(
-  ///         child: new Column(
+  ///         child: Column(
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             localNavContent,
-  ///             new RaisedButton(
-  ///               child: new Text('< Back'),
+  ///             RaisedButton(
+  ///               child: Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
   ///                 // visible then it will will pop our local history entry, which
@@ -751,16 +751,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// route from the top of the screen back to the bottom.
   ///
   /// ```dart
-  /// new PageRouteBuilder(
+  /// PageRouteBuilder(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
   ///       Widget child,
   ///   ) {
-  ///     return new Scaffold(
-  ///       appBar: new AppBar(title: new Text('Hello')),
-  ///       body: new Center(
-  ///         child: new Text('Hello World'),
+  ///     return Scaffold(
+  ///       appBar: AppBar(title: Text('Hello')),
+  ///       body: Center(
+  ///         child: Text('Hello World'),
   ///       ),
   ///     );
   ///   },
@@ -770,8 +770,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Animation<double> secondaryAnimation,
   ///       Widget child,
   ///    ) {
-  ///     return new SlideTransition(
-  ///       position: new Tween<Offset>(
+  ///     return SlideTransition(
+  ///       position: Tween<Offset>(
   ///         begin: const Offset(0.0, 1.0),
   ///         end: Offset.zero,
   ///       ).animate(animation),
@@ -807,13 +807,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Animation<double> secondaryAnimation,
   ///       Widget child,
   ///   ) {
-  ///     return new SlideTransition(
-  ///       position: new AlignmentTween(
+  ///     return SlideTransition(
+  ///       position: AlignmentTween(
   ///         begin: const Offset(0.0, 1.0),
   ///         end: Offset.zero,
   ///       ).animate(animation),
-  ///       child: new SlideTransition(
-  ///         position: new TweenOffset(
+  ///       child: SlideTransition(
+  ///         position: TweenOffset(
   ///           begin: Offset.zero,
   ///           end: const Offset(0.0, 1.0),
   ///         ).animate(secondaryAnimation),
@@ -1049,7 +1049,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
-  ///   return new WillPopScope(
+  ///   return WillPopScope(
   ///     onWillPop: askTheUserIfTheyAreSure,
   ///     child: ...,
   ///   );
@@ -1271,16 +1271,16 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
+/// final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 /// void main() {
-///   runApp(new MaterialApp(
-///     home: new Container(),
+///   runApp(MaterialApp(
+///     home: Container(),
 ///     navigatorObservers: [routeObserver],
 ///   ));
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
-///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
+///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();
 /// }
 ///
 /// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
@@ -1309,7 +1309,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   }
 ///
 ///   @override
-///   Widget build(BuildContext context) => new Container();
+///   Widget build(BuildContext context) => Container();
 ///
 /// }
 /// ```

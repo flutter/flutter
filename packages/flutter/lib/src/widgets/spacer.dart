@@ -20,14 +20,14 @@ import 'framework.dart';
 /// ## Sample code
 ///
 /// ```dart
-/// new Row(
+/// Row(
 ///   children: <Widget>[
-///     new Text('Begin'),
-///     new Spacer(), // Defaults to a flex of one.
-///     new Text('Middle'),
+///     Text('Begin'),
+///     Spacer(), // Defaults to a flex of one.
+///     Text('Middle'),
 ///     // Gives twice the space between Middle and End than Begin and Middle.
-///     new Spacer(flex: 2),
-///     new Text('End'),
+///     Spacer(flex: 2),
+///     Text('End'),
 ///   ],
 /// )
 /// ```

@@ -15,9 +15,10 @@ import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
 IOSWorkflow get iosWorkflow => context[IOSWorkflow];
+IOSValidator get iosValidator => context[IOSValidator];
 
-class IOSWorkflow extends DoctorValidator implements Workflow {
-  const IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
+class IOSWorkflow implements Workflow {
+  const IOSWorkflow();
 
   @override
   bool get appliesToHostPlatform => platform.isMacOS;
@@ -37,6 +38,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   String getPlistValueFromFile(String path, String key) {
     return plist.getValueFromFile(path, key);
   }
+}
+
+class IOSValidator extends DoctorValidator {
+
+  const IOSValidator() : super('iOS toolchain - develop for iOS devices', ValidatorCategory.ios);
+
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 

@@ -29,10 +29,10 @@ import 'thumb_painter.dart';
 /// for accessibility tools.
 ///
 /// ```dart
-/// new MergeSemantics(
-///   child: new ListTile(
-///     title: new Text('Lights'),
-///     trailing: new CupertinoSwitch(
+/// MergeSemantics(
+///   child: ListTile(
+///     title: Text('Lights'),
+///     trailing: CupertinoSwitch(
 ///       value: _lights,
 ///       onChanged: (bool value) { setState(() { _lights = value; }); },
 ///     ),
@@ -70,7 +70,7 @@ class CupertinoSwitch extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CupertinoSwitch(
+  /// CupertinoSwitch(
   ///   value: _giveVerse,
   ///   onChanged: (bool newValue) {
   ///     setState(() {

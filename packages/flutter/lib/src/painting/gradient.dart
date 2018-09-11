@@ -242,11 +242,11 @@ abstract class Gradient {
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
 ///
 /// ```dart
-/// new Container(
-///   decoration: new BoxDecoration(
-///     gradient: new LinearGradient(
+/// Container(
+///   decoration: BoxDecoration(
+///     gradient: LinearGradient(
 ///       begin: Alignment.topLeft,
-///       end: new Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
+///       end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
 ///       colors: [const Color(0xFFFFFFEE), const Color(0xFF999999)], // whitish to gray
 ///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///     ),
@@ -476,7 +476,7 @@ class LinearGradient extends Gradient {
 ///
 /// ```dart
 /// void paintSky(Canvas canvas, Rect rect) {
-///   var gradient = new RadialGradient(
+///   var gradient = RadialGradient(
 ///     center: const Alignment(0.7, -0.6), // near the top right
 ///     radius: 0.2,
 ///     colors: [
@@ -486,7 +486,7 @@ class LinearGradient extends Gradient {
 ///     stops: [0.4, 1.0],
 ///   );
 ///   // rect is the area we are painting over
-///   var paint = new Paint()
+///   var paint = Paint()
 ///     ..shader = gradient.createShader(rect);
 ///   canvas.drawRect(rect, paint);
 /// }
@@ -733,18 +733,18 @@ class RadialGradient extends Gradient {
 /// This sample draws a different color in each quadrant.
 ///
 /// ```dart
-/// new Container(
-///   decoration: new BoxDecoration(
-///     gradient: new SweepGradient(
+/// Container(
+///   decoration: BoxDecoration(
+///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
 ///       startAngle: 0.0,
 ///       endAngle: math.pi * 2,
 ///       colors: const <Color>[
-///         const Color(0xFF4285F4), // blue
-///         const Color(0xFF34A853), // green
-///         const Color(0xFFFBBC05), // yellow
-///         const Color(0xFFEA4335), // red
-///         const Color(0xFF4285F4), // blue again to seamlessly transition to the start
+///         Color(0xFF4285F4), // blue
+///         Color(0xFF34A853), // green
+///         Color(0xFFFBBC05), // yellow
+///         Color(0xFFEA4335), // red
+///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
 ///      ),

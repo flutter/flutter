@@ -167,11 +167,11 @@ class DefaultTextStyle extends InheritedWidget {
 /// ## Sample code
 ///
 /// ```dart
-/// new Text(
+/// Text(
 ///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
-///   style: new TextStyle(fontWeight: FontWeight.bold),
+///   style: TextStyle(fontWeight: FontWeight.bold),
 /// )
 /// ```
 ///
@@ -184,11 +184,11 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// ```dart
 /// const Text.rich(
-///   const TextSpan(
+///   TextSpan(
 ///     text: 'Hello', // default text style
-///     children: const <TextSpan>[
-///       const TextSpan(text: ' beautiful ', style: const TextStyle(fontStyle: FontStyle.italic)),
-///       const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
+///     children: <TextSpan>[
+///       TextSpan(text: ' beautiful ', style: TextStyle(fontStyle: FontStyle.italic)),
+///       TextSpan(text: 'world', style: TextStyle(fontWeight: FontWeight.bold)),
 ///     ],
 ///   ),
 /// )
@@ -327,11 +327,11 @@ class Text extends StatelessWidget {
   /// If present, the semantics of this widget will contain this value instead
   /// of the actual text.
   ///
-  /// This is useful for replacing abbreviations or shorthands will the full
+  /// This is useful for replacing abbreviations or shorthands with the full
   /// text value:
   ///
   /// ```dart
-  /// new Text(r'$$', semanticsLabel: 'Double dollars')
+  /// Text(r'$$', semanticsLabel: 'Double dollars')
   ///
   /// ```
   final String semanticsLabel;
@@ -342,6 +342,8 @@ class Text extends StatelessWidget {
     TextStyle effectiveTextStyle = style;
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
+    if (MediaQuery.boldTextOverride(context))
+      effectiveTextStyle = effectiveTextStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
     Widget result = new RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.

@@ -173,6 +173,127 @@ void main() {
     expect(value, isFalse);
   });
 
+  testWidgets('Switch has default colors when enabled', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Material(
+              child: new Center(
+                child: new Switch(
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+              color: const Color(0x52000000), // Black with 32% opacity
+              rrect: new RRect.fromLTRBR(
+                  383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+          ..circle(color: const Color(0x33000000))
+          ..circle(color: const Color(0x24000000))
+          ..circle(color: const Color(0x1f000000))
+          ..circle(color: Colors.grey.shade50),
+      reason: 'Inactive enabled switch should match these colors',
+    );
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+    await tester.pump();
+
+    expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(
+              color: Colors.blue[600].withAlpha(0x80),
+              rrect: new RRect.fromLTRBR(
+                  383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+          ..circle(color: const Color(0x33000000))
+          ..circle(color: const Color(0x24000000))
+          ..circle(color: const Color(0x1f000000))
+          ..circle(color: Colors.blue[600]),
+      reason: 'Active enabled switch should match these colors',
+    );
+  });
+
+  testWidgets('Switch has default colors when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return const Material(
+              child: Center(
+                child: Switch(
+                  value: false,
+                  onChanged: null,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: new RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.grey.shade400),
+      reason: 'Inactive disabled switch should match these colors',
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return const Material(
+              child: Center(
+                child: Switch(
+                  value: true,
+                  onChanged: null,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.black12,
+            rrect: new RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.grey.shade400),
+      reason: 'Active disabled switch should match these colors',
+    );
+  });
+
   testWidgets('Switch can be set color', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(

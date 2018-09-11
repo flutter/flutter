@@ -46,7 +46,7 @@ Future<Null> main(List<String> args) async {
 
   // Analyze all the sample code in the repo
   await runCommand(dart,
-    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+    <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -66,7 +66,6 @@ Future<Null> main(List<String> args) async {
   try {
     await runCommand(dart,
       <String>[
-        '--preview-dart-2',
         path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
         '--out',
         outDir.path,
@@ -89,7 +88,6 @@ Future<Null> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
-      '--preview-dart-2',
       path.join('dev', 'tools', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
@@ -249,7 +247,8 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
     })
     .map<String>((FileSystemEntity entity) {
       final File file = entity;
-      final String name = path.relative(file.path, from: workingDirectory);
+      final String name = Uri.file(path.relative(file.path,
+          from: workingDirectory)).toFilePath(windows: false);
       if (name.startsWith('bin/cache') ||
           name == 'dev/bots/test.dart' ||
           name.startsWith('.pub-cache'))
@@ -266,7 +265,7 @@ Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
           return '  $name: Shim seems to be missing the expected import/export lines.';
         }
         final int count = 'package:test'.allMatches(data).length;
-        if (file.path.contains('/test_driver/') ||
+        if (path.split(file.path).contains('test_driver') ||
             name.startsWith('dev/missing_dependency_tests/') ||
             name.startsWith('dev/automated_tests/') ||
             name.startsWith('packages/flutter/test/engine/') ||

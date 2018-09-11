@@ -107,6 +107,7 @@ Future<Null> main(List<String> arguments) async {
   try {
     final File mainDart = new File(path.join(tempDir.path, 'main.dart'));
     final File pubSpec = new File(path.join(tempDir.path, 'pubspec.yaml'));
+    final File analysisOptions = new File(path.join(tempDir.path, 'analysis_options.yaml'));
     Directory flutterPackage;
     if (arguments.length == 1) {
       // Used for testing.
@@ -213,6 +214,12 @@ dependencies:
   flutter_test:
     sdk: flutter
 ''');
+    analysisOptions.writeAsStringSync('''
+linter:
+  rules:
+    - unnecessary_const
+    - unnecessary_new
+''');
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
       _flutter,
@@ -308,18 +315,20 @@ dependencies:
   exit(exitCode);
 }
 
+final RegExp _constructorRegExp = new RegExp(r'[A-Z][a-zA-Z0-9<>.]*\(');
+
 int _expressionId = 0;
 
 void processBlock(Line line, List<String> block, List<Section> sections) {
   if (block.isEmpty)
     throw '$line: Empty ```dart block in sample code.';
-  if (block.first.startsWith('new ') || block.first.startsWith('const ')) {
+  if (block.first.startsWith('new ') || block.first.startsWith('const ') || block.first.startsWith(_constructorRegExp)) {
     _expressionId += 1;
     sections.add(new Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
   } else if (block.first.startsWith('await ')) {
     _expressionId += 1;
     sections.add(new Section(line, 'Future<Null> expression$_expressionId() async { ', block.toList(), ' }'));
-  } else if (block.first.startsWith('class ')) {
+  } else if (block.first.startsWith('class ') || block.first.startsWith('enum ')) {
     sections.add(new Section(line, null, block.toList(), null));
   } else {
     final List<String> buffer = <String>[];

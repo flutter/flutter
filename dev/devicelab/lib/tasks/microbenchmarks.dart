@@ -20,7 +20,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Device device = await devices.workingDevice;
     await device.unlock();
 
-    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2 = true}) async {
+    Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(
@@ -35,10 +35,6 @@ TaskFunction createMicrobenchmarkTask() {
             '-d',
             device.deviceId,
           ];
-          if (previewDart2)
-            options.add('--preview-dart-2');
-          else
-            options.add('--no-preview-dart-2');
           setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(

@@ -1015,17 +1015,17 @@ abstract class DiagnosticsNode {
 /// of an actual property of the object:
 ///
 /// ```dart
-/// new MessageProperty('table size', '$columns\u00D7$rows')
+/// MessageProperty('table size', '$columns\u00D7$rows')
 /// ```
 /// ```dart
-/// new MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)')
+/// MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)')
 /// ```
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
 ///
 /// ```dart
-/// new StringProperty('name', _name)
+/// StringProperty('name', _name)
 /// ```
 ///
 /// See also:
@@ -1322,7 +1322,7 @@ class PercentProperty extends DoubleProperty {
 /// ## Sample code
 ///
 /// ```dart
-/// new FlagProperty(
+/// FlagProperty(
 ///   'visible',
 ///   value: true,
 ///   ifFalse: 'hidden',
@@ -1334,7 +1334,7 @@ class PercentProperty extends DoubleProperty {
 /// property value.
 ///
 /// ```dart
-/// new FlagProperty(
+/// FlagProperty(
 ///   'inherit',
 ///   value: inherit,
 ///   ifTrue: '<all styles inherited>',
@@ -2162,12 +2162,12 @@ abstract class Diagnosticable {
   ///  * Specify `showName` and `showSeparator` in rare cases where the string
   ///    output would look clumsy if they were not set.
   ///    ```dart
-  ///    new DiagnosticsProperty<Object>('child(3, 4)', null, ifNull: 'is null', showSeparator: false).toString()
+  ///    DiagnosticsProperty<Object>('child(3, 4)', null, ifNull: 'is null', showSeparator: false).toString()
   ///    ```
   ///    Shows using `showSeparator` to get output `child(3, 4) is null` which
   ///    is more polished than `child(3, 4): is null`.
   ///    ```dart
-  ///    new DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false)).toString()
+  ///    DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false)).toString()
   ///    ```
   ///    Shows using `showName` to omit the property name as in this context the
   ///    property name does not add useful information.
@@ -2227,25 +2227,25 @@ abstract class Diagnosticable {
   ///
   ///     // Omit the property name 'message' when displaying this String property
   ///     // as it would just add visual noise.
-  ///     properties.add(new StringProperty('message', message, showName: false));
+  ///     properties.add(StringProperty('message', message, showName: false));
   ///
-  ///     properties.add(new DoubleProperty('stepWidth', stepWidth));
+  ///     properties.add(DoubleProperty('stepWidth', stepWidth));
   ///
   ///     // A scale of 1.0 does nothing so should be hidden.
-  ///     properties.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
+  ///     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
   ///
   ///     // If the hitTestExtent matches the paintExtent, it is just set to its
   ///     // default value so is not relevant.
-  ///     properties.add(new DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
+  ///     properties.add(DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
   ///
   ///     // maxWidth of double.infinity indicates the width is unconstrained and
   ///     // so maxWidth has no impact.,
-  ///     properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
+  ///     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
   ///
   ///     // Progress is a value between 0 and 1 or null. Showing it as a
   ///     // percentage makes the meaning clear enough that the name can be
   ///     // hidden.
-  ///     properties.add(new PercentProperty(
+  ///     properties.add(PercentProperty(
   ///       'progress',
   ///       progress,
   ///       showName: false,
@@ -2253,16 +2253,16 @@ abstract class Diagnosticable {
   ///     ));
   ///
   ///     // Most text fields have maxLines set to 1.
-  ///     properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+  ///     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
   ///
   ///     // Specify the unit as otherwise it would be unclear that time is in
   ///     // milliseconds.
-  ///     properties.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+  ///     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   ///
   ///     // Tooltip is used instead of unit for this case as a unit should be a
   ///     // terse description appropriate to display directly after a number
   ///     // without a space.
-  ///     properties.add(new DoubleProperty(
+  ///     properties.add(DoubleProperty(
   ///       'device pixel ratio',
   ///       ui.window.devicePixelRatio,
   ///       tooltip: 'physical pixels per logical pixel',
@@ -2270,12 +2270,12 @@ abstract class Diagnosticable {
   ///
   ///     // Displaying the depth value would be distracting. Instead only display
   ///     // if the depth value is missing.
-  ///     properties.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+  ///     properties.add(ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
   ///
   ///     // bool flag that is only shown when the value is true.
-  ///     properties.add(new FlagProperty('using primary controller', value: primary));
+  ///     properties.add(FlagProperty('using primary controller', value: primary));
   ///
-  ///     properties.add(new FlagProperty(
+  ///     properties.add(FlagProperty(
   ///       'isCurrent',
   ///       value: isCurrent,
   ///       ifTrue: 'active',
@@ -2283,20 +2283,20 @@ abstract class Diagnosticable {
   ///       showName: false,
   ///     ));
   ///
-  ///     properties.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
+  ///     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   ///
   ///     // FlagProperty could have also been used in this case.
   ///     // This option results in the text "obscureText: true" instead
   ///     // of "obscureText" which is a bit more verbose but a bit clearer.
-  ///     properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+  ///     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
   ///
-  ///     properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-  ///     properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+  ///     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+  ///     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
   ///
   ///     // Warn users when the widget is missing but do not show the value.
-  ///     properties.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
+  ///     properties.add(ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
   ///
-  ///     properties.add(new IterableProperty<BoxShadow>(
+  ///     properties.add(IterableProperty<BoxShadow>(
   ///       'boxShadow',
   ///       boxShadow,
   ///       defaultValue: null,
@@ -2304,7 +2304,7 @@ abstract class Diagnosticable {
   ///     ));
   ///
   ///     // Getting the value of size throws an exception unless hasSize is true.
-  ///     properties.add(new DiagnosticsProperty<Size>.lazy(
+  ///     properties.add(DiagnosticsProperty<Size>.lazy(
   ///       'size',
   ///       () => size,
   ///       description: '${ hasSize ? size : "MISSING" }',
@@ -2314,7 +2314,7 @@ abstract class Diagnosticable {
   ///     // good terse description, write a DiagnosticsProperty subclass as in
   ///     // the case of TransformProperty which displays a nice debugging view
   ///     // of a Matrix4 that represents a transform.
-  ///     properties.add(new TransformProperty('transform', transform));
+  ///     properties.add(TransformProperty('transform', transform));
   ///
   ///     // If the value class has a good `toString` method, use
   ///     // DiagnosticsProperty<YourValueType>. Specifying the value type ensures
@@ -2322,11 +2322,11 @@ abstract class Diagnosticable {
   ///     // provide the right UI affordances. For example, in this case even
   ///     // if color is null, a debugging tool still knows the value is a Color
   ///     // and can display relevant color related UI.
-  ///     properties.add(new DiagnosticsProperty<Color>('color', color));
+  ///     properties.add(DiagnosticsProperty<Color>('color', color));
   ///
   ///     // Use a custom description to generate a more terse summary than the
   ///     // `toString` method on the map class.
-  ///     properties.add(new DiagnosticsProperty<Map<Listenable, VoidCallback>>(
+  ///     properties.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(
   ///       'handles',
   ///       handles,
   ///       description: handles != null ?

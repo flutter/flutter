@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
@@ -429,5 +430,37 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
     messages.add('deleteFile $fsName $deviceUri');
     devicePathToContent.remove(deviceUri);
+  }
+}
+
+class MockResidentCompiler extends BasicMock implements ResidentCompiler {
+  @override
+  void accept() {}
+
+  @override
+  void reject() {}
+
+  @override
+  void reset() {}
+
+  @override
+  Future<dynamic> shutdown() async {}
+
+  @override
+  Future<CompilerOutput> compileExpression(
+    String expression,
+    List<String> definitions,
+    List<String> typeDefinitions,
+    String libraryUri,
+    String klass,
+    bool isStatic
+  ) async {
+    return null;
+  }
+  @override
+  Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
+    fs.file(outputPath).createSync(recursive: true);
+    fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
+    return new CompilerOutput(outputPath, 0);
   }
 }
