@@ -26,21 +26,11 @@
     return false;                           \
   }
 
-#define kLibrarySourceNamePrefix "/vmservice"
-static const char* kServiceIsolateScript = "vmservice_io.dart";
-
-namespace flutter {
-namespace runtime {
-extern ResourcesEntry __flutter_embedded_service_isolate_resources_[];
-}
-}  // namespace flutter
-
 namespace blink {
 namespace {
 
 static Dart_LibraryTagHandler g_embedder_tag_handler;
 static tonic::DartLibraryNatives* g_natives;
-static EmbedderResources* g_resources;
 static std::string observatory_uri_;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
@@ -56,13 +46,6 @@ const uint8_t* GetSymbol(Dart_NativeFunction native_function) {
 }
 
 }  // namespace
-
-void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
-  Dart_Handle library = Dart_RootLibrary();
-  FML_DCHECK(!Dart_IsError(library));
-  Dart_Handle result = LoadResources(library);
-  FML_DCHECK(!Dart_IsError(result));
-}
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
@@ -84,7 +67,6 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
 bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
-                                 bool running_from_sources,
                                  bool disable_origin_check,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
@@ -103,36 +85,13 @@ bool DartServiceIsolate::Startup(std::string server_ip,
     });
   }
 
-  if (!g_resources) {
-    g_resources = new EmbedderResources(
-        &flutter::runtime::__flutter_embedded_service_isolate_resources_[0]);
-  }
-
-  Dart_Handle result;
-
-  if (running_from_sources) {
-    // Use our own library tag handler when loading service isolate sources.
-    Dart_SetLibraryTagHandler(DartServiceIsolate::LibraryTagHandler);
-    // Load main script.
-    Dart_Handle library = LoadScript(kServiceIsolateScript);
-    FML_DCHECK(library != Dart_Null());
-    SHUTDOWN_ON_ERROR(library);
-    // Setup native entry resolution.
-    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-
-    SHUTDOWN_ON_ERROR(result);
-    // Finalize loading.
-    result = Dart_FinalizeLoading(false);
-    SHUTDOWN_ON_ERROR(result);
-  } else {
-    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
-    Dart_Handle library = Dart_LookupLibrary(uri);
-    SHUTDOWN_ON_ERROR(library);
-    result = Dart_SetRootLibrary(library);
-    SHUTDOWN_ON_ERROR(result);
-    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-    SHUTDOWN_ON_ERROR(result);
-  }
+  Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
+  Dart_Handle library = Dart_LookupLibrary(uri);
+  SHUTDOWN_ON_ERROR(library);
+  Dart_Handle result = Dart_SetRootLibrary(library);
+  SHUTDOWN_ON_ERROR(result);
+  result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+  SHUTDOWN_ON_ERROR(result);
 
   // Make runnable.
   Dart_ExitScope();
@@ -146,7 +105,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
   Dart_EnterIsolate(isolate);
   Dart_EnterScope();
 
-  Dart_Handle library = Dart_RootLibrary();
+  library = Dart_RootLibrary();
   SHUTDOWN_ON_ERROR(library);
 
   // Set the HTTP server's ip.
@@ -172,117 +131,6 @@ bool DartServiceIsolate::Startup(std::string server_ip,
                     Dart_NewBoolean(disable_origin_check));
   SHUTDOWN_ON_ERROR(result);
   return true;
-}
-
-Dart_Handle DartServiceIsolate::GetSource(const char* name) {
-  const intptr_t kBufferSize = 512;
-  char buffer[kBufferSize];
-  snprintf(&buffer[0], kBufferSize - 1, "%s/%s", kLibrarySourceNamePrefix,
-           name);
-  const char* vmservice_source = NULL;
-  int r = g_resources->ResourceLookup(buffer, &vmservice_source);
-  FML_DCHECK(r != EmbedderResources::kNoSuchInstance);
-  return Dart_NewStringFromCString(vmservice_source);
-}
-
-Dart_Handle DartServiceIsolate::LoadScript(const char* name) {
-  Dart_Handle url = Dart_NewStringFromCString("dart:vmservice_io");
-  Dart_Handle source = GetSource(name);
-  return Dart_LoadScript(url, Dart_Null(), source, 0, 0);
-}
-
-Dart_Handle DartServiceIsolate::LoadSource(Dart_Handle library,
-                                           const char* name) {
-  Dart_Handle url = Dart_NewStringFromCString(name);
-  Dart_Handle source = GetSource(name);
-  return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
-}
-
-Dart_Handle DartServiceIsolate::LoadResource(Dart_Handle library,
-                                             const char* resource_name) {
-  // Prepare for invoke call.
-  Dart_Handle name = Dart_NewStringFromCString(resource_name);
-  RETURN_ERROR_HANDLE(name);
-  const char* data_buffer = NULL;
-  int data_buffer_length =
-      g_resources->ResourceLookup(resource_name, &data_buffer);
-  FML_DCHECK(data_buffer_length != EmbedderResources::kNoSuchInstance);
-  Dart_Handle data_list =
-      Dart_NewTypedData(Dart_TypedData_kUint8, data_buffer_length);
-  RETURN_ERROR_HANDLE(data_list);
-  Dart_TypedData_Type type = Dart_TypedData_kInvalid;
-  void* data_list_buffer = NULL;
-  intptr_t data_list_buffer_length = 0;
-  Dart_Handle result = Dart_TypedDataAcquireData(
-      data_list, &type, &data_list_buffer, &data_list_buffer_length);
-  RETURN_ERROR_HANDLE(result);
-  FML_DCHECK(data_buffer_length == data_list_buffer_length);
-  FML_DCHECK(data_list_buffer != NULL);
-  FML_DCHECK(type = Dart_TypedData_kUint8);
-  memmove(data_list_buffer, &data_buffer[0], data_buffer_length);
-  result = Dart_TypedDataReleaseData(data_list);
-  RETURN_ERROR_HANDLE(result);
-
-  // Make invoke call.
-  const intptr_t kNumArgs = 2;
-  Dart_Handle args[kNumArgs] = {name, data_list};
-  result = Dart_Invoke(library, Dart_NewStringFromCString("_addResource"),
-                       kNumArgs, args);
-  return result;
-}
-
-Dart_Handle DartServiceIsolate::LoadResources(Dart_Handle library) {
-  Dart_Handle result = Dart_Null();
-  intptr_t prefixLen = strlen(kLibrarySourceNamePrefix);
-  for (intptr_t i = 0; g_resources->Path(i) != NULL; i++) {
-    const char* path = g_resources->Path(i);
-    // If it doesn't begin with kLibrarySourceNamePrefix it is a frontend
-    // resource.
-    if (strncmp(path, kLibrarySourceNamePrefix, prefixLen) != 0) {
-      result = LoadResource(library, path);
-      if (Dart_IsError(result)) {
-        break;
-      }
-    }
-  }
-  return result;
-}
-
-Dart_Handle DartServiceIsolate::LibraryTagHandler(Dart_LibraryTag tag,
-                                                  Dart_Handle library,
-                                                  Dart_Handle url) {
-  if (!Dart_IsLibrary(library)) {
-    return Dart_NewApiError("not a library");
-  }
-  if (!Dart_IsString(url)) {
-    return Dart_NewApiError("url is not a string");
-  }
-  const char* url_string = NULL;
-  Dart_Handle result = Dart_StringToCString(url, &url_string);
-  if (Dart_IsError(result)) {
-    return result;
-  }
-  Dart_Handle library_url = Dart_LibraryUrl(library);
-  const char* library_url_string = NULL;
-  result = Dart_StringToCString(library_url, &library_url_string);
-  if (Dart_IsError(result)) {
-    return result;
-  }
-  if (tag == Dart_kImportTag) {
-    // Embedder handles all requests for external libraries.
-    return g_embedder_tag_handler(tag, library, url);
-  }
-  FML_DCHECK((tag == Dart_kSourceTag) || (tag == Dart_kCanonicalizeUrl));
-  if (tag == Dart_kCanonicalizeUrl) {
-    // url is already canonicalized.
-    return url;
-  }
-  // Get source from builtin resources.
-  Dart_Handle source = GetSource(url_string);
-  if (Dart_IsError(source)) {
-    return source;
-  }
-  return Dart_LoadSource(library, url, Dart_Null(), source, 0, 0);
 }
 
 }  // namespace blink

@@ -277,16 +277,11 @@ FlutterResult FlutterEngineRun(size_t version,
 
   // Check whether the assets path contains Dart 2 kernel assets.
   const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
-  std::string platform_kernel_path =
-      fml::paths::JoinPaths({settings.assets_path, "platform_strong.dill"});
   std::string application_kernel_path = fml::paths::JoinPaths(
       {settings.assets_path, kApplicationKernelSnapshotFileName});
   if (fml::IsFile(application_kernel_path)) {
     // Run from a kernel snapshot.
-    settings.platform_kernel_path = platform_kernel_path;
-    if (fml::IsFile(platform_kernel_path)) {
-      settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
-    }
+    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
   } else {
     // Run from a main Dart file.
     settings.main_dart_file_path = args->main_path;
