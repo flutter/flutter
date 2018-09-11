@@ -344,7 +344,7 @@ class DecorationImagePainter {
 ///
 ///  * `invertColors`: Inverting the colors of an image applies a new color
 ///    filter to the paint. If there is another specified color filter, the
-///    invert will be applied after. This is primarily used for implementing
+///    invert will be applied after it. This is primarily used for implementing
 ///    smart invert on iOS.
 ///
 /// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
