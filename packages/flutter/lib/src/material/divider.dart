@@ -31,8 +31,9 @@ class Divider extends StatelessWidget {
     Key key,
     this.height = 16.0,
     this.indent = 0.0,
+    this.isVertical = false,
     this.color
-  }) : assert(height >= 0.0),
+  }) : assert(height >= 0.0 && isVertical != null),
        super(key: key);
 
   /// The divider's vertical extent.
@@ -61,6 +62,10 @@ class Divider extends StatelessWidget {
   /// ```
   final Color color;
 
+  /// Whether the divider should be vertical. When this is true, the height
+  /// argument becomes the width of the divider.
+  final bool isVertical;
+
   /// Computes the [BorderSide] that represents a divider of the specified
   /// color, or, if there is no specified color, of the default
   /// [ThemeData.dividerColor] specified in the ambient [Theme].
@@ -87,7 +92,7 @@ class Divider extends StatelessWidget {
   /// ```
   static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
     assert(width != null);
-    return new BorderSide(
+    return BorderSide(
       color: color ?? Theme.of(context).dividerColor,
       width: width,
     );
@@ -95,15 +100,18 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new SizedBox(
-      height: height,
-      child: new Center(
-        child: new Container(
-          height: 0.0,
-          margin: new EdgeInsetsDirectional.only(start: indent),
-          decoration: new BoxDecoration(
-            border: new Border(
-              bottom: createBorderSide(context, color: color),
+    return RotatedBox(
+      quarterTurns: isVertical ? 1 : 0,
+      child: SizedBox(
+        height: height,
+        child: Center(
+          child: Container(
+            height: 0.0,
+            margin: EdgeInsetsDirectional.only(start: indent),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: createBorderSide(context, color: color),
+              ),
             ),
           ),
         ),
