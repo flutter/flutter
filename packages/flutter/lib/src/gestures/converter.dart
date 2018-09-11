@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show PointerData, PointerChange;
-import 'dart:developer';
-
-import 'package:flutter/foundation.dart';
 
 import 'events.dart';
 
@@ -426,6 +423,4 @@ class PointerEventConverter {
     }
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
       physicalPixels == null ? null : physicalPixels / devicePixelRatio;
-
 }
-

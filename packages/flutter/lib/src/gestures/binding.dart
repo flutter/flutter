@@ -44,7 +44,6 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
     // We convert pointer data to logical pixels so that e.g. the touch slop can be
     // defined in a device-independent manner.
     _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio));
-
     if (!locked)
       _flushPointerEventQueue();
   }
