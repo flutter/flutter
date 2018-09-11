@@ -181,7 +181,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   });
                 },
               ),
-              new SizedBox(height: 8.0),
+              const SizedBox(height: 8.0),
               new InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Activity',
