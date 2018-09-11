@@ -404,7 +404,7 @@ class RenderEditable extends RenderBox {
 
   // Handles shortcut functionality including cut, copy, paste and select all
   // using control + (X, C, V, A).
-  void _handleShortcuts(int pressedKeyCode) async {
+  Future<void> _handleShortcuts(int pressedKeyCode) async {
     switch (pressedKeyCode) {
       case _kCKeyCode:
         if (!selection.isCollapsed) {
