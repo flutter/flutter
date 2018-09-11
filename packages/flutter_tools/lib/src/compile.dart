@@ -316,7 +316,7 @@ class ResidentCompiler {
 
   final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
 
-  void _handleCompilationRequest(_CompilationRequest request) async {
+  Future<void> _handleCompilationRequest(_CompilationRequest request) async {
     final bool isEmpty = _compilationQueue.isEmpty;
     _compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests

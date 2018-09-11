@@ -10,7 +10,7 @@ class InvalidOnInitLifecycleWidget extends StatefulWidget {
 
 class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidget> {
   @override
-  void initState() async {
+  Future<void> initState() async {
     super.initState();
   }
 
@@ -31,7 +31,7 @@ class InvalidDidUpdateWidgetLifecycleWidget extends StatefulWidget {
 
 class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateWidgetLifecycleWidget> {
   @override
-  void didUpdateWidget(InvalidDidUpdateWidgetLifecycleWidget oldWidget) async {
+  Future<void> didUpdateWidget(InvalidDidUpdateWidgetLifecycleWidget oldWidget) async {
     super.didUpdateWidget(oldWidget);
   }
 
