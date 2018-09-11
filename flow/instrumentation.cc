@@ -8,6 +8,7 @@
 #include <limits>
 
 #include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flow {
 
@@ -17,6 +18,8 @@ static const size_t kMaxFrameMarkers = 8;
 Stopwatch::Stopwatch() : start_(fml::TimePoint::Now()), current_sample_(0) {
   const fml::TimeDelta delta = fml::TimeDelta::Zero();
   laps_.resize(kMaxSamples, delta);
+  cache_dirty_ = true;
+  prev_drawn_sample_index_ = 0;
 }
 
 Stopwatch::~Stopwatch() = default;
@@ -60,32 +63,41 @@ fml::TimeDelta Stopwatch::MaxDelta() const {
   return max_delta;
 }
 
-void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
-  SkPaint paint;
+// Initialize the SkSurface for drawing into. Draws the base background and any
+// timing data from before the initial Visualize() call.
+void Stopwatch::InitVisualizeSurface(const SkRect& rect) const {
+  if (!cache_dirty_) {
+    return;
+  }
+  cache_dirty_ = false;
 
-  // Paint the background.
-  paint.setColor(0x99FFFFFF);
-  canvas.drawRect(rect, paint);
+  // TODO(garyq): Use a GPU surface instead of a CPU surface.
+  visualize_cache_surface_ =
+      SkSurface::MakeRasterN32Premul(rect.width(), rect.height());
+
+  SkCanvas* cache_canvas = visualize_cache_surface_->getCanvas();
 
   // Establish the graph position.
-  const SkScalar x = rect.x();
-  const SkScalar y = rect.y();
+  const SkScalar x = 0;
+  const SkScalar y = 0;
   const SkScalar width = rect.width();
   const SkScalar height = rect.height();
-  const SkScalar bottom = y + height;
-  const SkScalar right = x + width;
+
+  SkPaint paint;
+  paint.setColor(0x99FFFFFF);
+  cache_canvas->drawRect(SkRect::MakeXYWH(x, y, width, height), paint);
 
   // Scale the graph to show frame times up to those that are 3 times the frame
   // time.
   const double max_interval = kOneFrameMS * 3.0;
   const double max_unit_interval = UnitFrameInterval(max_interval);
 
-  // Prepare a path for the data.
-  // we start at the height of the last point, so it looks like we wrap around
+  // Draw the old data to initially populate the graph.
+  // Prepare a path for the data. We start at the height of the last point, so
+  // it looks like we wrap around
   SkPath path;
   path.setIsVolatile(true);
-  const double sample_unit_width = (1.0 / kMaxSamples);
-  path.moveTo(x, bottom);
+  path.moveTo(x, height);
   path.lineTo(x, y + height * (1.0 - UnitHeight(laps_[0].ToMillisecondsF(),
                                                 max_unit_interval)));
   double unit_x;
@@ -100,17 +112,61 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
     path.lineTo(x + width * unit_next_x, sample_y);
   }
   path.lineTo(
-      right,
+      width,
       y + height * (1.0 - UnitHeight(laps_[kMaxSamples - 1].ToMillisecondsF(),
                                      max_unit_interval)));
-  path.lineTo(right, bottom);
+  path.lineTo(width, height);
   path.close();
 
   // Draw the graph.
   paint.setColor(0xAA0000FF);
-  canvas.drawPath(path, paint);
+  cache_canvas->drawPath(path, paint);
+}
 
-  // Draw horizontal markers.
+void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
+  // Initialize visualize cache if it has not yet been initialized.
+  InitVisualizeSurface(rect);
+
+  SkCanvas* cache_canvas = visualize_cache_surface_->getCanvas();
+  SkPaint paint;
+
+  // Establish the graph position.
+  const SkScalar x = 0;
+  const SkScalar y = 0;
+  const SkScalar width = rect.width();
+  const SkScalar height = rect.height();
+
+  // Scale the graph to show frame times up to those that are 3 times the frame
+  // time.
+  const double max_interval = kOneFrameMS * 3.0;
+  const double max_unit_interval = UnitFrameInterval(max_interval);
+
+  const double sample_unit_width = (1.0 / kMaxSamples);
+
+  // Draw vertical replacement bar to erase old/stale pixels.
+  paint.setColor(0x99FFFFFF);
+  paint.setStyle(SkPaint::Style::kFill_Style);
+  paint.setBlendMode(SkBlendMode::kSrc);
+  double sample_x =
+      x + width * (static_cast<double>(prev_drawn_sample_index_) / kMaxSamples);
+  const auto eraser_rect = SkRect::MakeLTRB(
+      sample_x, y, sample_x + width * sample_unit_width, height);
+  cache_canvas->drawRect(eraser_rect, paint);
+
+  // Draws blue timing bar for new data.
+  paint.setColor(0xAA0000FF);
+  paint.setBlendMode(SkBlendMode::kSrcOver);
+  const auto bar_rect = SkRect::MakeLTRB(
+      sample_x,
+      y + height * (1.0 -
+                    UnitHeight(laps_[current_sample_ == 0 ? kMaxSamples - 1
+                                                          : current_sample_ - 1]
+                                   .ToMillisecondsF(),
+                               max_unit_interval)),
+      sample_x + width * sample_unit_width, height);
+  cache_canvas->drawRect(bar_rect, paint);
+
+  // Draw horizontal frame markers.
   paint.setStrokeWidth(0);  // hairline
   paint.setStyle(SkPaint::Style::kStroke_Style);
   paint.setColor(0xCC000000);
@@ -129,7 +185,8 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
       const double frame_height =
           height * (1.0 - (UnitFrameInterval((frame_index + 1) * kOneFrameMS) /
                            max_unit_interval));
-      canvas.drawLine(x, y + frame_height, right, y + frame_height, paint);
+      cache_canvas->drawLine(x, y + frame_height, width, y + frame_height,
+                             paint);
     }
   }
 
@@ -137,6 +194,7 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   // We paint it over the current frame, not after it, because when we
   // paint this we don't yet have all the times for the current frame.
   paint.setStyle(SkPaint::Style::kFill_Style);
+  paint.setBlendMode(SkBlendMode::kSrcOver);
   if (UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0) {
     // budget exceeded
     paint.setColor(SK_ColorRED);
@@ -144,12 +202,15 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
     // within budget
     paint.setColor(SK_ColorGREEN);
   }
-  double sample_x =
-      x + width * (static_cast<double>(current_sample_) / kMaxSamples);
-
+  sample_x = x + width * (static_cast<double>(current_sample_) / kMaxSamples);
   const auto marker_rect = SkRect::MakeLTRB(
-      sample_x, y, sample_x + width * sample_unit_width, bottom);
-  canvas.drawRect(marker_rect, paint);
+      sample_x, y, sample_x + width * sample_unit_width, height);
+  cache_canvas->drawRect(marker_rect, paint);
+  prev_drawn_sample_index_ = current_sample_;
+
+  // Draw the cached surface onto the output canvas.
+  paint.reset();
+  visualize_cache_surface_->draw(&canvas, rect.x(), rect.y(), &paint);
 }
 
 CounterValues::CounterValues() : current_sample_(kMaxSamples - 1) {
