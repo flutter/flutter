@@ -47,6 +47,113 @@ void main() {
       await run.exitCode;
       driver?.close();
     });
+
+    group('TextField', () {
+      setUpAll(() async {
+        await driver.tap(find.text(textFieldRoute));
+      });
+
+      test('TextField has correct Android semantics', () async {
+        final SerializableFinder normalTextField = find.byValueKey(normalTextFieldKeyValue);
+        expect(await getSemantics(normalTextField), hasAndroidSemantics(
+          className: AndroidClassName.editText,
+          isEditable: true,
+          isFocusable: true,
+          isFocused: false,
+          isPassword: false,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.accessibilityFocus,
+          ],
+        ));
+
+        await driver.tap(normalTextField);
+
+        expect(await getSemantics(normalTextField), hasAndroidSemantics(
+          className: AndroidClassName.editText,
+          isFocusable: true,
+          isFocused: true,
+          isEditable: true,
+          isPassword: false,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.copy,
+          ],
+        ));
+
+        await driver.enterText('hello world');
+
+        expect(await getSemantics(normalTextField), hasAndroidSemantics(
+          text: 'hello world',
+          className: AndroidClassName.editText,
+          isFocusable: true,
+          isFocused: true,
+          isEditable: true,
+          isPassword: false,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.copy,
+          ],
+        ));
+      });
+
+      test('password TextField has correct Android semantics', () async {
+        final SerializableFinder passwordTextField = find.byValueKey(passwordTextFieldKeyValue);
+        expect(await getSemantics(passwordTextField), hasAndroidSemantics(
+          className: AndroidClassName.editText,
+          isEditable: true,
+          isFocusable: true,
+          isFocused: false,
+          isPassword: true,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.accessibilityFocus,
+          ],
+        ));
+
+        await driver.tap(passwordTextField);
+
+        expect(await getSemantics(passwordTextField), hasAndroidSemantics(
+          className: AndroidClassName.editText,
+          isFocusable: true,
+          isFocused: true,
+          isEditable: true,
+          isPassword: true,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.copy,
+          ],
+        ));
+
+        await driver.enterText('hello world');
+
+        expect(await getSemantics(passwordTextField), hasAndroidSemantics(
+          text: '\u{2022}' * ('hello world'.length),
+          className: AndroidClassName.editText,
+          isFocusable: true,
+          isFocused: true,
+          isEditable: true,
+          isPassword: true,
+          actions: <AndroidSemanticsAction>[
+            AndroidSemanticsAction.click,
+            AndroidSemanticsAction.accessibilityFocus,
+            AndroidSemanticsAction.setSelection,
+            AndroidSemanticsAction.copy,
+          ],
+        ));
+      });
+
+      tearDownAll(() async {
+        await driver.tap(find.byValueKey('back'));
+      });
+    });
+
     group('SelectionControls', () {
       setUpAll(() async {
         await driver.tap(find.text(selectionControlsRoute));
