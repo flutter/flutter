@@ -1,4 +1,4 @@
-Signature: 5f13f15f6fc5eee125e43ecb575494da
+Signature: 10dfa753016bffb996532562239a77eb
 
 UNUSED LICENSES:
 
@@ -1325,6 +1325,7 @@ FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
 FILE: ../../../third_party/skia/gm/mandoline.cpp
 FILE: ../../../third_party/skia/gm/orientation.cpp
+FILE: ../../../third_party/skia/gm/p3.cpp
 FILE: ../../../third_party/skia/gm/pathmeasure.cpp
 FILE: ../../../third_party/skia/gm/perspimages.cpp
 FILE: ../../../third_party/skia/gm/polygonoffset.cpp
@@ -1986,10 +1987,10 @@ FILE: ../../../third_party/skia/infra/bots/assets/cmake_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go_deps/VERSION
-FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_debug/VERSION
-FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_release/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/lottie-samples/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/mesa-driver-builder/Dockerfile
 FILE: ../../../third_party/skia/infra/bots/assets/mips64el_toolchain_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/moltenvk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/node/VERSION
