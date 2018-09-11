@@ -34,7 +34,7 @@ void main() {
         height: 200.0,
         child: InvertColorTestWidget(
           color: Color.fromRGBO(255, 0, 0, 1.0),
-          filter: ColorFilter.mode(Color.fromRGBO(0, 255, 0, 0.5), BlendMode.darken),
+          filter: ColorFilter.mode(Color.fromRGBO(0, 255, 0, 0.5), BlendMode.plus),
         ),
       ),
     ));
