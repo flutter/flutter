@@ -57,7 +57,7 @@ class _DefaultHeroTag {
 class FloatingActionButton extends StatefulWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [elevation], [highlightElevation], [mini], and [shape]
+  /// The [elevation], [highlightElevation], [mini], [shape], and [clipBehavior]
   /// arguments must not be null.
   const FloatingActionButton({
     Key key,
@@ -71,6 +71,7 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.mini = false,
     this.shape = const CircleBorder(),
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.isExtended = false,
   }) :  assert(elevation != null),
@@ -84,7 +85,7 @@ class FloatingActionButton extends StatefulWidget {
   /// Creates a wider [StadiumBorder] shaped floating action button with both
   /// an [icon] and a [label].
   ///
-  /// The [label], [icon], [elevation], [highlightElevation]
+  /// The [label], [icon], [elevation], [highlightElevation], [clipBehavior]
   /// and [shape] arguments must not be null.
   FloatingActionButton.extended({
     Key key,
@@ -98,16 +99,18 @@ class FloatingActionButton extends StatefulWidget {
     this.shape = const StadiumBorder(),
     this.isExtended = true,
     this.materialTapTargetSize,
+    this.clipBehavior = Clip.none,
     @required Widget icon,
     @required Widget label,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
         assert(shape != null),
         assert(isExtended != null),
+        assert(clipBehavior != null),
         _sizeConstraints = _kExtendedSizeConstraints,
         mini = false,
-        child = new _ChildOverflowBox(
-          child: new Row(
+        child = _ChildOverflowBox(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const SizedBox(width: 16.0),
@@ -193,6 +196,9 @@ class FloatingActionButton extends StatefulWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// True if this is an "extended" floating action button.
   ///
   /// Typically [extended] buttons have a [StadiumBorder] [shape]
@@ -216,7 +222,7 @@ class FloatingActionButton extends StatefulWidget {
   final BoxConstraints _sizeConstraints;
 
   @override
-  _FloatingActionButtonState createState() => new _FloatingActionButtonState();
+  _FloatingActionButtonState createState() => _FloatingActionButtonState();
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
@@ -236,24 +242,14 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
     if (widget.child != null) {
       result = IconTheme.merge(
-        data: new IconThemeData(
+        data: IconThemeData(
           color: foregroundColor,
         ),
         child: widget.child,
       );
     }
 
-    if (widget.tooltip != null) {
-      final Widget tooltip = new Tooltip(
-        message: widget.tooltip,
-        child: result,
-      );
-      // The long-pressable area for the tooltip should always be as big as
-      // the tooltip even if there is no child.
-      result = widget.child != null ? tooltip : new SizedBox.expand(child: tooltip);
-    }
-
-    result = new RawMaterialButton(
+    result = RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
@@ -265,11 +261,21 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
         letterSpacing: 1.2,
       ),
       shape: widget.shape,
+      clipBehavior: widget.clipBehavior,
       child: result,
     );
 
+    if (widget.tooltip != null) {
+      result = MergeSemantics(
+        child: Tooltip(
+          message: widget.tooltip,
+          child: result,
+        ),
+      );
+    }
+
     if (widget.heroTag != null) {
-      result = new Hero(
+      result = Hero(
         tag: widget.heroTag,
         child: result,
       );
@@ -292,7 +298,7 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
 
   @override
   _RenderChildOverflowBox createRenderObject(BuildContext context) {
-    return new _RenderChildOverflowBox(
+    return _RenderChildOverflowBox(
       textDirection: Directionality.of(context),
     );
   }
@@ -320,7 +326,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   void performLayout() {
     if (child != null) {
       child.layout(const BoxConstraints(), parentUsesSize: true);
-      size = new Size(
+      size = Size(
         math.max(constraints.minWidth, math.min(constraints.maxWidth, child.size.width)),
         math.max(constraints.minHeight, math.min(constraints.maxHeight, child.size.height)),
       );

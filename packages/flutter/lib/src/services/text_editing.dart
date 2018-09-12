@@ -163,7 +163,7 @@ class TextSelection extends TextRange {
   /// The position at which the selection originates.
   ///
   /// Might be larger than, smaller than, or equal to extent.
-  TextPosition get base => new TextPosition(offset: baseOffset, affinity: affinity);
+  TextPosition get base => TextPosition(offset: baseOffset, affinity: affinity);
 
   /// The position at which the selection terminates.
   ///
@@ -172,7 +172,7 @@ class TextSelection extends TextRange {
   /// side of the selection, this is the location at which to paint the caret.
   ///
   /// Might be larger than, smaller than, or equal to base.
-  TextPosition get extent => new TextPosition(offset: extentOffset, affinity: affinity);
+  TextPosition get extent => TextPosition(offset: extentOffset, affinity: affinity);
 
   @override
   String toString() {
@@ -208,7 +208,7 @@ class TextSelection extends TextRange {
     TextAffinity affinity,
     bool isDirectional,
   }) {
-    return new TextSelection(
+    return TextSelection(
       baseOffset: baseOffset ?? this.baseOffset,
       extentOffset: extentOffset ?? this.extentOffset,
       affinity: affinity ?? this.affinity,

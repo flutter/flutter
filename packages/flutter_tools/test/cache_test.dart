@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -40,55 +40,55 @@ void main() {
       await Cache.lock();
       Cache.checkLockAcquired();
     }, overrides: <Type, Generator>{
-      FileSystem: () => new MockFileSystem(),
+      FileSystem: () => MockFileSystem(),
     });
 
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
       Cache.checkLockAcquired();
     }, overrides: <Type, Generator>{
-      Platform: () => new FakePlatform()..environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'},
+      Platform: () => FakePlatform()..environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'},
     });
   });
 
   group('Cache', () {
     test('should not be up to date, if some cached artifact is not', () {
-      final CachedArtifact artifact1 = new MockCachedArtifact();
-      final CachedArtifact artifact2 = new MockCachedArtifact();
+      final CachedArtifact artifact1 = MockCachedArtifact();
+      final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
-      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(cache.isUpToDate(), isFalse);
     });
     test('should be up to date, if all cached artifacts are', () {
-      final CachedArtifact artifact1 = new MockCachedArtifact();
-      final CachedArtifact artifact2 = new MockCachedArtifact();
+      final CachedArtifact artifact1 = MockCachedArtifact();
+      final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(true);
-      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       expect(cache.isUpToDate(), isTrue);
     });
     test('should update cached artifacts which are not up to date', () async {
-      final CachedArtifact artifact1 = new MockCachedArtifact();
-      final CachedArtifact artifact2 = new MockCachedArtifact();
+      final CachedArtifact artifact1 = MockCachedArtifact();
+      final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(true);
       when(artifact2.isUpToDate()).thenReturn(false);
-      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       await cache.updateAll();
       verifyNever(artifact1.update());
       verify(artifact2.update());
     });
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
-      final CachedArtifact artifact1 = new MockCachedArtifact();
-      final CachedArtifact artifact2 = new MockCachedArtifact();
+      final CachedArtifact artifact1 = MockCachedArtifact();
+      final CachedArtifact artifact2 = MockCachedArtifact();
       when(artifact1.isUpToDate()).thenReturn(false);
       when(artifact2.isUpToDate()).thenReturn(false);
-      final MockInternetAddress address = new MockInternetAddress();
+      final MockInternetAddress address = MockInternetAddress();
       when(address.host).thenReturn('storage.googleapis.com');
-      when(artifact1.update()).thenThrow(new SocketException(
+      when(artifact1.update()).thenThrow(SocketException(
         'Connection reset by peer',
         address: address,
       ));
-      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
       try {
         await cache.updateAll();
         fail('Mock thrown exception expected');
@@ -109,23 +109,23 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.io')), 'www.flutter.io');
   }, overrides: <Type, Generator>{
-    FileSystem: () => new MockFileSystem(),
+    FileSystem: () => MockFileSystem(),
   });
 }
 
 class MockFileSystem extends ForwardingFileSystem {
-  MockFileSystem() : super(new MemoryFileSystem());
+  MockFileSystem() : super(MemoryFileSystem());
 
   @override
   File file(dynamic path) {
-    return new MockFile();
+    return MockFile();
   }
 }
 
 class MockFile extends Mock implements File {
   @override
   Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
-    return new MockRandomAccessFile();
+    return MockRandomAccessFile();
   }
 }
 

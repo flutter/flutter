@@ -7,18 +7,18 @@ import 'package:flutter/cupertino.dart';
 
 void main() {
   testWidgets('Heroes work', (WidgetTester tester) async {
-    await tester.pumpWidget(new CupertinoApp(
+    await tester.pumpWidget(CupertinoApp(
       home:
-        new ListView(
+        ListView(
           children: <Widget>[
             const Hero(tag: 'a', child: Text('foo')),
-            new Builder(builder: (BuildContext context) {
-              return new CupertinoButton(
+            Builder(builder: (BuildContext context) {
+              return CupertinoButton(
                 child: const Text('next'),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    new CupertinoPageRoute<void>(
+                    CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
                         return const Hero(tag: 'a', child: Text('foo'));
                       }

@@ -72,7 +72,7 @@ class LogMessage {
   LogMessage(this.message, this.tag, this.level)
       : this.levelName =
             level.toString().substring(level.toString().indexOf('.') + 1),
-        this.time = new DateTime.now();
+        this.time = DateTime.now();
 
   /// The actual log message.
   final String message;
@@ -124,27 +124,27 @@ class Logger {
   ///
   /// Severe messages are always logged, regardless of what level is set.
   void severe(String message) {
-    loggingFunction(new LogMessage(message, tag, LoggingLevel.severe));
+    loggingFunction(LogMessage(message, tag, LoggingLevel.severe));
   }
 
   /// Logs a [LoggingLevel.warning] level `message`.
   void warning(String message) {
     if (globalLevel.index >= LoggingLevel.warning.index) {
-      loggingFunction(new LogMessage(message, tag, LoggingLevel.warning));
+      loggingFunction(LogMessage(message, tag, LoggingLevel.warning));
     }
   }
 
   /// Logs a [LoggingLevel.info] level `message`.
   void info(String message) {
     if (globalLevel.index >= LoggingLevel.info.index) {
-      loggingFunction(new LogMessage(message, tag, LoggingLevel.info));
+      loggingFunction(LogMessage(message, tag, LoggingLevel.info));
     }
   }
 
   /// Logs a [LoggingLevel.fine] level `message`.
   void fine(String message) {
     if (globalLevel.index >= LoggingLevel.fine.index) {
-      loggingFunction(new LogMessage(message, tag, LoggingLevel.fine));
+      loggingFunction(LogMessage(message, tag, LoggingLevel.fine));
     }
   }
 }

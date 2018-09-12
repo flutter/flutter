@@ -5,47 +5,54 @@
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:test/test.dart';
+
 import 'package:vm_service_client/vm_service_client.dart';
 
+import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
-BasicProject _project = new BasicProject();
-FlutterTestDriver _flutter;
-
 void main() {
-  group('hot reload', () {
+  group('hot', () {
+    Directory tempDir;
+    final BasicProject _project = BasicProject();
+    FlutterTestDriver _flutter;
+
     setUp(() async {
-      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_hot_reload_test_app.');
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
-      try {
-        await _flutter.stop();
-        _project.cleanup();
-      } catch (e) {
-        // Don't fail tests if we failed to clean up temp folder.
-      }
+      await _flutter.stop();
+      tryToDelete(tempDir);
     });
 
-    test('works without error', () async {
+    test('reload works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/17833.
+    });
+
+    test('restart works without error', () async {
+      await _flutter.run();
+      await _flutter.hotRestart();
+      // TODO(dantup): Unskip after flutter-tester restart issue is fixed on Windows:
+      // https://github.com/flutter/flutter/issues/21348.
     }, skip: platform.isWindows);
 
-    test('hits breakpoints with file:// prefixes after reload', () async {
+    test('reload hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
       // Hit breakpoint using a file:// URI.
       final VMIsolate isolate = await _flutter.breakAt(
-          new Uri.file(_project.breakpointFile).toString(),
+          Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
-      expect(isolate.pauseEvent, const isInstanceOf<VMPauseBreakpointEvent>());
-      // TODO(dantup): Unskip after https://github.com/flutter/flutter/issues/18441.
-    }, skip: !platform.isLinux);
-  }, timeout: const Timeout.factor(3));
+      expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
+
+      // TODO(dantup): Unskip for Mac when [1] is fixed.
+      // [1] hot reload/breakpoints fail when uris prefixed with file://
+      //     https://github.com/flutter/flutter/issues/18441
+    }, skip: !platform.isLinux && !platform.isWindows);
+  }, timeout: const Timeout.factor(6));
 }

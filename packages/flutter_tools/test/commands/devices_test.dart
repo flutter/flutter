@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,18 +23,18 @@ void main() {
     });
 
     testUsingContext('returns 0 when called', () async {
-      final DevicesCommand command = new DevicesCommand();
+      final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
     });
 
     testUsingContext('no error when no connected devices', () async {
-      final DevicesCommand command = new DevicesCommand();
+      final DevicesCommand command = DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);
       expect(testLogger.statusText, contains('No devices detected'));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => null,
-      DeviceManager: () => new DeviceManager(),
-      ProcessManager: () => new MockProcessManager(),
+      DeviceManager: () => DeviceManager(),
+      ProcessManager: () => MockProcessManager(),
     });
   });
 }
@@ -51,7 +50,7 @@ class MockProcessManager extends Mock implements ProcessManager {
         Encoding stdoutEncoding = systemEncoding,
         Encoding stderrEncoding = systemEncoding,
       }) async {
-    return new ProcessResult(0, 0, '', '');
+    return ProcessResult(0, 0, '', '');
   }
 
   @override
@@ -64,6 +63,6 @@ class MockProcessManager extends Mock implements ProcessManager {
         Encoding stdoutEncoding = systemEncoding,
         Encoding stderrEncoding = systemEncoding,
       }) {
-    return new ProcessResult(0, 0, '', '');
+    return ProcessResult(0, 0, '', '');
   }
 }

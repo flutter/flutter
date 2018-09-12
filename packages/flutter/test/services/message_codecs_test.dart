@@ -5,15 +5,15 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   group('Binary codec', () {
     const MessageCodec<ByteData> binary = BinaryCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<ByteData>(binary, null);
-      _checkEncodeDecode<ByteData>(binary, new ByteData(0));
-      _checkEncodeDecode<ByteData>(binary, new ByteData(4)..setInt32(0, -7));
+      _checkEncodeDecode<ByteData>(binary, ByteData(0));
+      _checkEncodeDecode<ByteData>(binary, ByteData(4)..setInt32(0, -7));
     });
   });
   group('String codec', () {
@@ -23,6 +23,19 @@ void main() {
       _checkEncodeDecode<String>(string, '');
       _checkEncodeDecode<String>(string, 'hello');
       _checkEncodeDecode<String>(string, 'special chars >\u263A\u{1F602}<');
+    });
+    test('ByteData with offset', () {
+      const MessageCodec<String> string = StringCodec();
+      final ByteData helloWorldByteData = string.encodeMessage('hello world');
+      final ByteData helloByteData = string.encodeMessage('hello');
+
+      final ByteData offsetByteData = ByteData.view(
+          helloWorldByteData.buffer,
+          helloByteData.lengthInBytes,
+          helloWorldByteData.lengthInBytes - helloByteData.lengthInBytes
+      );
+
+      expect(string.decodeMessage(offsetByteData), ' world');
     });
   });
   group('JSON message codec', () {
@@ -107,23 +120,23 @@ void main() {
     test('should encode sizes correctly at boundary cases', () {
       _checkEncoding<dynamic>(
         standard,
-        new Uint8List(253),
-        <int>[8, 253]..addAll(new List<int>.filled(253, 0)),
+        Uint8List(253),
+        <int>[8, 253]..addAll(List<int>.filled(253, 0)),
       );
       _checkEncoding<dynamic>(
         standard,
-        new Uint8List(254),
-        <int>[8, 254, 254, 0]..addAll(new List<int>.filled(254, 0)),
+        Uint8List(254),
+        <int>[8, 254, 254, 0]..addAll(List<int>.filled(254, 0)),
       );
       _checkEncoding<dynamic>(
         standard,
-        new Uint8List(0xffff),
-        <int>[8, 254, 0xff, 0xff]..addAll(new List<int>.filled(0xffff, 0)),
+        Uint8List(0xffff),
+        <int>[8, 254, 0xff, 0xff]..addAll(List<int>.filled(0xffff, 0)),
       );
       _checkEncoding<dynamic>(
         standard,
-        new Uint8List(0xffff + 1),
-        <int>[8, 255, 0, 0, 1, 0]..addAll(new List<int>.filled(0xffff + 1, 0)),
+        Uint8List(0xffff + 1),
+        <int>[8, 255, 0, 0, 1, 0]..addAll(List<int>.filled(0xffff + 1, 0)),
       );
     });
     test('should encode and decode simple messages', () {
@@ -154,13 +167,13 @@ void main() {
         -3.14,
         '',
         'hello',
-        new Uint8List.fromList(<int>[0xBA, 0x5E, 0xBA, 0x11]),
-        new Int32List.fromList(<int>[-0x7fffffff - 1, 0, 0x7fffffff]),
+        Uint8List.fromList(<int>[0xBA, 0x5E, 0xBA, 0x11]),
+        Int32List.fromList(<int>[-0x7fffffff - 1, 0, 0x7fffffff]),
         null, // ensures the offset of the following list is unaligned.
-        new Int64List.fromList(
+        Int64List.fromList(
             <int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
         null, // ensures the offset of the following list is unaligned.
-        new Float64List.fromList(<double>[
+        Float64List.fromList(<double>[
           double.negativeInfinity,
           -double.maxFinite,
           -double.minPositive,

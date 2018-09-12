@@ -53,10 +53,6 @@ class FuchsiaReloadCommand extends FlutterCommand {
     argParser.addOption('name-override',
       abbr: 'n',
       help: 'On-device name of the application binary.');
-    argParser.addFlag('preview-dart-2',
-      abbr: '2',
-      defaultsTo: false,
-      help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: bundle.defaultMainPath,
@@ -132,17 +128,16 @@ class FuchsiaReloadCommand extends FlutterCommand {
       final List<Uri> observatoryUris = fullAddresses.map(
         (String a) => Uri.parse('http://$a')
       ).toList();
-      final FuchsiaDevice device = new FuchsiaDevice(
+      final FuchsiaDevice device = FuchsiaDevice(
           fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = new FlutterDevice(
+      final FlutterDevice flutterDevice = FlutterDevice(
         device,
         trackWidgetCreation: false,
-        previewDart2: false,
       );
       flutterDevice.observatoryUris = observatoryUris;
-      final HotRunner hotRunner = new HotRunner(
+      final HotRunner hotRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
-        debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
+        debuggingOptions: DebuggingOptions.enabled(getBuildInfo()),
         target: _target,
         projectRootPath: _fuchsiaProjectPath,
         packagesFilePath: _dotPackagesPath
@@ -155,7 +150,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 
   // A cache of VMService connections.
-  final HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
+  final HashMap<int, VMService> _vmServiceCache = HashMap<int, VMService>();
 
   Future<VMService> _getVMService(int port) async {
     if (!_vmServiceCache.containsKey(port)) {
@@ -222,7 +217,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final String external = getSizeAsMB(totalExternal);
     final String tabs = '\t' * tabDepth;
     final String extraTabs = '\t' * (tabDepth + 1);
-    final StringBuffer stringBuffer = new StringBuffer(
+    final StringBuffer stringBuffer = StringBuffer(
       '$tabs$_bold$embedder at $addr$_reset\n'
       '${extraTabs}RSS: $maxRSS\n'
       '${extraTabs}Native allocations: $heapSize\n'
@@ -377,7 +372,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   Future<List<int>> _getServicePorts() async {
     final FuchsiaDeviceCommandRunner runner =
-        new FuchsiaDeviceCommandRunner(_address, _buildDir);
+        FuchsiaDeviceCommandRunner(_address, _buildDir);
     final List<String> lsOutput = await runner.run('ls /tmp/dart.services');
     final List<int> ports = <int>[];
     if (lsOutput != null) {
@@ -432,7 +427,7 @@ class _PortForwarder {
     if (localPort == 0) {
       printStatus(
           '_PortForwarder failed to find a local port for $address:$remotePort');
-      return new _PortForwarder._(null, 0, 0, null, null);
+      return _PortForwarder._(null, 0, 0, null, null);
     }
     const String dummyRemoteCommand = 'date';
     final List<String> command = <String>[
@@ -444,11 +439,12 @@ class _PortForwarder {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String data) { printTrace(data); });
-    process.exitCode.then((int c) {
+    // Best effort to print the exit code.
+    process.exitCode.then((int c) { // ignore: unawaited_futures
       printTrace("'${command.join(' ')}' exited with exit code $c");
     });
     printTrace('Set up forwarding from $localPort to $address:$remotePort');
-    return new _PortForwarder._(address, remotePort, localPort, process, sshConfig);
+    return _PortForwarder._(address, remotePort, localPort, process, sshConfig);
   }
 
   Future<Null> stop() async {

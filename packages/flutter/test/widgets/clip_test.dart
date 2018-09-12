@@ -14,8 +14,8 @@ class PathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     log.add('getClip');
-    return new Path()
-      ..addRect(new Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+    return Path()
+      ..addRect(Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
   @override
   bool shouldReclip(PathClipper oldClipper) => false;
@@ -42,9 +42,9 @@ class ValueClipper<T> extends CustomClipper<T> {
 void main() {
   testWidgets('ClipPath', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ClipPath(
-        clipper: new PathClipper(),
-        child: new GestureDetector(
+      ClipPath(
+        clipper: PathClipper(),
+        child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
         )
@@ -63,8 +63,8 @@ void main() {
 
   testWidgets('ClipOval', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ClipOval(
-        child: new GestureDetector(
+      ClipOval(
+        child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
         )
@@ -83,10 +83,10 @@ void main() {
 
   testWidgets('Transparent ClipOval hit test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Opacity(
+      Opacity(
         opacity: 0.0,
-        child: new ClipOval(
-          child: new GestureDetector(
+        child: ClipOval(
+          child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () { log.add('tap'); },
           )
@@ -106,14 +106,14 @@ void main() {
 
   testWidgets('ClipRect', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Align(
+      Align(
         alignment: Alignment.topLeft,
-        child: new SizedBox(
+        child: SizedBox(
           width: 100.0,
           height: 100.0,
-          child: new ClipRect(
-            clipper: new ValueClipper<Rect>('a', new Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
-            child: new GestureDetector(
+          child: ClipRect(
+            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
             )
@@ -130,14 +130,14 @@ void main() {
     expect(log, equals(<String>['a', 'tap']));
 
     await tester.pumpWidget(
-      new Align(
+      Align(
         alignment: Alignment.topLeft,
-        child: new SizedBox(
+        child: SizedBox(
           width: 100.0,
           height: 100.0,
-          child: new ClipRect(
-            clipper: new ValueClipper<Rect>('a', new Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
-            child: new GestureDetector(
+          child: ClipRect(
+            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
             )
@@ -148,14 +148,14 @@ void main() {
     expect(log, equals(<String>['a', 'tap']));
 
     await tester.pumpWidget(
-      new Align(
+      Align(
         alignment: Alignment.topLeft,
-        child: new SizedBox(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
-          child: new ClipRect(
-            clipper: new ValueClipper<Rect>('a', new Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
-            child: new GestureDetector(
+          child: ClipRect(
+            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
             )
@@ -166,14 +166,14 @@ void main() {
     expect(log, equals(<String>['a', 'tap', 'a']));
 
     await tester.pumpWidget(
-      new Align(
+      Align(
         alignment: Alignment.topLeft,
-        child: new SizedBox(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
-          child: new ClipRect(
-            clipper: new ValueClipper<Rect>('a', new Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
-            child: new GestureDetector(
+          child: ClipRect(
+            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
             )
@@ -184,14 +184,14 @@ void main() {
     expect(log, equals(<String>['a', 'tap', 'a']));
 
     await tester.pumpWidget(
-      new Align(
+      Align(
         alignment: Alignment.topLeft,
-        child: new SizedBox(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
-          child: new ClipRect(
-            clipper: new ValueClipper<Rect>('b', new Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
-            child: new GestureDetector(
+          child: ClipRect(
+            clipper: ValueClipper<Rect>('b', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
             )
@@ -202,14 +202,14 @@ void main() {
     expect(log, equals(<String>['a', 'tap', 'a', 'b']));
 
     await tester.pumpWidget(
-      new Align(
+      Align(
         alignment: Alignment.topLeft,
-        child: new SizedBox(
+        child: SizedBox(
           width: 200.0,
           height: 200.0,
-          child: new ClipRect(
-            clipper: new ValueClipper<Rect>('c', new Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
-            child: new GestureDetector(
+          child: ClipRect(
+            clipper: ValueClipper<Rect>('c', Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
             )
@@ -234,7 +234,7 @@ void main() {
     );
     expect(tester.renderObject(find.byType(ClipRect)).paint, paints
       ..save()
-      ..clipRect(rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
       ..save()
       ..path() // Placeholder
       ..restore()
@@ -242,7 +242,7 @@ void main() {
     );
     debugPaintSizeEnabled = true;
     expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints // ignore: INVALID_USE_OF_PROTECTED_MEMBER
-      ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..rect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
       ..paragraph()
     );
     debugPaintSizeEnabled = false;
@@ -250,25 +250,25 @@ void main() {
 
   testWidgets('ClipRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             color: Colors.white,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
-                child: new Transform.rotate(
+                child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: new ClipRect(
-                    child: new Container(
+                  child: ClipRect(
+                    child: Container(
                       color: Colors.red,
-                      child: new Container(
+                      child: Container(
                         color: Colors.white,
-                        child: new RepaintBoundary(
-                          child: new Center(
-                            child: new Container(
+                        child: RepaintBoundary(
+                          child: Center(
+                            child: Container(
                               color: Colors.black,
                               height: 10.0,
                               width: 10.0,
@@ -291,33 +291,73 @@ void main() {
     );
   });
 
+  testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              width: 100.0,
+              height: 100.0,
+              child: ClipRect(
+                child: Container(
+                  color: Colors.blue,
+                ),
+                clipBehavior: Clip.hardEdge,
+              ),
+            ),
+            Positioned(
+              top: 50.0,
+              left: 50.0,
+              width: 100.0,
+              height: 100.0,
+              child: Transform.rotate(
+                angle: 1.0,
+                child: Container(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.ClipRectOverlay.1.png'),
+    );
+  });
+
   testWidgets('ClipRRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             color: Colors.white,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
-                child: new Transform.rotate(
+                child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: new ClipRRect(
+                  child: ClipRRect(
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.elliptical(10.0, 20.0),
                       topRight: Radius.elliptical(5.0, 30.0),
                       bottomLeft: Radius.elliptical(2.5, 12.0),
                       bottomRight: Radius.elliptical(15.0, 6.0),
                     ),
-                    child: new Container(
+                    child: Container(
                       color: Colors.red,
-                      child: new Container(
+                      child: Container(
                         color: Colors.white,
-                        child: new RepaintBoundary(
-                          child: new Center(
-                            child: new Container(
+                        child: RepaintBoundary(
+                          child: Center(
+                            child: Container(
                               color: Colors.black,
                               height: 10.0,
                               width: 10.0,
@@ -342,25 +382,25 @@ void main() {
 
   testWidgets('ClipOval painting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             color: Colors.white,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
-                child: new Transform.rotate(
+                child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: new ClipOval(
-                    child: new Container(
+                  child: ClipOval(
+                    child: Container(
                       color: Colors.red,
-                      child: new Container(
+                      child: Container(
                         color: Colors.white,
-                        child: new RepaintBoundary(
-                          child: new Center(
-                            child: new Container(
+                        child: RepaintBoundary(
+                          child: Center(
+                            child: Container(
                               color: Colors.black,
                               height: 10.0,
                               width: 10.0,
@@ -385,30 +425,30 @@ void main() {
 
   testWidgets('ClipPath painting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             color: Colors.white,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
-                child: new Transform.rotate(
+                child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: new ClipPath(
-                    clipper: new ShapeBorderClipper(
-                      shape: new BeveledRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0),
+                  child: ClipPath(
+                    clipper: ShapeBorderClipper(
+                      shape: BeveledRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
-                    child: new Container(
+                    child: Container(
                       color: Colors.red,
-                      child: new Container(
+                      child: Container(
                         color: Colors.white,
-                        child: new RepaintBoundary(
-                          child: new Center(
-                            child: new Container(
+                        child: RepaintBoundary(
+                          child: Center(
+                            child: Container(
                               color: Colors.black,
                               height: 10.0,
                               width: 10.0,
@@ -431,27 +471,90 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalModel painting', (WidgetTester tester) async {
+  Center genPhysicalModel(Clip clipBehavior) {
+    return Center(
+      child: RepaintBoundary(
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: Transform.rotate(
+                angle: 1.0, // radians
+                child: PhysicalModel(
+                  borderRadius: BorderRadius.circular(20.0),
+                  color: Colors.red,
+                  clipBehavior: clipBehavior,
+                  child: Container(
+                    color: Colors.white,
+                    child: RepaintBoundary(
+                      child: Center(
+                        child: Container(
+                          color: Colors.black,
+                          height: 10.0,
+                          width: 10.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.antiAlias.png'),
+    );
+  });
+
+  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.hardEdge.png'),
+    );
+  });
+
+  // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
+  // round corners.
+  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
+    );
+  });
+
+  testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             color: Colors.white,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
-                child: new Transform.rotate(
+                child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: new PhysicalModel(
-                    borderRadius: new BorderRadius.circular(20.0),
+                  child: PhysicalModel(
+                    borderRadius: BorderRadius.circular(20.0),
                     color: Colors.red,
-                    child: new Container(
+                    child: Container(
                       color: Colors.white,
-                      child: new RepaintBoundary(
-                        child: new Center(
-                          child: new Container(
+                      child: RepaintBoundary(
+                        child: Center(
+                          child: Container(
                             color: Colors.black,
                             height: 10.0,
                             width: 10.0,
@@ -469,35 +572,100 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.1.png'),
+      matchesGoldenFile('clip.PhysicalModel.default.png'),
+    );
+  });
+
+  Center genPhysicalShape(Clip clipBehavior) {
+    return Center(
+      child: RepaintBoundary(
+        child: Container(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(100.0),
+            child: SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: Transform.rotate(
+                angle: 1.0, // radians
+                child: PhysicalShape(
+                  clipper: ShapeBorderClipper(
+                    shape: BeveledRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  clipBehavior: clipBehavior,
+                  color: Colors.red,
+                  child: Container(
+                    color: Colors.white,
+                    child: RepaintBoundary(
+                      child: Center(
+                        child: Container(
+                          color: Colors.black,
+                          height: 10.0,
+                          width: 10.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.antiAlias.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.hardEdge.png'),
+    );
+  });
+
+  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+    await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
     );
   });
 
   testWidgets('PhysicalShape painting', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             color: Colors.white,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.all(100.0),
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
-                child: new Transform.rotate(
+                child: Transform.rotate(
                   angle: 1.0, // radians
-                  child: new PhysicalShape(
-                    clipper: new ShapeBorderClipper(
-                      shape: new BeveledRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0),
+                  child: PhysicalShape(
+                    clipper: ShapeBorderClipper(
+                      shape: BeveledRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0),
                       ),
                     ),
                     color: Colors.red,
-                    child: new Container(
+                    child: Container(
                       color: Colors.white,
-                      child: new RepaintBoundary(
-                        child: new Center(
-                          child: new Container(
+                      child: RepaintBoundary(
+                        child: Center(
+                          child: Container(
                             color: Colors.black,
                             height: 10.0,
                             width: 10.0,
@@ -515,7 +683,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.1.png'),
+      matchesGoldenFile('clip.PhysicalShape.default.png'),
     );
   });
 }

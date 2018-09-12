@@ -8,7 +8,7 @@ import 'dart:io';
 // The first suffix in kPluralSuffixes must be "Other". "Other" is special
 // because it's the only one that is required.
 const List<String> kPluralSuffixes = <String>['Other', 'Zero', 'One', 'Two', 'Few', 'Many'];
-final RegExp kPluralRegexp = new RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
+final RegExp kPluralRegexp = RegExp(r'(\w*)(' + kPluralSuffixes.skip(1).join(r'|') + r')$');
 
 class ValidationError implements Exception {
   ValidationError(this. message);
@@ -28,11 +28,11 @@ class ValidationError implements Exception {
 ///
 /// Throws an exception upon failure.
 void validateEnglishLocalizations(File file) {
-  final StringBuffer errorMessages = new StringBuffer();
+  final StringBuffer errorMessages = StringBuffer();
 
   if (!file.existsSync()) {
     errorMessages.writeln('English localizations do not exist: $file');
-    throw new ValidationError(errorMessages.toString());
+    throw ValidationError(errorMessages.toString());
   }
 
   final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
@@ -83,7 +83,7 @@ void validateEnglishLocalizations(File file) {
   }
 
   if (errorMessages.isNotEmpty)
-    throw new ValidationError(errorMessages.toString());
+    throw ValidationError(errorMessages.toString());
 }
 
 /// Enforces the following invariants in our localizations:
@@ -100,8 +100,8 @@ void validateLocalizations(
   Map<String, Map<String, dynamic>> localeToAttributes,
 ) {
   final Map<String, String> canonicalLocalizations = localeToResources['en'];
-  final Set<String> canonicalKeys = new Set<String>.from(canonicalLocalizations.keys);
-  final StringBuffer errorMessages = new StringBuffer();
+  final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
+  final StringBuffer errorMessages = StringBuffer();
   bool explainMissingKeys = false;
   for (final String locale in localeToResources.keys) {
     final Map<String, String> resources = localeToResources[locale];
@@ -119,7 +119,7 @@ void validateLocalizations(
       return resources.containsKey('${prefix}Other');
     }
 
-    final Set<String> keys = new Set<String>.from(
+    final Set<String> keys = Set<String>.from(
       resources.keys.where((String key) => !isPluralVariation(key))
     );
 
@@ -161,6 +161,6 @@ void validateLocalizations(
           ..writeln('  "notUsed": "Sindhi time format does not use a.m. indicator"')
           ..writeln('}');
     }
-    throw new ValidationError(errorMessages.toString());
+    throw ValidationError(errorMessages.toString());
   }
 }

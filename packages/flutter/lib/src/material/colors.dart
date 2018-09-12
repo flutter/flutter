@@ -116,7 +116,7 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// Each [ColorSwatch] constant is a color and can used directly. For example:
 ///
 /// ```dart
-/// new Container(
+/// Container(
 ///   color: Colors.blue, // same as Colors.blue[500] or Colors.blue.shade500
 /// )
 /// ```
@@ -321,6 +321,19 @@ class Colors {
   ///    but with different opacities.
   static const Color white70 = Color(0xB3FFFFFF);
 
+  /// White with 54% opacity.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
+  ///
+  /// See also:
+  ///
+  ///  * [ExpandIcon], which uses this color for dark themes.
+  ///  * [Theme.of], which allows you to select colors from the current theme
+  ///    rather than hard-coding colors in your build methods.
+  ///  * [white, white30, white12, white10], which are variants on this color
+  ///    but with different opacities.
+  static const Color white54 = Color(0x8AFFFFFF);
+
   /// White with 32% opacity.
   ///
   /// Used for disabled radio buttons and the text of disabled flat buttons in dark themes.
@@ -385,7 +398,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.red[400],
   /// )
@@ -428,7 +441,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.redAccent[400],
   /// )
@@ -465,7 +478,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.pink[400],
   /// )
@@ -508,7 +521,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.pinkAccent[400],
   /// )
@@ -545,7 +558,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.purple[400],
   /// )
@@ -588,7 +601,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.purpleAccent[400],
   /// )
@@ -625,7 +638,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.deepPurple[400],
   /// )
@@ -668,7 +681,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.deepPurpleAccent[400],
   /// )
@@ -705,7 +718,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.indigo[400],
   /// )
@@ -748,7 +761,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.indigoAccent[400],
   /// )
@@ -787,7 +800,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.blue[400],
   /// )
@@ -830,7 +843,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.blueAccent[400],
   /// )
@@ -867,7 +880,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.lightBlue[400],
   /// )
@@ -910,7 +923,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.lightBlueAccent[400],
   /// )
@@ -949,7 +962,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.cyan[400],
   /// )
@@ -992,7 +1005,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.cyanAccent[400],
   /// )
@@ -1029,7 +1042,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.teal[400],
   /// )
@@ -1072,7 +1085,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.tealAccent[400],
   /// )
@@ -1112,7 +1125,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.green[400],
   /// )
@@ -1158,7 +1171,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.greenAccent[400],
   /// )
@@ -1195,7 +1208,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.lightGreen[400],
   /// )
@@ -1238,7 +1251,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.lightGreenAccent[400],
   /// )
@@ -1275,7 +1288,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.lime[400],
   /// )
@@ -1318,7 +1331,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.limeAccent[400],
   /// )
@@ -1355,7 +1368,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.yellow[400],
   /// )
@@ -1398,7 +1411,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.yellowAccent[400],
   /// )
@@ -1435,7 +1448,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.amber[400],
   /// )
@@ -1478,7 +1491,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.amberAccent[400],
   /// )
@@ -1517,7 +1530,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.orange[400],
   /// )
@@ -1560,7 +1573,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.orangeAccent[400],
   /// )
@@ -1599,7 +1612,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.deepOrange[400],
   /// )
@@ -1642,7 +1655,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.deepOrangeAccent[400],
   /// )
@@ -1678,7 +1691,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.brown[400],
   /// )
@@ -1724,7 +1737,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.grey[400],
   /// )
@@ -1771,7 +1784,7 @@ class Colors {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Icon(
+  /// Icon(
   ///   Icons.widgets,
   ///   color: Colors.blueGrey[400],
   /// )

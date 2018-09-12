@@ -4,10 +4,11 @@
 
 import 'dart:async';
 
-import 'package:test/test.dart';
 import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/adb.dart';
+
+import 'common.dart';
 
 void main() {
   group('device', () {
@@ -16,7 +17,7 @@ void main() {
     setUp(() {
       FakeDevice.resetLog();
       device = null;
-      device = new FakeDevice();
+      device = FakeDevice();
     });
 
     tearDown(() {
@@ -114,7 +115,7 @@ CommandArgs cmd({
   List<String> arguments,
   Map<String, String> environment,
 }) {
-  return new CommandArgs(
+  return CommandArgs(
     command: command,
     arguments: arguments,
     environment: environment,
@@ -182,7 +183,7 @@ class FakeDevice extends AndroidDevice {
 
   @override
   Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) async {
-    commandLog.add(new CommandArgs(
+    commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
       environment: environment,
@@ -192,7 +193,7 @@ class FakeDevice extends AndroidDevice {
 
   @override
   Future<Null> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
-    commandLog.add(new CommandArgs(
+    commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
       environment: environment,

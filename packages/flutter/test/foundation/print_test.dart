@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:quiver/testing/async.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 import 'capture_output.dart';
 
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('debugPrint throttling', () {
-    new FakeAsync().run((FakeAsync async) {
+    FakeAsync().run((FakeAsync async) {
       List<String> log = captureOutput(() {
         debugPrintThrottled('A' * (22 * 1024) + '\nB');
       });

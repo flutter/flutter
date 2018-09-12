@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('builder doesn\'t get called if app doesn\'t change', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final Widget app = new MaterialApp(
-      theme: new ThemeData(
+    final Widget app = MaterialApp(
+      theme: ThemeData(
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
@@ -22,14 +22,14 @@ void main() {
       },
     );
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
         child: app,
       ),
     );
     expect(log, <String>['build']);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: app,
       ),
@@ -40,11 +40,11 @@ void main() {
   testWidgets('builder doesn\'t get called if app doesn\'t change', (WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(
+      MaterialApp(
+        theme: ThemeData(
           primarySwatch: Colors.yellow,
         ),
-        home: new Builder(
+        home: Builder(
           builder: (BuildContext context) {
             log.add('build');
             expect(Theme.of(context).primaryColor, Colors.yellow);
@@ -53,7 +53,7 @@ void main() {
           },
         ),
         builder: (BuildContext context, Widget child) {
-          return new Directionality(
+          return Directionality(
             textDirection: TextDirection.rtl,
             child: child,
           );

@@ -110,7 +110,6 @@ tasks:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac/android"]
 
   flavors_test:
@@ -130,6 +129,19 @@ tasks:
       Checks that external UIs work on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  embedded_android_views_integration_test:
+    description: >
+      Tests embedded Android views.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  android_semantics_integration_test:
+    description: >
+      Tests that the Android accessibility bridge produces correct semantics.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   run_release_test:
     description: >
@@ -454,6 +466,7 @@ tasks:
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >

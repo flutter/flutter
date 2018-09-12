@@ -143,7 +143,7 @@ class FlutterErrorDetails {
 
   @override
   String toString() {
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if ((library != null && library != '') || (context != null && context != '')) {
       if (library != null && library != '') {
         buffer.write('Error caught by $library');
@@ -297,13 +297,13 @@ class FlutterError extends AssertionError {
           final List<String> stackList = stackLines.take(2).toList();
           if (stackList.length >= 2) {
             // TODO(ianh): This has bitrotted and is no longer matching. https://github.com/flutter/flutter/issues/4021
-            final RegExp throwPattern = new RegExp(r'^#0 +_AssertionError._throwNew \(dart:.+\)$');
-            final RegExp assertPattern = new RegExp(r'^#1 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
+            final RegExp throwPattern = RegExp(r'^#0 +_AssertionError._throwNew \(dart:.+\)$');
+            final RegExp assertPattern = RegExp(r'^#1 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
             if (throwPattern.hasMatch(stackList[0])) {
               final Match assertMatch = assertPattern.firstMatch(stackList[1]);
               if (assertMatch != null) {
                 assert(assertMatch.groupCount == 2);
-                final RegExp ourLibraryPattern = new RegExp(r'^package:flutter/');
+                final RegExp ourLibraryPattern = RegExp(r'^package:flutter/');
                 ourFault = ourLibraryPattern.hasMatch(assertMatch.group(1));
               }
             }
@@ -328,7 +328,7 @@ class FlutterError extends AssertionError {
           debugPrint(line, wrapWidth: wrapWidth);
       }
       if (details.informationCollector != null) {
-        final StringBuffer information = new StringBuffer();
+        final StringBuffer information = StringBuffer();
         details.informationCollector(information);
         debugPrint('\n${information.toString().trimRight()}', wrapWidth: wrapWidth);
       }
@@ -361,8 +361,8 @@ class FlutterError extends AssertionError {
       '_FakeAsync',
       '_FrameCallbackEntry',
     ];
-    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
-    final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');
+    final RegExp stackParser = RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
+    final RegExp packageParser = RegExp(r'^([^:]+):(.+)$');
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
     for (String line in frames) {
@@ -388,7 +388,7 @@ class FlutterError extends AssertionError {
     if (skipped.length == 1) {
       result.add('(elided one frame from ${skipped.single})');
     } else if (skipped.length > 1) {
-      final List<String> where = new Set<String>.from(skipped).toList()..sort();
+      final List<String> where = Set<String>.from(skipped).toList()..sort();
       if (where.length > 1)
         where[where.length - 1] = 'and ${where.last}';
       if (where.length > 2) {

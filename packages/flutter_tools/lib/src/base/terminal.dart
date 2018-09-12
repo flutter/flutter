@@ -12,7 +12,7 @@ import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
 
-final AnsiTerminal _kAnsiTerminal = new AnsiTerminal();
+final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
 AnsiTerminal get terminal {
   return (context == null || context[AnsiTerminal] == null)
@@ -25,28 +25,12 @@ class AnsiTerminal {
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
-  static const int _EBADF = 9;
-  static const int _ENXIO = 6;
-  static const int _ENOTTY = 25;
-  static const int _ENETRESET = 102;
-  static const int _INVALID_HANDLE = 6;
-
-  /// Setting the line mode can throw for some terminals (with "Operation not
-  /// supported on socket"), but the error can be safely ignored.
-  static const List<int> _lineModeIgnorableErrors = <int>[
-    _EBADF,
-    _ENXIO,
-    _ENOTTY,
-    _ENETRESET,
-    _INVALID_HANDLE,
-  ];
-
   bool supportsColor = platform.stdoutSupportsAnsi;
 
   String bolden(String message) {
     if (!supportsColor)
       return message;
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n'))
       buffer.writeln('$_bold$line$_reset');
     final String result = buffer.toString();
@@ -59,24 +43,15 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
-    // TODO(goderbauer): instead of trying to set lineMode and then catching
-    // [_ENOTTY] or [_INVALID_HANDLE], we should check beforehand if stdin is
-    // connected to a terminal or not.
-    // (Requires https://github.com/dart-lang/sdk/issues/29083 to be resolved.)
     final Stream<List<int>> stdin = io.stdin;
-    if (stdin is io.Stdin) {
-      try {
-        // The order of setting lineMode and echoMode is important on Windows.
-        if (value) {
-          stdin.echoMode = false;
-          stdin.lineMode = false;
-        } else {
-          stdin.lineMode = true;
-          stdin.echoMode = true;
-        }
-      } on io.StdinException catch (error) {
-        if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
-          rethrow;
+    if (stdin is io.Stdin && stdin.hasTerminal) {
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
       }
     }
   }
@@ -113,7 +88,7 @@ class AnsiTerminal {
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
-      charactersToDisplay = new List<String>.from(charactersToDisplay);
+      charactersToDisplay = List<String>.from(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('\n');
     }

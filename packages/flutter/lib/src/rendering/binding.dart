@@ -21,7 +21,7 @@ import 'view.dart';
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-abstract class RendererBinding extends BindingBase with ServicesBinding, SchedulerBinding, HitTestable {
+abstract class RendererBinding extends BindingBase with ServicesBinding, SchedulerBinding, SemanticsBinding, HitTestable {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory RendererBinding._() => null;
@@ -30,7 +30,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _pipelineOwner = new PipelineOwner(
+    _pipelineOwner = PipelineOwner(
       onNeedVisualUpdate: ensureVisualUpdate,
       onSemanticsOwnerCreated: _handleSemanticsOwnerCreated,
       onSemanticsOwnerDisposed: _handleSemanticsOwnerDisposed,
@@ -61,7 +61,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
         getter: () async => debugPaintSizeEnabled,
         setter: (bool value) {
           if (debugPaintSizeEnabled == value)
-            return new Future<Null>.value();
+            return Future<Null>.value();
           debugPaintSizeEnabled = value;
           return _forceRepaint();
         }
@@ -71,7 +71,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
           getter: () async => debugPaintBaselinesEnabled,
           setter: (bool value) {
           if (debugPaintBaselinesEnabled == value)
-            return new Future<Null>.value();
+            return Future<Null>.value();
           debugPaintBaselinesEnabled = value;
           return _forceRepaint();
         }
@@ -84,7 +84,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
             debugRepaintRainbowEnabled = value;
             if (repaint)
               return _forceRepaint();
-            return new Future<Null>.value();
+            return Future<Null>.value();
           }
       );
       return true;
@@ -119,7 +119,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   /// Called automatically when the binding is created.
   void initRenderView() {
     assert(renderView == null);
-    renderView = new RenderView(configuration: createViewConfiguration());
+    renderView = RenderView(configuration: createViewConfiguration());
     renderView.scheduleInitialFrame();
   }
 
@@ -153,12 +153,6 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   @protected
   void handleTextScaleFactorChanged() { }
 
-  /// Called when the platform accessibility features change.
-  ///
-  /// See [Window.onAccessibilityFeaturesChanged].
-  @protected
-  void handleAccessibilityFeaturesChanged() {}
-
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
   ///
@@ -171,7 +165,7 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   /// using `flutter run`.
   ViewConfiguration createViewConfiguration() {
     final double devicePixelRatio = ui.window.devicePixelRatio;
-    return new ViewConfiguration(
+    return ViewConfiguration(
       size: ui.window.physicalSize / devicePixelRatio,
       devicePixelRatio: devicePixelRatio,
     );
@@ -341,7 +335,7 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// that layer's binding.
 ///
 /// See also [BindingBase].
-class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, RendererBinding {
+class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, RendererBinding {
   /// Creates a binding for the rendering layer.
   ///
   /// The `root` render box is attached directly to the [renderView] and is

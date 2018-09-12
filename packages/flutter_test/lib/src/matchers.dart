@@ -9,7 +9,7 @@ import 'dart:ui';
 
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test/test.dart' as test_package show isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 import 'package:flutter/foundation.dart';
@@ -17,9 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'widget_tester.dart' show WidgetTester;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -79,7 +81,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
-Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
+Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -191,8 +193,8 @@ final Matcher isFlutterError = isInstanceOf<FlutterError>();
 final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
-// TODO(ianh): https://github.com/flutter/flutter/issues/18608, https://github.com/dart-lang/matcher/pull/88
-Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -209,7 +211,7 @@ Matcher isInstanceOf<T>() => new test_package.isInstanceOf<T>(); // ignore: pref
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
 Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
-  return new _MoreOrLessEquals(value, epsilon);
+  return _MoreOrLessEquals(value, epsilon);
 }
 
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
@@ -226,7 +228,7 @@ Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
 ///  * [TreeDiagnosticsMixin.toStringDeep], a method that returns a [String]
 ///    typically containing multiple hash codes.
 Matcher equalsIgnoringHashCodes(String value) {
-  return new _EqualsIgnoringHashCodes(value);
+  return _EqualsIgnoringHashCodes(value);
 }
 
 /// A matcher for [MethodCall]s, asserting that it has the specified
@@ -234,7 +236,7 @@ Matcher equalsIgnoringHashCodes(String value) {
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
 Matcher isMethodCall(String name, {@required dynamic arguments}) {
-  return new _IsMethodCall(name, arguments);
+  return _IsMethodCall(name, arguments);
 }
 
 /// Asserts that 2 paths cover the same area by sampling multiple points.
@@ -247,10 +249,14 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
-  => new _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
+  => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
-/// Asserts that a [Finder] matches exactly one widget whose rendered image
-/// matches the golden image file identified by [key].
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
+/// golden image file identified by [key].
+///
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget.
 ///
 /// [key] may be either a [Uri] or a [String] representation of a URI.
 ///
@@ -262,6 +268,8 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 ///
 /// ```dart
 /// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
+/// await expectLater(image, matchesGoldenFile('save.png'));
+/// await expectLater(imageFuture, matchesGoldenFile('save.png'));
 /// ```
 ///
 /// See also:
@@ -271,11 +279,11 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 ///    may swap out the backend for this matcher.
 Matcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
-    return new _MatchesGoldenFile(key);
+    return _MatchesGoldenFile(key);
   } else if (key is String) {
-    return new _MatchesGoldenFile.forStringPath(key);
+    return _MatchesGoldenFile.forStringPath(key);
   }
-  throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+  throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
 /// Asserts that a [SemanticsData] contains the specified information.
@@ -304,6 +312,8 @@ Matcher matchesSemanticsData({
   String label,
   String hint,
   String value,
+  String increasedValue,
+  String decreasedValue,
   TextDirection textDirection,
   Rect rect,
   Size size,
@@ -438,15 +448,17 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.moveCursorBackwardByWord);
   SemanticsHintOverrides hintOverrides;
   if (onTapHint != null || onLongPressHint != null)
-    hintOverrides = new SemanticsHintOverrides(
+    hintOverrides = SemanticsHintOverrides(
       onTapHint: onTapHint,
       onLongPressHint: onLongPressHint,
     );
 
-  return new _MatchesSemanticsData(
+  return _MatchesSemanticsData(
     label: label,
     hint: hint,
     value: value,
+    increasedValue: increasedValue,
+    decreasedValue: decreasedValue,
     actions: actions,
     flags: flags,
     textDirection: textDirection,
@@ -455,6 +467,37 @@ Matcher matchesSemanticsData({
     customActions: customActions,
     hintOverrides: hintOverrides,
   );
+}
+
+/// Asserts that the currently rendered widget meets the provided accessibility
+/// `guideline`.
+///
+/// This matcher requires the result to be awaited and for semantics to be
+/// enabled first.
+///
+/// ## Sample code
+///
+/// ```dart
+/// final SemanticsHandle handle = tester.ensureSemantics();
+/// await meetsGuideline(tester, meetsGuideline(textContrastGuideline));
+/// handle.dispose();
+/// ```
+///
+/// Supported accessibility guidelines:
+///
+///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
+AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
+  return _MatchesAccessibilityGuideline(guideline);
+}
+
+/// The inverse matcher of [meetsGuideline].
+///
+/// This is needed because the [isNot] matcher does not compose with an
+/// [AsyncMatcher].
+AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
+  return _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -635,10 +678,10 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   final String _value;
 
-  static final Object _mismatchedValueKey = new Object();
+  static final Object _mismatchedValueKey = Object();
 
   static String _normalize(String s) {
-    return s.replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#00000');
+    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
   }
 
   @override
@@ -708,7 +751,7 @@ bool _isAllTreeConnectorCharacters(String line) {
 class _HasGoodToStringDeep extends Matcher {
   const _HasGoodToStringDeep();
 
-  static final Object _toStringDeepErrorDescriptionKey = new Object();
+  static final Object _toStringDeepErrorDescriptionKey = Object();
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
@@ -767,7 +810,7 @@ class _HasGoodToStringDeep extends Matcher {
         prefixIssues.add('Line ${i+1} does not contain the expected prefix.');
     }
 
-    final StringBuffer errorDescription = new StringBuffer();
+    final StringBuffer errorDescription = StringBuffer();
     if (issues.isNotEmpty) {
       errorDescription.writeln('Bad toStringDeep():');
       errorDescription.writeln(description);
@@ -917,14 +960,14 @@ Matcher within<T>({
   distanceFunction ??= _kStandardDistanceFunctions[from.runtimeType];
 
   if (distanceFunction == null) {
-    throw new ArgumentError(
+    throw ArgumentError(
       'The specified distanceFunction was null, and a standard distance '
       'function was not found for type ${from.runtimeType} of the provided '
       '`from` argument.'
     );
   }
 
-  return new _IsWithinDistance<T>(distanceFunction, from, distance);
+  return _IsWithinDistance<T>(distanceFunction, from, distance);
 }
 
 class _IsWithinDistance<T> extends Matcher {
@@ -943,7 +986,7 @@ class _IsWithinDistance<T> extends Matcher {
     final T test = object;
     final num distance = distanceFunction(test, value);
     if (distance < 0) {
-      throw new ArgumentError(
+      throw ArgumentError(
         'Invalid distance function was used to compare a ${value.runtimeType} '
         'to a ${object.runtimeType}. The function must return a non-negative '
         'double value, but it returned $distance.'
@@ -1046,18 +1089,23 @@ class _IsMethodCall extends Matcher {
 /// [RenderClipPath].
 const Matcher clipsWithBoundingRect = _ClipsWithBoundingRect();
 
+/// Asserts that a [Finder] locates a single object whose root RenderObject is
+/// not a [RenderClipRect], [RenderClipRRect], [RenderClipOval], or
+/// [RenderClipPath].
+const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
+
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
 Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
-  return new _ClipsWithBoundingRRect(borderRadius: borderRadius);
+  return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
 Matcher clipsWithShapeBorder({@required ShapeBorder shape}) {
-  return new _ClipsWithShapeBorder(shape: shape);
+  return _ClipsWithShapeBorder(shape: shape);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
@@ -1082,7 +1130,7 @@ Matcher rendersOnPhysicalModel({
   BorderRadius borderRadius,
   double elevation,
 }) {
-  return new _RendersOnPhysicalModel(
+  return _RendersOnPhysicalModel(
     shape: shape,
     borderRadius: borderRadius,
     elevation: elevation,
@@ -1098,13 +1146,59 @@ Matcher rendersOnPhysicalShape({
   ShapeBorder shape,
   double elevation,
 }) {
-  return new _RendersOnPhysicalShape(
+  return _RendersOnPhysicalShape(
     shape: shape,
     elevation: elevation,
   );
 }
 
-abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject> extends Matcher {
+abstract class _FailWithDescriptionMatcher extends Matcher {
+  const _FailWithDescriptionMatcher();
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+      dynamic item,
+      Description mismatchDescription,
+      Map<dynamic, dynamic> matchState,
+      bool verbose
+  ) {
+    return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
+  const _MatchAnythingExceptClip();
+
+  @override
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+    final Iterable<Element> nodes = finder.evaluate();
+    if (nodes.length != 1)
+      return failWithDescription(matchState, 'did not have a exactly one child element');
+    final RenderObject renderObject = nodes.single.renderObject;
+
+    switch (renderObject.runtimeType) {
+      case RenderClipPath:
+      case RenderClipOval:
+      case RenderClipRect:
+      case RenderClipRRect:
+        return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
+      default:
+        return true;
+    }
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('does not have a clip as an immediate child');
+  }
+}
+
+abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject> extends _FailWithDescriptionMatcher {
   const _MatchRenderObject();
 
   bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, T renderObject);
@@ -1124,21 +1218,6 @@ abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject
       return renderObjectMatchesM(matchState, renderObject);
 
     return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
-  }
-
-  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
-    matchState['failure'] = description;
-    return false;
-  }
-
-  @override
-  Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose
-  ) {
-    return mismatchDescription.add(matchState['failure']);
   }
 }
 
@@ -1359,7 +1438,7 @@ class _CoversSameAreaAs extends Matcher {
   }) : maxHorizontalNoise = areaToCompare.width / sampleSize,
        maxVerticalNoise = areaToCompare.height / sampleSize {
     // Use a fixed random seed to make sure tests are deterministic.
-    random = new math.Random(1);
+    random = math.Random(1);
   }
 
   final Path expectedPath;
@@ -1373,7 +1452,7 @@ class _CoversSameAreaAs extends Matcher {
   bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
     for (int i = 0; i < sampleSize; i += 1) {
       for (int j = 0; j < sampleSize; j += 1) {
-        final Offset offset = new Offset(
+        final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
           j * (areaToCompare.height / sampleSize)
         );
@@ -1381,7 +1460,7 @@ class _CoversSameAreaAs extends Matcher {
         if (!_samplePoint(matchState, actualPath, offset))
           return false;
 
-        final Offset noise = new Offset(
+        final Offset noise = Offset(
           maxHorizontalNoise * random.nextDouble(),
           maxVerticalNoise * random.nextDouble(),
         );
@@ -1423,6 +1502,17 @@ class _CoversSameAreaAs extends Matcher {
     description.add('covers expected area and only expected area');
 }
 
+Future<ui.Image> _captureImage(Element element) {
+  RenderObject renderObject = element.renderObject;
+  while (!renderObject.isRepaintBoundary) {
+    renderObject = renderObject.parent;
+    assert(renderObject != null);
+  }
+  assert(!renderObject.debugNeedsPaint);
+  final OffsetLayer layer = renderObject.layer;
+  return layer.toImage(renderObject.paintBounds);
+}
+
 class _MatchesGoldenFile extends AsyncMatcher {
   const _MatchesGoldenFile(this.key);
 
@@ -1431,23 +1521,22 @@ class _MatchesGoldenFile extends AsyncMatcher {
   final Uri key;
 
   @override
-  Future<String> matchAsync(covariant Finder finder) async {
-    final Iterable<Element> elements = finder.evaluate();
-    if (elements.isEmpty) {
-      return 'could not be rendered because no widget was found';
-    } else if (elements.length > 1) {
-      return 'matched too many widgets';
+  Future<String> matchAsync(dynamic item) async {
+    Future<ui.Image> imageFuture;
+    if (item is Future<ui.Image>) {
+      imageFuture = item;
+    } else if (item is ui.Image) {
+      imageFuture = Future<ui.Image>.value(item);
+    } else {
+      final Finder finder = item;
+      final Iterable<Element> elements = finder.evaluate();
+      if (elements.isEmpty) {
+        return 'could not be rendered because no widget was found';
+      } else if (elements.length > 1) {
+        return 'matched too many widgets';
+      }
+      imageFuture = _captureImage(elements.single);
     }
-    final Element element = elements.single;
-
-    RenderObject renderObject = element.renderObject;
-    while (!renderObject.isRepaintBoundary) {
-      renderObject = renderObject.parent;
-      assert(renderObject != null);
-    }
-    assert(!renderObject.debugNeedsPaint);
-    final OffsetLayer layer = renderObject.layer;
-    final Future<ui.Image> imageFuture = layer.toImage(renderObject.paintBounds);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1458,13 +1547,13 @@ class _MatchesGoldenFile extends AsyncMatcher {
         return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(key, bytes.buffer.asUint8List());
-      } else {
-        try {
-          final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
-          return success ? null : 'does not match';
-        } on TestFailure catch (ex) {
-          return ex.message;
-        }
+        return null;
+      }
+      try {
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
+        return success ? null : 'does not match';
+      } on TestFailure catch (ex) {
+        return ex.message;
       }
     }, additionalTime: const Duration(seconds: 11));
   }
@@ -1478,6 +1567,8 @@ class _MatchesSemanticsData extends Matcher {
   _MatchesSemanticsData({
     this.label,
     this.value,
+    this.increasedValue,
+    this.decreasedValue,
     this.hint,
     this.flags,
     this.actions,
@@ -1491,6 +1582,8 @@ class _MatchesSemanticsData extends Matcher {
   final String label;
   final String value;
   final String hint;
+  final String increasedValue;
+  final String decreasedValue;
   final SemanticsHintOverrides hintOverrides;
   final List<SemanticsAction> actions;
   final List<CustomSemanticsAction> customActions;
@@ -1508,6 +1601,10 @@ class _MatchesSemanticsData extends Matcher {
       description.add('with value: $value ');
     if (hint != null)
       description.add('with hint: $hint ');
+    if (increasedValue != null)
+      description.add('with increasedValue: $increasedValue');
+    if (decreasedValue != null)
+      description.add('with decreasedValue: $decreasedValue');
     if (actions != null)
       description.add('with actions:').addDescriptionOf(actions);
     if (flags != null)
@@ -1537,6 +1634,10 @@ class _MatchesSemanticsData extends Matcher {
       return failWithDescription(matchState, 'hint was: ${data.hint}');
     if (value != null && value != data.value)
       return failWithDescription(matchState, 'value was: ${data.value}');
+    if (increasedValue != null && increasedValue != data.increasedValue)
+      return failWithDescription(matchState, 'increasedValue was: ${data.increasedValue}');
+    if (decreasedValue != null && decreasedValue != data.decreasedValue)
+      return failWithDescription(matchState, 'decreasedValue was: ${data.decreasedValue}');
     if (textDirection != null && textDirection != data.textDirection)
       return failWithDescription(matchState, 'textDirection was: $textDirection');
     if (rect != null && rect != data.rect)
@@ -1560,11 +1661,11 @@ class _MatchesSemanticsData extends Matcher {
       final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
         return CustomSemanticsAction.getAction(id);
       }).toList();
-      final List<CustomSemanticsAction> expectedCustomActions = new List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      final List<CustomSemanticsAction> expectedCustomActions = List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
       if (hintOverrides?.onTapHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
       if (expectedCustomActions.length != providedCustomActions.length)
         return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
@@ -1606,5 +1707,43 @@ class _MatchesSemanticsData extends Matcher {
       bool verbose
       ) {
     return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _MatchesAccessibilityGuideline extends AsyncMatcher {
+  _MatchesAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add(guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return null;
+    return result.reason;
+  }
+}
+
+class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
+  _DoesNotMatchAccessibilityGuideline(this.guideline);
+
+  final AccessibilityGuideline guideline;
+
+  @override
+  Description describe(Description description) {
+    return description.add('Does not ' + guideline.description);
+  }
+
+  @override
+  Future<String> matchAsync(covariant WidgetTester tester) async {
+    final Evaluation result = await guideline.evaluate(tester);
+    if (result.passed)
+      return 'Failed';
+    return null;
   }
 }

@@ -26,14 +26,10 @@ abstract class TestProject {
     await getPackages(dir.path);
   }
 
-  void cleanup() {
-    dir?.deleteSync(recursive: true);
-  }
-
   int lineContaining(String contents, String search) {
     final int index = contents.split('\n').indexWhere((String l) => l.contains(search));
     if (index == -1)
-      throw new Exception("Did not find '$search' inside the file");
+      throw Exception("Did not find '$search' inside the file");
     return index;
   }
 }

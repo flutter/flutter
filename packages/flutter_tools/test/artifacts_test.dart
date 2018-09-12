@@ -7,8 +7,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -18,12 +18,12 @@ void main() {
     CachedArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
-      artifacts = new CachedArtifacts();
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_cached.');
+      artifacts = CachedArtifacts();
     });
 
     tearDown(() {
-      tempDir.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('getArtifactPath', () {
@@ -40,8 +40,8 @@ void main() {
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
-      Cache: () => new Cache(rootOverride: tempDir),
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Cache: () => Cache(rootOverride: tempDir),
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
 
     testUsingContext('getEngineType', () {
@@ -58,8 +58,8 @@ void main() {
           'darwin-x64'
       );
     }, overrides: <Type, Generator> {
-      Cache: () => new Cache(rootOverride: tempDir),
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Cache: () => Cache(rootOverride: tempDir),
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
   });
 
@@ -69,15 +69,15 @@ void main() {
     LocalEngineArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
-      artifacts = new LocalEngineArtifacts(tempDir.path,
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_local.');
+      artifacts = LocalEngineArtifacts(tempDir.path,
         fs.path.join(tempDir.path, 'out', 'android_debug_unopt'),
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt'),
       );
     });
 
     tearDown(() {
-      tempDir.deleteSync(recursive: true);
+      tryToDelete(tempDir);
     });
 
     testUsingContext('getArtifactPath', () {
@@ -102,7 +102,7 @@ void main() {
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk')
       );
     }, overrides: <Type, Generator> {
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
 
     testUsingContext('getEngineType', () {
@@ -119,7 +119,7 @@ void main() {
           'android_debug_unopt'
       );
     }, overrides: <Type, Generator> {
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
   });
 }

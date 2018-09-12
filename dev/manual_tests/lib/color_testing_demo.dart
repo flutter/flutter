@@ -11,20 +11,20 @@ class ColorTestingDemo extends StatelessWidget {
   static const String routeName = '/color_demo';
 
   @override
-  Widget build(BuildContext context) => new ColorDemoHome();
+  Widget build(BuildContext context) => ColorDemoHome();
 }
 
 class ColorDemoHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Color Demo')),
-      body: new ListView(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Color Demo')),
+      body: ListView(
         padding: const EdgeInsets.all(5.0),
         children: <Widget>[
-          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/gbr.png'),
-          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/tf.png'),
-          new Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/wide-gamut.png'),
+          Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/gbr.png'),
+          Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/tf.png'),
+          Image.network('https://flutter.github.io/assets-for-api-docs/assets/tests/colors/wide-gamut.png'),
           const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFF00FF00)),
           const GradientRow(leftColor: Color(0xFF0000FF), rightColor: Color(0xFFFFFF00)),
           const GradientRow(leftColor: Color(0xFFFF0000), rightColor: Color(0xFF0000FF)),
@@ -58,10 +58,10 @@ class GradientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       height: 100.0,
-      decoration: new BoxDecoration(
-        gradient: new LinearGradient(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[ leftColor, rightColor ],
@@ -78,7 +78,7 @@ class ColorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       height: 100.0,
       color: color,
     );
@@ -86,8 +86,8 @@ class ColorRow extends StatelessWidget {
 }
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: 'Color Testing Demo',
-    home: new ColorDemoHome(),
+    home: ColorDemoHome(),
   ));
 }

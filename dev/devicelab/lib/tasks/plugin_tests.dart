@@ -19,7 +19,7 @@ TaskFunction combine(List<TaskFunction> tasks) {
         return result;
       }
     }
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   };
 }
 
@@ -33,23 +33,24 @@ class PluginTest {
 
   Future<TaskResult> call() async {
     section('Create Flutter project');
-    final Directory tmp = await Directory.systemTemp.createTemp('plugin');
-    final FlutterProject project = await FlutterProject.create(tmp, options);
-    if (buildTarget == 'ios') {
-      await prepareProvisioningCertificates(project.rootPath);
-    }
+    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     try {
-      section('Add plugin');
-      await project.addPlugin('path_provider');
-
-      section('Build');
-      await project.build(buildTarget);
-
-      return new TaskResult.success(null);
+      final FlutterProject project = await FlutterProject.create(tempDir, options);
+      try {
+        if (buildTarget == 'ios')
+          await prepareProvisioningCertificates(project.rootPath);
+        section('Add plugin');
+        await project.addPlugin('path_provider');
+        section('Build');
+        await project.build(buildTarget);
+      } finally {
+        await project.delete();
+      }
+      return TaskResult.success(null);
     } catch (e) {
-      return new TaskResult.failure(e.toString());
+      return TaskResult.failure(e.toString());
     } finally {
-      await project.delete();
+      rmTree(tempDir);
     }
   }
 }
@@ -67,13 +68,13 @@ class FlutterProject {
         options: <String>['--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest')
       );
     });
-    return new FlutterProject(directory, 'plugintest');
+    return FlutterProject(directory, 'plugintest');
   }
 
   String get rootPath => path.join(parent.path, name);
 
   Future<Null> addPlugin(String plugin) async {
-    final File pubspec = new File(path.join(rootPath, 'pubspec.yaml'));
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '\ndependencies:\n',
@@ -83,7 +84,7 @@ class FlutterProject {
   }
 
   Future<Null> build(String target) async {
-    await inDirectory(new Directory(rootPath), () async {
+    await inDirectory(Directory(rootPath), () async {
       await flutter('build', options: <String>[target]);
     });
   }
@@ -97,9 +98,9 @@ class FlutterProject {
         <String>['--stop'],
         canFail: true,
       );
-      // TODO(mravn): Investigating if flakiness is timing dependent.
-      await new Future<Null>.delayed(const Duration(seconds: 10));
+      // TODO(ianh): Investigating if flakiness is timing dependent.
+      await Future<Null>.delayed(const Duration(seconds: 10));
     }
-    await parent.delete(recursive: true);
+    rmTree(parent);
   }
 }

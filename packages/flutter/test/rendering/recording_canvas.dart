@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Clip;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -45,8 +43,8 @@ class RecordedInvocation {
 ///
 /// ```dart
 /// RenderBox box = tester.renderObject(find.text('ABC'));
-/// TestRecordingCanvas canvas = new TestRecordingCanvas();
-/// TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+/// TestRecordingCanvas canvas = TestRecordingCanvas();
+/// TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
 /// box.paint(context, Offset.zero);
 /// // Now test the expected canvas.invocations.
 /// ```
@@ -69,25 +67,25 @@ class TestRecordingCanvas implements Canvas {
   @override
   void save() {
     _saveCount += 1;
-    invocations.add(new RecordedInvocation(new _MethodCall(#save), stack: StackTrace.current));
+    invocations.add(RecordedInvocation(_MethodCall(#save), stack: StackTrace.current));
   }
 
   @override
   void saveLayer(Rect bounds, Paint paint) {
     _saveCount += 1;
-    invocations.add(new RecordedInvocation(new _MethodCall(#saveLayer, <dynamic>[bounds, paint]), stack: StackTrace.current));
+    invocations.add(RecordedInvocation(_MethodCall(#saveLayer, <dynamic>[bounds, paint]), stack: StackTrace.current));
   }
 
   @override
   void restore() {
     _saveCount -= 1;
     assert(_saveCount >= 0);
-    invocations.add(new RecordedInvocation(new _MethodCall(#restore), stack: StackTrace.current));
+    invocations.add(RecordedInvocation(_MethodCall(#restore), stack: StackTrace.current));
   }
 
   @override
   void noSuchMethod(Invocation invocation) {
-    invocations.add(new RecordedInvocation(invocation, stack: StackTrace.current));
+    invocations.add(RecordedInvocation(invocation, stack: StackTrace.current));
   }
 }
 
@@ -124,6 +122,13 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     canvas.save();
     canvas.transform(transform.storage);
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
+  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+    canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
   }
@@ -176,7 +181,7 @@ String _symbolName(Symbol symbol) {
 
 // Workaround for https://github.com/dart-lang/sdk/issues/28373
 String _describeInvocation(Invocation call) {
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   buffer.write(_symbolName(call.memberName));
   if (call.isSetter) {
     buffer.write(call.positionalArguments[0].toString());

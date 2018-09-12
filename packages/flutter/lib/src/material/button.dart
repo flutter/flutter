@@ -29,8 +29,8 @@ import 'theme_data.dart';
 class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
-  /// The [shape], [elevation], [padding], and [constraints] arguments
-  /// must not be null.
+  /// The [shape], [elevation], [padding], [constraints], and [clipBehavior]
+  /// arguments must not be null.
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
@@ -46,6 +46,7 @@ class RawMaterialButton extends StatefulWidget {
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
+    this.clipBehavior = Clip.none,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
   }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -56,6 +57,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(padding != null),
        assert(constraints != null),
        assert(animationDuration != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
@@ -148,8 +150,11 @@ class RawMaterialButton extends StatefulWidget {
   ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   @override
-  _RawMaterialButtonState createState() => new _RawMaterialButtonState();
+  _RawMaterialButtonState createState() => _RawMaterialButtonState();
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
@@ -168,25 +173,27 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ? (_highlight ? widget.highlightElevation : widget.elevation)
       : widget.disabledElevation;
 
-    final Widget result = new ConstrainedBox(
+    final Widget result = ConstrainedBox(
       constraints: widget.constraints,
-      child: new Material(
+      child: Material(
         elevation: elevation,
         textStyle: widget.textStyle,
         shape: widget.shape,
         color: widget.fillColor,
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
-        child: new InkWell(
+        clipBehavior: widget.clipBehavior,
+        child: InkWell(
           onHighlightChanged: _handleHighlightChanged,
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           onTap: widget.onPressed,
+          customBorder: widget.shape,
           child: IconTheme.merge(
-            data: new IconThemeData(color: widget.textStyle?.color),
-            child: new Container(
+            data: IconThemeData(color: widget.textStyle?.color),
+            child: Container(
               padding: widget.padding,
-              child: new Center(
+              child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: widget.child,
@@ -206,11 +213,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         break;
     }
 
-    return new Semantics(
+    return Semantics(
       container: true,
       button: true,
       enabled: widget.enabled,
-      child: new _InputPadding(
+      child: _InputPadding(
         minSize: minSize,
         child: result,
       ),
@@ -245,6 +252,8 @@ class MaterialButton extends StatelessWidget {
   /// Rather than creating a material button directly, consider using
   /// [FlatButton] or [RaisedButton]. To create a custom Material button
   /// consider using [RawMaterialButton].
+  ///
+  /// The [clipBehavior] argument must not be null.
   const MaterialButton({
     Key key,
     this.colorBrightness,
@@ -259,9 +268,10 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.padding,
     this.materialTapTargetSize,
+    this.clipBehavior = Clip.none,
     @required this.onPressed,
     this.child
-  }) : super(key: key);
+  }) : assert(clipBehavior != null), super(key: key);
 
   /// The theme brightness to use for this button.
   ///
@@ -283,11 +293,11 @@ class MaterialButton extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  new MaterialButton(
-  ///    color: Colors.blue[500],
-  ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
-  ///  ),
+  /// MaterialButton(
+  ///   color: Colors.blue[500],
+  ///   onPressed: _handleTap,
+  ///   child: Text('DEMO'),
+  /// ),
   /// ```
   final Color color;
 
@@ -373,6 +383,9 @@ class MaterialButton extends StatelessWidget {
   ///   * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -398,11 +411,11 @@ class MaterialButton extends StatelessWidget {
       case ButtonTextTheme.normal:
         return enabled
           ? (themeIsDark ? Colors.white : Colors.black87)
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.accent:
         return enabled
           ? theme.accentColor
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.primary:
         return enabled
           ? (fillIsDark ? Colors.white : Colors.black)
@@ -417,7 +430,7 @@ class MaterialButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color textColor = _getTextColor(theme, buttonTheme, color);
 
-    return new RawMaterialButton(
+    return RawMaterialButton(
       onPressed: onPressed,
       fillColor: color,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
@@ -433,13 +446,14 @@ class MaterialButton extends StatelessWidget {
       shape: buttonTheme.shape,
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
+      clipBehavior: clipBehavior,
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -459,7 +473,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderInputPadding(minSize);
+    return _RenderInputPadding(minSize);
   }
 
   @override
@@ -483,28 +497,28 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicWidth(height), minSize.width);
+      return math.max(child.getMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicHeight(width), minSize.height);
+      return math.max(child.getMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicWidth(height), minSize.width);
+      return math.max(child.getMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicHeight(width), minSize.height);
+      return math.max(child.getMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
@@ -514,7 +528,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       child.layout(constraints, parentUsesSize: true);
       final double height = math.max(child.size.width, minSize.width);
       final double width = math.max(child.size.height, minSize.height);
-      size = constraints.constrain(new Size(height, width));
+      size = constraints.constrain(Size(height, width));
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = Alignment.center.alongOffset(size - child.size);
     } else {

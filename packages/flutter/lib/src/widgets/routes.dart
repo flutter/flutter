@@ -89,7 +89,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// after [popped], because [popped] typically completes before the animation
   /// even starts, as soon as the route is popped.
   Future<T> get completed => _transitionCompleter.future;
-  final Completer<T> _transitionCompleter = new Completer<T>();
+  final Completer<T> _transitionCompleter = Completer<T>();
 
   /// The duration the transition lasts.
   Duration get transitionDuration;
@@ -122,7 +122,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.zero);
-    return new AnimationController(
+    return AnimationController(
       duration: duration,
       debugLabel: debugLabel,
       vsync: navigator,
@@ -170,7 +170,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// animation lets this route coordinate with the entrance and exit transition
   /// of routes pushed on top of this route.
   Animation<double> get secondaryAnimation => _secondaryAnimation;
-  final ProxyAnimation _secondaryAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
   @override
   void install(OverlayEntry insertionPoint) {
@@ -231,7 +231,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
-          newAnimation = new TrainHoppingAnimation(
+          newAnimation = TrainHoppingAnimation(
             current.currentTrain,
             nextRoute._animation,
             onSwitchedTrain: () {
@@ -244,7 +244,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
         } else {
-          _secondaryAnimation.parent = new TrainHoppingAnimation(current, nextRoute._animation);
+          _secondaryAnimation.parent = TrainHoppingAnimation(current, nextRoute._animation);
         }
       } else {
         _secondaryAnimation.parent = nextRoute._animation;
@@ -341,11 +341,11 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   /// class App extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new MaterialApp(
+  ///     return MaterialApp(
   ///       initialRoute: '/',
   ///       routes: {
-  ///         '/': (BuildContext context) => new HomePage(),
-  ///         '/second_page': (BuildContext context) => new SecondPage(),
+  ///         '/': (BuildContext context) => HomePage(),
+  ///         '/second_page': (BuildContext context) => SecondPage(),
   ///       },
   ///     );
   ///   }
@@ -355,21 +355,21 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///   HomePage();
   ///
   ///   @override
-  ///   _HomePageState createState() => new _HomePageState();
+  ///   _HomePageState createState() => _HomePageState();
   /// }
   ///
   /// class _HomePageState extends State<HomePage> {
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Scaffold(
-  ///       body: new Center(
+  ///     return Scaffold(
+  ///       body: Center(
   ///         child: Column(
   ///           mainAxisSize: MainAxisSize.min,
   ///           children: <Widget>[
-  ///             new Text('HomePage'),
+  ///             Text('HomePage'),
   ///             // Press this button to open the SecondPage.
-  ///             new RaisedButton(
-  ///               child: new Text('Second Page >'),
+  ///             RaisedButton(
+  ///               child: Text('Second Page >'),
   ///               onPressed: () {
   ///                 Navigator.pushNamed(context, '/second_page');
   ///               },
@@ -383,7 +383,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///
   /// class SecondPage extends StatefulWidget {
   ///   @override
-  ///   _SecondPageState createState() => new _SecondPageState();
+  ///   _SecondPageState createState() => _SecondPageState();
   /// }
   ///
   /// class _SecondPageState extends State<SecondPage> {
@@ -396,7 +396,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///     // rectangle.
   ///     setState(() => _showRectangle = true);
   ///     ModalRoute.of(context).addLocalHistoryEntry(
-  ///         new LocalHistoryEntry(
+  ///         LocalHistoryEntry(
   ///             onRemove: () {
   ///               // Hide the red rectangle.
   ///               setState(() => _showRectangle = false);
@@ -408,24 +408,24 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     final localNavContent = _showRectangle
-  ///       ? new Container(
+  ///       ? Container(
   ///           width: 100.0,
   ///           height: 100.0,
   ///           color: Colors.red,
   ///         )
-  ///       : new RaisedButton(
-  ///           child: new Text('Show Rectangle'),
+  ///       : RaisedButton(
+  ///           child: Text('Show Rectangle'),
   ///           onPressed: _navigateLocallyToShowRectangle,
   ///         );
   ///
-  ///     return new Scaffold(
+  ///     return Scaffold(
   ///       body: Center(
-  ///         child: new Column(
+  ///         child: Column(
   ///           mainAxisAlignment: MainAxisAlignment.center,
   ///           children: <Widget>[
   ///             localNavContent,
-  ///             new RaisedButton(
-  ///               child: new Text('< Back'),
+  ///             RaisedButton(
+  ///               child: Text('< Back'),
   ///               onPressed: () {
   ///                 // Pop a route. If this is pressed while the red rectangle is
   ///                 // visible then it will will pop our local history entry, which
@@ -520,8 +520,8 @@ class _ModalScopeStatus extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
-    description.add(new FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
+    description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
+    description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
   }
 }
 
@@ -534,7 +534,7 @@ class _ModalScope<T> extends StatefulWidget {
   final ModalRoute<T> route;
 
   @override
-  _ModalScopeState<T> createState() => new _ModalScopeState<T>();
+  _ModalScopeState<T> createState() => _ModalScopeState<T>();
 }
 
 class _ModalScopeState<T> extends State<_ModalScope<T>> {
@@ -555,7 +555,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       animations.add(widget.route.animation);
     if (widget.route.secondaryAnimation != null)
       animations.add(widget.route.secondaryAnimation);
-    _listenable = new Listenable.merge(animations);
+    _listenable = Listenable.merge(animations);
   }
 
   @override
@@ -584,33 +584,33 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return new _ModalScopeStatus(
+    return _ModalScopeStatus(
       route: widget.route,
       isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
       canPop: widget.route.canPop, // _routeSetState is called if this updates
-      child: new Offstage(
+      child: Offstage(
         offstage: widget.route.offstage, // _routeSetState is called if this updates
-        child: new PageStorage(
+        child: PageStorage(
           bucket: widget.route._storageBucket, // immutable
-          child: new FocusScope(
+          child: FocusScope(
             node: widget.route.focusScopeNode, // immutable
-            child: new RepaintBoundary(
-              child: new AnimatedBuilder(
+            child: RepaintBoundary(
+              child: AnimatedBuilder(
                 animation: _listenable, // immutable
                 builder: (BuildContext context, Widget child) {
                   return widget.route.buildTransitions(
                     context,
                     widget.route.animation,
                     widget.route.secondaryAnimation,
-                    new IgnorePointer(
+                    IgnorePointer(
                       ignoring: widget.route.animation?.status == AnimationStatus.reverse,
                       child: child,
                     ),
                   );
                 },
-                child: _page ??= new RepaintBoundary(
+                child: _page ??= RepaintBoundary(
                   key: widget.route._subtreeKey, // immutable
-                  child: new Builder(
+                  child: Builder(
                     builder: (BuildContext context) {
                       return widget.route.buildPage(
                         context,
@@ -751,16 +751,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// route from the top of the screen back to the bottom.
   ///
   /// ```dart
-  /// new PageRouteBuilder(
+  /// PageRouteBuilder(
   ///   pageBuilder: (BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
   ///       Widget child,
   ///   ) {
-  ///     return new Scaffold(
-  ///       appBar: new AppBar(title: new Text('Hello')),
-  ///       body: new Center(
-  ///         child: new Text('Hello World'),
+  ///     return Scaffold(
+  ///       appBar: AppBar(title: Text('Hello')),
+  ///       body: Center(
+  ///         child: Text('Hello World'),
   ///       ),
   ///     );
   ///   },
@@ -770,8 +770,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Animation<double> secondaryAnimation,
   ///       Widget child,
   ///    ) {
-  ///     return new SlideTransition(
-  ///       position: new Tween<Offset>(
+  ///     return SlideTransition(
+  ///       position: Tween<Offset>(
   ///         begin: const Offset(0.0, 1.0),
   ///         end: Offset.zero,
   ///       ).animate(animation),
@@ -807,13 +807,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Animation<double> secondaryAnimation,
   ///       Widget child,
   ///   ) {
-  ///     return new SlideTransition(
-  ///       position: new AlignmentTween(
+  ///     return SlideTransition(
+  ///       position: AlignmentTween(
   ///         begin: const Offset(0.0, 1.0),
   ///         end: Offset.zero,
   ///       ).animate(animation),
-  ///       child: new SlideTransition(
-  ///         position: new TweenOffset(
+  ///       child: SlideTransition(
+  ///         position: TweenOffset(
   ///           begin: Offset.zero,
   ///           end: const Offset(0.0, 1.0),
   ///         ).animate(secondaryAnimation),
@@ -851,13 +851,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   /// The node this route will use for its root [FocusScope] widget.
-  final FocusScopeNode focusScopeNode = new FocusScopeNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   @override
   void install(OverlayEntry insertionPoint) {
     super.install(insertionPoint);
-    _animationProxy = new ProxyAnimation(super.animation);
-    _secondaryAnimationProxy = new ProxyAnimation(super.secondaryAnimation);
+    _animationProxy = ProxyAnimation(super.animation);
+    _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
   }
 
   @override
@@ -897,6 +897,21 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [barrierColor], which controls the color of the scrim for this route.
   ///  * [ModalBarrier], the widget that implements this feature.
   bool get barrierDismissible;
+
+  /// Whether the semantics of the modal barrier are included in the
+  /// semantics tree.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// If [semanticsDismissible] is true, then modal barrier semantics are
+  /// included in the semantics tree.
+  ///
+  /// If [semanticsDismissible] is false, then modal barrier semantics are
+  /// excluded from the the semantics tree and tapping on the modal barrier
+  /// has no effect.
+  bool get semanticsDismissible => true;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
@@ -1019,7 +1034,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
-    for (WillPopCallback callback in new List<WillPopCallback>.from(_willPopCallbacks)) {
+    for (WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
       if (!await callback())
         return RoutePopDisposition.doNotPop;
     }
@@ -1034,7 +1049,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// ```dart
   /// Widget build(BuildContext context) {
-  ///   return new WillPopScope(
+  ///   return WillPopScope(
   ///     onWillPop: askTheUserIfTheyAreSure,
   ///     child: ...,
   ///   );
@@ -1152,9 +1167,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // Internals
 
-  final GlobalKey<_ModalScopeState<T>> _scopeKey = new GlobalKey<_ModalScopeState<T>>();
-  final GlobalKey _subtreeKey = new GlobalKey();
-  final PageStorageBucket _storageBucket = new PageStorageBucket();
+  final GlobalKey<_ModalScopeState<T>> _scopeKey = GlobalKey<_ModalScopeState<T>>();
+  final GlobalKey _subtreeKey = GlobalKey();
+  final PageStorageBucket _storageBucket = PageStorageBucket();
 
   // one of the builders
   OverlayEntry _modalBarrier;
@@ -1162,25 +1177,27 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget barrier;
     if (barrierColor != null && !offstage) { // changedInternalState is called if these update
       assert(barrierColor != _kTransparent);
-      final Animation<Color> color = new ColorTween(
+      final Animation<Color> color = ColorTween(
         begin: _kTransparent,
         end: barrierColor, // changedInternalState is called if this updates
-      ).animate(new CurvedAnimation(
+      ).animate(CurvedAnimation(
         parent: animation,
         curve: Curves.ease,
       ));
-      barrier = new AnimatedModalBarrier(
+      barrier = AnimatedModalBarrier(
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        barrierSemanticsDismissible: semanticsDismissible,
       );
     } else {
-      barrier = new ModalBarrier(
+      barrier = ModalBarrier(
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        barrierSemanticsDismissible: semanticsDismissible,
       );
     }
-    return new IgnorePointer(
+    return IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when this updates
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
@@ -1193,7 +1210,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    return _modalScopeCache ??= new _ModalScope<T>(
+    return _modalScopeCache ??= _ModalScope<T>(
       key: _scopeKey,
       route: this,
       // _ModalScope calls buildTransitions() and buildChild(), defined above
@@ -1202,8 +1219,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield _modalBarrier = new OverlayEntry(builder: _buildModalBarrier);
-    yield new OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
+    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier);
+    yield OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
   }
 
   @override
@@ -1254,16 +1271,16 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
-/// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
+/// final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 /// void main() {
-///   runApp(new MaterialApp(
-///     home: new Container(),
+///   runApp(MaterialApp(
+///     home: Container(),
 ///     navigatorObservers: [routeObserver],
 ///   ));
 /// }
 ///
 /// class RouteAwareWidget extends StatefulWidget {
-///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
+///   State<RouteAwareWidget> createState() => RouteAwareWidgetState();
 /// }
 ///
 /// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
@@ -1292,7 +1309,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   }
 ///
 ///   @override
-///   Widget build(BuildContext context) => new Container();
+///   Widget build(BuildContext context) => Container();
 ///
 /// }
 /// ```
@@ -1307,7 +1324,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   void subscribe(RouteAware routeAware, R route) {
     assert(routeAware != null);
     assert(route != null);
-    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => new Set<RouteAware>());
+    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => Set<RouteAware>());
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
     }
@@ -1379,3 +1396,143 @@ abstract class RouteAware {
   /// longer visible.
   void didPushNext() { }
 }
+
+class _DialogRoute<T> extends PopupRoute<T> {
+  _DialogRoute({
+    @required RoutePageBuilder pageBuilder,
+    bool barrierDismissible = true,
+    String barrierLabel,
+    Color barrierColor = const Color(0x80000000),
+    Duration transitionDuration = const Duration(milliseconds: 200),
+    RouteTransitionsBuilder transitionBuilder,
+    RouteSettings settings,
+  })  : assert(barrierDismissible != null),
+        _pageBuilder = pageBuilder,
+        _barrierDismissible = barrierDismissible,
+        _barrierLabel = barrierLabel,
+        _barrierColor = barrierColor,
+        _transitionDuration = transitionDuration,
+        _transitionBuilder = transitionBuilder,
+        super(settings: settings);
+
+  final RoutePageBuilder _pageBuilder;
+
+  @override
+  bool get barrierDismissible => _barrierDismissible;
+  final bool _barrierDismissible;
+
+  @override
+  String get barrierLabel => _barrierLabel;
+  final String _barrierLabel;
+
+  @override
+  Color get barrierColor => _barrierColor;
+  final Color _barrierColor;
+
+  @override
+  Duration get transitionDuration => _transitionDuration;
+  final Duration _transitionDuration;
+
+  final RouteTransitionsBuilder _transitionBuilder;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return Semantics(
+      child: _pageBuilder(context, animation, secondaryAnimation),
+      scopesRoute: true,
+      explicitChildNodes: true,
+    );
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (_transitionBuilder == null) {
+      return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.linear,
+          ),
+          child: child);
+    } // Some default transition
+    return _transitionBuilder(context, animation, secondaryAnimation, child);
+  }
+}
+
+/// Displays a dialog above the current contents of the app.
+///
+/// This function allows for customization of aspects of the dialog popup.
+///
+/// This function takes a `pageBuilder` which is used to build the primary
+/// content of the route (typically a dialog widget). Content below the dialog
+/// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
+/// does not share a context with the location that `showGeneralDialog` is
+/// originally called from. Use a [StatefulBuilder] or a custom
+/// [StatefulWidget] if the dialog needs to update dynamically. The
+/// `pageBuilder` argument can not be null.
+///
+/// The `context` argument is used to look up the [Navigator] for the dialog.
+/// It is only used when the method is called. Its corresponding widget can
+/// be safely removed from the tree before the dialog is closed.
+///
+/// The `barrierDismissible` argument is used to determine whether this route
+/// can be dismissed by tapping the modal barrier. This argument defaults
+/// to true. If `barrierDismissible` is true, a non-null `barrierLabel` must be
+/// provided.
+///
+/// The `barrierLabel` argument is the semantic label used for a dismissible
+/// barrier. This argument defaults to "Dismiss".
+///
+/// The `barrierColor` argument is the color used for the modal barrier. This
+/// argument defaults to `Color(0x80000000)`.
+///
+/// The `transitionDuration` argument is used to determine how long it takes
+/// for the route to arrive on or leave off the screen. This argument defaults
+/// to 200 milliseconds.
+///
+/// The `transitionBuilder` argument is used to define how the route arrives on
+/// and leaves off the screen. By default, the transition is a linear fade of
+/// the page's contents.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
+///
+/// The dialog route created by this method is pushed to the root navigator.
+/// If the application has multiple [Navigator] objects, it may be necessary to
+/// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
+/// dialog rather than just `Navigator.pop(context, result)`.
+///
+/// See also:
+///  * [showDialog], which displays a Material-style dialog.
+///  * [showCupertinoDialog], which displays an iOS-style dialog.
+Future<T> showGeneralDialog<T>({
+  @required BuildContext context,
+  @required RoutePageBuilder pageBuilder,
+  bool barrierDismissible,
+  String barrierLabel,
+  Color barrierColor,
+  Duration transitionDuration,
+  RouteTransitionsBuilder transitionBuilder,
+}) {
+  assert(pageBuilder != null);
+  assert(!barrierDismissible || barrierLabel != null);
+  return Navigator.of(context, rootNavigator: true).push(_DialogRoute<T>(
+    pageBuilder: pageBuilder,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: barrierLabel,
+    barrierColor: barrierColor,
+    transitionDuration: transitionDuration,
+    transitionBuilder: transitionBuilder,
+  ));
+}
+
+/// Signature for the function that builds a route's primary contents.
+/// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// See [ModalRoute.buildPage] for complete definition of the parameters.
+typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
+
+/// Signature for the function that builds a route's transitions.
+/// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// See [ModalRoute.buildTransitions] for complete definition of the parameters.
+typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);

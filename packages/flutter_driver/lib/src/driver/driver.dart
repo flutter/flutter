@@ -96,7 +96,7 @@ String _timelineStreamsToString(List<TimelineStream> streams) {
   return '[$contents]';
 }
 
-final Logger _log = new Logger('FlutterDriver');
+final Logger _log = Logger('FlutterDriver');
 
 /// A convenient accessor to frequently used finders.
 ///
@@ -165,7 +165,7 @@ class FlutterDriver {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
-      throw new DriverError(
+      throw DriverError(
           'Could not determine URL to connect to application.\n'
           'Either the VM_SERVICE_URL environment variable should be set, or an explicit\n'
           'URL should be provided to the FlutterDriver.connect() method.');
@@ -186,7 +186,7 @@ class FlutterDriver {
     VMIsolate isolate = await isolateRef
         .loadRunnable()
         .timeout(isolateReadyTimeout, onTimeout: () {
-      throw new TimeoutException(
+      throw TimeoutException(
           'Timeout while waiting for the isolate to become runnable');
     });
 
@@ -203,11 +203,11 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await new Future<Null>.delayed(_kShortTimeout ~/ 10);
+      await Future<Null>.delayed(_kShortTimeout ~/ 10);
       isolate = await isolateRef.loadRunnable();
     }
 
-    final FlutterDriver driver = new FlutterDriver.connectedTo(
+    final FlutterDriver driver = FlutterDriver.connectedTo(
       client, connection.peer, isolate,
       printCommunication: printCommunication,
       logCommunicationToFile: logCommunicationToFile,
@@ -273,7 +273,7 @@ class FlutterDriver {
         // register it. If that happens time out.
         await whenServiceExtensionReady.timeout(_kLongTimeout * 2);
       } on TimeoutException catch (_) {
-        throw new DriverError(
+        throw DriverError(
           'Timed out waiting for Flutter Driver extension to become available. '
           'Ensure your test app (often: lib/main.dart) imports '
           '"package:flutter_driver/driver_extension.dart" and '
@@ -320,7 +320,7 @@ class FlutterDriver {
     final Health health = await checkHealth();
     if (health.status != HealthStatus.ok) {
       await client.close();
-      throw new DriverError('Flutter application health check failed.');
+      throw DriverError('Flutter application health check failed.');
     }
 
     _log.info('Connected to Flutter application.');
@@ -350,20 +350,20 @@ class FlutterDriver {
           .timeout(command.timeout + _kRpcGraceTime);
       _logCommunication('<<< $response');
     } on TimeoutException catch (error, stackTrace) {
-      throw new DriverError(
+      throw DriverError(
         'Failed to fulfill ${command.runtimeType}: Flutter application not responding',
         error,
         stackTrace,
       );
     } catch (error, stackTrace) {
-      throw new DriverError(
+      throw DriverError(
         'Failed to fulfill ${command.runtimeType} due to remote error',
         error,
         stackTrace,
       );
     }
     if (response['isError'])
-      throw new DriverError('Error in Flutter application: ${response['response']}');
+      throw DriverError('Error in Flutter application: ${response['response']}');
     return response['response'];
   }
 
@@ -373,35 +373,35 @@ class FlutterDriver {
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
-      file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
+      file.writeAsStringSync('${DateTime.now()} $message\n', mode: f.FileMode.append, flush: true);
     }
   }
 
   /// Checks the status of the Flutter Driver extension.
   Future<Health> checkHealth({Duration timeout}) async {
-    return Health.fromJson(await _sendCommand(new GetHealth(timeout: timeout)));
+    return Health.fromJson(await _sendCommand(GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
   Future<RenderTree> getRenderTree({Duration timeout}) async {
-    return RenderTree.fromJson(await _sendCommand(new GetRenderTree(timeout: timeout)));
+    return RenderTree.fromJson(await _sendCommand(GetRenderTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
   Future<Null> tap(SerializableFinder finder, {Duration timeout}) async {
-    await _sendCommand(new Tap(finder, timeout: timeout));
+    await _sendCommand(Tap(finder, timeout: timeout));
     return null;
   }
 
   /// Waits until [finder] locates the target.
   Future<Null> waitFor(SerializableFinder finder, {Duration timeout}) async {
-    await _sendCommand(new WaitFor(finder, timeout: timeout));
+    await _sendCommand(WaitFor(finder, timeout: timeout));
     return null;
   }
 
   /// Waits until [finder] can no longer locate the target.
   Future<Null> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
-    await _sendCommand(new WaitForAbsent(finder, timeout: timeout));
+    await _sendCommand(WaitForAbsent(finder, timeout: timeout));
     return null;
   }
 
@@ -410,7 +410,7 @@ class FlutterDriver {
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<Null> waitUntilNoTransientCallbacks({Duration timeout}) async {
-    await _sendCommand(new WaitUntilNoTransientCallbacks(timeout: timeout));
+    await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
     return null;
   }
 
@@ -428,7 +428,7 @@ class FlutterDriver {
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
   Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
-    return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
@@ -439,7 +439,7 @@ class FlutterDriver {
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
   Future<Null> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
-    return await _sendCommand(new ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
   /// Repeatedly [scroll] the widget located by [scrollable] by [dxScroll] and
@@ -484,10 +484,10 @@ class FlutterDriver {
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
     waitFor(item, timeout: timeout).then((Null value) { isVisible = true; });
-    await new Future<Null>.delayed(const Duration(milliseconds: 500));
+    await Future<Null>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
-      await new Future<Null>.delayed(const Duration(milliseconds: 500));
+      await Future<Null>.delayed(const Duration(milliseconds: 500));
     }
 
     return scrollIntoView(item, alignment: alignment);
@@ -495,7 +495,7 @@ class FlutterDriver {
 
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
-    return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
+    return GetTextResult.fromJson(await _sendCommand(GetText(finder, timeout: timeout))).text;
   }
 
   /// Enters `text` into the currently focused text input, such as the
@@ -531,7 +531,7 @@ class FlutterDriver {
   /// });
   /// ```
   Future<Null> enterText(String text, { Duration timeout }) async {
-    await _sendCommand(new EnterText(text, timeout: timeout));
+    await _sendCommand(EnterText(text, timeout: timeout));
   }
 
   /// Configures text entry emulation.
@@ -549,7 +549,7 @@ class FlutterDriver {
   /// channel will be mocked out.
   Future<Null> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
     assert(enabled != null);
-    await _sendCommand(new SetTextEntryEmulation(enabled, timeout: timeout));
+    await _sendCommand(SetTextEntryEmulation(enabled, timeout: timeout));
   }
 
   /// Sends a string and returns a string.
@@ -559,7 +559,7 @@ class FlutterDriver {
   /// callback in [enableFlutterDriverExtension] that can successfully handle
   /// these requests.
   Future<String> requestData(String message, { Duration timeout }) async {
-    return RequestDataResult.fromJson(await _sendCommand(new RequestData(message, timeout: timeout))).message;
+    return RequestDataResult.fromJson(await _sendCommand(RequestData(message, timeout: timeout))).message;
   }
 
   /// Turns semantics on or off in the Flutter app under test.
@@ -567,7 +567,7 @@ class FlutterDriver {
   /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
   Future<bool> setSemantics(bool enabled, { Duration timeout = _kShortTimeout }) async {
-    final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(new SetSemantics(enabled, timeout: timeout)));
+    final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(SetSemantics(enabled, timeout: timeout)));
     return result.changedState;
   }
 
@@ -580,7 +580,7 @@ class FlutterDriver {
   /// Semantics must be enabled to use this method, either using a platform
   /// specific shell command or [setSemantics].
   Future<int> getSemanticsId(SerializableFinder finder, { Duration timeout = _kShortTimeout}) async {
-    final Map<String, dynamic> jsonResponse = await _sendCommand(new GetSemanticsId(finder, timeout: timeout));
+    final Map<String, dynamic> jsonResponse = await _sendCommand(GetSemanticsId(finder, timeout: timeout));
     final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(jsonResponse);
     return result.id;
   }
@@ -622,7 +622,7 @@ class FlutterDriver {
     //       The two-second gap should be long enough for the GPU thread to
     //       finish rasterizing the frame, but not longer than necessary to keep
     //       driver tests as fast a possible.
-    await new Future<Null>.delayed(const Duration(seconds: 2));
+    await Future<Null>.delayed(const Duration(seconds: 2));
 
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return base64.decode(result['screenshot']);
@@ -664,7 +664,7 @@ class FlutterDriver {
       }).timeout(timeout);
       return null;
     } catch (error, stackTrace) {
-      throw new DriverError(
+      throw DriverError(
         'Failed to start tracing due to remote error',
         error,
         stackTrace,
@@ -678,9 +678,9 @@ class FlutterDriver {
       await _peer
           .sendRequest(_setVMTimelineFlagsMethodName, <String, String>{'recordedStreams': '[]'})
           .timeout(timeout);
-      return new Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName));
+      return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName));
     } catch (error, stackTrace) {
-      throw new DriverError(
+      throw DriverError(
         'Failed to stop tracing due to remote error',
         error,
         stackTrace,
@@ -722,7 +722,7 @@ class FlutterDriver {
           .sendRequest(_clearVMTimelineMethodName, <String, String>{})
           .timeout(timeout);
     } catch (error, stackTrace) {
-      throw new DriverError(
+      throw DriverError(
         'Failed to clear event timeline due to remote error',
         error,
         stackTrace,
@@ -747,12 +747,12 @@ class FlutterDriver {
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
   Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
-    await _sendCommand(new SetFrameSync(false, timeout: timeout));
+    await _sendCommand(SetFrameSync(false, timeout: timeout));
     T result;
     try {
       result = await action();
     } finally {
-      await _sendCommand(new SetFrameSync(true, timeout: timeout));
+      await _sendCommand(SetFrameSync(true, timeout: timeout));
     }
     return result;
   }
@@ -802,7 +802,7 @@ void restoreVmServiceConnectFunction() {
 ///
 /// Times out after 30 seconds.
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
-  final Stopwatch timer = new Stopwatch()..start();
+  final Stopwatch timer = Stopwatch()..start();
 
   Future<VMServiceClientConnection> attemptConnection() async {
     Uri uri = Uri.parse(url);
@@ -814,9 +814,9 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
     try {
       ws1 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
       ws2 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
-      return new VMServiceClientConnection(
-        new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
-        new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()
+      return VMServiceClientConnection(
+        VMServiceClient(IOWebSocketChannel(ws1).cast()),
+        rpc.Peer(IOWebSocketChannel(ws2).cast())..listen()
       );
     } catch (e) {
       await ws1?.close();
@@ -824,7 +824,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
 
       if (timer.elapsed < _kLongTimeout * 2) {
         _log.info('Waiting for application to start');
-        await new Future<Null>.delayed(_kPauseBetweenReconnectAttempts);
+        await Future<Null>.delayed(_kPauseBetweenReconnectAttempts);
         return attemptConnection();
       } else {
         _log.critical(
@@ -844,14 +844,14 @@ class CommonFinders {
   const CommonFinders._();
 
   /// Finds [Text] and [EditableText] widgets containing string equal to [text].
-  SerializableFinder text(String text) => new ByText(text);
+  SerializableFinder text(String text) => ByText(text);
 
   /// Finds widgets by [key]. Only [String] and [int] values can be used.
-  SerializableFinder byValueKey(dynamic key) => new ByValueKey(key);
+  SerializableFinder byValueKey(dynamic key) => ByValueKey(key);
 
   /// Finds widgets with a tooltip with the given [message].
-  SerializableFinder byTooltip(String message) => new ByTooltipMessage(message);
+  SerializableFinder byTooltip(String message) => ByTooltipMessage(message);
 
   /// Finds widgets whose class name matches the given string.
-  SerializableFinder byType(String type) => new ByType(type);
+  SerializableFinder byType(String type) => ByType(type);
 }

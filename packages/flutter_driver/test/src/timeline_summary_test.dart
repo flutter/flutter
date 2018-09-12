@@ -8,13 +8,14 @@ import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/driver/common.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
+
+import '../common.dart';
 
 void main() {
   group('TimelineSummary', () {
 
     TimelineSummary summarize(List<Map<String, dynamic>> testEvents) {
-      return new TimelineSummary.summarize(new Timeline.fromJson(<String, dynamic>{
+      return TimelineSummary.summarize(Timeline.fromJson(<String, dynamic>{
         'traceEvents': testEvents,
       }));
     }
@@ -286,11 +287,11 @@ void main() {
 
       setUp(() {
         useMemoryFileSystemForTesting();
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test.');
       });
 
       tearDown(() {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
         restoreFileSystem();
       });
 

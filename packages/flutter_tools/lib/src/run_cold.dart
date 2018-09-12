@@ -66,7 +66,7 @@ class ColdRunner extends ResidentRunner {
 
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
-      connectionInfoCompleter?.complete(new DebugConnectionInfo(
+      connectionInfoCompleter?.complete(DebugConnectionInfo(
         httpUri: flutterDevices.first.observatoryUris.first,
         wsUri: flutterDevices.first.vmServices.first.wsAddress,
       ));

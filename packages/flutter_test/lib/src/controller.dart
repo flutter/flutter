@@ -136,12 +136,8 @@ abstract class WidgetController {
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
     return allElements
-           // TODO(vegorov) replace with Iterable.whereType, when it is available. https://github.com/dart-lang/sdk/issues/27827
-           .where((Element element) => element is StatefulElement)
-           .map((Element element) {
-             final StatefulElement statefulElement = element;
-             return statefulElement.state;
-           });
+           .whereType<StatefulElement>()
+           .map((StatefulElement element) => element.state);
   }
 
   /// The matching state in the widget tree.
@@ -151,7 +147,7 @@ abstract class WidgetController {
   ///
   /// * Use [firstState] if you expect to match several states but only want the first.
   /// * Use [stateList] if you expect to match several states and want all of them.
-  T state<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T state<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().single, finder);
   }
@@ -163,7 +159,7 @@ abstract class WidgetController {
   /// matching widget has no state.
   ///
   /// * Use [state] if you only expect to match one state.
-  T firstState<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T firstState<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return _stateOf<T>(finder.evaluate().first, finder);
   }
@@ -175,16 +171,16 @@ abstract class WidgetController {
   ///
   /// * Use [state] if you only expect to match one state.
   /// * Use [firstState] if you expect to match several but only want the first.
-  Iterable<T> stateList<T extends State<StatefulWidget>>(Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  Iterable<T> stateList<T extends State>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map((Element element) => _stateOf<T>(element, finder));
   }
 
-  T _stateOf<T extends State<StatefulWidget>>(Element element, Finder finder) { // TODO(leafp): remove '<StatefulWidget>' when https://github.com/dart-lang/sdk/issues/28580 is fixed
+  T _stateOf<T extends State>(Element element, Finder finder) {
     TestAsyncUtils.guardSync();
     if (element is StatefulElement)
       return element.state;
-    throw new StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
+    throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
 
@@ -270,6 +266,17 @@ abstract class WidgetController {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
       return null;
+    });
+  }
+
+  /// Dispatch a pointer down at the center of the given widget, assuming it is
+  /// exposed.
+  ///
+  /// If the center of the widget is not exposed, this might send events to
+  /// another object.
+  Future<TestGesture> press(Finder finder, { int pointer }) {
+    return TestAsyncUtils.guard<TestGesture>(() {
+      return startGesture(getCenter(finder), pointer: pointer);
     });
   }
 
@@ -365,28 +372,28 @@ abstract class WidgetController {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard(() async {
-      final TestPointer testPointer = new TestPointer(pointer ?? _getNextPointer());
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer());
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
-      await sendEventToBinding(testPointer.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.down(startLocation, timeStamp: Duration(milliseconds: timeStamp.round())), result);
       if (initialOffset.distance > 0.0) {
-        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: Duration(milliseconds: timeStamp.round())), result);
         timeStamp += initialOffsetDelay.inMilliseconds;
         await pump(initialOffsetDelay);
       }
       for (int i = 0; i <= kMoveCount; i += 1) {
         final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-        await sendEventToBinding(testPointer.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(location, timeStamp: Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
-          await pump(new Duration(milliseconds: (timeStamp - lastTimeStamp).truncate()));
+          await pump(Duration(milliseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(testPointer.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.up(timeStamp: Duration(milliseconds: timeStamp.round())), result);
       return null;
     });
   }
@@ -455,7 +462,7 @@ abstract class WidgetController {
 
   /// Forwards the given location to the binding's hitTest logic.
   HitTestResult hitTestOnBinding(Offset location) {
-    final HitTestResult result = new HitTestResult();
+    final HitTestResult result = HitTestResult();
     binding.hitTest(result, location);
     return result;
   }
@@ -533,7 +540,7 @@ class LiveWidgetController extends WidgetController {
   @override
   Future<Null> pump(Duration duration) async {
     if (duration != null)
-      await new Future<void>.delayed(duration);
+      await Future<void>.delayed(duration);
     binding.scheduleFrame();
     await binding.endOfFrame;
   }

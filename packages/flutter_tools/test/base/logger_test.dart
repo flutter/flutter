@@ -7,16 +7,16 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
   group('AppContext', () {
     test('error', () async {
-      final BufferLogger mockLogger = new BufferLogger();
-      final VerboseLogger verboseLogger = new VerboseLogger(mockLogger);
+      final BufferLogger mockLogger = BufferLogger();
+      final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
       verboseLogger.supportsColor = false;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
@@ -35,13 +35,13 @@ void main() {
     AnsiSpinner ansiSpinner;
     AnsiStatus ansiStatus;
     int called;
-    final RegExp secondDigits = new RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
+    final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
-      mockStdio = new MockStdio();
-      ansiSpinner = new AnsiSpinner();
+      mockStdio = MockStdio();
+      ansiSpinner = AnsiSpinner();
       called = 0;
-      ansiStatus = new AnsiStatus(
+      ansiStatus = AnsiStatus(
         message: 'Hello world',
         expectSlowOperation: true,
         padding: 20,
@@ -72,8 +72,8 @@ void main() {
       expect(lines.length, equals(1));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiSpinner.stop(); }, throwsA(const isInstanceOf<AssertionError>()));
-      expect(() { ansiSpinner.cancel(); }, throwsA(const isInstanceOf<AssertionError>()));
+      expect(() { ansiSpinner.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(() { ansiSpinner.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('AnsiStatus works when cancelled', () async {
@@ -95,8 +95,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.cancel(); }, throwsA(const isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.stop(); }, throwsA(const isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('AnsiStatus works when stopped', () async {
@@ -119,8 +119,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.stop(); }, throwsA(const isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.cancel(); }, throwsA(const isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
@@ -133,7 +133,7 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Logger: () => new StdoutLogger(),
+      Logger: () => StdoutLogger(),
     });
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
@@ -148,7 +148,7 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Logger: () => new VerboseLogger(new StdoutLogger()),
+      Logger: () => VerboseLogger(StdoutLogger()),
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
@@ -157,7 +157,7 @@ void main() {
       final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
-      Logger: () => new BufferLogger(),
+      Logger: () => BufferLogger(),
     });
   });
 }
