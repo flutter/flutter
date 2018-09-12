@@ -37,7 +37,7 @@ class UnderlineTabIndicator extends Decoration {
   @override
   Decoration lerpFrom(Decoration a, double t) {
     if (a is UnderlineTabIndicator) {
-      return new UnderlineTabIndicator(
+      return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
         insets: EdgeInsetsGeometry.lerp(a.insets, insets, t),
       );
@@ -48,7 +48,7 @@ class UnderlineTabIndicator extends Decoration {
   @override
   Decoration lerpTo(Decoration b, double t) {
     if (b is UnderlineTabIndicator) {
-      return new UnderlineTabIndicator(
+      return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
         insets: EdgeInsetsGeometry.lerp(insets, b.insets, t),
       );
@@ -58,7 +58,7 @@ class UnderlineTabIndicator extends Decoration {
 
   @override
   _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
-    return new _UnderlinePainter(this, onChanged);
+    return _UnderlinePainter(this, onChanged);
   }
 }
 
@@ -75,7 +75,7 @@ class _UnderlinePainter extends BoxPainter {
     assert(rect != null);
     assert(textDirection != null);
     final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
-    return new Rect.fromLTWH(
+    return Rect.fromLTWH(
       indicator.left,
       indicator.bottom - borderSide.width,
       indicator.width,

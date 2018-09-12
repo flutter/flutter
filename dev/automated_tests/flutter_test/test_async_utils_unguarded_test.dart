@@ -16,7 +16,7 @@ Future<Null> helperFunction(WidgetTester tester) async {
 }
 
 void main() {
-  new TestTestBinding();
+  TestTestBinding();
   testWidgets('TestAsyncUtils - handling unguarded async helper functions', (WidgetTester tester) async {
     helperFunction(tester);
     helperFunction(tester);

@@ -56,7 +56,7 @@ class AndroidEmulator extends Emulator {
     // return.
     return Future.any<void>(<Future<void>>[
       launchResult,
-      new Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3))
     ]);
   }
 }
@@ -98,13 +98,13 @@ AndroidEmulator _loadEmulatorInfo(String id) {
         if (configFile.existsSync()) {
           final Map<String, String> properties =
               parseIniLines(configFile.readAsLinesSync());
-          return new AndroidEmulator(id, properties);
+          return AndroidEmulator(id, properties);
         }
       }
     }
   }
 
-  return new AndroidEmulator(id);
+  return AndroidEmulator(id);
 }
 
 @visibleForTesting

@@ -16,7 +16,7 @@ const Duration _kReconnectAttemptInterval = Duration(seconds: 3);
 
 const Duration _kRpcTimeout = Duration(seconds: 5);
 
-final Logger _log = new Logger('DartVm');
+final Logger _log = Logger('DartVm');
 
 /// Signature of an asynchronous function for astablishing a JSON RPC-2
 /// connection to a [Uri].
@@ -32,7 +32,7 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 ///
 /// Gives up after `_kConnectTimeout` has elapsed.
 Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
-  final Stopwatch timer = new Stopwatch()..start();
+  final Stopwatch timer = Stopwatch()..start();
 
   Future<json_rpc.Peer> attemptConnection(Uri uri) async {
     WebSocket socket;
@@ -40,7 +40,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
     try {
       socket =
           await WebSocket.connect(uri.toString()).timeout(_kConnectTimeout);
-      peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
+      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast())..listen();
       return peer;
     } on HttpException catch (e) {
       // This is a fine warning as this most likely means the port is stale.
@@ -55,7 +55,7 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       await socket?.close();
       if (timer.elapsed < _kConnectTimeout) {
         _log.info('Attempting to reconnect');
-        await new Future<Null>.delayed(_kReconnectAttemptInterval);
+        await Future<Null>.delayed(_kReconnectAttemptInterval);
         return attemptConnection(uri);
       } else {
         _log.warning('Connection to Fuchsia\'s Dart VM timed out at '
@@ -113,7 +113,7 @@ class DartVm {
     if (peer == null) {
       return null;
     }
-    return new DartVm._(peer, uri);
+    return DartVm._(peer, uri);
   }
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
@@ -125,8 +125,8 @@ class DartVm {
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      if (name.contains(pattern) && name.contains(new RegExp(r':main\(\)'))) {
-        result.add(new IsolateRef._fromJson(jsonIsolate, this));
+      if (name.contains(pattern) && name.contains(RegExp(r':main\(\)'))) {
+        result.add(IsolateRef._fromJson(jsonIsolate, this));
       }
     }
     return result;
@@ -145,7 +145,7 @@ class DartVm {
     final Map<String, dynamic> result = await _peer
         .sendRequest(function, params ?? <String, dynamic>{})
         .timeout(timeout, onTimeout: () {
-      throw new TimeoutException(
+      throw TimeoutException(
         'Peer connection timed out during RPC call',
         timeout,
       );
@@ -164,7 +164,7 @@ class DartVm {
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
     for (Map<String, dynamic> jsonView in rpcResponse['views']) {
-      final FlutterView flutterView = new FlutterView._fromJson(jsonView);
+      final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
       }
@@ -199,14 +199,14 @@ class FlutterView {
     if (isolate != null) {
       name = isolate['name'];
       if (name == null) {
-        throw new RpcFormatError('Unable to find name for isolate "$isolate"');
+        throw RpcFormatError('Unable to find name for isolate "$isolate"');
       }
     }
     if (id == null) {
-      throw new RpcFormatError(
+      throw RpcFormatError(
           'Unable to find view name for the following JSON structure "$json"');
     }
-    return new FlutterView._(name, id);
+    return FlutterView._(name, id);
   }
 
   /// Determines the name of the isolate associated with this view. If there is
@@ -240,20 +240,20 @@ class IsolateRef {
     final String name = json['name'];
     final String type = json['type'];
     if (type == null) {
-      throw new RpcFormatError('Unable to find type within JSON "$json"');
+      throw RpcFormatError('Unable to find type within JSON "$json"');
     }
     if (type != '@Isolate') {
-      throw new RpcFormatError('Type "$type" does not match for IsolateRef');
+      throw RpcFormatError('Type "$type" does not match for IsolateRef');
     }
     if (number == null) {
-      throw new RpcFormatError(
+      throw RpcFormatError(
           'Unable to find number for isolate ref within JSON "$json"');
     }
     if (name == null) {
-      throw new RpcFormatError(
+      throw RpcFormatError(
           'Unable to find name for isolate ref within JSON "$json"');
     }
-    return new IsolateRef._(name, int.parse(number), dartVm);
+    return IsolateRef._(name, int.parse(number), dartVm);
   }
 
   /// The full name of this Isolate (not guaranteed to be unique).

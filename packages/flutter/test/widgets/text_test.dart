@@ -115,13 +115,13 @@ void main() {
   });
 
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       const Text('\$\$', semanticsLabel: 'Double dollars', textDirection: TextDirection.ltr)
     );
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           label: 'Double dollars',
           textDirection: TextDirection.ltr,
         ),
@@ -140,14 +140,14 @@ void main() {
   });
 
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
     await tester.pumpWidget(
-      new Text.rich(
-        new TextSpan(
+      Text.rich(
+        TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            new TextSpan(text: 'world', recognizer: new TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () {}),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
           ],
@@ -156,22 +156,22 @@ void main() {
         textDirection: TextDirection.ltr,
       ),
     );
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               label: 'hello ',
               textDirection: TextDirection.ltr,
             ),
-            new TestSemantics(
+            TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
               ],
             ),
-            new TestSemantics(
+            TestSemantics(
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
             )
@@ -184,17 +184,17 @@ void main() {
   });
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
     await tester.pumpWidget(
-      new RichText(
-        text: new TextSpan(
+      RichText(
+        text: TextSpan(
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            new TextSpan(text: 'BOY', recognizer: new LongPressGestureRecognizer()..onLongPress = () {}),
+            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            new TextSpan(text: 'SIR', recognizer: new TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () {}),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
         ),
@@ -203,39 +203,39 @@ void main() {
     );
     // The expected visual order of the text is:
     //   hello world RIS OD you OD WOH YOB good bye
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+        TestSemantics.rootChild(
+          rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
-            new TestSemantics(
-              rect: new Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
+            TestSemantics(
+              rect: Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
               label: 'hello world ',
               textDirection: TextDirection.ltr, // text direction is declared as LTR.
             ),
-            new TestSemantics(
-              rect: new Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
+            TestSemantics(
+              rect: Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
               textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
               ],
             ),
-            new TestSemantics(
-              rect: new Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
+            TestSemantics(
+              rect: Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
               label: ' OD you OD WOH ', // Still RTL.
               textDirection: TextDirection.rtl,
             ),
-            new TestSemantics(
-              rect: new Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
+            TestSemantics(
+              rect: Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
               label: 'YOB',
               textDirection: TextDirection.rtl, // Still RTL.
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
               ],
             ),
-            new TestSemantics(
-              rect: new Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
+            TestSemantics(
+              rect: Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
               label: ' good bye',
               textDirection: TextDirection.rtl, // Begin as RTL but pop to LTR.
             ),

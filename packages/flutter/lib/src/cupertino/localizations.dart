@@ -80,6 +80,9 @@ abstract class CupertinoLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
+  /// The term used by the system to announce dialog alerts.
+  String get alertDialogLabel;
+
   /// Hour that is shown in [CupertinoCountdownTimerPicker] corresponding to
   /// the given hour value.
   ///
@@ -233,6 +236,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
+  String get alertDialogLabel => 'Alert';
+
+  @override
   String timerPickerHour(int hour) => hour.toString();
 
   @override
@@ -257,7 +263,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   static Future<CupertinoLocalizations> load(Locale locale) {
-    return new SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
+    return SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
   }
 
   /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]

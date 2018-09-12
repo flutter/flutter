@@ -15,7 +15,7 @@ void main() {
   group('SshCommandRunner.constructors', () {
     test('throws exception with invalid address', () async {
       SshCommandRunner newCommandRunner() {
-        return new SshCommandRunner(address: 'sillyaddress.what');
+        return SshCommandRunner(address: 'sillyaddress.what');
       }
 
       expect(newCommandRunner, throwsArgumentError);
@@ -24,7 +24,7 @@ void main() {
     test('throws exception from injection constructor with invalid addr',
         () async {
       SshCommandRunner newCommandRunner() {
-        return new SshCommandRunner.withProcessManager(
+        return SshCommandRunner.withProcessManager(
             const LocalProcessManager(),
             address: '192.168.1.1.1');
       }
@@ -39,16 +39,16 @@ void main() {
     SshCommandRunner runner;
 
     setUp(() {
-      mockProcessManager = new MockProcessManager();
-      mockProcessResult = new MockProcessResult();
+      mockProcessManager = MockProcessManager();
+      mockProcessResult = MockProcessResult();
       when(mockProcessManager.run(any)).thenAnswer(
-          (_) => new Future<MockProcessResult>.value(mockProcessResult));
+          (_) => Future<MockProcessResult>.value(mockProcessResult));
     });
 
     test('verify interface is appended to ipv6 address', () async {
       const String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';
-      runner = new SshCommandRunner.withProcessManager(
+      runner = SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: ipV6Addr,
         interface: interface,
@@ -65,7 +65,7 @@ void main() {
     test('verify no percentage symbol is added when no ipv6 interface',
         () async {
       const String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
-      runner = new SshCommandRunner.withProcessManager(
+      runner = SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: ipV6Addr,
       );
@@ -79,7 +79,7 @@ void main() {
 
     test('verify commands are split into multiple lines', () async {
       const String addr = '192.168.1.1';
-      runner = new SshCommandRunner.withProcessManager(mockProcessManager,
+      runner = SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
       when<String>(mockProcessResult.stdout).thenReturn('''this
           has
@@ -92,7 +92,7 @@ void main() {
 
     test('verify exception on nonzero process result exit code', () async {
       const String addr = '192.168.1.1';
-      runner = new SshCommandRunner.withProcessManager(mockProcessManager,
+      runner = SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
       when<String>(mockProcessResult.stdout).thenReturn('whatever');
       when(mockProcessResult.exitCode).thenReturn(1);
@@ -106,7 +106,7 @@ void main() {
     test('verify correct args with config', () async {
       const String addr = 'fe80::8eae:4cff:fef4:9247';
       const String config = '/this/that/this/and/uh';
-      runner = new SshCommandRunner.withProcessManager(
+      runner = SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: addr,
         sshConfigPath: config,
@@ -124,7 +124,7 @@ void main() {
 
     test('verify config is excluded correctly', () async {
       const String addr = 'fe80::8eae:4cff:fef4:9247';
-      runner = new SshCommandRunner.withProcessManager(
+      runner = SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: addr,
       );

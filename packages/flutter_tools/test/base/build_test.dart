@@ -75,12 +75,12 @@ void main() {
   group('SnapshotType', () {
     test('throws, if build mode is null', () {
       expect(
-        () => new SnapshotType(TargetPlatform.android_x64, null),
+        () => SnapshotType(TargetPlatform.android_x64, null),
         throwsA(anything),
       );
     });
     test('does not throw, if target platform is null', () {
-      expect(new SnapshotType(null, BuildMode.release), isNotNull);
+      expect(SnapshotType(null, BuildMode.release), isNotNull);
     });
   });
 
@@ -100,7 +100,7 @@ void main() {
     MockXcode mockXcode;
 
     setUp(() async {
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
       fs.file(kVmEntrypoints).createSync();
       fs.file(kIoEntries).createSync();
       fs.file(kSnapshotDart).createSync();
@@ -108,18 +108,18 @@ void main() {
       fs.file(kEntrypointsExtraJson).createSync();
       fs.file('.packages').writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
 
-      skyEnginePath = fs.path.fromUri(new Uri.file('/flutter/bin/cache/pkg/sky_engine'));
+      skyEnginePath = fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
       fs.directory(fs.path.join(skyEnginePath, 'lib', 'ui')).createSync(recursive: true);
       fs.directory(fs.path.join(skyEnginePath, 'sdk_ext')).createSync(recursive: true);
       fs.file(fs.path.join(skyEnginePath, '.packages')).createSync();
       fs.file(fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')).createSync();
       fs.file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
 
-      genSnapshot = new _FakeGenSnapshot();
-      snapshotter = new AOTSnapshotter();
-      mockAndroidSdk = new MockAndroidSdk();
-      mockArtifacts = new MockArtifacts();
-      mockXcode = new MockXcode();
+      genSnapshot = _FakeGenSnapshot();
+      snapshotter = AOTSnapshotter();
+      mockAndroidSdk = MockAndroidSdk();
+      mockArtifacts = MockArtifacts();
+      mockXcode = MockXcode();
       for (BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, any, mode)).thenReturn(kVmEntrypoints);
         when(mockArtifacts.getArtifactPath(Artifact.dartIoEntriesTxt, any, mode)).thenReturn(kIoEntries);
@@ -184,9 +184,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -230,9 +230,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -277,9 +277,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm,
@@ -328,9 +328,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm64,
@@ -374,9 +374,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -420,9 +420,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'snapshot_assembly.S')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -485,9 +485,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm,
@@ -536,9 +536,9 @@ void main() {
         fs.path.join(outputPath, 'snapshot.d'): '${fs.path.join(outputPath, 'vm_snapshot_data')} : ',
       };
 
-      final RunResult successResult = new RunResult(new ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
-      when(xcode.cc(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
-      when(xcode.clang(any)).thenAnswer((_) => new Future<RunResult>.value(successResult));
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm64,
@@ -583,13 +583,13 @@ void main() {
     MockArtifacts mockArtifacts;
 
     setUp(() async {
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
       fs.file(kTrace).createSync();
 
-      genSnapshot = new _FakeGenSnapshot();
-      snapshotter = new CoreJITSnapshotter();
-      mockAndroidSdk = new MockAndroidSdk();
-      mockArtifacts = new MockArtifacts();
+      genSnapshot = _FakeGenSnapshot();
+      snapshotter = CoreJITSnapshotter();
+      mockAndroidSdk = MockAndroidSdk();
+      mockArtifacts = MockArtifacts();
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{

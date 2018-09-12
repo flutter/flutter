@@ -11,7 +11,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: new ExpandIcon(
+          child: ExpandIcon(
             onPressed: (bool isExpanded) {
               expanded = !expanded;
             }
@@ -45,7 +45,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: new ExpandIcon(
+          child: ExpandIcon(
             isExpanded: false,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
@@ -56,7 +56,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-          child: new ExpandIcon(
+          child: ExpandIcon(
             isExpanded: true,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
@@ -73,7 +73,7 @@ void main() {
 
     await tester.pumpWidget(
         wrap(
-            child: new ExpandIcon(
+            child: ExpandIcon(
               isExpanded: expanded,
               onPressed: (bool isExpanded) {
                 expanded = !isExpanded;
@@ -89,7 +89,7 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
-        child: new ExpandIcon(
+        child: ExpandIcon(
           isExpanded: true,
           onPressed: (bool _) {},
         )
@@ -104,7 +104,7 @@ void main() {
     ));
 
     await tester.pumpWidget(wrap(
-      child: new ExpandIcon(
+      child: ExpandIcon(
         isExpanded: false,
         onPressed: (bool _) {},
       )
@@ -122,9 +122,9 @@ void main() {
 }
 
 Widget wrap({ Widget child }) {
-  return new MaterialApp(
-    home: new Center(
-      child: new Material(child: child),
+  return MaterialApp(
+    home: Center(
+      child: Material(child: child),
     ),
   );
 }

@@ -116,7 +116,7 @@ class OverlayEntry {
   }
 
   OverlayState _overlay;
-  final GlobalKey<_OverlayEntryState> _key = new GlobalKey<_OverlayEntryState>();
+  final GlobalKey<_OverlayEntryState> _key = GlobalKey<_OverlayEntryState>();
 
   /// Remove this entry from the overlay.
   ///
@@ -161,7 +161,7 @@ class _OverlayEntry extends StatefulWidget {
   final OverlayEntry entry;
 
   @override
-  _OverlayEntryState createState() => new _OverlayEntryState();
+  _OverlayEntryState createState() => _OverlayEntryState();
 }
 
 class _OverlayEntryState extends State<_OverlayEntry> {
@@ -241,7 +241,7 @@ class Overlay extends StatefulWidget {
         final String additional = context.widget != debugRequiredFor
           ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
           : '';
-        throw new FlutterError(
+        throw FlutterError(
           'No Overlay widget found.\n'
           '${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.\n'
           'The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.\n'
@@ -256,7 +256,7 @@ class Overlay extends StatefulWidget {
   }
 
   @override
-  OverlayState createState() => new OverlayState();
+  OverlayState createState() => OverlayState();
 }
 
 /// The current state of an [Overlay].
@@ -353,15 +353,15 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     for (int i = _entries.length - 1; i >= 0; i -= 1) {
       final OverlayEntry entry = _entries[i];
       if (onstage) {
-        onstageChildren.add(new _OverlayEntry(entry));
+        onstageChildren.add(_OverlayEntry(entry));
         if (entry.opaque)
           onstage = false;
       } else if (entry.maintainState) {
-        offstageChildren.add(new TickerMode(enabled: false, child: new _OverlayEntry(entry)));
+        offstageChildren.add(TickerMode(enabled: false, child: _OverlayEntry(entry)));
       }
     }
-    return new _Theatre(
-      onstage: new Stack(
+    return _Theatre(
+      onstage: Stack(
         fit: StackFit.expand,
         children: onstageChildren.reversed.toList(growable: false),
       ),
@@ -374,7 +374,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     super.debugFillProperties(properties);
     // TODO(jacobr): use IterableProperty instead as that would
     // provide a slightly more consistent string summary of the List.
-    properties.add(new DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
+    properties.add(DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
   }
 }
 
@@ -398,10 +398,10 @@ class _Theatre extends RenderObjectWidget {
   final List<Widget> offstage;
 
   @override
-  _TheatreElement createElement() => new _TheatreElement(this);
+  _TheatreElement createElement() => _TheatreElement(this);
 
   @override
-  _RenderTheatre createRenderObject(BuildContext context) => new _RenderTheatre();
+  _RenderTheatre createRenderObject(BuildContext context) => _RenderTheatre();
 }
 
 class _TheatreElement extends RenderObjectElement {
@@ -416,10 +416,10 @@ class _TheatreElement extends RenderObjectElement {
   _RenderTheatre get renderObject => super.renderObject;
 
   Element _onstage;
-  static final Object _onstageSlot = new Object();
+  static final Object _onstageSlot = Object();
 
   List<Element> _offstage;
-  final Set<Element> _forgottenOffstageChildren = new HashSet<Element>();
+  final Set<Element> _forgottenOffstageChildren = HashSet<Element>();
 
   @override
   void insertChildRenderObject(RenderBox child, dynamic slot) {
@@ -491,7 +491,7 @@ class _TheatreElement extends RenderObjectElement {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     _onstage = updateChild(_onstage, widget.onstage, _onstageSlot);
-    _offstage = new List<Element>(widget.offstage.length);
+    _offstage = List<Element>(widget.offstage.length);
     Element previousChild;
     for (int i = 0; i < _offstage.length; i += 1) {
       final Element newChild = inflateWidget(widget.offstage[i], previousChild);
@@ -525,7 +525,7 @@ class _RenderTheatre extends RenderBox
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! StackParentData)
-      child.parentData = new StackParentData();
+      child.parentData = StackParentData();
   }
 
   // Because both RenderObjectWithChildMixin and ContainerRenderObjectMixin
@@ -584,7 +584,7 @@ class _RenderTheatre extends RenderBox
       }
     } else {
       children.add(
-        new DiagnosticsNode.message(
+        DiagnosticsNode.message(
           'no offstage children',
           style: DiagnosticsTreeStyle.offstage,
         ),

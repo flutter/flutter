@@ -112,7 +112,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Paint get _paint {
-    return new Paint()..color =
+    return Paint()..color =
         color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
@@ -128,23 +128,23 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintVerticalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Offset thumbOrigin = new Offset(_getThumbX(size), thumbOffset);
-    final Size thumbSize = new Size(thickness, thumbExtent);
+    final Offset thumbOrigin = Offset(_getThumbX(size), thumbOffset);
+    final Size thumbSize = Size(thickness, thumbExtent);
     final Rect thumbRect = thumbOrigin & thumbSize;
     if (radius == null)
       canvas.drawRect(thumbRect, _paint);
     else
-      canvas.drawRRect(new RRect.fromRectAndRadius(thumbRect, radius), _paint);
+      canvas.drawRRect(RRect.fromRectAndRadius(thumbRect, radius), _paint);
   }
 
   void _paintHorizontalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Offset thumbOrigin = new Offset(thumbOffset, size.height - thickness);
-    final Size thumbSize = new Size(thumbExtent, thickness);
+    final Offset thumbOrigin = Offset(thumbOffset, size.height - thickness);
+    final Size thumbSize = Size(thumbExtent, thickness);
     final Rect thumbRect = thumbOrigin & thumbSize;
     if (radius == null)
       canvas.drawRect(thumbRect, _paint);
     else
-      canvas.drawRRect(new RRect.fromRectAndRadius(thumbRect, radius), _paint);
+      canvas.drawRRect(RRect.fromRectAndRadius(thumbRect, radius), _paint);
   }
 
   void _paintThumb(

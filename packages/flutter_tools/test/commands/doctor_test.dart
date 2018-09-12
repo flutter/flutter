@@ -16,7 +16,7 @@ void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
-      final ValidationResult result = await new IntelliJValidatorTestTarget('Test', installPath).validate();
+      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath).validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
       expect(result.messages, hasLength(4));
@@ -94,14 +94,14 @@ void main() {
               '• No issues found!\n'
       ));
     }, overrides: <Type, Generator>{
-      DoctorValidatorsProvider: () => new FakeDoctorValidatorsProvider()
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider()
     });
   });
 
 
  group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      expect(await new FakeQuietDoctor().diagnose(verbose: false), isTrue);
+      expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -114,7 +114,7 @@ void main() {
     });
 
     testUsingContext('validate non-verbose output format when only one category fails', () async {
-      expect(await new FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
+      expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[!] Partial Validator with only a Hint\n'
@@ -125,7 +125,7 @@ void main() {
     });
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
-      expect(await new FakePassingDoctor().diagnose(verbose: false), isTrue);
+      expect(await FakePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -141,7 +141,7 @@ void main() {
     });
 
     testUsingContext('validate non-verbose output format', () async {
-      expect(await new FakeDoctor().diagnose(verbose: false), isFalse);
+      expect(await FakeDoctor().diagnose(verbose: false), isFalse);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -159,7 +159,7 @@ void main() {
     });
 
     testUsingContext('validate verbose output format', () async {
-      expect(await new FakeDoctor().diagnose(verbose: true), isFalse);
+      expect(await FakeDoctor().diagnose(verbose: true), isFalse);
       expect(testLogger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -187,7 +187,7 @@ void main() {
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
-      expect(await new FakeGroupedDoctor().diagnose(), isTrue);
+      expect(await FakeGroupedDoctor().diagnose(), isTrue);
       expect(testLogger.statusText, equals(
               '[✓] Category 1\n'
               '    • A helpful message\n'
@@ -202,7 +202,7 @@ void main() {
     });
 
     testUsingContext('validate summary combines validator output', () async {
-      expect(await new FakeGroupedDoctor().summaryText, equals(
+      expect(await FakeGroupedDoctor().summaryText, equals(
               '[✓] Category 1 is fully installed.\n'
               '[!] Category 2 is partially installed; more components are available.\n'
               '\n'
@@ -214,52 +214,52 @@ void main() {
 
 
   group('doctor merging validator results', () {
-    final PassingGroupedValidator installed = new PassingGroupedValidator('Category', groupedCategory1);
-    final PartialGroupedValidator partial = new PartialGroupedValidator('Category', groupedCategory1);
-    final MissingGroupedValidator missing = new MissingGroupedValidator('Category', groupedCategory1);
+    final PassingGroupedValidator installed = PassingGroupedValidator('Category', groupedCategory1);
+    final PartialGroupedValidator partial = PartialGroupedValidator('Category', groupedCategory1);
+    final MissingGroupedValidator missing = MissingGroupedValidator('Category', groupedCategory1);
 
     testUsingContext('validate installed + installed = installed', () async {
-      expect(await new FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[✓]'));
     });
 
     testUsingContext('validate installed + partial = partial', () async {
-      expect(await new FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate installed + missing = partial', () async {
-      expect(await new FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate partial + installed = partial', () async {
-      expect(await new FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate partial + partial = partial', () async {
-      expect(await new FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate partial + missing = partial', () async {
-      expect(await new FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate missing + installed = partial', () async {
-      expect(await new FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate missing + partial = partial', () async {
-      expect(await new FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
+      expect(await FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     });
 
     testUsingContext('validate missing + missing = missing', () async {
-      expect(await new FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
+      expect(await FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
       expect(testLogger.statusText, startsWith('[✗]'));
     });
   });
@@ -281,9 +281,9 @@ class PassingValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage('A helpful message'));
-    messages.add(new ValidationMessage('A second, somewhat longer helpful message'));
-    return new ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+    messages.add(ValidationMessage('A helpful message'));
+    messages.add(ValidationMessage('A second, somewhat longer helpful message'));
+    return ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -293,10 +293,10 @@ class MissingValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.error('A useful error message'));
-    messages.add(new ValidationMessage('A message that is not an error'));
-    messages.add(new ValidationMessage.hint('A hint message'));
-    return new ValidationResult(ValidationType.missing, messages);
+    messages.add(ValidationMessage.error('A useful error message'));
+    messages.add(ValidationMessage('A message that is not an error'));
+    messages.add(ValidationMessage.hint('A hint message'));
+    return ValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -306,10 +306,10 @@ class PartialValidatorWithErrors extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.error('A error message indicating partial installation'));
-    messages.add(new ValidationMessage.hint('Maybe a hint will help the user'));
-    messages.add(new ValidationMessage('An extra message with some verbose details'));
-    return new ValidationResult(ValidationType.partial, messages);
+    messages.add(ValidationMessage.error('A error message indicating partial installation'));
+    messages.add(ValidationMessage.hint('Maybe a hint will help the user'));
+    messages.add(ValidationMessage('An extra message with some verbose details'));
+    return ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -319,9 +319,9 @@ class PartialValidatorWithHintsOnly extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.hint('There is a hint here'));
-    messages.add(new ValidationMessage('But there is no error'));
-    return new ValidationResult(ValidationType.partial, messages);
+    messages.add(ValidationMessage.hint('There is a hint here'));
+    messages.add(ValidationMessage('But there is no error'));
+    return ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -333,10 +333,10 @@ class FakeDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(new PassingValidator('Passing Validator'));
-      _validators.add(new MissingValidator());
-      _validators.add(new PartialValidatorWithHintsOnly());
-      _validators.add(new PartialValidatorWithErrors());
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(MissingValidator());
+      _validators.add(PartialValidatorWithHintsOnly());
+      _validators.add(PartialValidatorWithErrors());
     }
     return _validators;
   }
@@ -349,10 +349,10 @@ class FakePassingDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(new PassingValidator('Passing Validator'));
-      _validators.add(new PartialValidatorWithHintsOnly());
-      _validators.add(new PartialValidatorWithErrors());
-      _validators.add(new PassingValidator('Another Passing Validator'));
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PartialValidatorWithHintsOnly());
+      _validators.add(PartialValidatorWithErrors());
+      _validators.add(PassingValidator('Another Passing Validator'));
     }
     return _validators;
   }
@@ -366,7 +366,7 @@ class FakeSinglePassingDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(new PartialValidatorWithHintsOnly());
+      _validators.add(PartialValidatorWithHintsOnly());
     }
     return _validators;
   }
@@ -379,10 +379,10 @@ class FakeQuietDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(new PassingValidator('Passing Validator'));
-      _validators.add(new PassingValidator('Another Passing Validator'));
-      _validators.add(new PassingValidator('Validators are fun'));
-      _validators.add(new PassingValidator('Four score and seven validators ago'));
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
     }
     return _validators;
   }
@@ -394,9 +394,9 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<DoctorValidator> get validators {
     return <DoctorValidator>[
-      new PassingValidator('Passing Validator'),
-      new PassingValidator('Another Passing Validator'),
-      new PassingValidator('Providing validators is fun')
+      PassingValidator('Passing Validator'),
+      PassingValidator('Another Passing Validator'),
+      PassingValidator('Providing validators is fun')
     ];
   }
 
@@ -414,8 +414,8 @@ class PassingGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage('A helpful message'));
-    return new ValidationResult(ValidationType.installed, messages);
+    messages.add(ValidationMessage('A helpful message'));
+    return ValidationResult(ValidationType.installed, messages);
   }
 
 }
@@ -426,8 +426,8 @@ class MissingGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.error('A useful error message'));
-    return new ValidationResult(ValidationType.missing, messages);
+    messages.add(ValidationMessage.error('A useful error message'));
+    return ValidationResult(ValidationType.missing, messages);
   }
 }
 
@@ -437,8 +437,8 @@ class PartialGroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage.error('An error message for partial installation'));
-    return new ValidationResult(ValidationType.partial, messages);
+    messages.add(ValidationMessage.error('An error message for partial installation'));
+    return ValidationResult(ValidationType.partial, messages);
   }
 }
 
@@ -449,10 +449,10 @@ class FakeGroupedDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
-      _validators.add(new PassingGroupedValidator('Category 2', groupedCategory2));
-      _validators.add(new MissingGroupedValidator('Category 2', groupedCategory2));
+      _validators.add(PassingGroupedValidator('Category 1', groupedCategory1));
+      _validators.add(PassingGroupedValidator('Category 1', groupedCategory1));
+      _validators.add(PassingGroupedValidator('Category 2', groupedCategory2));
+      _validators.add(MissingGroupedValidator('Category 2', groupedCategory2));
     }
     return _validators;
   }
@@ -474,14 +474,14 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-      : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+      : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
-      new VsCodeValidatorTestTargets._(validInstall, validExtensions);
+      VsCodeValidatorTestTargets._(validInstall, validExtensions);
 
   static VsCodeValidatorTestTargets get installedWithExtension64bit =>
-      new VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
+      VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
 
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
-      new VsCodeValidatorTestTargets._(validInstall, missingExtensions);
+      VsCodeValidatorTestTargets._(validInstall, missingExtensions);
 }

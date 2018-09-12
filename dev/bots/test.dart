@@ -173,7 +173,7 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
-  final File coverageFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
+  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
     print('Expected to find: ${coverageFile.absolute}');
@@ -209,7 +209,7 @@ Future<Null> _pubRunTest(
   if (testPath != null)
     args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{};
-  if (new Directory(pubCache).existsSync()) {
+  if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
   if (enableFlutterToolAsserts) {
@@ -274,20 +274,20 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 }
 
 Future<Null> _verifyVersion(String filename) async {
-  if (!new File(filename).existsSync()) {
+  if (!File(filename).existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');
     print('$redLine');
     exit(1);
   }
-  final String version = await new File(filename).readAsString();
+  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
     print('$redLine');
     print('The version logic failed to determine the Flutter version.');
     print('$redLine');
     exit(1);
   }
-  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');

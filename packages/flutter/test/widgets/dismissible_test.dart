@@ -15,13 +15,13 @@ Widget background;
 const double crossAxisEndOffset = 0.5;
 
 Widget buildTest({ double startToEndThreshold, TextDirection textDirection = TextDirection.ltr }) {
-  return new Directionality(
+  return Directionality(
     textDirection: textDirection,
-    child: new StatefulBuilder(
+    child: StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         Widget buildDismissibleItem(int item) {
-          return new Dismissible(
-            key: new ValueKey<int>(item),
+          return Dismissible(
+            key: ValueKey<int>(item),
             direction: dismissDirection,
             onDismissed: (DismissDirection direction) {
               setState(() {
@@ -38,17 +38,17 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection = Tex
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
             crossAxisEndOffset: crossAxisEndOffset,
-            child: new Container(
+            child: Container(
               width: itemExtent,
               height: itemExtent,
-              child: new Text(item.toString()),
+              child: Text(item.toString()),
             ),
           );
         }
 
-        return new Container(
+        return Container(
           padding: const EdgeInsets.all(10.0),
-          child: new ListView(
+          child: ListView(
             scrollDirection: scrollDirection,
             itemExtent: itemExtent,
             children: <int>[0, 1, 2, 3, 4]
@@ -198,11 +198,11 @@ class Test1215DismissibleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Dismissible(
-      key: new ObjectKey(text),
-      child: new AspectRatio(
+    return Dismissible(
+      key: ObjectKey(text),
+      child: AspectRatio(
         aspectRatio: 1.0,
-        child: new Text(text),
+        child: Text(text),
       ),
     );
   }
@@ -559,13 +559,13 @@ void main() {
   // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             width: 100.0,
             height: 1000.0,
-            child: new Column(
+            child: Column(
               children: const <Widget>[
                 Test1215DismissibleWidget('1'),
                 Test1215DismissibleWidget('2'),

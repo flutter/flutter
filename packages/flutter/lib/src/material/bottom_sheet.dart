@@ -98,11 +98,11 @@ class BottomSheet extends StatefulWidget {
   final double initialHeight;
 
   @override
-  _BottomSheetState createState() => new _BottomSheetState(initialHeight);
+  _BottomSheetState createState() => _BottomSheetState(initialHeight);
 
   /// Creates an animation controller suitable for controlling a [BottomSheet].
   static AnimationController createAnimationController(TickerProvider vsync) {
-    return new AnimationController(
+    return AnimationController(
       duration: _kBottomSheetDuration,
       debugLabel: 'BottomSheet',
       vsync: vsync,
@@ -188,18 +188,18 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
+    return Material(
       child: !widget.enableDrag
         ? widget.builder(context)
-        : new SizedBox(
+        : SizedBox(
         height: _renderedHeight,
-        child: new Stack(
+        child: Stack(
           children: <Widget>[
-            new CustomSingleChildLayout(
-              delegate: new _StandardBottomSheetLayout(_renderedHeight),
+            CustomSingleChildLayout(
+              delegate: _StandardBottomSheetLayout(_renderedHeight),
               child: widget.builder(context),
             ),
-            new GestureDetector(
+            GestureDetector(
               onVerticalDragUpdate: _handleDragUpdate,
               onVerticalDragEnd: _handleDragEnd,
               child: _isFullScreen ? const LimitedBox() : null,
@@ -226,7 +226,7 @@ class _StandardBottomSheetLayout extends SingleChildLayoutDelegate {
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
 //    print(constraints.maxHeight);
-    return new BoxConstraints(
+    return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       minHeight: 56.0,
@@ -254,7 +254,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return new BoxConstraints(
+    return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       minHeight: 56.0,
@@ -264,7 +264,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return new Offset(0.0, size.height - childSize.height * progress);
+    return Offset(0.0, size.height - childSize.height * progress);
   }
 
   @override
@@ -279,7 +279,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final _ModalBottomSheetRoute<T> route;
 
   @override
-  _ModalBottomSheetState<T> createState() => new _ModalBottomSheetState<T>();
+  _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
@@ -298,24 +298,24 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         break;
     }
 
-    return new GestureDetector(
+    return GestureDetector(
       excludeFromSemantics: true,
       onTap: () => Navigator.pop(context),
-      child: new AnimatedBuilder(
+      child: AnimatedBuilder(
         animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
           // Disable the initial animation when accessible navigation is on so
           // that the semantics are added to the tree at the correct time.
           final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
-          return new Semantics(
+          return Semantics(
             scopesRoute: true,
             namesRoute: true,
             label: routeLabel,
             explicitChildNodes: true,
-            child: new ClipRect(
-              child: new CustomSingleChildLayout(
-                delegate: new _ModalBottomSheetLayout(animationValue),
-                child: new BottomSheet(
+            child: ClipRect(
+              child: CustomSingleChildLayout(
+                delegate: _ModalBottomSheetLayout(animationValue),
+                child: BottomSheet(
                   animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
                   builder: widget.route.builder,
@@ -365,13 +365,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
-    Widget bottomSheet = new MediaQuery.removePadding(
+    Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: new _ModalBottomSheet<T>(route: this),
+      child: _ModalBottomSheet<T>(route: this),
     );
     if (theme != null)
-      bottomSheet = new Theme(data: theme, child: bottomSheet);
+      bottomSheet = Theme(data: theme, child: bottomSheet);
     return bottomSheet;
   }
 }
@@ -408,7 +408,7 @@ Future<T> showModalBottomSheet<T>({
 }) {
   assert(context != null);
   assert(builder != null);
-  return Navigator.push(context, new _ModalBottomSheetRoute<T>(
+  return Navigator.push(context, _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
