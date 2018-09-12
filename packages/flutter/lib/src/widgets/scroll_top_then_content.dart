@@ -55,7 +55,7 @@ class ScrollTopThenContentController extends ScrollController {
   @override
   ScrollTopThenContentPosition createScrollPosition(ScrollPhysics physics,
       ScrollContext context, ScrollPosition oldPosition) {
-    _position = new ScrollTopThenContentPosition(
+    _position = ScrollTopThenContentPosition(
       physics: physics,
       context: context,
       top: _top,
@@ -118,14 +118,14 @@ class ScrollTopThenContentController extends ScrollController {
   void notifyTopListeners() {
     if (_topListeners != null) {
       final List<VoidCallback> localListeners =
-      new List<VoidCallback>.from(_topListeners);
+      List<VoidCallback>.from(_topListeners);
       for (VoidCallback listener in localListeners) {
         try {
           if (_topListeners.contains(listener)) {
             listener();
           }
         } catch (exception, stack) {
-          FlutterError.reportError(new FlutterErrorDetails(
+          FlutterError.reportError(FlutterErrorDetails(
               exception: exception,
               stack: stack,
               library: 'widgets library',
@@ -277,7 +277,7 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
     physics.createBallisticSimulation(this, velocity);
 
     if (simulation != null) {
-      controller = new AnimationController.unbounded(
+      controller = AnimationController.unbounded(
         debugLabel: '$runtimeType',
         vsync: context.vsync,
       )
