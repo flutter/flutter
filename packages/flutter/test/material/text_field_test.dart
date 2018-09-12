@@ -2895,6 +2895,9 @@ void main() {
             TestSemantics(
               id: 3,
               label: '10 characters remaining',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLiveRegion,
+              ],
               textDirection: TextDirection.ltr,
             ),
           ],
