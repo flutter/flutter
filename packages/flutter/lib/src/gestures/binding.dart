@@ -80,6 +80,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   void _handlePointerEvent(PointerEvent event) {
     assert(!locked);
     HitTestResult result;
+    bool propagating = false;
     if (event is PointerDownEvent) {
       assert(!_hitTests.containsKey(event.pointer));
       result = new HitTestResult();
@@ -92,13 +93,19 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
       }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       result = _hitTests.remove(event.pointer);
+    } else if (event is PointerScrollEvent) {
+      result = new HitTestResult();
+      // Pointer scroll events are instantaneous, not gesture-based, so use
+      // the propagating dispatch model.
+      propagating = true;
+      hitTest(result, event.position);
     } else if (event.down) {
       result = _hitTests[event.pointer];
     } else {
       return; // We currently ignore add, remove, and hover move events.
     }
     if (result != null)
-      dispatchEvent(event, result);
+      dispatchEvent(event, result, propagating: propagating);
   }
 
   /// Determine which [HitTestTarget] objects are located at a given position.
@@ -110,15 +117,20 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   /// Dispatch an event to a hit test result's path.
   ///
   /// This sends the given event to every [HitTestTarget] in the entries
-  /// of the given [HitTestResult], and catches exceptions that any of
-  /// the handlers might throw. The `result` argument must not be null.
+  /// of the given [HitTestResult], stopping early if `propagating` is true and
+  /// a handler retruns `true`, and catches exceptions that any of the handlers
+  /// might throw. The `result` argument must not be null.
   @override // from HitTestDispatcher
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
+  void dispatchEvent(PointerEvent event, HitTestResult result, {bool propagating = false}) {
     assert(!locked);
     assert(result != null);
     for (HitTestEntry entry in result.path) {
       try {
-        entry.target.handleEvent(event, entry);
+        if (propagating) {
+          entry.target.handlePropagatingEvent(event, entry);
+        } else {
+          entry.target.handleEvent(event, entry);
+        }
       } catch (exception, stack) {
         FlutterError.reportError(new FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
@@ -146,6 +158,11 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
     } else if (event is PointerUpEvent) {
       gestureArena.sweep(event.pointer);
     }
+  }
+
+  @override // from HitTestTarget
+  bool handlePropagatingEvent(PointerEvent event, HitTestEntry entry) {
+    return false;
   }
 }
 

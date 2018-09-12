@@ -2460,6 +2460,14 @@ typedef void PointerUpEventListener(PointerUpEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef void PointerCancelEventListener(PointerCancelEvent event);
 
+/// Signature for listening to [PointerScrollEvent] events.
+///
+/// Implementations should return true if the event was handled and should
+/// not be propagated further.
+///
+/// Used by [Listener] and [RenderPointerListener].
+typedef bool PointerScrollEventListener(PointerScrollEvent event);
+
 /// Calls callbacks in response to pointer events.
 ///
 /// If it has a child, defers to the child for sizing behavior.
@@ -2474,6 +2482,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     this.onPointerMove,
     this.onPointerUp,
     this.onPointerCancel,
+    this.onPointerScroll,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child
   }) : super(behavior: behavior, child: child);
@@ -2491,6 +2500,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when the input from a pointer that triggered an [onPointerDown] is
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
+
+  /// Called when a pointer scrolls while over this object.
+  PointerScrollEventListener onPointerScroll;
 
   @override
   void performResize() {
@@ -2511,6 +2523,14 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 
   @override
+  bool handlePropagatingEvent(PointerEvent event, HitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
+    if (onPointerScroll != null && event is PointerScrollEvent)
+      return onPointerScroll(event);
+    return false;
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
@@ -2522,6 +2542,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
+    if (onPointerScroll != null)
+      listeners.add('scroll');
     if (listeners.isEmpty)
       listeners.add('<none>');
     properties.add(new IterableProperty<String>('listeners', listeners));

@@ -7,7 +7,7 @@ import 'dart:ui' as ui show PointerData, PointerChange;
 import 'events.dart';
 
 class _PointerState {
-  _PointerState(this.lastPosition);
+  _PointerState(this.lastPosition, this.kind);
 
   int get pointer => _pointer; // The identifier used in PointerEvent objects.
   int _pointer;
@@ -23,12 +23,15 @@ class _PointerState {
     assert(!_down);
     _down = true;
   }
+
   void setUp() {
     assert(_down);
     _down = false;
   }
 
   Offset lastPosition;
+
+  PointerDeviceKind kind;
 
   @override
   String toString() {
@@ -50,7 +53,7 @@ class PointerEventConverter {
   static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
     return _pointers.putIfAbsent(
       datum.device,
-      () => new _PointerState(position)
+      () => new _PointerState(position, datum.kind)
     );
   }
 
@@ -88,7 +91,7 @@ class PointerEventConverter {
             radiusMin: radiusMin,
             radiusMax: radiusMax,
             orientation: datum.orientation,
-            tilt: datum.tilt
+            tilt: datum.tilt,
           );
           break;
         case ui.PointerChange.hover:
@@ -110,7 +113,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
           }
           final Offset offset = position - state.lastPosition;
@@ -132,7 +135,7 @@ class PointerEventConverter {
             radiusMin: radiusMin,
             radiusMax: radiusMax,
             orientation: datum.orientation,
-            tilt: datum.tilt
+            tilt: datum.tilt,
           );
           state.lastPosition = position;
           break;
@@ -155,7 +158,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
           }
           if (state.lastPosition != position) {
@@ -205,7 +208,66 @@ class PointerEventConverter {
             radiusMin: radiusMin,
             radiusMax: radiusMax,
             orientation: datum.orientation,
-            tilt: datum.tilt
+            tilt: datum.tilt,
+          );
+          break;
+        case ui.PointerChange.scroll:
+          final bool alreadyAdded = _pointers.containsKey(datum.device);
+          final _PointerState state = _ensureStateForPointer(datum, position);
+          if (!alreadyAdded) {
+            assert(state.lastPosition == position);
+            yield new PointerAddedEvent(
+              timeStamp: timeStamp,
+              kind: kind,
+              device: datum.device,
+              position: position,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
+            );
+          }
+          if (state.lastPosition != position) {
+            // Synthesize a hover of the pointer to the scroll location before
+            // sending the scroll event, if necessary, so that clients don't have
+            // to worry about native ordering of hover and scroll events.
+            final Offset offset = position - state.lastPosition;
+            state.lastPosition = position;
+            yield new PointerHoverEvent(
+              timeStamp: timeStamp,
+              kind: state.kind,
+              device: datum.device,
+              position: position,
+              delta: offset,
+              buttons: datum.buttons,
+              obscured: datum.obscured,
+              pressureMin: datum.pressureMin,
+              pressureMax: datum.pressureMax,
+              distance: datum.distance,
+              distanceMax: datum.distanceMax,
+              radiusMajor: radiusMajor,
+              radiusMinor: radiusMinor,
+              radiusMin: radiusMin,
+              radiusMax: radiusMax,
+              orientation: datum.orientation,
+              tilt: datum.tilt,
+              synthesized: true,
+            );
+            state.lastPosition = position;
+          }
+          final Offset scrollDelta = new Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+          yield new PointerScrollEvent(
+            timeStamp: timeStamp,
+            pointer: state.pointer,
+            kind: kind,
+            device: datum.device,
+            position: position,
+            scrollDelta: scrollDelta,
           );
           break;
         case ui.PointerChange.move:
@@ -235,7 +297,7 @@ class PointerEventConverter {
             radiusMin: radiusMin,
             radiusMax: radiusMax,
             orientation: datum.orientation,
-            tilt: datum.tilt
+            tilt: datum.tilt,
           );
           break;
         case ui.PointerChange.up:
@@ -295,7 +357,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
           } else {
             yield new PointerCancelEvent(
@@ -315,7 +377,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
           }
           break;
@@ -340,7 +402,7 @@ class PointerEventConverter {
               radiusMin: radiusMin,
               radiusMax: radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
             );
           }
           _pointers.remove(datum.device);
@@ -353,13 +415,12 @@ class PointerEventConverter {
             pressureMax: datum.pressureMax,
             distanceMax: datum.distanceMax,
             radiusMin: radiusMin,
-            radiusMax: radiusMax
+            radiusMax: radiusMax,
           );
           break;
+        }
       }
     }
-  }
-
   static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) =>
       physicalPixels == null ? null : physicalPixels / devicePixelRatio;
 }

@@ -114,6 +114,7 @@ abstract class PointerEvent {
     this.radiusMax = 0.0,
     this.orientation = 0.0,
     this.tilt = 0.0,
+    this.scrollDelta = Offset.zero,
     this.synthesized = false,
   });
 
@@ -236,6 +237,11 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
+  /// For PointerChange.scroll:
+  ///
+  /// The amount to scroll in the x direction, in logical pixels.
+  final Offset scrollDelta;
+
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
@@ -275,6 +281,7 @@ abstract class PointerEvent {
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
              'tilt: $tilt, '
+             'scrollDelta: $scrollDelta, '
              'synthesized: $synthesized'
            ')';
   }
@@ -550,6 +557,30 @@ class PointerUpEvent extends PointerEvent {
     radiusMax: radiusMax,
     orientation: orientation,
     tilt: tilt
+  );
+}
+
+/// The pointer issued a scroll event.
+///
+/// For example, the scroll wheel on a mouse was scrolled.
+class PointerScrollEvent extends PointerEvent {
+  /// Creates a pointer scroll event.
+  ///
+  /// All of the argument must be non-null.
+  const PointerScrollEvent({
+    Duration timeStamp = Duration.zero,
+    int pointer = 0,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device = 0,
+    Offset position = Offset.zero,
+    Offset scrollDelta = Offset.zero
+  }) : super(
+    timeStamp: timeStamp,
+    pointer: pointer,
+    kind: kind,
+    device: device,
+    position: position,
+    scrollDelta: scrollDelta
   );
 }
 
