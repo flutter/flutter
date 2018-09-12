@@ -1,4 +1,4 @@
-Signature: f683ca056a64c7d0b66ff352887d98ae
+Signature: 1e98ae8c9000bfb017653df6f739f132
 
 UNUSED LICENSES:
 
@@ -1521,6 +1521,20 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.h
