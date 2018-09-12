@@ -16,6 +16,7 @@ import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
+import 'tab_bar_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -137,6 +138,7 @@ class ThemeData extends Diagnosticable {
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
     InputDecorationTheme inputDecorationTheme,
+    TabBarTheme tabBarTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
@@ -185,6 +187,7 @@ class ThemeData extends Diagnosticable {
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
+  tabBarTheme ??= const TabBarTheme();
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
@@ -248,6 +251,7 @@ class ThemeData extends Diagnosticable {
       primaryTextTheme: primaryTextTheme,
       accentTextTheme: accentTextTheme,
       inputDecorationTheme: inputDecorationTheme,
+      tabBarTheme: tabBarTheme,
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
@@ -303,6 +307,7 @@ class ThemeData extends Diagnosticable {
     @required this.primaryTextTheme,
     @required this.accentTextTheme,
     @required this.inputDecorationTheme,
+    @required this.tabBarTheme,
     @required this.iconTheme,
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
@@ -344,6 +349,7 @@ class ThemeData extends Diagnosticable {
        assert(primaryTextTheme != null),
        assert(accentTextTheme != null),
        assert(inputDecorationTheme != null),
+       assert(tabBarTheme != null),
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
@@ -519,6 +525,9 @@ class ThemeData extends Diagnosticable {
   /// See [InputDecoration.applyDefaults].
   final InputDecorationTheme inputDecorationTheme;
 
+  /// A theme for customizing the size, shape, and color of the tab bar indicator.
+  final TabBarTheme tabBarTheme;
+
   /// An icon theme that contrasts with the card and canvas colors.
   final IconThemeData iconTheme;
 
@@ -596,6 +605,7 @@ class ThemeData extends Diagnosticable {
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
     InputDecorationTheme inputDecorationTheme,
+    TabBarTheme tabBarTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
@@ -640,6 +650,7 @@ class ThemeData extends Diagnosticable {
       primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
       accentTextTheme: accentTextTheme ?? this.accentTextTheme,
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
+      tabBarTheme: tabBarTheme ?? this.tabBarTheme,
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
@@ -770,6 +781,7 @@ class ThemeData extends Diagnosticable {
       primaryTextTheme: TextTheme.lerp(a.primaryTextTheme, b.primaryTextTheme, t),
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
       inputDecorationTheme: t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
+      tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
@@ -823,6 +835,7 @@ class ThemeData extends Diagnosticable {
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.accentTextTheme == accentTextTheme) &&
            (otherData.inputDecorationTheme == inputDecorationTheme) &&
+           (otherData.tabBarTheme == tabBarTheme) &&
            (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
@@ -883,6 +896,7 @@ class ThemeData extends Diagnosticable {
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
+     tabBarTheme,
         ),
       ),
     );
@@ -924,6 +938,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
     properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme));
+    properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
     properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
     properties.add(DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));

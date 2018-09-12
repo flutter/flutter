@@ -15,6 +15,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
 import 'theme.dart';
@@ -504,6 +505,8 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// Uses values from [ThemeData.tabBarTheme] if its set in the current context.
+///
 /// See also:
 ///
 ///  * [TabBarView], which displays page views that correspond to each tab.
@@ -741,7 +744,7 @@ class _TabBarState extends State<TabBar> {
     _indicatorPainter = _controller == null ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
-      indicatorSize: widget.indicatorSize,
+      indicatorSize: widget.indicatorSize ?? Theme.of(context).tabBarTheme.indicatorSize,
       tabKeys: _tabKeys,
       old: _indicatorPainter,
     );
@@ -851,7 +854,7 @@ class _TabBarState extends State<TabBar> {
   void _handleTabControllerTick() {
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
-      if (widget.isScrollable)
+      if (_isScrollable)
         _scrollToCurrentIndex();
     }
     setState(() {
@@ -875,12 +878,24 @@ class _TabBarState extends State<TabBar> {
     return _TabStyle(
       animation: animation,
       selected: selected,
-      labelColor: widget.labelColor,
-      unselectedLabelColor: widget.unselectedLabelColor,
+      labelColor: _labelColor,
+      unselectedLabelColor: _unselectedLabelColor,
       labelStyle: widget.labelStyle,
       unselectedLabelStyle: widget.unselectedLabelStyle,
       child: child,
     );
+  }
+
+  bool get _isScrollable {
+    return widget.isScrollable ?? Theme.of(context).tabBarTheme.isScrollable;
+  }
+
+  Color get _labelColor {
+    return widget.labelColor ?? Theme.of(context).tabBarTheme.labelColor;
+  }
+
+  Color get _unselectedLabelColor {
+    return widget.unselectedLabelColor ?? Theme.of(context).tabBarTheme.unselectedLabelColor;
   }
 
   @override
@@ -957,7 +972,7 @@ class _TabBarState extends State<TabBar> {
           ),
         ),
       );
-      if (!widget.isScrollable)
+      if (!_isScrollable)
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
     }
 
@@ -966,8 +981,8 @@ class _TabBarState extends State<TabBar> {
       child: _TabStyle(
         animation: kAlwaysDismissedAnimation,
         selected: false,
-        labelColor: widget.labelColor,
-        unselectedLabelColor: widget.unselectedLabelColor,
+        labelColor: _labelColor,
+        unselectedLabelColor: _unselectedLabelColor,
         labelStyle: widget.labelStyle,
         unselectedLabelStyle: widget.unselectedLabelStyle,
         child: _TabLabelBar(
@@ -977,7 +992,7 @@ class _TabBarState extends State<TabBar> {
       ),
     );
 
-    if (widget.isScrollable) {
+    if (_isScrollable) {
       _scrollController ??= _TabBarScrollController(this);
       tabBar = SingleChildScrollView(
         scrollDirection: Axis.horizontal,
