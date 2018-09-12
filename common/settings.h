@@ -23,6 +23,9 @@ using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
 
 struct Settings {
   // VM settings
+  std::string script_snapshot_path;
+  std::string platform_kernel_path;
+
   std::string vm_snapshot_data_path;
   std::string vm_snapshot_instr_path;
   std::string isolate_snapshot_data_path;

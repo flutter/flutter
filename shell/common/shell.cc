@@ -875,8 +875,12 @@ bool Shell::OnServiceProtocolRunInView(
   auto main_script_file_mapping =
       std::make_unique<fml::FileMapping>(main_script_path, false);
 
-  auto isolate_configuration = IsolateConfiguration::CreateForKernel(
-      std::move(main_script_file_mapping));
+  auto isolate_configuration =
+      blink::DartVM::IsKernelMapping(main_script_file_mapping.get())
+          ? IsolateConfiguration::CreateForSnapshot(
+                std::move(main_script_file_mapping))
+          : IsolateConfiguration::CreateForSource(main_script_path,
+                                                  packages_path);
 
   RunConfiguration configuration(std::move(isolate_configuration));
 

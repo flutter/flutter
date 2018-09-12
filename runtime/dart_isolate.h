@@ -68,8 +68,13 @@ class DartIsolate : public UIDartState {
   bool PrepareForRunningFromPrecompiledCode();
 
   FML_WARN_UNUSED_RESULT
-  bool PrepareForRunningFromKernel(std::shared_ptr<const fml::Mapping> kernel,
-                                   bool last_piece = true);
+  bool PrepareForRunningFromSnapshot(
+      std::shared_ptr<const fml::Mapping> snapshot,
+      bool last_piece = true);
+
+  FML_WARN_UNUSED_RESULT
+  bool PrepareForRunningFromSource(const std::string& main_source_file,
+                                   const std::string& packages);
 
   FML_WARN_UNUSED_RESULT
   bool Run(const std::string& entrypoint);
@@ -91,7 +96,12 @@ class DartIsolate : public UIDartState {
   std::weak_ptr<DartIsolate> GetWeakIsolatePtr();
 
  private:
-  bool LoadKernel(std::shared_ptr<const fml::Mapping> mapping, bool last_piece);
+  bool LoadScriptSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                          bool last_piece);
+  bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                          bool last_piece);
+  bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
+                    bool last_piece);
 
   class AutoFireClosure {
    public:
