@@ -12,17 +12,17 @@ import 'package:flutter/widgets.dart';
 // is at 0). The top of the bottom widget is 500 when it has been
 // scrolled completely into view.
 Widget buildFrame(ScrollPhysics physics) {
-  return new SingleChildScrollView(
-    key: new UniqueKey(),
+  return SingleChildScrollView(
+    key: UniqueKey(),
     physics: physics,
-    child: new SizedBox(
+    child: SizedBox(
       height: 650.0,
-      child: new Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(height: 100.0, child: Text('top', textDirection: TextDirection.ltr)),
-          new Expanded(child: new Container()),
+          Expanded(child: Container()),
           const SizedBox(height: 100.0, child: Text('bottom', textDirection: TextDirection.ltr)),
         ],
       ),
@@ -41,7 +41,7 @@ void main() {
       final RenderBox textBox = tester.renderObject(find.text(target));
       final Offset widgetOrigin = textBox.localToGlobal(Offset.zero);
       await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
-      return new Future<Offset>.value(widgetOrigin);
+      return Future<Offset>.value(widgetOrigin);
     }
 
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));

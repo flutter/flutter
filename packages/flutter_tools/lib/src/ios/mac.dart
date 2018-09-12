@@ -60,10 +60,10 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(<String>['idevice_id', '-l']);
       if (result.exitCode != 0)
-        throw new ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout;
     } on ProcessException {
-      throw new ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
   }
 
@@ -71,10 +71,10 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
       if (result.exitCode != 0)
-        throw new ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout.trim();
     } on ProcessException {
-      throw new ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
   }
 
@@ -189,18 +189,18 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign = true,
   bool usesTerminalUi = true,
 }) async {
-  if (!await upgradePbxProjWithFlutterAssets(app.name, app.appDirectory))
-    return new XcodeBuildResult(success: false);
+  if (!await upgradePbxProjWithFlutterAssets(app.project))
+    return XcodeBuildResult(success: false);
 
   if (!_checkXcodeVersion())
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
 
-  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
+  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.directory.path);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
   }
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
@@ -212,7 +212,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       printError('The Xcode project does not define custom schemes.');
       printError('You cannot use the --flavor option.');
     }
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
   }
   final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
@@ -221,7 +221,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
   }
 
   Map<String, String> autoSigningConfigs;
@@ -230,34 +230,31 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
-  final Directory appDirectory = fs.directory(app.appDirectory);
-  await _addServicesToBundle(appDirectory);
+  await _addServicesToBundle(app.project.directory);
 
   final FlutterProject project = await FlutterProject.current();
   await updateGeneratedXcodeProperties(
     project: project,
     targetOverride: targetOverride,
-    previewDart2: buildInfo.previewDart2,
     buildInfo: buildInfo,
   );
 
   if (hasPlugins(project)) {
-    final String iosPath = fs.path.join(fs.currentDirectory.path, app.appDirectory);
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
-    final Fingerprinter fingerprinter = new Fingerprinter(
+    final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
       paths: <String>[
-        _getPbxProjPath(app.appDirectory),
-        fs.path.join(iosPath, 'Podfile'),
-        fs.path.join(iosPath, 'Flutter', 'Generated.xcconfig'),
+        app.project.xcodeProjectInfoFile.path,
+        app.project.podfile.path,
+        app.project.generatedXcodePropertiesFile.path,
       ],
       properties: <String, String>{},
     );
     final bool didPodInstall = await cocoaPods.processPods(
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
+      isSwift: project.ios.isSwift,
       dependenciesChanged: !await fingerprinter.doesFingerprintMatch()
     );
     if (didPodInstall)
@@ -288,7 +285,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
+  final List<FileSystemEntity> contents = app.project.directory.listSync();
   for (FileSystemEntity entity in contents) {
     if (fs.path.extension(entity.path) == '.xcworkspace') {
       buildCommands.addAll(<String>[
@@ -349,11 +346,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
-  final Stopwatch buildStopwatch = new Stopwatch()..start();
+  final Stopwatch buildStopwatch = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
-    workingDirectory: app.appDirectory,
+    workingDirectory: app.project.directory.path,
     allowReentrantFlutter: true
   );
   buildSubStatus?.stop();
@@ -369,7 +366,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    (new List<String>
+    (List<String>
         .from(buildCommands)
         ..add('-showBuildSettings'))
         // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
@@ -381,7 +378,7 @@ Future<XcodeBuildResult> buildXcodeProject({
             '-allowProvisioningDeviceRegistration',
           ].contains(buildCommand);
         }).toList(),
-    workingDirectory: app.appDirectory,
+    workingDirectory: app.project.directory.path,
   ));
 
   if (buildResult.exitCode != 0) {
@@ -394,13 +391,13 @@ Future<XcodeBuildResult> buildXcodeProject({
       printStatus('Xcode\'s output:\n↳');
       printStatus(buildResult.stdout, indent: 4);
     }
-    return new XcodeBuildResult(
+    return XcodeBuildResult(
       success: false,
       stdout: buildResult.stdout,
       stderr: buildResult.stderr,
-      xcodeBuildExecution: new XcodeBuildExecution(
+      xcodeBuildExecution: XcodeBuildExecution(
         buildCommands: buildCommands,
-        appDirectory: app.appDirectory,
+        appDirectory: app.project.directory.path,
         buildForPhysicalDevice: buildForDevice,
         buildSettings: buildSettings,
       ),
@@ -418,14 +415,14 @@ Future<XcodeBuildResult> buildXcodeProject({
       outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
       if (fs.isDirectorySync(outputDir)) {
         // Previous output directory might have incompatible artifacts
-        // (for example, kernel binary files produced from previous `--preview-dart-2` run).
+        // (for example, kernel binary files produced from previous run).
         fs.directory(outputDir).deleteSync(recursive: true);
       }
       copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));
     } else {
       printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
-    return new XcodeBuildResult(success: true, output: outputDir);
+    return XcodeBuildResult(success: true, output: outputDir);
   }
 }
 
@@ -568,9 +565,6 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
   }
 }
 
-/// The path of the Xcode project file.
-String _getPbxProjPath(String appPath) => fs.path.join(fs.currentDirectory.path, appPath, 'Runner.xcodeproj', 'project.pbxproj');
-
 void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
   printTrace("Creating service definitions manifest at '${manifest.path}'");
   final List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => <String, String>{
@@ -583,8 +577,8 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
 }
 
-Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {
-  final File xcodeProjectFile = fs.file(_getPbxProjPath(appPath));
+Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
+  final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(await xcodeProjectFile.exists());
   final List<String> lines = await xcodeProjectFile.readAsLines();
 
@@ -601,7 +595,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {
   const String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
 
 
-  printStatus("Upgrading project.pbxproj of $app' to include the "
+  printStatus("Upgrading project.pbxproj of ${project.hostAppBundleName}' to include the "
               "'flutter_assets' directory");
 
   if (!lines.contains(l1) || !lines.contains(l3) ||
@@ -638,7 +632,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app, String appPath) async {
     lines.remove(l12);
   }
 
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   lines.forEach(buffer.writeln);
   await xcodeProjectFile.writeAsString(buffer.toString());
   return true;

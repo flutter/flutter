@@ -100,7 +100,7 @@ void main() {
     });
     test('can handle method call of unimplemented method', () async {
       channel.setMethodCallHandler((MethodCall call) async {
-        throw new MissingPluginException();
+        throw MissingPluginException();
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
@@ -120,7 +120,7 @@ void main() {
     });
     test('can handle method call with expressive error result', () async {
       channel.setMethodCallHandler((MethodCall call) async {
-        throw new PlatformException(code: 'bad', message: 'sayHello failed', details: null);
+        throw PlatformException(code: 'bad', message: 'sayHello failed', details: null);
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
@@ -139,7 +139,7 @@ void main() {
     });
     test('can handle method call with other error result', () async {
       channel.setMethodCallHandler((MethodCall call) async {
-        throw new ArgumentError('bad');
+        throw ArgumentError('bad');
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
@@ -190,7 +190,7 @@ void main() {
       );
       final List<dynamic> events = await channel.receiveBroadcastStream('hello').toList();
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
-      await new Future<Null>.delayed(Duration.zero);
+      await Future<Null>.delayed(Duration.zero);
       expect(canceled, isTrue);
     });
     test('can receive error event', () async {
@@ -212,7 +212,7 @@ void main() {
       final List<dynamic> events = <dynamic>[];
       final List<dynamic> errors = <dynamic>[];
       channel.receiveBroadcastStream('hello').listen(events.add, onError: errors.add);
-      await new Future<Null>.delayed(Duration.zero);
+      await Future<Null>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
       expect(errors[0], isInstanceOf<PlatformException>());

@@ -167,13 +167,13 @@ class Scrollable extends StatefulWidget {
   Axis get axis => axisDirectionToAxis(axisDirection);
 
   @override
-  ScrollableState createState() => new ScrollableState();
+  ScrollableState createState() => ScrollableState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
+    properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -210,7 +210,7 @@ class Scrollable extends StatefulWidget {
     }
 
     if (futures.isEmpty || duration == Duration.zero)
-      return new Future<Null>.value();
+      return Future<Null>.value();
     if (futures.length == 1)
       return futures.single;
     return Future.wait<Null>(futures).then((List<Null> _) => null);
@@ -281,7 +281,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     }
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
-      ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
+      ?? ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
     assert(position != null);
     controller?.attach(position);
   }
@@ -328,7 +328,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // SEMANTICS
 
-  final GlobalKey _scrollSemanticsKey = new GlobalKey();
+  final GlobalKey _scrollSemanticsKey = GlobalKey();
 
   @override
   @protected
@@ -340,8 +340,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // GESTURE RECOGNITION AND POINTER IGNORING
 
-  final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
-  final GlobalKey _ignorePointerKey = new GlobalKey();
+  final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = GlobalKey<RawGestureDetectorState>();
+  final GlobalKey _ignorePointerKey = GlobalKey();
 
   // This field is set during layout, and then reused until the next time it is set.
   Map<Type, GestureRecognizerFactory> _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
@@ -361,8 +361,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => new VerticalDragGestureRecognizer(),
+            VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+              () => VerticalDragGestureRecognizer(),
               (VerticalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -379,8 +379,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => new HorizontalDragGestureRecognizer(),
+            HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+              () => HorizontalDragGestureRecognizer(),
               (HorizontalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
@@ -483,18 +483,18 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    Widget result = new RawGestureDetector(
+    Widget result = RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: widget.excludeFromSemantics,
-      child: new Semantics(
+      child: Semantics(
         explicitChildNodes: !widget.excludeFromSemantics,
-        child: new IgnorePointer(
+        child: IgnorePointer(
           key: _ignorePointerKey,
           ignoring: _shouldIgnorePointer,
           ignoringSemantics: false,
-          child: new _ScrollableScope(
+          child: _ScrollableScope(
             scrollable: this,
             position: position,
             child: widget.viewportBuilder(context, position),
@@ -504,7 +504,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     );
 
     if (!widget.excludeFromSemantics) {
-      result = new _ScrollSemantics(
+      result = _ScrollSemantics(
         key: _scrollSemanticsKey,
         child: result,
         position: position,
@@ -518,7 +518,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ScrollPosition>('position', position));
+    properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
   }
 }
 
@@ -549,7 +549,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
-    return new _RenderScrollSemantics(
+    return _RenderScrollSemantics(
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
     );
@@ -619,7 +619,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
       return;
     }
 
-    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
+    _innerNode ??= SemanticsNode(showOnScreen: showOnScreen);
     _innerNode
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;

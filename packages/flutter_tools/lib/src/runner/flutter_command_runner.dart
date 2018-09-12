@@ -146,7 +146,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
 
   @override
   String get usageFooter {
@@ -214,13 +214,13 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   @override
   Future<Null> runCommand(ArgResults topLevelResults) async {
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
-      Flags: new Flags(topLevelResults),
+      Flags: Flags(topLevelResults),
     };
 
     // Check for verbose.
     if (topLevelResults['verbose']) {
       // Override the logger.
-      contextOverrides[Logger] = new VerboseLogger(logger);
+      contextOverrides[Logger] = VerboseLogger(logger);
     }
 
     if (topLevelResults['show-test-device'] ||
@@ -240,7 +240,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
       // Record the arguments that were used to invoke this runner.
       final File manifest = tempDir.childFile('MANIFEST.txt');
-      final StringBuffer buffer = new StringBuffer()
+      final StringBuffer buffer = StringBuffer()
         ..writeln('# arguments')
         ..writeln(topLevelResults.arguments)
         ..writeln()
@@ -302,7 +302,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     await context.run<Null>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
-        return new MapEntry<Type, Generator>(type, () => value);
+        return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
         logger.quiet = topLevelResults['quiet'];
@@ -360,7 +360,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        final Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        final Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         if (engineUri != null) {
           engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
           final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
@@ -414,7 +414,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
 
-    return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
+    return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
   static void initFlutterRoot() {
@@ -485,7 +485,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
-      final PackageMap packageMap = new PackageMap(kPackagesFileName);
+      final PackageMap packageMap = PackageMap(kPackagesFileName);
       final Uri flutterUri = packageMap.map['flutter'];
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {

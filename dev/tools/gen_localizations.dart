@@ -86,7 +86,7 @@ String generateString(String s) {
   if (!s.contains("'"))
     return "r'$s'";
 
-  final StringBuffer output = new StringBuffer();
+  final StringBuffer output = StringBuffer();
   bool started = false; // Have we started writing a raw string.
   for (int i = 0; i < s.length; i++) {
     if (s[i] == "'") {
@@ -108,11 +108,11 @@ String generateString(String s) {
 
 /// This is the core of this script; it generates the code used for translations.
 String generateTranslationBundles() {
-  final StringBuffer output = new StringBuffer();
-  final StringBuffer supportedLocales = new StringBuffer();
+  final StringBuffer output = StringBuffer();
+  final StringBuffer supportedLocales = StringBuffer();
 
   final Map<String, List<String>> languageToLocales = <String, List<String>>{};
-  final Set<String> allResourceIdentifiers = new Set<String>();
+  final Set<String> allResourceIdentifiers = Set<String>();
   for (String locale in localeToResources.keys.toList()..sort()) {
     final List<String> codes = locale.split('_'); // [language, country]
     assert(codes.length == 1 || codes.length == 2);
@@ -201,7 +201,7 @@ String generateTranslationBundles() {
 /// See also:
 ///
 ///  * [getTranslation], whose documentation describes these values.
-final Set<String> kSupportedLanguages = new HashSet<String>.from(const <String>[
+final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ${languageCodes.map((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
@@ -234,7 +234,7 @@ GlobalMaterialLocalizations getTranslation(
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case '$language':
-      return new MaterialLocalization${camelCase(languageToLocales[language][0])}($arguments);''');
+      return MaterialLocalization${camelCase(languageToLocales[language][0])}($arguments);''');
     } else {
       output.writeln('''
     case '$language': {
@@ -246,11 +246,11 @@ GlobalMaterialLocalizations getTranslation(
         final String countryCode = localeName.substring(localeName.indexOf('_') + 1);
         output.writeln('''
         case '$countryCode':
-          return new MaterialLocalization${camelCase(localeName)}($arguments);''');
+          return MaterialLocalization${camelCase(localeName)}($arguments);''');
       }
       output.writeln('''
       }
-      return new MaterialLocalization${camelCase(language)}($arguments);
+      return MaterialLocalization${camelCase(language)}($arguments);
     }''');
     }
   }
@@ -323,7 +323,7 @@ String generateValue(String value, Map<String, dynamic> attributes) {
     switch (attributes['x-flutter-type']) {
       case 'icuShortTimePattern':
         if (!_icuTimeOfDayToEnum.containsKey(value)) {
-          throw new Exception(
+          throw Exception(
             '"$value" is not one of the ICU short time patterns supported '
             'by the material library. Here is the list of supported '
             'patterns:\n  ' + _icuTimeOfDayToEnum.keys.join('\n  ')
@@ -399,11 +399,11 @@ Future<void> main(List<String> rawArgs) async {
   // is the 2nd command line argument, lc is a language code and cc is the country
   // code. In most cases both codes are just two characters.
 
-  final Directory directory = new Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
-  final RegExp filenameRE = new RegExp(r'material_(\w+)\.arb$');
+  final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  final RegExp filenameRE = RegExp(r'material_(\w+)\.arb$');
 
   try {
-    validateEnglishLocalizations(new File(path.join(directory.path, 'material_en.arb')));
+    validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
@@ -413,7 +413,7 @@ Future<void> main(List<String> rawArgs) async {
   for (FileSystemEntity entity in directory.listSync()) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenameRE.hasMatch(entityPath)) {
-      processBundle(new File(entityPath), locale: filenameRE.firstMatch(entityPath)[1]);
+      processBundle(File(entityPath), locale: filenameRE.firstMatch(entityPath)[1]);
     }
   }
 
@@ -423,12 +423,12 @@ Future<void> main(List<String> rawArgs) async {
     exitWithError('$exception');
   }
 
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   buffer.writeln(outputHeader.replaceFirst('@(regenerate)', 'dart dev/tools/gen_localizations.dart --overwrite'));
   buffer.write(generateTranslationBundles());
 
   if (options.writeToFile) {
-    final File localizationsFile = new File(path.join(directory.path, 'localizations.dart'));
+    final File localizationsFile = File(path.join(directory.path, 'localizations.dart'));
     localizationsFile.writeAsStringSync(buffer.toString());
   } else {
     stdout.write(buffer.toString());

@@ -38,6 +38,8 @@ import 'theme_data.dart';
 /// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
+/// The [clipBehavior] argument must not be null.
+///
 /// See also:
 ///
 ///  * [RaisedButton], a filled button whose material elevates when pressed.
@@ -63,9 +65,10 @@ class FlatButton extends StatelessWidget {
     this.colorBrightness,
     this.padding,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     @required this.child,
-  }) : super(key: key);
+  }) : assert(clipBehavior != null), super(key: key);
 
   /// Create a text button from a pair of widgets that serve as the button's
   /// [icon] and [label].
@@ -73,7 +76,7 @@ class FlatButton extends StatelessWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [icon] and [label] arguments must not be null.
+  /// The [icon], [label], and [clipBehavior] arguments must not be null.
   FlatButton.icon({
     Key key,
     @required this.onPressed,
@@ -87,13 +90,15 @@ class FlatButton extends StatelessWidget {
     this.splashColor,
     this.colorBrightness,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
        assert(label != null),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
-       child = new Row(
+       child = Row(
          mainAxisSize: MainAxisSize.min,
          children: <Widget>[
            icon,
@@ -221,6 +226,9 @@ class FlatButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
   }
@@ -293,7 +301,7 @@ class FlatButton extends StatelessWidget {
     final Color fillColor = enabled ? color : disabledColor;
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
 
-    return new RawMaterialButton(
+    return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
       fillColor: fillColor,
@@ -306,6 +314,7 @@ class FlatButton extends StatelessWidget {
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
+      clipBehavior: clipBehavior,
       child: child,
     );
   }
@@ -313,17 +322,17 @@ class FlatButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }

@@ -72,7 +72,7 @@ class Form extends StatefulWidget {
   final VoidCallback onChanged;
 
   @override
-  FormState createState() => new FormState();
+  FormState createState() => FormState();
 }
 
 /// State associated with a [Form] widget.
@@ -83,7 +83,7 @@ class Form extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
-  final Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
+  final Set<FormFieldState<dynamic>> _fields = Set<FormFieldState<dynamic>>();
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -111,9 +111,9 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     if (widget.autovalidate)
       _validate();
-    return new WillPopScope(
+    return WillPopScope(
       onWillPop: widget.onWillPop,
-      child: new _FormScope(
+      child: _FormScope(
         formState: this,
         generation: _generation,
         child: widget.child,
@@ -257,7 +257,7 @@ class FormField<T> extends StatefulWidget {
   final bool autovalidate;
 
   @override
-  FormFieldState<T> createState() => new FormFieldState<T>();
+  FormFieldState<T> createState() => FormFieldState<T>();
 }
 
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method

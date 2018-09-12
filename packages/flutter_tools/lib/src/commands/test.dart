@@ -64,11 +64,6 @@ class TestCommand extends FlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addFlag('track-widget-creation',
         negatable: false,
         hide: !verboseHelp,
@@ -145,7 +140,7 @@ class TestCommand extends FlutterCommand {
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
-      collector = new CoverageCollector();
+      collector = CoverageCollector();
     }
 
     final bool machine = argResults['machine'];
@@ -157,7 +152,7 @@ class TestCommand extends FlutterCommand {
     if (collector != null) {
       watcher = collector;
     } else if (machine) {
-      watcher = new EventPrinter();
+      watcher = EventPrinter();
     }
 
     Cache.releaseLockEarly();
@@ -172,7 +167,6 @@ class TestCommand extends FlutterCommand {
       startPaused: startPaused,
       ipv6: argResults['ipv6'],
       machine: machine,
-      previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,

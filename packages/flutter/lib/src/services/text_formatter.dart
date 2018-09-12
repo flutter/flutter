@@ -47,7 +47,7 @@ abstract class TextInputFormatter {
   static TextInputFormatter withFunction(
     TextInputFormatFunction formatFunction
   ) {
-    return new _SimpleTextInputFormatter(formatFunction);
+    return _SimpleTextInputFormatter(formatFunction);
   }
 }
 
@@ -119,7 +119,7 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 
   /// A [BlacklistingTextInputFormatter] that forces input to be a single line.
   static final BlacklistingTextInputFormatter singleLineFormatter
-      = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
+      = BlacklistingTextInputFormatter(RegExp(r'\n'));
 }
 
 /// A [TextInputFormatter] that prevents the insertion of more characters
@@ -184,13 +184,13 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
       // address this in Dart.
       // TODO(gspencer): convert this to count actual characters when Dart
       // supports that.
-      final RuneIterator iterator = new RuneIterator(newValue.text);
+      final RuneIterator iterator = RuneIterator(newValue.text);
       if (iterator.moveNext())
         for (int count = 0; count < maxLength; ++count)
           if (!iterator.moveNext())
             break;
       final String truncated = newValue.text.substring(0, iterator.rawIndex);
-      return new TextEditingValue(
+      return TextEditingValue(
         text: truncated,
         selection: newSelection,
         composing: TextRange.empty,
@@ -241,7 +241,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
 
   /// A [WhitelistingTextInputFormatter] that takes in digits `[0-9]` only.
   static final WhitelistingTextInputFormatter digitsOnly
-      = new WhitelistingTextInputFormatter(new RegExp(r'\d+'));
+      = WhitelistingTextInputFormatter(RegExp(r'\d+'));
 }
 
 TextEditingValue _selectionAwareTextManipulation(
@@ -277,7 +277,7 @@ TextEditingValue _selectionAwareTextManipulation(
       );
     }
   }
-  return new TextEditingValue(
+  return TextEditingValue(
     text: manipulatedText,
     selection: manipulatedSelection ?? const TextSelection.collapsed(offset: -1),
     composing: manipulatedText == value.text

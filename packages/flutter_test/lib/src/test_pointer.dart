@@ -52,7 +52,7 @@ class TestPointer {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
-    return new PointerDownEvent(
+    return PointerDownEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: location
@@ -68,7 +68,7 @@ class TestPointer {
     assert(isDown);
     final Offset delta = newLocation - location;
     _location = newLocation;
-    return new PointerMoveEvent(
+    return PointerMoveEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: newLocation,
@@ -86,7 +86,7 @@ class TestPointer {
   PointerUpEvent up({ Duration timeStamp = Duration.zero }) {
     assert(isDown);
     _isDown = false;
-    return new PointerUpEvent(
+    return PointerUpEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: location
@@ -103,7 +103,7 @@ class TestPointer {
   PointerCancelEvent cancel({ Duration timeStamp = Duration.zero }) {
     assert(isDown);
     _isDown = false;
-    return new PointerCancelEvent(
+    return PointerCancelEvent(
       timeStamp: timeStamp,
       pointer: pointer,
       position: location
@@ -145,16 +145,16 @@ class TestGesture {
     return TestAsyncUtils.guard(() async {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
-      final TestPointer testPointer = new TestPointer(pointer);
+      final TestPointer testPointer = TestPointer(pointer);
       await dispatcher(testPointer.down(downLocation), hitTestResult);
 
       // create a TestGesture
-      result = new TestGesture._(dispatcher, hitTestResult, testPointer);
+      result = TestGesture._(dispatcher, hitTestResult, testPointer);
       return null;
     }).then<TestGesture>((Null value) {
       return result;
     }, onError: (dynamic error, StackTrace stack) {
-      return new Future<TestGesture>.error(error, stack);
+      return Future<TestGesture>.error(error, stack);
     });
   }
 

@@ -191,7 +191,9 @@ Future<int> runInteractively(List<String> command, {
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
   );
-  process.stdin.addStream(stdin);
+  // The real stdin will never finish streaming. Pipe until the child process
+  // finishes.
+  process.stdin.addStream(stdin); // ignore: unawaited_futures
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
   await Future.wait<dynamic>(<Future<dynamic>>[
@@ -203,7 +205,7 @@ Future<int> runInteractively(List<String> command, {
 
 Future<Null> runAndKill(List<String> cmd, Duration timeout) {
   final Future<Process> proc = runDetached(cmd);
-  return new Future<Null>.delayed(timeout, () async {
+  return Future<Null>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     processManager.killPid((await proc).pid);
   });
@@ -229,7 +231,7 @@ Future<RunResult> runAsync(List<String> cmd, {
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
-  final RunResult runResults = new RunResult(results, cmd);
+  final RunResult runResults = RunResult(results, cmd);
   printTrace(runResults.toString());
   return runResults;
 }
@@ -377,7 +379,7 @@ class RunResult {
 
   @override
   String toString() {
-    final StringBuffer out = new StringBuffer();
+    final StringBuffer out = StringBuffer();
     if (processResult.stdout.isNotEmpty)
       out.writeln(processResult.stdout);
     if (processResult.stderr.isNotEmpty)
@@ -387,7 +389,7 @@ class RunResult {
 
  /// Throws a [ProcessException] with the given `message`.
  void throwException(String message) {
-    throw new ProcessException(
+    throw ProcessException(
       _command.first,
       _command.skip(1).toList(),
       message,

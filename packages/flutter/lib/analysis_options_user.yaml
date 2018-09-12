@@ -26,9 +26,6 @@ analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    # TODO(ianh): https://github.com/flutter/flutter/issues/20114
-    missing_return: ignore
     # allow having TODOs in the code
     todo: ignore
 

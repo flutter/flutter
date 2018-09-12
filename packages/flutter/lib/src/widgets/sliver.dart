@@ -259,9 +259,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     if (child == null)
       return null;
     if (addRepaintBoundaries)
-      child = new RepaintBoundary.wrap(child, index);
+      child = RepaintBoundary.wrap(child, index);
     if (addAutomaticKeepAlives)
-      child = new AutomaticKeepAlive(child: child);
+      child = AutomaticKeepAlive(child: child);
     return child;
   }
 
@@ -351,9 +351,9 @@ class SliverChildListDelegate extends SliverChildDelegate {
     Widget child = children[index];
     assert(child != null);
     if (addRepaintBoundaries)
-      child = new RepaintBoundary.wrap(child, index);
+      child = RepaintBoundary.wrap(child, index);
     if (addAutomaticKeepAlives)
-      child = new AutomaticKeepAlive(child: child);
+      child = AutomaticKeepAlive(child: child);
     return child;
   }
 
@@ -390,7 +390,7 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   final SliverChildDelegate delegate;
 
   @override
-  SliverMultiBoxAdaptorElement createElement() => new SliverMultiBoxAdaptorElement(this);
+  SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this);
 
   @override
   RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
@@ -424,7 +424,7 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
+    properties.add(DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
   }
 }
 
@@ -464,7 +464,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverList(childManager: element);
+    return RenderSliverList(childManager: element);
   }
 }
 
@@ -486,14 +486,14 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// list, shows an infinite number of items in varying shades of blue:
 ///
 /// ```dart
-/// new SliverFixedExtentList(
+/// SliverFixedExtentList(
 ///   itemExtent: 50.0,
-///   delegate: new SliverChildBuilderDelegate(
+///   delegate: SliverChildBuilderDelegate(
 ///     (BuildContext context, int index) {
-///       return new Container(
+///       return Container(
 ///         alignment: Alignment.center,
 ///         color: Colors.lightBlue[100 * (index % 9)],
-///         child: new Text('list item $index'),
+///         child: Text('list item $index'),
 ///       );
 ///     },
 ///   ),
@@ -526,7 +526,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
+    return RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
   @override
@@ -550,19 +550,19 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// list, shows twenty boxes in a pretty teal grid:
 ///
 /// ```dart
-/// new SliverGrid(
-///   gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+/// SliverGrid(
+///   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
 ///     maxCrossAxisExtent: 200.0,
 ///     mainAxisSpacing: 10.0,
 ///     crossAxisSpacing: 10.0,
 ///     childAspectRatio: 4.0,
 ///   ),
-///   delegate: new SliverChildBuilderDelegate(
+///   delegate: SliverChildBuilderDelegate(
 ///     (BuildContext context, int index) {
-///       return new Container(
+///       return Container(
 ///         alignment: Alignment.center,
 ///         color: Colors.teal[100 * (index % 9)],
-///         child: new Text('grid item $index'),
+///         child: Text('grid item $index'),
 ///       );
 ///     },
 ///     childCount: 20,
@@ -605,13 +605,13 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+  }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: new SliverChildListDelegate(children));
+       super(key: key, delegate: SliverChildListDelegate(children));
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with tiles that each have a maximum cross-axis extent.
@@ -629,13 +629,13 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     double crossAxisSpacing = 0.0,
     double childAspectRatio = 1.0,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+  }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: new SliverChildListDelegate(children));
+       super(key: key, delegate: SliverChildListDelegate(children));
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -643,7 +643,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverGrid createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
+    return RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
   }
 
   @override
@@ -704,7 +704,7 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
+    return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
   @override
@@ -745,8 +745,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   // so that if we do case 2 later, we don't call the builder again.
   // Any time we do case 1, though, we reset the cache.
 
-  final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
-  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+  final Map<int, Widget> _childWidgets = HashMap<int, Widget>();
+  final SplayTreeMap<int, Element> _childElements = SplayTreeMap<int, Element>();
   RenderBox _currentBeforeChild;
 
   @override
@@ -756,23 +756,23 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
     try {
-      int firstIndex = _childElements.firstKey();
-      int lastIndex = _childElements.lastKey();
-      if (_childElements.isEmpty) {
-        firstIndex = 0;
-        lastIndex = 0;
-      } else if (_didUnderflow) {
-        lastIndex += 1;
-      }
-      for (int index = firstIndex; index <= lastIndex; ++index) {
+      void processElement(int index) {
         _currentlyUpdatingChildIndex = index;
         final Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          _currentBeforeChild = newChild.renderObject;
+          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData;
+          if (!parentData.keptAlive)
+            _currentBeforeChild = newChild.renderObject;
         } else {
           _childElements.remove(index);
         }
+      }
+      // processElement may modify the Map - need to do a .toList() here.
+      _childElements.keys.toList().forEach(processElement);
+      if (_didUnderflow) {
+        final int lastKey = _childElements.lastKey() ?? -1;
+        processElement(lastKey + 1);
       }
     } finally {
       _currentlyUpdatingChildIndex = null;
@@ -1001,7 +1001,7 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   }) : super(key: key, child: child);
 
   @override
-  RenderSliverFillRemaining createRenderObject(BuildContext context) => new RenderSliverFillRemaining();
+  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
 }
 
 /// Mark a child as needing to stay alive even when it's in a lazy list that
@@ -1048,6 +1048,6 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
+    properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
 }

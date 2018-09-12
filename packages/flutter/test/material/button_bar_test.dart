@@ -17,10 +17,10 @@ void main() {
 
   testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new ListBody(
+      SingleChildScrollView(
+        child: ListBody(
           children: <Widget>[
-            new ButtonTheme.bar(
+            ButtonTheme.bar(
               layoutBehavior: ButtonBarLayoutBehavior.constrained,
               child: const Directionality(
                 textDirection: TextDirection.ltr,
@@ -42,10 +42,10 @@ void main() {
 
   testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new ListBody(
+      SingleChildScrollView(
+        child: ListBody(
           children: <Widget>[
-            new ButtonTheme.bar(
+            ButtonTheme.bar(
               layoutBehavior: ButtonBarLayoutBehavior.padded,
               child: const Directionality(
                 textDirection: TextDirection.ltr,

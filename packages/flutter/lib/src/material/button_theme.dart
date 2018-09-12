@@ -85,7 +85,7 @@ class ButtonTheme extends InheritedWidget {
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
-       data = new ButtonThemeData(
+       data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
          height: height,
@@ -134,7 +134,7 @@ class ButtonTheme extends InheritedWidget {
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
-       data = new ButtonThemeData(
+       data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
          height: height,
@@ -216,13 +216,13 @@ class ButtonThemeData extends Diagnosticable {
   /// Simply a convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object:
   /// ```dart
-  /// return new BoxConstraints(
+  /// return BoxConstraints(
   ///   minWidth: minWidth,
-  ///    minHeight: height,
+  ///   minHeight: height,
   /// );
   /// ```
   BoxConstraints get constraints {
-    return new BoxConstraints(
+    return BoxConstraints(
       minWidth: minWidth,
       minHeight: height,
     );
@@ -294,7 +294,7 @@ class ButtonThemeData extends Diagnosticable {
     ShapeBorder shape,
     bool alignedDropdown,
   }) {
-    return new ButtonThemeData(
+    return ButtonThemeData(
       textTheme: textTheme ?? this.textTheme,
       minWidth: minWidth ?? this.minWidth,
       height: height ?? this.height,
@@ -333,12 +333,12 @@ class ButtonThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const ButtonThemeData defaultTheme = ButtonThemeData();
-    properties.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
-    properties.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
-    properties.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
-    properties.add(new FlagProperty('alignedDropdown',
+    properties.add(EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
+    properties.add(DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
+    properties.add(DoubleProperty('height', height, defaultValue: defaultTheme.height));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
+    properties.add(FlagProperty('alignedDropdown',
       value: alignedDropdown,
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',
