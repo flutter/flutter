@@ -14,12 +14,12 @@ void main() {
     int pressedCount = 0;
 
     Widget buildFrame(VoidCallback onPressed) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(),
-          child: new Center(
-            child: new OutlineButton(onPressed: onPressed),
+        child: Theme(
+          data: ThemeData(),
+          child: Center(
+            child: OutlineButton(onPressed: onPressed),
           ),
         ),
       );
@@ -54,9 +54,9 @@ void main() {
     Widget buildFrame({VoidCallback onPressed}) {
       return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-          child: new Container(
+        child: Theme(
+          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          child: Container(
             alignment: Alignment.topLeft,
             child: OutlineButton(
               shape: const RoundedRectangleBorder(), // default border radius is 0
@@ -76,8 +76,8 @@ void main() {
       );
     }
 
-    final Rect clipRect = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
-    final Path clipPath = new Path()..addRect(clipRect);
+    final Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    final Path clipPath = Path()..addRect(clipRect);
 
     final Finder outlineButton = find.byType(OutlineButton);
 
@@ -137,13 +137,13 @@ void main() {
   });
 
   testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
-    final GlobalKey buttonKey = new GlobalKey();
+    final GlobalKey buttonKey = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new OutlineButton(
+        child: Material(
+          child: Center(
+            child: OutlineButton(
                 key: buttonKey,
                 onPressed: () { },
                 child: const Text('ABC'),
@@ -160,13 +160,13 @@ void main() {
   });
 
   testWidgets('OutlineButton contributes semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new OutlineButton(
+        child: Material(
+          child: Center(
+            child: OutlineButton(
               onPressed: () { },
               child: const Text('ABC'),
             ),
@@ -176,15 +176,15 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             actions: <SemanticsAction>[
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-            transform: new Matrix4.translationValues(356.0, 276.0, 0.0),
+            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
               SemanticsFlag.hasEnabledState,
@@ -202,13 +202,13 @@ void main() {
 
   testWidgets('OutlineButton scales textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.0),
-            child: new Center(
-              child: new OutlineButton(
+            child: Center(
+              child: OutlineButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -223,13 +223,13 @@ void main() {
 
     // textScaleFactor expands text, but not button.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 1.3),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -247,13 +247,13 @@ void main() {
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new MediaQuery(
+        child: Material(
+          child: MediaQuery(
             data: const MediaQueryData(textScaleFactor: 3.0),
-            child: new Center(
-              child: new FlatButton(
+            child: Center(
+              child: FlatButton(
                 onPressed: () { },
                 child: const Text('ABC'),
               ),
@@ -272,8 +272,8 @@ void main() {
   });
 
   testWidgets('OutlineButton implements debugFillDescription', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
-    new OutlineButton(
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    OutlineButton(
         onPressed: () {},
         textColor: const Color(0xFF00FF00),
         disabledTextColor: const Color(0xFFFF0000),

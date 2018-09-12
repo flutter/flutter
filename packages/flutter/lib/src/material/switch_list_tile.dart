@@ -166,7 +166,7 @@ class SwitchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Switch(
+    final Widget control = Switch(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
@@ -174,10 +174,10 @@ class SwitchListTile extends StatelessWidget {
       inactiveThumbImage: inactiveThumbImage,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: secondary,
           title: title,
           subtitle: subtitle,

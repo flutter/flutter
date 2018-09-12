@@ -15,7 +15,7 @@ import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
-     new mustache.Template(template).renderString(context);
+     mustache.Template(template).renderString(context);
   final File file = fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
@@ -45,7 +45,7 @@ class Plugin {
       iosPrefix = pluginYaml['iosPrefix'] ?? '';
       pluginClass = pluginYaml['pluginClass'];
     }
-    return new Plugin(
+    return Plugin(
       name: name,
       path: path,
       androidPackage: androidPackage,
@@ -67,7 +67,7 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     return null;
   final String packageRootPath = fs.path.fromUri(packageRoot);
   printTrace('Found plugin $name at $packageRootPath');
-  return new Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
+  return Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
 }
 
 List<Plugin> findPlugins(FlutterProject project) {
@@ -75,7 +75,7 @@ List<Plugin> findPlugins(FlutterProject project) {
   Map<String, Uri> packages;
   try {
     final String packagesFile = fs.path.join(project.directory.path, PackageMap.globalPackagesPath);
-    packages = new PackageMap(packagesFile).map;
+    packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
     return plugins;
@@ -297,7 +297,7 @@ Future<void> injectPlugins(FlutterProject project) async {
   await _writeAndroidPluginRegistrant(project, plugins);
   await _writeIOSPluginRegistrant(project, plugins);
   if (!project.isModule && project.ios.directory.existsSync()) {
-    final CocoaPods cocoaPods = new CocoaPods();
+    final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty)
       cocoaPods.setupPodfile(project.ios);
   }

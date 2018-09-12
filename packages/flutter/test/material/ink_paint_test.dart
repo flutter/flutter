@@ -12,17 +12,17 @@ void main() {
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
-    final BorderRadius borderRadius = new BorderRadius.circular(6.0);
+    final BorderRadius borderRadius = BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Container(
+        child: Material(
+          child: Center(
+            child: Container(
               width: 200.0,
               height: 60.0,
-              child: new InkWell(
+              child: InkWell(
                 borderRadius: borderRadius,
                 highlightColor: highlightColor,
                 splashColor: splashColor,
@@ -46,11 +46,11 @@ void main() {
         ..translate(x: 0.0, y: 0.0)
         ..save()
         ..translate(x: 300.0, y: 270.0)
-        ..clipRRect(rrect: new RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
+        ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
         ..circle(x: 100.0, y: 30.0, radius: 21.0, color: splashColor)
         ..restore()
         ..rrect(
-          rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)),
+          rrect: RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)),
           color: highlightColor,
         )
     );
@@ -61,17 +61,17 @@ void main() {
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
-    final BorderRadius borderRadius = new BorderRadius.circular(6.0);
+    final BorderRadius borderRadius = BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Container(
+        child: Material(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new InkWell(
+              child: InkWell(
                 borderRadius: borderRadius,
                 highlightColor: highlightColor,
                 splashColor: splashColor,
@@ -144,15 +144,15 @@ void main() {
 
   testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Ink(
+        child: Material(
+          child: Center(
+            child: Ink(
               color: Colors.blue,
               width: 200.0,
               height: 200.0,
-              child: new InkWell(
+              child: InkWell(
                 splashColor: Colors.green,
                 onTap: () { },
               ),
@@ -171,20 +171,20 @@ void main() {
     expect(
       box,
       paints
-        ..rect(rect: new Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: new Color(Colors.blue.value))
-        ..circle(color: new Color(Colors.green.value))
+        ..rect(rect: Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value))
+        ..circle(color: Color(Colors.green.value))
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Ink(
+        child: Material(
+          child: Center(
+            child: Ink(
               color: Colors.red,
               width: 200.0,
               height: 200.0,
-              child: new InkWell(
+              child: InkWell(
                 splashColor: Colors.green,
                 onTap: () { },
               ),
@@ -199,16 +199,16 @@ void main() {
     expect(
       box,
       paints
-        ..rect(rect: new Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: new Color(Colors.red.value))
-        ..circle(color: new Color(Colors.green.value))
+        ..rect(rect: Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value))
+        ..circle(color: Color(Colors.green.value))
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new InkWell( // this is at a different depth in the tree so it's now a new InkWell
+        child: Material(
+          child: Center(
+            child: InkWell( // this is at a different depth in the tree so it's now a new InkWell
               splashColor: Colors.green,
               onTap: () { },
             ),
@@ -228,14 +228,14 @@ void main() {
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Container(
+        child: Material(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new InkWell(
+              child: InkWell(
                 onTap: () { },
                 radius: 100.0,
                 splashFactory: InkRipple.splashFactory,
@@ -264,14 +264,14 @@ void main() {
 
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Container(
+        child: Material(
+          child: Center(
+            child: Container(
               width: 100.0,
               height: 100.0,
-              child: new InkWell(
+              child: InkWell(
                 splashColor: splashColor,
                 highlightColor: highlightColor,
                 onTap: () { },

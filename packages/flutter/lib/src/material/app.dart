@@ -421,7 +421,7 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowMaterialGrid;
 
   @override
-  _MaterialAppState createState() => new _MaterialAppState();
+  _MaterialAppState createState() => _MaterialAppState();
 }
 
 class _MaterialScrollBehavior extends ScrollBehavior {
@@ -439,7 +439,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return new GlowingOverscrollIndicator(
+        return GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
           color: Theme.of(context).accentColor,
@@ -455,7 +455,7 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   void initState() {
     super.initState();
-    _heroController = new HeroController(createRectTween: _createRectTween);
+    _heroController = HeroController(createRectTween: _createRectTween);
     _updateNavigator();
   }
 
@@ -467,7 +467,7 @@ class _MaterialAppState extends State<MaterialApp> {
       // old Navigator won't be disposed (and thus won't unregister with its
       // observers) until after the new one has been created (because the
       // Navigator has a GlobalKey).
-      _heroController = new HeroController(createRectTween: _createRectTween);
+      _heroController = HeroController(createRectTween: _createRectTween);
     }
     _updateNavigator();
   }
@@ -480,12 +480,12 @@ class _MaterialAppState extends State<MaterialApp> {
                      widget.routes.isNotEmpty ||
                      widget.onGenerateRoute != null ||
                      widget.onUnknownRoute != null;
-    _navigatorObservers = new List<NavigatorObserver>.from(widget.navigatorObservers)
+    _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
       ..add(_heroController);
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
-    return new MaterialRectArcTween(begin: begin, end: end);
+    return MaterialRectArcTween(begin: begin, end: end);
   }
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
@@ -497,7 +497,7 @@ class _MaterialAppState extends State<MaterialApp> {
       builder = widget.routes[name];
     }
     if (builder != null) {
-      return new MaterialPageRoute<dynamic>(
+      return MaterialPageRoute<dynamic>(
         builder: builder,
         settings: settings,
       );
@@ -510,7 +510,7 @@ class _MaterialAppState extends State<MaterialApp> {
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'Could not find a generator for route $settings in the $runtimeType.\n'
           'Generators for routes are searched for in the following order:\n'
           ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
@@ -527,7 +527,7 @@ class _MaterialAppState extends State<MaterialApp> {
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'The onUnknownRoute callback returned null.\n'
           'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '
@@ -552,12 +552,12 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = widget.theme ?? new ThemeData.fallback();
-    Widget result = new AnimatedTheme(
+    final ThemeData theme = widget.theme ?? ThemeData.fallback();
+    Widget result = AnimatedTheme(
       data: theme,
       isMaterialAppTheme: true,
-      child: new WidgetsApp(
-        key: new GlobalObjectKey(this),
+      child: WidgetsApp(
+        key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
         navigatorObservers: _haveNavigator ? _navigatorObservers : null,
         initialRoute: widget.initialRoute,
@@ -579,7 +579,7 @@ class _MaterialAppState extends State<MaterialApp> {
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return new FloatingActionButton(
+          return FloatingActionButton(
             child: const Icon(Icons.search),
             onPressed: onPressed,
             mini: true,
@@ -590,7 +590,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
     assert(() {
       if (widget.debugShowMaterialGrid) {
-        result = new GridPaper(
+        result = GridPaper(
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
           divisions: 2,
@@ -601,8 +601,8 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     }());
 
-    return new ScrollConfiguration(
-      behavior: new _MaterialScrollBehavior(),
+    return ScrollConfiguration(
+      behavior: _MaterialScrollBehavior(),
       child: result,
     );
   }

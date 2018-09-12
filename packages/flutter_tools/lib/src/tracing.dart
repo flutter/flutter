@@ -20,7 +20,7 @@ class Tracing {
 
   static Future<Tracing> connect(Uri uri) async {
     final VMService observatory = await VMService.connect(uri);
-    return new Tracing(observatory);
+    return Tracing(observatory);
   }
 
   final VMService vmService;
@@ -41,7 +41,7 @@ class Tracing {
       await vmService.vm.setVMTimelineFlags(<String>[]);
       timeline = await vmService.vm.getVMTimeline();
     } else {
-      final Completer<Null> whenFirstFrameRendered = new Completer<Null>();
+      final Completer<Null> whenFirstFrameRendered = Completer<Null>();
 
       (await vmService.onTimelineEvent).listen((ServiceEvent timelineEvent) {
         final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
@@ -86,7 +86,7 @@ Future<Null> downloadStartupTrace(VMService observatory) async {
   if (!(await traceInfoFile.parent.exists()))
     await traceInfoFile.parent.create();
 
-  final Tracing tracing = new Tracing(observatory);
+  final Tracing tracing = Tracing(observatory);
 
   final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
       waitForFirstFrame: true
@@ -94,7 +94,7 @@ Future<Null> downloadStartupTrace(VMService observatory) async {
 
   int extractInstantEventTimestamp(String eventName) {
     final List<Map<String, dynamic>> events =
-        new List<Map<String, dynamic>>.from(timeline['traceEvents']);
+        List<Map<String, dynamic>>.from(timeline['traceEvents']);
     final Map<String, dynamic> event = events.firstWhere(
             (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null
     );

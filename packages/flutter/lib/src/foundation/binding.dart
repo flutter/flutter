@@ -114,7 +114,7 @@ abstract class BindingBase {
     );
     registerSignalServiceExtension(
       name: 'frameworkPresent',
-      callback: () => new Future<Null>.value(),
+      callback: () => Future<Null>.value(),
     );
     assert(() {
       registerServiceExtension(
@@ -231,7 +231,7 @@ abstract class BindingBase {
   @protected
   Future<Null> performReassemble() {
     FlutterError.resetErrorCount();
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   /// Registers a service extension method with the given name (full
@@ -382,7 +382,7 @@ abstract class BindingBase {
       // breaks many assertions. As such, we ensure they we run the callbacks
       // on the outer event loop here.
       await debugInstrumentAction<void>('Wait for outer event loop', () {
-        return new Future<void>.delayed(Duration.zero);
+        return Future<void>.delayed(Duration.zero);
       });
 
       dynamic caughtException;
@@ -397,14 +397,14 @@ abstract class BindingBase {
       if (caughtException == null) {
         result['type'] = '_extensionType';
         result['method'] = method;
-        return new developer.ServiceExtensionResponse.result(json.encode(result));
+        return developer.ServiceExtensionResponse.result(json.encode(result));
       } else {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: caughtException,
           stack: caughtStack,
           context: 'during a service extension callback for "$method"'
         ));
-        return new developer.ServiceExtensionResponse.error(
+        return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
           json.encode(<String, String>{
             'exception': caughtException.toString(),

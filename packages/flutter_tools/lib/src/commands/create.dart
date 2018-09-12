@@ -360,7 +360,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
   }
 
   int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context) {
-    final Template template = new Template.fromName(templateName);
+    final Template template = Template.fromName(templateName);
     return template.render(directory, context, overwriteExisting: false);
   }
 
@@ -392,13 +392,13 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  final RegExp disallowed = new RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
+  final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return '$organization.$name';
 }
 
-final Set<String> _packageDependencies = new Set<String>.from(<String>[
+final Set<String> _packageDependencies = Set<String>.from(<String>[
   'analyzer',
   'args',
   'async',
@@ -431,7 +431,7 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
   if (!linter_utils.isValidPackageName(projectName)) {
-    final String packageNameDetails = new package_names.PubPackageNames().details;
+    final String packageNameDetails = package_names.PubPackageNames().details;
     return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
   }
   if (_packageDependencies.contains(projectName)) {

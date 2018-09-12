@@ -114,7 +114,7 @@ abstract class Route<T> {
   /// The [didChangeNext] and [didChangePrevious] methods are typically called
   /// immediately after this method is called.
   @protected
-  TickerFuture didPush() => new TickerFuture.complete();
+  TickerFuture didPush() => TickerFuture.complete();
 
   /// Called after [install] when the route replaced another in the navigator.
   ///
@@ -152,7 +152,7 @@ abstract class Route<T> {
   ///
   /// The future completes with the value given to [Navigator.pop], if any.
   Future<T> get popped => _popCompleter.future;
-  final Completer<T> _popCompleter = new Completer<T>();
+  final Completer<T> _popCompleter = Completer<T>();
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -295,7 +295,7 @@ class RouteSettings {
     String name,
     bool isInitialRoute,
   }) {
-    return new RouteSettings(
+    return RouteSettings(
       name: name ?? this.name,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
     );
@@ -1270,7 +1270,7 @@ class Navigator extends StatefulWidget {
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null && !nullOk) {
-        throw new FlutterError(
+        throw FlutterError(
           'Navigator operation requested with a context that does not include a Navigator.\n'
           'The context used to push or pop routes from the Navigator must be that of a '
           'widget that is a descendant of a Navigator widget.'
@@ -1282,17 +1282,17 @@ class Navigator extends StatefulWidget {
   }
 
   @override
-  NavigatorState createState() => new NavigatorState();
+  NavigatorState createState() => NavigatorState();
 }
 
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
-  final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
+  final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   final List<Route<dynamic>> _history = <Route<dynamic>>[];
-  final Set<Route<dynamic>> _poppedRoutes = new Set<Route<dynamic>>();
+  final Set<Route<dynamic>> _poppedRoutes = Set<Route<dynamic>>();
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
-  final FocusScopeNode focusScopeNode = new FocusScopeNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
 
@@ -1325,7 +1325,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (plannedInitialRoutes.contains(null)) {
         assert(() {
           FlutterError.reportError(
-            new FlutterErrorDetails(
+            FlutterErrorDetails(
               exception:
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
@@ -1401,7 +1401,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Route<T> _routeNamed<T>(String name, { bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
-    final RouteSettings settings = new RouteSettings(
+    final RouteSettings settings = RouteSettings(
       name: name,
       isInitialRoute: _history.isEmpty,
     );
@@ -1409,7 +1409,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
-          throw new FlutterError(
+          throw FlutterError(
             'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
             'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
             'onUnknownRoute callback specified.\n'
@@ -1422,7 +1422,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route = widget.onUnknownRoute(settings);
       assert(() {
         if (route == null) {
-          throw new FlutterError(
+          throw FlutterError(
             'A Navigator\'s onUnknownRoute returned null.\n'
             'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
             'null. The onUnknownRoute callback should never return null.\n'
@@ -1915,7 +1915,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
   }
 
-  final Set<int> _activePointers = new Set<int>();
+  final Set<int> _activePointers = Set<int>();
 
   void _handlePointerDown(PointerDownEvent event) {
     _activePointers.add(event.pointer);
@@ -1945,16 +1945,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    return new Listener(
+    return Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
       onPointerCancel: _handlePointerUpOrCancel,
-      child: new AbsorbPointer(
+      child: AbsorbPointer(
         absorbing: false, // it's mutated directly by _cancelActivePointers above
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new Overlay(
+          child: Overlay(
             key: _overlayKey,
             initialEntries: _initialOverlayEntries,
           ),

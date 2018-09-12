@@ -82,19 +82,19 @@ class CupertinoPageScaffold extends StatelessWidget {
       // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
       if (navigationBar.fullObstruction) {
-        paddedContent = new Padding(
-          padding: new EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+        paddedContent = Padding(
+          padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
           child: child,
         );
       } else {
-        paddedContent = new MediaQuery(
+        paddedContent = MediaQuery(
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               top: topPadding,
             ),
           ),
-          child: new Padding(
-            padding: new EdgeInsets.only(bottom: bottomPadding),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomPadding),
             child: child,
           ),
         );
@@ -105,7 +105,7 @@ class CupertinoPageScaffold extends StatelessWidget {
     stacked.add(paddedContent);
 
     if (navigationBar != null) {
-      stacked.add(new Positioned(
+      stacked.add(Positioned(
         top: 0.0,
         left: 0.0,
         right: 0.0,
@@ -113,9 +113,9 @@ class CupertinoPageScaffold extends StatelessWidget {
       ));
     }
 
-    return new DecoratedBox(
-      decoration: new BoxDecoration(color: backgroundColor),
-      child: new Stack(
+    return DecoratedBox(
+      decoration: BoxDecoration(color: backgroundColor),
+      child: Stack(
         children: stacked,
       ),
     );

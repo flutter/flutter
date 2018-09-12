@@ -13,7 +13,7 @@ void main() {
     });
 
     test('understands RegExp', () {
-      expect(grep(new RegExp('^b'), from: 'ab\nba'), <String>['ba']);
+      expect(grep(RegExp('^b'), from: 'ab\nba'), <String>['ba']);
     });
   });
 }

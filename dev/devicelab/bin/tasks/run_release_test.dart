@@ -18,7 +18,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<Null> ready = Completer<Null>();
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
@@ -76,6 +76,6 @@ void main() {
             '${stdout.join('\n')}';
       }
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

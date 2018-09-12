@@ -81,7 +81,7 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-    return new AndroidApk(
+    return AndroidApk(
       id: data.packageName,
       file: apk,
       launchActivity: '${data.packageName}/${data.launchableActivityName}'
@@ -97,7 +97,7 @@ class AndroidApk extends ApplicationPackage {
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
-        return new AndroidApk.fromApk(apkFile);
+        return AndroidApk.fromApk(apkFile);
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
       // command will grab a new AndroidApk after building, to get the updated
@@ -135,7 +135,7 @@ class AndroidApk extends ApplicationPackage {
     if (packageId == null || launchActivity == null)
       return null;
 
-    return new AndroidApk(
+    return AndroidApk(
       id: packageId,
       file: apkFile,
       launchActivity: launchActivity
@@ -209,7 +209,7 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
     }
 
-    return new PrebuiltIOSApp(
+    return PrebuiltIOSApp(
       bundleDir: bundleDir,
       bundleName: fs.path.basename(bundleDir.path),
       projectBundleId: id,
@@ -219,7 +219,7 @@ abstract class IOSApp extends ApplicationPackage {
   factory IOSApp.fromIosProject(IosProject project) {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
-    return new BuildableIOSApp(project);
+    return BuildableIOSApp(project);
   }
 
   @override
@@ -281,13 +281,13 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(
     case TargetPlatform.android_x86:
       return applicationBinary == null
           ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
-          : new AndroidApk.fromApk(applicationBinary);
+          : AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
       return applicationBinary == null
-          ? new IOSApp.fromIosProject((await FlutterProject.current()).ios)
-          : new IOSApp.fromPrebuiltApp(applicationBinary);
+          ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
+          : IOSApp.fromPrebuiltApp(applicationBinary);
     case TargetPlatform.tester:
-      return new FlutterTesterApp.fromCurrentDirectory();
+      return FlutterTesterApp.fromCurrentDirectory();
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
@@ -395,7 +395,7 @@ class ApkManifestData {
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
 
-    final _Element manifest = new _Element.fromLine(lines[1], null);
+    final _Element manifest = _Element.fromLine(lines[1], null);
     _Element currentElement = manifest;
 
     for (String line in lines.skip(2)) {
@@ -411,10 +411,10 @@ class ApkManifestData {
         switch (trimLine[0]) {
           case 'A':
             currentElement
-                .addChild(new _Attribute.fromLine(line, currentElement));
+                .addChild(_Attribute.fromLine(line, currentElement));
             break;
           case 'E':
-            final _Element element = new _Element.fromLine(line, currentElement);
+            final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);
             currentElement = element;
         }
@@ -453,14 +453,14 @@ class ApkManifestData {
     map['package'] = <String, String>{'name': packageName};
     map['launchable-activity'] = <String, String>{'name': activityName};
 
-    return new ApkManifestData._(map);
+    return ApkManifestData._(map);
   }
 
   final Map<String, Map<String, String>> _data;
 
   @visibleForTesting
   Map<String, Map<String, String>> get data =>
-      new UnmodifiableMapView<String, Map<String, String>>(_data);
+      UnmodifiableMapView<String, Map<String, String>>(_data);
 
   String get packageName => _data['package'] == null ? null : _data['package']['name'];
 

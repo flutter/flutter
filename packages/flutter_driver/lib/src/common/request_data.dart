@@ -37,7 +37,7 @@ class RequestDataResult extends Result {
 
   /// Deserializes the result from JSON.
   static RequestDataResult fromJson(Map<String, dynamic> json) {
-    return new RequestDataResult(json['message']);
+    return RequestDataResult(json['message']);
   }
 
   @override

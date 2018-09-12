@@ -19,8 +19,8 @@ import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
 
-final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = new RegExp(r'\$\(([^)]*)\)');
+final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
+final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
@@ -35,7 +35,7 @@ Future<void> updateGeneratedXcodeProperties({
   @required BuildInfo buildInfo,
   String targetOverride,
 }) async {
-  final StringBuffer localsBuffer = new StringBuffer();
+  final StringBuffer localsBuffer = StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
@@ -102,7 +102,7 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInter
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   static const String _executable = '/usr/bin/xcodebuild';
-  static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
     if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
@@ -165,7 +165,7 @@ class XcodeProjectInterpreter {
     final String out = runCheckedSync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(out);
   }
 }
 
@@ -218,7 +218,7 @@ class XcodeProjectInfo {
     }
     if (schemes.isEmpty)
       schemes.add('Runner');
-    return new XcodeProjectInfo(targets, buildConfigurations, schemes);
+    return XcodeProjectInfo(targets, buildConfigurations, schemes);
   }
 
   final List<String> targets;

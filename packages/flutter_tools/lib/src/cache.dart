@@ -21,9 +21,9 @@ class Cache {
   /// [artifacts] is configurable for testing.
   Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride {
     if (artifacts == null) {
-      _artifacts.add(new MaterialFonts(this));
-      _artifacts.add(new FlutterEngine(this));
-      _artifacts.add(new GradleWrapper(this));
+      _artifacts.add(MaterialFonts(this));
+      _artifacts.add(FlutterEngine(this));
+      _artifacts.add(GradleWrapper(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -87,7 +87,7 @@ class Cache {
           printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
-        await new Future<Null>.delayed(const Duration(milliseconds: 50));
+        await Future<Null>.delayed(const Duration(milliseconds: 50));
       }
     }
   }
@@ -104,7 +104,7 @@ class Cache {
   /// this very moment; throws a [StateError] if it doesn't.
   static void checkLockAcquired() {
     if (_lockEnabled && _lock == null && platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-      throw new StateError(
+      throw StateError(
         'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
       );
     }
@@ -554,7 +554,7 @@ String _flattenNameNoSubdirs(String fileName) {
   for (int codeUnit in fileName.codeUnits) {
     replacedCodeUnits.addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
   }
-  return new String.fromCharCodes(replacedCodeUnits);
+  return String.fromCharCodes(replacedCodeUnits);
 }
 
 @visibleForTesting

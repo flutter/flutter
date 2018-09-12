@@ -33,9 +33,9 @@ class IconTheme extends InheritedWidget {
     @required IconThemeData data,
     @required Widget child,
   }) {
-    return new Builder(
+    return Builder(
       builder: (BuildContext context) {
-        return new IconTheme(
+        return IconTheme(
           key: key,
           data: _getInheritedIconThemeData(context).merge(data),
           child: child,
@@ -73,6 +73,6 @@ class IconTheme extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<IconThemeData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<IconThemeData>('data', data, showName: false));
   }
 }

@@ -55,7 +55,7 @@ class RenderParagraph extends RenderBox {
        assert(maxLines == null || maxLines > 0),
        _softWrap = softWrap,
        _overflow = overflow,
-       _textPainter = new TextPainter(
+       _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
          textDirection: textDirection,
@@ -291,8 +291,8 @@ class RenderParagraph extends RenderBox {
           break;
         case TextOverflow.fade:
           assert(textDirection != null);
-          final TextPainter fadeSizePainter = new TextPainter(
-            text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
+          final TextPainter fadeSizePainter = TextPainter(
+            text: TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textDirection: textDirection,
             textScaleFactor: textScaleFactor,
             locale: locale,
@@ -309,17 +309,17 @@ class RenderParagraph extends RenderBox {
                 fadeStart = fadeEnd - fadeSizePainter.width;
                 break;
             }
-            _overflowShader = new ui.Gradient.linear(
-              new Offset(fadeStart, 0.0),
-              new Offset(fadeEnd, 0.0),
+            _overflowShader = ui.Gradient.linear(
+              Offset(fadeStart, 0.0),
+              Offset(fadeEnd, 0.0),
               <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           } else {
             final double fadeEnd = size.height;
             final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
-            _overflowShader = new ui.Gradient.linear(
-              new Offset(0.0, fadeStart),
-              new Offset(0.0, fadeEnd),
+            _overflowShader = ui.Gradient.linear(
+              Offset(0.0, fadeStart),
+              Offset(0.0, fadeEnd),
               <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
@@ -347,7 +347,7 @@ class RenderParagraph extends RenderBox {
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(offset & size, paint);
       }
@@ -359,7 +359,7 @@ class RenderParagraph extends RenderBox {
       if (_overflowShader != null) {
         // This layer limits what the shader below blends with to be just the text
         // (as opposed to the text and its background).
-        canvas.saveLayer(bounds, new Paint());
+        canvas.saveLayer(bounds, Paint());
       } else {
         canvas.save();
       }
@@ -369,7 +369,7 @@ class RenderParagraph extends RenderBox {
     if (_hasVisualOverflow) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
         canvas.drawRect(Offset.zero & size, paint);
@@ -480,7 +480,7 @@ class RenderParagraph extends RenderBox {
 
     SemanticsConfiguration buildSemanticsConfig(int start, int end) {
       final TextDirection initialDirection = currentDirection;
-      final TextSelection selection = new TextSelection(baseOffset: start, extentOffset: end);
+      final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
       Rect rect;
       for (ui.TextBox textBox in rects) {
@@ -491,15 +491,15 @@ class RenderParagraph extends RenderBox {
       // round the current rectangle to make this API testable and add some
       // padding so that the accessibility rects do not overlap with the text.
       // TODO(jonahwilliams): implement this for all text accessibility rects.
-      currentRect = new Rect.fromLTRB(
+      currentRect = Rect.fromLTRB(
         rect.left.floorToDouble() - 4.0,
         rect.top.floorToDouble() - 4.0,
         rect.right.ceilToDouble() + 4.0,
         rect.bottom.ceilToDouble() + 4.0,
       );
       order += 1;
-      return new SemanticsConfiguration()
-        ..sortKey = new OrdinalSortKey(order)
+      return SemanticsConfiguration()
+        ..sortKey = OrdinalSortKey(order)
         ..textDirection = initialDirection
         ..label = rawLabel.substring(start, end);
     }
@@ -508,13 +508,13 @@ class RenderParagraph extends RenderBox {
       final int start = _recognizerOffsets[i];
       final int end = _recognizerOffsets[i + 1];
       if (current != start) {
-        final SemanticsNode node = new SemanticsNode();
+        final SemanticsNode node = SemanticsNode();
         final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
         node.updateWith(config: configuration);
         node.rect = currentRect;
         newChildren.add(node);
       }
-      final SemanticsNode node = new SemanticsNode();
+      final SemanticsNode node = SemanticsNode();
       final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
       final GestureRecognizer recognizer = _recognizers[j];
       if (recognizer is TapGestureRecognizer) {
@@ -530,7 +530,7 @@ class RenderParagraph extends RenderBox {
       current = end;
     }
     if (current < rawLabel.length) {
-      final SemanticsNode node = new SemanticsNode();
+      final SemanticsNode node = SemanticsNode();
       final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
       node.updateWith(config: configuration);
       node.rect = currentRect;
@@ -547,12 +547,12 @@ class RenderParagraph extends RenderBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    properties.add(new EnumProperty<TextOverflow>('overflow', overflow));
-    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
-    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(EnumProperty<TextOverflow>('overflow', overflow));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

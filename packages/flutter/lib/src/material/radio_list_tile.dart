@@ -194,7 +194,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Radio<T>(
+    final Widget control = Radio<T>(
       value: value,
       groupValue: groupValue,
       onChanged: onChanged,
@@ -213,10 +213,10 @@ class RadioListTile<T> extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

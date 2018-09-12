@@ -274,5 +274,5 @@ const List<Product> _allProducts = <Product> [
 
 List<Product> allProducts() {
   assert(_allProducts.every((Product product) => product.isValid()));
-  return new List<Product>.unmodifiable(_allProducts);
+  return List<Product>.unmodifiable(_allProducts);
 }

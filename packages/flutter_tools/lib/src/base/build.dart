@@ -103,7 +103,7 @@ class AOTSnapshotter {
       return 1;
     }
 
-    final PackageMap packageMap = new PackageMap(packagesPath);
+    final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
     if (packageMapError != null) {
       printError(packageMapError);
@@ -120,7 +120,7 @@ class AOTSnapshotter {
     final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, vmEntryPoints, ioEntryPoints, mainPath];
-    final Set<String> outputPaths = new Set<String>();
+    final Set<String> outputPaths = Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -181,7 +181,7 @@ class AOTSnapshotter {
     }
 
     // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = new Fingerprinter(
+    final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
       paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
       properties: <String, String>{
@@ -198,7 +198,7 @@ class AOTSnapshotter {
       return 0;
     }
 
-    final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+    final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packageMap.packagesPath,
@@ -369,7 +369,7 @@ class CoreJITSnapshotter {
     outputDir.createSync(recursive: true);
 
     final List<String> inputPaths = <String>[mainPath, compilationTraceFilePath];
-    final Set<String> outputPaths = new Set<String>();
+    final Set<String> outputPaths = Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -419,7 +419,7 @@ class CoreJITSnapshotter {
     }
 
     // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = new Fingerprinter(
+    final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
       paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
       properties: <String, String>{
@@ -435,7 +435,7 @@ class CoreJITSnapshotter {
       return 0;
     }
 
-    final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+    final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packagesPath,

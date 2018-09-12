@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Back during pushReplacement', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: const Material(child: Text('home')),
       routes: <String, WidgetBuilder> {
         '/a': (BuildContext context) => const Material(child: Text('a')),
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets('pushAndRemoveUntil', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: const Material(child: Text('home')),
       routes: <String, WidgetBuilder> {
         '/a': (BuildContext context) => const Material(child: Text('a')),

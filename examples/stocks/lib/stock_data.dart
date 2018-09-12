@@ -13,7 +13,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-final math.Random _rng = new math.Random();
+final math.Random _rng = math.Random();
 
 class Stock {
   String symbol;
@@ -41,7 +41,7 @@ class Stock {
 class StockData extends ChangeNotifier {
   StockData() {
     if (actuallyFetchData) {
-      _httpClient = new http.Client();
+      _httpClient = http.Client();
       _fetchNextChunk();
     }
   }
@@ -57,7 +57,7 @@ class StockData extends ChangeNotifier {
 
   void add(List<dynamic> data) {
     for (List<dynamic> fields in data) {
-      final Stock stock = new Stock.fromFields(fields.cast<String>());
+      final Stock stock = Stock.fromFields(fields.cast<String>());
       _symbols.add(stock.symbol);
       _stocks[stock.symbol] = stock;
     }

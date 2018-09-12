@@ -14,12 +14,12 @@ class FooMaterialLocalizations extends MaterialLocalizationEn {
     this.backButtonTooltip,
   ) : super(
     localeName: localeName.toString(),
-    fullYearFormat: new intl.DateFormat.y(),
-    mediumDateFormat: new intl.DateFormat('E, MMM\u00a0d'),
-    longDateFormat: new intl.DateFormat.yMMMMEEEEd(),
-    yearMonthFormat: new intl.DateFormat.yMMMM(),
-    decimalFormat: new intl.NumberFormat.decimalPattern(),
-    twoDigitZeroPaddedFormat: new intl.NumberFormat('00'),
+    fullYearFormat: intl.DateFormat.y(),
+    mediumDateFormat: intl.DateFormat('E, MMM\u00a0d'),
+    longDateFormat: intl.DateFormat.yMMMMEEEEd(),
+    yearMonthFormat: intl.DateFormat.yMMMM(),
+    decimalFormat: intl.NumberFormat.decimalPattern(),
+    twoDigitZeroPaddedFormat: intl.NumberFormat('00'),
   );
 
   @override
@@ -42,7 +42,7 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
   @override
   Future<FooMaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<FooMaterialLocalizations>(new FooMaterialLocalizations(locale, backButtonTooltip));
+    return SynchronousFuture<FooMaterialLocalizations>(FooMaterialLocalizations(locale, backButtonTooltip));
   }
 
   @override
@@ -59,14 +59,14 @@ Widget buildFrame({
     Locale('es', 'ES'),
   ],
 }) {
-  return new MaterialApp(
+  return MaterialApp(
     color: const Color(0xFFFFFFFF),
     locale: locale,
     supportedLocales: supportedLocales,
     localizationsDelegates: delegates,
     localeResolutionCallback: localeResolutionCallback,
     onGenerateRoute: (RouteSettings settings) {
-      return new MaterialPageRoute<void>(
+      return MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return buildContent(context);
         }
@@ -77,12 +77,12 @@ Widget buildFrame({
 
 void main() {
   testWidgets('Locale fallbacks', (WidgetTester tester) async {
-    final Key textKey = new UniqueKey();
+    final Key textKey = UniqueKey();
 
     await tester.pumpWidget(
       buildFrame(
         buildContent: (BuildContext context) {
-          return new Text(
+          return Text(
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
@@ -108,15 +108,15 @@ void main() {
       return buildFrame(
         locale: locale,
         buildContent: (BuildContext context) {
-          return new Localizations.override(
+          return Localizations.override(
             context: context,
-            child: new Builder(
+            child: Builder(
               builder: (BuildContext context) {
                 // No MaterialLocalizations are defined for the first Localizations
                 // ancestor, so we should get the values from the default one, i.e.
                 // the one created by WidgetsApp via the LocalizationsDelegate
                 // provided by MaterialApp.
-                return new Text(MaterialLocalizations.of(context).backButtonTooltip);
+                return Text(MaterialLocalizations.of(context).backButtonTooltip);
               },
             ),
           );
@@ -139,16 +139,16 @@ void main() {
       return buildFrame(
         locale: locale,
         buildContent: (BuildContext context) {
-          return new Localizations.override(
+          return Localizations.override(
             context: context,
             locale: const Locale('en', 'US'),
-            child: new Builder(
+            child: Builder(
               builder: (BuildContext context) {
                 // No MaterialLocalizations are defined for the Localizations.override
                 // ancestor, so we should get all values from the default one, i.e.
                 // the one created by WidgetsApp via the LocalizationsDelegate
                 // provided by MaterialApp.
-                return new Text(MaterialLocalizations.of(context).backButtonTooltip);
+                return Text(MaterialLocalizations.of(context).backButtonTooltip);
               },
             ),
           );
@@ -167,7 +167,7 @@ void main() {
   });
 
   testWidgets('MaterialApp adds MaterialLocalizations for additional languages', (WidgetTester tester) async {
-    final Key textKey = new UniqueKey();
+    final Key textKey = UniqueKey();
 
     await tester.pumpWidget(
       buildFrame(
@@ -181,7 +181,7 @@ void main() {
           Locale('de', ''),
         ],
         buildContent: (BuildContext context) {
-          return new Text(
+          return Text(
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
@@ -201,7 +201,7 @@ void main() {
   });
 
   testWidgets('MaterialApp overrides MaterialLocalizations for all locales', (WidgetTester tester) async {
-    final Key textKey = new UniqueKey();
+    final Key textKey = UniqueKey();
 
     await tester.pumpWidget(
       buildFrame(
@@ -212,7 +212,7 @@ void main() {
         ],
         buildContent: (BuildContext context) {
           // Should always be 'foo', no matter what the locale is
-          return new Text(
+          return Text(
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
@@ -232,7 +232,7 @@ void main() {
   });
 
   testWidgets('MaterialApp overrides MaterialLocalizations for default locale', (WidgetTester tester) async {
-    final Key textKey = new UniqueKey();
+    final Key textKey = UniqueKey();
 
     await tester.pumpWidget(
       buildFrame(
@@ -241,7 +241,7 @@ void main() {
         ],
         // supportedLocales not specified, so all locales resolve to 'en'
         buildContent: (BuildContext context) {
-          return new Text(
+          return Text(
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
@@ -264,7 +264,7 @@ void main() {
   });
 
   testWidgets('deprecated Android/Java locales are modernized', (WidgetTester tester) async {
-    final Key textKey = new UniqueKey();
+    final Key textKey = UniqueKey();
 
     await tester.pumpWidget(
       buildFrame(
@@ -275,7 +275,7 @@ void main() {
           const Locale('id', 'JV'),
         ],
         buildContent: (BuildContext context) {
-          return new Text(
+          return Text(
             '${Localizations.localeOf(context)}',
             key: textKey,
           );

@@ -49,7 +49,7 @@ class FuchsiaDevice extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) => new Future<bool>.value(false);
+  Future<bool> installApp(ApplicationPackage app) => Future<bool>.value(false);
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => false;
@@ -68,7 +68,7 @@ class FuchsiaDevice extends Device {
     bool applicationNeedsRebuild = false,
     bool usesTerminalUi = false,
     bool ipv6 = false,
-  }) => new Future<Null>.error('unimplemented');
+  }) => Future<Null>.error('unimplemented');
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
@@ -85,7 +85,7 @@ class FuchsiaDevice extends Device {
   _FuchsiaLogReader _logReader;
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    _logReader ??= new _FuchsiaLogReader(this);
+    _logReader ??= _FuchsiaLogReader(this);
     return _logReader;
   }
 

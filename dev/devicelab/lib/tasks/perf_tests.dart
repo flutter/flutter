@@ -15,7 +15,7 @@ import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createComplexLayoutScrollPerfTest() {
-  return new PerfTest(
+  return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
@@ -23,7 +23,7 @@ TaskFunction createComplexLayoutScrollPerfTest() {
 }
 
 TaskFunction createTilesScrollPerfTest() {
-  return new PerfTest(
+  return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'tiles_scroll_perf',
@@ -31,38 +31,38 @@ TaskFunction createTilesScrollPerfTest() {
 }
 
 TaskFunction createFlutterGalleryStartupTest() {
-  return new StartupTest(
+  return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
   ).run;
 }
 
 TaskFunction createComplexLayoutStartupTest() {
-  return new StartupTest(
+  return StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
   ).run;
 }
 
 TaskFunction createFlutterGalleryCompileTest() {
-  return new CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
+  return CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
 
 TaskFunction createHelloWorldCompileTest() {
-  return new CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
+  return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
 TaskFunction createComplexLayoutCompileTest() {
-  return new CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
+  return CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
 }
 
 TaskFunction createFlutterViewStartupTest() {
-  return new StartupTest(
+  return StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
       reportMetrics: false,
   ).run;
 }
 
 TaskFunction createPlatformViewStartupTest() {
-  return new StartupTest(
+  return StartupTest(
     '${flutterDirectory.path}/examples/platform_view',
     reportMetrics: false,
   ).run;
@@ -82,7 +82,7 @@ TaskFunction createBasicMaterialCompileTest() {
     if (!(await sampleDir.exists()))
       throw 'Failed to create default Flutter app in ${sampleDir.path}';
 
-    return new CompileTest(sampleDir.path).run();
+    return CompileTest(sampleDir.path).run();
   };
 }
 
@@ -112,9 +112,9 @@ class StartupTest {
       final Map<String, dynamic> data = json.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
 
       if (!reportMetrics)
-        return new TaskResult.success(data);
+        return TaskResult.success(data);
 
-      return new TaskResult.success(data, benchmarkScoreKeys: <String>[
+      return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
       ]);
     });
@@ -152,13 +152,13 @@ class PerfTest {
       final Map<String, dynamic> data = json.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
 
       if (data['frame_count'] < 5) {
-        return new TaskResult.failure(
+        return TaskResult.failure(
           'Timeline contains too few frames: ${data['frame_count']}. Possibly '
           'trace events are not being captured.',
         );
       }
 
-      return new TaskResult.success(data, benchmarkScoreKeys: <String>[
+      return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
         'missed_frame_build_budget_count',
@@ -190,14 +190,14 @@ class CompileTest {
         ..addAll(await _compileApp(reportPackageContentSizes: reportPackageContentSizes))
         ..addAll(await _compileDebug());
 
-      return new TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+      return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
   }
 
   static Future<Map<String, dynamic>> _compileAot() async {
     // Generate blobs instead of assembly.
     await flutter('clean');
-    final Stopwatch watch = new Stopwatch()..start();
+    final Stopwatch watch = Stopwatch()..start();
     final List<String> options = <String>[
       'aot',
       '-v',
@@ -218,7 +218,7 @@ class CompileTest {
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
 
-    final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
+    final RegExp metricExpression = RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
     final Map<String, dynamic> metrics = <String, dynamic>{};
     for (Match m in metricExpression.allMatches(compileLog)) {
       metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
@@ -233,7 +233,7 @@ class CompileTest {
 
   static Future<Map<String, dynamic>> _compileApp({ bool reportPackageContentSizes = false }) async {
     await flutter('clean');
-    final Stopwatch watch = new Stopwatch();
+    final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
     final List<String> options = <String>['--release'];
     setLocalEngineOptionIfNecessary(options);
@@ -281,7 +281,7 @@ class CompileTest {
 
   static Future<Map<String, dynamic>> _compileDebug() async {
     await flutter('clean');
-    final Stopwatch watch = new Stopwatch();
+    final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
     setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
@@ -327,8 +327,8 @@ class CompileTest {
       'TARGET_BUILD_DIR': path.dirname(appPath),
     });
 
-    final File appFramework = new File(path.join(appPath, 'Frameworks', 'App.framework', 'App'));
-    final File flutterFramework = new File(path.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
+    final File appFramework = File(path.join(appPath, 'Frameworks', 'App.framework', 'App'));
+    final File flutterFramework = File(path.join(appPath, 'Frameworks', 'Flutter.framework', 'Flutter'));
 
     return <String, dynamic>{
       'app_framework_uncompressed_bytes': await appFramework.length(),
@@ -344,7 +344,7 @@ class CompileTest {
 
     // First three lines are header, last two lines are footer.
     for (int i = 3; i < lines.length - 2; i++) {
-      final _UnzipListEntry entry = new _UnzipListEntry.fromLine(lines[i]);
+      final _UnzipListEntry entry = _UnzipListEntry.fromLine(lines[i]);
       fileToMetadata[entry.path] = entry;
     }
 
@@ -390,7 +390,7 @@ class MemoryTest {
   /// when `adb logcat` sees a log line with the given `message`.
   void prepareForNextMessage(String message) {
     _nextMessage = message;
-    _receivedNextMessage = new Completer<void>();
+    _receivedNextMessage = Completer<void>();
   }
 
   int get iterationCount => 15;
@@ -427,14 +427,14 @@ class MemoryTest {
         assert(_diffMemory.length == iteration + 1);
         print('terminating...');
         await device.stop(package);
-        await new Future<void>.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
       }
 
       await adb.cancel();
 
-      final ListStatistics startMemoryStatistics = new ListStatistics(_startMemory);
-      final ListStatistics endMemoryStatistics = new ListStatistics(_endMemory);
-      final ListStatistics diffMemoryStatistics = new ListStatistics(_diffMemory);
+      final ListStatistics startMemoryStatistics = ListStatistics(_startMemory);
+      final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
+      final ListStatistics diffMemoryStatistics = ListStatistics(_diffMemory);
 
       final Map<String, dynamic> memoryUsage = <String, dynamic>{};
       memoryUsage.addAll(startMemoryStatistics.asMap('start'));
@@ -446,7 +446,7 @@ class MemoryTest {
       _endMemory.clear();
       _diffMemory.clear();
 
-      return new TaskResult.success(memoryUsage, benchmarkScoreKeys: memoryUsage.keys.toList());
+      return TaskResult.success(memoryUsage, benchmarkScoreKeys: memoryUsage.keys.toList());
     });
   }
 
@@ -516,7 +516,7 @@ class ListStatistics {
     assert(data.isNotEmpty);
     assert(data.length % 2 == 1);
     final List<int> sortedData = data.toList()..sort();
-    return new ListStatistics._(
+    return ListStatistics._(
       sortedData.first,
       sortedData.last,
       sortedData[(sortedData.length - 1) ~/ 2],
@@ -540,9 +540,9 @@ class ListStatistics {
 
 class _UnzipListEntry {
   factory _UnzipListEntry.fromLine(String line) {
-    final List<String> data = line.trim().split(new RegExp('\\s+'));
+    final List<String> data = line.trim().split(RegExp('\\s+'));
     assert(data.length == 8);
-    return new _UnzipListEntry._(
+    return _UnzipListEntry._(
       uncompressedSize:  int.parse(data[0]),
       compressedSize: int.parse(data[2]),
       path: data[7],

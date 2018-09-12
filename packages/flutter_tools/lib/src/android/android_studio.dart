@@ -25,7 +25,7 @@ AndroidStudio get androidStudio => context[AndroidStudio];
 // $HOME/Applications/Android Studio.app/Contents/
 
 final RegExp _dotHomeStudioVersionMatcher =
-    new RegExp(r'^\.AndroidStudio([^\d]*)([\d.]+)');
+    RegExp(r'^\.AndroidStudio([^\d]*)([\d.]+)');
 
 String get javaPath => androidStudio?.javaPath;
 
@@ -54,8 +54,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     Version version;
     if (versionString != null)
-      version = new Version.parse(versionString);
-    return new AndroidStudio(studioPath, version: version);
+      version = Version.parse(versionString);
+    return AndroidStudio(studioPath, version: version);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
@@ -64,7 +64,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (versionMatch?.groupCount != 2) {
       return null;
     }
-    final Version version = new Version.parse(versionMatch[2]);
+    final Version version = Version.parse(versionMatch[2]);
     if (version == null) {
       return null;
     }
@@ -77,7 +77,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       // ignored, installPath will be null, which is handled below
     }
     if (installPath != null && fs.isDirectorySync(installPath)) {
-      return new AndroidStudio(installPath, version: version);
+      return AndroidStudio(installPath, version: version);
     }
     return null;
   }
@@ -123,7 +123,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       String configuredStudioPath = configuredStudio;
       if (platform.isMacOS && !configuredStudioPath.endsWith('Contents'))
         configuredStudioPath = fs.path.join(configuredStudioPath, 'Contents');
-      return new AndroidStudio(configuredStudioPath,
+      return AndroidStudio(configuredStudioPath,
           configured: configuredStudio);
     }
 
@@ -181,7 +181,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map((FileSystemEntity e) => new AndroidStudio.fromMacOSBundle(e.path))
+        .map((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .where((AndroidStudio s) => s != null)
         .toList();
   }
@@ -205,7 +205,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (fs.directory(homeDirPath).existsSync()) {
       for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
-          final AndroidStudio studio = new AndroidStudio.fromHomeDot(entity);
+          final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
           if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
             studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
             studios.add(studio);
@@ -216,14 +216,14 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     final String configuredStudioDir = config.getValue('android-studio-dir');
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
-      studios.add(new AndroidStudio(configuredStudioDir,
+      studios.add(AndroidStudio(configuredStudioDir,
           configured: configuredStudioDir));
     }
 
     if (platform.isLinux) {
       void _checkWellKnownPath(String path) {
         if (fs.isDirectorySync(path) && !_hasStudioAt(path)) {
-          studios.add(new AndroidStudio(path));
+          studios.add(AndroidStudio(path));
         }
       }
 
