@@ -65,14 +65,15 @@ class FlutterDevice {
   Future<Null> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (vmServices != null)
       return;
-    vmServices = new List<VMService>(observatoryUris.length);
+    final List<VMService> localVmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
-      vmServices[i] = await VMService.connect(observatoryUris[i],
+      localVmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources,
           compileExpression: compileExpression);
       printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
+    vmServices = localVmServices;
   }
 
   Future<Null> refreshViews() async {
