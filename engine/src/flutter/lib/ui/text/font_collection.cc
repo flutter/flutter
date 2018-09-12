@@ -96,7 +96,7 @@ void FontCollection::RegisterFonts(fml::RefPtr<AssetManager> asset_manager) {
 
 void FontCollection::RegisterTestFonts() {
   sk_sp<SkTypeface> test_typeface =
-      SkTypeface::MakeFromStream(GetTestFontData().release());
+      SkTypeface::MakeFromStream(GetTestFontData());
 
   std::unique_ptr<txt::TypefaceFontAssetProvider> font_provider =
       std::make_unique<txt::TypefaceFontAssetProvider>();

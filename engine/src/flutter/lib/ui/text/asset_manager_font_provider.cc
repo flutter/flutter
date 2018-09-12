@@ -103,7 +103,7 @@ SkTypeface* AssetManagerFontStyleSet::createTypeface(int i) {
     std::unique_ptr<SkMemoryStream> stream = SkMemoryStream::Make(asset_data);
 
     // Ownership of the stream is transferred.
-    asset.typeface = SkTypeface::MakeFromStream(stream.release());
+    asset.typeface = SkTypeface::MakeFromStream(std::move(stream));
     if (!asset.typeface)
       return nullptr;
   }
