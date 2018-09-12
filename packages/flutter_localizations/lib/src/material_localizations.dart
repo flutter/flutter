@@ -402,6 +402,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [Intl.plural], to which this form is passed.
   ///  * [remainingTextFieldCharacterCountZero], the "zero" form
   ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountZero;
@@ -412,12 +415,62 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   /// See also:
   ///
-  ///  * [Intl.plural], to which this form is passed.
   ///  * [remainingTextFieldCharacterCountZero], the "zero" form
   ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountOne => null;
+
+  /// The "two" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  /// The "many" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountMany => null;
+
+  /// The "few" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountFew => null;
 
   /// The "other" form of [remainingTextFieldCharacterCount].
   ///
@@ -428,6 +481,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [Intl.plural], to which this form is passed.
   ///  * [remainingTextFieldCharacterCountZero], the "zero" form
   ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountOther;
@@ -438,6 +494,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
       remainingCount,
       zero: remainingTextFieldCharacterCountZero,
       one: remainingTextFieldCharacterCountOne,
+      two: remainingTextFieldCharacterCountTwo,
+      many: remainingTextFieldCharacterCountMany,
+      few: remainingTextFieldCharacterCountFew,
       other: remainingTextFieldCharacterCountOther,
       locale: _localeName,
     ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
