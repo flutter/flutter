@@ -26,6 +26,19 @@ enum ButtonTextTheme {
   primary,
 }
 
+/// Used with [ButtonTheme] and [ButtonThemeData] to define how the button bar
+/// should size itself with either constraints or internal padding.
+enum ButtonBarLayoutBehavior {
+  /// Button bars will be constrained to a minimum height of 52.
+  ///
+  /// This setting is require to create button bars which conform to the
+  /// material specification.
+  constrained,
+
+  /// Button bars will calculate their padding from the button theme padding.
+  padded,
+}
+
 /// Used with [ButtonThemeData] to configure the color and geometry of buttons.
 ///
 /// A button theme can be specified as part of the overall Material theme
@@ -60,6 +73,7 @@ class ButtonTheme extends InheritedWidget {
   ButtonTheme({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
+    ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
     double minWidth = 88.0,
     double height = 36.0,
     EdgeInsetsGeometry padding,
@@ -70,13 +84,15 @@ class ButtonTheme extends InheritedWidget {
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
+       assert(layoutBehavior != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
          height: height,
          padding: padding,
          shape: shape,
-         alignedDropdown: alignedDropdown
+         alignedDropdown: alignedDropdown,
+         layoutBehavior: layoutBehavior,
        ),
        super(key: key, child: child);
 
@@ -113,6 +129,7 @@ class ButtonTheme extends InheritedWidget {
     ShapeBorder shape,
     bool alignedDropdown = false,
     Widget child,
+    ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
@@ -124,6 +141,7 @@ class ButtonTheme extends InheritedWidget {
          padding: padding,
          shape: shape,
          alignedDropdown: alignedDropdown,
+         layoutBehavior: layoutBehavior,
        ),
        super(key: key, child: child);
 
@@ -162,11 +180,13 @@ class ButtonThemeData extends Diagnosticable {
     this.height = 36.0,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
+    this.layoutBehavior = ButtonBarLayoutBehavior.padded,
     this.alignedDropdown = false,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
+       assert(layoutBehavior != null),
        _padding = padding,
        _shape = shape;
 
@@ -186,6 +206,12 @@ class ButtonThemeData extends Diagnosticable {
   /// Defines a button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
   final ButtonTextTheme textTheme;
+
+  /// Defines whether a button bar should size itself with a minimum size
+  /// constraint or padding.
+  ///
+  /// Defaults to [ButtonBarLayoutBehavior.padded].
+  final ButtonBarLayoutBehavior layoutBehavior;
 
   /// Simply a convenience that returns [minWidth] and [height] as a
   /// [BoxConstraints] object:
