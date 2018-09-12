@@ -26,7 +26,8 @@ config("executable_config") {
   ldflags = [ "-pie" ]
 }
 
-config("hide_native_jni_exports") {
-  ldflags = [ "-Wl,--version-script=" +
-              rebase_path("//build/android/android_no_jni_exports.lst") ]
+config("hide_all_but_jni_onload") {
+  ldflags = [ "-Wl,--version-script=" + rebase_path(
+                  "//build/android/android_only_explicit_jni_exports.lst",
+                  root_build_dir) ]
 }

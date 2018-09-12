@@ -528,10 +528,9 @@ if (is_win) {
 } else if (is_mac) {
   _shared_library_configs += [ "//build/config/mac:mac_dynamic_flags" ]
 } else if (is_android) {
-  # Strip native JNI exports from shared libraries by default. Binaries that
-  # want this can remove this config.
+  # Only export JNI_OnLoad symbol.
   _shared_library_configs +=
-      [ "//build/config/android:hide_native_jni_exports" ]
+      [ "//build/config/android:hide_all_but_jni_onload" ]
 }
 set_defaults("shared_library") {
   configs = _shared_library_configs
