@@ -61,7 +61,7 @@ class InvertColorTestWidget extends LeafRenderObjectWidget {
 
   @override
   RenderInvertColorTest createRenderObject(BuildContext context) {
-    return new RenderInvertColorTest(color, filter);
+    return RenderInvertColorTest(color, filter);
   }
   @override
   void updateRenderObject(BuildContext context, covariant RenderInvertColorTest renderObject) {
@@ -96,7 +96,7 @@ class RenderInvertColorTest extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..style = PaintingStyle.fill
       ..color = color
       ..colorFilter = filter
