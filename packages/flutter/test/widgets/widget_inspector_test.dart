@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1545,18 +1545,48 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matchesGoldenFile('inspector.clipRect_debugPaint.png'),
       );
 
+      final Element clipRect = find.byType(ClipRRect).evaluate().single;
+
+      final Future<ui.Image> clipRectScreenshot = service.screenshot(
+        clipRect,
+        width: 100.0,
+        height: 100.0,
+        margin: 20.0,
+        debugPaint: true,
+      );
       // Add a margin so that the clip icon shows up in the screenshot.
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
-        service.screenshot(
-          find.byType(ClipRRect).evaluate().single,
-          width: 100.0,
-          height: 100.0,
-          margin: 20.0,
-          debugPaint: true,
-        ),
+        clipRectScreenshot,
         matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
-        skip: !Platform.isLinux
+        skip: !Platform.isLinux,
+      );
+
+      // Verify we get the same image if we go through the service extension
+      // instead of invoking the screenshot method directly.
+      final Future<Object> base64ScreenshotFuture = service.testExtension(
+        'screenshot',
+        <String, String>{
+          'id': service.toId(clipRect, 'group'),
+          'width': '100.0',
+          'height': '100.0',
+          'margin': '20.0',
+          'debugPaint': 'true',
+        },
+      );
+
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding
+          .ensureInitialized();
+      final ui.Image screenshotImage = await binding.runAsync<ui.Image>(() async {
+        final String base64Screenshot = await base64ScreenshotFuture;
+        final ui.Codec codec = await ui.instantiateImageCodec(base64.decode(base64Screenshot));
+        final ui.FrameInfo frame = await codec.getNextFrame();
+        return frame.image;
+      }, additionalTime: const Duration(seconds: 11));
+
+      await expectLater(
+        screenshotImage,
+        matchesReferenceImage(await clipRectScreenshot),
       );
 
       // Test with a very visible debug paint
