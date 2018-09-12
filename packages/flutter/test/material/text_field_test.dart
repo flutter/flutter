@@ -2945,16 +2945,16 @@ void main() {
   });
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (WidgetTester tester) async {
-    final TextEditingController controller = new TextEditingController(text: 'Just some text');
+    final TextEditingController controller = TextEditingController(text: 'Just some text');
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          body: new DefaultTextStyle(
+      MaterialApp(
+        home: Scaffold(
+          body: DefaultTextStyle(
             style: const TextStyle(fontSize: 12.0, fontFamily: 'Ahem'),
-            child: new MediaQuery(
-              data: new MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
+            child: MediaQuery(
+              data: MediaQueryData.fromWindow(ui.window).copyWith(textScaleFactor: 4.0),
               child: Center(
-                child: new TextField(
+                child: TextField(
                   decoration: const InputDecoration(labelText: 'Label', border: UnderlineInputBorder()),
                   controller: controller,
                 ),
