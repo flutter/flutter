@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'floating_action_button_location.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
@@ -18,6 +17,7 @@ import 'theme.dart';
 const Duration _kBottomSheetDuration = Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
+const double _kBottomSheetSnapHeight = 0.60;
 
 /// A material design bottom sheet.
 ///
@@ -114,20 +114,46 @@ class _BottomSheetState extends State<BottomSheet> {
   _BottomSheetState(this._renderedHeight);
 
   double _renderedHeight;
+  ScaffoldState _scaffold;
 
   bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
+
+  bool get _snapToFullScreen {
+    final MediaQueryData mediaData = MediaQuery.of(context);
+    return mediaData.size.height * _kBottomSheetSnapHeight <= _renderedHeight;
+  }
+
+  double get _screenHeight {
+    final MediaQueryData mediaData = MediaQuery.of(context);
+    return mediaData.size.height;
+  }
+
+  bool get _isFullScreen {
+    return _renderedHeight >= _screenHeight - 1;
+  }
+
+  @override
+  void didChangeDependencies() {
+    _scaffold = Scaffold.of(context);
+    super.didChangeDependencies();
+  }
+
+  @override
+  void deactivate() {
+    _scaffold.showFloatingActionButton();
+    super.deactivate();
+  }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway)
       return;
 
-
-    final MediaQueryData mediaData = MediaQuery.of(context);
-    final bool snapToFullScreen = mediaData.size.height * .66 <= _renderedHeight;
+    if (_snapToFullScreen) {
+      final double fabVisibility = -((_renderedHeight / (_screenHeight * .85)) - 1.0) / (1.0 - _kBottomSheetSnapHeight * 1.1765);
+      _scaffold.floatingActionButtonVisbilityValue = fabVisibility;
+    }
     setState(() {
-      _renderedHeight = snapToFullScreen
-          ? mediaData.size.height
-          : _renderedHeight - details.primaryDelta;
+      _renderedHeight = _renderedHeight - details.primaryDelta;
     });
   }
 
@@ -137,17 +163,23 @@ class _BottomSheetState extends State<BottomSheet> {
 
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / widget.initialHeight;
-      if (widget.animationController.value > 0.0)
+      if (widget.animationController.value > 0.0) {
         widget.animationController.fling(velocity: flingVelocity);
-      if (flingVelocity < 0.0)
+      }
+      if (flingVelocity < 0.0) {
+        _scaffold.showFloatingActionButton();
         widget.onClosing();
+      }
     } else if (details.velocity.pixelsPerSecond.dy < -_kMinFlingVelocity) {
+      _scaffold.hideFloatingActionButton();
       setState(() {
         _renderedHeight = double.infinity;
       });
     } else if (widget.animationController.value < _kCloseProgressThreshold) {
-      if (widget.animationController.value > 0.0)
+      if (widget.animationController.value > 0.0) {
         widget.animationController.fling(velocity: -1.0);
+      }
+      _scaffold.showFloatingActionButton();
       widget.onClosing();
     } else {
       widget.animationController.forward();
@@ -156,16 +188,6 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaData = MediaQuery.of(context);
-    final ScaffoldState scaffold = Scaffold.of(context);
-print('${mediaData.size.height * .75}, $_renderedHeight');
-    final bool snapToFullScreen = mediaData.size.height * .75 <= _renderedHeight;
-//    if (isFullscreen) {
-//      scaffold.moveFloatingActionButton(FloatingActionButtonLocation.offstage);
-//    } else {
-//      scaffold.moveFloatingActionButton(FloatingActionButtonLocation.endFloat);
-//    }
-
     return new Material(
       child: !widget.enableDrag
         ? widget.builder(context)
@@ -180,7 +202,7 @@ print('${mediaData.size.height * .75}, $_renderedHeight');
             new GestureDetector(
               onVerticalDragUpdate: _handleDragUpdate,
               onVerticalDragEnd: _handleDragEnd,
-              child: snapToFullScreen ? const LimitedBox() : null,
+              child: _isFullScreen ? const LimitedBox() : null,
             ),
           ],
         ),
@@ -194,16 +216,23 @@ class _StandardBottomSheetLayout extends SingleChildLayoutDelegate {
 
   final double renderHeight;
 
-//  @override
-//  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  @override
+  Size getSize(BoxConstraints constraints) {
+//    print(constraints);
+
+    return super.getSize(constraints);
+  }
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
 //    print(constraints.maxHeight);
-//    return new BoxConstraints(
-//      minWidth: constraints.maxWidth,
-//      maxWidth: constraints.maxWidth,
-//      minHeight: 56.0,
-//      maxHeight: math.min(56.0, constraints.maxHeight),
-//    );
-//  }
+    return new BoxConstraints(
+      minWidth: constraints.maxWidth,
+      maxWidth: constraints.maxWidth,
+      minHeight: 56.0,
+      maxHeight: math.max(56.0, constraints.maxHeight * .5),
+    );
+  }
 
   @override
   bool shouldRelayout(_StandardBottomSheetLayout oldDelegate) {
@@ -228,8 +257,8 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return new BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
-      maxHeight: constraints.maxHeight * .5,
+      minHeight: 56.0,
+      maxHeight: math.max(56.0, constraints.maxHeight * .5),
     );
   }
 
