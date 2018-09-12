@@ -15,6 +15,7 @@ TEST(DartVM, SimpleInitialization) {
   ASSERT_TRUE(vm);
   ASSERT_EQ(vm, DartVM::ForProcess(settings));
   ASSERT_FALSE(DartVM::IsRunningPrecompiledCode());
+  ASSERT_EQ(vm->GetPlatformKernel().GetSize(), 0u);
 }
 
 TEST(DartVM, SimpleIsolateNameServer) {

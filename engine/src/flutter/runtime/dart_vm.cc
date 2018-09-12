@@ -66,9 +66,6 @@ static const char* kDartLanguageArgs[] = {
     "--background_compilation",
     "--await_is_keyword",
     "--causal_async_stacks",
-    "--strong",
-    "--reify_generic_functions",
-    "--sync_async",
     // clang-format on
 };
 
@@ -84,6 +81,30 @@ static const char* kDartWriteProtectCodeArgs[] = {
 static const char* kDartAssertArgs[] = {
     // clang-format off
     "--enable_asserts",
+    // clang-format on
+};
+
+static const char* kDartCheckedModeArgs[] = {
+    // clang-format off
+    "--enable_type_checks",
+    "--error_on_bad_type",
+    "--error_on_bad_override",
+    // clang-format on
+};
+
+static const char* kDartModeArgs[] = {
+    // clang-format off
+    "--no-strong",
+    "--no-reify_generic_functions",
+    "--no-sync_async",
+    // clang-format on
+};
+
+static const char* kDart2ModeArgs[] = {
+    // clang-format off
+    "--strong",
+    "--reify_generic_functions",
+    "--sync_async",
     // clang-format on
 };
 
@@ -297,6 +318,8 @@ DartVM::DartVM(const Settings& settings,
       vm_snapshot_(std::move(vm_snapshot)),
       isolate_snapshot_(std::move(isolate_snapshot)),
       shared_snapshot_(std::move(shared_snapshot)),
+      platform_kernel_mapping_(
+          std::make_unique<fml::FileMapping>(settings.platform_kernel_path)),
       weak_factory_(this) {
   TRACE_EVENT0("flutter", "DartVMInitializer");
   FML_DLOG(INFO) << "Attempting Dart VM launch for mode: "
@@ -353,12 +376,32 @@ DartVM::DartVM(const Settings& settings,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
-  const bool is_preview_dart2 =
+  const bool isolate_snapshot_is_dart_2 =
       Dart_IsDart2Snapshot(isolate_snapshot_->GetData()->GetSnapshotPointer());
-  FML_CHECK(is_preview_dart2) << "Not Dart 2!";
 
-  if (use_checked_mode) {
-    PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+  const bool is_preview_dart2 =
+      (platform_kernel_mapping_->GetSize() > 0) || isolate_snapshot_is_dart_2;
+
+  FML_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? "is" : "is NOT")
+                 << " enabled. Platform kernel: "
+                 << static_cast<bool>(platform_kernel_mapping_->GetSize() > 0)
+                 << " Isolate Snapshot is Dart 2: "
+                 << isolate_snapshot_is_dart_2;
+
+  if (is_preview_dart2) {
+    PushBackAll(&args, kDart2ModeArgs, arraysize(kDart2ModeArgs));
+    if (use_checked_mode) {
+      PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+    }
+  } else {
+    PushBackAll(&args, kDartModeArgs, arraysize(kDartModeArgs));
+    if (use_checked_mode) {
+      FML_DLOG(INFO) << "Checked mode is ON";
+      PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+      PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
+    } else {
+      FML_DLOG(INFO) << "Is not Dart 2 and Checked mode is OFF";
+    }
   }
 
   if (settings.start_paused) {
@@ -451,6 +494,10 @@ DartVM::~DartVM() {
 
 const Settings& DartVM::GetSettings() const {
   return settings_;
+}
+
+const fml::Mapping& DartVM::GetPlatformKernel() const {
+  return *platform_kernel_mapping_.get();
 }
 
 const DartSnapshot& DartVM::GetVMSnapshot() const {

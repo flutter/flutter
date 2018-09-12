@@ -156,8 +156,7 @@ final List<TestFunction> basicTests = <TestFunction>[
 ];
 
 final List<TestFunction> startPausedTests = <TestFunction>[
-  // TODO(engine): Investigate difference in lifecycle events.
-  // testStartPaused,
+  testStartPaused,
 ];
 
 Future<bool> runTests(ShellLauncher launcher, List<TestFunction> tests) async {
