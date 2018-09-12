@@ -1390,7 +1390,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       duration: kFloatingActionButtonSegue * 2,
     );
 
-    _floatingActionButtonVisibilityController = new AnimationController(
+    _floatingActionButtonVisibilityController = AnimationController(
       duration: kFloatingActionButtonSegue,
       vsync: this,
     );

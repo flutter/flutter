@@ -51,20 +51,20 @@ void main() {
     });
 
     testWidgets('moves fab from center to end and back with hide', (WidgetTester tester) async {
-      final GlobalKey fabKey = new GlobalKey(debugLabel: 'fabKey');
+      final GlobalKey fabKey = GlobalKey(debugLabel: 'fabKey');
       void fabExists({bool visible = true}) {
         expect(find.byKey(fabKey), findsOneWidget);
         expect(find.byKey(fabKey).hitTestable(), visible ? findsOneWidget : findsNothing);
       }
       await tester.pumpWidget(buildFrame(
         location: FloatingActionButtonLocation.endFloat,
-        fab: new FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
+        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
 
       await tester.pumpWidget(buildFrame(
         location: FloatingActionButtonLocation.centerFloat,
-        fab: new FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
+        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
 
       // FAB should be visible
       fabExists();
@@ -79,14 +79,14 @@ void main() {
 
       await tester.pumpWidget(buildFrame(
         location: FloatingActionButtonLocation.centerFloat,
-        fab: new FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
+        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
 
       // FAB should not be visible - rebuilt in same location
       fabExists(visible: false);
 
       await tester.pumpWidget(buildFrame(
         location: FloatingActionButtonLocation.endFloat,
-        fab: new FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
+        fab: FloatingActionButton(key: fabKey, child: const Text('1'), onPressed: () {})));
 
       await tester.pumpAndSettle();
 

@@ -148,9 +148,9 @@ void main() {
   });
 
   testWidgets('Floating action button show/hide', (WidgetTester tester) async {
-    final GlobalKey one = new GlobalKey(debugLabel: 'one');
-    await tester.pumpWidget(new MaterialApp(home: new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+    final GlobalKey one = GlobalKey(debugLabel: 'one');
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      floatingActionButton: FloatingActionButton(
         key: one,
         onPressed: null,
         child: const Text('1'),
