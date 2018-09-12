@@ -1342,7 +1342,6 @@ void main() {
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
     expect(tester.getRect(find.byKey(tabs[1].key)), tabRect);
 
-
     // Tab2 width = 150, height = 50
     tabLeft = tabRight + labelPadding.right + labelPadding.left;
     tabRight = tabLeft + 150.0;
