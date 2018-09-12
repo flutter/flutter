@@ -8,11 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Nested Localizations', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp( // Creates the outer Localizations widget.
-      home: new ListView(
+    await tester.pumpWidget(MaterialApp( // Creates the outer Localizations widget.
+      home: ListView(
         children: <Widget>[
           const LocalizationTracker(key: ValueKey<String>('outer')),
-          new Localizations(
+          Localizations(
             locale: const Locale('zh', 'CN'),
             delegates: GlobalMaterialLocalizations.delegates,
             child: const LocalizationTracker(key: ValueKey<String>('inner')),
@@ -30,28 +30,28 @@ void main() {
   testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
     // PageView calls ScrollPosition.dispose() during didChangeDependencies.
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         supportedLocales: const <Locale>[
           Locale('en', 'US'),
           Locale('es', 'ES'),
         ],
         localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-          new _DummyLocalizationsDelegate(),
+          _DummyLocalizationsDelegate(),
           GlobalMaterialLocalizations.delegate,
         ],
-        home: new PageView(),
+        home: PageView(),
       )
     );
 
     await tester.binding.setLocale('es', 'US');
     await tester.pump();
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Locale without coutryCode', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
           GlobalMaterialLocalizations.delegate,
         ],
@@ -59,7 +59,7 @@ void main() {
           Locale('es', 'ES'),
           Locale('zh'),
         ],
-        home: new Container(),
+        home: Container(),
       )
     );
 
@@ -75,7 +75,7 @@ void main() {
 /// used to trigger didChangeDependencies upon locale change.
 class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
   @override
-  Future<DummyLocalizations> load(Locale locale) async => new DummyLocalizations();
+  Future<DummyLocalizations> load(Locale locale) async => DummyLocalizations();
 
   @override
   bool isSupported(Locale locale) => true;
@@ -90,7 +90,7 @@ class LocalizationTracker extends StatefulWidget {
   const LocalizationTracker({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => new LocalizationTrackerState();
+  State<StatefulWidget> createState() => LocalizationTrackerState();
 }
 
 class LocalizationTrackerState extends State<LocalizationTracker> {
@@ -99,6 +99,6 @@ class LocalizationTrackerState extends State<LocalizationTracker> {
   @override
   Widget build(BuildContext context) {
     captionFontSize = Theme.of(context).textTheme.caption.fontSize;
-    return new Container();
+    return Container();
   }
 }

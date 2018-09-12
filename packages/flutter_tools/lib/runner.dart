@@ -40,11 +40,11 @@ Future<int> run(
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
-    args = new List<String>.from(args);
+    args = List<String>.from(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
+  final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
   commands.forEach(runner.addCommand);
 
   return runInContext<int>(() async {
@@ -138,7 +138,7 @@ Future<int> _handleToolError(
         // get caught by our zone's `onError` handler. In order to avoid an
         // infinite error loop, we throw an error that is recognized above
         // and will trigger an immediate exit.
-        throw new ProcessExit(1, immediate: true);
+        throw ProcessExit(1, immediate: true);
       }
     }
   }
@@ -156,7 +156,7 @@ FileSystem crashFileSystem = const LocalFileSystem();
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace) async {
   File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
@@ -188,7 +188,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
 
 Future<String> _doctorText() async {
   try {
-    final BufferLogger logger = new BufferLogger();
+    final BufferLogger logger = BufferLogger();
 
     await context.run<bool>(
       body: () => doctor.diagnose(verbose: true),
@@ -210,7 +210,7 @@ Future<int> _exit(int code) async {
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {
-    final Stopwatch stopwatch = new Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     await flutterUsage.ensureAnalyticsSent();
     printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
@@ -218,7 +218,7 @@ Future<int> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
-  final Completer<Null> completer = new Completer<Null>();
+  final Completer<Null> completer = Completer<Null>();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

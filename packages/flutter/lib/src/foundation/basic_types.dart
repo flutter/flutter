@@ -194,42 +194,42 @@ class CachingIterable<E> extends IterableBase<E> {
 
   @override
   Iterator<E> get iterator {
-    return new _LazyListIterator<E>(this);
+    return _LazyListIterator<E>(this);
   }
 
   @override
   Iterable<T> map<T>(T f(E e)) {
-    return new CachingIterable<T>(super.map<T>(f).iterator);
+    return CachingIterable<T>(super.map<T>(f).iterator);
   }
 
   @override
   Iterable<E> where(bool test(E element)) {
-    return new CachingIterable<E>(super.where(test).iterator);
+    return CachingIterable<E>(super.where(test).iterator);
   }
 
   @override
   Iterable<T> expand<T>(Iterable<T> f(E element)) {
-    return new CachingIterable<T>(super.expand<T>(f).iterator);
+    return CachingIterable<T>(super.expand<T>(f).iterator);
   }
 
   @override
   Iterable<E> take(int count) {
-    return new CachingIterable<E>(super.take(count).iterator);
+    return CachingIterable<E>(super.take(count).iterator);
   }
 
   @override
   Iterable<E> takeWhile(bool test(E value)) {
-    return new CachingIterable<E>(super.takeWhile(test).iterator);
+    return CachingIterable<E>(super.takeWhile(test).iterator);
   }
 
   @override
   Iterable<E> skip(int count) {
-    return new CachingIterable<E>(super.skip(count).iterator);
+    return CachingIterable<E>(super.skip(count).iterator);
   }
 
   @override
   Iterable<E> skipWhile(bool test(E value)) {
-    return new CachingIterable<E>(super.skipWhile(test).iterator);
+    return CachingIterable<E>(super.skipWhile(test).iterator);
   }
 
   @override
@@ -241,7 +241,7 @@ class CachingIterable<E> extends IterableBase<E> {
   @override
   List<E> toList({ bool growable = true }) {
     _precacheEntireList();
-    return new List<E>.from(_results, growable: growable);
+    return List<E>.from(_results, growable: growable);
   }
 
   void _precacheEntireList() {

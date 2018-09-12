@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
-final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
+final Tween<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 0.25),
   end: Offset.zero,
 );
@@ -20,11 +20,11 @@ class _MountainViewPageTransition extends StatelessWidget {
     @required bool fade,
     @required Animation<double> routeAnimation,
     @required this.child,
-  }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
+  }) : _positionAnimation = _kBottomUpTween.animate(CurvedAnimation(
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
          curve: Curves.fastOutSlowIn,
        )),
-       _opacityAnimation = fade ? new CurvedAnimation(
+       _opacityAnimation = fade ? CurvedAnimation(
          parent: routeAnimation,
          curve: Curves.easeIn, // Eyeballed from other Material apps.
        ) : const AlwaysStoppedAnimation<double>(1.0),
@@ -37,9 +37,9 @@ class _MountainViewPageTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
-    return new SlideTransition(
+    return SlideTransition(
       position: _positionAnimation,
-      child: new FadeTransition(
+      child: FadeTransition(
         opacity: _opacityAnimation,
         child: child,
       ),
@@ -97,7 +97,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// It's lazily created on first use.
   CupertinoPageRoute<T> get _cupertinoPageRoute {
     assert(_useCupertinoTransitions);
-    _internalCupertinoPageRoute ??= new CupertinoPageRoute<T>(
+    _internalCupertinoPageRoute ??= CupertinoPageRoute<T>(
       builder: builder, // Not used.
       fullscreenDialog: fullscreenDialog,
       hostRoute: this,
@@ -142,14 +142,14 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = new Semantics(
+    final Widget result = Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
       child: builder(context),
     );
     assert(() {
       if (result == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'The builder for route "${settings.name}" returned null.\n'
           'Route builders must never return null.'
         );
@@ -164,7 +164,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     if (_useCupertinoTransitions) {
       return _cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
     } else {
-      return new _MountainViewPageTransition(
+      return _MountainViewPageTransition(
         routeAnimation: animation,
         child: child,
         fade: true,

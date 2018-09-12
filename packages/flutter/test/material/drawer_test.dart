@@ -14,13 +14,13 @@ void main() {
     const Key containerKey = Key('container');
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Scaffold(
-          drawer: new Drawer(
-            child: new ListView(
+      MaterialApp(
+        home: Scaffold(
+          drawer: Drawer(
+            child: ListView(
               children: <Widget>[
-                new DrawerHeader(
-                  child: new Container(
+                DrawerHeader(
+                  child: Container(
                     key: containerKey,
                     child: const Text('header'),
                   ),
@@ -58,10 +58,10 @@ void main() {
   });
 
   testWidgets('Drawer dismiss barrier has label on iOS', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
           drawer: Drawer()
         ),
@@ -84,9 +84,9 @@ void main() {
   });
 
   testWidgets('Drawer dismiss barrier has no label on Android', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
             drawer: Drawer()
         ),

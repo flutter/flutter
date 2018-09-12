@@ -94,7 +94,7 @@ class ShapeDecoration extends Decoration {
       case BoxShape.circle:
         if (source.border != null) {
           assert(source.border.isUniform);
-          shape = new CircleBorder(side: source.border.top);
+          shape = CircleBorder(side: source.border.top);
         } else {
           shape = const CircleBorder();
         }
@@ -102,7 +102,7 @@ class ShapeDecoration extends Decoration {
       case BoxShape.rectangle:
         if (source.borderRadius != null) {
           assert(source.border == null || source.border.isUniform);
-          shape = new RoundedRectangleBorder(
+          shape = RoundedRectangleBorder(
             side: source.border?.top ?? BorderSide.none,
             borderRadius: source.borderRadius,
           );
@@ -111,7 +111,7 @@ class ShapeDecoration extends Decoration {
         }
         break;
     }
-    return new ShapeDecoration(
+    return ShapeDecoration(
       color: source.color,
       image: source.image,
       gradient: source.gradient,
@@ -178,7 +178,7 @@ class ShapeDecoration extends Decoration {
   @override
   ShapeDecoration lerpFrom(Decoration a, double t) {
     if (a is BoxDecoration) {
-      return ShapeDecoration.lerp(new ShapeDecoration.fromBoxDecoration(a), this, t);
+      return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
       return ShapeDecoration.lerp(a, this, t);
     }
@@ -188,7 +188,7 @@ class ShapeDecoration extends Decoration {
   @override
   ShapeDecoration lerpTo(Decoration b, double t) {
     if (b is BoxDecoration) {
-      return ShapeDecoration.lerp(this, new ShapeDecoration.fromBoxDecoration(b), t);
+      return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
       return ShapeDecoration.lerp(this, b, t);
     }
@@ -233,7 +233,7 @@ class ShapeDecoration extends Decoration {
       if (t == 1.0)
         return b;
     }
-    return new ShapeDecoration(
+    return ShapeDecoration(
       color: Color.lerp(a?.color, b?.color, t),
       gradient: Gradient.lerp(a?.gradient, b?.gradient, t),
       image: t < 0.5 ? a.image : b.image, // TODO(ianh): cross-fade the image
@@ -271,11 +271,11 @@ class ShapeDecoration extends Decoration {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
-    properties.add(new DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
-    properties.add(new IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
+    properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
+    properties.add(IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
   }
 
   @override
@@ -286,7 +286,7 @@ class ShapeDecoration extends Decoration {
   @override
   _ShapeDecorationPainter createBoxPainter([VoidCallback onChanged]) {
     assert(onChanged != null || image == null);
-    return new _ShapeDecorationPainter(this, onChanged);
+    return _ShapeDecorationPainter(this, onChanged);
   }
 }
 
@@ -317,7 +317,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     //  - subsequent times, if the rect has changed, in which case we only need to update
     //    the features that depend on the actual rect.
     if (_interiorPaint == null && (_decoration.color != null || _decoration.gradient != null)) {
-      _interiorPaint = new Paint();
+      _interiorPaint = Paint();
       if (_decoration.color != null)
         _interiorPaint.color = _decoration.color;
     }
@@ -326,8 +326,8 @@ class _ShapeDecorationPainter extends BoxPainter {
     if (_decoration.shadows != null) {
       if (_shadowCount == null) {
         _shadowCount = _decoration.shadows.length;
-        _shadowPaths = new List<Path>(_shadowCount);
-        _shadowPaints = new List<Paint>(_shadowCount);
+        _shadowPaths = List<Path>(_shadowCount);
+        _shadowPaints = List<Paint>(_shadowCount);
         for (int index = 0; index < _shadowCount; index += 1)
           _shadowPaints[index] = _decoration.shadows[index].toPaint();
       }

@@ -211,7 +211,7 @@ class TextPainter {
       maxLines: _maxLines,
       ellipsis: _ellipsis,
       locale: _locale,
-    ) ?? new ui.ParagraphStyle(
+    ) ?? ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
@@ -234,14 +234,14 @@ class TextPainter {
   /// sans-serif font).
   double get preferredLineHeight {
     if (_layoutTemplate == null) {
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
         _createParagraphStyle(TextDirection.rtl),
       ); // direction doesn't matter, text is just a space
       if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(' ');
       _layoutTemplate = builder.build()
-        ..layout(new ui.ParagraphConstraints(width: double.infinity));
+        ..layout(ui.ParagraphConstraints(width: double.infinity));
     }
     return _layoutTemplate.height;
   }
@@ -295,7 +295,7 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   Size get size {
     assert(!_needsLayout);
-    return new Size(width, height);
+    return Size(width, height);
   }
 
   /// Returns the distance from the top of the text to the first baseline of the
@@ -348,17 +348,17 @@ class TextPainter {
       return;
     _needsLayout = false;
     if (_paragraph == null) {
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
       _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();
     }
     _lastMinWidth = minWidth;
     _lastMaxWidth = maxWidth;
-    _paragraph.layout(new ui.ParagraphConstraints(width: maxWidth));
+    _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
       if (newWidth != width)
-        _paragraph.layout(new ui.ParagraphConstraints(width: newWidth));
+        _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
     }
   }
 
@@ -377,7 +377,7 @@ class TextPainter {
   void paint(Canvas canvas, Offset offset) {
     assert(() {
       if (_needsLayout) {
-        throw new FlutterError(
+        throw FlutterError(
           'TextPainter.paint called when text geometry was not yet calculated.\n'
           'Please call layout() before paint() to position the text before painting it.'
         );
@@ -422,7 +422,7 @@ class TextPainter {
     final TextBox box = boxes[0];
     final double caretEnd = box.end;
     final double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
-    return new Offset(dx, box.top);
+    return Offset(dx, box.top);
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
@@ -436,7 +436,7 @@ class TextPainter {
     final TextBox box = boxes[0];
     final double caretStart = box.start;
     final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-    return new Offset(dx, box.top);
+    return Offset(dx, box.top);
   }
 
   Offset get _emptyOffset {
@@ -446,15 +446,15 @@ class TextPainter {
       case TextAlign.left:
         return Offset.zero;
       case TextAlign.right:
-        return new Offset(width, 0.0);
+        return Offset(width, 0.0);
       case TextAlign.center:
-        return new Offset(width / 2.0, 0.0);
+        return Offset(width / 2.0, 0.0);
       case TextAlign.justify:
       case TextAlign.start:
         assert(textDirection != null);
         switch (textDirection) {
           case TextDirection.rtl:
-            return new Offset(width, 0.0);
+            return Offset(width, 0.0);
           case TextDirection.ltr:
             return Offset.zero;
         }
@@ -465,7 +465,7 @@ class TextPainter {
           case TextDirection.rtl:
             return Offset.zero;
           case TextDirection.ltr:
-            return new Offset(width, 0.0);
+            return Offset(width, 0.0);
         }
         return null;
     }
@@ -518,6 +518,6 @@ class TextPainter {
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
     final List<int> indices = _paragraph.getWordBoundary(position.offset);
-    return new TextRange(start: indices[0], end: indices[1]);
+    return TextRange(start: indices[0], end: indices[1]);
   }
 }

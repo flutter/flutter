@@ -146,7 +146,7 @@ class AndroidView extends StatefulWidget {
   final MessageCodec<dynamic> creationParamsCodec;
 
   @override
-  State createState() => new _AndroidViewState();
+  State createState() => _AndroidViewState();
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -157,7 +157,7 @@ class _AndroidViewState extends State<AndroidView> {
 
   @override
   Widget build(BuildContext context) {
-    return new _AndroidPlatformView(
+    return _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers,
@@ -249,7 +249,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      new RenderAndroidView(
+      RenderAndroidView(
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
         gestureRecognizers: gestureRecognizers,

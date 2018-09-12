@@ -212,15 +212,15 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   @override
   void initState() {
     super.initState();
-    _forwardBackgroundColorTween = new ColorTween(
+    _forwardBackgroundColorTween = ColorTween(
       begin: widget.pressedColor,
       end: widget.selectedColor,
     );
-    _reverseBackgroundColorTween = new ColorTween(
+    _reverseBackgroundColorTween = ColorTween(
       begin: widget.unselectedColor,
       end: widget.selectedColor,
     );
-    _textColorTween = new ColorTween(
+    _textColorTween = ColorTween(
       begin: widget.selectedColor,
       end: widget.unselectedColor,
     );
@@ -238,7 +238,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   AnimationController createAnimationController() {
-    return new AnimationController(
+    return AnimationController(
       duration: _kFadeDuration,
       vsync: this,
     )..addListener(() {
@@ -344,15 +344,15 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
         color: getTextColor(index, currentKey),
       );
-      final IconThemeData iconTheme = new IconThemeData(
+      final IconThemeData iconTheme = IconThemeData(
         color: getTextColor(index, currentKey),
       );
 
-      Widget child = new Center(
+      Widget child = Center(
         child: widget.children[currentKey],
       );
 
-      child = new GestureDetector(
+      child = GestureDetector(
         onTapDown: (TapDownDetails event) {
           _onTapDown(currentKey);
         },
@@ -360,11 +360,11 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
         onTap: () {
           _onTap(currentKey);
         },
-        child: new IconTheme(
+        child: IconTheme(
           data: iconTheme,
-          child: new DefaultTextStyle(
+          child: DefaultTextStyle(
             style: textStyle,
-            child: new Semantics(
+            child: Semantics(
               button: true,
               inMutuallyExclusiveGroup: true,
               selected: widget.groupValue == currentKey,
@@ -379,7 +379,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       index += 1;
     }
 
-    final Widget box = new _SegmentedControlRenderWidget<T>(
+    final Widget box = _SegmentedControlRenderWidget<T>(
       children: _gestureChildren,
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
@@ -387,9 +387,9 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       borderColor: widget.borderColor,
     );
 
-    return new Padding(
+    return Padding(
       padding: _kHorizontalItemPadding.resolve(Directionality.of(context)),
-      child: new UnconstrainedBox(
+      child: UnconstrainedBox(
         constrainedAxis: Axis.horizontal,
         child: box,
       ),
@@ -417,7 +417,7 @@ class _SegmentedControlRenderWidget<T> extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderSegmentedControl<T>(
+    return _RenderSegmentedControl<T>(
       textDirection: Directionality.of(context),
       selectedIndex: selectedIndex,
       pressedIndex: pressedIndex,
@@ -572,7 +572,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! _SegmentedControlContainerBoxParentData) {
-      child.parentData = new _SegmentedControlContainerBoxParentData();
+      child.parentData = _SegmentedControlContainerBoxParentData();
     }
   }
 
@@ -581,18 +581,18 @@ class _RenderSegmentedControl<T> extends RenderBox
     double start = 0.0;
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
-      final Offset childOffset = new Offset(start, 0.0);
+      final Offset childOffset = Offset(start, 0.0);
       childParentData.offset = childOffset;
-      final Rect childRect = new Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
+      final Rect childRect = Rect.fromLTWH(start, 0.0, child.size.width, child.size.height);
       RRect rChildRect;
       if (child == leftChild) {
-        rChildRect = new RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
+        rChildRect = RRect.fromRectAndCorners(childRect, topLeft: const Radius.circular(3.0),
             bottomLeft: const Radius.circular(3.0));
       } else if (child == rightChild) {
-        rChildRect = new RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
+        rChildRect = RRect.fromRectAndCorners(childRect, topRight: const Radius.circular(3.0),
             bottomRight: const Radius.circular(3.0));
       } else {
-        rChildRect = new RRect.fromRectAndCorners(childRect);
+        rChildRect = RRect.fromRectAndCorners(childRect);
       }
       childParentData.surroundingRect = rChildRect;
       start += child.size.width;
@@ -619,7 +619,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     constraints.constrainHeight(maxHeight);
 
-    final BoxConstraints childConstraints = new BoxConstraints.tightFor(
+    final BoxConstraints childConstraints = BoxConstraints.tightFor(
       width: childWidth,
       height: maxHeight,
     );
@@ -647,7 +647,7 @@ class _RenderSegmentedControl<T> extends RenderBox
         break;
     }
 
-    size = constraints.constrain(new Size(childWidth * childCount, maxHeight));
+    size = constraints.constrain(Size(childWidth * childCount, maxHeight));
   }
 
   @override
@@ -668,13 +668,13 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     context.canvas.drawRRect(
       childParentData.surroundingRect.shift(offset),
-      new Paint()
+      Paint()
         ..color = backgroundColors[childIndex]
         ..style = PaintingStyle.fill,
     );
     context.canvas.drawRRect(
       childParentData.surroundingRect.shift(offset),
-      new Paint()
+      Paint()
         ..color = borderColor
         ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke,

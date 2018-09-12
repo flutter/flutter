@@ -12,7 +12,7 @@ import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
 
-final AnsiTerminal _kAnsiTerminal = new AnsiTerminal();
+final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
 AnsiTerminal get terminal {
   return (context == null || context[AnsiTerminal] == null)
@@ -30,7 +30,7 @@ class AnsiTerminal {
   String bolden(String message) {
     if (!supportsColor)
       return message;
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n'))
       buffer.writeln('$_bold$line$_reset');
     final String result = buffer.toString();
@@ -88,7 +88,7 @@ class AnsiTerminal {
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
       assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
-      charactersToDisplay = new List<String>.from(charactersToDisplay);
+      charactersToDisplay = List<String>.from(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('\n');
     }

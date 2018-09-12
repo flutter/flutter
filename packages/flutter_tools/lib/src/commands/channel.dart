@@ -39,7 +39,7 @@ class ChannelCommand extends FlutterCommand {
       case 1:
         return _switchChannel(argResults.rest[0]);
       default:
-        throw new ToolExit('Too many arguments.\n$usage');
+        throw ToolExit('Too many arguments.\n$usage');
     }
   }
 
@@ -47,7 +47,7 @@ class ChannelCommand extends FlutterCommand {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
-    final Set<String> seenChannels = new Set<String>();
+    final Set<String> seenChannels = Set<String>();
 
     showAll = showAll || currentChannel != currentBranch;
 

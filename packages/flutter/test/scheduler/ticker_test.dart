@@ -13,7 +13,7 @@ void main() {
       tickCount += 1;
     }
 
-    final Ticker ticker = new Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isFalse);
@@ -74,7 +74,7 @@ void main() {
     Ticker ticker;
 
     void testFunction() {
-      ticker = new Ticker(null);
+      ticker = Ticker(null);
     }
 
     testFunction();
@@ -90,7 +90,7 @@ void main() {
       lastDuration = duration;
     }
 
-    final Ticker ticker = new Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     ticker.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -106,7 +106,7 @@ void main() {
       lastDuration = duration;
     }
 
-    final Ticker ticker = new Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     ticker.start();
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
@@ -121,7 +121,7 @@ void main() {
       tickCount += 1;
     }
 
-    final Ticker ticker = new Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     ticker.start();
 
     expect(ticker.isTicking, isTrue);
@@ -145,7 +145,7 @@ void main() {
       tickCount += 1;
     }
 
-    final Ticker ticker = new Ticker(handleTick);
+    final Ticker ticker = Ticker(handleTick);
     ticker.start();
 
     expect(tickCount, equals(0));

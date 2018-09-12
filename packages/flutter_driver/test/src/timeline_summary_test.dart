@@ -15,7 +15,7 @@ void main() {
   group('TimelineSummary', () {
 
     TimelineSummary summarize(List<Map<String, dynamic>> testEvents) {
-      return new TimelineSummary.summarize(new Timeline.fromJson(<String, dynamic>{
+      return TimelineSummary.summarize(Timeline.fromJson(<String, dynamic>{
         'traceEvents': testEvents,
       }));
     }

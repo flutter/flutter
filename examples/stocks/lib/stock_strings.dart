@@ -20,7 +20,7 @@ class StockStrings {
   static Future<StockStrings> load(Locale locale) {
     return initializeMessages(locale.toString())
       .then((Object _) {
-        return new StockStrings(locale);
+        return StockStrings(locale);
       });
   }
 

@@ -125,7 +125,7 @@ abstract class BoxBorder extends ShapeBorder {
     if (a is Border && b is BorderDirectional) {
       if (b.start == BorderSide.none && b.end == BorderSide.none) {
         // The fact that b is a BorderDirectional really doesn't matter, it turns out.
-        return new Border(
+        return Border(
           top: BorderSide.lerp(a.top, b.top, t),
           right: BorderSide.lerp(a.right, BorderSide.none, t),
           bottom: BorderSide.lerp(a.bottom, b.bottom, t),
@@ -134,7 +134,7 @@ abstract class BoxBorder extends ShapeBorder {
       }
       if (a.left == BorderSide.none && a.right == BorderSide.none) {
         // The fact that a is a Border really doesn't matter, it turns out.
-        return new BorderDirectional(
+        return BorderDirectional(
           top: BorderSide.lerp(a.top, b.top, t),
           start: BorderSide.lerp(BorderSide.none, b.start, t),
           end: BorderSide.lerp(BorderSide.none, b.end, t),
@@ -145,21 +145,21 @@ abstract class BoxBorder extends ShapeBorder {
       // we speed up the horizontal sides' transitions and switch from
       // one mode to the other at t=0.5.
       if (t < 0.5) {
-        return new Border(
+        return Border(
           top: BorderSide.lerp(a.top, b.top, t),
           right: BorderSide.lerp(a.right, BorderSide.none, t * 2.0),
           bottom: BorderSide.lerp(a.bottom, b.bottom, t),
           left: BorderSide.lerp(a.left, BorderSide.none, t * 2.0),
         );
       }
-      return new BorderDirectional(
+      return BorderDirectional(
         top: BorderSide.lerp(a.top, b.top, t),
         start: BorderSide.lerp(BorderSide.none, b.start, (t - 0.5) * 2.0),
         end: BorderSide.lerp(BorderSide.none, b.end, (t - 0.5) * 2.0),
         bottom: BorderSide.lerp(a.bottom, b.bottom, t),
       );
     }
-    throw new FlutterError(
+    throw FlutterError(
       'BoxBorder.lerp can only interpolate Border and BorderDirectional classes.\n'
       'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
       '  $a\n'
@@ -172,14 +172,14 @@ abstract class BoxBorder extends ShapeBorder {
   @override
   Path getInnerPath(Rect rect, { @required TextDirection textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getInnerPath must not be null.');
-    return new Path()
+    return Path()
       ..addRect(dimensions.resolve(textDirection).deflateRect(rect));
   }
 
   @override
   Path getOuterPath(Rect rect, { @required TextDirection textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getOuterPath must not be null.');
-    return new Path()
+    return Path()
       ..addRect(rect);
   }
 
@@ -211,7 +211,7 @@ abstract class BoxBorder extends ShapeBorder {
 
   static void _paintUniformBorderWithRadius(Canvas canvas, Rect rect, BorderSide side, BorderRadius borderRadius) {
     assert(side.style != BorderStyle.none);
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = side.color;
     final RRect outer = borderRadius.toRRect(rect);
     final double width = side.width;
@@ -322,8 +322,8 @@ class Border extends BoxBorder {
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
   }) {
-    final BorderSide side = new BorderSide(color: color, width: width, style: style);
-    return new Border(top: side, right: side, bottom: side, left: side);
+    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    return Border(top: side, right: side, bottom: side, left: side);
   }
 
   /// Creates a [Border] that represents the addition of the two given
@@ -340,7 +340,7 @@ class Border extends BoxBorder {
     assert(BorderSide.canMerge(a.right, b.right));
     assert(BorderSide.canMerge(a.bottom, b.bottom));
     assert(BorderSide.canMerge(a.left, b.left));
-    return new Border(
+    return Border(
       top: BorderSide.merge(a.top, b.top),
       right: BorderSide.merge(a.right, b.right),
       bottom: BorderSide.merge(a.bottom, b.bottom),
@@ -362,7 +362,7 @@ class Border extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
+    return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
   @override
@@ -404,7 +404,7 @@ class Border extends BoxBorder {
 
   @override
   Border scale(double t) {
-    return new Border(
+    return Border(
       top: top.scale(t),
       right: right.scale(t),
       bottom: bottom.scale(t),
@@ -450,7 +450,7 @@ class Border extends BoxBorder {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    return new Border(
+    return Border(
       top: BorderSide.lerp(a.top, b.top, t),
       right: BorderSide.lerp(a.right, b.right, t),
       bottom: BorderSide.lerp(a.bottom, b.bottom, t),
@@ -597,7 +597,7 @@ class BorderDirectional extends BoxBorder {
     assert(BorderSide.canMerge(a.start, b.start));
     assert(BorderSide.canMerge(a.end, b.end));
     assert(BorderSide.canMerge(a.bottom, b.bottom));
-    return new BorderDirectional(
+    return BorderDirectional(
       top: BorderSide.merge(a.top, b.top),
       start: BorderSide.merge(a.start, b.start),
       end: BorderSide.merge(a.end, b.end),
@@ -633,7 +633,7 @@ class BorderDirectional extends BoxBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return new EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
+    return EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
   }
 
   @override
@@ -683,7 +683,7 @@ class BorderDirectional extends BoxBorder {
           return null;
         assert(typedOther.left == BorderSide.none);
         assert(typedOther.right == BorderSide.none);
-        return new BorderDirectional(
+        return BorderDirectional(
           top: BorderSide.merge(typedOther.top, top),
           start: start,
           end: end,
@@ -692,7 +692,7 @@ class BorderDirectional extends BoxBorder {
       }
       assert(start == BorderSide.none);
       assert(end == BorderSide.none);
-      return new Border(
+      return Border(
         top: BorderSide.merge(typedOther.top, top),
         right: typedOther.right,
         bottom: BorderSide.merge(typedOther.bottom, bottom),
@@ -704,7 +704,7 @@ class BorderDirectional extends BoxBorder {
 
   @override
   BorderDirectional scale(double t) {
-    return new BorderDirectional(
+    return BorderDirectional(
       top: top.scale(t),
       start: start.scale(t),
       end: end.scale(t),
@@ -750,7 +750,7 @@ class BorderDirectional extends BoxBorder {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    return new BorderDirectional(
+    return BorderDirectional(
       top: BorderSide.lerp(a.top, b.top, t),
       end: BorderSide.lerp(a.end, b.end, t),
       bottom: BorderSide.lerp(a.bottom, b.bottom, t),

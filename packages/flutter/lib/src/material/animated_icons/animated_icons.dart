@@ -97,7 +97,7 @@ class AnimatedIcon extends StatelessWidget {
   /// horizontally (e.g back arrow will point right).
   final TextDirection textDirection;
 
-  static final _UiPathFactory _pathFactory = () => new ui.Path();
+  static final _UiPathFactory _pathFactory = () => ui.Path();
 
   @override
   Widget build(BuildContext context) {
@@ -109,11 +109,11 @@ class AnimatedIcon extends StatelessWidget {
     Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
-    return new Semantics(
+    return Semantics(
       label: semanticLabel,
-      child: new CustomPaint(
-        size: new Size(iconSize, iconSize),
-        painter: new _AnimatedIconPainter(
+      child: CustomPaint(
+        size: Size(iconSize, iconSize),
+        painter: _AnimatedIconPainter(
           paths: iconData.paths,
           progress: progress,
           color: iconColor,
@@ -196,7 +196,7 @@ class _PathFrames {
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
     final double opacity = _interpolate(opacities, progress, lerpDouble);
-    final ui.Paint paint = new ui.Paint()
+    final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();

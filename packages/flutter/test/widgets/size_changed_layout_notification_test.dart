@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 class NotifyMaterial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    new LayoutChangedNotification().dispatch(context);
-    return new Container();
+    LayoutChangedNotification().dispatch(context);
+    return Container();
   }
 }
 
@@ -18,10 +18,10 @@ void main() {
     bool notified = false;
 
     await tester.pumpWidget(
-      new Center(
-        child: new NotificationListener<LayoutChangedNotification>(
+      Center(
+        child: NotificationListener<LayoutChangedNotification>(
           onNotification: (LayoutChangedNotification notification) {
-            throw new Exception('Should not reach this point.');
+            throw Exception('Should not reach this point.');
           },
           child: const SizeChangedLayoutNotifier(
             child: SizedBox(
@@ -34,8 +34,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Center(
-        child: new NotificationListener<LayoutChangedNotification>(
+      Center(
+        child: NotificationListener<LayoutChangedNotification>(
           onNotification: (LayoutChangedNotification notification) {
             expect(notification, isInstanceOf<SizeChangedLayoutNotification>());
             notified = true;

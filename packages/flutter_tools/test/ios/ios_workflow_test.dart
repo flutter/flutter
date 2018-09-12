@@ -27,11 +27,11 @@ void main() {
     FileSystem fs;
 
     setUp(() {
-      iMobileDevice = new MockIMobileDevice();
-      xcode = new MockXcode();
-      processManager = new MockProcessManager();
-      cocoaPods = new MockCocoaPods();
-      fs = new MemoryFileSystem();
+      iMobileDevice = MockIMobileDevice();
+      xcode = MockXcode();
+      processManager = MockProcessManager();
+      cocoaPods = MockCocoaPods();
+      fs = MemoryFileSystem();
 
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.recommended);
@@ -42,7 +42,7 @@ void main() {
     testUsingContext('Emit missing status when nothing is installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn(null);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(
         hasHomebrew: false,
         hasIosDeploy: false,
       );
@@ -57,7 +57,7 @@ void main() {
     testUsingContext('Emits partial status when Xcode is not installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn(null);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -69,7 +69,7 @@ void main() {
     testUsingContext('Emits partial status when Xcode is partially installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn('/Library/Developer/CommandLineTools');
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -85,7 +85,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -101,7 +101,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(false);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -117,7 +117,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasHomebrew: false);
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -133,11 +133,11 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
-      IMobileDevice: () => new MockIMobileDevice(isInstalled: false, isWorking: false),
+      IMobileDevice: () => MockIMobileDevice(isInstalled: false, isWorking: false),
       Xcode: () => xcode,
       CocoaPods: () => cocoaPods,
     });
@@ -149,11 +149,11 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
-      IMobileDevice: () => new MockIMobileDevice(isWorking: false),
+      IMobileDevice: () => MockIMobileDevice(isWorking: false),
       Xcode: () => xcode,
       CocoaPods: () => cocoaPods,
     });
@@ -165,7 +165,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasIosDeploy: false);
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasIosDeploy: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -181,7 +181,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -199,7 +199,7 @@ void main() {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -217,7 +217,7 @@ void main() {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -235,7 +235,7 @@ void main() {
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       when(xcode.isSimctlInstalled).thenReturn(true);
 
-      final ValidationResult result = await new IOSWorkflowTestTarget().validate();
+      final ValidationResult result = await IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -252,7 +252,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(false);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -272,7 +272,7 @@ void main() {
 
       ensureDirectoryExists(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
 
-      final ValidationResult result = await new IOSWorkflowTestTarget().validate();
+      final ValidationResult result = await IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -284,7 +284,7 @@ void main() {
   });
 }
 
-final ProcessResult exitsHappy = new ProcessResult(
+final ProcessResult exitsHappy = ProcessResult(
   1, // pid
   0, // exitCode
   '', // stdout
@@ -295,7 +295,7 @@ class MockIMobileDevice extends IMobileDevice {
   MockIMobileDevice({
     this.isInstalled = true,
     bool isWorking = true,
-  }) : isWorking = new Future<bool>.value(isWorking);
+  }) : isWorking = Future<bool>.value(isWorking);
 
   @override
   final bool isInstalled;
@@ -314,9 +314,9 @@ class IOSWorkflowTestTarget extends IOSValidator {
     bool hasIosDeploy = true,
     String iosDeployVersionText = '1.9.2',
     bool hasIDeviceInstaller = true,
-  }) : hasIosDeploy = new Future<bool>.value(hasIosDeploy),
-       iosDeployVersionText = new Future<String>.value(iosDeployVersionText),
-       hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller);
+  }) : hasIosDeploy = Future<bool>.value(hasIosDeploy),
+       iosDeployVersionText = Future<String>.value(iosDeployVersionText),
+       hasIDeviceInstaller = Future<bool>.value(hasIDeviceInstaller);
 
   @override
   final bool hasHomebrew;

@@ -57,7 +57,7 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
-       tags = tags?.toSet() ?? new Set<SemanticsTag>();
+       tags = tags?.toSet() ?? Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -84,7 +84,7 @@ class TestSemantics {
        assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
-       tags = tags?.toSet() ?? new Set<SemanticsTag>();
+       tags = tags?.toSet() ?? Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -119,7 +119,7 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
-       tags = tags?.toSet() ?? new Set<SemanticsTag>();
+       tags = tags?.toSet() ?? Set<SemanticsTag>();
 
   /// The unique identifier for this node.
   ///
@@ -187,11 +187,11 @@ class TestSemantics {
   ///
   /// See also [new TestSemantics.root], which uses this value to describe the
   /// root node.
-  static final Rect rootRect = new Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
+  static final Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
 
   /// The test screen's size in logical pixels, useful for the [rect] of
   /// full-screen widgets other than the root node.
-  static final Rect fullScreen = new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
+  static final Rect fullScreen = Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
@@ -203,7 +203,7 @@ class TestSemantics {
   final TextSelection textSelection;
 
   static Matrix4 _applyRootChildScale(Matrix4 transform) {
-    final Matrix4 result = new Matrix4.diagonal3Values(3.0, 3.0, 1.0);
+    final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null)
       result.multiply(transform);
     return result;
@@ -300,8 +300,8 @@ class TestSemantics {
   @override
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
-    final StringBuffer buf = new StringBuffer();
-    buf.writeln('${indent}new $runtimeType(');
+    final StringBuffer buf = StringBuffer();
+    buf.writeln('$indent$runtimeType(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
     if (flags is int && flags != 0 || flags is List<SemanticsFlag> && flags.isNotEmpty)
@@ -523,10 +523,10 @@ class SemanticsTester {
     if (node == null)
       return 'null';
     final String indent = '  ' * indentAmount;
-    final StringBuffer buf = new StringBuffer();
+    final StringBuffer buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
     final bool isRoot = node.id == 0;
-    buf.writeln('new TestSemantics${isRoot ? '.root': ''}(');
+    buf.writeln('TestSemantics${isRoot ? '.root': ''}(');
     if (!isRoot)
       buf.writeln('  id: ${node.id},');
     if (nodeData.tags != null)
@@ -642,7 +642,7 @@ Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreId = false,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
-  return new _HasSemantics(
+  return _HasSemantics(
     semantics,
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
@@ -738,7 +738,7 @@ Matcher includesNodeWith({
   double scrollExtentMax,
   double scrollExtentMin,
 }) {
-  return new _IncludesNodeWith(
+  return _IncludesNodeWith(
     label: label,
     value: value,
     hint: hint,
