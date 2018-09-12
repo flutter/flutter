@@ -342,6 +342,11 @@ class DecorationImagePainter {
 ///    when using this, to not flip images with integral shadows, text, or other
 ///    effects that will look incorrect when flipped.
 ///
+///  * `invertColors`: Inverting the colors of an image applies a new color
+///    filter to the paint. If there is another specified color filter, the
+///    invert will be applied after it. This is primarily used for implementing
+///    smart invert on iOS.
+///
 /// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
 /// arguments must not be null.
 ///
@@ -361,6 +366,7 @@ void paintImage({
   Rect centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
+  bool invertColors = false,
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -406,6 +412,7 @@ void paintImage({
     // to nearest-neighbor.
     paint.filterQuality = FilterQuality.low;
   }
+  paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
   final double dx = halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
