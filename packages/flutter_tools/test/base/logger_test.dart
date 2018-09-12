@@ -15,8 +15,8 @@ import '../src/mocks.dart';
 void main() {
   group('AppContext', () {
     test('error', () async {
-      final BufferLogger mockLogger = new BufferLogger();
-      final VerboseLogger verboseLogger = new VerboseLogger(mockLogger);
+      final BufferLogger mockLogger = BufferLogger();
+      final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
       verboseLogger.supportsColor = false;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
@@ -35,13 +35,13 @@ void main() {
     AnsiSpinner ansiSpinner;
     AnsiStatus ansiStatus;
     int called;
-    final RegExp secondDigits = new RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
+    final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
-      mockStdio = new MockStdio();
-      ansiSpinner = new AnsiSpinner();
+      mockStdio = MockStdio();
+      ansiSpinner = AnsiSpinner();
       called = 0;
-      ansiStatus = new AnsiStatus(
+      ansiStatus = AnsiStatus(
         message: 'Hello world',
         expectSlowOperation: true,
         padding: 20,
@@ -133,7 +133,7 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Logger: () => new StdoutLogger(),
+      Logger: () => StdoutLogger(),
     });
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
@@ -148,7 +148,7 @@ void main() {
       ]);
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
-      Logger: () => new VerboseLogger(new StdoutLogger()),
+      Logger: () => VerboseLogger(StdoutLogger()),
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
@@ -157,7 +157,7 @@ void main() {
       final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
-      Logger: () => new BufferLogger(),
+      Logger: () => BufferLogger(),
     });
   });
 }

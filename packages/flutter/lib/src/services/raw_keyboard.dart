@@ -132,7 +132,7 @@ abstract class RawKeyEvent {
     final String keymap = message['keymap'];
     switch (keymap) {
       case 'android':
-        data = new RawKeyEventDataAndroid(
+        data = RawKeyEventDataAndroid(
           flags: message['flags'] ?? 0,
           codePoint: message['codePoint'] ?? 0,
           keyCode: message['keyCode'] ?? 0,
@@ -141,7 +141,7 @@ abstract class RawKeyEvent {
         );
         break;
       case 'fuchsia':
-        data = new RawKeyEventDataFuchsia(
+        data = RawKeyEventDataFuchsia(
           hidUsage: message['hidUsage'] ?? 0,
           codePoint: message['codePoint'] ?? 0,
           modifiers: message['modifiers'] ?? 0,
@@ -150,17 +150,17 @@ abstract class RawKeyEvent {
       default:
         // We don't yet implement raw key events on iOS, but we don't hit this
         // exception because the engine never sends us these messages.
-        throw new FlutterError('Unknown keymap for key events: $keymap');
+        throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
     final String type = message['type'];
     switch (type) {
       case 'keydown':
-        return new RawKeyDownEvent(data: data);
+        return RawKeyDownEvent(data: data);
       case 'keyup':
-        return new RawKeyUpEvent(data: data);
+        return RawKeyUpEvent(data: data);
       default:
-        throw new FlutterError('Unknown key event type: $type');
+        throw FlutterError('Unknown key event type: $type');
     }
   }
 
@@ -215,7 +215,7 @@ class RawKeyboard {
   }
 
   /// The shared instance of [RawKeyboard].
-  static final RawKeyboard instance = new RawKeyboard._();
+  static final RawKeyboard instance = RawKeyboard._();
 
   final List<ValueChanged<RawKeyEvent>> _listeners = <ValueChanged<RawKeyEvent>>[];
 
@@ -236,10 +236,10 @@ class RawKeyboard {
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     if (_listeners.isEmpty)
       return;
-    final RawKeyEvent event = new RawKeyEvent.fromMessage(message);
+    final RawKeyEvent event = RawKeyEvent.fromMessage(message);
     if (event == null)
       return;
-    for (ValueChanged<RawKeyEvent> listener in new List<ValueChanged<RawKeyEvent>>.from(_listeners))
+    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners))
       if (_listeners.contains(listener))
         listener(event);
   }

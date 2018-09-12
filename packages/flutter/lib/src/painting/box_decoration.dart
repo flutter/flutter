@@ -170,7 +170,7 @@ class BoxDecoration extends Decoration {
 
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
-    return new BoxDecoration(
+    return BoxDecoration(
       color: Color.lerp(null, color, factor),
       image: image, // TODO(ianh): fade the image from transparent
       border: BoxBorder.lerp(null, border, factor),
@@ -247,7 +247,7 @@ class BoxDecoration extends Decoration {
       return a;
     if (t == 1.0)
       return b;
-    return new BoxDecoration(
+    return BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
       image: t < 0.5 ? a.image : b.image, // TODO(ianh): cross-fade the image
       border: BoxBorder.lerp(a.border, b.border, t),
@@ -294,13 +294,13 @@ class BoxDecoration extends Decoration {
       ..defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace
       ..emptyBodyDescription = '<no decorations specified>';
 
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
-    properties.add(new DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
-    properties.add(new DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
-    properties.add(new IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
-    properties.add(new DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
-    properties.add(new EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
+    properties.add(IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
+    properties.add(EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
   }
 
   @override
@@ -327,7 +327,7 @@ class BoxDecoration extends Decoration {
   @override
   _BoxDecorationPainter createBoxPainter([VoidCallback onChanged]) {
     assert(onChanged != null || image == null);
-    return new _BoxDecorationPainter(this, onChanged);
+    return _BoxDecorationPainter(this, onChanged);
   }
 }
 
@@ -347,7 +347,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
     if (_cachedBackgroundPaint == null ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
-      final Paint paint = new Paint();
+      final Paint paint = Paint();
       if (_decoration.backgroundBlendMode != null)
         paint.blendMode = _decoration.backgroundBlendMode;
       if (_decoration.color != null)
@@ -403,11 +403,11 @@ class _BoxDecorationPainter extends BoxPainter {
     Path clipPath;
     switch (_decoration.shape) {
       case BoxShape.circle:
-        clipPath = new Path()..addOval(rect);
+        clipPath = Path()..addOval(rect);
         break;
       case BoxShape.rectangle:
         if (_decoration.borderRadius != null)
-          clipPath = new Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
+          clipPath = Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
         break;
     }
     _imagePainter.paint(canvas, rect, clipPath, configuration);

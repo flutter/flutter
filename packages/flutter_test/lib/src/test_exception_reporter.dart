@@ -39,4 +39,4 @@ void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String test
   test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
 }
 
-final StackTrace _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
+final StackTrace _emptyStackTrace = stack_trace.Chain(const <stack_trace.Trace>[]);

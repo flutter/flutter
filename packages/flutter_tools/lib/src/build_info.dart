@@ -94,7 +94,7 @@ class BuildInfo {
   String get modeName => getModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      new BuildInfo(mode, flavor,
+      BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -259,7 +259,7 @@ String getBuildDirectory() {
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
-    throw new Exception(
+    throw Exception(
         'build-dir config setting in ${config.configPath} must be relative');
   }
   return buildDir;

@@ -14,7 +14,7 @@ import 'base/utils.dart';
 import 'cache.dart';
 import 'globals.dart';
 
-final RegExp _versionPattern = new RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
+final RegExp _versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -22,7 +22,7 @@ class FlutterManifest {
 
   /// Returns an empty manifest.
   static FlutterManifest empty() {
-    final FlutterManifest manifest = new FlutterManifest._();
+    final FlutterManifest manifest = FlutterManifest._();
     manifest._descriptor = const <String, dynamic>{};
     manifest._flutterDescriptor = const <String, dynamic>{};
     return manifest;
@@ -43,7 +43,7 @@ class FlutterManifest {
   }
 
   static Future<FlutterManifest> _createFromYaml(dynamic yamlDocument) async {
-    final FlutterManifest pubspec = new FlutterManifest._();
+    final FlutterManifest pubspec = FlutterManifest._();
     if (yamlDocument != null && !await _validate(yamlDocument))
       return null;
 
@@ -199,14 +199,14 @@ class FlutterManifest {
           continue;
         }
 
-        fontAssets.add(new FontAsset(
+        fontAssets.add(FontAsset(
           Uri.parse(asset),
           weight: fontFile['weight'],
           style: fontFile['style'],
         ));
       }
       if (fontAssets.isNotEmpty)
-        fonts.add(new Font(fontFamily['family'], fontAssets));
+        fonts.add(Font(fontFamily['family'], fontAssets));
     }
     return fonts;
   }
@@ -277,7 +277,7 @@ Future<bool> _validate(dynamic manifest) async {
   final String schemaData = fs.file(schemaPath).readAsStringSync();
   final Schema schema = await Schema.createSchema(
       convert.json.decode(schemaData));
-  final Validator validator = new Validator(schema);
+  final Validator validator = Validator(schema);
   if (validator.validate(manifest)) {
     return true;
   } else {

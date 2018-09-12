@@ -89,7 +89,7 @@ class PageStorageBucket {
   }
 
   _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return new _StorageEntryIdentifier(_allKeys(context));
+    return _StorageEntryIdentifier(_allKeys(context));
   }
 
   Map<Object, dynamic> _storage;

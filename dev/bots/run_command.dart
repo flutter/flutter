@@ -23,7 +23,7 @@ const String clock = '🕐';
 const Duration _kLongTimeout = Duration(minutes: 45);
 
 String elapsedTime(DateTime start) {
-  return new DateTime.now().difference(start).toString();
+  return DateTime.now().difference(start).toString();
 }
 
 void printProgress(String action, String workingDir, String command) {
@@ -48,7 +48,7 @@ Future<Null> runCommand(String executable, List<String> arguments, {
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = new DateTime.now();
+  final DateTime start = DateTime.now();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,

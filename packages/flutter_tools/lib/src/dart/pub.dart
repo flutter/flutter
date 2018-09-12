@@ -23,32 +23,32 @@ import 'sdk.dart';
 // DO NOT update without contacting kevmoo.
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
-  static final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
+  static final RegExp _validContext = RegExp('[a-z][a-z_]*[a-z]');
 
-  static final PubContext create = new PubContext._(<String>['create']);
-  static final PubContext createPackage = new PubContext._(<String>['create_pkg']);
-  static final PubContext createPlugin = new PubContext._(<String>['create_plugin']);
-  static final PubContext interactive = new PubContext._(<String>['interactive']);
-  static final PubContext pubGet = new PubContext._(<String>['get']);
-  static final PubContext pubUpgrade = new PubContext._(<String>['upgrade']);
-  static final PubContext runTest = new PubContext._(<String>['run_test']);
+  static final PubContext create = PubContext._(<String>['create']);
+  static final PubContext createPackage = PubContext._(<String>['create_pkg']);
+  static final PubContext createPlugin = PubContext._(<String>['create_plugin']);
+  static final PubContext interactive = PubContext._(<String>['interactive']);
+  static final PubContext pubGet = PubContext._(<String>['get']);
+  static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
+  static final PubContext runTest = PubContext._(<String>['run_test']);
 
-  static final PubContext flutterTests = new PubContext._(<String>['flutter_tests']);
-  static final PubContext updatePackages = new PubContext._(<String>['update_packages']);
+  static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
+  static final PubContext updatePackages = PubContext._(<String>['update_packages']);
 
   final List<String> _values;
 
   PubContext._(this._values) {
     for (String item in _values) {
       if (!_validContext.hasMatch(item)) {
-        throw new ArgumentError.value(
+        throw ArgumentError.value(
             _values, 'value', 'Must match RegExp ${_validContext.pattern}');
       }
     }
   }
 
   static PubContext getVerifyContext(String commandName) =>
-      new PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+      PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
 
   @override
   String toString() => 'PubContext: ${_values.join(':')}';
@@ -161,7 +161,7 @@ Future<Null> pub(List<String> arguments, {
     if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
     printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await new Future<Null>.delayed(new Duration(seconds: duration));
+    await Future<Null>.delayed(Duration(seconds: duration));
     if (duration < 64)
       duration *= 2;
   }
@@ -207,7 +207,7 @@ Map<String, String> _createPubEnvironment(PubContext context) {
   return environment;
 }
 
-final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
+final RegExp _analyzerWarning = RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 /// The console environment key used by the pub tool.
 const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';

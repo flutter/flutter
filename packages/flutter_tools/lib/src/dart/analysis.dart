@@ -21,9 +21,9 @@ class AnalysisServer {
 
   Process _process;
   final StreamController<bool> _analyzingController =
-      new StreamController<bool>.broadcast();
+      StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
-      new StreamController<FileAnalysisErrors>.broadcast();
+      StreamController<FileAnalysisErrors>.broadcast();
 
   int _id = 0;
 
@@ -132,10 +132,10 @@ class AnalysisServer {
     final List<dynamic> errorsList = issueInfo['errors'];
     final List<AnalysisError> errors = errorsList
         .map<Map<String, dynamic>>(castStringKeyedMap)
-        .map<AnalysisError>((Map<String, dynamic> json) => new AnalysisError(json))
+        .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
         .toList();
     if (!_errorsController.isClosed)
-      _errorsController.add(new FileAnalysisErrors(file, errors));
+      _errorsController.add(FileAnalysisErrors(file, errors));
   }
 
   Future<bool> dispose() async {

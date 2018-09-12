@@ -10,13 +10,13 @@ import 'rendering_tester.dart';
 void main() {
   test('RenderFractionallySizedBox constraints', () {
     RenderBox root, leaf, test;
-    root = new RenderPositionedBox(
-      child: new RenderConstrainedBox(
-        additionalConstraints: new BoxConstraints.tight(const Size(200.0, 200.0)),
-        child: test = new RenderFractionallySizedOverflowBox(
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
+        additionalConstraints: BoxConstraints.tight(const Size(200.0, 200.0)),
+        child: test = RenderFractionallySizedOverflowBox(
           widthFactor: 2.0,
           heightFactor: 0.5,
-          child: leaf = new RenderConstrainedBox(
+          child: leaf = RenderConstrainedBox(
             additionalConstraints: const BoxConstraints.expand()
           )
         )

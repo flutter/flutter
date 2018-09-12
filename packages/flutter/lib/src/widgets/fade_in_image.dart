@@ -138,8 +138,8 @@ class FadeInImage extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       placeholder = new MemoryImage(placeholder, scale: placeholderScale),
-       image = new NetworkImage(image, scale: imageScale),
+       placeholder = MemoryImage(placeholder, scale: placeholderScale),
+       image = NetworkImage(image, scale: imageScale),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -186,8 +186,8 @@ class FadeInImage extends StatefulWidget {
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
-         ? new ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
-         : new AssetImage(placeholder, bundle: bundle),
+         ? ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
+         : AssetImage(placeholder, bundle: bundle),
        assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
@@ -196,7 +196,7 @@ class FadeInImage extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       image = new NetworkImage(image, scale: imageScale),
+       image = NetworkImage(image, scale: imageScale),
        super(key: key);
 
   /// Image displayed while the target [image] is loading.
@@ -284,7 +284,7 @@ class FadeInImage extends StatefulWidget {
   final bool matchTextDirection;
 
   @override
-  State<StatefulWidget> createState() => new _FadeInImageState();
+  State<StatefulWidget> createState() => _FadeInImageState();
 }
 
 
@@ -331,7 +331,7 @@ class _ImageProviderResolver {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(
       state.context,
-      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
     ));
     assert(_imageStream != null);
 
@@ -363,13 +363,13 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   @override
   void initState() {
-    _imageResolver = new _ImageProviderResolver(state: this, listener: _updatePhase);
-    _placeholderResolver = new _ImageProviderResolver(state: this, listener: () {
+    _imageResolver = _ImageProviderResolver(state: this, listener: _updatePhase);
+    _placeholderResolver = _ImageProviderResolver(state: this, listener: () {
       setState(() {
         // Trigger rebuild to display the placeholder image
       });
     });
-    _controller = new AnimationController(
+    _controller = AnimationController(
       value: 1.0,
       vsync: this,
     );
@@ -427,7 +427,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           if (_imageResolver._imageInfo != null) {
             // Received image data. Begin placeholder fade-out.
             _controller.duration = widget.fadeOutDuration;
-            _animation = new CurvedAnimation(
+            _animation = CurvedAnimation(
               parent: _controller,
               curve: widget.fadeOutCurve,
             );
@@ -439,7 +439,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           if (_controller.status == AnimationStatus.dismissed) {
             // Done fading out placeholder. Begin target image fade-in.
             _controller.duration = widget.fadeInDuration;
-            _animation = new CurvedAnimation(
+            _animation = CurvedAnimation(
               parent: _controller,
               curve: widget.fadeInCurve,
             );
@@ -494,12 +494,12 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(_phase != FadeInImagePhase.start);
     final ImageInfo imageInfo = _imageInfo;
-    return new RawImage(
+    return RawImage(
       image: imageInfo?.image,
       width: widget.width,
       height: widget.height,
       scale: imageInfo?.scale ?? 1.0,
-      color: new Color.fromRGBO(255, 255, 255, _animation?.value ?? 1.0),
+      color: Color.fromRGBO(255, 255, 255, _animation?.value ?? 1.0),
       colorBlendMode: BlendMode.modulate,
       fit: widget.fit,
       alignment: widget.alignment,
@@ -511,9 +511,9 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new EnumProperty<FadeInImagePhase>('phase', _phase));
-    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
-    description.add(new DiagnosticsProperty<ImageStream>('image stream', _imageResolver._imageStream));
-    description.add(new DiagnosticsProperty<ImageStream>('placeholder stream', _placeholderResolver._imageStream));
+    description.add(EnumProperty<FadeInImagePhase>('phase', _phase));
+    description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(DiagnosticsProperty<ImageStream>('image stream', _imageResolver._imageStream));
+    description.add(DiagnosticsProperty<ImageStream>('placeholder stream', _placeholderResolver._imageStream));
   }
 }

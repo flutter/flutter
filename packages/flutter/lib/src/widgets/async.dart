@@ -93,7 +93,7 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   Widget build(BuildContext context, S currentSummary);
 
   @override
-  State<StreamBuilderBase<T, S>> createState() => new _StreamBuilderBaseState<T, S>();
+  State<StreamBuilderBase<T, S>> createState() => _StreamBuilderBaseState<T, S>();
 }
 
 /// State for [StreamBuilderBase].
@@ -230,7 +230,7 @@ class AsyncSnapshot<T> {
       return data;
     if (hasError)
       throw error;
-    throw new StateError('Snapshot has neither data nor error');
+    throw StateError('Snapshot has neither data nor error');
   }
 
   /// The latest error object received by the asynchronous computation.
@@ -244,7 +244,7 @@ class AsyncSnapshot<T> {
   ///
   /// The [data] and [error] fields persist unmodified, even if the new state is
   /// [ConnectionState.none].
-  AsyncSnapshot<T> inState(ConnectionState state) => new AsyncSnapshot<T>._(state, data, error);
+  AsyncSnapshot<T> inState(ConnectionState state) => AsyncSnapshot<T>._(state, data, error);
 
   /// Returns whether this snapshot contains a non-null [data] value.
   ///
@@ -385,19 +385,19 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   final T initialData;
 
   @override
-  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
+  AsyncSnapshot<T> initial() => AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
 
   @override
   AsyncSnapshot<T> afterData(AsyncSnapshot<T> current, T data) {
-    return new AsyncSnapshot<T>.withData(ConnectionState.active, data);
+    return AsyncSnapshot<T>.withData(ConnectionState.active, data);
   }
 
   @override
   AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error) {
-    return new AsyncSnapshot<T>.withError(ConnectionState.active, error);
+    return AsyncSnapshot<T>.withError(ConnectionState.active, error);
   }
 
   @override
@@ -550,7 +550,7 @@ class FutureBuilder<T> extends StatefulWidget {
   final T initialData;
 
   @override
-  State<FutureBuilder<T>> createState() => new _FutureBuilderState<T>();
+  State<FutureBuilder<T>> createState() => _FutureBuilderState<T>();
 }
 
 /// State for [FutureBuilder].
@@ -564,7 +564,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
+    _snapshot = AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
     _subscribe();
   }
 
@@ -591,18 +591,18 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
 
   void _subscribe() {
     if (widget.future != null) {
-      final Object callbackIdentity = new Object();
+      final Object callbackIdentity = Object();
       _activeCallbackIdentity = callbackIdentity;
       widget.future.then<void>((T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.done, data);
+            _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
         }
       }, onError: (Object error) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
-            _snapshot = new AsyncSnapshot<T>.withError(ConnectionState.done, error);
+            _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error);
           });
         }
       });

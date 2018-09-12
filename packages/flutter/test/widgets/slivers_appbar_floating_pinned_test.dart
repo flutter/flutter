@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
+        child: MediaQuery(
           data: const MediaQueryData(),
-          child: new CustomScrollView(
+          child: CustomScrollView(
             controller: controller,
             slivers: const <Widget>[
               SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
@@ -57,6 +57,6 @@ void main() {
     // we have scrolled 600.0 pixels
     // initial position of E was 200 + 56 + cSize.height + cSize.height + 500
     // we've scrolled that up by 600.0, meaning it's at that minus 600 now:
-    expect(tester.getTopLeft(find.text('E')), new Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
+    expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
   });
 }

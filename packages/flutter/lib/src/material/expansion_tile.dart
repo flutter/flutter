@@ -75,7 +75,7 @@ class ExpansionTile extends StatefulWidget {
   final bool initiallyExpanded;
 
   @override
-  _ExpansionTileState createState() => new _ExpansionTileState();
+  _ExpansionTileState createState() => _ExpansionTileState();
 }
 
 class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
@@ -93,14 +93,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kExpand, vsync: this);
-    _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _borderColor = new ColorTween();
-    _headerColor = new ColorTween();
-    _iconColor = new ColorTween();
-    _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
-    _backgroundColor = new ColorTween();
+    _controller = AnimationController(duration: _kExpand, vsync: this);
+    _easeOutAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _easeInAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _borderColor = ColorTween();
+    _headerColor = ColorTween();
+    _iconColor = ColorTween();
+    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
+    _backgroundColor = ColorTween();
 
     _isExpanded = PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
     if (_isExpanded)
@@ -134,34 +134,34 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation) ?? Colors.transparent;
     final Color titleColor = _headerColor.evaluate(_easeInAnimation);
 
-    return new Container(
-      decoration: new BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
         color: _backgroundColor.evaluate(_easeOutAnimation) ?? Colors.transparent,
-        border: new Border(
-          top: new BorderSide(color: borderSideColor),
-          bottom: new BorderSide(color: borderSideColor),
+        border: Border(
+          top: BorderSide(color: borderSideColor),
+          bottom: BorderSide(color: borderSideColor),
         )
       ),
-      child: new Column(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           IconTheme.merge(
-            data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
-            child: new ListTile(
+            data: IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
+            child: ListTile(
               onTap: _handleTap,
               leading: widget.leading,
-              title: new DefaultTextStyle(
+              title: DefaultTextStyle(
                 style: Theme.of(context).textTheme.subhead.copyWith(color: titleColor),
                 child: widget.title,
               ),
-              trailing: widget.trailing ?? new RotationTransition(
+              trailing: widget.trailing ?? RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more),
               ),
             ),
           ),
-          new ClipRect(
-            child: new Align(
+          ClipRect(
+            child: Align(
               heightFactor: _easeInAnimation.value,
               child: child,
             ),
@@ -184,10 +184,10 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _backgroundColor.end = widget.backgroundColor;
 
     final bool closed = !_isExpanded && _controller.isDismissed;
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: closed ? null : new Column(children: widget.children),
+      child: closed ? null : Column(children: widget.children),
     );
 
   }

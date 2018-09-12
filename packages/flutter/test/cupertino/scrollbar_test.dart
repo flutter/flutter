@@ -9,10 +9,10 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoScrollbar(
-        child: new SingleChildScrollView(
+      child: CupertinoScrollbar(
+        child: SingleChildScrollView(
           child: const SizedBox(width: 4000.0, height: 4000.0),
         ),
       ),
@@ -45,10 +45,10 @@ void main() {
 
   testWidgets('Scrollbar is not smaller than minLength with large scroll views',
           (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoScrollbar(
-        child: new SingleChildScrollView(
+      child: CupertinoScrollbar(
+        child: SingleChildScrollView(
           child: const SizedBox(width: 800.0, height: 20000.0),
         ),
       ),

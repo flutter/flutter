@@ -32,7 +32,7 @@ _ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aSt
     for (int i = 0; i < aStops.length; i += 1)
       interpolatedStops.add(ui.lerpDouble(aStops[i], bStops[i], t).clamp(0.0, 1.0));
   }
-  return new _ColorsAndStops(interpolatedColors, interpolatedStops);
+  return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
 
 /// A 2D gradient.
@@ -92,7 +92,7 @@ abstract class Gradient {
       return null;
     assert(colors.length >= 2, 'colors list must have at least two colors');
     final double separation = 1.0 / (colors.length - 1);
-    return new List<double>.generate(
+    return List<double>.generate(
       colors.length,
       (int index) => index * separation,
       growable: false,
@@ -320,7 +320,7 @@ class LinearGradient extends Gradient {
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
-    return new ui.Gradient.linear(
+    return ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
@@ -333,7 +333,7 @@ class LinearGradient extends Gradient {
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   LinearGradient scale(double factor) {
-    return new LinearGradient(
+    return LinearGradient(
       begin: begin,
       end: end,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
@@ -384,7 +384,7 @@ class LinearGradient extends Gradient {
     if (b == null)
       return a.scale(1.0 - t);
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
-    return new LinearGradient(
+    return LinearGradient(
       begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
       end: AlignmentGeometry.lerp(a.end, b.end, t),
       colors: interpolated.colors,
@@ -583,7 +583,7 @@ class RadialGradient extends Gradient {
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
-    return new ui.Gradient.radial(
+    return ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
@@ -599,7 +599,7 @@ class RadialGradient extends Gradient {
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   RadialGradient scale(double factor) {
-    return new RadialGradient(
+    return RadialGradient(
       center: center,
       radius: radius,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
@@ -652,7 +652,7 @@ class RadialGradient extends Gradient {
     if (b == null)
       return a.scale(1.0 - t);
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
-    return new RadialGradient(
+    return RadialGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       radius: math.max(0.0, ui.lerpDouble(a.radius, b.radius, t)),
       colors: interpolated.colors,
@@ -816,7 +816,7 @@ class SweepGradient extends Gradient {
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
-    return new ui.Gradient.sweep(
+    return ui.Gradient.sweep(
       center.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
       startAngle,
@@ -830,7 +830,7 @@ class SweepGradient extends Gradient {
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   SweepGradient scale(double factor) {
-    return new SweepGradient(
+    return SweepGradient(
       center: center,
       startAngle: startAngle,
       endAngle: endAngle,
@@ -881,7 +881,7 @@ class SweepGradient extends Gradient {
     if (b == null)
       return a.scale(1.0 - t);
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
-    return new SweepGradient(
+    return SweepGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       startAngle: math.max(0.0, ui.lerpDouble(a.startAngle, b.startAngle, t)),
       endAngle: math.max(0.0, ui.lerpDouble(a.endAngle, b.endAngle, t)),

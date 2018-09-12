@@ -48,11 +48,11 @@ Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debu
   profile(() { debugLabel ??= callback.toString(); });
   final Flow flow = Flow.begin();
   Timeline.startSync('$debugLabel: start', flow: flow);
-  final ReceivePort resultPort = new ReceivePort();
+  final ReceivePort resultPort = ReceivePort();
   Timeline.finishSync();
   final Isolate isolate = await Isolate.spawn(
     _spawn,
-    new _IsolateConfiguration<Q, R>(
+    _IsolateConfiguration<Q, R>(
       callback,
       message,
       resultPort.sendPort,

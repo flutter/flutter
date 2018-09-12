@@ -14,33 +14,33 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
-  new TestRenderingFlutterBinding(); // initializes the imageCache
+  TestRenderingFlutterBinding(); // initializes the imageCache
 
   test('ShapeDecoration constructor', () {
     const Color colorR = Color(0xffff0000);
     const Color colorG = Color(0xff00ff00);
     const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
     expect(const ShapeDecoration(shape: Border()), const ShapeDecoration(shape: Border()));
-    expect(() => new ShapeDecoration(color: colorR, gradient: nonconst(gradient), shape: const Border()), throwsAssertionError);
-    expect(() => new ShapeDecoration(gradient: nonconst(gradient), shape: null), throwsAssertionError);
+    expect(() => ShapeDecoration(color: colorR, gradient: nonconst(gradient), shape: const Border()), throwsAssertionError);
+    expect(() => ShapeDecoration(gradient: nonconst(gradient), shape: null), throwsAssertionError);
     expect(
-      new ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
+      ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
       const ShapeDecoration(shape: CircleBorder(side: BorderSide.none)),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, borderRadius: new BorderRadiusDirectional.circular(100.0))),
-      new ShapeDecoration(shape: new RoundedRectangleBorder(borderRadius: new BorderRadiusDirectional.circular(100.0))),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.rectangle, borderRadius: BorderRadiusDirectional.circular(100.0))),
+      ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(100.0))),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.circle, border: new Border.all(color: colorG))),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.circle, border: Border.all(color: colorG))),
       const ShapeDecoration(shape: CircleBorder(side: BorderSide(color: colorG))),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, border: new Border.all(color: colorR))),
-      new ShapeDecoration(shape: new Border.all(color: colorR)),
+      ShapeDecoration.fromBoxDecoration(BoxDecoration(shape: BoxShape.rectangle, border: Border.all(color: colorR))),
+      ShapeDecoration(shape: Border.all(color: colorR)),
     );
     expect(
-      new ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.rectangle, border: BorderDirectional(start: BorderSide()))),
+      ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.rectangle, border: BorderDirectional(start: BorderSide()))),
       const ShapeDecoration(shape: BorderDirectional(start: BorderSide())),
     );
   });
@@ -60,10 +60,10 @@ void main() {
 
   test('ShapeDecoration.image RTL test', () {
     final List<int> log = <int>[];
-    final ShapeDecoration decoration = new ShapeDecoration(
+    final ShapeDecoration decoration = ShapeDecoration(
       shape: const CircleBorder(),
-      image: new DecorationImage(
-        image: new TestImageProvider(),
+      image: DecorationImage(
+        image: TestImageProvider(),
         alignment: AlignmentDirectional.bottomEnd,
       ),
     );
@@ -81,7 +81,7 @@ void main() {
         );
       },
       paints
-        ..drawImageRect(source: new Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: new Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0))
+        ..drawImageRect(source: Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0))
     );
     expect(
       (Canvas canvas) {
@@ -103,13 +103,13 @@ void main() {
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<TestImageProvider>(this);
+    return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
   ImageStreamCompleter load(TestImageProvider key) {
-    return new OneFrameImageStreamCompleter(
-      new SynchronousFuture<ImageInfo>(new ImageInfo(image: new TestImage(), scale: 1.0)),
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: TestImage(), scale: 1.0)),
     );
   }
 }
@@ -126,6 +126,6 @@ class TestImage implements ui.Image {
 
   @override
   Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+    throw UnsupportedError('Cannot encode test image');
   }
 }

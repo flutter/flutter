@@ -70,7 +70,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 
   @override
   RenderDecoratedBox createRenderObject(BuildContext context) {
-    return new RenderDecoratedBox(
+    return RenderDecoratedBox(
       decoration: decoration,
       position: position,
       configuration: createLocalImageConfiguration(context),
@@ -101,8 +101,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     } else {
       label = 'decoration';
     }
-    properties.add(new EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    properties.add(new DiagnosticsProperty<Decoration>(
+    properties.add(EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    properties.add(DiagnosticsProperty<Decoration>(
       label,
       decoration,
       ifNull: 'no decoration',
@@ -260,11 +260,11 @@ class Container extends StatelessWidget {
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
        ),
-       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
-            ?? new BoxConstraints.tightFor(width: width, height: height)
+            ?? BoxConstraints.tightFor(width: width, height: height)
           : constraints,
        super(key: key);
 
@@ -339,25 +339,25 @@ class Container extends StatelessWidget {
     Widget current = child;
 
     if (child == null && (constraints == null || !constraints.isTight)) {
-      current = new LimitedBox(
+      current = LimitedBox(
         maxWidth: 0.0,
         maxHeight: 0.0,
-        child: new ConstrainedBox(constraints: const BoxConstraints.expand())
+        child: ConstrainedBox(constraints: const BoxConstraints.expand())
       );
     }
 
     if (alignment != null)
-      current = new Align(alignment: alignment, child: current);
+      current = Align(alignment: alignment, child: current);
 
     final EdgeInsetsGeometry effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
-      current = new Padding(padding: effectivePadding, child: current);
+      current = Padding(padding: effectivePadding, child: current);
 
     if (decoration != null)
-      current = new DecoratedBox(decoration: decoration, child: current);
+      current = DecoratedBox(decoration: decoration, child: current);
 
     if (foregroundDecoration != null) {
-      current = new DecoratedBox(
+      current = DecoratedBox(
         decoration: foregroundDecoration,
         position: DecorationPosition.foreground,
         child: current
@@ -365,13 +365,13 @@ class Container extends StatelessWidget {
     }
 
     if (constraints != null)
-      current = new ConstrainedBox(constraints: constraints, child: current);
+      current = ConstrainedBox(constraints: constraints, child: current);
 
     if (margin != null)
-      current = new Padding(padding: margin, child: current);
+      current = Padding(padding: margin, child: current);
 
     if (transform != null)
-      current = new Transform(transform: transform, child: current);
+      current = Transform(transform: transform, child: current);
 
     return current;
   }
@@ -379,12 +379,12 @@ class Container extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
-    properties.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
-    properties.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }

@@ -128,7 +128,7 @@ class Checkbox extends StatefulWidget {
   static const double width = 18.0;
 
   @override
-  _CheckboxState createState() => new _CheckboxState();
+  _CheckboxState createState() => _CheckboxState();
 }
 
 class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
@@ -145,8 +145,8 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
         size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
         break;
     }
-    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
-    return new _CheckboxRenderObjectWidget(
+    final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
+    return _CheckboxRenderObjectWidget(
       value: widget.value,
       tristate: widget.tristate,
       activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
@@ -184,7 +184,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   final BoxConstraints additionalConstraints;
 
   @override
-  _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
+  _RenderCheckbox createRenderObject(BuildContext context) => _RenderCheckbox(
     value: value,
     tristate: tristate,
     activeColor: activeColor,
@@ -254,8 +254,8 @@ class _RenderCheckbox extends RenderToggleable {
   RRect _outerRectAt(Offset origin, double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
     final double size = _kEdgeSize - inset * _kStrokeWidth;
-    final Rect rect = new Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
-    return new RRect.fromRectAndRadius(rect, _kEdgeRadius);
+    final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
+    return RRect.fromRectAndRadius(rect, _kEdgeRadius);
   }
 
   // The checkbox's border color if value == false, or its fill color when
@@ -287,7 +287,7 @@ class _RenderCheckbox extends RenderToggleable {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
-    final Path path = new Path();
+    final Path path = Path();
     const Offset start = Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
     const Offset mid = Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
     const Offset end = Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
@@ -333,7 +333,7 @@ class _RenderCheckbox extends RenderToggleable {
     if (_oldValue == false || value == false) {
       final double t = value == false ? 1.0 - tNormalized : tNormalized;
       final RRect outer = _outerRectAt(origin, t);
-      final Paint paint = new Paint()..color = _colorAt(t);
+      final Paint paint = Paint()..color = _colorAt(t);
 
       if (t <= 0.5) {
         _drawBorder(canvas, outer, t, paint);
@@ -349,7 +349,7 @@ class _RenderCheckbox extends RenderToggleable {
       }
     } else { // Two cases: null to true, true to null
       final RRect outer = _outerRectAt(origin, 1.0);
-      final Paint paint = new Paint() ..color = _colorAt(1.0);
+      final Paint paint = Paint() ..color = _colorAt(1.0);
       canvas.drawRRect(outer, paint);
 
       _initStrokePaint(paint);

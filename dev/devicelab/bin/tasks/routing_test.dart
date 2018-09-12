@@ -29,7 +29,7 @@ void main() {
     });
     section('TEST WHETHER `flutter run --route` WORKS');
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<Null> ready = Completer<Null>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -86,6 +86,6 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

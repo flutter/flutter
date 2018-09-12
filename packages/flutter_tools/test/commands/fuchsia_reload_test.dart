@@ -17,7 +17,7 @@ void main() {
   group('FuchsiaDeviceCommandRunner', () {
     testUsingContext('a test', () async {
       final FuchsiaDeviceCommandRunner commandRunner =
-          new FuchsiaDeviceCommandRunner('8.8.9.9',
+          FuchsiaDeviceCommandRunner('8.8.9.9',
                                          '~/fuchsia/out/release-x86-64');
       final List<String> ports = await commandRunner.run('ls /tmp');
       expect(ports, hasLength(3));
@@ -25,7 +25,7 @@ void main() {
       expect(ports[1], equals('5678'));
       expect(ports[2], equals('5'));
     }, overrides: <Type, Generator>{
-      ProcessManager: () => new MockProcessManager(),
+      ProcessManager: () => MockProcessManager(),
     });
   });
 }
@@ -41,6 +41,6 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) async {
-    return new ProcessResult(0, 0, '1234\n5678\n5', '');
+    return ProcessResult(0, 0, '1234\n5678\n5', '');
   }
 }

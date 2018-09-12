@@ -47,7 +47,7 @@ class LogsCommand extends FlutterCommand {
 
     printStatus('Showing $logReader logs:');
 
-    final Completer<int> exitCompleter = new Completer<int>();
+    final Completer<int> exitCompleter = Completer<int>();
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(

@@ -15,9 +15,9 @@ import 'package:mockito/mockito.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  final TextEditingController controller = new TextEditingController();
-  final FocusNode focusNode = new FocusNode();
-  final FocusScopeNode focusScopeNode = new FocusScopeNode();
+  final TextEditingController controller = TextEditingController();
+  final FocusNode focusNode = FocusNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode();
   const TextStyle textStyle = TextStyle();
   const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
@@ -36,12 +36,12 @@ void main() {
     String serializedActionName,
   }) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             textInputAction: action,
@@ -63,9 +63,9 @@ void main() {
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new EditableText(
+        child: EditableText(
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -84,9 +84,9 @@ void main() {
 
   testWidgets('cursor has expected width and radius',
       (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
-        child: new EditableText(
+        child: EditableText(
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -104,12 +104,12 @@ void main() {
   testWidgets('text keyboard is requested when maxLines is default',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             style: textStyle,
@@ -265,12 +265,12 @@ void main() {
   testWidgets('multiline keyboard is requested when set explicitly',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             keyboardType: TextInputType.multiline,
@@ -294,12 +294,12 @@ void main() {
 
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             maxLines: null,
@@ -323,12 +323,12 @@ void main() {
 
   testWidgets('Text keyboard is requested when explicitly set and maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             maxLines: null,
@@ -355,12 +355,12 @@ void main() {
       'Correct keyboard is requested when set explicitly and maxLines > 1',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             keyboardType: TextInputType.phone,
@@ -386,12 +386,12 @@ void main() {
   testWidgets('multiline keyboard is requested when set implicitly',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             maxLines: 3, // Sets multiline keyboard implicitly.
@@ -416,12 +416,12 @@ void main() {
   testWidgets('single line inputs have correct default keyboard',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             maxLines: 1, // Sets text keyboard implicitly.
@@ -446,15 +446,15 @@ void main() {
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
+        GlobalKey<EditableTextState>();
 
     String changedValue;
-    final Widget widget = new MaterialApp(
-      home: new EditableText(
+    final Widget widget = MaterialApp(
+      home: EditableText(
         key: editableTextKey,
-        controller: new TextEditingController(),
-        focusNode: new FocusNode(),
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        controller: TextEditingController(),
+        focusNode: FocusNode(),
+        style: Typography(platform: TargetPlatform.android).black.subhead,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -487,17 +487,17 @@ void main() {
 
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
+        GlobalKey<EditableTextState>();
 
     String changedValue;
-    final Widget widget = new MaterialApp(
-      home: new RepaintBoundary(
+    final Widget widget = MaterialApp(
+      home: RepaintBoundary(
         key: const ValueKey<int>(1),
-        child: new EditableText(
+        child: EditableText(
           key: editableTextKey,
-          controller: new TextEditingController(),
-          focusNode: new FocusNode(),
-          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          controller: TextEditingController(),
+          focusNode: FocusNode(),
+          style: Typography(platform: TargetPlatform.android).black.subhead,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -537,17 +537,17 @@ void main() {
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
+        GlobalKey<EditableTextState>();
 
     String changedValue;
-    final Widget widget = new MaterialApp(
-      home: new RepaintBoundary(
+    final Widget widget = MaterialApp(
+      home: RepaintBoundary(
         key: const ValueKey<int>(1),
-        child: new EditableText(
+        child: EditableText(
           key: editableTextKey,
-          controller: new TextEditingController(),
-          focusNode: new FocusNode(),
-          style: new Typography(platform: TargetPlatform.android).black.subhead,
+          controller: TextEditingController(),
+          focusNode: FocusNode(),
+          style: Typography(platform: TargetPlatform.android).black.subhead,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
@@ -589,15 +589,15 @@ void main() {
   testWidgets('Does not lose focus by default when "next" action is pressed',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
-    final FocusNode focusNode = new FocusNode();
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
 
-    final Widget widget = new MaterialApp(
-      home: new EditableText(
+    final Widget widget = MaterialApp(
+      home: EditableText(
         key: editableTextKey,
-        controller: new TextEditingController(),
+        controller: TextEditingController(),
         focusNode: focusNode,
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -623,15 +623,15 @@ void main() {
       'Does not lose focus by default when "done" action is pressed and onEditingComplete is provided',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
-    final FocusNode focusNode = new FocusNode();
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
 
-    final Widget widget = new MaterialApp(
-      home: new EditableText(
+    final Widget widget = MaterialApp(
+      home: EditableText(
         key: editableTextKey,
-        controller: new TextEditingController(),
+        controller: TextEditingController(),
         focusNode: focusNode,
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
         cursorColor: Colors.blue,
         selectionControls: materialTextSelectionControls,
         keyboardType: TextInputType.text,
@@ -661,18 +661,18 @@ void main() {
       'When "done" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
-    final FocusNode focusNode = new FocusNode();
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
 
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
-    final Widget widget = new MaterialApp(
-      home: new EditableText(
+    final Widget widget = MaterialApp(
+      home: EditableText(
         key: editableTextKey,
-        controller: new TextEditingController(),
+        controller: TextEditingController(),
         focusNode: focusNode,
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -705,18 +705,18 @@ void main() {
       'When "next" is pressed callbacks are invoked: onEditingComplete > onSubmitted',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
-    final FocusNode focusNode = new FocusNode();
+        GlobalKey<EditableTextState>();
+    final FocusNode focusNode = FocusNode();
 
     bool onEditingCompleteCalled = false;
     bool onSubmittedCalled = false;
 
-    final Widget widget = new MaterialApp(
-      home: new EditableText(
+    final Widget widget = MaterialApp(
+      home: EditableText(
         key: editableTextKey,
-        controller: new TextEditingController(),
+        controller: TextEditingController(),
         focusNode: focusNode,
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        style: Typography(platform: TargetPlatform.android).black.subhead,
         cursorColor: Colors.blue,
         onEditingComplete: () {
           onEditingCompleteCalled = true;
@@ -748,27 +748,27 @@ void main() {
   testWidgets('Changing controller updates EditableText',
       (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey =
-        new GlobalKey<EditableTextState>();
+        GlobalKey<EditableTextState>();
     final TextEditingController controller1 =
-        new TextEditingController(text: 'Wibble');
+        TextEditingController(text: 'Wibble');
     final TextEditingController controller2 =
-        new TextEditingController(text: 'Wobble');
+        TextEditingController(text: 'Wobble');
     TextEditingController currentController = controller1;
     StateSetter setState;
 
     Widget builder() {
-      return new StatefulBuilder(
+      return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
           setState = setter;
-          return new Directionality(
+          return Directionality(
             textDirection: TextDirection.ltr,
-            child: new Center(
-              child: new Material(
-                child: new EditableText(
+            child: Center(
+              child: Material(
+                child: EditableText(
                   key: editableTextKey,
                   controller: currentController,
-                  focusNode: new FocusNode(),
-                  style: new Typography(platform: TargetPlatform.android)
+                  focusNode: FocusNode(),
+                  style: Typography(platform: TargetPlatform.android)
                       .black
                       .subhead,
                   cursorColor: Colors.blue,
@@ -815,15 +815,15 @@ void main() {
 
   testWidgets('EditableText identifies as text field (w/ focus) in semantics',
       (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             style: textStyle,
@@ -852,18 +852,18 @@ void main() {
 
   testWidgets('EditableText includes text as value in semantics',
       (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     const String value1 = 'EditableText content';
 
     controller.text = value1;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
-          child: new EditableText(
+          child: EditableText(
             controller: controller,
             focusNode: focusNode,
             style: textStyle,
@@ -902,8 +902,8 @@ void main() {
     controller.text = value1;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new EditableText(
+      MaterialApp(
+        home: EditableText(
           controller: controller,
           selectionControls: materialTextSelectionControls,
           focusNode: focusNode,
@@ -940,12 +940,12 @@ void main() {
 
   testWidgets('exposes correct cursor movement semantics',
       (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'test';
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new EditableText(
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -960,7 +960,7 @@ void main() {
         ));
 
     controller.selection =
-        new TextSelection.collapsed(offset: controller.text.length);
+        TextSelection.collapsed(offset: controller.text.length);
     await tester.pumpAndSettle();
 
     // At end, can only go backwards.
@@ -976,7 +976,7 @@ void main() {
         ));
 
     controller.selection =
-        new TextSelection.collapsed(offset: controller.text.length - 2);
+        TextSelection.collapsed(offset: controller.text.length - 2);
     await tester.pumpAndSettle();
 
     // Somewhere in the middle, can go in both directions.
@@ -1012,15 +1012,15 @@ void main() {
   });
 
   testWidgets('can move cursor with a11y means - character', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     const bool doNotExtendSelection = false;
 
     controller.text = 'test';
     controller.selection =
-        new TextSelection.collapsed(offset: controller.text.length);
+        TextSelection.collapsed(offset: controller.text.length);
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new EditableText(
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1101,15 +1101,15 @@ void main() {
   });
 
   testWidgets('can move cursor with a11y means - word', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     const bool doNotExtendSelection = false;
 
     controller.text = 'test for words';
     controller.selection =
-    new TextSelection.collapsed(offset: controller.text.length);
+    TextSelection.collapsed(offset: controller.text.length);
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new EditableText(
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1199,16 +1199,16 @@ void main() {
 
   testWidgets('can extend selection with a11y means - character',
       (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     const bool extendSelection = true;
     const bool doNotExtendSelection = false;
 
     controller.text = 'test';
     controller.selection =
-        new TextSelection.collapsed(offset: controller.text.length);
+        TextSelection.collapsed(offset: controller.text.length);
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new EditableText(
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1297,16 +1297,16 @@ void main() {
 
   testWidgets('can extend selection with a11y means - word',
           (WidgetTester tester) async {
-      final SemanticsTester semantics = new SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
       const bool extendSelection = true;
       const bool doNotExtendSelection = false;
 
       controller.text = 'test for words';
       controller.selection =
-      new TextSelection.collapsed(offset: controller.text.length);
+      TextSelection.collapsed(offset: controller.text.length);
 
-      await tester.pumpWidget(new MaterialApp(
-        home: new EditableText(
+      await tester.pumpWidget(MaterialApp(
+        home: EditableText(
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -1396,12 +1396,12 @@ void main() {
 
   testWidgets('password fields have correct semantics',
       (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     controller.text = 'super-secret-password!!1';
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new EditableText(
+    await tester.pumpWidget(MaterialApp(
+      home: EditableText(
         obscureText: true,
         controller: controller,
         focusNode: focusNode,
@@ -1415,14 +1415,14 @@ void main() {
     expect(
         semantics,
         hasSemantics(
-            new TestSemantics(
+            TestSemantics(
               children: <TestSemantics>[
-                new TestSemantics.rootChild(
+                TestSemantics.rootChild(
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isObscured
@@ -1446,8 +1446,8 @@ void main() {
   group('a11y copy/cut/paste', () {
     Future<Null> _buildApp(
         MockTextSelectionControls controls, WidgetTester tester) {
-      return tester.pumpWidget(new MaterialApp(
-        home: new EditableText(
+      return tester.pumpWidget(MaterialApp(
+        home: EditableText(
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -1462,16 +1462,16 @@ void main() {
     setUp(() {
       controller.text = 'test';
       controller.selection =
-          new TextSelection.collapsed(offset: controller.text.length);
+          TextSelection.collapsed(offset: controller.text.length);
 
-      controls = new MockTextSelectionControls();
-      when(controls.buildHandle(any, any, any)).thenReturn(new Container());
+      controls = MockTextSelectionControls();
+      when(controls.buildHandle(any, any, any)).thenReturn(Container());
       when(controls.buildToolbar(any, any, any, any))
-          .thenReturn(new Container());
+          .thenReturn(Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
-      final SemanticsTester semantics = new SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
       when(controls.canCopy(any)).thenReturn(false);
       when(controls.canCut(any)).thenReturn(false);
@@ -1558,7 +1558,7 @@ void main() {
     });
 
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
-      final SemanticsTester semantics = new SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
       when(controls.canCopy(any)).thenReturn(true);
       when(controls.canCut(any)).thenReturn(true);
@@ -1573,16 +1573,16 @@ void main() {
       expect(
           semantics,
           hasSemantics(
-              new TestSemantics.root(
+              TestSemantics.root(
                 children: <TestSemantics>[
-                  new TestSemantics.rootChild(
+                  TestSemantics.rootChild(
                     id: 1,
                     children: <TestSemantics>[
-                      new TestSemantics(
+                      TestSemantics(
                         id: 2,
                         flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                         children: <TestSemantics>[
-                          new TestSemantics.rootChild(
+                          TestSemantics.rootChild(
                             id: expectedNodeId,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
@@ -1597,7 +1597,7 @@ void main() {
                               SemanticsAction.paste
                             ],
                             value: 'test',
-                            textSelection: new TextSelection.collapsed(
+                            textSelection: TextSelection.collapsed(
                                 offset: controller.text.length),
                             textDirection: TextDirection.ltr,
                           ),
@@ -1627,8 +1627,8 @@ void main() {
       (WidgetTester tester) async {
     controller.text = 'Hello World';
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new CustomStyleEditableText(
+    await tester.pumpWidget(MaterialApp(
+      home: CustomStyleEditableText(
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1645,16 +1645,16 @@ void main() {
   testWidgets('autofocus sets cursor to the end of text',
       (WidgetTester tester) async {
     const String text = 'hello world';
-    final FocusScopeNode focusScopeNode = new FocusScopeNode();
-    final FocusNode focusNode = new FocusNode();
+    final FocusScopeNode focusScopeNode = FocusScopeNode();
+    final FocusNode focusNode = FocusNode();
 
     controller.text = text;
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new FocusScope(
+      child: FocusScope(
         node: focusScopeNode,
         autofocus: true,
-        child: new EditableText(
+        child: EditableText(
           controller: controller,
           focusNode: focusNode,
           autofocus: true,
@@ -1686,13 +1686,13 @@ class CustomStyleEditableText extends EditableText {
         );
   @override
   CustomStyleEditableTextState createState() =>
-      new CustomStyleEditableTextState();
+      CustomStyleEditableTextState();
 }
 
 class CustomStyleEditableTextState extends EditableTextState {
   @override
   TextSpan buildTextSpan() {
-    return new TextSpan(
+    return TextSpan(
       style: const TextStyle(fontStyle: FontStyle.italic),
       text: widget.controller.value.text,
     );

@@ -89,7 +89,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// after [popped], because [popped] typically completes before the animation
   /// even starts, as soon as the route is popped.
   Future<T> get completed => _transitionCompleter.future;
-  final Completer<T> _transitionCompleter = new Completer<T>();
+  final Completer<T> _transitionCompleter = Completer<T>();
 
   /// The duration the transition lasts.
   Duration get transitionDuration;
@@ -122,7 +122,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.zero);
-    return new AnimationController(
+    return AnimationController(
       duration: duration,
       debugLabel: debugLabel,
       vsync: navigator,
@@ -170,7 +170,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// animation lets this route coordinate with the entrance and exit transition
   /// of routes pushed on top of this route.
   Animation<double> get secondaryAnimation => _secondaryAnimation;
-  final ProxyAnimation _secondaryAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
+  final ProxyAnimation _secondaryAnimation = ProxyAnimation(kAlwaysDismissedAnimation);
 
   @override
   void install(OverlayEntry insertionPoint) {
@@ -231,7 +231,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
-          newAnimation = new TrainHoppingAnimation(
+          newAnimation = TrainHoppingAnimation(
             current.currentTrain,
             nextRoute._animation,
             onSwitchedTrain: () {
@@ -244,7 +244,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
           _secondaryAnimation.parent = newAnimation;
           current.dispose();
         } else {
-          _secondaryAnimation.parent = new TrainHoppingAnimation(current, nextRoute._animation);
+          _secondaryAnimation.parent = TrainHoppingAnimation(current, nextRoute._animation);
         }
       } else {
         _secondaryAnimation.parent = nextRoute._animation;
@@ -520,8 +520,8 @@ class _ModalScopeStatus extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
-    description.add(new FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
+    description.add(FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
+    description.add(FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
   }
 }
 
@@ -534,7 +534,7 @@ class _ModalScope<T> extends StatefulWidget {
   final ModalRoute<T> route;
 
   @override
-  _ModalScopeState<T> createState() => new _ModalScopeState<T>();
+  _ModalScopeState<T> createState() => _ModalScopeState<T>();
 }
 
 class _ModalScopeState<T> extends State<_ModalScope<T>> {
@@ -555,7 +555,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
       animations.add(widget.route.animation);
     if (widget.route.secondaryAnimation != null)
       animations.add(widget.route.secondaryAnimation);
-    _listenable = new Listenable.merge(animations);
+    _listenable = Listenable.merge(animations);
   }
 
   @override
@@ -584,33 +584,33 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return new _ModalScopeStatus(
+    return _ModalScopeStatus(
       route: widget.route,
       isCurrent: widget.route.isCurrent, // _routeSetState is called if this updates
       canPop: widget.route.canPop, // _routeSetState is called if this updates
-      child: new Offstage(
+      child: Offstage(
         offstage: widget.route.offstage, // _routeSetState is called if this updates
-        child: new PageStorage(
+        child: PageStorage(
           bucket: widget.route._storageBucket, // immutable
-          child: new FocusScope(
+          child: FocusScope(
             node: widget.route.focusScopeNode, // immutable
-            child: new RepaintBoundary(
-              child: new AnimatedBuilder(
+            child: RepaintBoundary(
+              child: AnimatedBuilder(
                 animation: _listenable, // immutable
                 builder: (BuildContext context, Widget child) {
                   return widget.route.buildTransitions(
                     context,
                     widget.route.animation,
                     widget.route.secondaryAnimation,
-                    new IgnorePointer(
+                    IgnorePointer(
                       ignoring: widget.route.animation?.status == AnimationStatus.reverse,
                       child: child,
                     ),
                   );
                 },
-                child: _page ??= new RepaintBoundary(
+                child: _page ??= RepaintBoundary(
                   key: widget.route._subtreeKey, // immutable
-                  child: new Builder(
+                  child: Builder(
                     builder: (BuildContext context) {
                       return widget.route.buildPage(
                         context,
@@ -851,13 +851,13 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   /// The node this route will use for its root [FocusScope] widget.
-  final FocusScopeNode focusScopeNode = new FocusScopeNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   @override
   void install(OverlayEntry insertionPoint) {
     super.install(insertionPoint);
-    _animationProxy = new ProxyAnimation(super.animation);
-    _secondaryAnimationProxy = new ProxyAnimation(super.secondaryAnimation);
+    _animationProxy = ProxyAnimation(super.animation);
+    _secondaryAnimationProxy = ProxyAnimation(super.secondaryAnimation);
   }
 
   @override
@@ -1034,7 +1034,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
-    for (WillPopCallback callback in new List<WillPopCallback>.from(_willPopCallbacks)) {
+    for (WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
       if (!await callback())
         return RoutePopDisposition.doNotPop;
     }
@@ -1167,9 +1167,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // Internals
 
-  final GlobalKey<_ModalScopeState<T>> _scopeKey = new GlobalKey<_ModalScopeState<T>>();
-  final GlobalKey _subtreeKey = new GlobalKey();
-  final PageStorageBucket _storageBucket = new PageStorageBucket();
+  final GlobalKey<_ModalScopeState<T>> _scopeKey = GlobalKey<_ModalScopeState<T>>();
+  final GlobalKey _subtreeKey = GlobalKey();
+  final PageStorageBucket _storageBucket = PageStorageBucket();
 
   // one of the builders
   OverlayEntry _modalBarrier;
@@ -1177,27 +1177,27 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget barrier;
     if (barrierColor != null && !offstage) { // changedInternalState is called if these update
       assert(barrierColor != _kTransparent);
-      final Animation<Color> color = new ColorTween(
+      final Animation<Color> color = ColorTween(
         begin: _kTransparent,
         end: barrierColor, // changedInternalState is called if this updates
-      ).animate(new CurvedAnimation(
+      ).animate(CurvedAnimation(
         parent: animation,
         curve: Curves.ease,
       ));
-      barrier = new AnimatedModalBarrier(
+      barrier = AnimatedModalBarrier(
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
         barrierSemanticsDismissible: semanticsDismissible,
       );
     } else {
-      barrier = new ModalBarrier(
+      barrier = ModalBarrier(
         dismissible: barrierDismissible, // changedInternalState is called if this updates
         semanticsLabel: barrierLabel, // changedInternalState is called if this updates
         barrierSemanticsDismissible: semanticsDismissible,
       );
     }
-    return new IgnorePointer(
+    return IgnorePointer(
       ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when this updates
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
@@ -1210,7 +1210,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
-    return _modalScopeCache ??= new _ModalScope<T>(
+    return _modalScopeCache ??= _ModalScope<T>(
       key: _scopeKey,
       route: this,
       // _ModalScope calls buildTransitions() and buildChild(), defined above
@@ -1219,8 +1219,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield _modalBarrier = new OverlayEntry(builder: _buildModalBarrier);
-    yield new OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
+    yield _modalBarrier = OverlayEntry(builder: _buildModalBarrier);
+    yield OverlayEntry(builder: _buildModalScope, maintainState: maintainState);
   }
 
   @override
@@ -1324,7 +1324,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   void subscribe(RouteAware routeAware, R route) {
     assert(routeAware != null);
     assert(route != null);
-    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => new Set<RouteAware>());
+    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => Set<RouteAware>());
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
     }
@@ -1437,7 +1437,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return new Semantics(
+    return Semantics(
       child: _pageBuilder(context, animation, secondaryAnimation),
       scopesRoute: true,
       explicitChildNodes: true,
@@ -1447,8 +1447,8 @@ class _DialogRoute<T> extends PopupRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (_transitionBuilder == null) {
-      return new FadeTransition(
-          opacity: new CurvedAnimation(
+      return FadeTransition(
+          opacity: CurvedAnimation(
             parent: animation,
             curve: Curves.linear,
           ),
@@ -1515,7 +1515,7 @@ Future<T> showGeneralDialog<T>({
 }) {
   assert(pageBuilder != null);
   assert(!barrierDismissible || barrierLabel != null);
-  return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: true).push(_DialogRoute<T>(
     pageBuilder: pageBuilder,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabel,
