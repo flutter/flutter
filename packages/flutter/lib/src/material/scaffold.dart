@@ -1319,7 +1319,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   AnimationController _floatingActionButtonVisibilityController;
 
-  /// Gets the current value of the visbility animation for the
+  /// Gets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton].
   double get floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
 
@@ -1398,7 +1398,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       duration: kFloatingActionButtonSegue * 2,
     );
 
-    _floatingActionButtonVisibilityController = new AnimationController(
+    _floatingActionButtonVisibilityController = AnimationController(
       duration: kFloatingActionButtonSegue,
       vsync: this,
     );
