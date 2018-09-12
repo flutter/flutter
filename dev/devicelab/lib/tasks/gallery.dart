@@ -13,7 +13,7 @@ import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
-  return new GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
 class GalleryTransitionTest {
@@ -67,7 +67,7 @@ class GalleryTransitionTest {
     };
     data.addAll(summary);
 
-    return new TaskResult.success(data, benchmarkScoreKeys: <String>[
+    return TaskResult.success(data, benchmarkScoreKeys: <String>[
       'missed_transition_count',
       'average_frame_build_time_millis',
       'worst_frame_build_time_millis',

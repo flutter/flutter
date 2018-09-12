@@ -11,7 +11,7 @@ import '../base/version.dart';
 import '../doctor.dart';
 
 class IntelliJPlugins {
-  static final Version kMinFlutterPluginVersion = new Version(16, 0, 0);
+  static final Version kMinFlutterPluginVersion = Version(16, 0, 0);
 
   final String pluginsPath;
 
@@ -26,19 +26,19 @@ class IntelliJPlugins {
       }
 
       final String versionText = _readPackageVersion(packageName);
-      final Version version = new Version.parse(versionText);
+      final Version version = Version.parse(versionText);
       if (version != null && minVersion != null && version < minVersion) {
-        messages.add(new ValidationMessage.error(
+        messages.add(ValidationMessage.error(
             '$title plugin version $versionText - the recommended minimum version is $minVersion'));
       } else {
-        messages.add(new ValidationMessage(
+        messages.add(ValidationMessage(
             '$title plugin ${version != null ? "version $version" : "installed"}'));
       }
 
       return;
     }
 
-    messages.add(new ValidationMessage.error(
+    messages.add(ValidationMessage.error(
         '$title plugin not installed; this adds $title specific functionality.'));
   }
 
@@ -57,7 +57,7 @@ class IntelliJPlugins {
     // rather than reading the entire file into memory.
     try {
       final Archive archive =
-          new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
+          ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
       final String content = utf8.decode(file.content);
       const String versionStartTag = '<version>';

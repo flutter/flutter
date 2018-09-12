@@ -9,9 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Chip demo has semantic labels', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(new MaterialApp(
-      theme: new ThemeData(platform: TargetPlatform.iOS),
-      home: new ChipDemo(),
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: ChipDemo(),
     ));
 
     expect(tester.getSemanticsData(find.byIcon(Icons.vignette)), matchesSemanticsData(

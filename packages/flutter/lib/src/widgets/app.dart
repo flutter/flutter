@@ -415,7 +415,7 @@ class WidgetsApp extends StatefulWidget {
   static bool debugAllowBannerOverride = true;
 
   @override
-  _WidgetsAppState createState() => new _WidgetsAppState();
+  _WidgetsAppState createState() => _WidgetsAppState();
 }
 
 class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
@@ -458,7 +458,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     if (widget.onGenerateRoute == null) {
       _navigator = null;
     } else {
-      _navigator = widget.navigatorKey ?? new GlobalObjectKey<NavigatorState>(this);
+      _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
     }
   }
 
@@ -564,7 +564,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   Widget build(BuildContext context) {
     Widget navigator;
     if (_navigator != null) {
-      navigator = new Navigator(
+      navigator = Navigator(
         key: _navigator,
         initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
         onGenerateRoute: widget.onGenerateRoute,
@@ -575,7 +575,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     Widget result;
     if (widget.builder != null) {
-      result = new Builder(
+      result = Builder(
         builder: (BuildContext context) {
           return widget.builder(context, navigator);
         },
@@ -586,7 +586,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
 
     if (widget.textStyle != null) {
-      result = new DefaultTextStyle(
+      result = DefaultTextStyle(
         style: widget.textStyle,
         child: result,
       );
@@ -596,40 +596,40 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // We need to push a performance overlay if any of the display or checkerboarding
     // options are set.
     if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
-      performanceOverlay = new PerformanceOverlay.allEnabled(
+      performanceOverlay = PerformanceOverlay.allEnabled(
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       );
     } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
-      performanceOverlay = new PerformanceOverlay(
+      performanceOverlay = PerformanceOverlay(
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       );
     }
     if (performanceOverlay != null) {
-      result = new Stack(
+      result = Stack(
         children: <Widget>[
           result,
-          new Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
+          Positioned(top: 0.0, left: 0.0, right: 0.0, child: performanceOverlay),
         ]
       );
     }
 
     if (widget.showSemanticsDebugger) {
-      result = new SemanticsDebugger(
+      result = SemanticsDebugger(
         child: result,
       );
     }
 
     assert(() {
       if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
-        result = new WidgetInspector(
+        result = WidgetInspector(
           child: result,
           selectButtonBuilder: widget.inspectorSelectButtonBuilder,
         );
       }
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
-        result = new CheckedModeBanner(
+        result = CheckedModeBanner(
           child: result,
         );
       }
@@ -638,14 +638,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     Widget title;
     if (widget.onGenerateTitle != null) {
-      title = new Builder(
+      title = Builder(
         // This Builder exists to provide a context below the Localizations widget.
         // The onGenerateTitle callback can refer to Localizations via its context
         // parameter.
         builder: (BuildContext context) {
           final String title = widget.onGenerateTitle(context);
           assert(title != null, 'onGenerateTitle must return a non-null String');
-          return new Title(
+          return Title(
             title: title,
             color: widget.color,
             child: result,
@@ -653,16 +653,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         },
       );
     } else {
-      title = new Title(
+      title = Title(
         title: widget.title,
         color: widget.color,
         child: result,
       );
     }
 
-    return new MediaQuery(
-      data: new MediaQueryData.fromWindow(ui.window),
-      child: new Localizations(
+    return MediaQuery(
+      data: MediaQueryData.fromWindow(ui.window),
+      child: Localizations(
         locale: widget.locale ?? _locale,
         delegates: _localizationsDelegates.toList(),
         child: title,

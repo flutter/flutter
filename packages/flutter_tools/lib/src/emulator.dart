@@ -21,8 +21,8 @@ class EmulatorManager {
   /// of their methods are called.
   EmulatorManager() {
     // Register the known discoverers.
-    _emulatorDiscoverers.add(new AndroidEmulators());
-    _emulatorDiscoverers.add(new IOSEmulators());
+    _emulatorDiscoverers.add(AndroidEmulators());
+    _emulatorDiscoverers.add(IOSEmulators());
   }
 
   final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[];
@@ -81,12 +81,12 @@ class EmulatorManager {
 
     final String device = await _getPreferredAvailableDevice();
     if (device == null)
-      return new CreateEmulatorResult(name,
+      return CreateEmulatorResult(name,
           success: false, error: 'No device definitions are available');
 
     final String sdkId = await _getPreferredSdkId();
     if (sdkId == null)
-      return new CreateEmulatorResult(name,
+      return CreateEmulatorResult(name,
           success: false,
           error:
               'No suitable Android AVD system images are available. You may need to install these'
@@ -119,7 +119,7 @@ class EmulatorManager {
     ];
     final ProcessResult runResult = processManager.runSync(args,
         environment: androidSdk?.sdkManagerEnv);
-    return new CreateEmulatorResult(
+    return CreateEmulatorResult(
       name,
       success: runResult.exitCode == 0,
       output: runResult.stdout,
@@ -154,7 +154,7 @@ class EmulatorManager {
     );
   }
 
-  RegExp androidApiVersion = new RegExp(r';android-(\d+);');
+  RegExp androidApiVersion = RegExp(r';android-(\d+);');
   Future<String> _getPreferredSdkId() async {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
@@ -252,14 +252,14 @@ abstract class Emulator {
     }
 
     // Calculate column widths
-    final List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map((int i) => 0).toList();
     for (List<String> row in table) {
       widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
-    final RegExp whiteSpaceAndDots = new RegExp(r'[•\s]+$');
+    final RegExp whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
         .map((List<String> row) {
           return indices

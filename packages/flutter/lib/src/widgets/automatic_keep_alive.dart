@@ -36,7 +36,7 @@ class AutomaticKeepAlive extends StatefulWidget {
   final Widget child;
 
   @override
-  _AutomaticKeepAliveState createState() => new _AutomaticKeepAliveState();
+  _AutomaticKeepAliveState createState() => _AutomaticKeepAliveState();
 }
 
 class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
@@ -57,7 +57,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   }
 
   void _updateChild() {
-    _child = new NotificationListener<KeepAliveNotification>(
+    _child = NotificationListener<KeepAliveNotification>(
       onNotification: _addClient,
       child: widget.child,
     );
@@ -143,7 +143,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     return () {
       assert(() {
         if (!mounted) {
-          throw new FlutterError(
+          throw FlutterError(
             'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.'
             'Widgets should always trigger their KeepAliveNotification handle when they are '
             'deactivated, so that they (or their handle) do not send spurious events later '
@@ -228,7 +228,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   @override
   Widget build(BuildContext context) {
     assert(_child != null);
-    return new KeepAlive(
+    return KeepAlive(
       keepAlive: _keepingAlive,
       child: _child,
     );
@@ -238,8 +238,8 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new FlagProperty('_keepingAlive', value: _keepingAlive, ifTrue: 'keeping subtree alive'));
-    description.add(new DiagnosticsProperty<Map<Listenable, VoidCallback>>(
+    description.add(FlagProperty('_keepingAlive', value: _keepingAlive, ifTrue: 'keeping subtree alive'));
+    description.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(
       'handles',
       _handles,
       description: _handles != null ?
@@ -345,8 +345,8 @@ abstract class AutomaticKeepAliveClientMixin<T extends StatefulWidget> extends S
 
   void _ensureKeepAlive() {
     assert(_keepAliveHandle == null);
-    _keepAliveHandle = new KeepAliveHandle();
-    new KeepAliveNotification(_keepAliveHandle).dispatch(context);
+    _keepAliveHandle = KeepAliveHandle();
+    KeepAliveNotification(_keepAliveHandle).dispatch(context);
   }
 
   void _releaseKeepAlive() {

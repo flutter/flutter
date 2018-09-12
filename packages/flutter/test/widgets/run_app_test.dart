@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('runApp inside onPressed does not throw', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new RaisedButton(
+        child: Material(
+          child: RaisedButton(
             onPressed: () {
               runApp(const Center(child: Text('Done', textDirection: TextDirection.ltr,)));
             },

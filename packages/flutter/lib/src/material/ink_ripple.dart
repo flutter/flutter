@@ -53,7 +53,7 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
     double radius,
     VoidCallback onRemoved,
   }) {
-    return new InkRipple(
+    return InkRipple(
       controller: controller,
       referenceBox: referenceBox,
       position: position,
@@ -137,25 +137,25 @@ class InkRipple extends InteractiveInkFeature {
     assert(_borderRadius != null);
 
     // Immediately begin fading-in the initial splash.
-    _fadeInController = new AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    _fadeIn = new IntTween(
+    _fadeIn = IntTween(
       begin: 0,
       end: color.alpha,
     ).animate(_fadeInController);
 
     // Controls the splash radius and its center. Starts upon confirm.
-    _radiusController = new AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
      // Initial splash diameter is 60% of the target diameter, final
      // diameter is 10dps larger than the target diameter.
-    _radius = new Tween<double>(
+    _radius = Tween<double>(
       begin: _targetRadius * 0.30,
       end: _targetRadius + 5.0,
     ).animate(
-      new CurvedAnimation(
+      CurvedAnimation(
         parent: _radiusController,
         curve: Curves.ease,
       )
@@ -163,14 +163,14 @@ class InkRipple extends InteractiveInkFeature {
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController = new AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
+    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _fadeOut = new IntTween(
+    _fadeOut = IntTween(
       begin: color.alpha,
       end: 0,
     ).animate(
-      new CurvedAnimation(
+      CurvedAnimation(
         parent: _fadeOutController,
         curve: const Interval(_kFadeOutIntervalStart, 1.0)
       ),
@@ -234,7 +234,7 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
-    final Paint paint = new Paint()..color = color.withAlpha(alpha);
+    final Paint paint = Paint()..color = color.withAlpha(alpha);
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(
       _position,
@@ -253,7 +253,7 @@ class InkRipple extends InteractiveInkFeature {
       if (_customBorder != null) {
         canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
       } else if (_borderRadius != BorderRadius.zero) {
-        canvas.clipRRect(new RRect.fromRectAndCorners(
+        canvas.clipRRect(RRect.fromRectAndCorners(
           rect,
           topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
           bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,

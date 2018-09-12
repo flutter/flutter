@@ -41,7 +41,7 @@ Future<Null> main(List<String> rawArgs) async {
 
   final bool writeToFile = parseArgs(rawArgs).writeToFile;
 
-  final File dotPackagesFile = new File(path.join('packages', 'flutter_localizations', '.packages'));
+  final File dotPackagesFile = File(path.join('packages', 'flutter_localizations', '.packages'));
   final bool dotPackagesExists = dotPackagesFile.existsSync();
 
   if (!dotPackagesExists) {
@@ -64,12 +64,12 @@ Future<Null> main(List<String> rawArgs) async {
     .split(':')
     .last;
 
-  final Directory dateSymbolsDirectory = new Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'symbols'));
+  final Directory dateSymbolsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'symbols'));
   final Map<String, File> symbolFiles = _listIntlData(dateSymbolsDirectory);
-  final Directory datePatternsDirectory = new Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'patterns'));
+  final Directory datePatternsDirectory = Directory(path.join(pathToIntl, 'src', 'data', 'dates', 'patterns'));
   final Map<String, File> patternFiles = _listIntlData(datePatternsDirectory);
   final List<String> materialLocales = _materialLocales().toList();
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
 
   buffer.writeln(
 '''
@@ -108,7 +108,7 @@ Future<Null> main(List<String> rawArgs) async {
   buffer.writeln('};');
 
   if (writeToFile) {
-    final File dateLocalizationsFile = new File(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'date_localizations.dart'));
+    final File dateLocalizationsFile = File(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'date_localizations.dart'));
     dateLocalizationsFile.writeAsStringSync(buffer.toString());
     Process.runSync(path.join('bin', 'cache', 'dart-sdk', 'bin', 'dartfmt'), <String>[
       '-w',
@@ -138,7 +138,7 @@ String _jsonToMap(dynamic json) {
     return '<dynamic>[${json.map(_jsonToMap).join(',')}]';
 
   if (json is Map<String, dynamic>) {
-    final StringBuffer buffer = new StringBuffer('<String, dynamic>{');
+    final StringBuffer buffer = StringBuffer('<String, dynamic>{');
     json.forEach((String key, dynamic value) {
       buffer.writeln(_jsonToMapEntry(key, value));
     });
@@ -150,8 +150,8 @@ String _jsonToMap(dynamic json) {
 }
 
 Iterable<String> _materialLocales() sync* {
-  final RegExp filenameRE = new RegExp(r'material_(\w+)\.arb$');
-  final Directory materialLocalizationsDirectory = new Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  final RegExp filenameRE = RegExp(r'material_(\w+)\.arb$');
+  final Directory materialLocalizationsDirectory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   for (FileSystemEntity entity in materialLocalizationsDirectory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filenameRE.hasMatch(filePath))
@@ -171,5 +171,5 @@ Map<String, File> _listIntlData(Directory directory) {
 
   final List<String> locales = localeFiles.keys.toList(growable: false);
   locales.sort();
-  return new Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
+  return Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
 }

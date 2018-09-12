@@ -11,7 +11,7 @@ import '../painting/mocks_for_image_cache.dart';
 void main() {
   testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoPageScaffold(
           // Default nav bar is translucent.
           navigationBar: CupertinoNavigationBar(
@@ -78,9 +78,9 @@ void main() {
     const Center page1Center = Center();
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
-          tabBar: new CupertinoTabBar(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
             backgroundColor: CupertinoColors.white,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
@@ -102,7 +102,7 @@ void main() {
                   ),
                   child: page1Center,
                 )
-                : new Stack();
+                : Stack();
           },
         ),
       ),
@@ -112,16 +112,16 @@ void main() {
   });
 
   testWidgets('Contents have automatic sliver padding between translucent bars', (WidgetTester tester) async {
-    final Container content = new Container(height: 600.0, width: 600.0);
+    final Container content = Container(height: 600.0, width: 600.0);
 
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new MediaQuery(
+      CupertinoApp(
+        home: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.symmetric(vertical: 20.0),
           ),
-          child: new CupertinoTabScaffold(
-            tabBar: new CupertinoTabBar(
+          child: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: ImageIcon(TestImageProvider(24, 24)),
@@ -135,17 +135,17 @@ void main() {
             ),
             tabBuilder: (BuildContext context, int index) {
               return index == 0
-                  ? new CupertinoPageScaffold(
+                  ? CupertinoPageScaffold(
                     navigationBar: const CupertinoNavigationBar(
                       middle: Text('Title'),
                     ),
-                    child: new ListView(
+                    child: ListView(
                       children: <Widget>[
                         content,
                       ],
                     ),
                   )
-                  : new Stack();
+                  : Stack();
             }
           ),
         ),
@@ -169,9 +169,9 @@ void main() {
     // A full on iOS information architecture app with 2 tabs, and 2 pages
     // in each with independent navigation states.
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabScaffold(
-          tabBar: new CupertinoTabBar(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: ImageIcon(TestImageProvider(24, 24)),
@@ -186,25 +186,25 @@ void main() {
           tabBuilder: (BuildContext context, int index) {
             // For 1-indexed readability.
             ++index;
-            return new CupertinoTabView(
+            return CupertinoTabView(
               builder: (BuildContext context) {
-                return new CupertinoPageScaffold(
-                  navigationBar: new CupertinoNavigationBar(
-                    middle: new Text('Page 1 of tab $index'),
+                return CupertinoPageScaffold(
+                  navigationBar: CupertinoNavigationBar(
+                    middle: Text('Page 1 of tab $index'),
                   ),
-                  child: new Center(
-                    child: new CupertinoButton(
+                  child: Center(
+                    child: CupertinoButton(
                       child: const Text('Next'),
                       onPressed: () {
                         Navigator.of(context).push(
-                          new CupertinoPageRoute<void>(
+                          CupertinoPageRoute<void>(
                             builder: (BuildContext context) {
-                              return new CupertinoPageScaffold(
-                                navigationBar: new CupertinoNavigationBar(
-                                  middle: new Text('Page 2 of tab $index'),
+                              return CupertinoPageScaffold(
+                                navigationBar: CupertinoNavigationBar(
+                                  middle: Text('Page 2 of tab $index'),
                                 ),
-                                child: new Center(
-                                  child: new CupertinoButton(
+                                child: Center(
+                                  child: CupertinoButton(
                                     child: const Text('Back'),
                                     onPressed: () {
                                       Navigator.of(context).pop();
@@ -276,7 +276,7 @@ void main() {
 
   testWidgets('Decorated with white background by default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoPageScaffold(
           child: Center(),
         ),
@@ -292,7 +292,7 @@ void main() {
 
   testWidgets('Overrides background color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoPageScaffold(
           child: Center(),
           backgroundColor: Color(0xFF010203),

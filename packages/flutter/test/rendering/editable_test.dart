@@ -22,8 +22,8 @@ class FakeEditableTextState extends TextSelectionDelegate {
 
 void main() {
   test('editable intrinsics', () {
-    final TextSelectionDelegate delegate = new FakeEditableTextState();
-    final RenderEditable editable = new RenderEditable(
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
       text: const TextSpan(
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
@@ -31,7 +31,7 @@ void main() {
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
-      offset: new ViewportOffset.zero(),
+      offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
     );
     expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);

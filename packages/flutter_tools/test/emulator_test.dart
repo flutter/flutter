@@ -26,10 +26,10 @@ void main() {
   MockXcode mockXcode;
 
   setUp(() {
-    mockProcessManager = new MockProcessManager();
-    mockConfig = new MockConfig();
-    mockSdk = new MockAndroidSdk();
-    mockXcode = new MockXcode();
+    mockProcessManager = MockProcessManager();
+    mockConfig = MockConfig();
+    mockSdk = MockAndroidSdk();
+    mockXcode = MockXcode();
 
     when(mockSdk.avdManagerPath).thenReturn('avdmanager');
     when(mockSdk.emulatorPath).thenReturn('emulator');
@@ -45,18 +45,18 @@ void main() {
 
     testUsingContext('getEmulatorsById', () async {
       final _MockEmulator emulator1 =
-          new _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
+          _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
       final _MockEmulator emulator2 =
-          new _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
+          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
       final _MockEmulator emulator3 =
-          new _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
+          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
       final List<Emulator> emulators = <Emulator>[
         emulator1,
         emulator2,
         emulator3
       ];
       final TestEmulatorManager testEmulatorManager =
-          new TestEmulatorManager(emulators);
+          TestEmulatorManager(emulators);
 
       Future<Null> expectEmulator(String id, List<Emulator> expected) async {
         expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
@@ -136,11 +136,11 @@ void main() {
         if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
           didAttemptToRunSimulator = true;
         }
-        return new ProcessResult(101, 0, '', '');
+        return ProcessResult(101, 0, '', '');
       });
     });
     testUsingContext('runs correct launch commands', () async {
-      final Emulator emulator = new IOSEmulator('ios');
+      final Emulator emulator = IOSEmulator('ios');
       await emulator.launch();
       expect(didAttemptToRunSimulator, equals(true));
     }, overrides: <Type, Generator>{
@@ -158,7 +158,7 @@ class TestEmulatorManager extends EmulatorManager {
 
   @override
   Future<List<Emulator>> getAllAvailableEmulators() {
-    return new Future<List<Emulator>>.value(allEmulators);
+    return Future<List<Emulator>>.value(allEmulators);
   }
 }
 
@@ -177,7 +177,7 @@ class _MockEmulator extends Emulator {
 
   @override
   Future<void> launch() {
-    throw new UnimplementedError('Not implemented in Mock');
+    throw UnimplementedError('Not implemented in Mock');
   }
 }
 
@@ -210,29 +210,29 @@ class MockProcessManager extends Mock implements ProcessManager {
     final List<String> args = command.sublist(1);
     switch (command[0]) {
       case '/usr/bin/xcode-select':
-        throw new ProcessException(program, args);
+        throw ProcessException(program, args);
         break;
       case 'emulator':
         return _handleEmulator(args);
       case 'avdmanager':
         return _handleAvdManager(args);
     }
-    throw new StateError('Unexpected process call: $command');
+    throw StateError('Unexpected process call: $command');
   }
 
   ProcessResult _handleEmulator(List<String> args) {
     if (_equality.equals(args, <String>['-list-avds'])) {
-      return new ProcessResult(101, 0, '${_existingAvds.join('\n')}\n', '');
+      return ProcessResult(101, 0, '${_existingAvds.join('\n')}\n', '');
     }
-    throw new ProcessException('emulator', args);
+    throw ProcessException('emulator', args);
   }
 
   ProcessResult _handleAvdManager(List<String> args) {
     if (_equality.equals(args, <String>['list', 'device', '-c'])) {
-      return new ProcessResult(101, 0, 'test\ntest2\npixel\npixel-xl\n', '');
+      return ProcessResult(101, 0, 'test\ntest2\npixel\npixel-xl\n', '');
     }
     if (_equality.equals(args, <String>['create', 'avd', '-n', 'temp'])) {
-      return new ProcessResult(101, 1, '', mockCreateFailureOutput);
+      return ProcessResult(101, 1, '', mockCreateFailureOutput);
     }
     if (args.length == 8 &&
         _equality.equals(args,
@@ -244,7 +244,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       final String name = args[3];
       // Error if this AVD already existed
       if (_existingAvds.contains(name)) {
-        return new ProcessResult(
+        return ProcessResult(
             101,
             1,
             '',
@@ -252,10 +252,10 @@ class MockProcessManager extends Mock implements ProcessManager {
             'Use --force if you want to replace it.');
       } else {
         _existingAvds.add(name);
-        return new ProcessResult(101, 0, '', '');
+        return ProcessResult(101, 0, '', '');
       }
     }
-    throw new ProcessException('emulator', args);
+    throw ProcessException('emulator', args);
   }
 }
 

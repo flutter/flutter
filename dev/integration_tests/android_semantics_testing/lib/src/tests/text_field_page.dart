@@ -11,28 +11,28 @@ export 'text_field_constants.dart';
 /// A page with a normal text field and a password field.
 class TextFieldPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _TextFieldPageState();
+  State<StatefulWidget> createState() => _TextFieldPageState();
 }
 
 class _TextFieldPageState extends State<TextFieldPage> {
-  final TextEditingController _normalController = new TextEditingController();
-  final TextEditingController _passwordController = new TextEditingController();
+  final TextEditingController _normalController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final Key normalTextFieldKey = const ValueKey<String>(normalTextFieldKeyValue);
   final Key passwordTextFieldKey = const ValueKey<String>(passwordTextFieldKeyValue);
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
-      body: new Material(
-        child: new Column(children: <Widget>[
-          new TextField(
+    return Scaffold(
+      appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
+      body: Material(
+        child: Column(children: <Widget>[
+          TextField(
             key: normalTextFieldKey,
             controller: _normalController,
             autofocus: false,
           ),
           const Spacer(),
-          new TextField(
+          TextField(
             key: passwordTextFieldKey,
             controller: _passwordController,
             obscureText: true,

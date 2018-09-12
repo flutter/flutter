@@ -16,7 +16,7 @@ class RenderTestBox extends RenderBox {
 
 void main() {
   test('Intrinsics cache', () {
-    final RenderBox test = new RenderTestBox();
+    final RenderBox test = RenderTestBox();
 
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));

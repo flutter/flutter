@@ -43,7 +43,7 @@ class RenderErrorBox extends RenderBox {
         // Generally, the much better way to draw text in a RenderObject is to
         // use the TextPainter class. If you're looking for code to crib from,
         // see the paragraph.dart file and the RenderParagraph class.
-        final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
+        final ui.ParagraphBuilder builder = ui.ParagraphBuilder(paragraphStyle);
         builder.pushStyle(textStyle);
         builder.addText(
           '$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine'
@@ -84,7 +84,7 @@ class RenderErrorBox extends RenderBox {
   static Color backgroundColor = const Color(0xF0900000);
 
   /// The text style to use when painting [RenderErrorBox] objects.
-  static ui.TextStyle textStyle = new ui.TextStyle(
+  static ui.TextStyle textStyle = ui.TextStyle(
     color: const Color(0xFFFFFF66),
     fontFamily: 'monospace',
     fontSize: 14.0,
@@ -92,14 +92,14 @@ class RenderErrorBox extends RenderBox {
   );
 
   /// The paragraph style to use when painting [RenderErrorBox] objects.
-  static ui.ParagraphStyle paragraphStyle = new ui.ParagraphStyle(
+  static ui.ParagraphStyle paragraphStyle = ui.ParagraphStyle(
     lineHeight: 1.0,
   );
 
   @override
   void paint(PaintingContext context, Offset offset) {
     try {
-      context.canvas.drawRect(offset & size, new Paint() .. color = backgroundColor);
+      context.canvas.drawRect(offset & size, Paint() .. color = backgroundColor);
       double width;
       if (_paragraph != null) {
         // See the comment in the RenderErrorBox constructor. This is not the
@@ -110,7 +110,7 @@ class RenderErrorBox extends RenderBox {
         } else {
           width = size.width;
         }
-        _paragraph.layout(new ui.ParagraphConstraints(width: width));
+        _paragraph.layout(ui.ParagraphConstraints(width: width));
 
         context.canvas.drawParagraph(_paragraph, offset);
       }

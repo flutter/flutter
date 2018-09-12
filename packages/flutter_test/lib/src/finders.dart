@@ -34,7 +34,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder text(String text, { bool skipOffstage = true }) => new _TextFinder(text, skipOffstage: skipOffstage);
+  Finder text(String text, { bool skipOffstage = true }) => _TextFinder(text, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
@@ -70,7 +70,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byKey(Key key, { bool skipOffstage = true }) => new _KeyFinder(key, skipOffstage: skipOffstage);
+  Finder byKey(Key key, { bool skipOffstage = true }) => _KeyFinder(key, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for widgets with a particular type.
   ///
@@ -88,7 +88,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byType(Type type, { bool skipOffstage = true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
+  Finder byType(Type type, { bool skipOffstage = true }) => _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds [Icon] widgets containing icon data equal to the `icon`
   /// argument.
@@ -101,7 +101,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byIcon(IconData icon, { bool skipOffstage = true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
+  Finder byIcon(IconData icon, { bool skipOffstage = true }) => _WidgetIconFinder(icon, skipOffstage: skipOffstage);
 
   /// Looks for widgets that contain an [Icon] descendant displaying [IconData]
   /// `icon` in it.
@@ -143,7 +143,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byElementType(Type type, { bool skipOffstage = true }) => new _ElementTypeFinder(type, skipOffstage: skipOffstage);
+  Finder byElementType(Type type, { bool skipOffstage = true }) => _ElementTypeFinder(type, skipOffstage: skipOffstage);
 
   /// Finds widgets whose current widget is the instance given by the
   /// argument.
@@ -162,7 +162,7 @@ class CommonFinders {
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byWidget(Widget widget, { bool skipOffstage = true }) => new _WidgetFinder(widget, skipOffstage: skipOffstage);
+  Finder byWidget(Widget widget, { bool skipOffstage = true }) => _WidgetFinder(widget, skipOffstage: skipOffstage);
 
   /// Finds widgets using a widget [predicate].
   ///
@@ -183,7 +183,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byWidgetPredicate(WidgetPredicate predicate, { String description, bool skipOffstage = true }) {
-    return new _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
+    return _WidgetPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds Tooltip widgets with the given message.
@@ -225,7 +225,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byElementPredicate(ElementPredicate predicate, { String description, bool skipOffstage = true }) {
-    return new _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
+    return _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets that are descendants of the [of] parameter and that match
@@ -245,7 +245,7 @@ class CommonFinders {
   /// If the [skipOffstage] argument is true (the default), then nodes that are
   /// [Offstage] or that are from inactive [Route]s are skipped.
   Finder descendant({ Finder of, Finder matching, bool matchRoot = false, bool skipOffstage = true }) {
-    return new _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
+    return _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 
   /// Finds widgets that are ancestors of the [of] parameter and that match
@@ -270,7 +270,7 @@ class CommonFinders {
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
   Finder ancestor({ Finder of, Finder matching, bool matchRoot = false}) {
-    return new _AncestorFinder(of, matching, matchRoot: matchRoot);
+    return _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
 }
 
@@ -343,22 +343,22 @@ abstract class Finder {
 
   /// Returns a variant of this finder that only matches the first element
   /// matched by this finder.
-  Finder get first => new _FirstFinder(this);
+  Finder get first => _FirstFinder(this);
 
   /// Returns a variant of this finder that only matches the last element
   /// matched by this finder.
-  Finder get last => new _LastFinder(this);
+  Finder get last => _LastFinder(this);
 
   /// Returns a variant of this finder that only matches the element at the
   /// given index matched by this finder.
-  Finder at(int index) => new _IndexFinder(this, index);
+  Finder at(int index) => _IndexFinder(this, index);
 
   /// Returns a variant of this finder that only matches elements reachable by
   /// a hit test.
   ///
   /// The [at] parameter specifies the location relative to the size of the
   /// target element where the hit test is performed.
-  Finder hitTestable({ Alignment at = Alignment.center }) => new _HitTestableFinder(this, at);
+  Finder hitTestable({ Alignment at = Alignment.center }) => _HitTestableFinder(this, at);
 
   @override
   String toString() {
@@ -450,7 +450,7 @@ class _HitTestableFinder extends ChainedFinder {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
-      final HitTestResult hitResult = new HitTestResult();
+      final HitTestResult hitResult = HitTestResult();
       WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {

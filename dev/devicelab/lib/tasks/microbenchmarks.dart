@@ -54,7 +54,7 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
-    return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
+    return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
 }
 
@@ -74,8 +74,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   const String jsonEnd = '================ FORMATTED ==============';
   const String jsonPrefix = ':::JSON:::';
   bool jsonStarted = false;
-  final StringBuffer jsonBuf = new StringBuffer();
-  final Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
+  final StringBuffer jsonBuf = StringBuffer();
+  final Completer<Map<String, double>> completer = Completer<Map<String, double>>();
 
   final StreamSubscription<String> stderrSub = process.stderr
       .transform(const Utf8Decoder())
@@ -126,7 +126,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       // Also send a kill signal in case the `q` above didn't work.
       process.kill(ProcessSignal.sigint); // ignore: deprecated_member_use
       try {
-        completer.complete(new Map<String, double>.from(json.decode(jsonOutput)));
+        completer.complete(Map<String, double>.from(json.decode(jsonOutput)));
       } catch (ex) {
         completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
       }

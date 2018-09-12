@@ -60,10 +60,10 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(<String>['idevice_id', '-l']);
       if (result.exitCode != 0)
-        throw new ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout;
     } on ProcessException {
-      throw new ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
   }
 
@@ -71,10 +71,10 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
       if (result.exitCode != 0)
-        throw new ToolExit('idevice_id returned an error:\n${result.stderr}');
+        throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout.trim();
     } on ProcessException {
-      throw new ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
+      throw ToolExit('Failed to invoke idevice_id. Run flutter doctor.');
     }
   }
 
@@ -190,17 +190,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool usesTerminalUi = true,
 }) async {
   if (!await upgradePbxProjWithFlutterAssets(app.project))
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
 
   if (!_checkXcodeVersion())
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
 
   final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.directory.path);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
   }
   final String scheme = projectInfo.schemeFor(buildInfo);
   if (scheme == null) {
@@ -212,7 +212,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       printError('The Xcode project does not define custom schemes.');
       printError('You cannot use the --flavor option.');
     }
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
   }
   final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
@@ -221,7 +221,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
-    return new XcodeBuildResult(success: false);
+    return XcodeBuildResult(success: false);
   }
 
   Map<String, String> autoSigningConfigs;
@@ -242,7 +242,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (hasPlugins(project)) {
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
-    final Fingerprinter fingerprinter = new Fingerprinter(
+    final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
       paths: <String>[
         app.project.xcodeProjectInfoFile.path,
@@ -346,7 +346,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
-  final Stopwatch buildStopwatch = new Stopwatch()..start();
+  final Stopwatch buildStopwatch = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
@@ -366,7 +366,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    (new List<String>
+    (List<String>
         .from(buildCommands)
         ..add('-showBuildSettings'))
         // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
@@ -391,11 +391,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       printStatus('Xcode\'s output:\n↳');
       printStatus(buildResult.stdout, indent: 4);
     }
-    return new XcodeBuildResult(
+    return XcodeBuildResult(
       success: false,
       stdout: buildResult.stdout,
       stderr: buildResult.stderr,
-      xcodeBuildExecution: new XcodeBuildExecution(
+      xcodeBuildExecution: XcodeBuildExecution(
         buildCommands: buildCommands,
         appDirectory: app.project.directory.path,
         buildForPhysicalDevice: buildForDevice,
@@ -422,7 +422,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     } else {
       printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
-    return new XcodeBuildResult(success: true, output: outputDir);
+    return XcodeBuildResult(success: true, output: outputDir);
   }
 }
 
@@ -632,7 +632,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
     lines.remove(l12);
   }
 
-  final StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = StringBuffer();
   lines.forEach(buffer.writeln);
   await xcodeProjectFile.writeAsString(buffer.toString());
   return true;

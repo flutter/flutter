@@ -24,7 +24,7 @@ abstract class StatusTransitionWidget extends StatefulWidget {
   Widget build(BuildContext context);
 
   @override
-  _StatusTransitionState createState() => new _StatusTransitionState();
+  _StatusTransitionState createState() => _StatusTransitionState();
 }
 
 class _StatusTransitionState extends State<StatusTransitionWidget> {

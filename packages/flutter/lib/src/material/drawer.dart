@@ -125,14 +125,14 @@ class Drawer extends StatelessWidget {
       case TargetPlatform.fuchsia:
         label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
     }
-    return new Semantics(
+    return Semantics(
       scopesRoute: true,
       namesRoute: true,
       explicitChildNodes: true,
       label: label,
-      child: new ConstrainedBox(
+      child: ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
-        child: new Material(
+        child: Material(
           elevation: elevation,
           child: child,
         ),
@@ -189,7 +189,7 @@ class DrawerController extends StatefulWidget {
   final DrawerCallback drawerCallback;
 
   @override
-  DrawerControllerState createState() => new DrawerControllerState();
+  DrawerControllerState createState() => DrawerControllerState();
 }
 
 /// State for a [DrawerController].
@@ -199,7 +199,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _kBaseSettleDuration, vsync: this)
+    _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
   }
@@ -218,13 +218,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   LocalHistoryEntry _historyEntry;
-  final FocusScopeNode _focusScopeNode = new FocusScopeNode();
+  final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route != null) {
-        _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
+        _historyEntry = LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);
         FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }
@@ -269,7 +269,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
-  final GlobalKey _drawerKey = new GlobalKey();
+  final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
     final RenderBox box = _drawerKey.currentContext?.findRenderObject();
@@ -347,8 +347,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       widget.drawerCallback(false);
   }
 
-  final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
-  final GlobalKey _gestureDetectorKey = new GlobalKey();
+  final ColorTween _color = ColorTween(begin: Colors.transparent, end: Colors.black54);
+  final GlobalKey _gestureDetectorKey = GlobalKey();
 
   AlignmentDirectional get _drawerOuterAlignment {
     assert(widget.alignment != null);
@@ -374,48 +374,48 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
-      return new Align(
+      return Align(
         alignment: _drawerOuterAlignment,
-        child: new GestureDetector(
+        child: GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
           onHorizontalDragEnd: _settle,
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
-          child: new Container(width: _kEdgeDragWidth)
+          child: Container(width: _kEdgeDragWidth)
         ),
       );
     } else {
-      return new GestureDetector(
+      return GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragDown: _handleDragDown,
         onHorizontalDragUpdate: _move,
         onHorizontalDragEnd: _settle,
         onHorizontalDragCancel: _handleDragCancel,
         excludeFromSemantics: true,
-        child: new RepaintBoundary(
-          child: new Stack(
+        child: RepaintBoundary(
+          child: Stack(
             children: <Widget>[
-              new BlockSemantics(
-                child: new GestureDetector(
+              BlockSemantics(
+                child: GestureDetector(
                   // On Android, the back button is used to dismiss a modal.
                   excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
                   onTap: close,
-                  child: new Semantics(
+                  child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: new Container(
+                    child: Container(
                       color: _color.evaluate(_controller),
                     ),
                   ),
                 ),
               ),
-              new Align(
+              Align(
                 alignment: _drawerOuterAlignment,
-                child: new Align(
+                child: Align(
                   alignment: _drawerInnerAlignment,
                   widthFactor: _controller.value,
-                  child: new RepaintBoundary(
-                    child: new FocusScope(
+                  child: RepaintBoundary(
+                    child: FocusScope(
                       key: _drawerKey,
                       node: _focusScopeNode,
                       child: widget.child
@@ -431,7 +431,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
   @override
   Widget build(BuildContext context) {
-    return new ListTileTheme(
+    return ListTileTheme(
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),
     );

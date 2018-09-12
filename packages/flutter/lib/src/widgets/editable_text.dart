@@ -62,7 +62,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// This constructor treats a null [text] argument as if it were the empty
   /// string.
   TextEditingController({ String text })
-    : super(text == null ? TextEditingValue.empty : new TextEditingValue(text: text));
+    : super(text == null ? TextEditingValue.empty : TextEditingValue(text: text));
 
   /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
@@ -94,7 +94,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   set selection(TextSelection newSelection) {
     if (newSelection.start > text.length || newSelection.end > text.length)
-      throw new FlutterError('invalid text selection: $newSelection');
+      throw FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -406,37 +406,37 @@ class EditableText extends StatefulWidget {
   static bool debugDeterministicCursor = false;
 
   @override
-  EditableTextState createState() => new EditableTextState();
+  EditableTextState createState() => EditableTextState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
-    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
-    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
     style?.debugFillProperties(properties);
-    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
 }
 
 /// State for a [EditableText].
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin, WidgetsBindingObserver implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
-  final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
-  final GlobalKey _editableKey = new GlobalKey();
+  final ValueNotifier<bool> _showCursor = ValueNotifier<bool>(false);
+  final GlobalKey _editableKey = GlobalKey();
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  final ScrollController _scrollController = new ScrollController();
-  final LayerLink _layerLink = new LayerLink();
+  final ScrollController _scrollController = ScrollController();
+  final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
 
   @override
@@ -593,7 +593,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(this,
-          new TextInputConfiguration(
+          TextInputConfiguration(
               inputType: widget.keyboardType,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
@@ -665,7 +665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _hideSelectionOverlayIfNeeded();
 
     if (widget.selectionControls != null) {
-      _selectionOverlay = new TextSelectionOverlay(
+      _selectionOverlay = TextSelectionOverlay(
         context: context,
         value: _value,
         debugRequiredFor: widget,
@@ -786,7 +786,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _startCursorTimer() {
     _showCursor.value = true;
-    _cursorTimer = new Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
+    _cursorTimer = Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
   void _stopCursorTimer() {
@@ -824,12 +824,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _showCaretOnScreen();
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        widget.controller.selection = new TextSelection.collapsed(offset: _value.text.length);
+        widget.controller.selection = TextSelection.collapsed(offset: _value.text.length);
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
-      _value = new TextEditingValue(text: _value.text);
+      _value = TextEditingValue(text: _value.text);
     }
     updateKeepAlive();
   }
@@ -871,19 +871,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
     final TextSelectionControls controls = widget.selectionControls;
 
-    return new Scrollable(
+    return Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return new CompositedTransformTarget(
+        return CompositedTransformTarget(
           link: _layerLink,
-          child: new Semantics(
+          child: Semantics(
             onCopy: _hasFocus && controls?.canCopy(this) == true ? () => controls.handleCopy(this) : null,
             onCut: _hasFocus && controls?.canCut(this) == true ? () => controls.handleCut(this) : null,
             onPaste: _hasFocus && controls?.canPaste(this) == true ? () => controls.handlePaste(this) : null,
-            child: new _Editable(
+            child: _Editable(
               key: _editableKey,
               textSpan: buildTextSpan(),
               value: _value,
@@ -922,15 +922,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         const TextStyle(decoration: TextDecoration.underline),
       );
 
-      return new TextSpan(
+      return TextSpan(
         style: widget.style,
         children: <TextSpan>[
-          new TextSpan(text: _value.composing.textBefore(_value.text)),
-          new TextSpan(
+          TextSpan(text: _value.composing.textBefore(_value.text)),
+          TextSpan(
             style: composingStyle,
             text: _value.composing.textInside(_value.text),
           ),
-          new TextSpan(text: _value.composing.textAfter(_value.text)),
+          TextSpan(text: _value.composing.textAfter(_value.text)),
       ]);
     }
 
@@ -942,7 +942,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (o != null && o >= 0 && o < text.length)
         text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
     }
-    return new TextSpan(style: widget.style, text: text);
+    return TextSpan(style: widget.style, text: text);
   }
 }
 
@@ -996,7 +996,7 @@ class _Editable extends LeafRenderObjectWidget {
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
-    return new RenderEditable(
+    return RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
