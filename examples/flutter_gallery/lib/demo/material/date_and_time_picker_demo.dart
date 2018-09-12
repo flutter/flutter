@@ -181,15 +181,16 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                   });
                 },
               ),
+              const SizedBox(height: 8.0),
               InputDecorator(
                 decoration: const InputDecoration(
                   labelText: 'Activity',
                   hintText: 'Choose an activity',
+                  contentPadding: EdgeInsets.zero,
                 ),
                 isEmpty: _activity == null,
                 child: DropdownButton<String>(
                   value: _activity,
-                  isDense: true,
                   onChanged: (String newValue) {
                     setState(() {
                       _activity = newValue;
