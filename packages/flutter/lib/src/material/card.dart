@@ -127,12 +127,12 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Semantics(
+    return Semantics(
       container: semanticContainer,
       explicitChildNodes: !semanticContainer,
-      child: new Container(
+      child: Container(
         margin: margin ?? const EdgeInsets.all(4.0),
-        child: new Material(
+        child: Material(
           type: MaterialType.card,
           color: color ?? Theme.of(context).cardColor,
           elevation: elevation ?? 1.0,

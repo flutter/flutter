@@ -16,7 +16,7 @@ void exitWithError(String errorMessage) {
 }
 
 void checkCwdIsRepoRoot(String commandName) {
-  final bool isRepoRoot = new Directory('.git').existsSync();
+  final bool isRepoRoot = Directory('.git').existsSync();
 
   if (!isRepoRoot) {
     exitWithError(
@@ -34,7 +34,7 @@ String camelCase(String locale) {
 }
 
 GeneratorOptions parseArgs(List<String> rawArgs) {
-  final argslib.ArgParser argParser = new argslib.ArgParser()
+  final argslib.ArgParser argParser = argslib.ArgParser()
     ..addFlag(
       'overwrite',
       abbr: 'w',
@@ -43,7 +43,7 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
   final argslib.ArgResults args = argParser.parse(rawArgs);
   final bool writeToFile = args['overwrite'];
 
-  return new GeneratorOptions(writeToFile: writeToFile);
+  return GeneratorOptions(writeToFile: writeToFile);
 }
 
 class GeneratorOptions {
@@ -88,7 +88,7 @@ const String kParentheticalPrefix = ' (';
 ///
 /// The data is obtained from the official IANA registry.
 Future<void> precacheLanguageAndRegionTags() async {
-  final HttpClient client = new HttpClient();
+  final HttpClient client = HttpClient();
   final HttpClientRequest request = await client.getUrl(Uri.parse(registry));
   final HttpClientResponse response = await request.close();
   final String body = (await response.transform(utf8.decoder).toList()).join('');

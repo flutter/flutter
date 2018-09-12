@@ -24,7 +24,7 @@ void main() {
     FileSystem testFileSystem;
 
     setUp(() async {
-      testFileSystem = new MemoryFileSystem(
+      testFileSystem = MemoryFileSystem(
         style: platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,

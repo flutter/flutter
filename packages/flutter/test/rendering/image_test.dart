@@ -20,7 +20,7 @@ class SquareImage implements ui.Image {
 
   @override
   Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+    throw UnsupportedError('Cannot encode test image');
   }
 
   @override
@@ -39,7 +39,7 @@ class WideImage implements ui.Image {
 
   @override
   Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+    throw UnsupportedError('Cannot encode test image');
   }
 
   @override
@@ -58,7 +58,7 @@ class TallImage implements ui.Image {
 
   @override
   Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+    throw UnsupportedError('Cannot encode test image');
   }
 
   @override
@@ -72,7 +72,7 @@ void main() {
   test('Image sizing', () {
     RenderImage image;
 
-    image = new RenderImage(image: new SquareImage());
+    image = RenderImage(image: SquareImage());
     layout(image,
           constraints: const BoxConstraints(
               minWidth: 25.0,
@@ -96,7 +96,7 @@ void main() {
       ),
     );
 
-    image = new RenderImage(image: new WideImage());
+    image = RenderImage(image: WideImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -106,7 +106,7 @@ void main() {
     expect(image.size.width, equals(60.0));
     expect(image.size.height, equals(30.0));
 
-    image = new RenderImage(image: new TallImage());
+    image = RenderImage(image: TallImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 50.0,
@@ -116,7 +116,7 @@ void main() {
     expect(image.size.width, equals(50.0));
     expect(image.size.height, equals(75.0));
 
-    image = new RenderImage(image: new WideImage());
+    image = RenderImage(image: WideImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -126,7 +126,7 @@ void main() {
     expect(image.size.width, equals(20.0));
     expect(image.size.height, equals(10.0));
 
-    image = new RenderImage(image: new WideImage());
+    image = RenderImage(image: WideImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -136,7 +136,7 @@ void main() {
     expect(image.size.width, equals(16.0));
     expect(image.size.height, equals(8.0));
 
-    image = new RenderImage(image: new TallImage());
+    image = RenderImage(image: TallImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 5.0,
@@ -146,7 +146,7 @@ void main() {
     expect(image.size.width, equals(8.0));
     expect(image.size.height, equals(16.0));
 
-    image = new RenderImage(image: new SquareImage());
+    image = RenderImage(image: SquareImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 4.0,
@@ -156,7 +156,7 @@ void main() {
     expect(image.size.width, equals(8.0));
     expect(image.size.height, equals(8.0));
 
-    image = new RenderImage(image: new WideImage());
+    image = RenderImage(image: WideImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 20.0,
@@ -166,7 +166,7 @@ void main() {
     expect(image.size.width, equals(30.0));
     expect(image.size.height, equals(20.0));
 
-    image = new RenderImage(image: new TallImage());
+    image = RenderImage(image: TallImage());
     layout(image,
            constraints: const BoxConstraints(
               minWidth: 20.0,
@@ -180,7 +180,7 @@ void main() {
   test('Null image sizing', () {
     RenderImage image;
 
-    image = new RenderImage();
+    image = RenderImage();
     layout(image,
            constraints: const BoxConstraints(
              minWidth: 25.0,
@@ -190,7 +190,7 @@ void main() {
     expect(image.size.width, equals(25.0));
     expect(image.size.height, equals(25.0));
 
-    image = new RenderImage(width: 50.0);
+    image = RenderImage(width: 50.0);
     layout(image,
            constraints: const BoxConstraints(
              minWidth: 25.0,
@@ -200,7 +200,7 @@ void main() {
     expect(image.size.width, equals(50.0));
     expect(image.size.height, equals(25.0));
 
-    image = new RenderImage(height: 50.0);
+    image = RenderImage(height: 50.0);
     layout(image,
            constraints: const BoxConstraints(
              minWidth: 25.0,
@@ -210,7 +210,7 @@ void main() {
     expect(image.size.width, equals(25.0));
     expect(image.size.height, equals(50.0));
 
-    image = new RenderImage(width: 100.0, height: 100.0);
+    image = RenderImage(width: 100.0, height: 100.0);
     layout(image,
            constraints: const BoxConstraints(
              minWidth: 25.0,
@@ -222,7 +222,7 @@ void main() {
   });
 
   test('update image colorBlendMode', () {
-    final RenderImage image = new RenderImage();
+    final RenderImage image = RenderImage();
     expect(image.colorBlendMode, isNull);
     image.colorBlendMode = BlendMode.color;
     expect(image.colorBlendMode, BlendMode.color);

@@ -88,7 +88,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
-  Future<bool> didPopRoute() => new Future<bool>.value(false);
+  Future<bool> didPopRoute() => Future<bool>.value(false);
 
   /// Called when the host tells the app to push a new route onto the
   /// navigator.
@@ -99,7 +99,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
-  Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
+  Future<bool> didPushRoute(String route) => Future<bool>.value(false);
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
@@ -273,10 +273,10 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
 
     registerBoolServiceExtension(
       name: 'showPerformanceOverlay',
-      getter: () => new Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
+      getter: () => Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
       setter: (bool value) {
         if (WidgetsApp.showPerformanceOverlayOverride == value)
-          return new Future<Null>.value();
+          return Future<Null>.value();
         WidgetsApp.showPerformanceOverlayOverride = value;
         return _forceRebuild();
       }
@@ -284,10 +284,10 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
 
     registerBoolServiceExtension(
       name: 'debugAllowBanner',
-      getter: () => new Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
+      getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
       setter: (bool value) {
         if (WidgetsApp.debugAllowBannerOverride == value)
-          return new Future<Null>.value();
+          return Future<Null>.value();
         WidgetsApp.debugAllowBannerOverride = value;
         return _forceRebuild();
       }
@@ -301,7 +301,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
           getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
           setter: (bool value) {
             if (WidgetsApp.debugShowWidgetInspectorOverride == value)
-              return new Future<Null>.value();
+              return Future<Null>.value();
             WidgetsApp.debugShowWidgetInspectorOverride = value;
             return _forceRebuild();
           }
@@ -317,13 +317,13 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       buildOwner.reassemble(renderViewElement);
       return endOfFrame;
     }
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   /// The [BuildOwner] in charge of executing the build pipeline for the
   /// widget tree rooted at this binding.
   BuildOwner get buildOwner => _buildOwner;
-  final BuildOwner _buildOwner = new BuildOwner();
+  final BuildOwner _buildOwner = BuildOwner();
 
   /// The object in charge of the focus tree.
   ///
@@ -438,7 +438,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   /// [SystemChannels.navigation].
   @protected
   Future<Null> handlePopRoute() async {
-    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
+    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -458,7 +458,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @protected
   @mustCallSuper
   Future<Null> handlePushRoute(String route) async {
-    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
+    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
@@ -471,7 +471,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       case 'pushRoute':
         return handlePushRoute(methodCall.arguments);
     }
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   @override
@@ -548,7 +548,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     // should not trigger a new frame.
     assert(() {
       if (debugBuildingDirtyElements) {
-        throw new FlutterError(
+        throw FlutterError(
           'Build scheduled during frame.\n'
           'While the widget tree was being built, laid out, and painted, '
           'a new frame was scheduled to rebuild the widget tree. '
@@ -685,7 +685,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   ///
   /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
   void attachRootWidget(Widget rootWidget) {
-    _renderViewElement = new RenderObjectToWidgetAdapter<RenderBox>(
+    _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget
@@ -761,7 +761,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     this.child,
     this.container,
     this.debugShortDescription
-  }) : super(key: new GlobalObjectKey(container));
+  }) : super(key: GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
   ///
@@ -775,7 +775,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   final String debugShortDescription;
 
   @override
-  RenderObjectToWidgetElement<T> createElement() => new RenderObjectToWidgetElement<T>(this);
+  RenderObjectToWidgetElement<T> createElement() => RenderObjectToWidgetElement<T>(this);
 
   @override
   RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
@@ -884,7 +884,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       _child = updateChild(_child, widget.child, _rootChildSlot);
       assert(_child != null);
     } catch (exception, stack) {
-      final FlutterErrorDetails details = new FlutterErrorDetails(
+      final FlutterErrorDetails details = FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',
@@ -935,7 +935,7 @@ class WidgetsFlutterBinding extends BindingBase with GestureBinding, ServicesBin
   /// [WidgetsFlutterBinding].
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null)
-      new WidgetsFlutterBinding();
+      WidgetsFlutterBinding();
     return WidgetsBinding.instance;
   }
 }

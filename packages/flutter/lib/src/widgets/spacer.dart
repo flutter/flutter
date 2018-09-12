@@ -57,7 +57,7 @@ class Spacer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Expanded(
+    return Expanded(
       flex: flex,
       child: const SizedBox(
         height: 0.0,

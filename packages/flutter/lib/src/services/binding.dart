@@ -55,17 +55,17 @@ abstract class ServicesBinding extends BindingBase {
     // See: https://github.com/dart-lang/sdk/issues/31959
     //      https://github.com/dart-lang/sdk/issues/31960
     // TODO(ianh): Remove this complexity once these bugs are fixed.
-    final Completer<String> rawLicenses = new Completer<String>();
+    final Completer<String> rawLicenses = Completer<String>();
     Timer.run(() async {
       rawLicenses.complete(rootBundle.loadString('LICENSE', cache: false));
     });
     await rawLicenses.future;
-    final Completer<List<LicenseEntry>> parsedLicenses = new Completer<List<LicenseEntry>>();
+    final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
     Timer.run(() async {
       parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
     });
     await parsedLicenses.future;
-    yield* new Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
+    yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
   }
 
   // This is run in another isolate created by _addLicenses above.
@@ -76,12 +76,12 @@ abstract class ServicesBinding extends BindingBase {
     for (String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
-        result.add(new LicenseEntryWithLineBreaks(
+        result.add(LicenseEntryWithLineBreaks(
           license.substring(0, split).split('\n'),
           license.substring(split + 2)
         ));
       } else {
-        result.add(new LicenseEntryWithLineBreaks(const <String>[], license));
+        result.add(LicenseEntryWithLineBreaks(const <String>[], license));
       }
     }
     return result;

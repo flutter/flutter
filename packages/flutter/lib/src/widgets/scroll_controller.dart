@@ -147,7 +147,7 @@ class ScrollController extends ChangeNotifier {
     @required Curve curve,
   }) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    final List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
+    final List<Future<Null>> animations = List<Future<Null>>(_positions.length);
     for (int i = 0; i < _positions.length; i += 1)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
     return Future.wait<Null>(animations).then((List<Null> _) => null);
@@ -167,7 +167,7 @@ class ScrollController extends ChangeNotifier {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (ScrollPosition position in new List<ScrollPosition>.from(_positions))
+    for (ScrollPosition position in List<ScrollPosition>.from(_positions))
       position.jumpTo(value);
   }
 
@@ -229,7 +229,7 @@ class ScrollController extends ChangeNotifier {
     ScrollContext context,
     ScrollPosition oldPosition,
   ) {
-    return new ScrollPositionWithSingleContext(
+    return ScrollPositionWithSingleContext(
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,

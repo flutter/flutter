@@ -11,20 +11,20 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('has only root node if surface size is 0x0', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(new Semantics(
+    await tester.pumpWidget(Semantics(
       selected: true,
     ));
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
+      TestSemantics(
         id: 0,
-        rect: new Rect.fromLTRB(0.0, 0.0, 2400.0, 1800.0),
+        rect: Rect.fromLTRB(0.0, 0.0, 2400.0, 1800.0),
         children: <TestSemantics>[
-          new TestSemantics(
+          TestSemantics(
             id: 1,
-            rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             flags: <SemanticsFlag>[SemanticsFlag.isSelected],
           ),
         ],
@@ -35,9 +35,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
+      TestSemantics(
         id: 0,
-        rect: new Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        rect: Rect.fromLTRB(0.0, 0.0, 0.0, 0.0),
       ), ignoreTransform: true,
     ));
 

@@ -155,7 +155,7 @@ class ImageStream extends Diagnosticable {
     if (_completer != null)
       return _completer.addListener(listener, onError: onError);
     _listeners ??= <_ImageListenerPair>[];
-    _listeners.add(new _ImageListenerPair(listener, onError));
+    _listeners.add(_ImageListenerPair(listener, onError));
   }
 
   /// Stop listening for new concrete [ImageInfo] objects and errors from
@@ -188,13 +188,13 @@ class ImageStream extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new ObjectFlagProperty<ImageStreamCompleter>(
+    properties.add(ObjectFlagProperty<ImageStreamCompleter>(
       'completer',
       _completer,
       ifPresent: _completer?.toStringShort(),
       ifNull: 'unresolved',
     ));
-    properties.add(new ObjectFlagProperty<List<_ImageListenerPair>>(
+    properties.add(ObjectFlagProperty<List<_ImageListenerPair>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -229,7 +229,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
   void addListener(ImageListener listener, { ImageErrorListener onError }) {
-    _listeners.add(new _ImageListenerPair(listener, onError));
+    _listeners.add(_ImageListenerPair(listener, onError));
     if (_currentImage != null) {
       try {
         listener(_currentImage, true);
@@ -246,7 +246,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         onError(_currentError.exception, _currentError.stack);
       } catch (exception, stack) {
         FlutterError.reportError(
-          new FlutterErrorDetails(
+          FlutterErrorDetails(
             exception: exception,
             library: 'image resource service',
             context: 'by a synchronously-called image error listener',
@@ -303,7 +303,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     InformationCollector informationCollector,
     bool silent = false,
   }) {
-    _currentError = new FlutterErrorDetails(
+    _currentError = FlutterErrorDetails(
       exception: exception,
       stack: stack,
       library: 'image resource service',
@@ -327,7 +327,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
           errorListener(exception, stack);
         } catch (exception, stack) {
           FlutterError.reportError(
-            new FlutterErrorDetails(
+            FlutterErrorDetails(
               context: 'by an image error listener',
               library: 'image resource service',
               exception: exception,
@@ -344,8 +344,8 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
-    description.add(new ObjectFlagProperty<List<_ImageListenerPair>>(
+    description.add(DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
+    description.add(ObjectFlagProperty<List<_ImageListenerPair>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -468,7 +468,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!_hasActiveListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
-      _emitFrame(new ImageInfo(image: _nextFrame.image, scale: _scale));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame.duration;
       _nextFrame = null;
@@ -479,7 +479,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
-    _timer = new Timer(delay * timeDilation, () {
+    _timer = Timer(delay * timeDilation, () {
       SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
     });
   }
@@ -509,7 +509,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (_codec.frameCount == 1) {
       // This is not an animated image, just return it and don't schedule more
       // frames.
-      _emitFrame(new ImageInfo(image: _nextFrame.image, scale: _scale));
+      _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
       return;
     }
     SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);

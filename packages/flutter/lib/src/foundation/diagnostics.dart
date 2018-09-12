@@ -310,7 +310,7 @@ class TextTreeConfiguration {
 /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.sparse]
-final TextTreeConfiguration sparseTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration sparseTextConfiguration = TextTreeConfiguration(
   prefixLineOne:            '├─',
   prefixOtherLines:         ' ',
   prefixLastChildLineOne:   '└─',
@@ -364,7 +364,7 @@ final TextTreeConfiguration sparseTextConfiguration = new TextTreeConfiguration(
 /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.offstage], uses this style for ASCII art display.
-final TextTreeConfiguration dashedTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration dashedTextConfiguration = TextTreeConfiguration(
   prefixLineOne:            '╎╌',
   prefixLastChildLineOne:   '└╌',
   prefixOtherLines:         ' ',
@@ -388,7 +388,7 @@ final TextTreeConfiguration dashedTextConfiguration = new TextTreeConfiguration(
 /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.dense]
-final TextTreeConfiguration denseTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
   afterProperties: ')',
@@ -427,7 +427,7 @@ final TextTreeConfiguration denseTextConfiguration = new TextTreeConfiguration(
 /// /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition]
-final TextTreeConfiguration transitionTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
   prefixLineOne:           '╞═╦══ ',
   prefixLastChildLineOne:  '╘═╦══ ',
   prefixOtherLines:         ' ║ ',
@@ -474,7 +474,7 @@ final TextTreeConfiguration transitionTextConfiguration = new TextTreeConfigurat
 /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.whitespace]
-final TextTreeConfiguration whitespaceTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
   prefixLineOne: '',
   prefixLastChildLineOne: '',
   prefixOtherLines: ' ',
@@ -498,7 +498,7 @@ final TextTreeConfiguration whitespaceTextConfiguration = new TextTreeConfigurat
 /// See also:
 ///
 ///   * [DiagnosticsTreeStyle.singleLine]
-final TextTreeConfiguration singleLineTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
   afterProperties: ')',
@@ -534,7 +534,7 @@ class _PrefixedStringBuilder {
   /// subsequent lines will be added with the modified prefix.
   String prefixOtherLines;
 
-  final StringBuffer _buffer = new StringBuffer();
+  final StringBuffer _buffer = StringBuffer();
   bool _atLineStart = true;
   bool _hasMultipleLines = false;
 
@@ -664,7 +664,7 @@ abstract class DiagnosticsNode {
   }) {
     assert(style != null);
     assert(level != null);
-    return new DiagnosticsProperty<Null>(
+    return DiagnosticsProperty<Null>(
       '',
       null,
       description: message,
@@ -866,7 +866,7 @@ abstract class DiagnosticsNode {
     if (prefixOtherLines.isEmpty)
       prefixOtherLines += config.prefixOtherLinesRootNode;
 
-    final _PrefixedStringBuilder builder = new _PrefixedStringBuilder(
+    final _PrefixedStringBuilder builder = _PrefixedStringBuilder(
       prefixLineOne,
       prefixOtherLines,
     );
@@ -1970,7 +1970,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   DiagnosticPropertiesBuilder get _builder {
     if (_cachedBuilder == null) {
-      _cachedBuilder = new DiagnosticPropertiesBuilder();
+      _cachedBuilder = DiagnosticPropertiesBuilder();
       value?.debugFillProperties(_cachedBuilder);
     }
     return _cachedBuilder;
@@ -2131,7 +2131,7 @@ abstract class Diagnosticable {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new DiagnosticableNode<Diagnosticable>(
+    return DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
       style: style,
@@ -2385,10 +2385,10 @@ abstract class DiagnosticableTree extends Diagnosticable {
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    final StringBuffer result = new StringBuffer();
+    final StringBuffer result = StringBuffer();
     result.write(toString());
     result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     debugFillProperties(builder);
     result.write(
       builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
@@ -2427,7 +2427,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new _DiagnosticableTreeNode(
+    return _DiagnosticableTreeNode(
       name: name,
       value: this,
       style: style,
@@ -2475,10 +2475,10 @@ abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
-    final StringBuffer result = new StringBuffer();
+    final StringBuffer result = StringBuffer();
     result.write(toStringShort());
     result.write(joiner);
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     debugFillProperties(builder);
     result.write(
       builder.properties.where((DiagnosticsNode n) => !n.isFiltered(minLevel)).join(joiner),
@@ -2500,7 +2500,7 @@ abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new _DiagnosticableTreeNode(
+    return _DiagnosticableTreeNode(
       name: name,
       value: this,
       style: style,

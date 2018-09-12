@@ -188,7 +188,7 @@ class Hero extends StatefulWidget {
         assert(tag != null);
         assert(() {
           if (result.containsKey(tag)) {
-            throw new FlutterError(
+            throw FlutterError(
               'There are multiple heroes that share the same tag within a subtree.\n'
               'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
               'each Hero must have a unique non-null tag.\n'
@@ -213,17 +213,17 @@ class Hero extends StatefulWidget {
   }
 
   @override
-  _HeroState createState() => new _HeroState();
+  _HeroState createState() => _HeroState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Object>('tag', tag));
+    properties.add(DiagnosticsProperty<Object>('tag', tag));
   }
 }
 
 class _HeroState extends State<Hero> {
-  final GlobalKey _key = new GlobalKey();
+  final GlobalKey _key = GlobalKey();
   Size _placeholderSize;
 
   void startFlight() {
@@ -247,7 +247,7 @@ class _HeroState extends State<Hero> {
   Widget build(BuildContext context) {
     if (_placeholderSize != null) {
       if (widget.placeholderBuilder == null) {
-        return new SizedBox(
+        return SizedBox(
           width: _placeholderSize.width,
           height: _placeholderSize.height
         );
@@ -255,7 +255,7 @@ class _HeroState extends State<Hero> {
         return widget.placeholderBuilder(context, widget.child);
       }
     }
-    return new KeyedSubtree(
+    return KeyedSubtree(
       key: _key,
       child: widget.child,
     );
@@ -289,7 +289,7 @@ class _HeroFlightManifest {
   Object get tag => fromHero.widget.tag;
 
   Animation<double> get animation {
-    return new CurvedAnimation(
+    return CurvedAnimation(
       parent: (type == HeroFlightDirection.push) ? toRoute.animation : fromRoute.animation,
       curve: Curves.fastOutSlowIn,
     );
@@ -305,7 +305,7 @@ class _HeroFlightManifest {
 // Builds the in-flight hero widget.
 class _HeroFlight {
   _HeroFlight(this.onFlightEnded) {
-    _proxyAnimation = new ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
+    _proxyAnimation = ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
   }
 
   final _OnFlightEnded onFlightEnded;
@@ -323,7 +323,7 @@ class _HeroFlight {
     final CreateRectTween createRectTween = manifest.toHero.widget.createRectTween ?? manifest.createRectTween;
     if (createRectTween != null)
       return createRectTween(begin, end);
-    return new RectTween(begin: begin, end: end);
+    return RectTween(begin: begin, end: end);
   }
 
   // The OverlayEntry WidgetBuilder callback for the hero's overlay.
@@ -338,7 +338,7 @@ class _HeroFlight {
     );
     assert(shuttle != null);
 
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget child) {
@@ -347,8 +347,8 @@ class _HeroFlight {
           // The toHero no longer exists or it's no longer the flight's destination.
           // Continue flying while fading out.
           if (_heroOpacity.isCompleted) {
-            _heroOpacity = new Tween<double>(begin: 1.0, end: 0.0)
-              .chain(new CurveTween(curve: new Interval(_proxyAnimation.value, 1.0)))
+            _heroOpacity = Tween<double>(begin: 1.0, end: 0.0)
+              .chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0)))
               .animate(_proxyAnimation);
           }
         } else if (toHeroBox.hasSize) {
@@ -364,16 +364,16 @@ class _HeroFlight {
 
         final Rect rect = heroRectTween.evaluate(_proxyAnimation);
         final Size size = manifest.navigatorRect.size;
-        final RelativeRect offsets = new RelativeRect.fromSize(rect, size);
+        final RelativeRect offsets = RelativeRect.fromSize(rect, size);
 
-        return new Positioned(
+        return Positioned(
           top: offsets.top,
           right: offsets.right,
           bottom: offsets.bottom,
           left: offsets.left,
-          child: new IgnorePointer(
-            child: new RepaintBoundary(
-              child: new Opacity(
+          child: IgnorePointer(
+            child: RepaintBoundary(
+              child: Opacity(
                 opacity: _heroOpacity.value,
                 child: child,
               ),
@@ -418,7 +418,7 @@ class _HeroFlight {
     manifest = initialManifest;
 
     if (manifest.type == HeroFlightDirection.pop)
-      _proxyAnimation.parent = new ReverseAnimation(manifest.animation);
+      _proxyAnimation.parent = ReverseAnimation(manifest.animation);
     else
       _proxyAnimation.parent = manifest.animation;
 
@@ -430,7 +430,7 @@ class _HeroFlight {
       _globalBoundingBoxFor(manifest.toHero.context),
     );
 
-    overlayEntry = new OverlayEntry(builder: _buildOverlay);
+    overlayEntry = OverlayEntry(builder: _buildOverlay);
     manifest.overlay.insert(overlayEntry);
   }
 
@@ -452,15 +452,15 @@ class _HeroFlight {
       // That's because tweens like MaterialRectArcTween may create a different
       // path for swapped begin and end parameters. We want the pop flight
       // path to be the same (in reverse) as the push flight path.
-      _proxyAnimation.parent = new ReverseAnimation(newManifest.animation);
-      heroRectTween = new ReverseTween<Rect>(heroRectTween);
+      _proxyAnimation.parent = ReverseAnimation(newManifest.animation);
+      heroRectTween = ReverseTween<Rect>(heroRectTween);
     } else if (manifest.type == HeroFlightDirection.pop && newManifest.type == HeroFlightDirection.push) {
       // A pop flight was interrupted by a push.
       assert(newManifest.animation.status == AnimationStatus.forward);
       assert(manifest.toHero == newManifest.fromHero);
       assert(manifest.toRoute == newManifest.fromRoute);
 
-      _proxyAnimation.parent = new Tween<double>(
+      _proxyAnimation.parent = Tween<double>(
         begin: manifest.animation.value,
         end: 1.0,
       ).animate(newManifest.animation);
@@ -484,7 +484,7 @@ class _HeroFlight {
       shuttle = null;
 
       if (newManifest.type == HeroFlightDirection.pop)
-        _proxyAnimation.parent = new ReverseAnimation(newManifest.animation);
+        _proxyAnimation.parent = ReverseAnimation(newManifest.animation);
       else
         _proxyAnimation.parent = newManifest.animation;
 
@@ -617,7 +617,7 @@ class HeroController extends NavigatorObserver {
         final HeroFlightShuttleBuilder fromShuttleBuilder = fromHeroes[tag].widget.flightShuttleBuilder;
         final HeroFlightShuttleBuilder toShuttleBuilder = toHeroes[tag].widget.flightShuttleBuilder;
 
-        final _HeroFlightManifest manifest = new _HeroFlightManifest(
+        final _HeroFlightManifest manifest = _HeroFlightManifest(
           type: flightType,
           overlay: navigator.overlay,
           navigatorRect: navigatorRect,
@@ -633,7 +633,7 @@ class HeroController extends NavigatorObserver {
         if (_flights[tag] != null)
           _flights[tag].divert(manifest);
         else
-          _flights[tag] = new _HeroFlight(_handleFlightEnded)..start(manifest);
+          _flights[tag] = _HeroFlight(_handleFlightEnded)..start(manifest);
       } else if (_flights[tag] != null) {
         _flights[tag].abort();
       }

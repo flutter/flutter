@@ -33,7 +33,7 @@ FileSystem get fs => context[FileSystem] ?? _kLocalFs;
 /// directory as long as there is no collision with the `"file"` subdirectory.
 RecordingFileSystem getRecordingFileSystem(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  final RecordingFileSystem fileSystem = new RecordingFileSystem(
+  final RecordingFileSystem fileSystem = RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
     await fileSystem.recording.flush(
@@ -51,7 +51,7 @@ RecordingFileSystem getRecordingFileSystem(String location) {
 /// [getRecordingFileSystem]), or a [ToolExit] will be thrown.
 ReplayFileSystem getReplayFileSystem(String location) {
   final Directory dir = getReplaySource(location, _kRecordingType);
-  return new ReplayFileSystem(recording: dir);
+  return ReplayFileSystem(recording: dir);
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.
@@ -72,7 +72,7 @@ void ensureDirectoryExists(String filePath) {
 /// Creates `destDir` if needed.
 void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
   if (!srcDir.existsSync())
-    throw new Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
   if (!destDir.existsSync())
     destDir.createSync(recursive: true);
@@ -87,7 +87,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
       copyDirectorySync(
         entity, destDir.fileSystem.directory(newPath));
     } else {
-      throw new Exception('${entity.path} is neither File nor Directory');
+      throw Exception('${entity.path} is neither File nor Directory');
     }
   }
 }

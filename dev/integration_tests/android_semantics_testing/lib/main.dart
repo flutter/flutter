@@ -23,7 +23,7 @@ const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
 Future<String> dataHandler(String message) async {
   if (message.contains('getSemanticsNode')) {
-    final Completer<String> completer = new Completer<String>();
+    final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
     Future<void> completeSemantics([Object _]) async {
       final dynamic result = await kSemanticsChannel.invokeMethod('getSemanticsNode', <String, dynamic>{
@@ -37,7 +37,7 @@ Future<String> dataHandler(String message) async {
       completeSemantics();
     return completer.future;
   }
-  throw new UnimplementedError();
+  throw UnimplementedError();
 }
 
 const List<String> routes = <String>[
@@ -50,18 +50,18 @@ class TestApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       routes: <String, WidgetBuilder>{
-        selectionControlsRoute: (BuildContext context) => new SelectionControlsPage(),
-        textFieldRoute: (BuildContext context) => new TextFieldPage(),
+        selectionControlsRoute: (BuildContext context) => SelectionControlsPage(),
+        textFieldRoute: (BuildContext context) => TextFieldPage(),
       },
-      home: new Builder(
+      home: Builder(
         builder: (BuildContext context) {
-          return new Scaffold(
-            body: new ListView(
+          return Scaffold(
+            body: ListView(
               children: routes.map((String value) {
-                return new MaterialButton(
-                  child: new Text(value),
+                return MaterialButton(
+                  child: Text(value),
                   onPressed: () {
                     Navigator.of(context).pushNamed(value);
                   },

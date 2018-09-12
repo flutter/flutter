@@ -60,7 +60,7 @@ class ExpandIcon extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   @override
-  _ExpandIconState createState() => new _ExpandIconState();
+  _ExpandIconState createState() => _ExpandIconState();
 }
 
 class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
@@ -70,9 +70,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: kThemeAnimationDuration, vsync: this);
-    _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(
-      new CurvedAnimation(
+    _controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
+    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(
+      CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn
       )
@@ -113,13 +113,13 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
     final ThemeData theme = Theme.of(context);
     final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
 
-    return new Semantics(
+    return Semantics(
       onTapHint: widget.onPressed == null ? null : onTapHint,
-      child: new IconButton(
+      child: IconButton(
         padding: widget.padding,
         color: theme.brightness == Brightness.dark ? Colors.white54 : Colors.black54,
         onPressed: widget.onPressed == null ? null : _handlePressed,
-        icon: new RotationTransition(
+        icon: RotationTransition(
           turns: _iconTurns,
           child: const Icon(Icons.expand_more)
         ),

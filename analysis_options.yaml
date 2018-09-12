@@ -152,7 +152,7 @@ linter:
     - unnecessary_const
     - unnecessary_getters_setters
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
-    # - unnecessary_new # not yet tested
+    - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides

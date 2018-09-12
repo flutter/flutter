@@ -221,7 +221,7 @@ class TextSpan extends DiagnosticableTree {
   /// Styles are not honored in this process.
   String toPlainText() {
     assert(debugAssertIsValid());
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     visitTextSpan((TextSpan span) {
       buffer.write(span.text);
       return true;
@@ -267,7 +267,7 @@ class TextSpan extends DiagnosticableTree {
         }
         return true;
       })) {
-        throw new FlutterError(
+        throw FlutterError(
           'TextSpan contains a null child.\n'
           'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
           'The full text in question was:\n'
@@ -340,15 +340,15 @@ class TextSpan extends DiagnosticableTree {
     if (style != null)
       style.debugFillProperties(properties);
 
-    properties.add(new DiagnosticsProperty<GestureRecognizer>(
+    properties.add(DiagnosticsProperty<GestureRecognizer>(
       'recognizer', recognizer,
       description: recognizer?.runtimeType?.toString(),
       defaultValue: null,
     ));
 
-    properties.add(new StringProperty('text', text, showName: false, defaultValue: null));
+    properties.add(StringProperty('text', text, showName: false, defaultValue: null));
     if (style == null && text == null && children == null)
-      properties.add(new DiagnosticsNode.message('(empty)'));
+      properties.add(DiagnosticsNode.message('(empty)'));
   }
 
   @override
@@ -359,7 +359,7 @@ class TextSpan extends DiagnosticableTree {
       if (child != null) {
         return child.toDiagnosticsNode();
       } else {
-        return new DiagnosticsNode.message('<null child>');
+        return DiagnosticsNode.message('<null child>');
       }
     }).toList();
   }

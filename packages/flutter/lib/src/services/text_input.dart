@@ -458,15 +458,15 @@ class TextEditingValue {
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    return new TextEditingValue(
+    return TextEditingValue(
       text: encoded['text'],
-      selection: new TextSelection(
+      selection: TextSelection(
         baseOffset: encoded['selectionBase'] ?? -1,
         extentOffset: encoded['selectionExtent'] ?? -1,
         affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
-      composing: new TextRange(
+      composing: TextRange(
         start: encoded['composingBase'] ?? -1,
         end: encoded['composingExtent'] ?? -1,
       ),
@@ -504,7 +504,7 @@ class TextEditingValue {
     TextSelection selection,
     TextRange composing
   }) {
-    return new TextEditingValue(
+    return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing
@@ -645,7 +645,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.newline':
       return TextInputAction.newline;
   }
-  throw new FlutterError('Unknown text input action: $action');
+  throw FlutterError('Unknown text input action: $action');
 }
 
 class _TextInputClientHandler {
@@ -666,13 +666,13 @@ class _TextInputClientHandler {
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(new TextEditingValue.fromJSON(args[1]));
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
         break;
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
       default:
-        throw new MissingPluginException();
+        throw MissingPluginException();
     }
   }
 
@@ -694,7 +694,7 @@ class _TextInputClientHandler {
   }
 }
 
-final _TextInputClientHandler _clientHandler = new _TextInputClientHandler();
+final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
 
 /// An interface to the system's text input control.
 class TextInput {
@@ -740,7 +740,7 @@ class TextInput {
     assert(client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    final TextInputConnection connection = new TextInputConnection._(client);
+    final TextInputConnection connection = TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
       'TextInput.setClient',

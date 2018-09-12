@@ -22,7 +22,7 @@ void main() {
     testWidgets('white text on black background - Text Widget - direct style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new Container(
+        Container(
           width: 200.0,
           height: 200.0,
           color: Colors.black,
@@ -39,9 +39,9 @@ void main() {
     testWidgets('black text on white background - Text Widget - inherited style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new DefaultTextStyle(
+        DefaultTextStyle(
           style: const TextStyle(fontSize: 14.0, color: Colors.black),
-          child: new Container(
+          child: Container(
             color: Colors.white,
             child: const Text('this is a test'),
           ),
@@ -54,9 +54,9 @@ void main() {
     testWidgets('white text on black background - Text Widget - inherited style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new DefaultTextStyle(
+        DefaultTextStyle(
           style: const TextStyle(fontSize: 14.0, color: Colors.white),
-          child: new Container(
+          child: Container(
             width: 200.0,
             height: 200.0,
             color: Colors.black,
@@ -70,15 +70,15 @@ void main() {
 
     testWidgets('Material text field - amber on amber', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(new MaterialApp(
-        home: new Scaffold(
-          body: new Container(
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Container(
             width: 200.0,
             height: 200.0,
             color: Colors.amberAccent,
-            child: new TextField(
+            child: TextField(
               style: const TextStyle(color: Colors.amber),
-              controller: new TextEditingController(text: 'this is a test'),
+              controller: TextEditingController(text: 'this is a test'),
             ),
           ),
         ),
@@ -89,11 +89,11 @@ void main() {
 
     testWidgets('Material text field - default style', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(new MaterialApp(
-          home: new Scaffold(
-            body: new Center(
-              child: new TextField(
-                controller: new TextEditingController(text: 'this is a test'),
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: TextField(
+                controller: TextEditingController(text: 'this is a test'),
               ),
             ),
           ),
@@ -106,7 +106,7 @@ void main() {
     testWidgets('yellow text on yellow background fails with correct message', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new Container(
+        Container(
           width: 200.0,
           height: 200.0,
           color: Colors.yellow,
@@ -131,10 +131,10 @@ void main() {
     testWidgets('label without corresponding text is skipped', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new Semantics(
+        Semantics(
           label: 'This is not text',
           container: true,
-          child: new Container(
+          child: Container(
             width: 200.0,
             height: 200.0,
             child: const Placeholder(),
@@ -150,11 +150,11 @@ void main() {
     testWidgets('offscreen text is skipped', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new Stack(
+        Stack(
           children: <Widget>[
-            new Positioned(
+            Positioned(
               left: -300.0,
-              child: new Container(
+              child: Container(
                 width: 200.0,
                 height: 200.0,
                 color: Colors.yellow,
@@ -178,10 +178,10 @@ void main() {
     testWidgets('Tappable box at 48 by 48', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new SizedBox(
+        SizedBox(
           width: 48.0,
           height: 48.0,
-          child: new GestureDetector(
+          child: GestureDetector(
             onTap: () {},
           ),
         ),
@@ -193,10 +193,10 @@ void main() {
     testWidgets('Tappable box at 47 by 48', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new SizedBox(
+        SizedBox(
           width: 47.0,
           height: 48.0,
-          child: new GestureDetector(
+          child: GestureDetector(
             onTap: () {},
           ),
         ),
@@ -208,10 +208,10 @@ void main() {
     testWidgets('Tappable box at 48 by 47', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new SizedBox(
+        SizedBox(
           width: 48.0,
           height: 47.0,
-          child: new GestureDetector(
+          child: GestureDetector(
             onTap: () {},
           ),
         ),
@@ -223,12 +223,12 @@ void main() {
     testWidgets('Tappable box at 48 by 48 shrunk by transform', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new Transform.scale(
+        Transform.scale(
           scale: 0.5, // should have new height of 24 by 24.
-          child: new SizedBox(
+          child: SizedBox(
             width: 48.0,
             height: 48.0,
-            child: new GestureDetector(
+            child: GestureDetector(
               onTap: () {},
             ),
           ),
@@ -241,10 +241,10 @@ void main() {
     testWidgets('Too small tap target fails with the correct message', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new SizedBox(
+        SizedBox(
           width: 48.0,
           height: 47.0,
-          child: new GestureDetector(
+          child: GestureDetector(
             onTap: () {},
           ),
         ),
@@ -260,18 +260,18 @@ void main() {
 
     testWidgets('Box that overlaps edge of window is skipped', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      final Widget smallBox = new SizedBox(
+      final Widget smallBox = SizedBox(
         width: 48.0,
         height: 47.0,
-        child: new GestureDetector(
+        child: GestureDetector(
           onTap: () {},
         ),
       );
       await tester.pumpWidget(
-        new MaterialApp(
-          home: new Stack(
+        MaterialApp(
+          home: Stack(
             children: <Widget>[
-              new Positioned(
+              Positioned(
                 left: 0.0,
                 top: -1.0,
                 child: smallBox,
@@ -285,10 +285,10 @@ void main() {
       expect(overlappingTopResult.passed, true);
 
       await tester.pumpWidget(
-        new MaterialApp(
-          home: new Stack(
+        MaterialApp(
+          home: Stack(
             children: <Widget>[
-              new Positioned(
+              Positioned(
                 left: -1.0,
                 top: 0.0,
                 child: smallBox,
@@ -302,10 +302,10 @@ void main() {
       expect(overlappingLeftResult.passed, true);
 
       await tester.pumpWidget(
-        new MaterialApp(
-          home: new Stack(
+        MaterialApp(
+          home: Stack(
             children: <Widget>[
-              new Positioned(
+              Positioned(
                 bottom: -1.0,
                 child: smallBox,
               ),
@@ -318,10 +318,10 @@ void main() {
       expect(overlappingBottomResult.passed, true);
 
       await tester.pumpWidget(
-        new MaterialApp(
-          home: new Stack(
+        MaterialApp(
+          home: Stack(
             children: <Widget>[
-              new Positioned(
+              Positioned(
                 right: -1.0,
                 child: smallBox,
               ),
@@ -338,15 +338,15 @@ void main() {
     testWidgets('Does not fail on mergedIntoParent child', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
-        new MergeSemantics(
-          child: new Semantics(
+        MergeSemantics(
+          child: Semantics(
             container: true,
-            child: new SizedBox(
+            child: SizedBox(
               width: 50.0,
               height: 50.0,
-              child: new Semantics(
+              child: Semantics(
                 container: true,
-                child: new GestureDetector(
+                child: GestureDetector(
                   onTap: () {},
                   child: const SizedBox(width: 4.0, height: 4.0),
                 )
@@ -364,7 +364,7 @@ void main() {
 }
 
 Widget _boilerplate(Widget child) {
-  return new MaterialApp(
-    home: new Scaffold(body: new Center(child: child)),
+  return MaterialApp(
+    home: Scaffold(body: Center(child: child)),
   );
 }

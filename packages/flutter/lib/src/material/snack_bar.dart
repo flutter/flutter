@@ -97,7 +97,7 @@ class SnackBarAction extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  _SnackBarActionState createState() => new _SnackBarActionState();
+  _SnackBarActionState createState() => _SnackBarActionState();
 }
 
 class _SnackBarActionState extends State<SnackBarAction> {
@@ -115,9 +115,9 @@ class _SnackBarActionState extends State<SnackBarAction> {
 
   @override
   Widget build(BuildContext context) {
-    return new FlatButton(
+    return FlatButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
-      child: new Text(widget.label),
+      child: Text(widget.label),
     );
   }
 }
@@ -193,17 +193,17 @@ class SnackBar extends StatelessWidget {
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     assert(animation != null);
     final ThemeData theme = Theme.of(context);
-    final ThemeData darkTheme = new ThemeData(
+    final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
       accentColorBrightness: theme.accentColorBrightness,
     );
     final List<Widget> children = <Widget>[
       const SizedBox(width: _kSnackBarPadding),
-      new Expanded(
-        child: new Container(
+      Expanded(
+        child: Container(
           padding: const EdgeInsets.symmetric(vertical: _kSingleLineVerticalPadding),
-          child: new DefaultTextStyle(
+          child: DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             child: content,
           ),
@@ -211,7 +211,7 @@ class SnackBar extends StatelessWidget {
       ),
     ];
     if (action != null) {
-      children.add(new ButtonTheme.bar(
+      children.add(ButtonTheme.bar(
         padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
         textTheme: ButtonTextTheme.accent,
         child: action,
@@ -219,34 +219,34 @@ class SnackBar extends StatelessWidget {
     } else {
       children.add(const SizedBox(width: _kSnackBarPadding));
     }
-    final CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
-    final CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
-    Widget snackbar = new SafeArea(
+    final CurvedAnimation heightAnimation = CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
+    final CurvedAnimation fadeAnimation = CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
+    Widget snackbar = SafeArea(
       top: false,
-      child: new Row(
+      child: Row(
         children: children,
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
     );
-    snackbar = new Semantics(
+    snackbar = Semantics(
       container: true,
       liveRegion: true,
       onDismiss: () {
         Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
-      child: new Dismissible(
+      child: Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
         onDismissed: (DismissDirection direction) {
           Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
-        child: new Material(
+        child: Material(
           elevation: 6.0,
           color: backgroundColor ?? _kSnackBackground,
-          child: new Theme(
+          child: Theme(
             data: darkTheme,
-            child: mediaQueryData.accessibleNavigation ? snackbar : new FadeTransition(
+            child: mediaQueryData.accessibleNavigation ? snackbar : FadeTransition(
               opacity: fadeAnimation,
               child: snackbar,
             ),
@@ -254,11 +254,11 @@ class SnackBar extends StatelessWidget {
         ),
       ),
     );
-    return new ClipRect(
-      child: mediaQueryData.accessibleNavigation ? snackbar : new AnimatedBuilder(
+    return ClipRect(
+      child: mediaQueryData.accessibleNavigation ? snackbar : AnimatedBuilder(
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
-          return new Align(
+          return Align(
             alignment: AlignmentDirectional.topStart,
             heightFactor: heightAnimation.value,
             child: child,
@@ -273,7 +273,7 @@ class SnackBar extends StatelessWidget {
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
   static AnimationController createAnimationController({ @required TickerProvider vsync }) {
-    return new AnimationController(
+    return AnimationController(
       duration: _kSnackBarTransitionDuration,
       debugLabel: 'SnackBar',
       vsync: vsync,
@@ -285,7 +285,7 @@ class SnackBar extends StatelessWidget {
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
   SnackBar withAnimation(Animation<double> newAnimation, { Key fallbackKey }) {
-    return new SnackBar(
+    return SnackBar(
       key: key ?? fallbackKey,
       content: content,
       backgroundColor: backgroundColor,

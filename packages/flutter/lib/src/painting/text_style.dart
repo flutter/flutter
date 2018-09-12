@@ -400,7 +400,7 @@ class TextStyle extends Diagnosticable {
         newDebugLabel = debugLabel ?? '(${this.debugLabel}).copyWith';
       return true;
     }());
-    return new TextStyle(
+    return TextStyle(
       inherit: inherit,
       color: this.foreground == null && foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
@@ -485,7 +485,7 @@ class TextStyle extends Diagnosticable {
       return true;
     }());
 
-    return new TextStyle(
+    return TextStyle(
       inherit: inherit,
       color: foreground == null ? color ?? this.color : null,
       fontFamily: fontFamily ?? this.fontFamily,
@@ -589,7 +589,7 @@ class TextStyle extends Diagnosticable {
     }());
 
     if (a == null) {
-      return new TextStyle(
+      return TextStyle(
         inherit: b.inherit,
         color: Color.lerp(null, b.color, t),
         fontFamily: t < 0.5 ? null : b.fontFamily,
@@ -611,7 +611,7 @@ class TextStyle extends Diagnosticable {
     }
 
     if (b == null) {
-      return new TextStyle(
+      return TextStyle(
         inherit: a.inherit,
         color: Color.lerp(a.color, null, t),
         fontFamily: t < 0.5 ? a.fontFamily : null,
@@ -632,7 +632,7 @@ class TextStyle extends Diagnosticable {
       );
     }
 
-    return new TextStyle(
+    return TextStyle(
       inherit: b.inherit,
       color: a.foreground == null && b.foreground == null ? Color.lerp(a.color, b.color, t) : null,
       fontFamily: t < 0.5 ? a.fontFamily : b.fontFamily,
@@ -646,8 +646,8 @@ class TextStyle extends Diagnosticable {
       locale: t < 0.5 ? a.locale : b.locale,
       foreground: (a.foreground != null || b.foreground != null)
         ? t < 0.5
-          ? a.foreground ?? (new Paint()..color = a.color)
-          : b.foreground ?? (new Paint()..color = b.color)
+          ? a.foreground ?? (Paint()..color = a.color)
+          : b.foreground ?? (Paint()..color = b.color)
         : null,
       background: t < 0.5 ? a.background : b.background,
       decoration: t < 0.5 ? a.decoration : b.decoration,
@@ -659,7 +659,7 @@ class TextStyle extends Diagnosticable {
 
   /// The style information for text runs, encoded for use by `dart:ui`.
   ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
-    return new ui.TextStyle(
+    return ui.TextStyle(
       color: color,
       decoration: decoration,
       decorationColor: decorationColor,
@@ -696,7 +696,7 @@ class TextStyle extends Diagnosticable {
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
-    return new ui.ParagraphStyle(
+    return ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
       fontWeight: fontWeight,
@@ -795,11 +795,11 @@ class TextStyle extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null)
-      properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));
+      properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
-    styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
-    styles.add(new DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
+    styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
       switch (fontWeight) {
@@ -835,20 +835,20 @@ class TextStyle extends Diagnosticable {
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing
     // enumProperty to handle this special case.
-    styles.add(new DiagnosticsProperty<FontWeight>(
+    styles.add(DiagnosticsProperty<FontWeight>(
       '${prefix}weight',
       fontWeight,
       description: weightDescription,
       defaultValue: null,
     ));
-    styles.add(new EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}letterSpacing', letterSpacing, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
-    styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
-    styles.add(new DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
-    styles.add(new DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
-    styles.add(new DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
+    styles.add(EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}letterSpacing', letterSpacing, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
+    styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
+    styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
+    styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
@@ -856,7 +856,7 @@ class TextStyle extends Diagnosticable {
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(new DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+      styles.add(DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
       if (decorationColor != null)
         decorationDescription.add('$decorationColor');
@@ -864,18 +864,18 @@ class TextStyle extends Diagnosticable {
       // Intentionally collide with the property 'decoration' added below.
       // Tools that show hidden properties could choose the first property
       // matching the name to disambiguate.
-      styles.add(new DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
+      styles.add(DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
       if (decoration != null)
         decorationDescription.add('$decoration');
       assert(decorationDescription.isNotEmpty);
-      styles.add(new MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
+      styles.add(MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
     }
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
-    properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
+    properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     styles.forEach(properties.add);
 
     if (!styleSpecified)
-      properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
+      properties.add(FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }
 }

@@ -5,31 +5,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final Key blockKey = new UniqueKey();
+final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
-final Key appbarContainerKey = new UniqueKey();
+final Key appbarContainerKey = UniqueKey();
 
 void main() {
   testWidgets('FlexibleSpaceBar collapse mode none on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
-        home: new Scaffold(
-          body: new CustomScrollView(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          body: CustomScrollView(
             key: blockKey,
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new Container(
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     key: appbarContainerKey,
                   ),
                   collapseMode: CollapseMode.none,
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 10000.0,
                 ),
               ),
@@ -50,24 +50,24 @@ void main() {
 
   testWidgets('FlexibleSpaceBar collapse mode none on IOS', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Scaffold(
-          body: new CustomScrollView(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: CustomScrollView(
             key: blockKey,
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new Container(
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     key: appbarContainerKey,
                   ),
                   collapseMode: CollapseMode.none,
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 10000.0,
                 ),
               ),
@@ -88,24 +88,24 @@ void main() {
 
   testWidgets('FlexibleSpaceBar collapse mode pin on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
-        home: new Scaffold(
-          body: new CustomScrollView(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          body: CustomScrollView(
             key: blockKey,
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new Container(
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     key: appbarContainerKey,
                   ),
                   collapseMode: CollapseMode.pin,
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 10000.0,
                 ),
               ),
@@ -126,24 +126,24 @@ void main() {
 
   testWidgets('FlexibleSpaceBar collapse mode pin on IOS', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Scaffold(
-          body: new CustomScrollView(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: CustomScrollView(
             key: blockKey,
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new Container(
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     key: appbarContainerKey,
                   ),
                   collapseMode: CollapseMode.pin,
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 10000.0,
                 ),
               ),
@@ -166,24 +166,24 @@ void main() {
 
   testWidgets('FlexibleSpaceBar collapse mode parallax on Android', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
-        home: new Scaffold(
-          body: new CustomScrollView(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          body: CustomScrollView(
             key: blockKey,
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new Container(
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     key: appbarContainerKey,
                   ),
                   collapseMode: CollapseMode.parallax,
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 10000.0,
                 ),
               ),
@@ -205,24 +205,24 @@ void main() {
 
   testWidgets('FlexibleSpaceBar collapse mode parallax on IOS', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Scaffold(
-          body: new CustomScrollView(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: CustomScrollView(
             key: blockKey,
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: expandedAppbarHeight,
                 pinned: true,
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new Container(
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
                     key: appbarContainerKey,
                   ),
                   collapseMode: CollapseMode.parallax,
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 10000.0,
                 ),
               ),
