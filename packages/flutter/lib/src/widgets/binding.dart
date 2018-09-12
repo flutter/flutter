@@ -293,23 +293,20 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       }
     );
 
-    assert(() {
-      // This service extension is deprecated and will be removed by 7/1/2018.
-      // Use ext.flutter.inspector.show instead.
-      registerBoolServiceExtension(
-          name: 'debugWidgetInspector',
-          getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
-          setter: (bool value) {
-            if (WidgetsApp.debugShowWidgetInspectorOverride == value)
-              return Future<Null>.value();
-            WidgetsApp.debugShowWidgetInspectorOverride = value;
-            return _forceRebuild();
-          }
-      );
+    // This service extension is deprecated and will be removed by 7/1/2018.
+    // Use ext.flutter.inspector.show instead.
+    registerBoolServiceExtension(
+        name: 'debugWidgetInspector',
+        getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+        setter: (bool value) {
+          if (WidgetsApp.debugShowWidgetInspectorOverride == value)
+            return Future<Null>.value();
+          WidgetsApp.debugShowWidgetInspectorOverride = value;
+          return _forceRebuild();
+        }
+    );
 
-      WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
-      return true;
-    }());
+    WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
   }
 
   Future<Null> _forceRebuild() {
