@@ -2842,7 +2842,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'label\nhelper',
+          label: 'label',
           id: 1,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
@@ -2854,6 +2854,11 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 2,
+              label: 'helper',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              id: 3,
               label: '10 characters remaining',
               textDirection: TextDirection.ltr,
             ),
@@ -2868,7 +2873,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'hint\nhelper',
+          label: 'hint',
           id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
@@ -2884,6 +2889,11 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: 2,
+              label: 'helper',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              id: 3,
               label: '10 characters remaining',
               textDirection: TextDirection.ltr,
             ),
@@ -2921,8 +2931,7 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          label: 'label\nhelper',
-          id: 1,
+          label: 'label',
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -2932,7 +2941,57 @@ void main() {
           ],
           children: <TestSemantics>[
             TestSemantics(
+              label: 'helper',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
               label: '0 out of 10',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final TextEditingController controller = TextEditingController();
+    final Key key = UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: key,
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'label',
+            hintText: 'hint',
+            errorText: 'oh no!',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          label: 'label',
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'oh no!',
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLiveRegion,
+              ],
               textDirection: TextDirection.ltr,
             ),
           ],
