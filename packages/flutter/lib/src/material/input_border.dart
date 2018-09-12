@@ -308,7 +308,7 @@ class OutlineInputBorder extends InputBorder {
     double gapPadding,
   }) {
     return new OutlineInputBorder(
-      borderSide: borderSide ?? this.borderSide,
+      borderSide: this.borderSide ?? borderSide,
       borderRadius: borderRadius ?? this.borderRadius,
       gapPadding: gapPadding ?? this.gapPadding,
     );
