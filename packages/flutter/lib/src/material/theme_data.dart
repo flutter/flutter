@@ -14,6 +14,7 @@ import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
 import 'typography.dart';
 
@@ -143,6 +144,7 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    PageTransitionsTheme pageTransitionsTheme,
   }) {
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
     brightness ??= Brightness.light;
@@ -182,6 +184,7 @@ class ThemeData extends Diagnosticable {
     hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
+    pageTransitionsTheme ??= const PageTransitionsTheme();
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
@@ -251,6 +254,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
+      pageTransitionsTheme: pageTransitionsTheme,
     );
   }
 
@@ -302,6 +306,7 @@ class ThemeData extends Diagnosticable {
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
+    @required this.pageTransitionsTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -341,7 +346,8 @@ class ThemeData extends Diagnosticable {
        assert(sliderTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
-       assert(materialTapTargetSize != null);
+       assert(materialTapTargetSize != null),
+       assert(pageTransitionsTheme != null);
 
   /// A default light blue theme.
   ///
@@ -543,6 +549,9 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// Default [PageRoute] transitions per [TargetPlatform].
+  final PageTransitionsTheme pageTransitionsTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -586,6 +595,7 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    PageTransitionsTheme pageTransitionsTheme,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -629,6 +639,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
+      pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
     );
   }
 
@@ -758,6 +769,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
+      pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
     );
   }
 
@@ -804,7 +816,8 @@ class ThemeData extends Diagnosticable {
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
-           (otherData.materialTapTargetSize == materialTapTargetSize);
+           (otherData.materialTapTargetSize == materialTapTargetSize) &&
+           (otherData.pageTransitionsTheme == pageTransitionsTheme);
   }
 
   @override
@@ -829,7 +842,7 @@ class ThemeData extends Diagnosticable {
       secondaryHeaderColor,
       textSelectionColor,
       textSelectionHandleColor,
-      hashValues(  // Too many values.
+      hashValues(  // hashValues only supports 20 arguments
         toggleableActiveColor,
         backgroundColor,
         accentColor,
@@ -849,7 +862,10 @@ class ThemeData extends Diagnosticable {
         chipTheme,
         platform,
         materialTapTargetSize,
-        cursorColor
+        hashValues(
+          pageTransitionsTheme,
+          cursorColor,
+        ),
       ),
     );
   }
@@ -896,6 +912,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
+    properties.add(new DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
   }
 }
 
