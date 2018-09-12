@@ -151,7 +151,7 @@ class TextTheme extends Diagnosticable {
     TextStyle caption,
     TextStyle button,
   }) {
-    return new TextTheme(
+    return TextTheme(
       display4: display4 ?? this.display4,
       display3: display3 ?? this.display3,
       display2: display2 ?? this.display2,
@@ -254,7 +254,7 @@ class TextTheme extends Diagnosticable {
     Color decorationColor,
     TextDecorationStyle decorationStyle,
   }) {
-    return new TextTheme(
+    return TextTheme(
       display4: display4.apply(
         color: displayColor,
         decoration: decoration,
@@ -376,7 +376,7 @@ class TextTheme extends Diagnosticable {
     assert(a != null);
     assert(b != null);
     assert(t != null);
-    return new TextTheme(
+    return TextTheme(
       display4: TextStyle.lerp(a.display4, b.display4, t),
       display3: TextStyle.lerp(a.display3, b.display3, t),
       display2: TextStyle.lerp(a.display2, b.display2, t),
@@ -431,18 +431,18 @@ class TextTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final TextTheme defaultTheme = new Typography(platform: defaultTargetPlatform).black;
-    properties.add(new DiagnosticsProperty<TextStyle>('display4', display4, defaultValue: defaultTheme.display4));
-    properties.add(new DiagnosticsProperty<TextStyle>('display3', display3, defaultValue: defaultTheme.display3));
-    properties.add(new DiagnosticsProperty<TextStyle>('display2', display2, defaultValue: defaultTheme.display2));
-    properties.add(new DiagnosticsProperty<TextStyle>('display1', display1, defaultValue: defaultTheme.display1));
-    properties.add(new DiagnosticsProperty<TextStyle>('headline', headline, defaultValue: defaultTheme.headline));
-    properties.add(new DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
-    properties.add(new DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
-    properties.add(new DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
-    properties.add(new DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
-    properties.add(new DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
-    properties.add(new DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
+    final TextTheme defaultTheme = Typography(platform: defaultTargetPlatform).black;
+    properties.add(DiagnosticsProperty<TextStyle>('display4', display4, defaultValue: defaultTheme.display4));
+    properties.add(DiagnosticsProperty<TextStyle>('display3', display3, defaultValue: defaultTheme.display3));
+    properties.add(DiagnosticsProperty<TextStyle>('display2', display2, defaultValue: defaultTheme.display2));
+    properties.add(DiagnosticsProperty<TextStyle>('display1', display1, defaultValue: defaultTheme.display1));
+    properties.add(DiagnosticsProperty<TextStyle>('headline', headline, defaultValue: defaultTheme.headline));
+    properties.add(DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
+    properties.add(DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
+    properties.add(DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
+    properties.add(DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
+    properties.add(DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
+    properties.add(DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
   }
 }
 

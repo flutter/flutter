@@ -57,8 +57,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -80,8 +80,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(150.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(150.0, 0.0, 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -107,8 +107,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -134,8 +134,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -161,8 +161,8 @@ void main() {
     expect(
       find.byType(LinearProgressIndicator),
       paints
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
     );
   });
 
@@ -183,14 +183,14 @@ void main() {
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[LinearProgressIndicator(value: 0.0)]),
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.0)]),
     ));
     final List<Layer> layers1 = tester.layers;
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
+      child: ListView(children: const <Widget>[LinearProgressIndicator(value: 0.5)])),
     );
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));

@@ -154,7 +154,7 @@ class RawMaterialButton extends StatefulWidget {
   final Clip clipBehavior;
 
   @override
-  _RawMaterialButtonState createState() => new _RawMaterialButtonState();
+  _RawMaterialButtonState createState() => _RawMaterialButtonState();
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
@@ -173,9 +173,9 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ? (_highlight ? widget.highlightElevation : widget.elevation)
       : widget.disabledElevation;
 
-    final Widget result = new ConstrainedBox(
+    final Widget result = ConstrainedBox(
       constraints: widget.constraints,
-      child: new Material(
+      child: Material(
         elevation: elevation,
         textStyle: widget.textStyle,
         shape: widget.shape,
@@ -183,17 +183,17 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
-        child: new InkWell(
+        child: InkWell(
           onHighlightChanged: _handleHighlightChanged,
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           onTap: widget.onPressed,
           customBorder: widget.shape,
           child: IconTheme.merge(
-            data: new IconThemeData(color: widget.textStyle?.color),
-            child: new Container(
+            data: IconThemeData(color: widget.textStyle?.color),
+            child: Container(
               padding: widget.padding,
-              child: new Center(
+              child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: widget.child,
@@ -213,11 +213,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         break;
     }
 
-    return new Semantics(
+    return Semantics(
       container: true,
       button: true,
       enabled: widget.enabled,
-      child: new _InputPadding(
+      child: _InputPadding(
         minSize: minSize,
         child: result,
       ),
@@ -430,7 +430,7 @@ class MaterialButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color textColor = _getTextColor(theme, buttonTheme, color);
 
-    return new RawMaterialButton(
+    return RawMaterialButton(
       onPressed: onPressed,
       fillColor: color,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
@@ -453,7 +453,7 @@ class MaterialButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -473,7 +473,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderInputPadding(minSize);
+    return _RenderInputPadding(minSize);
   }
 
   @override
@@ -528,7 +528,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       child.layout(constraints, parentUsesSize: true);
       final double height = math.max(child.size.width, minSize.width);
       final double width = math.max(child.size.height, minSize.height);
-      size = constraints.constrain(new Size(height, width));
+      size = constraints.constrain(Size(height, width));
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = Alignment.center.alongOffset(size - child.size);
     } else {

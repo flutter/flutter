@@ -263,7 +263,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   static Future<CupertinoLocalizations> load(Locale locale) {
-    return new SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
+    return SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
   }
 
   /// A [LocalizationsDelegate] that uses [DefaultCupertinoLocalizations.load]

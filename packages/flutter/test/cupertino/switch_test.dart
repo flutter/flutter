@@ -7,15 +7,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
-    final Key switchKey = new UniqueKey();
+    final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Center(
-              child: new CupertinoSwitch(
+            return Center(
+              child: CupertinoSwitch(
                 key: switchKey,
                 value: value,
                 onChanged: (bool newValue) {
@@ -39,12 +39,12 @@ void main() {
     bool value = false;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Center(
-              child: new CupertinoSwitch(
+            return Center(
+              child: CupertinoSwitch(
                 value: value,
                 onChanged: (bool newValue) {
                   setState(() {
@@ -83,12 +83,12 @@ void main() {
     bool value = false;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Center(
-              child: new CupertinoSwitch(
+            return Center(
+              child: CupertinoSwitch(
                 value: value,
                 onChanged: (bool newValue) {
                   setState(() {

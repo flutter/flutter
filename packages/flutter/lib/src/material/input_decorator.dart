@@ -86,7 +86,7 @@ class _InputBorderPainter extends CustomPainter {
     if (fillColor.alpha > 0) {
       canvas.drawPath(
         borderValue.getOuterPath(canvasRect, textDirection: textDirection),
-        new Paint()
+        Paint()
           ..color = fillColor
           ..style = PaintingStyle.fill,
       );
@@ -136,7 +136,7 @@ class _BorderContainer extends StatefulWidget {
   final Widget child;
 
   @override
-  _BorderContainerState createState() => new _BorderContainerState();
+  _BorderContainerState createState() => _BorderContainerState();
 }
 
 class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin {
@@ -147,15 +147,15 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
     );
-    _borderAnimation = new CurvedAnimation(
+    _borderAnimation = CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
     );
-    _border = new _InputBorderTween(
+    _border = _InputBorderTween(
       begin: widget.border,
       end: widget.border,
     );
@@ -171,7 +171,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   void didUpdateWidget(_BorderContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.border != oldWidget.border) {
-      _border = new _InputBorderTween(
+      _border = _InputBorderTween(
         begin: oldWidget.border,
         end: widget.border,
       );
@@ -183,9 +183,9 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
-      foregroundPainter: new _InputBorderPainter(
-        repaint: new Listenable.merge(<Listenable>[_borderAnimation, widget.gap]),
+    return CustomPaint(
+      foregroundPainter: _InputBorderPainter(
+        repaint: Listenable.merge(<Listenable>[_borderAnimation, widget.gap]),
         borderAnimation: _borderAnimation,
         border: _border,
         gapAnimation: widget.gapAnimation,
@@ -224,8 +224,8 @@ class _Shaker extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Transform(
-      transform: new Matrix4.translationValues(translateX, 0.0, 0.0),
+    return Transform(
+      transform: Matrix4.translationValues(translateX, 0.0, 0.0),
       child: child,
     );
   }
@@ -253,7 +253,7 @@ class _HelperError extends StatefulWidget {
   final int errorMaxLines;
 
   @override
-  _HelperErrorState createState() => new _HelperErrorState();
+  _HelperErrorState createState() => _HelperErrorState();
 }
 
 class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
@@ -268,7 +268,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
     );
@@ -320,9 +320,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildHelper() {
     assert(widget.helperText != null);
-    return new Opacity(
+    return Opacity(
       opacity: 1.0 - _controller.value,
-      child: new Text(
+      child: Text(
         widget.helperText,
         style: widget.helperStyle,
         textAlign: widget.textAlign,
@@ -333,14 +333,14 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildError() {
     assert(widget.errorText != null);
-    return new Opacity(
+    return Opacity(
       opacity: _controller.value,
-      child: new FractionalTranslation(
-        translation: new Tween<Offset>(
+      child: FractionalTranslation(
+        translation: Tween<Offset>(
           begin: const Offset(0.0, -0.25),
           end: const Offset(0.0, 0.0),
         ).evaluate(_controller.view),
-        child: new Text(
+        child: Text(
           widget.errorText,
           style: widget.errorStyle,
           textAlign: widget.textAlign,
@@ -380,9 +380,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return _buildHelper();
 
     if (widget.errorText != null) {
-      return new Stack(
+      return Stack(
         children: <Widget>[
-          new Opacity(
+          Opacity(
             opacity: 1.0 - _controller.value,
             child: _helper,
           ),
@@ -392,10 +392,10 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     }
 
     if (widget.helperText != null) {
-      return new Stack(
+      return Stack(
         children: <Widget>[
           _buildHelper(),
-          new Opacity(
+          Opacity(
             opacity: _controller.value,
             child: _error,
           ),
@@ -890,7 +890,7 @@ class _RenderDecoration extends RenderBox {
       }
     }
 
-    return new _RenderDecorationLayout(
+    return _RenderDecorationLayout(
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
       inputBaseline: inputBaseline,
@@ -972,7 +972,7 @@ class _RenderDecoration extends RenderBox {
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
     if (container != null) {
-      final BoxConstraints containerConstraints = new BoxConstraints.tightFor(
+      final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
@@ -986,18 +986,18 @@ class _RenderDecoration extends RenderBox {
           x = _boxSize(icon).width;
           break;
        }
-      _boxParentData(container).offset = new Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     double height;
     double centerLayout(RenderBox box, double x) {
-      _boxParentData(box).offset = new Offset(x, (height - box.size.height) / 2.0);
+      _boxParentData(box).offset = Offset(x, (height - box.size.height) / 2.0);
       return box.size.width;
     }
 
     double baseline;
     double baselineLayout(RenderBox box, double x) {
-      _boxParentData(box).offset = new Offset(x, baseline - layout.boxToBaseline[box]);
+      _boxParentData(box).offset = Offset(x, baseline - layout.boxToBaseline[box]);
       return box.size.width;
     }
 
@@ -1109,7 +1109,7 @@ class _RenderDecoration extends RenderBox {
       decoration.borderGap.extent = 0.0;
     }
 
-    size = constraints.constrain(new Size(overallWidth, overallHeight));
+    size = constraints.constrain(Size(overallWidth, overallHeight));
     assert(size.width == constraints.constrainWidth(overallWidth));
     assert(size.height == constraints.constrainHeight(overallHeight));
   }
@@ -1145,7 +1145,7 @@ class _RenderDecoration extends RenderBox {
           break;
       }
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
-      _labelTransform = new Matrix4.identity()
+      _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
       context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
@@ -1354,11 +1354,11 @@ class _Decorator extends RenderObjectWidget {
   final bool isFocused;
 
   @override
-  _RenderDecorationElement createElement() => new _RenderDecorationElement(this);
+  _RenderDecorationElement createElement() => _RenderDecorationElement(this);
 
   @override
   _RenderDecoration createRenderObject(BuildContext context) {
-    return new _RenderDecoration(
+    return _RenderDecoration(
       decoration: decoration,
       textDirection: textDirection,
       textBaseline: textBaseline,
@@ -1393,11 +1393,11 @@ class _AffixText extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTextStyle.merge(
       style: style,
-      child: new AnimatedOpacity(
+      child: AnimatedOpacity(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? new Text(text, style: style,),
+        child: child ?? Text(text, style: style,),
       ),
     );
   }
@@ -1484,7 +1484,7 @@ class InputDecorator extends StatefulWidget {
   bool get _labelIsFloating => !isEmpty || isFocused;
 
   @override
-  _InputDecoratorState createState() => new _InputDecoratorState();
+  _InputDecoratorState createState() => _InputDecoratorState();
 
   /// The RenderBox that defines this decorator's "container". That's the
   /// area which is filled if [InputDecoration.isFilled] is true. It's the area
@@ -1501,29 +1501,29 @@ class InputDecorator extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    properties.add(new DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
-    properties.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
-    properties.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
+    properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('isFocused', isFocused));
+    properties.add(DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
 }
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   AnimationController _floatingLabelController;
   AnimationController _shakingLabelController;
-  final _InputBorderGap _borderGap = new _InputBorderGap();
+  final _InputBorderGap _borderGap = _InputBorderGap();
 
   @override
   void initState() {
     super.initState();
-    _floatingLabelController = new AnimationController(
+    _floatingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
       value: widget._labelIsFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
-    _shakingLabelController = new AnimationController(
+    _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
     );
@@ -1682,7 +1682,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       borderWeight = isFocused ? 2.0 : 1.0;
 
     final InputBorder border = decoration.border ?? const UnderlineInputBorder();
-    return border.copyWith(borderSide: new BorderSide(color: borderColor, width: borderWeight));
+    return border.copyWith(borderSide: BorderSide(color: borderColor, width: borderWeight));
   }
 
   @override
@@ -1692,11 +1692,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final TextBaseline textBaseline = inlineStyle.textBaseline;
 
     final TextStyle hintStyle = inlineStyle.merge(decoration.hintStyle);
-    final Widget hint = decoration.hintText == null ? null : new AnimatedOpacity(
+    final Widget hint = decoration.hintText == null ? null : AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
-      child: new Text(
+      child: Text(
         decoration.hintText,
         style: hintStyle,
         overflow: TextOverflow.ellipsis,
@@ -1714,7 +1714,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       border = isError ? decoration.errorBorder : decoration.enabledBorder;
     border ??= _getDefaultBorder(themeData);
 
-    final Widget container = new _BorderContainer(
+    final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
       gapAnimation: _floatingLabelController.view,
@@ -1722,15 +1722,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
-    final Widget label = decoration.labelText == null ? null : new _Shaker(
+    final Widget label = decoration.labelText == null ? null : _Shaker(
       animation: _shakingLabelController.view,
-      child: new AnimatedDefaultTextStyle(
+      child: AnimatedDefaultTextStyle(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         style: widget._labelIsFloating
           ? _getFloatingLabelStyle(themeData)
           : inlineLabelStyle,
-        child: new Text(
+        child: Text(
           decoration.labelText,
           overflow: TextOverflow.ellipsis,
           textAlign: textAlign,
@@ -1739,7 +1739,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final Widget prefix = decoration.prefix == null && decoration.prefixText == null ? null :
-      new _AffixText(
+      _AffixText(
         labelIsFloating: widget._labelIsFloating,
         text: decoration.prefixText,
         style: decoration.prefixStyle ?? hintStyle,
@@ -1747,7 +1747,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget suffix = decoration.suffix == null && decoration.suffixText == null ? null :
-      new _AffixText(
+      _AffixText(
         labelIsFloating: widget._labelIsFloating,
         text: decoration.suffixText,
         style: decoration.suffixStyle ?? hintStyle,
@@ -1760,10 +1760,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Color iconColor = isFocused ? activeColor : _getDefaultIconColor(themeData);
 
     final Widget icon = decoration.icon == null ? null :
-      new Padding(
+      Padding(
         padding: const EdgeInsetsDirectional.only(end: 16.0),
         child: IconTheme.merge(
-          data: new IconThemeData(
+          data: IconThemeData(
             color: iconColor,
             size: iconSize,
           ),
@@ -1772,13 +1772,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget prefixIcon = decoration.prefixIcon == null ? null :
-      new Center(
+      Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: new ConstrainedBox(
+        child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
           child: IconTheme.merge(
-            data: new IconThemeData(
+            data: IconThemeData(
               color: iconColor,
               size: iconSize,
             ),
@@ -1788,13 +1788,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget suffixIcon = decoration.suffixIcon == null ? null :
-      new Center(
+      Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
           child: IconTheme.merge(
-            data: new IconThemeData(
+            data: IconThemeData(
               color: iconColor,
               size: iconSize,
             ),
@@ -1803,7 +1803,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    final Widget helperError = new _HelperError(
+    final Widget helperError = _HelperError(
       textAlign: textAlign,
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData),
@@ -1813,9 +1813,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final Widget counter = decoration.counterText == null ? null :
-      new Semantics(
+      Semantics(
         container: true,
-        child: new Text(
+        child: Text(
           decoration.counterText,
           style: _getHelperStyle(themeData).merge(decoration.counterStyle),
           overflow: TextOverflow.ellipsis,
@@ -1855,8 +1855,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
-    return new _Decorator(
-      decoration: new _Decoration(
+    return _Decorator(
+      decoration: _Decoration(
         contentPadding: contentPadding,
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
@@ -2433,7 +2433,7 @@ class InputDecoration {
     bool enabled,
     String semanticCounterText,
   }) {
-    return new InputDecoration(
+    return InputDecoration(
       icon: icon ?? this.icon,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
@@ -2946,24 +2946,24 @@ class InputDecorationTheme extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const InputDecorationTheme defaultTheme = InputDecorationTheme();
-    properties.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
-    properties.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
-    properties.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
-    properties.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
-    properties.add(new DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
-    properties.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
-    properties.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
-    properties.add(new DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
-    properties.add(new DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
-    properties.add(new DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
-    properties.add(new DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
-    properties.add(new DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
-    properties.add(new DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
-    properties.add(new DiagnosticsProperty<InputBorder>('focusedBorder', focusedBorder, defaultValue: defaultTheme.focusedErrorBorder));
-    properties.add(new DiagnosticsProperty<InputBorder>('focusedErrorborder', focusedErrorBorder, defaultValue: defaultTheme.focusedErrorBorder));
-    properties.add(new DiagnosticsProperty<InputBorder>('disabledBorder', disabledBorder, defaultValue: defaultTheme.disabledBorder));
-    properties.add(new DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
-    properties.add(new DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
+    properties.add(DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
+    properties.add(DiagnosticsProperty<int>('errorMaxLines', errorMaxLines, defaultValue: defaultTheme.errorMaxLines));
+    properties.add(DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
+    properties.add(DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
+    properties.add(DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
+    properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
+    properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
+    properties.add(DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
+    properties.add(DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('focusedBorder', focusedBorder, defaultValue: defaultTheme.focusedErrorBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('focusedErrorborder', focusedErrorBorder, defaultValue: defaultTheme.focusedErrorBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('disabledBorder', disabledBorder, defaultValue: defaultTheme.disabledBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
+    properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
   }
 }

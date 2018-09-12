@@ -191,20 +191,20 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
-    Widget result = new Semantics(
+    Widget result = Semantics(
       button: true,
       enabled: onPressed != null,
-      child: new ConstrainedBox(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
-        child: new Padding(
+        child: Padding(
           padding: padding,
-          child: new SizedBox(
+          child: SizedBox(
             height: iconSize,
             width: iconSize,
-            child: new Align(
+            child: Align(
               alignment: alignment,
               child: IconTheme.merge(
-                data: new IconThemeData(
+                data: IconThemeData(
                   size: iconSize,
                   color: currentColor
                 ),
@@ -217,12 +217,12 @@ class IconButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      result = new Tooltip(
+      result = Tooltip(
         message: tooltip,
         child: result
       );
     }
-    return new InkResponse(
+    return InkResponse(
       onTap: onPressed,
       child: result,
       highlightColor: highlightColor ?? Theme.of(context).highlightColor,
@@ -238,8 +238,8 @@ class IconButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
-    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
+    properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
   }
 }

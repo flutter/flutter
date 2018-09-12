@@ -39,10 +39,10 @@ Future<void> getPackages(String folder) async {
     'get'
   ];
   final Process process = await processManager.start(command, workingDirectory: folder);
-  final StringBuffer errorOutput = new StringBuffer();
+  final StringBuffer errorOutput = StringBuffer();
   process.stderr.transform(utf8.decoder).listen(errorOutput.write);
   final int exitCode = await process.exitCode;
   if (exitCode != 0)
-    throw new Exception(
+    throw Exception(
         'flutter packages get failed: ${errorOutput.toString()}');
 }

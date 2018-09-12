@@ -56,7 +56,7 @@ class TweenSequence<T> extends Animatable<T> {
     double start = 0.0;
     for (int i = 0; i < _items.length; i += 1) {
       final double end = i == _items.length - 1 ? 1.0 : start + _items[i].weight / totalWeight;
-      _intervals.add(new _Interval(start, end));
+      _intervals.add(_Interval(start, end));
       start = end;
     }
   }
@@ -67,7 +67,7 @@ class TweenSequence<T> extends Animatable<T> {
   T _evaluateAt(double t, int index) {
     final TweenSequenceItem<T> element = _items[index];
     final double tInterval = _intervals[index].value(t);
-    return element.tween.evaluate(new AlwaysStoppedAnimation<double>(tInterval));
+    return element.tween.evaluate(AlwaysStoppedAnimation<double>(tInterval));
   }
 
   @override

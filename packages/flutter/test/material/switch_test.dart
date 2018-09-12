@@ -12,17 +12,17 @@ import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
-    final Key switchKey = new UniqueKey();
+    final Key switchKey = UniqueKey();
     bool value = false;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   key: switchKey,
                   value: value,
                   onChanged: (bool newValue) {
@@ -45,13 +45,13 @@ void main() {
 
   testWidgets('Switch size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new Switch(
+          child: Material(
+            child: Center(
+              child: Switch(
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -64,13 +64,13 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 48.0));
 
     await tester.pumpWidget(
-      new Theme(
-        data: new ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        child: new Directionality(
+      Theme(
+        data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new Switch(
+          child: Material(
+            child: Center(
+              child: Switch(
                 value: true,
                 onChanged: (bool newValue) {},
               ),
@@ -87,13 +87,13 @@ void main() {
     bool value = false;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -133,13 +133,13 @@ void main() {
     bool value = false;
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -176,13 +176,13 @@ void main() {
   testWidgets('Switch has default colors when enabled', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -202,7 +202,7 @@ void main() {
         paints
           ..rrect(
               color: const Color(0x52000000), // Black with 32% opacity
-              rrect: new RRect.fromLTRBR(
+              rrect: RRect.fromLTRBR(
                   383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))
           ..circle(color: const Color(0x24000000))
@@ -218,7 +218,7 @@ void main() {
         paints
           ..rrect(
               color: Colors.blue[600].withAlpha(0x80),
-              rrect: new RRect.fromLTRBR(
+              rrect: RRect.fromLTRBR(
                   383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
           ..circle(color: const Color(0x33000000))
           ..circle(color: const Color(0x24000000))
@@ -230,9 +230,9 @@ void main() {
 
   testWidgets('Switch has default colors when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return const Material(
               child: Center(
@@ -252,7 +252,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: new RRect.fromLTRBR(
+            rrect: RRect.fromLTRBR(
                 383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -262,9 +262,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return const Material(
               child: Center(
@@ -284,7 +284,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.black12,
-            rrect: new RRect.fromLTRBR(
+            rrect: RRect.fromLTRBR(
                 383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -297,13 +297,13 @@ void main() {
   testWidgets('Switch can be set color', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -327,7 +327,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.blue[500],
-            rrect: new RRect.fromLTRBR(
+            rrect: RRect.fromLTRBR(
                 383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -342,7 +342,7 @@ void main() {
       paints
         ..rrect(
             color: Colors.green[500],
-            rrect: new RRect.fromLTRBR(
+            rrect: RRect.fromLTRBR(
                 383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
         ..circle(color: const Color(0x33000000))
         ..circle(color: const Color(0x24000000))
@@ -356,13 +356,13 @@ void main() {
 
     bool value = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -382,7 +382,7 @@ void main() {
     final Rect switchRect = tester.getRect(find.byType(Switch));
     final TestGesture gesture = await tester.startGesture(switchRect.centerLeft);
     await tester.pump();
-    await gesture.moveBy(new Offset(switchRect.width, 0.0));
+    await gesture.moveBy(Offset(switchRect.width, 0.0));
     await tester.pump();
     await gesture.up();
     await tester.pump();
@@ -398,16 +398,16 @@ void main() {
     SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
-    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Switch(
+            return Material(
+              child: Center(
+                child: Switch(
                   value: value,
                   onChanged: (bool newValue) {
                     setState(() {
@@ -442,25 +442,25 @@ void main() {
     SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvent = message;
     });
-    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new StatefulBuilder(
+      MaterialApp(
+        home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             void onChanged(bool newValue) {
               setState(() {
                 value = newValue;
               });
             }
-            return new Material(
-              child: new MergeSemantics(
-                child: new ListTile(
+            return Material(
+              child: MergeSemantics(
+                child: ListTile(
                   leading: const Text('test'),
                   onTap: () {
                     onChanged(!value);
                   },
-                  trailing: new Switch(
+                  trailing: Switch(
                     value: value,
                     onChanged: onChanged,
                   ),

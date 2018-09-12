@@ -10,16 +10,16 @@ void main() {
     final Map<int, Animation<double>> animations = <int, Animation<double>>{};
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new AnimatedList(
+        child: AnimatedList(
           initialItemCount: 2,
           itemBuilder: (BuildContext context, int index, Animation<double> animation) {
             animations[index] = animation;
-            return new SizedBox(
+            return SizedBox(
               height: 100.0,
-              child: new Center(
-                child: new Text('item $index'),
+              child: Center(
+                child: Text('item $index'),
               ),
             );
           },
@@ -36,22 +36,22 @@ void main() {
   });
 
   testWidgets('AnimatedList insert', (WidgetTester tester) async {
-    final GlobalKey<AnimatedListState> listKey = new GlobalKey<AnimatedListState>();
+    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new AnimatedList(
+        child: AnimatedList(
           key: listKey,
           itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-            return new SizeTransition(
-              key: new ValueKey<int>(index),
+            return SizeTransition(
+              key: ValueKey<int>(index),
               axis: Axis.vertical,
               sizeFactor: animation,
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
-                child: new Center(
-                  child: new Text('item $index'),
+                child: Center(
+                  child: Text('item $index'),
                 ),
               ),
             );
@@ -60,9 +60,9 @@ void main() {
       ),
     );
 
-    double itemHeight(int index) => tester.getSize(find.byKey(new ValueKey<int>(index), skipOffstage: false)).height;
-    double itemTop(int index) => tester.getTopLeft(find.byKey(new ValueKey<int>(index), skipOffstage: false)).dy;
-    double itemBottom(int index) => tester.getBottomLeft(find.byKey(new ValueKey<int>(index), skipOffstage: false)).dy;
+    double itemHeight(int index) => tester.getSize(find.byKey(ValueKey<int>(index), skipOffstage: false)).height;
+    double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
+    double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dy;
 
     listKey.currentState.insertItem(0, duration: const Duration(milliseconds: 100));
     await tester.pump();
@@ -110,27 +110,27 @@ void main() {
   });
 
   testWidgets('AnimatedList remove', (WidgetTester tester) async {
-    final GlobalKey<AnimatedListState> listKey = new GlobalKey<AnimatedListState>();
+    final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
     final List<int> items = <int>[0, 1, 2];
 
     Widget buildItem(BuildContext context, int item, Animation<double> animation) {
-      return new SizeTransition(
-        key: new ValueKey<int>(item),
+      return SizeTransition(
+        key: ValueKey<int>(item),
         axis: Axis.vertical,
         sizeFactor: animation,
-        child: new SizedBox(
+        child: SizedBox(
           height: 100.0,
-          child: new Center(
-            child: new Text('item $item', textDirection: TextDirection.ltr),
+          child: Center(
+            child: Text('item $item', textDirection: TextDirection.ltr),
           ),
         ),
       );
     }
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new AnimatedList(
+        child: AnimatedList(
           key: listKey,
           initialItemCount: 3,
           itemBuilder: (BuildContext context, int index, Animation<double> animation) {
@@ -140,8 +140,8 @@ void main() {
       ),
     );
 
-    double itemTop(int index) => tester.getTopLeft(find.byKey(new ValueKey<int>(index))).dy;
-    double itemBottom(int index) => tester.getBottomLeft(find.byKey(new ValueKey<int>(index))).dy;
+    double itemTop(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index))).dy;
+    double itemBottom(int index) => tester.getBottomLeft(find.byKey(ValueKey<int>(index))).dy;
 
     expect(find.text('item 0'), findsOneWidget);
     expect(find.text('item 1'), findsOneWidget);

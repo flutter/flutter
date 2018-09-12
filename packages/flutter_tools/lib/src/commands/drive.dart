@@ -254,7 +254,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     package,
     mainPath: mainPath,
     route: command.route,
-    debuggingOptions: new DebuggingOptions.enabled(
+    debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,

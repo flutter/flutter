@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('BorderRadius control test', () {
-    final Rect rect = new Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
+    final Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
     BorderRadius borderRadius;
 
     borderRadius = const BorderRadius.all(Radius.elliptical(5.0, 7.0));
@@ -16,15 +16,15 @@ void main() {
     expect(borderRadius.topRight, const Radius.elliptical(5.0, 7.0));
     expect(borderRadius.bottomLeft, const Radius.elliptical(5.0, 7.0));
     expect(borderRadius.bottomRight, const Radius.elliptical(5.0, 7.0));
-    expect(borderRadius.toRRect(rect), new RRect.fromRectXY(rect, 5.0, 7.0));
+    expect(borderRadius.toRRect(rect), RRect.fromRectXY(rect, 5.0, 7.0));
 
-    borderRadius = new BorderRadius.circular(3.0);
+    borderRadius = BorderRadius.circular(3.0);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topLeft, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.topRight, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.bottomLeft, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.bottomRight, const Radius.elliptical(3.0, 3.0));
-    expect(borderRadius.toRRect(rect), new RRect.fromRectXY(rect, 3.0, 3.0));
+    expect(borderRadius.toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
     const Radius radius1 = Radius.elliptical(89.0, 87.0);
     const Radius radius2 = Radius.elliptical(103.0, 107.0);
@@ -35,7 +35,7 @@ void main() {
     expect(borderRadius.topRight, radius1);
     expect(borderRadius.bottomLeft, radius2);
     expect(borderRadius.bottomRight, radius2);
-    expect(borderRadius.toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
       topRight: radius1,
@@ -49,7 +49,7 @@ void main() {
     expect(borderRadius.topRight, radius2);
     expect(borderRadius.bottomLeft, radius1);
     expect(borderRadius.bottomRight, radius2);
-    expect(borderRadius.toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
       topRight: radius2,
@@ -63,7 +63,7 @@ void main() {
     expect(borderRadius.topRight, Radius.zero);
     expect(borderRadius.bottomLeft, Radius.zero);
     expect(borderRadius.bottomRight, Radius.zero);
-    expect(borderRadius.toRRect(rect), new RRect.fromRectAndCorners(rect));
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(rect));
 
     borderRadius = const BorderRadius.only(topRight: radius1, bottomRight: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -71,7 +71,7 @@ void main() {
     expect(borderRadius.topRight, radius1);
     expect(borderRadius.bottomLeft, Radius.zero);
     expect(borderRadius.bottomRight, radius2);
-    expect(borderRadius.toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: Radius.zero,
       topRight: radius1,
@@ -113,28 +113,28 @@ void main() {
     );
 
     expect(
-      new BorderRadius.circular(15.0) / 10.0,
-      new BorderRadius.circular(1.5),
+      BorderRadius.circular(15.0) / 10.0,
+      BorderRadius.circular(1.5),
     );
 
     expect(
-      new BorderRadius.circular(15.0) ~/ 10.0,
-      new BorderRadius.circular(1.0),
+      BorderRadius.circular(15.0) ~/ 10.0,
+      BorderRadius.circular(1.0),
     );
 
     expect(
-      new BorderRadius.circular(15.0) % 10.0,
-      new BorderRadius.circular(5.0),
+      BorderRadius.circular(15.0) % 10.0,
+      BorderRadius.circular(5.0),
     );
   });
 
   test('BorderRadius.lerp() invariants', () {
-    final BorderRadius a = new BorderRadius.circular(10.0);
-    final BorderRadius b = new BorderRadius.circular(20.0);
+    final BorderRadius a = BorderRadius.circular(10.0);
+    final BorderRadius b = BorderRadius.circular(20.0);
     expect(BorderRadius.lerp(a, b, 0.25), equals(a * 1.25));
     expect(BorderRadius.lerp(a, b, 0.25), equals(b * 0.625));
-    expect(BorderRadius.lerp(a, b, 0.25), equals(a + new BorderRadius.circular(2.5)));
-    expect(BorderRadius.lerp(a, b, 0.25), equals(b - new BorderRadius.circular(7.5)));
+    expect(BorderRadius.lerp(a, b, 0.25), equals(a + BorderRadius.circular(2.5)));
+    expect(BorderRadius.lerp(a, b, 0.25), equals(b - BorderRadius.circular(7.5)));
 
     expect(BorderRadius.lerp(null, null, 0.25), isNull);
     expect(BorderRadius.lerp(null, b, 0.25), equals(b * 0.25));
@@ -162,7 +162,7 @@ void main() {
   });
 
   test('BorderRadiusDirectional control test', () {
-    final Rect rect = new Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
+    final Rect rect = Rect.fromLTRB(19.0, 23.0, 29.0, 31.0);
     BorderRadiusDirectional borderRadius;
 
     borderRadius = const BorderRadiusDirectional.all(Radius.elliptical(5.0, 7.0));
@@ -171,17 +171,17 @@ void main() {
     expect(borderRadius.topEnd, const Radius.elliptical(5.0, 7.0));
     expect(borderRadius.bottomStart, const Radius.elliptical(5.0, 7.0));
     expect(borderRadius.bottomEnd, const Radius.elliptical(5.0, 7.0));
-    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), new RRect.fromRectXY(rect, 5.0, 7.0));
-    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), new RRect.fromRectXY(rect, 5.0, 7.0));
+    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectXY(rect, 5.0, 7.0));
+    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectXY(rect, 5.0, 7.0));
 
-    borderRadius = new BorderRadiusDirectional.circular(3.0);
+    borderRadius = BorderRadiusDirectional.circular(3.0);
     expect(borderRadius, hasOneLineDescription);
     expect(borderRadius.topStart, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.topEnd, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.bottomStart, const Radius.elliptical(3.0, 3.0));
     expect(borderRadius.bottomEnd, const Radius.elliptical(3.0, 3.0));
-    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), new RRect.fromRectXY(rect, 3.0, 3.0));
-    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), new RRect.fromRectXY(rect, 3.0, 3.0));
+    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
+    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectXY(rect, 3.0, 3.0));
 
     const Radius radius1 = Radius.elliptical(89.0, 87.0);
     const Radius radius2 = Radius.elliptical(103.0, 107.0);
@@ -192,14 +192,14 @@ void main() {
     expect(borderRadius.topEnd, radius1);
     expect(borderRadius.bottomStart, radius2);
     expect(borderRadius.bottomEnd, radius2);
-    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
       topRight: radius1,
       bottomLeft: radius2,
       bottomRight: radius2,
     ));
-    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
       topRight: radius1,
@@ -213,14 +213,14 @@ void main() {
     expect(borderRadius.topEnd, radius2);
     expect(borderRadius.bottomStart, radius1);
     expect(borderRadius.bottomEnd, radius2);
-    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
       topRight: radius2,
       bottomLeft: radius1,
       bottomRight: radius2,
     ));
-    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius2,
       topRight: radius1,
@@ -234,8 +234,8 @@ void main() {
     expect(borderRadius.topEnd, Radius.zero);
     expect(borderRadius.bottomStart, Radius.zero);
     expect(borderRadius.bottomEnd, Radius.zero);
-    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), new RRect.fromRectAndCorners(rect));
-    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), new RRect.fromRectAndCorners(rect));
+    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectAndCorners(rect));
+    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectAndCorners(rect));
 
     borderRadius = const BorderRadiusDirectional.only(topEnd: radius1, bottomEnd: radius2);
     expect(borderRadius, hasOneLineDescription);
@@ -243,14 +243,14 @@ void main() {
     expect(borderRadius.topEnd, radius1);
     expect(borderRadius.bottomStart, Radius.zero);
     expect(borderRadius.bottomEnd, radius2);
-    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.resolve(TextDirection.ltr).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: Radius.zero,
       topRight: radius1,
       bottomLeft: Radius.zero,
       bottomRight: radius2,
     ));
-    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), new RRect.fromRectAndCorners(
+    expect(borderRadius.resolve(TextDirection.rtl).toRRect(rect), RRect.fromRectAndCorners(
       rect,
       topLeft: radius1,
       topRight: Radius.zero,
@@ -292,28 +292,28 @@ void main() {
     );
 
     expect(
-      new BorderRadiusDirectional.circular(15.0) / 10.0,
-      new BorderRadiusDirectional.circular(1.5),
+      BorderRadiusDirectional.circular(15.0) / 10.0,
+      BorderRadiusDirectional.circular(1.5),
     );
 
     expect(
-      new BorderRadiusDirectional.circular(15.0) ~/ 10.0,
-      new BorderRadiusDirectional.circular(1.0),
+      BorderRadiusDirectional.circular(15.0) ~/ 10.0,
+      BorderRadiusDirectional.circular(1.0),
     );
 
     expect(
-      new BorderRadiusDirectional.circular(15.0) % 10.0,
-      new BorderRadiusDirectional.circular(5.0),
+      BorderRadiusDirectional.circular(15.0) % 10.0,
+      BorderRadiusDirectional.circular(5.0),
     );
   });
 
   test('BorderRadiusDirectional.lerp() invariants', () {
-    final BorderRadiusDirectional a = new BorderRadiusDirectional.circular(10.0);
-    final BorderRadiusDirectional b = new BorderRadiusDirectional.circular(20.0);
+    final BorderRadiusDirectional a = BorderRadiusDirectional.circular(10.0);
+    final BorderRadiusDirectional b = BorderRadiusDirectional.circular(20.0);
     expect(BorderRadiusDirectional.lerp(a, b, 0.25), equals(a * 1.25));
     expect(BorderRadiusDirectional.lerp(a, b, 0.25), equals(b * 0.625));
-    expect(BorderRadiusDirectional.lerp(a, b, 0.25), equals(a + new BorderRadiusDirectional.circular(2.5)));
-    expect(BorderRadiusDirectional.lerp(a, b, 0.25), equals(b - new BorderRadiusDirectional.circular(7.5)));
+    expect(BorderRadiusDirectional.lerp(a, b, 0.25), equals(a + BorderRadiusDirectional.circular(2.5)));
+    expect(BorderRadiusDirectional.lerp(a, b, 0.25), equals(b - BorderRadiusDirectional.circular(7.5)));
 
     expect(BorderRadiusDirectional.lerp(null, null, 0.25), isNull);
     expect(BorderRadiusDirectional.lerp(null, b, 0.25), equals(b * 0.25));
@@ -380,13 +380,13 @@ void main() {
       bottomStart: Radius.elliptical(120.0, 130.0),
       bottomEnd: Radius.elliptical(140.0, 150.0),
     );
-    expect((a.subtract(b)).resolve(TextDirection.ltr), new BorderRadius.only(
+    expect((a.subtract(b)).resolve(TextDirection.ltr), BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0) - Radius.zero,
       topRight: const Radius.elliptical(30.0, 40.0) - const Radius.elliptical(100.0, 110.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0) - const Radius.elliptical(120.0, 130.0),
       bottomRight: Radius.zero - const Radius.elliptical(140.0, 150.0),
     ));
-    expect((a.subtract(b)).resolve(TextDirection.rtl), new BorderRadius.only(
+    expect((a.subtract(b)).resolve(TextDirection.rtl), BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0) - const Radius.elliptical(100.0, 110.0),
       topRight: const Radius.elliptical(30.0, 40.0) - Radius.zero,
       bottomLeft: const Radius.elliptical(50.0, 60.0) - const Radius.elliptical(140.0, 150.0),
@@ -405,13 +405,13 @@ void main() {
       bottomStart: Radius.elliptical(120.0, 130.0),
       bottomEnd: Radius.elliptical(140.0, 150.0),
     );
-    expect((a.add(b)).resolve(TextDirection.ltr), new BorderRadius.only(
+    expect((a.add(b)).resolve(TextDirection.ltr), BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0) + Radius.zero,
       topRight: const Radius.elliptical(30.0, 40.0) + const Radius.elliptical(100.0, 110.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0) + const Radius.elliptical(120.0, 130.0),
       bottomRight: Radius.zero + const Radius.elliptical(140.0, 150.0),
     ));
-    expect((a.add(b)).resolve(TextDirection.rtl), new BorderRadius.only(
+    expect((a.add(b)).resolve(TextDirection.rtl), BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0) + const Radius.elliptical(100.0, 110.0),
       topRight: const Radius.elliptical(30.0, 40.0) + Radius.zero,
       bottomLeft: const Radius.elliptical(50.0, 60.0) + const Radius.elliptical(140.0, 150.0),
@@ -430,13 +430,13 @@ void main() {
       bottomStart: Radius.elliptical(120.0, 130.0),
       bottomEnd: Radius.elliptical(140.0, 150.0),
     );
-    expect((a.add(b) * 0.5).resolve(TextDirection.ltr), new BorderRadius.only(
+    expect((a.add(b) * 0.5).resolve(TextDirection.ltr), BorderRadius.only(
       topLeft: (const Radius.elliptical(10.0, 20.0) + Radius.zero) / 2.0,
       topRight: (const Radius.elliptical(30.0, 40.0) + const Radius.elliptical(100.0, 110.0)) / 2.0,
       bottomLeft: (const Radius.elliptical(50.0, 60.0) + const Radius.elliptical(120.0, 130.0)) / 2.0,
       bottomRight: (Radius.zero + const Radius.elliptical(140.0, 150.0)) / 2.0,
     ));
-    expect((a.add(b) * 0.5).resolve(TextDirection.rtl), new BorderRadius.only(
+    expect((a.add(b) * 0.5).resolve(TextDirection.rtl), BorderRadius.only(
       topLeft: (const Radius.elliptical(10.0, 20.0) + const Radius.elliptical(100.0, 110.0)) / 2.0,
       topRight: (const Radius.elliptical(30.0, 40.0) + Radius.zero) / 2.0,
       bottomLeft: (const Radius.elliptical(50.0, 60.0) + const Radius.elliptical(140.0, 150.0)) / 2.0,

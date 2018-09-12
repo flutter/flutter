@@ -61,7 +61,7 @@ class AppContext {
   List<Type> _reentrantChecks;
 
   /// Bootstrap context.
-  static final AppContext _root = new AppContext._(null, 'ROOT');
+  static final AppContext _root = AppContext._(null, 'ROOT');
 
   dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
 
@@ -90,8 +90,8 @@ class AppContext {
       final int index = _reentrantChecks.indexOf(type);
       if (index >= 0) {
         // We're already in the process of trying to generate this type.
-        throw new ContextDependencyCycleException._(
-            new UnmodifiableListView<Type>(_reentrantChecks.sublist(index)));
+        throw ContextDependencyCycleException._(
+            UnmodifiableListView<Type>(_reentrantChecks.sublist(index)));
       }
 
       _reentrantChecks.add(type);
@@ -132,11 +132,11 @@ class AppContext {
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
   }) async {
-    final AppContext child = new AppContext._(
+    final AppContext child = AppContext._(
       this,
       name,
-      new Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
-      new Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
+      Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
+      Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
     );
     return await runZoned<Future<V>>(
       () async => await body(),
@@ -146,7 +146,7 @@ class AppContext {
 
   @override
   String toString() {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuffer buf = StringBuffer();
     String indent = '';
     AppContext ctx = this;
     while (ctx != null) {

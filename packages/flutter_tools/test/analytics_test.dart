@@ -51,13 +51,13 @@ void main() {
 
       count = 0;
       flutterUsage.enabled = false;
-      final DoctorCommand doctorCommand = new DoctorCommand();
+      final DoctorCommand doctorCommand = DoctorCommand();
       final CommandRunner<Null>runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => new FlutterVersion(const Clock()),
-      Usage: () => new Usage(configDirOverride: tempDir.path),
+      FlutterVersion: () => FlutterVersion(const Clock()),
+      Usage: () => Usage(configDirOverride: tempDir.path),
     });
 
     // Ensure we don't send for the 'flutter config' command.
@@ -66,7 +66,7 @@ void main() {
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       flutterUsage.enabled = false;
-      final ConfigCommand command = new ConfigCommand();
+      final ConfigCommand command = ConfigCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
@@ -75,8 +75,8 @@ void main() {
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => new FlutterVersion(const Clock()),
-      Usage: () => new Usage(configDirOverride: tempDir.path),
+      FlutterVersion: () => FlutterVersion(const Clock()),
+      Usage: () => Usage(configDirOverride: tempDir.path),
     });
   });
 
@@ -87,19 +87,19 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
-      mockUsage = new MockUsage();
+      mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(false);
-      mockClock = new MockClock();
-      mockDoctor = new MockDoctor();
+      mockClock = MockClock();
+      mockDoctor = MockDoctor();
       when(mockClock.now()).thenAnswer(
-        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
+        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
     });
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
-      final DoctorCommand command = new DoctorCommand();
+      final DoctorCommand command = DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
@@ -118,7 +118,7 @@ void main() {
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
       when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
-      final DoctorCommand command = new DoctorCommand();
+      final DoctorCommand command = DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
 
@@ -135,14 +135,14 @@ void main() {
     });
 
     testUsingContext('single command usage path', () async {
-      final FlutterCommand doctorCommand = new DoctorCommand();
+      final FlutterCommand doctorCommand = DoctorCommand();
       expect(await doctorCommand.usagePath, 'doctor');
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });
 
     testUsingContext('compound command usage path', () async {
-      final BuildCommand buildCommand = new BuildCommand();
+      final BuildCommand buildCommand = BuildCommand();
       final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'];
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
@@ -168,7 +168,7 @@ void main() {
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      Usage: () => new Usage(
+      Usage: () => Usage(
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
         configDirOverride: tempDir.path,
@@ -183,7 +183,7 @@ void main() {
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      Usage: () => new Usage(
+      Usage: () => Usage(
         settingsName: 'flutter_bot_test',
         versionOverride: 'dev/unknown',
         configDirOverride: tempDir.path,

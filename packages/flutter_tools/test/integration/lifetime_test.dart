@@ -18,14 +18,14 @@ const Duration requiredLifespan = Duration(seconds: 5);
 
 void main() {
   group('flutter run', () {
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
     FlutterTestDriver _flutter;
     Directory tempDir;
 
     setUp(() async {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_lifetime_test.');
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -35,13 +35,13 @@ void main() {
 
     test('does not terminate when a debugger is attached', () async {
       await _flutter.run(withDebugger: true);
-      await new Future<void>.delayed(requiredLifespan);
+      await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
 
     test('does not terminate when a debugger is attached and pause-on-exceptions', () async {
       await _flutter.run(withDebugger: true, pauseOnExceptions: true);
-      await new Future<void>.delayed(requiredLifespan);
+      await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
   }, timeout: const Timeout.factor(6));

@@ -39,7 +39,7 @@ class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, Gest
 
 TestRenderingFlutterBinding _renderer;
 TestRenderingFlutterBinding get renderer {
-  _renderer ??= new TestRenderingFlutterBinding();
+  _renderer ??= TestRenderingFlutterBinding();
   return _renderer;
 }
 
@@ -65,9 +65,9 @@ void layout(RenderBox box, {
 
   renderer.renderView.child = null;
   if (constraints != null) {
-    box = new RenderPositionedBox(
+    box = RenderPositionedBox(
       alignment: alignment,
-      child: new RenderConstrainedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: constraints,
         child: box
       )

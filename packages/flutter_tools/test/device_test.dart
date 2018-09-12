@@ -13,17 +13,17 @@ void main() {
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.
-      final DeviceManager deviceManager = new DeviceManager();
+      final DeviceManager deviceManager = DeviceManager();
       final List<Device> devices = await deviceManager.getDevices().toList();
       expect(devices, isList);
     });
 
     testUsingContext('getDeviceById', () async {
-      final _MockDevice device1 = new _MockDevice('Nexus 5', '0553790d0a4e726f');
-      final _MockDevice device2 = new _MockDevice('Nexus 5X', '01abfc49119c410e');
-      final _MockDevice device3 = new _MockDevice('iPod touch', '82564b38861a9a5');
+      final _MockDevice device1 = _MockDevice('Nexus 5', '0553790d0a4e726f');
+      final _MockDevice device2 = _MockDevice('Nexus 5X', '01abfc49119c410e');
+      final _MockDevice device3 = _MockDevice('iPod touch', '82564b38861a9a5');
       final List<Device> devices = <Device>[device1, device2, device3];
-      final DeviceManager deviceManager = new TestDeviceManager(devices);
+      final DeviceManager deviceManager = TestDeviceManager(devices);
 
       Future<Null> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id).toList(), expected);
@@ -45,7 +45,7 @@ class TestDeviceManager extends DeviceManager {
 
   @override
   Stream<Device> getAllConnectedDevices() {
-    return new Stream<Device>.fromIterable(allDevices);
+    return Stream<Device>.fromIterable(allDevices);
   }
 }
 

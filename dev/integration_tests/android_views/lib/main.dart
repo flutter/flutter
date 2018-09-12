@@ -23,7 +23,7 @@ const String kEventsFileName = 'touchEvents';
 /// set by the app in which case the requestData call will only complete once the app is ready
 /// for it.
 class FutureDataHandler {
-  final Completer<DataHandler> handlerCompleter = new Completer<DataHandler>();
+  final Completer<DataHandler> handlerCompleter = Completer<DataHandler>();
 
   Future<String> handleMessage(String message) async {
     final DataHandler handler = await handlerCompleter.future;
@@ -31,20 +31,20 @@ class FutureDataHandler {
   }
 }
 
-FutureDataHandler driverDataHandler = new FutureDataHandler();
+FutureDataHandler driverDataHandler = FutureDataHandler();
 
 void main() {
   enableFlutterDriverExtension(handler: driverDataHandler.handleMessage);
-  runApp(new MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Android Views Integration Test',
-      home: new Scaffold(
-        body: new PlatformViewPage(),
+      home: Scaffold(
+        body: PlatformViewPage(),
       ),
     );
   }
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
 
 class PlatformViewPage extends StatefulWidget {
   @override
-  State createState() => new PlatformViewState();
+  State createState() => PlatformViewState();
 }
 
 class PlatformViewState extends State<PlatformViewPage> {
@@ -68,27 +68,27 @@ class PlatformViewState extends State<PlatformViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Column(
+    return Column(
       children: <Widget>[
-        new SizedBox(
+        SizedBox(
           height: 300.0,
-          child: new AndroidView(
+          child: AndroidView(
               viewType: 'simple_view',
               onPlatformViewCreated: onPlatformViewCreated),
         ),
-        new Expanded(
-          child: new ListView.builder(
+        Expanded(
+          child: ListView.builder(
             itemBuilder: buildEventTile,
             itemCount: flutterViewEvents.length,
           ),
         ),
-        new Row(
+        Row(
           children: <Widget>[
-            new RaisedButton(
+            RaisedButton(
               child: const Text('RECORD'),
               onPressed: listenToFlutterViewEvents,
             ),
-            new RaisedButton(
+            RaisedButton(
               child: const Text('CLEAR'),
               onPressed: () {
                 setState(() {
@@ -97,7 +97,7 @@ class PlatformViewState extends State<PlatformViewPage> {
                 });
               },
             ),
-            new RaisedButton(
+            RaisedButton(
               child: const Text('SAVE'),
               onPressed: () {
                 const StandardMessageCodec codec = StandardMessageCodec();
@@ -105,7 +105,7 @@ class PlatformViewState extends State<PlatformViewPage> {
                     codec.encodeMessage(flutterViewEvents), context);
               },
             ),
-            new RaisedButton(
+            RaisedButton(
               key: const ValueKey<String>('play'),
               child: const Text('PLAY FILE'),
               onPressed: () { playEventsFile(); },
@@ -138,7 +138,7 @@ class PlatformViewState extends State<PlatformViewPage> {
       if (flutterViewEvents.length != embeddedViewEvents.length)
         return 'Synthesized ${flutterViewEvents.length} events but the embedded view received ${embeddedViewEvents.length} events';
 
-      final StringBuffer diff = new StringBuffer();
+      final StringBuffer diff = StringBuffer();
       for (int i = 0; i < flutterViewEvents.length; ++i) {
         final String currentDiff = diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
         if (currentDiff.isEmpty)
@@ -168,7 +168,7 @@ class PlatformViewState extends State<PlatformViewPage> {
     try {
       final Directory outDir = await getExternalStorageDirectory();
       // This test only runs on Android so we can assume path separator is '/'.
-      final File file = new File('${outDir.path}/$kEventsFileName');
+      final File file = File('${outDir.path}/$kEventsFileName');
       await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
       showMessage(context, 'Saved original events to ${file.path}');
     } catch (e) {
@@ -177,14 +177,14 @@ class PlatformViewState extends State<PlatformViewPage> {
   }
 
   void showMessage(BuildContext context, String message) {
-    Scaffold.of(context).showSnackBar(new SnackBar(
-      content: new Text(message),
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text(message),
       duration: const Duration(seconds: 3),
     ));
   }
 
   void onPlatformViewCreated(int id) {
-    viewChannel = new MethodChannel('simple_view/$id');
+    viewChannel = MethodChannel('simple_view/$id');
     viewChannel.setMethodCallHandler(onViewMethodChannelCall);
     driverDataHandler.handlerCompleter.complete(handleDriverMessage);
   }
@@ -192,7 +192,7 @@ class PlatformViewState extends State<PlatformViewPage> {
   void listenToFlutterViewEvents() {
     channel.invokeMethod('pipeFlutterViewEvents');
     viewChannel.invokeMethod('pipeTouchEvents');
-    new Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       channel.invokeMethod('stopFlutterViewEvents');
       viewChannel.invokeMethod('stopTouchEvents');
     });
@@ -216,7 +216,7 @@ class PlatformViewState extends State<PlatformViewPage> {
         setState(() {});
         break;
     }
-    return new Future<dynamic>.sync(null);
+    return Future<dynamic>.sync(null);
   }
 
   Future<dynamic> onViewMethodChannelCall(MethodCall call) {
@@ -229,14 +229,14 @@ class PlatformViewState extends State<PlatformViewPage> {
         setState(() {});
         break;
     }
-    return new Future<dynamic>.sync(null);
+    return Future<dynamic>.sync(null);
   }
 
   Widget buildEventTile(BuildContext context, int index) {
     if (embeddedViewEvents.length > index)
-      return new TouchEventDiff(
+      return TouchEventDiff(
           flutterViewEvents[index], embeddedViewEvents[index]);
-    return new Text(
+    return Text(
         'Unmatched event, action: ${flutterViewEvents[index]['action']}');
   }
 }
@@ -262,23 +262,23 @@ class TouchEventDiff extends StatelessWidget {
       color = Colors.red;
       msg = '[$actionName] $diff';
     }
-    return new GestureDetector(
+    return GestureDetector(
       onLongPress: () {
         print('expected:');
         prettyPrintEvent(originalEvent);
         print('\nactual:');
         prettyPrintEvent(synthesizedEvent);
       },
-      child: new Container(
+      child: Container(
         color: color,
         margin: const EdgeInsets.only(bottom: 2.0),
-        child: new Text(msg),
+        child: Text(msg),
       ),
     );
   }
 
   void prettyPrintEvent(Map<String, dynamic> event) {
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     final int action = event['action'];
     final int maskedAction = getActionMasked(action);
     final String actionName = getActionName(maskedAction, action);

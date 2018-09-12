@@ -25,7 +25,7 @@ void main() {
       // period of increased load on the device. Without this delay, the
       // benchmark has greater noise.
       // See: https://github.com/flutter/flutter/issues/19434
-      await new Future<Null>.delayed(const Duration(milliseconds: 250));
+      await Future<Null>.delayed(const Duration(milliseconds: 250));
       final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
         final SerializableFinder list = find.byValueKey(listKey);
@@ -34,17 +34,17 @@ void main() {
         // Scroll down
         for (int i = 0; i < 5; i += 1) {
           await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
-          await new Future<Null>.delayed(const Duration(milliseconds: 500));
+          await Future<Null>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i += 1) {
           await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
-          await new Future<Null>.delayed(const Duration(milliseconds: 500));
+          await Future<Null>.delayed(const Duration(milliseconds: 500));
         }
       });
 
-      final TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       summary.writeSummaryToFile(summaryName, pretty: true);
       summary.writeTimelineToFile(summaryName, pretty: true);
     }

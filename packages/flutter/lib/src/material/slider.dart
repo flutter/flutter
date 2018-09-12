@@ -328,14 +328,14 @@ class Slider extends StatefulWidget {
   final SemanticFormatterCallback semanticFormatterCallback;
 
   @override
-  _SliderState createState() => new _SliderState();
+  _SliderState createState() => _SliderState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('value', value));
-    properties.add(new DoubleProperty('min', min));
-    properties.add(new DoubleProperty('max', max));
+    properties.add(DoubleProperty('value', value));
+    properties.add(DoubleProperty('min', min));
+    properties.add(DoubleProperty('max', max));
   }
 }
 
@@ -359,19 +359,19 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    overlayController = new AnimationController(
+    overlayController = AnimationController(
       duration: kRadialReactionDuration,
       vsync: this,
     );
-    valueIndicatorController = new AnimationController(
+    valueIndicatorController = AnimationController(
       duration: valueIndicatorAnimationDuration,
       vsync: this,
     );
-    enableController = new AnimationController(
+    enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
     );
-    positionController = new AnimationController(
+    positionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
     );
@@ -444,7 +444,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       );
     }
 
-    return new _SliderRenderObjectWidget(
+    return _SliderRenderObjectWidget(
       value: _unlerp(widget.value),
       divisions: widget.divisions,
       label: widget.label,
@@ -487,7 +487,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
-    return new _RenderSlider(
+    return _RenderSlider(
       value: value,
       divisions: divisions,
       label: label,
@@ -554,27 +554,27 @@ class _RenderSlider extends RenderBox {
        _state = state,
        _textDirection = textDirection {
     _updateLabelPainter();
-    final GestureArenaTeam team = new GestureArenaTeam();
-    _drag = new HorizontalDragGestureRecognizer()
+    final GestureArenaTeam team = GestureArenaTeam();
+    _drag = HorizontalDragGestureRecognizer()
       ..team = team
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd
       ..onCancel = _endInteraction;
-    _tap = new TapGestureRecognizer()
+    _tap = TapGestureRecognizer()
       ..team = team
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
-    _overlayAnimation = new CurvedAnimation(
+    _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
       curve: Curves.fastOutSlowIn,
     );
-    _valueIndicatorAnimation = new CurvedAnimation(
+    _valueIndicatorAnimation = CurvedAnimation(
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
     );
-    _enableAnimation = new CurvedAnimation(
+    _enableAnimation = CurvedAnimation(
       parent: _state.enableController,
       curve: Curves.easeInOut,
     );
@@ -587,13 +587,13 @@ class _RenderSlider extends RenderBox {
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
-  static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
+  static final Tween<double> _overlayRadiusTween = Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
   Animation<double> _overlayAnimation;
   Animation<double> _valueIndicatorAnimation;
   Animation<double> _enableAnimation;
-  final TextPainter _labelPainter = new TextPainter();
+  final TextPainter _labelPainter = TextPainter();
   HorizontalDragGestureRecognizer _drag;
   TapGestureRecognizer _tap;
   bool _active = false;
@@ -768,7 +768,7 @@ class _RenderSlider extends RenderBox {
   void _updateLabelPainter() {
     if (label != null) {
       _labelPainter
-        ..text = new TextSpan(
+        ..text = TextSpan(
           style: _sliderTheme.valueIndicatorTextStyle,
           text: label,
         )
@@ -840,7 +840,7 @@ class _RenderSlider extends RenderBox {
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
         _state.interactionTimer?.cancel();
-        _state.interactionTimer = new Timer(_minimumInteractionTime * timeDilation, () {
+        _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
           _state.interactionTimer = null;
           if (!_active &&
               _state.valueIndicatorController.status == AnimationStatus.completed) {
@@ -927,7 +927,7 @@ class _RenderSlider extends RenderBox {
 
   @override
   void performResize() {
-    size = new Size(
+    size = Size(
       constraints.hasBoundedWidth ? constraints.maxWidth : _preferredTotalWidth,
       constraints.hasBoundedHeight ? constraints.maxHeight : _overlayDiameter,
     );
@@ -949,7 +949,7 @@ class _RenderSlider extends RenderBox {
       if (dx >= 3.0 * _trackHeight) {
         for (int i = 0; i <= divisions; i += 1) {
           final double left = trackLeft.left + i * dx;
-          final Offset center = new Offset(left + tickRadius, trackLeft.top + tickRadius);
+          final Offset center = Offset(left + tickRadius, trackLeft.top + tickRadius);
           if (trackLeft.contains(center)) {
             canvas.drawCircle(center, tickRadius, leftPaint);
           } else if (trackRight.contains(center)) {
@@ -967,7 +967,7 @@ class _RenderSlider extends RenderBox {
       // and 32% for colored material, but we don't really have a way to
       // know what the underlying color is, so there's no easy way to
       // implement this. Choosing the "light" version for now.
-      final Paint overlayPaint = new Paint()..color = _sliderTheme.overlayColor;
+      final Paint overlayPaint = Paint()..color = _sliderTheme.overlayColor;
       final double radius = _overlayRadiusTween.evaluate(_overlayAnimation);
       canvas.drawCircle(center, radius, overlayPaint);
     }
@@ -979,15 +979,15 @@ class _RenderSlider extends RenderBox {
 
     final double trackLength = size.width - 2 * _overlayRadius;
     final double value = _state.positionController.value;
-    final ColorTween activeTrackEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveTrackColor, end: _sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveTrackColor, end: _sliderTheme.inactiveTrackColor);
-    final ColorTween activeTickMarkEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveTickMarkColor, end: _sliderTheme.activeTickMarkColor);
-    final ColorTween inactiveTickMarkEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveTickMarkColor, end: _sliderTheme.inactiveTickMarkColor);
+    final ColorTween activeTrackEnableColor = ColorTween(begin: _sliderTheme.disabledActiveTrackColor, end: _sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackEnableColor = ColorTween(begin: _sliderTheme.disabledInactiveTrackColor, end: _sliderTheme.inactiveTrackColor);
+    final ColorTween activeTickMarkEnableColor = ColorTween(begin: _sliderTheme.disabledActiveTickMarkColor, end: _sliderTheme.activeTickMarkColor);
+    final ColorTween inactiveTickMarkEnableColor = ColorTween(begin: _sliderTheme.disabledInactiveTickMarkColor, end: _sliderTheme.inactiveTickMarkColor);
 
-    final Paint activeTrackPaint = new Paint()..color = activeTrackEnableColor.evaluate(_enableAnimation);
-    final Paint inactiveTrackPaint = new Paint()..color = inactiveTrackEnableColor.evaluate(_enableAnimation);
-    final Paint activeTickMarkPaint = new Paint()..color = activeTickMarkEnableColor.evaluate(_enableAnimation);
-    final Paint inactiveTickMarkPaint = new Paint()..color = inactiveTickMarkEnableColor.evaluate(_enableAnimation);
+    final Paint activeTrackPaint = Paint()..color = activeTrackEnableColor.evaluate(_enableAnimation);
+    final Paint inactiveTrackPaint = Paint()..color = inactiveTrackEnableColor.evaluate(_enableAnimation);
+    final Paint activeTickMarkPaint = Paint()..color = activeTickMarkEnableColor.evaluate(_enableAnimation);
+    final Paint inactiveTickMarkPaint = Paint()..color = inactiveTickMarkEnableColor.evaluate(_enableAnimation);
 
     double visualPosition;
     Paint leftTrackPaint;
@@ -1023,10 +1023,10 @@ class _RenderSlider extends RenderBox {
     final double thumbRadius = _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width / 2.0;
     final double trackActiveLeft = math.max(0.0, trackActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
     final double trackActiveRight = math.min(trackActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), trackRight);
-    final Rect trackLeftRect = new Rect.fromLTRB(trackLeft, trackTop, trackActiveLeft, trackBottom);
-    final Rect trackRightRect = new Rect.fromLTRB(trackActiveRight, trackTop, trackRight, trackBottom);
+    final Rect trackLeftRect = Rect.fromLTRB(trackLeft, trackTop, trackActiveLeft, trackBottom);
+    final Rect trackRightRect = Rect.fromLTRB(trackActiveRight, trackTop, trackRight, trackBottom);
 
-    final Offset thumbCenter = new Offset(trackActive, trackVerticalCenter);
+    final Offset thumbCenter = Offset(trackActive, trackVerticalCenter);
 
     // Paint the track.
     if (visualPosition > 0.0) {

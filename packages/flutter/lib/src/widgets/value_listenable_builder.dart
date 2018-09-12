@@ -86,7 +86,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   final Widget child;
 
   @override
-  State<StatefulWidget> createState() => new _ValueListenableBuilderState<T>();
+  State<StatefulWidget> createState() => _ValueListenableBuilderState<T>();
 }
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {

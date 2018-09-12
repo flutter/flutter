@@ -18,7 +18,7 @@ void main() {
 
     test('null connector', () async {
       Future<json_rpc.Peer> mockServiceFunction(Uri uri) {
-        return new Future<json_rpc.Peer>(() => null);
+        return Future<json_rpc.Peer>(() => null);
       }
 
       fuchsiaVmServiceConnectionFunction = mockServiceFunction;
@@ -27,9 +27,9 @@ void main() {
     });
 
     test('disconnect closes peer', () async {
-      final MockPeer peer = new MockPeer();
+      final MockPeer peer = MockPeer();
       Future<json_rpc.Peer> mockServiceFunction(Uri uri) {
-        return new Future<json_rpc.Peer>(() => peer);
+        return Future<json_rpc.Peer>(() => peer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockServiceFunction;
@@ -45,7 +45,7 @@ void main() {
     MockPeer mockPeer;
 
     setUp(() {
-      mockPeer = new MockPeer();
+      mockPeer = MockPeer();
     });
 
     tearDown(() {
@@ -86,9 +86,9 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
-            .thenAnswer((_) => new Future<Map<String, dynamic>>(
+            .thenAnswer((_) => Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponses));
-        return new Future<json_rpc.Peer>(() => mockPeer);
+        return Future<json_rpc.Peer>(() => mockPeer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -142,9 +142,9 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
-            .thenAnswer((_) => new Future<Map<String, dynamic>>(
+            .thenAnswer((_) => Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponses));
-        return new Future<json_rpc.Peer>(() => mockPeer);
+        return Future<json_rpc.Peer>(() => mockPeer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -190,9 +190,9 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
-            .thenAnswer((_) => new Future<Map<String, dynamic>>(
+            .thenAnswer((_) => Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponseMissingId));
-        return new Future<json_rpc.Peer>(() => mockPeer);
+        return Future<json_rpc.Peer>(() => mockPeer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -237,8 +237,8 @@ void main() {
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
             .thenAnswer((_) =>
-                new Future<Map<String, dynamic>>(() => vmCannedResponse));
-        return new Future<json_rpc.Peer>(() => mockPeer);
+                Future<Map<String, dynamic>>(() => vmCannedResponse));
+        return Future<json_rpc.Peer>(() => mockPeer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -270,9 +270,9 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
-            .thenAnswer((_) => new Future<Map<String, dynamic>>(
+            .thenAnswer((_) => Future<Map<String, dynamic>>(
                 () => flutterViewCannedResponseMissingIsolateName));
-        return new Future<json_rpc.Peer>(() => mockPeer);
+        return Future<json_rpc.Peer>(() => mockPeer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
@@ -292,7 +292,7 @@ void main() {
     MockPeer mockPeer;
 
     setUp(() {
-      mockPeer = new MockPeer();
+      mockPeer = MockPeer();
     });
 
     tearDown(() {
@@ -304,8 +304,8 @@ void main() {
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         // Return a command that will never complete.
         when(mockPeer.sendRequest(any, any))
-            .thenAnswer((_) => new Completer<Map<String, dynamic>>().future);
-        return new Future<json_rpc.Peer>(() => mockPeer);
+            .thenAnswer((_) => Completer<Map<String, dynamic>>().future);
+        return Future<json_rpc.Peer>(() => mockPeer);
       }
 
       fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;

@@ -220,7 +220,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<void>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () { onTapDown(TapDownDetails(globalPosition: initialPosition)); });
       _sentTapDown = true;
     }
   }
@@ -237,7 +237,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         return;
       }
       if (onTapUp != null)
-        invokeCallback<void>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
+        invokeCallback<void>('onTapUp', () { onTapUp(TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)
         invokeCallback<void>('onTap', onTap);
       _reset();
@@ -256,8 +256,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
-    properties.add(new DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
-    properties.add(new FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
+    properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
+    properties.add(DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
+    properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
   }
 }

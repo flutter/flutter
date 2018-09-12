@@ -8,23 +8,23 @@ class SearchDemo extends StatefulWidget {
   static const String routeName = '/material/search';
 
   @override
-  _SearchDemoState createState() => new _SearchDemoState();
+  _SearchDemoState createState() => _SearchDemoState();
 }
 
 class _SearchDemoState extends State<SearchDemo> {
-  final _SearchDemoSearchDelegate _delegate = new _SearchDemoSearchDelegate();
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final _SearchDemoSearchDelegate _delegate = _SearchDemoSearchDelegate();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int _lastIntegerSelected;
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        leading: new IconButton(
+      appBar: AppBar(
+        leading: IconButton(
           tooltip: 'Navigation menu',
-          icon: new AnimatedIcon(
+          icon: AnimatedIcon(
             icon: AnimatedIcons.menu_arrow,
             color: Colors.white,
             progress: _delegate.transitionAnimation,
@@ -35,7 +35,7 @@ class _SearchDemoState extends State<SearchDemo> {
         ),
         title: const Text('Numbers'),
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             tooltip: 'Search',
             icon: const Icon(Icons.search),
             onPressed: () async {
@@ -50,9 +50,9 @@ class _SearchDemoState extends State<SearchDemo> {
               }
             },
           ),
-          new IconButton(
+          IconButton(
             tooltip: 'More (not implemented)',
-            icon: new Icon(
+            icon: Icon(
               Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
@@ -61,15 +61,15 @@ class _SearchDemoState extends State<SearchDemo> {
           ),
         ],
       ),
-      body: new Center(
-        child: new Column(
+      body: Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new MergeSemantics(
-              child: new Column(
+            MergeSemantics(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  new Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const <Widget>[
                       Text('Press the '),
@@ -88,11 +88,11 @@ class _SearchDemoState extends State<SearchDemo> {
               ),
             ),
             const SizedBox(height: 64.0),
-            new Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
+            Text('Last selected integer: ${_lastIntegerSelected ?? 'NONE' }.')
           ],
         ),
       ),
-      floatingActionButton: new FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton.extended(
         tooltip: 'Back', // Tests depend on this label to exit the demo.
         onPressed: () {
           Navigator.of(context).pop();
@@ -100,8 +100,8 @@ class _SearchDemoState extends State<SearchDemo> {
         label: const Text('Close demo'),
         icon: const Icon(Icons.close),
       ),
-      drawer: new Drawer(
-        child: new Column(
+      drawer: Drawer(
+        child: Column(
           children: <Widget>[
             const UserAccountsDrawerHeader(
               accountName: Text('Peter Widget'),
@@ -114,7 +114,7 @@ class _SearchDemoState extends State<SearchDemo> {
               ),
               margin: EdgeInsets.zero,
             ),
-            new MediaQuery.removePadding(
+            MediaQuery.removePadding(
               context: context,
               // DrawerHeader consumes top MediaQuery padding.
               removeTop: true,
@@ -131,14 +131,14 @@ class _SearchDemoState extends State<SearchDemo> {
 }
 
 class _SearchDemoSearchDelegate extends SearchDelegate<int> {
-  final List<int> _data = new List<int>.generate(100001, (int i) => i).reversed.toList();
+  final List<int> _data = List<int>.generate(100001, (int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
 
   @override
   Widget buildLeading(BuildContext context) {
-    return new IconButton(
+    return IconButton(
       tooltip: 'Back',
-      icon: new AnimatedIcon(
+      icon: AnimatedIcon(
         icon: AnimatedIcons.menu_arrow,
         progress: transitionAnimation,
       ),
@@ -155,7 +155,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
         ? _history
         : _data.where((int i) => '$i'.startsWith(query));
 
-    return new _SuggestionList(
+    return _SuggestionList(
       query: query,
       suggestions: suggestions.map((int i) => '$i').toList(),
       onSelected: (String suggestion) {
@@ -169,27 +169,27 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
   Widget buildResults(BuildContext context) {
     final int searched = int.tryParse(query);
     if (searched == null || !_data.contains(searched)) {
-      return new Center(
-        child: new Text(
+      return Center(
+        child: Text(
           '"$query"\n is not a valid integer between 0 and 100,000.\nTry again.',
           textAlign: TextAlign.center,
         ),
       );
     }
 
-    return new ListView(
+    return ListView(
       children: <Widget>[
-        new _ResultCard(
+        _ResultCard(
           title: 'This integer',
           integer: searched,
           searchDelegate: this,
         ),
-        new _ResultCard(
+        _ResultCard(
           title: 'Next integer',
           integer: searched + 1,
           searchDelegate: this,
         ),
-        new _ResultCard(
+        _ResultCard(
           title: 'Previous integer',
           integer: searched - 1,
           searchDelegate: this,
@@ -202,14 +202,14 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
       query.isEmpty
-          ? new IconButton(
+          ? IconButton(
               tooltip: 'Voice Search',
               icon: const Icon(Icons.mic),
               onPressed: () {
                 query = 'TODO: implement voice input';
               },
             )
-          : new IconButton(
+          : IconButton(
               tooltip: 'Clear',
               icon: const Icon(Icons.clear),
               onPressed: () {
@@ -231,17 +231,17 @@ class _ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new GestureDetector(
+    return GestureDetector(
       onTap: () {
         searchDelegate.close(context, integer);
       },
-      child: new Card(
-        child: new Padding(
+      child: Card(
+        child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: new Column(
+          child: Column(
             children: <Widget>[
-              new Text(title),
-              new Text(
+              Text(title),
+              Text(
                 '$integer',
                 style: theme.textTheme.headline.copyWith(fontSize: 72.0),
               ),
@@ -263,18 +263,18 @@ class _SuggestionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new ListView.builder(
+    return ListView.builder(
       itemCount: suggestions.length,
       itemBuilder: (BuildContext context, int i) {
         final String suggestion = suggestions[i];
-        return new ListTile(
+        return ListTile(
           leading: query.isEmpty ? const Icon(Icons.history) : const Icon(null),
-          title: new RichText(
-            text: new TextSpan(
+          title: RichText(
+            text: TextSpan(
               text: suggestion.substring(0, query.length),
               style: theme.textTheme.subhead.copyWith(fontWeight: FontWeight.bold),
               children: <TextSpan>[
-                new TextSpan(
+                TextSpan(
                   text: suggestion.substring(query.length),
                   style: theme.textTheme.subhead,
                 ),

@@ -34,18 +34,18 @@ void main() {
     setUp(() {
       log = <LogRecord>[];
       logSub = flutterDriverLog.listen(log.add);
-      mockClient = new MockVMServiceClient();
-      mockVM = new MockVM();
-      mockIsolate = new MockIsolate();
-      mockPeer = new MockPeer();
-      when(mockClient.getVM()).thenAnswer((_) => new Future<MockVM>.value(mockVM));
+      mockClient = MockVMServiceClient();
+      mockVM = MockVM();
+      mockIsolate = MockIsolate();
+      mockPeer = MockPeer();
+      when(mockClient.getVM()).thenAnswer((_) => Future<MockVM>.value(mockVM));
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
-      when(mockIsolate.loadRunnable()).thenAnswer((_) => new Future<MockIsolate>.value(mockIsolate));
+      when(mockIsolate.loadRunnable()).thenAnswer((_) => Future<MockIsolate>.value(mockIsolate));
       when(mockIsolate.invokeExtension(any, any)).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
-        return new Future<VMServiceClientConnection>.value(
-          new VMServiceClientConnection(mockClient, mockPeer)
+        return Future<VMServiceClientConnection>.value(
+          VMServiceClientConnection(mockClient, mockPeer)
         );
       };
     });
@@ -61,14 +61,14 @@ void main() {
         connectionLog.add('streamListen');
         return null;
       });
-      when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseStartEvent());
+      when(mockIsolate.pauseEvent).thenReturn(MockVMPauseStartEvent());
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         connectionLog.add('resume');
-        return new Future<Null>.value();
+        return Future<Null>.value();
       });
       when(mockIsolate.onExtensionAdded).thenAnswer((Invocation invocation) {
         connectionLog.add('onExtensionAdded');
-        return new Stream<String>.fromIterable(<String>['ext.flutter.driver']);
+        return Stream<String>.fromIterable(<String>['ext.flutter.driver']);
       });
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
@@ -78,8 +78,8 @@ void main() {
     });
 
     test('connects to isolate paused mid-flight', () async {
-      when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => new Future<Null>.value());
+      when(mockIsolate.pauseEvent).thenReturn(MockVMPauseBreakpointEvent());
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) => Future<Null>.value());
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -91,11 +91,11 @@ void main() {
     // we do. There's no need to fail as we should be able to drive the app
     // just fine.
     test('connects despite losing the race to resume isolate', () async {
-      when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
+      when(mockIsolate.pauseEvent).thenReturn(MockVMPauseBreakpointEvent());
       when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
         // This needs to be wrapped in a closure to not be considered uncaught
         // by package:test
-        return new Future<Null>.error(new rpc.RpcException(101, ''));
+        return Future<Null>.error(rpc.RpcException(101, ''));
       });
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
@@ -104,7 +104,7 @@ void main() {
     });
 
     test('connects to unpaused isolate', () async {
-      when(mockIsolate.pauseEvent).thenReturn(new MockVMResumeEvent());
+      when(mockIsolate.pauseEvent).thenReturn(MockVMResumeEvent());
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is not paused. Assuming application is ready.');
@@ -118,10 +118,10 @@ void main() {
     FlutterDriver driver;
 
     setUp(() {
-      mockClient = new MockVMServiceClient();
-      mockPeer = new MockPeer();
-      mockIsolate = new MockIsolate();
-      driver = new FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      mockClient = MockVMServiceClient();
+      mockPeer = MockPeer();
+      mockIsolate = MockIsolate();
+      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('checks the health of the driver extension', () async {
@@ -132,7 +132,7 @@ void main() {
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenAnswer((Invocation invocation) => new Future<Null>.value());
+      when(mockClient.close()).thenAnswer((Invocation invocation) => Future<Null>.value());
       await driver.close();
     });
 
@@ -359,7 +359,7 @@ void main() {
       test('local timeout', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           // completer never competed to trigger timeout
-          return new Completer<Map<String, dynamic>>().future;
+          return Completer<Map<String, dynamic>>().future;
         });
         try {
           await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(milliseconds: 100));
@@ -390,7 +390,7 @@ void main() {
 
 Future<Map<String, dynamic>> makeMockResponse(
     Map<String, dynamic> response, {bool isError = false}) {
-  return new Future<Map<String, dynamic>>.value(<String, dynamic>{
+  return Future<Map<String, dynamic>>.value(<String, dynamic>{
     'isError': isError,
     'response': response
   });

@@ -66,20 +66,20 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new AnimatedPadding(
+    return AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
       curve: insetAnimationCurve,
-      child: new MediaQuery.removeViewInsets(
+      child: MediaQuery.removeViewInsets(
         removeLeft: true,
         removeTop: true,
         removeRight: true,
         removeBottom: true,
         context: context,
-        child: new Center(
-          child: new ConstrainedBox(
+        child: Center(
+          child: ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 280.0),
-            child: new Material(
+            child: Material(
               elevation: 24.0,
               color: _getColor(context),
               type: MaterialType.card,
@@ -236,11 +236,11 @@ class AlertDialog extends StatelessWidget {
     String label = semanticLabel;
 
     if (title != null) {
-      children.add(new Padding(
-        padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-        child: new DefaultTextStyle(
+      children.add(Padding(
+        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+        child: DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: new Semantics(child: title, namesRoute: true),
+          child: Semantics(child: title, namesRoute: true),
         ),
       ));
     } else {
@@ -255,10 +255,10 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (content != null) {
-      children.add(new Flexible(
-        child: new Padding(
+      children.add(Flexible(
+        child: Padding(
           padding: contentPadding,
-          child: new DefaultTextStyle(
+          child: DefaultTextStyle(
             style: Theme.of(context).textTheme.subhead,
             child: content,
           ),
@@ -267,15 +267,15 @@ class AlertDialog extends StatelessWidget {
     }
 
     if (actions != null) {
-      children.add(new ButtonTheme.bar(
-        child: new ButtonBar(
+      children.add(ButtonTheme.bar(
+        child: ButtonBar(
           children: actions,
         ),
       ));
     }
 
-    Widget dialogChild = new IntrinsicWidth(
-      child: new Column(
+    Widget dialogChild = IntrinsicWidth(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: children,
@@ -283,13 +283,13 @@ class AlertDialog extends StatelessWidget {
     );
 
     if (label != null)
-      dialogChild = new Semantics(
+      dialogChild = Semantics(
         namesRoute: true,
         label: label,
         child: dialogChild
       );
 
-    return new Dialog(child: dialogChild);
+    return Dialog(child: dialogChild);
   }
 }
 
@@ -345,9 +345,9 @@ class SimpleDialogOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new InkWell(
+    return InkWell(
       onTap: onPressed,
-      child: new Padding(
+      child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
         child: child
       ),
@@ -494,11 +494,11 @@ class SimpleDialog extends StatelessWidget {
     String label = semanticLabel;
 
     if (title != null) {
-      body.add(new Padding(
+      body.add(Padding(
         padding: titlePadding,
-        child: new DefaultTextStyle(
+        child: DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: new Semantics(namesRoute: true, child: title),
+          child: Semantics(namesRoute: true, child: title),
         )
       ));
     } else {
@@ -513,19 +513,19 @@ class SimpleDialog extends StatelessWidget {
     }
 
     if (children != null) {
-      body.add(new Flexible(
-        child: new SingleChildScrollView(
+      body.add(Flexible(
+        child: SingleChildScrollView(
           padding: contentPadding,
-          child: new ListBody(children: children),
+          child: ListBody(children: children),
         )
       ));
     }
 
-    Widget dialogChild = new IntrinsicWidth(
+    Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
-      child: new ConstrainedBox(
+      child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 280.0),
-        child: new Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: body,
@@ -534,18 +534,18 @@ class SimpleDialog extends StatelessWidget {
     );
 
     if (label != null)
-      dialogChild = new Semantics(
+      dialogChild = Semantics(
         namesRoute: true,
         label: label,
         child: dialogChild,
       );
-    return new Dialog(child: dialogChild);
+    return Dialog(child: dialogChild);
   }
 }
 
 Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-  return new FadeTransition(
-    opacity: new CurvedAnimation(
+  return FadeTransition(
+    opacity: CurvedAnimation(
       parent: animation,
       curve: Curves.easeOut,
     ),
@@ -600,12 +600,12 @@ Future<T> showDialog<T>({
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
       final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
-      final Widget pageChild =  child ?? new Builder(builder: builder);
-      return new SafeArea(
-        child: new Builder(
+      final Widget pageChild =  child ?? Builder(builder: builder);
+      return SafeArea(
+        child: Builder(
           builder: (BuildContext context) {
             return theme != null
-                ? new Theme(data: theme, child: pageChild)
+                ? Theme(data: theme, child: pageChild)
                 : pageChild;
           }
         ),

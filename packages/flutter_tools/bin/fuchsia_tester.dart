@@ -43,12 +43,12 @@ const String _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
   runInContext<Null>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => new DisabledUsage(),
+    Usage: () => DisabledUsage(),
   });
 }
 
 Future<Null> run(List<String> args) async {
-  final ArgParser parser = new ArgParser()
+  final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
@@ -108,7 +108,7 @@ Future<Null> run(List<String> args) async {
 
     CoverageCollector collector;
     if (argResults['coverage']) {
-      collector = new CoverageCollector();
+      collector = CoverageCollector();
     }
 
 

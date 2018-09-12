@@ -102,31 +102,31 @@ class CategoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new ListView(
-      key: new PageStorageKey<Category>(category),
+    return ListView(
+      key: PageStorageKey<Category>(category),
       padding: const EdgeInsets.symmetric(
         vertical: 16.0,
         horizontal: 64.0,
       ),
       children: category.assets.map<Widget>((String asset) {
-        return new Column(
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            new Card(
-              child: new Container(
+            Card(
+              child: Container(
                 width: 144.0,
                 alignment: Alignment.center,
-                child: new Column(
+                child: Column(
                   children: <Widget>[
-                    new Image.asset(
+                    Image.asset(
                       asset,
                       package: 'flutter_gallery_assets',
                       fit: BoxFit.contain,
                     ),
-                    new Container(
+                    Container(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       alignment: AlignmentDirectional.center,
-                      child: new Text(
+                      child: Text(
                         asset,
                         style: theme.textTheme.caption,
                       ),
@@ -164,27 +164,27 @@ class BackdropPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return new Material(
+    return Material(
       elevation: 2.0,
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(16.0),
         topRight: Radius.circular(16.0),
       ),
-      child: new Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          new GestureDetector(
+          GestureDetector(
             behavior: HitTestBehavior.opaque,
             onVerticalDragUpdate: onVerticalDragUpdate,
             onVerticalDragEnd: onVerticalDragEnd,
             onTap: onTap,
-            child: new Container(
+            child: Container(
               height: 48.0,
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               alignment: AlignmentDirectional.centerStart,
-              child: new DefaultTextStyle(
+              child: DefaultTextStyle(
                 style: theme.textTheme.subhead,
-                child: new Tooltip(
+                child: Tooltip(
                   message: 'Tap to dismiss',
                   child: title,
                 ),
@@ -192,7 +192,7 @@ class BackdropPanel extends StatelessWidget {
             ),
           ),
           const Divider(height: 1.0),
-          new Expanded(child: child),
+          Expanded(child: child),
         ],
       ),
     );
@@ -209,21 +209,21 @@ class BackdropTitle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable;
-    return new DefaultTextStyle(
+    return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.title,
       softWrap: false,
       overflow: TextOverflow.ellipsis,
-      child: new Stack(
+      child: Stack(
         children: <Widget>[
-          new Opacity(
-            opacity: new CurvedAnimation(
-              parent: new ReverseAnimation(animation),
+          Opacity(
+            opacity: CurvedAnimation(
+              parent: ReverseAnimation(animation),
               curve: const Interval(0.5, 1.0),
             ).value,
             child: const Text('Select a Category'),
           ),
-          new Opacity(
-            opacity: new CurvedAnimation(
+          Opacity(
+            opacity: CurvedAnimation(
               parent: animation,
               curve: const Interval(0.5, 1.0),
             ).value,
@@ -240,18 +240,18 @@ class BackdropDemo extends StatefulWidget {
   static const String routeName = '/material/backdrop';
 
   @override
-  _BackdropDemoState createState() => new _BackdropDemoState();
+  _BackdropDemoState createState() => _BackdropDemoState();
 }
 
 class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderStateMixin {
-  final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
+  final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
   Category _category = allCategories[0];
 
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       value: 1.0,
       vsync: this,
@@ -318,8 +318,8 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     final Size panelSize = constraints.biggest;
     final double panelTop = panelSize.height - panelTitleHeight;
 
-    final Animation<RelativeRect> panelAnimation = new RelativeRectTween(
-      begin: new RelativeRect.fromLTRB(
+    final Animation<RelativeRect> panelAnimation = RelativeRectTween(
+      begin: RelativeRect.fromLTRB(
         0.0,
         panelTop - MediaQuery.of(context).padding.bottom,
         0.0,
@@ -327,7 +327,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       ),
       end: const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0),
     ).animate(
-      new CurvedAnimation(
+      CurvedAnimation(
         parent: _controller,
         curve: Curves.linear,
       ),
@@ -336,15 +336,15 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     final ThemeData theme = Theme.of(context);
     final List<Widget> backdropItems = allCategories.map<Widget>((Category category) {
       final bool selected = category == _category;
-      return new Material(
+      return Material(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
         color: selected
           ? Colors.white.withOpacity(0.25)
           : Colors.transparent,
-        child: new ListTile(
-          title: new Text(category.title),
+        child: ListTile(
+          title: Text(category.title),
           selected: selected,
           onTap: () {
             _changeCategory(category);
@@ -353,31 +353,31 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       );
     }).toList();
 
-    return new Container(
+    return Container(
       key: _backdropKey,
       color: theme.primaryColor,
-      child: new Stack(
+      child: Stack(
         children: <Widget>[
-          new ListTileTheme(
+          ListTileTheme(
             iconColor: theme.primaryIconTheme.color,
             textColor: theme.primaryTextTheme.title.color.withOpacity(0.6),
             selectedColor: theme.primaryTextTheme.title.color,
-            child: new Padding(
+            child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: new Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: backdropItems,
               ),
             ),
           ),
-          new PositionedTransition(
+          PositionedTransition(
             rect: panelAnimation,
-            child: new BackdropPanel(
+            child: BackdropPanel(
               onTap: _toggleBackdropPanelVisibility,
               onVerticalDragUpdate: _handleDragUpdate,
               onVerticalDragEnd: _handleDragEnd,
-              title: new Text(_category.title),
-              child: new CategoryView(category: _category),
+              title: Text(_category.title),
+              child: CategoryView(category: _category),
             ),
           ),
         ],
@@ -387,23 +387,23 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         elevation: 0.0,
-        title: new BackdropTitle(
+        title: BackdropTitle(
           listenable: _controller.view,
         ),
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             onPressed: _toggleBackdropPanelVisibility,
-            icon: new AnimatedIcon(
+            icon: AnimatedIcon(
               icon: AnimatedIcons.close_menu,
               progress: _controller.view,
             ),
           ),
         ],
       ),
-      body: new LayoutBuilder(
+      body: LayoutBuilder(
         builder: _buildStack,
       ),
     );

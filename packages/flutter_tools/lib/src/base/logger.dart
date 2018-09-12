@@ -108,10 +108,10 @@ class StdoutLogger extends Logger {
   }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
-      return new Status(onFinish: _clearStatus)..start();
+      return Status(onFinish: _clearStatus)..start();
     }
     if (terminal.supportsColor) {
-      _status = new AnsiStatus(
+      _status = AnsiStatus(
         message: message,
         expectSlowOperation: expectSlowOperation,
         padding: progressIndicatorPadding,
@@ -119,7 +119,7 @@ class StdoutLogger extends Logger {
       )..start();
     } else {
       printStatus(message);
-      _status = new Status(onFinish: _clearStatus)..start();
+      _status = Status(onFinish: _clearStatus)..start();
     }
     return _status;
   }
@@ -153,9 +153,9 @@ class BufferLogger extends Logger {
   @override
   bool get isVerbose => false;
 
-  final StringBuffer _error = new StringBuffer();
-  final StringBuffer _status = new StringBuffer();
-  final StringBuffer _trace = new StringBuffer();
+  final StringBuffer _error = StringBuffer();
+  final StringBuffer _status = StringBuffer();
+  final StringBuffer _trace = StringBuffer();
 
   String get errorText => _error.toString();
   String get statusText => _status.toString();
@@ -188,7 +188,7 @@ class BufferLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
-    return new Status()..start();
+    return Status()..start();
   }
 
   /// Clears all buffers.
@@ -207,7 +207,7 @@ class VerboseLogger extends Logger {
 
   final Logger parent;
 
-  Stopwatch stopwatch = new Stopwatch();
+  Stopwatch stopwatch = Stopwatch();
 
   @override
   bool get isVerbose => true;
@@ -238,7 +238,7 @@ class VerboseLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
-    return new Status(onFinish: () {
+    return Status(onFinish: () {
       printTrace('$message (completed)');
     })..start();
   }
@@ -303,8 +303,8 @@ class Status {
   /// terminal is fancy enough), already started.
   factory Status.withSpinner({ VoidCallback onFinish }) {
     if (terminal.supportsColor)
-      return new AnsiSpinner(onFinish: onFinish)..start();
-    return new Status(onFinish: onFinish)..start();
+      return AnsiSpinner(onFinish: onFinish)..start();
+    return Status(onFinish: onFinish)..start();
   }
 
   final VoidCallback onFinish;
@@ -353,7 +353,7 @@ class AnsiSpinner extends Status {
     super.start();
     assert(timer == null);
     stdout.write(' ');
-    timer = new Timer.periodic(const Duration(milliseconds: 100), _callback);
+    timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer);
   }
 
@@ -394,7 +394,7 @@ class AnsiStatus extends AnsiSpinner {
 
   @override
   void start() {
-    stopwatch = new Stopwatch()..start();
+    stopwatch = Stopwatch()..start();
     stdout.write('${message.padRight(padding)}     ');
     super.start();
   }
