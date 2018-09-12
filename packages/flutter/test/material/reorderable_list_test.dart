@@ -22,22 +22,22 @@ void main() {
     }
 
     Widget listItemToWidget(String listItem) {
-      return new SizedBox(
-        key: new Key(listItem),
+      return SizedBox(
+        key: Key(listItem),
         height: itemHeight,
         width: itemHeight,
-        child: new Text(listItem),
+        child: Text(listItem),
       );
     }
 
     Widget build({Widget header, Axis scrollDirection = Axis.vertical, TextDirection textDirection = TextDirection.ltr}) {
-      return new MaterialApp(
-        home: new Directionality(
+      return MaterialApp(
+        home: Directionality(
           textDirection: textDirection,
-          child: new SizedBox(
+          child: SizedBox(
             height: itemHeight * 10,
             width: itemHeight * 10,
-            child: new ReorderableListView(
+            child: ReorderableListView(
               header: header,
               children: listItems.map(listItemToWidget).toList(),
               scrollDirection: scrollDirection,
@@ -113,7 +113,7 @@ void main() {
       });
 
       testWidgets('properly determines the vertical drop area extents', (WidgetTester tester) async {
-        final Widget reorderableListView = new ReorderableListView(
+        final Widget reorderableListView = ReorderableListView(
           children: const <Widget>[
             SizedBox(
               key: Key('Normal item'),
@@ -134,8 +134,8 @@ void main() {
           scrollDirection: Axis.vertical,
           onReorder: (int oldIndex, int newIndex) {},
         );
-        await tester.pumpWidget(new MaterialApp(
-          home: new SizedBox(
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
             height: itemHeight * 10,
             child: reorderableListView,
           ),
@@ -191,12 +191,12 @@ void main() {
               .first
               .ancestorStateOfType(const TypeMatcher<_StatefulState>());
         }
-        await tester.pumpWidget(new MaterialApp(
-          home: new ReorderableListView(
+        await tester.pumpWidget(MaterialApp(
+          home: ReorderableListView(
             children: <Widget>[
-              new _Stateful(key: const Key('A')),
-              new _Stateful(key: const Key('B')),
-              new _Stateful(key: const Key('C')),
+              _Stateful(key: const Key('A')),
+              _Stateful(key: const Key('B')),
+              _Stateful(key: const Key('C')),
             ],
             onReorder: (int oldIndex, int newIndex) {},
           ),
@@ -208,12 +208,12 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
 
-        await tester.pumpWidget(new MaterialApp(
-          home: new ReorderableListView(
+        await tester.pumpWidget(MaterialApp(
+          home: ReorderableListView(
             children: <Widget>[
-              new _Stateful(key: const Key('B')),
-              new _Stateful(key: const Key('C')),
-              new _Stateful(key: const Key('A')),
+              _Stateful(key: const Key('B')),
+              _Stateful(key: const Key('C')),
+              _Stateful(key: const Key('A')),
             ],
             onReorder: (int oldIndex, int newIndex) {},
           ),
@@ -225,8 +225,8 @@ void main() {
       });
 
       testWidgets('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
-        final ScrollController primary = new ScrollController();
-        final Widget reorderableList = new ReorderableListView(
+        final ScrollController primary = ScrollController();
+        final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
             SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
@@ -236,10 +236,10 @@ void main() {
         );
 
         Widget buildWithScrollController(ScrollController controller) {
-          return new MaterialApp(
-            home: new PrimaryScrollController(
+          return MaterialApp(
+            home: PrimaryScrollController(
               controller: controller,
-              child: new SizedBox(
+              child: SizedBox(
                 height: 100.0,
                 width: 100.0,
                 child: reorderableList,
@@ -255,7 +255,7 @@ void main() {
         expect(scrollView.controller, primary);
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
-        final ScrollController primary2 = new ScrollController();
+        final ScrollController primary2 = ScrollController();
         await tester.pumpWidget(buildWithScrollController(primary2));
         scrollView = tester.widget(
           find.byType(SingleChildScrollView),
@@ -264,7 +264,7 @@ void main() {
       });
 
       testWidgets('Still builds when no PrimaryScrollController is available', (WidgetTester tester) async {
-        final Widget reorderableList = new ReorderableListView(
+        final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, child: Text('C'), key: Key('C')),
             SizedBox(width: 100.0, height: 100.0, child: Text('B'), key: Key('B')),
@@ -272,16 +272,16 @@ void main() {
           ],
           onReorder: (int oldIndex, int newIndex) {},
         );
-        final Widget boilerplate = new Localizations(
+        final Widget boilerplate = Localizations(
           locale: const Locale('en'),
           delegates: const <LocalizationsDelegate<dynamic>>[
             DefaultMaterialLocalizations.delegate,
             DefaultWidgetsLocalizations.delegate,
           ],
-          child:new SizedBox(
+          child:SizedBox(
             width: 100.0,
             height: 100.0,
-            child: new Directionality(
+            child: Directionality(
               textDirection: TextDirection.ltr,
               child: reorderableList,
             ),
@@ -302,7 +302,7 @@ void main() {
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
           final Semantics semantics = find.ancestor(
-            of: find.byKey(new Key(listItems[index])),
+            of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
           ).evaluate().first.widget;
           return semantics.properties.customSemanticsActions;
@@ -427,18 +427,18 @@ void main() {
 
         testWidgets("Doesn't hide accessibility when a child declares its own semantics", (WidgetTester tester) async {
           final SemanticsHandle handle = tester.ensureSemantics();
-          final Widget reorderableListView = new ReorderableListView(
+          final Widget reorderableListView = ReorderableListView(
             children: <Widget>[
               const SizedBox(
                 key: Key('List tile 1'),
                 height: itemHeight,
                 child: Text('List tile 1'),
               ),
-              new SizedBox(
+              SizedBox(
                 key: const Key('Switch tile'),
                 height: itemHeight,
-                child: new Material(
-                  child: new SwitchListTile(
+                child: Material(
+                  child: SwitchListTile(
                     title: const Text('Switch tile'),
                     value: true,
                     onChanged: (bool newValue) {},
@@ -454,8 +454,8 @@ void main() {
             scrollDirection: Axis.vertical,
             onReorder: (int oldIndex, int newIndex) {},
           );
-          await tester.pumpWidget(new MaterialApp(
-            home: new SizedBox(
+          await tester.pumpWidget(MaterialApp(
+            home: SizedBox(
               height: itemHeight * 10,
               child: reorderableListView,
             ),
@@ -541,7 +541,7 @@ void main() {
       });
 
       testWidgets('properly determines the horizontal drop area extents', (WidgetTester tester) async {
-        final Widget reorderableListView = new ReorderableListView(
+        final Widget reorderableListView = ReorderableListView(
           children: const <Widget>[
             SizedBox(
               key: Key('Normal item'),
@@ -562,8 +562,8 @@ void main() {
           scrollDirection: Axis.horizontal,
           onReorder: (int oldIndex, int newIndex) {},
         );
-        await tester.pumpWidget(new MaterialApp(
-          home: new SizedBox(
+        await tester.pumpWidget(MaterialApp(
+          home: SizedBox(
             width: itemHeight * 10,
             child: reorderableListView,
           ),
@@ -620,12 +620,12 @@ void main() {
               .first
               .ancestorStateOfType(const TypeMatcher<_StatefulState>());
         }
-        await tester.pumpWidget(new MaterialApp(
-          home: new ReorderableListView(
+        await tester.pumpWidget(MaterialApp(
+          home: ReorderableListView(
             children: <Widget>[
-              new _Stateful(key: const Key('A')),
-              new _Stateful(key: const Key('B')),
-              new _Stateful(key: const Key('C')),
+              _Stateful(key: const Key('A')),
+              _Stateful(key: const Key('B')),
+              _Stateful(key: const Key('C')),
             ],
             onReorder: (int oldIndex, int newIndex) {},
             scrollDirection: Axis.horizontal,
@@ -638,12 +638,12 @@ void main() {
         expect(findState(const Key('B')).checked, false);
         expect(findState(const Key('C')).checked, false);
 
-        await tester.pumpWidget(new MaterialApp(
-          home: new ReorderableListView(
+        await tester.pumpWidget(MaterialApp(
+          home: ReorderableListView(
             children: <Widget>[
-              new _Stateful(key: const Key('B')),
-              new _Stateful(key: const Key('C')),
-              new _Stateful(key: const Key('A')),
+              _Stateful(key: const Key('B')),
+              _Stateful(key: const Key('C')),
+              _Stateful(key: const Key('A')),
             ],
             onReorder: (int oldIndex, int newIndex) {},
             scrollDirection: Axis.horizontal,
@@ -658,7 +658,7 @@ void main() {
       group('Accessibility (a11y/Semantics)', () {
         Map<CustomSemanticsAction, VoidCallback> getSemanticsActions(int index) {
           final Semantics semantics = find.ancestor(
-            of: find.byKey(new Key(listItems[index])),
+            of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
           ).evaluate().first.widget;
           return semantics.properties.customSemanticsActions;
@@ -919,7 +919,7 @@ class _Stateful extends StatefulWidget {
   _Stateful({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => new _StatefulState();
+  State<StatefulWidget> createState() => _StatefulState();
 }
 
 class _StatefulState extends State<_Stateful> {
@@ -927,11 +927,11 @@ class _StatefulState extends State<_Stateful> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       width: 48.0,
       height: 48.0,
-      child: new Material(
-        child: new Checkbox(
+      child: Material(
+        child: Checkbox(
           value: checked,
           onChanged: (bool newValue) => checked = newValue,
         ),

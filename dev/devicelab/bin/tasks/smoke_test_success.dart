@@ -9,6 +9,6 @@ import 'package:flutter_devicelab/framework/framework.dart';
 /// Smoke test of a successful task.
 Future<Null> main() async {
   await task(() async {
-    return new TaskResult.success(<String, dynamic>{});
+    return TaskResult.success(<String, dynamic>{});
   });
 }

@@ -18,6 +18,7 @@ import '../globals.dart';
 import 'android_sdk.dart';
 
 AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
+AndroidValidator get androidValidator => context[AndroidValidator];
 
 enum LicensesAccepted {
   none,
@@ -26,13 +27,11 @@ enum LicensesAccepted {
   unknown,
 }
 
-final RegExp licenseCounts = new RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
-final RegExp licenseNotAccepted = new RegExp(r'licenses? not accepted', caseSensitive: false);
-final RegExp licenseAccepted = new RegExp(r'All SDK package licenses accepted.');
+final RegExp licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
+final RegExp licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
+final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
-class AndroidWorkflow extends DoctorValidator implements Workflow {
-  AndroidWorkflow() : super('Android toolchain - develop for Android devices');
-
+class AndroidWorkflow implements Workflow {
   @override
   bool get appliesToHostPlatform => true;
 
@@ -44,6 +43,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
   @override
   bool get canListEmulators => getEmulatorPath(androidSdk) != null && getAvdPath() != null;
+}
+
+class AndroidValidator extends DoctorValidator {
+  AndroidValidator(): super('Android toolchain - develop for Android devices',
+                            ValidatorCategory.androidToolchain);
 
   static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
@@ -51,7 +55,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   /// is not compatible.
   bool _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) {
     if (!processManager.canRun(javaBinary)) {
-      messages.add(new ValidationMessage.error('Cannot execute $javaBinary to determine the version'));
+      messages.add(ValidationMessage.error('Cannot execute $javaBinary to determine the version'));
       return false;
     }
     String javaVersion;
@@ -65,10 +69,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     } catch (_) { /* ignore */ }
     if (javaVersion == null) {
       // Could not determine the java version.
-      messages.add(new ValidationMessage.error('Could not determine java version'));
+      messages.add(ValidationMessage.error('Could not determine java version'));
       return false;
     }
-    messages.add(new ValidationMessage('Java version $javaVersion'));
+    messages.add(ValidationMessage('Java version $javaVersion'));
     // TODO(johnmccutchan): Validate version.
     return true;
   }
@@ -81,12 +85,12 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       // No Android SDK found.
       if (platform.environment.containsKey(kAndroidHome)) {
         final String androidHomeDir = platform.environment[kAndroidHome];
-        messages.add(new ValidationMessage.error(
+        messages.add(ValidationMessage.error(
           '$kAndroidHome = $androidHomeDir\n'
           'but Android SDK not found at this location.'
         ));
       } else {
-        messages.add(new ValidationMessage.error(
+        messages.add(ValidationMessage.error(
           'Unable to locate Android SDK.\n'
           'Install Android Studio from: https://developer.android.com/studio/index.html\n'
           'On first launch it will assist you in installing the Android SDK components.\n'
@@ -95,12 +99,12 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         ));
       }
 
-      return new ValidationResult(ValidationType.missing, messages);
+      return ValidationResult(ValidationType.missing, messages);
     }
 
-    messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
+    messages.add(ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
-    messages.add(new ValidationMessage(androidSdk.ndk == null
+    messages.add(ValidationMessage(androidSdk.ndk == null
           ? 'Android NDK location not configured (optional; useful for native profiling support)'
           : 'Android NDK at ${androidSdk.ndk.directory}'));
 
@@ -108,7 +112,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     if (androidSdk.latestVersion != null) {
       sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
 
-      messages.add(new ValidationMessage(
+      messages.add(ValidationMessage(
         'Platform ${androidSdk.latestVersion.platformName}, '
         'build-tools ${androidSdk.latestVersion.buildToolsVersionName}'
       ));
@@ -116,7 +120,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     if (platform.environment.containsKey(kAndroidHome)) {
       final String androidHomeDir = platform.environment[kAndroidHome];
-      messages.add(new ValidationMessage('$kAndroidHome = $androidHomeDir'));
+      messages.add(ValidationMessage('$kAndroidHome = $androidHomeDir'));
     }
 
     final List<String> validationResult = androidSdk.validateSdkWellFormed();
@@ -124,48 +128,48 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     if (validationResult.isNotEmpty) {
       // Android SDK is not functional.
       messages.addAll(validationResult.map((String message) {
-        return new ValidationMessage.error(message);
+        return ValidationMessage.error(message);
       }));
-      messages.add(new ValidationMessage(
+      messages.add(ValidationMessage(
           'Try re-installing or updating your Android SDK,\n'
           'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
-      return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
     // Now check for the JDK.
     final String javaBinary = AndroidSdk.findJavaBinary();
     if (javaBinary == null) {
-      messages.add(new ValidationMessage.error(
+      messages.add(ValidationMessage.error(
           'No Java Development Kit (JDK) found; You must have the environment '
           'variable JAVA_HOME set and the java binary in your PATH. '
           'You can download the JDK from $_jdkDownload.'));
-      return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-    messages.add(new ValidationMessage('Java binary at: $javaBinary'));
+    messages.add(ValidationMessage('Java binary at: $javaBinary'));
 
     // Check JDK version.
     if (!_checkJavaVersion(javaBinary, messages)) {
-      return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
     // Check for licenses.
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
-        messages.add(new ValidationMessage('All Android licenses accepted.'));
+        messages.add(ValidationMessage('All Android licenses accepted.'));
         break;
       case LicensesAccepted.some:
-        messages.add(new ValidationMessage.hint('Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses'));
-        return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+        messages.add(ValidationMessage.hint('Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses'));
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.none:
-        messages.add(new ValidationMessage.error('Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses'));
-        return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+        messages.add(ValidationMessage.error('Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses'));
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
-        messages.add(new ValidationMessage.error('Android license status unknown.'));
-        return new ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+        messages.add(ValidationMessage.error('Android license status unknown.'));
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
     // Success.
-    return new ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
   }
 
   Future<LicensesAccepted> get licensesAccepted async {
@@ -223,7 +227,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     _ensureCanRunSdkManager();
 
-    final Version sdkManagerVersion = new Version.parse(androidSdk.sdkManagerVersion);
+    final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
     if (sdkManagerVersion == null || sdkManagerVersion.major < 26)
       // SDK manager is found, but needs to be updated.
       throwToolExit(
@@ -236,7 +240,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       environment: androidSdk.sdkManagerEnv,
     );
 
-    process.stdin.addStream(stdin);
+    // The real stdin will never finish streaming. Pipe until the child process
+    // finishes.
+    process.stdin.addStream(stdin); // ignore: unawaited_futures
+    // Wait for stdout and stderr to be fully processed, because process.exitCode
+    // may complete first.
     await waitGroup<void>(<Future<void>>[
       stdout.addStream(process.stdout),
       stderr.addStream(process.stderr),

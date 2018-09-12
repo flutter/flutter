@@ -53,7 +53,7 @@ bool get isRunningOnBot {
 }
 
 String hex(List<int> bytes) {
-  final StringBuffer result = new StringBuffer();
+  final StringBuffer result = StringBuffer();
   for (int part in bytes)
     result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
   return result.toString();
@@ -75,7 +75,7 @@ String camelCase(String str) {
   return str;
 }
 
-final RegExp _upperRegex = new RegExp(r'[A-Z]');
+final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str, [String sep = '_']) {
@@ -121,8 +121,8 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
-final NumberFormat kSecondsFormat = new NumberFormat('0.0');
-final NumberFormat kMillisecondsFormat = new NumberFormat.decimalPattern();
+final NumberFormat kSecondsFormat = NumberFormat('0.0');
+final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
   final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
@@ -145,17 +145,17 @@ String getDisplayPath(String fullPath) {
 /// available.
 class ItemListNotifier<T> {
   ItemListNotifier() {
-    _items = new Set<T>();
+    _items = Set<T>();
   }
 
   ItemListNotifier.from(List<T> items) {
-    _items = new Set<T>.from(items);
+    _items = Set<T>.from(items);
   }
 
   Set<T> _items;
 
-  final StreamController<T> _addedController = new StreamController<T>.broadcast();
-  final StreamController<T> _removedController = new StreamController<T>.broadcast();
+  final StreamController<T> _addedController = StreamController<T>.broadcast();
+  final StreamController<T> _removedController = StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -163,7 +163,7 @@ class ItemListNotifier<T> {
   List<T> get items => _items.toList();
 
   void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = new Set<T>.from(updatedList);
+    final Set<T> updatedSet = Set<T>.from(updatedList);
 
     final Set<T> addedItems = updatedSet.difference(_items);
     final Set<T> removedItems = _items.difference(updatedSet);
@@ -196,7 +196,7 @@ class SettingsFile {
   }
 
   factory SettingsFile.parseFromFile(File file) {
-    return new SettingsFile.parse(file.readAsStringSync());
+    return SettingsFile.parse(file.readAsStringSync());
   }
 
   final Map<String, String> values = <String, String>{};
@@ -217,7 +217,7 @@ class SettingsFile {
 /// For more information, see
 /// http://en.wikipedia.org/wiki/Universally_unique_identifier.
 class Uuid {
-  final Random _random = new Random();
+  final Random _random = Random();
 
   /// Generate a version 4 (random) UUID. This is a UUID scheme that only uses
   /// random numbers as the source of the generated UUID.
@@ -258,7 +258,7 @@ typedef Future<Null> AsyncCallback();
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
   Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
-    new Future<Null>.delayed(initialDelay, _handleCallback);
+    Future<Null>.delayed(initialDelay, _handleCallback);
   }
 
   final AsyncCallback callback;
@@ -279,7 +279,7 @@ class Poller {
     }
 
     if (!_cancelled)
-      _timer = new Timer(pollingInterval, _handleCallback);
+      _timer = Timer(pollingInterval, _handleCallback);
   }
 
   /// Cancels the poller.

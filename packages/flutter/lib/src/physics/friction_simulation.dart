@@ -41,11 +41,11 @@ class FrictionSimulation extends Simulation {
     assert(startVelocity == 0.0 || endVelocity == 0.0 || startVelocity.sign == endVelocity.sign);
     assert(startVelocity.abs() >= endVelocity.abs());
     assert((endPosition - startPosition).sign == startVelocity.sign);
-    return new FrictionSimulation(
+    return FrictionSimulation(
       _dragFor(startPosition, endPosition, startVelocity, endVelocity),
       startPosition,
       startVelocity,
-      tolerance: new Tolerance(velocity: endVelocity.abs()),
+      tolerance: Tolerance(velocity: endVelocity.abs()),
     );
   }
 

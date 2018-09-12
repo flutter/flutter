@@ -27,32 +27,32 @@ import 'bottom_tab_bar.dart';
 /// A sample code implementing a typical iOS information architecture with tabs.
 ///
 /// ```dart
-/// new CupertinoTabScaffold(
-///   tabBar: new CupertinoTabBar(
+/// CupertinoTabScaffold(
+///   tabBar: CupertinoTabBar(
 ///     items: <BottomNavigationBarItem> [
 ///       // ...
 ///     ],
 ///   ),
 ///   tabBuilder: (BuildContext context, int index) {
-///     return new CupertinoTabView(
+///     return CupertinoTabView(
 ///       builder: (BuildContext context) {
-///         return new CupertinoPageScaffold(
-///           navigationBar: new CupertinoNavigationBar(
-///             middle: new Text('Page 1 of tab $index'),
+///         return CupertinoPageScaffold(
+///           navigationBar: CupertinoNavigationBar(
+///             middle: Text('Page 1 of tab $index'),
 ///           ),
-///           child: new Center(
-///             child: new CupertinoButton(
+///           child: Center(
+///             child: CupertinoButton(
 ///               child: const Text('Next page'),
 ///               onPressed: () {
 ///                 Navigator.of(context).push(
-///                   new CupertinoPageRoute<Null>(
+///                   CupertinoPageRoute<Null>(
 ///                     builder: (BuildContext context) {
-///                       return new CupertinoPageScaffold(
-///                         navigationBar: new CupertinoNavigationBar(
-///                           middle: new Text('Page 2 of tab $index'),
+///                       return CupertinoPageScaffold(
+///                         navigationBar: CupertinoNavigationBar(
+///                           middle: Text('Page 2 of tab $index'),
 ///                         ),
-///                         child: new Center(
-///                           child: new CupertinoButton(
+///                         child: Center(
+///                           child: CupertinoButton(
 ///                             child: const Text('Back'),
 ///                             onPressed: () { Navigator.of(context).pop(); },
 ///                           ),
@@ -137,7 +137,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   final IndexedWidgetBuilder tabBuilder;
 
   @override
-  _CupertinoTabScaffoldState createState() => new _CupertinoTabScaffoldState();
+  _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
@@ -161,7 +161,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
-    Widget content = new _TabSwitchingView(
+    Widget content = _TabSwitchingView(
       currentTabIndex: _currentPage,
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
@@ -179,12 +179,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // translucent, let main content draw behind the tab bar but hint the
       // obstructed area.
       if (widget.tabBar.opaque) {
-        content = new Padding(
-          padding: new EdgeInsets.only(bottom: bottomPadding),
+        content = Padding(
+          padding: EdgeInsets.only(bottom: bottomPadding),
           child: content,
         );
       } else {
-        content = new MediaQuery(
+        content = MediaQuery(
           data: existingMediaQuery.copyWith(
             padding: existingMediaQuery.padding.copyWith(
               bottom: bottomPadding,
@@ -199,7 +199,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     stacked.add(content);
 
     if (widget.tabBar != null) {
-      stacked.add(new Align(
+      stacked.add(Align(
         alignment: Alignment.bottomCenter,
         // Override the tab bar's currentIndex to the current tab and hook in
         // our own listener to update the _currentPage on top of a possibly user
@@ -218,7 +218,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       ));
     }
 
-    return new Stack(
+    return Stack(
       children: stacked,
     );
   }
@@ -240,7 +240,7 @@ class _TabSwitchingView extends StatefulWidget {
   final IndexedWidgetBuilder tabBuilder;
 
   @override
-  _TabSwitchingViewState createState() => new _TabSwitchingViewState();
+  _TabSwitchingViewState createState() => _TabSwitchingViewState();
 }
 
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
@@ -250,10 +250,10 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   @override
   void initState() {
     super.initState();
-    tabs = new List<Widget>(widget.tabNumber);
-    tabFocusNodes = new List<FocusScopeNode>.generate(
+    tabs = List<Widget>(widget.tabNumber);
+    tabFocusNodes = List<FocusScopeNode>.generate(
       widget.tabNumber,
-      (int index) => new FocusScopeNode(),
+      (int index) => FocusScopeNode(),
     );
   }
 
@@ -283,22 +283,22 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
+    return Stack(
       fit: StackFit.expand,
-      children: new List<Widget>.generate(widget.tabNumber, (int index) {
+      children: List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
 
         if (active || tabs[index] != null) {
           tabs[index] = widget.tabBuilder(context, index);
         }
 
-        return new Offstage(
+        return Offstage(
           offstage: !active,
-          child: new TickerMode(
+          child: TickerMode(
             enabled: active,
-            child: new FocusScope(
+            child: FocusScope(
               node: tabFocusNodes[index],
-              child: tabs[index] ?? new Container(),
+              child: tabs[index] ?? Container(),
             ),
           ),
         );

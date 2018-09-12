@@ -75,7 +75,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   Future<Null> flushMicrotasks() {
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = Completer<Null>();
     Timer.run(completer.complete);
     return completer.future;
   }
@@ -102,7 +102,7 @@ void main() {
   final List<String> console = <String>[];
 
   test('Service extensions - pretest', () async {
-    binding = new TestServiceExtensionsBinding();
+    binding = TestServiceExtensionsBinding();
     expect(binding.frameScheduled, isTrue);
     await binding.doFrame(); // initial frame scheduled by creating the binding
     expect(binding.frameScheduled, isFalse);
@@ -306,7 +306,7 @@ void main() {
     BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
-      return new ByteData(5); // 0x0000000000
+      return ByteData(5); // 0x0000000000
     });
     bool data;
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return true; });

@@ -33,8 +33,8 @@ class TableBorder {
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
   }) {
-    final BorderSide side = new BorderSide(color: color, width: width, style: style);
-    return new TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side);
+    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side);
   }
 
   /// Creates a border for a table where all the interior sides use the same
@@ -43,7 +43,7 @@ class TableBorder {
     BorderSide inside = BorderSide.none,
     BorderSide outside = BorderSide.none,
   }) {
-    return new TableBorder(
+    return TableBorder(
       top: outside,
       right: outside,
       bottom: outside,
@@ -76,7 +76,7 @@ class TableBorder {
   /// This can be used, for example, with a [Padding] widget to inset a box by
   /// the size of these borders.
   EdgeInsets get dimensions {
-    return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
+    return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
   /// Whether all the sides of the border (outside and inside) are identical.
@@ -132,7 +132,7 @@ class TableBorder {
   ///
   ///  * [BorderSide.scale], which is used to implement this method.
   TableBorder scale(double t) {
-    return new TableBorder(
+    return TableBorder(
       top: top.scale(t),
       right: right.scale(t),
       bottom: bottom.scale(t),
@@ -166,7 +166,7 @@ class TableBorder {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    return new TableBorder(
+    return TableBorder(
       top: BorderSide.lerp(a.top, b.top, t),
       right: BorderSide.lerp(a.right, b.right, t),
       bottom: BorderSide.lerp(a.bottom, b.bottom, t),
@@ -223,8 +223,8 @@ class TableBorder {
     assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
     if (columns.isNotEmpty || rows.isNotEmpty) {
-      final Paint paint = new Paint();
-      final Path path = new Path();
+      final Paint paint = Paint();
+      final Path path = Path();
 
       if (columns.isNotEmpty) {
         switch (verticalInside.style) {

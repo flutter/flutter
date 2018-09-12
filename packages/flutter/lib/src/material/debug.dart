@@ -23,7 +23,7 @@ import 'material_localizations.dart';
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln('No Material widget found.');
       message.writeln(
         '${context.widget.runtimeType} widgets require a Material '
@@ -61,7 +61,7 @@ bool debugCheckHasMaterial(BuildContext context) {
           'ancestors, let alone a "Material" ancestor.'
         );
       }
-      throw new FlutterError(message.toString());
+      throw FlutterError(message.toString());
     }
     return true;
   }());
@@ -86,7 +86,7 @@ bool debugCheckHasMaterial(BuildContext context) {
 bool debugCheckHasMaterialLocalizations(BuildContext context) {
   assert(() {
     if (Localizations.of<MaterialLocalizations>(context, MaterialLocalizations) == null) {
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln('No MaterialLocalizations found.');
       message.writeln(
         '${context.widget.runtimeType} widgets require MaterialLocalizations '
@@ -121,7 +121,7 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
           'ancestors, let alone a "Localizations" ancestor.'
         );
       }
-      throw new FlutterError(message.toString());
+      throw FlutterError(message.toString());
     }
     return true;
   }());

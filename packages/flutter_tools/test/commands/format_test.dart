@@ -30,7 +30,7 @@ void main() {
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
-      final FormatCommand command = new FormatCommand();
+      final FormatCommand command = FormatCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', srcFile.path]);
 
@@ -47,7 +47,7 @@ void main() {
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
-      final FormatCommand command = new FormatCommand();
+      final FormatCommand command = FormatCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', '--dry-run', srcFile.path]);
 
@@ -64,7 +64,7 @@ void main() {
           'main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
-      final FormatCommand command = new FormatCommand();
+      final FormatCommand command = FormatCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       expect(runner.run(<String>[

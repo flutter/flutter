@@ -22,12 +22,12 @@ import 'theme.dart';
 /// ## Sample code
 ///
 /// ```dart
-/// new Scaffold(
-///   bottomNavigationBar: new BottomAppBar(
+/// Scaffold(
+///   bottomNavigationBar: BottomAppBar(
 ///     color: Colors.white,
 ///     child: bottomAppBarContents,
 ///   ),
-///   floatingActionButton: new FloatingActionButton(onPressed: null),
+///   floatingActionButton: FloatingActionButton(onPressed: null),
 /// )
 /// ```
 ///
@@ -41,16 +41,18 @@ import 'theme.dart';
 class BottomAppBar extends StatefulWidget {
   /// Creates a bottom application bar.
   ///
-  /// The [color] and [elevation] arguments must not be null.
+  /// The [color], [elevation], and [clipBehavior] arguments must not be null.
   const BottomAppBar({
     Key key,
     this.color,
     this.elevation = 8.0,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.notchMargin = 4.0,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -77,6 +79,9 @@ class BottomAppBar extends StatefulWidget {
   /// If null the bottom app bar will be rectangular with no notch.
   final NotchedShape shape;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// The margin between the [FloatingActionButton] and the [BottomAppBar]'s
   /// notch.
   ///
@@ -84,7 +89,7 @@ class BottomAppBar extends StatefulWidget {
   final double notchMargin;
 
   @override
-  State createState() => new _BottomAppBarState();
+  State createState() => _BottomAppBarState();
 }
 
 class _BottomAppBarState extends State<BottomAppBar> {
@@ -99,21 +104,22 @@ class _BottomAppBarState extends State<BottomAppBar> {
   @override
   Widget build(BuildContext context) {
     final CustomClipper<Path> clipper = widget.shape != null
-      ? new _BottomAppBarClipper(
+      ? _BottomAppBarClipper(
         geometry: geometryListenable,
         shape: widget.shape,
         notchMargin: widget.notchMargin,
       )
       : const ShapeBorderClipper(shape: RoundedRectangleBorder());
-    return new PhysicalShape(
+    return PhysicalShape(
       clipper: clipper,
       elevation: widget.elevation,
       color: widget.color ?? Theme.of(context).bottomAppBarColor,
-      child: new Material(
+      clipBehavior: widget.clipBehavior,
+      child: Material(
         type: MaterialType.transparency,
         child: widget.child == null
           ? null
-          : new SafeArea(child: widget.child),
+          : SafeArea(child: widget.child),
       ),
     );
   }
@@ -137,7 +143,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final Rect appBar = Offset.zero & size;
     if (geometry.value.floatingActionButtonArea == null) {
-      return new Path()..addRect(appBar);
+      return Path()..addRect(appBar);
     }
 
     // button is the floating action button's bounding rectangle in the

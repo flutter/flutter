@@ -25,7 +25,7 @@ void main() {
 
     test('inital tree creation', () async {
       // Let app become fully idle.
-      await new Future<Null>.delayed(const Duration(seconds: 1));
+      await Future<Null>.delayed(const Duration(seconds: 1));
 
       final Timeline timeline = await driver.traceAction(() async {
         expect(await driver.setSemantics(true), isTrue);
@@ -37,7 +37,7 @@ void main() {
       final Duration semanticsTreeCreation = semanticsEvents.first.duration;
 
       final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
-      new File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
+      File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
     });
   });
 }

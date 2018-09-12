@@ -44,5 +44,5 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
     );
   });
 
-  return new TaskResult.success(null);
+  return TaskResult.success(null);
 }

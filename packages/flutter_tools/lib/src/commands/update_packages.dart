@@ -112,7 +112,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // package that is in the goldens repository. We need to make sure that the goldens
     // repository is cloned locally before we verify or update pubspecs.
     printStatus('Cloning goldens repository...');
-    final GoldensClient goldensClient = new GoldensClient();
+    final GoldensClient goldensClient = GoldensClient();
     await goldensClient.prepare();
 
     if (isVerifyOnly) {
@@ -121,7 +121,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       for (Directory directory in packages) {
         PubspecYaml pubspec;
         try {
-          pubspec = new PubspecYaml(directory);
+          pubspec = PubspecYaml(directory);
         } on String catch (message) {
           throwToolExit(message);
         }
@@ -176,12 +176,12 @@ class UpdatePackagesCommand extends FlutterCommand {
       // First, collect up the explicit dependencies:
       final List<PubspecYaml> pubspecs = <PubspecYaml>[];
       final Map<String, PubspecDependency> dependencies = <String, PubspecDependency>{};
-      final Set<String> specialDependencies = new Set<String>();
+      final Set<String> specialDependencies = Set<String>();
       for (Directory directory in packages) { // these are all the directories with pubspec.yamls we care about
         printTrace('Reading pubspec.yaml from: ${directory.path}');
         PubspecYaml pubspec;
         try {
-          pubspec = new PubspecYaml(directory); // this parses the pubspec.yaml
+          pubspec = PubspecYaml(directory); // this parses the pubspec.yaml
         } on String catch (message) {
           throwToolExit(message);
         }
@@ -222,7 +222,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       // going to create a fake package and then run "pub upgrade" on it. The
       // pub tool will attempt to bring these dependencies up to the most recent
       // possible versions while honoring all their constraints.
-      final PubDependencyTree tree = new PubDependencyTree(); // object to collect results
+      final PubDependencyTree tree = PubDependencyTree(); // object to collect results
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_update_packages.');
       try {
         final File fakePackage = _pubspecFor(tempDir);
@@ -255,7 +255,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         for (PubspecDependency dependency in pubspec.dependencies) {
           if (dependency.kind == DependencyKind.normal) {
             tree._versions[package] = version;
-            tree._dependencyTree[package] ??= new Set<String>();
+            tree._dependencyTree[package] ??= Set<String>();
             tree._dependencyTree[package].add(dependency.name);
           }
         }
@@ -290,7 +290,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       // the regular code path.
     }
 
-    final Stopwatch timer = new Stopwatch()..start();
+    final Stopwatch timer = Stopwatch()..start();
     int count = 0;
 
     for (Directory dir in packages) {
@@ -314,11 +314,11 @@ class UpdatePackagesCommand extends FlutterCommand {
     if (!tree.contains(to))
       throwToolExit('Package $to not found in the dependency tree.');
 
-    final Queue<_DependencyLink> traversalQueue = new Queue<_DependencyLink>();
-    final Set<String> visited = new Set<String>();
+    final Queue<_DependencyLink> traversalQueue = Queue<_DependencyLink>();
+    final Set<String> visited = Set<String>();
     final List<_DependencyLink> paths = <_DependencyLink>[];
 
-    traversalQueue.addFirst(new _DependencyLink(from: null, to: from));
+    traversalQueue.addFirst(_DependencyLink(from: null, to: from));
     while (traversalQueue.isNotEmpty) {
       final _DependencyLink link = traversalQueue.removeLast();
       if (link.to == to)
@@ -327,13 +327,13 @@ class UpdatePackagesCommand extends FlutterCommand {
         visited.add(link.from.to);
       for (String dependency in tree._dependencyTree[link.to]) {
         if (!visited.contains(dependency)) {
-          traversalQueue.addFirst(new _DependencyLink(from: link, to: dependency));
+          traversalQueue.addFirst(_DependencyLink(from: link, to: dependency));
         }
       }
     }
 
     for (_DependencyLink path in paths) {
-      final StringBuffer buf = new StringBuffer();
+      final StringBuffer buf = StringBuffer();
       while (path != null) {
         buf.write('${path.to}');
         path = path.from;
@@ -490,7 +490,7 @@ class PubspecYaml {
           } else {
             // This line isn't a section header, and we're not in a section we care about.
             // We just stick the line into the output unmodified.
-            result.add(new PubspecLine(line));
+            result.add(PubspecLine(line));
           }
         } else {
           // We're in a section we care about. Try to parse out the dependency:
@@ -531,7 +531,7 @@ class PubspecYaml {
             // We're in a section we care about but got a line we didn't
             // recognize. Maybe it's a comment or a blank line or something.
             // Just pass it through.
-            result.add(new PubspecLine(line));
+            result.add(PubspecLine(line));
           }
         }
       } else {
@@ -555,15 +555,15 @@ class PubspecYaml {
           // Remove the PubspecDependency entry we had for it and replace it
           // with a PubspecLine entry, and add such an entry for this line.
           result.removeLast();
-          result.add(new PubspecLine(lastDependency.line));
-          result.add(new PubspecLine(line));
+          result.add(PubspecLine(lastDependency.line));
+          result.add(PubspecLine(line));
         }
         // We're done with this special dependency, so reset back to null so
         // we'll go in the top section next time instead.
         lastDependency = null;
       }
     }
-    return new PubspecYaml._(file, packageName, packageVersion, result, checksum ?? new PubspecChecksum(null, ''));
+    return PubspecYaml._(file, packageName, packageVersion, result, checksum ?? PubspecChecksum(null, ''));
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
@@ -594,8 +594,8 @@ class PubspecYaml {
   void apply(PubDependencyTree versions, Set<String> specialDependencies) {
     assert(versions != null);
     final List<String> output = <String>[]; // the string data to output to the file, line by line
-    final Set<String> directDependencies = new Set<String>(); // packages this pubspec directly depends on (i.e. not transitive)
-    final Set<String> devDependencies = new Set<String>();
+    final Set<String> directDependencies = Set<String>(); // packages this pubspec directly depends on (i.e. not transitive)
+    final Set<String> devDependencies = Set<String>();
     Section section = Section.other; // the section we're currently handling
 
     // the line number where we're going to insert the transitive dependencies.
@@ -693,19 +693,19 @@ class PubspecYaml {
     final List<String> transitiveDevDependencyOutput = <String>[];
 
     // Which dependencies we need to handle for the transitive and dev dependency sections.
-    final Set<String> transitiveDependencies = new Set<String>();
-    final Set<String> transitiveDevDependencies = new Set<String>();
+    final Set<String> transitiveDependencies = Set<String>();
+    final Set<String> transitiveDevDependencies = Set<String>();
 
     // Merge the lists of dependencies we've seen in this file from dependencies, dev dependencies,
     // and the dependencies we know this file mentions that are already pinned
     // (and which didn't get special processing above).
-    final Set<String> implied = new Set<String>.from(directDependencies)
+    final Set<String> implied = Set<String>.from(directDependencies)
       ..addAll(specialDependencies)
       ..addAll(devDependencies);
 
     // Create a new set to hold the list of packages we've already processed, so
     // that we don't redundantly process them multiple times.
-    final Set<String> done = new Set<String>();
+    final Set<String> done = Set<String>();
     for (String package in directDependencies)
       transitiveDependencies.addAll(versions.getTransitiveDependenciesFor(package, seen: done, exclude: implied));
     for (String package in devDependencies)
@@ -722,7 +722,7 @@ class PubspecYaml {
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
     // Build a sorted list of all dependencies for the checksum.
-    final Set<String> checksumDependencies = new Set<String>()
+    final Set<String> checksumDependencies = Set<String>()
       ..addAll(directDependencies)
       ..addAll(devDependencies)
       ..addAll(transitiveDependenciesAsList)
@@ -755,7 +755,7 @@ class PubspecYaml {
 
     // Output the result to the pubspec.yaml file, skipping leading and
     // duplicate blank lines and removing trailing spaces.
-    final StringBuffer contents = new StringBuffer();
+    final StringBuffer contents = StringBuffer();
     bool hadBlankLine = true;
     for (String line in output) {
       line = line.trimRight();
@@ -799,8 +799,8 @@ class PubspecChecksum extends PubspecLine {
   static PubspecChecksum parse(String line) {
     final List<String> tokens = line.split(kDependencyChecksum);
     if (tokens.length != 2)
-      return new PubspecChecksum(null, line);
-    return new PubspecChecksum(tokens.last.trim(), line);
+      return PubspecChecksum(null, line);
+    return PubspecChecksum(tokens.last.trim(), line);
   }
 }
 
@@ -852,16 +852,16 @@ class PubspecHeader extends PubspecLine {
     final String value = parts.last.trim();
     switch (sectionName) {
       case 'dependencies':
-        return new PubspecHeader(line, Section.dependencies);
+        return PubspecHeader(line, Section.dependencies);
       case 'dev_dependencies':
-        return new PubspecHeader(line, Section.devDependencies);
+        return PubspecHeader(line, Section.devDependencies);
       case 'dependency_overrides':
-        return new PubspecHeader(line, Section.dependencyOverrides);
+        return PubspecHeader(line, Section.dependencyOverrides);
       case 'name':
       case 'version':
-        return new PubspecHeader(line, Section.header, name: sectionName, value: value);
+        return PubspecHeader(line, Section.header, name: sectionName, value: value);
       default:
-        return new PubspecHeader(line, Section.other);
+        return PubspecHeader(line, Section.other);
     }
   }
 
@@ -930,7 +930,7 @@ class PubspecDependency extends PubspecLine {
     if (colonIndex != -1) {
       version = line.substring(colonIndex + 1, hashIndex != -1 ? hashIndex : line.length).trim();
     }
-    return new PubspecDependency(line, package, suffix, isTransitive: isTransitive, version: version, kind: stripped.isEmpty ? DependencyKind.unknown : DependencyKind.normal, sourcePath: filename);
+    return PubspecDependency(line, package, suffix, isTransitive: isTransitive, version: version, kind: stripped.isEmpty ? DependencyKind.unknown : DependencyKind.normal, sourcePath: filename);
   }
 
   final String name; // the package name
@@ -1066,8 +1066,8 @@ File _pubspecFor(Directory directory) {
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
 String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
-  final StringBuffer result = new StringBuffer();
-  final StringBuffer overrides = new StringBuffer();
+  final StringBuffer result = StringBuffer();
+  final StringBuffer overrides = StringBuffer();
   result.writeln('name: flutter_update_packages');
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
@@ -1145,7 +1145,7 @@ class PubDependencyTree {
           dependencies = const <String>[];
         }
         _versions[package] = version;
-        _dependencyTree[package] = new Set<String>.from(dependencies);
+        _dependencyTree[package] = Set<String>.from(dependencies);
       }
     }
     return null;
