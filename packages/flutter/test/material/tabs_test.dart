@@ -1294,6 +1294,7 @@ void main() {
   testWidgets('TabBar with labelPadding', (WidgetTester tester) async {
     const double indicatorWeight = 2.0; // default indicator weight
     const EdgeInsets labelPadding = EdgeInsets.only(left: 3.0, right: 7.0);
+    const EdgeInsets indicatorPadding = labelPadding;
 
     final List<Widget> tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
@@ -1312,6 +1313,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: TabBar(
             labelPadding: labelPadding,
+            indicatorPadding: labelPadding,
             isScrollable: true,
             controller: controller,
             tabs: tabs,
@@ -1349,9 +1351,9 @@ void main() {
     tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
     expect(tester.getRect(find.byKey(tabs[2].key)), tabRect);
 
-    // Tab 0 selected, no indicator padding
-    const double indicatorLeft = indicatorWeight / 2.0;
-    final double indicatorRight = 130.0 + labelPadding.horizontal - indicatorWeight / 2.0;
+    // Tab 0 selected, indicatorPadding == labelPadding
+    final double indicatorLeft = indicatorPadding.left + indicatorWeight / 2.0;
+    final double indicatorRight = 130.0 + labelPadding.horizontal - indicatorPadding.right - indicatorWeight / 2.0;
     final double indicatorY = tabBottom + indicatorWeight / 2.0;
     expect(tabBarBox, paints..line(
       strokeWidth: indicatorWeight,
