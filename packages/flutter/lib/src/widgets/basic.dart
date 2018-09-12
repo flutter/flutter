@@ -4494,6 +4494,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.repeat = ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection = false,
+    this.invertColors = false,
   }) : assert(scale != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -4595,6 +4596,17 @@ class RawImage extends LeafRenderObjectWidget {
   /// scope.
   final bool matchTextDirection;
 
+  /// Whether the colors of the image are inverted when drawn.
+  ///
+  /// inverting the colors of an image applies a new color filter to the paint.
+  /// If there is another specified color filter, the invert will be applied
+  /// after it. This is primarily used for implementing smart invert on iOS.
+  ///
+  /// See also:
+  ///
+  ///   * [Paint.invertColors], for the dart:ui implementation.
+  final bool invertColors;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
@@ -4611,6 +4623,7 @@ class RawImage extends LeafRenderObjectWidget {
       centerSlice: centerSlice,
       matchTextDirection: matchTextDirection,
       textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
+      invertColors: invertColors,
     );
   }
 
@@ -4628,7 +4641,8 @@ class RawImage extends LeafRenderObjectWidget {
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
-      ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
+      ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null
+      ..invertColors = invertColors;
   }
 
   @override
@@ -4645,6 +4659,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
   }
 }
 
