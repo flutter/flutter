@@ -64,7 +64,7 @@ TargetPlatform get defaultTargetPlatform {
   if (debugDefaultTargetPlatformOverride != null)
     result = debugDefaultTargetPlatformOverride;
   if (result == null) {
-    throw new FlutterError(
+    throw FlutterError(
       'Unknown platform.\n'
       '${Platform.operatingSystem} was not recognized as a target platform. '
       'Consider updating the list of TargetPlatforms to include this platform.'

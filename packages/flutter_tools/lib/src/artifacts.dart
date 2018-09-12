@@ -89,7 +89,7 @@ abstract class Artifacts {
   static Artifacts get instance => context[Artifacts];
 
   static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
-    return new LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);
+    return LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
@@ -233,7 +233,7 @@ class CachedArtifacts extends Artifacts {
       return TargetPlatform.linux_x64;
     if (platform.isWindows)
       return TargetPlatform.windows_x64;
-    throw new UnimplementedError('Host OS not supported.');
+    throw UnimplementedError('Host OS not supported.');
   }
 }
 
@@ -300,7 +300,7 @@ class LocalEngineArtifacts extends Artifacts {
       if (processManager.canRun(genSnapshotPath))
         return genSnapshotPath;
     }
-    throw new Exception('Unable to find $genSnapshotName');
+    throw Exception('Unable to find $genSnapshotName');
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
@@ -311,6 +311,6 @@ class LocalEngineArtifacts extends Artifacts {
     } else if (getCurrentHostPlatform() == HostPlatform.windows_x64) {
       return fs.path.join(engineOutPath, 'flutter_tester.exe');
     }
-    throw new Exception('Unsupported platform $platform.');
+    throw Exception('Unsupported platform $platform.');
   }
 }

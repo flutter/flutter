@@ -183,7 +183,7 @@ class SystemUiOverlayStyle {
     Brightness statusBarIconBrightness,
     Brightness systemNavigationBarIconBrightness,
   }) {
-    return new SystemUiOverlayStyle(
+    return SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
       systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
       statusBarColor: statusBarColor ?? this.statusBarColor,

@@ -77,7 +77,7 @@ class BuildAotCommand extends BuildSubCommand {
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
     try {
       String mainPath = findMainDartFile(targetFile);
-      final AOTSnapshotter snapshotter = new AOTSnapshotter();
+      final AOTSnapshotter snapshotter = AOTSnapshotter();
 
       // Compile to kernel.
       mainPath = await snapshotter.compileKernel(

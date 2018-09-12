@@ -19,8 +19,8 @@ int countSemanticsChildren(RenderObject object) {
 
 void main() {
   test('RenderOpacity and children and semantics', () {
-    final RenderOpacity box = new RenderOpacity(
-      child: new RenderParagraph(
+    final RenderOpacity box = RenderOpacity(
+      child: RenderParagraph(
         const TextSpan(),
         textDirection: TextDirection.ltr,
       ),
@@ -41,11 +41,11 @@ void main() {
   });
 
   test('RenderOpacity and children and semantics', () {
-    final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final RenderAnimatedOpacity box = new RenderAnimatedOpacity(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final RenderAnimatedOpacity box = RenderAnimatedOpacity(
       alwaysIncludeSemantics: false,
       opacity: controller,
-      child: new RenderParagraph(
+      child: RenderParagraph(
         const TextSpan(),
         textDirection: TextDirection.ltr,
       ),

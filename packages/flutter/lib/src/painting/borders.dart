@@ -92,7 +92,7 @@ class BorderSide {
       return a;
     assert(a.color == b.color);
     assert(a.style == b.style);
-    return new BorderSide(
+    return BorderSide(
       color: a.color, // == b.color
       width: a.width + b.width,
       style: a.style, // == b.style
@@ -123,7 +123,7 @@ class BorderSide {
     BorderStyle style
   }) {
     assert(width == null || width >= 0.0);
-    return new BorderSide(
+    return BorderSide(
       color: color ?? this.color,
       width: width ?? this.width,
       style: style ?? this.style,
@@ -148,7 +148,7 @@ class BorderSide {
   /// an [AnimationController].
   BorderSide scale(double t) {
     assert(t != null);
-    return new BorderSide(
+    return BorderSide(
       color: color,
       width: math.max(0.0, width * t),
       style: t <= 0.0 ? BorderStyle.none : style,
@@ -164,12 +164,12 @@ class BorderSide {
   Paint toPaint() {
     switch (style) {
       case BorderStyle.solid:
-        return new Paint()
+        return Paint()
           ..color = color
           ..strokeWidth = width
           ..style = PaintingStyle.stroke;
       case BorderStyle.none:
-        return new Paint()
+        return Paint()
           ..color = const Color(0x00000000)
           ..strokeWidth = 0.0
           ..style = PaintingStyle.stroke;
@@ -221,7 +221,7 @@ class BorderSide {
     if (width < 0.0)
       return BorderSide.none;
     if (a.style == b.style) {
-      return new BorderSide(
+      return BorderSide(
         color: Color.lerp(a.color, b.color, t),
         width: width,
         style: a.style, // == b.style
@@ -244,7 +244,7 @@ class BorderSide {
         colorB = b.color.withAlpha(0x00);
         break;
     }
-    return new BorderSide(
+    return BorderSide(
       color: Color.lerp(colorA, colorB, t),
       width: width,
       style: BorderStyle.solid,
@@ -317,7 +317,7 @@ abstract class ShapeBorder {
   /// merely paints the two borders sequentially, with the left hand operand on
   /// the inside and the right hand operand on the outside.
   ShapeBorder operator +(ShapeBorder other) {
-    return add(other) ?? other.add(this, reversed: true) ?? new _CompoundBorder(<ShapeBorder>[other, this]);
+    return add(other) ?? other.add(this, reversed: true) ?? _CompoundBorder(<ShapeBorder>[other, this]);
   }
 
   /// Creates a copy of this border, scaled by the factor `t`.
@@ -530,7 +530,7 @@ class _CompoundBorder extends ShapeBorder {
         final List<ShapeBorder> result = <ShapeBorder>[];
         result.addAll(borders);
         result[reversed ? result.length - 1 : 0] = merged;
-        return new _CompoundBorder(result);
+        return _CompoundBorder(result);
       }
     }
     // We can't, so fall back to just adding the new border to the list.
@@ -543,12 +543,12 @@ class _CompoundBorder extends ShapeBorder {
       mergedBorders.add(other);
     if (!reversed)
       mergedBorders.addAll(borders);
-    return new _CompoundBorder(mergedBorders);
+    return _CompoundBorder(mergedBorders);
   }
 
   @override
   ShapeBorder scale(double t) {
-    return new _CompoundBorder(
+    return _CompoundBorder(
       borders.map<ShapeBorder>((ShapeBorder border) => border.scale(t)).toList()
     );
   }
@@ -589,7 +589,7 @@ class _CompoundBorder extends ShapeBorder {
       if (localA != null)
         results.add(localA.scale(1.0 - t));
     }
-    return new _CompoundBorder(results);
+    return _CompoundBorder(results);
   }
 
   @override
@@ -676,10 +676,10 @@ void paintBorder(Canvas canvas, Rect rect, {
   // We draw the borders as filled shapes, unless the borders are hairline
   // borders, in which case we use PaintingStyle.stroke, with the stroke width
   // specified here.
-  final Paint paint = new Paint()
+  final Paint paint = Paint()
     ..strokeWidth = 0.0;
 
-  final Path path = new Path();
+  final Path path = Path();
 
   switch (top.style) {
     case BorderStyle.solid:

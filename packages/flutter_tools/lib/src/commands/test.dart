@@ -140,7 +140,7 @@ class TestCommand extends FlutterCommand {
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
-      collector = new CoverageCollector();
+      collector = CoverageCollector();
     }
 
     final bool machine = argResults['machine'];
@@ -152,7 +152,7 @@ class TestCommand extends FlutterCommand {
     if (collector != null) {
       watcher = collector;
     } else if (machine) {
-      watcher = new EventPrinter();
+      watcher = EventPrinter();
     }
 
     Cache.releaseLockEarly();

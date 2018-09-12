@@ -121,7 +121,7 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final Set<String> manifest = new Set<String>();
+    final Set<String> manifest = Set<String>();
     final List<FileSystemEntity> flutterFiles = _flutterRoot.listSync(recursive: true);
     for (FileSystemEntity entity in flutterFiles) {
       final String relativePath = fs.path.relative(entity.path, from: _flutterRoot.absolute.path);
@@ -139,7 +139,7 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       // Skip files we aren't interested in.
-      final RegExp _trackedIdeaFileRegExp = new RegExp(
+      final RegExp _trackedIdeaFileRegExp = RegExp(
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
@@ -253,7 +253,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = new Template(_templateDirectory, _templateDirectory);
+    final Template template = Template(_templateDirectory, _templateDirectory);
     return template.render(
       fs.directory(dirPath),
       context,

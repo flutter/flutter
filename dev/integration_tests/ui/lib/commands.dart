@@ -15,7 +15,7 @@ void main() {
     await WidgetsBinding.instance.reassembleApplication();
     return log;
   });
-  runApp(new MaterialApp(home: const Test()));
+  runApp(MaterialApp(home: const Test()));
 }
 
 class Test extends SingleChildRenderObjectWidget {
@@ -23,7 +23,7 @@ class Test extends SingleChildRenderObjectWidget {
 
   @override
   RenderTest createRenderObject(BuildContext context) {
-    return new RenderTest();
+    return RenderTest();
   }
 }
 

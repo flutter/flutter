@@ -39,12 +39,12 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 
   @override
   Size getSize(BoxConstraints constraints) {
-    return new Size(constraints.maxWidth, kToolbarHeight);
+    return Size(constraints.maxWidth, kToolbarHeight);
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return new Offset(0.0, size.height - childSize.height);
+    return Offset(0.0, size.height - childSize.height);
   }
 
   @override
@@ -156,7 +156,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
+       preferredSize = Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -317,7 +317,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   }
 
   @override
-  _AppBarState createState() => new _AppBarState();
+  _AppBarState createState() => _AppBarState();
 }
 
 class _AppBarState extends State<AppBar> {
@@ -359,7 +359,7 @@ class _AppBarState extends State<AppBar> {
     Widget leading = widget.leading;
     if (leading == null && widget.automaticallyImplyLeading) {
       if (hasDrawer) {
-        leading = new IconButton(
+        leading = IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
@@ -370,7 +370,7 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      leading = new ConstrainedBox(
+      leading = ConstrainedBox(
         constraints: const BoxConstraints.tightFor(width: _kLeadingWidth),
         child: leading,
       );
@@ -387,11 +387,11 @@ class _AppBarState extends State<AppBar> {
         case TargetPlatform.iOS:
           break;
       }
-      title = new DefaultTextStyle(
+      title = DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: new Semantics(
+        child: Semantics(
           namesRoute: namesRoute,
           child: title,
           header: true,
@@ -401,20 +401,20 @@ class _AppBarState extends State<AppBar> {
 
     Widget actions;
     if (widget.actions != null && widget.actions.isNotEmpty) {
-      actions = new Row(
+      actions = Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: widget.actions,
       );
     } else if (hasEndDrawer) {
-      actions = new IconButton(
+      actions = IconButton(
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );
     }
 
-    final Widget toolbar = new NavigationToolbar(
+    final Widget toolbar = NavigationToolbar(
       leading: leading,
       middle: title,
       trailing: actions,
@@ -424,12 +424,12 @@ class _AppBarState extends State<AppBar> {
 
     // If the toolbar is allocated less than kToolbarHeight make it
     // appear to scroll upwards within its shrinking container.
-    Widget appBar = new ClipRect(
-      child: new CustomSingleChildLayout(
+    Widget appBar = ClipRect(
+      child: CustomSingleChildLayout(
         delegate: const _ToolbarContainerLayout(),
         child: IconTheme.merge(
           data: appBarIconTheme,
-          child: new DefaultTextStyle(
+          child: DefaultTextStyle(
             style: sideStyle,
             child: toolbar,
           ),
@@ -437,16 +437,16 @@ class _AppBarState extends State<AppBar> {
       ),
     );
     if (widget.bottom != null) {
-      appBar = new Column(
+      appBar = Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new Flexible(
-            child: new ConstrainedBox(
+          Flexible(
+            child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: kToolbarHeight),
               child: appBar,
             ),
           ),
-          widget.bottomOpacity == 1.0 ? widget.bottom : new Opacity(
+          widget.bottomOpacity == 1.0 ? widget.bottom : Opacity(
             opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
             child: widget.bottom,
           ),
@@ -456,19 +456,19 @@ class _AppBarState extends State<AppBar> {
 
     // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
-      appBar = new SafeArea(
+      appBar = SafeArea(
         top: true,
         child: appBar,
       );
     }
 
-    appBar = new Align(
+    appBar = Align(
       alignment: Alignment.topCenter,
       child: appBar,
     );
 
     if (widget.flexibleSpace != null) {
-      appBar = new Stack(
+      appBar = Stack(
         fit: StackFit.passthrough,
         children: <Widget>[
           widget.flexibleSpace,
@@ -481,12 +481,12 @@ class _AppBarState extends State<AppBar> {
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
 
-    return new Semantics(
+    return Semantics(
       container: true,
       explicitChildNodes: true,
-      child: new AnnotatedRegion<SystemUiOverlayStyle>(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
-        child: new Material(
+        child: Material(
           color: widget.backgroundColor ?? themeData.primaryColor,
           elevation: widget.elevation,
           child: appBar,
@@ -502,7 +502,7 @@ class _FloatingAppBar extends StatefulWidget {
   final Widget child;
 
   @override
-  _FloatingAppBarState createState() => new _FloatingAppBarState();
+  _FloatingAppBarState createState() => _FloatingAppBarState();
 }
 
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
@@ -616,13 +616,13 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       maxExtent: maxExtent,
       currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
       toolbarOpacity: toolbarOpacity,
-      child: new AppBar(
+      child: AppBar(
         leading: leading,
         automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
         flexibleSpace: (title == null && flexibleSpace != null)
-          ? new Semantics(child: flexibleSpace, header: true)
+          ? Semantics(child: flexibleSpace, header: true)
           : flexibleSpace,
         bottom: bottom,
         elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
@@ -637,7 +637,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         bottomOpacity: pinned ? 1.0 : (visibleMainHeight / _bottomHeight).clamp(0.0, 1.0),
       ),
     );
-    return floating ? new _FloatingAppBar(child: appBar) : appBar;
+    return floating ? _FloatingAppBar(child: appBar) : appBar;
   }
 
   @override
@@ -931,7 +931,7 @@ class SliverAppBar extends StatefulWidget {
   final bool snap;
 
   @override
-  _SliverAppBarState createState() => new _SliverAppBarState();
+  _SliverAppBarState createState() => _SliverAppBarState();
 }
 
 // This class is only Stateful because it owns the TickerProvider used
@@ -941,7 +941,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
 
   void _updateSnapConfiguration() {
     if (widget.snap && widget.floating) {
-      _snapConfiguration = new FloatingHeaderSnapConfiguration(
+      _snapConfiguration = FloatingHeaderSnapConfiguration(
         vsync: this,
         curve: Curves.easeOut,
         duration: const Duration(milliseconds: 200),
@@ -971,13 +971,13 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? widget.bottom.preferredSize.height + topPadding : null;
 
-    return new MediaQuery.removePadding(
+    return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
-      child: new SliverPersistentHeader(
+      child: SliverPersistentHeader(
         floating: widget.floating,
         pinned: widget.pinned,
-        delegate: new _SliverAppBarDelegate(
+        delegate: _SliverAppBarDelegate(
           leading: widget.leading,
           automaticallyImplyLeading: widget.automaticallyImplyLeading,
           title: widget.title,

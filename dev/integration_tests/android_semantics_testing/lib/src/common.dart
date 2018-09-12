@@ -51,7 +51,7 @@ class AndroidSemanticsNode  {
   ///       ]
   ///     }
   factory AndroidSemanticsNode.deserialize(String value) {
-    return new AndroidSemanticsNode._(json.decode(value));
+    return AndroidSemanticsNode._(json.decode(value));
   }
 
   final Map<String, Object> _values;
@@ -129,7 +129,7 @@ class AndroidSemanticsNode  {
   Rect getRect() {
     final Map<String, Object> rawRect = _values['rect'];
     final Map<String, int> rect = rawRect.cast<String, int>();
-    return new Rect.fromLTRB(
+    return Rect.fromLTRB(
       rect['left'].toDouble(),
       rect['top'].toDouble(),
       rect['right'].toDouble(),
@@ -140,7 +140,7 @@ class AndroidSemanticsNode  {
   /// Gets a [Size] which defines the size of the semantics node.
   Size getSize() {
     final Rect rect = getRect();
-    return new Size(rect.bottom - rect.top, rect.right - rect.left);
+    return Size(rect.bottom - rect.top, rect.right - rect.left);
   }
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.

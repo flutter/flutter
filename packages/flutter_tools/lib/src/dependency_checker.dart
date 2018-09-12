@@ -9,7 +9,7 @@ import 'globals.dart';
 
 class DependencyChecker {
   final DartDependencySetBuilder builder;
-  final Set<String> _dependencies = new Set<String>();
+  final Set<String> _dependencies = Set<String>();
   final AssetBundle assets;
   DependencyChecker(this.builder, this.assets);
 

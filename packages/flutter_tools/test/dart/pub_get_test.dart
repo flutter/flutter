@@ -29,7 +29,7 @@ void main() {
 
     final MockProcessManager processMock = context[ProcessManager];
 
-    new FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
       pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
@@ -85,9 +85,9 @@ void main() {
     expect(testLogger.errorText, isEmpty);
     expect(error, isNull);
   }, overrides: <Type, Generator>{
-    ProcessManager: () => new MockProcessManager(69),
-    FileSystem: () => new MockFileSystem(),
-    Platform: () => new FakePlatform(
+    ProcessManager: () => MockProcessManager(69),
+    FileSystem: () => MockFileSystem(),
+    Platform: () => FakePlatform(
       environment: <String, String>{},
     ),
   });
@@ -98,7 +98,7 @@ void main() {
     final MockProcessManager processMock = context[ProcessManager];
     final MockFileSystem fsMock = context[FileSystem];
 
-    new FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
@@ -112,9 +112,9 @@ void main() {
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
-    ProcessManager: () => new MockProcessManager(69),
-    FileSystem: () => new MockFileSystem(),
-    Platform: () => new FakePlatform(
+    ProcessManager: () => MockProcessManager(69),
+    FileSystem: () => MockFileSystem(),
+    Platform: () => FakePlatform(
       environment: <String, String>{},
     ),
   });
@@ -124,7 +124,7 @@ void main() {
 
     final MockProcessManager processMock = context[ProcessManager];
 
-    new FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
@@ -138,9 +138,9 @@ void main() {
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
-    ProcessManager: () => new MockProcessManager(69),
-    FileSystem: () => new MockFileSystem(),
-    Platform: () => new FakePlatform(
+    ProcessManager: () => MockProcessManager(69),
+    FileSystem: () => MockFileSystem(),
+    Platform: () => FakePlatform(
       environment: <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
     ),
   });
@@ -167,7 +167,7 @@ class MockProcessManager implements ProcessManager {
   }) {
     lastPubEnvironment = environment['PUB_ENVIRONMENT'];
     lastPubCache = environment['PUB_CACHE'];
-    return new Future<Process>.value(new MockProcess(fakeExitCode));
+    return Future<Process>.value(MockProcess(fakeExitCode));
   }
 
   @override
@@ -180,13 +180,13 @@ class MockProcess implements Process {
   final int fakeExitCode;
 
   @override
-  Stream<List<int>> get stdout => new MockStream<List<int>>();
+  Stream<List<int>> get stdout => MockStream<List<int>>();
 
   @override
-  Stream<List<int>> get stderr => new MockStream<List<int>>();
+  Stream<List<int>> get stderr => MockStream<List<int>>();
 
   @override
-  Future<int> get exitCode => new Future<int>.value(fakeExitCode);
+  Future<int> get exitCode => Future<int>.value(fakeExitCode);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
@@ -194,14 +194,14 @@ class MockProcess implements Process {
 
 class MockStream<T> implements Stream<T> {
   @override
-  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) => new MockStream<S>();
+  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) => MockStream<S>();
 
   @override
-  Stream<T> where(bool test(T event)) => new MockStream<T>();
+  Stream<T> where(bool test(T event)) => MockStream<T>();
 
   @override
   StreamSubscription<T> listen(void onData(T event), {Function onError, void onDone(), bool cancelOnError}) {
-    return new MockStreamSubscription<T>();
+    return MockStreamSubscription<T>();
   }
 
   @override
@@ -210,7 +210,7 @@ class MockStream<T> implements Stream<T> {
 
 class MockStreamSubscription<T> implements StreamSubscription<T> {
   @override
-  Future<E> asFuture<E>([E futureValue]) => new Future<E>.value();
+  Future<E> asFuture<E>([E futureValue]) => Future<E>.value();
 
   @override
   Future<Null> cancel() => null;
@@ -221,30 +221,30 @@ class MockStreamSubscription<T> implements StreamSubscription<T> {
 
 
 class MockFileSystem extends ForwardingFileSystem {
-  MockFileSystem() : super(new MemoryFileSystem());
+  MockFileSystem() : super(MemoryFileSystem());
 
   @override
   File file(dynamic path) {
-    return new MockFile();
+    return MockFile();
   }
 
   @override
   Directory directory(dynamic path) {
-    return new MockDirectory(path);
+    return MockDirectory(path);
   }
 }
 
 class MockFile implements File {
   @override
   Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
-    return new MockRandomAccessFile();
+    return MockRandomAccessFile();
   }
 
   @override
   bool existsSync() => true;
 
   @override
-  DateTime lastModifiedSync() => new DateTime(0);
+  DateTime lastModifiedSync() => DateTime(0);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

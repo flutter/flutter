@@ -13,11 +13,11 @@ void main() {
   testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
     BuildContext savedContext;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Builder(
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
         builder: (BuildContext context) {
           savedContext = context;
-          return new Container();
+          return Container();
         }
       )
     ));
@@ -70,11 +70,11 @@ void main() {
   });
 
   testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body'))
       )
@@ -84,7 +84,7 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Container(
+      return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet')
       );
@@ -128,17 +128,17 @@ void main() {
 
   testWidgets('Verify that dragging past the bottom dismisses a persistent BottomSheet', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5528
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body'))
       )
     ));
 
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Container(
+      return Container(
         margin: const EdgeInsets.all(40.0),
         child: const Text('BottomSheet')
       );
@@ -160,24 +160,24 @@ void main() {
     BuildContext outerContext;
     BuildContext innerContext;
 
-    await tester.pumpWidget(new Localizations(
+    await tester.pumpWidget(Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
-      child: new Directionality(
+      child: Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
+        child: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.all(50.0),
           ),
-          child: new Navigator(
+          child: Navigator(
             onGenerateRoute: (_) {
-              return new PageRouteBuilder<void>(
+              return PageRouteBuilder<void>(
                 pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                   outerContext = context;
-                  return new Container();
+                  return Container();
                 },
               );
             },
@@ -190,7 +190,7 @@ void main() {
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;
-        return new Container();
+        return Container();
       },
     );
     await tester.pump();
@@ -207,11 +207,11 @@ void main() {
   });
 
   testWidgets('modal BottomSheet has semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final SemanticsTester semantics = SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
         key: scaffoldKey,
         body: const Center(child: Text('body'))
       )
@@ -219,7 +219,7 @@ void main() {
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
-      return new Container(
+      return Container(
         child: const Text('BottomSheet')
       );
     });
@@ -227,11 +227,11 @@ void main() {
     await tester.pump(); // bottom sheet show animation starts
     await tester.pump(const Duration(seconds: 1)); // animation done
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               label: 'Dialog',
               textDirection: TextDirection.ltr,
               flags: <SemanticsFlag>[
@@ -239,7 +239,7 @@ void main() {
                 SemanticsFlag.namesRoute,
               ],
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   label: 'BottomSheet',
                   textDirection: TextDirection.ltr,
                 ),

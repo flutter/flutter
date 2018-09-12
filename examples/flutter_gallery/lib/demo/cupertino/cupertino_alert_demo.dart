@@ -9,11 +9,11 @@ class CupertinoAlertDemo extends StatefulWidget {
   static const String routeName = '/cupertino/alert';
 
   @override
-  _CupertinoAlertDemoState createState() => new _CupertinoAlertDemoState();
+  _CupertinoAlertDemoState createState() => _CupertinoAlertDemoState();
 }
 
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void showDemoDialog<T>({BuildContext context, Widget child}) {
     showDialog<T>(
@@ -24,8 +24,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
       // The value passed to Navigator.pop() or null.
       if (value != null) {
         _scaffoldKey.currentState.showSnackBar(
-          new SnackBar(
-            content: new Text('You selected: $value'),
+          SnackBar(
+            content: Text('You selected: $value'),
           ),
         );
       }
@@ -39,8 +39,8 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     ).then<void>((T value) {
       if (value != null) {
         _scaffoldKey.currentState.showSnackBar(
-          new SnackBar(
-            content: new Text('You selected: $value'),
+          SnackBar(
+            content: Text('You selected: $value'),
           ),
         );
       }
@@ -49,31 +49,31 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
+      appBar: AppBar(
         title: const Text('Cupertino Alerts'),
       ),
-      body: new ListView(
+      body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
-          new CupertinoButton(
+          CupertinoButton(
             child: const Text('Alert'),
             color: CupertinoColors.activeBlue,
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
-                child: new CupertinoAlertDialog(
+                child: CupertinoAlertDialog(
                   title: const Text('Discard draft?'),
                   actions: <Widget>[
-                    new CupertinoDialogAction(
+                    CupertinoDialogAction(
                       child: const Text('Discard'),
                       isDestructiveAction: true,
                       onPressed: () {
                         Navigator.pop(context, 'Discard');
                       },
                     ),
-                    new CupertinoDialogAction(
+                    CupertinoDialogAction(
                       child: const Text('Cancel'),
                       isDefaultAction: true,
                       onPressed: () {
@@ -86,25 +86,25 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             },
           ),
           const Padding(padding: EdgeInsets.all(8.0)),
-          new CupertinoButton(
+          CupertinoButton(
             child: const Text('Alert with Title'),
             color: CupertinoColors.activeBlue,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
-                child: new CupertinoAlertDialog(
+                child: CupertinoAlertDialog(
                   title: const Text('Allow "Maps" to access your location while you are using the app?'),
                   content: const Text('Your current location will be displayed on the map and used '
                       'for directions, nearby search results, and estimated travel times.'),
                   actions: <Widget>[
-                    new CupertinoDialogAction(
+                    CupertinoDialogAction(
                       child: const Text('Don\'t Allow'),
                       onPressed: () {
                         Navigator.pop(context, 'Disallow');
                       },
                     ),
-                    new CupertinoDialogAction(
+                    CupertinoDialogAction(
                       child: const Text('Allow'),
                       onPressed: () {
                         Navigator.pop(context, 'Allow');
@@ -116,7 +116,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             },
           ),
           const Padding(padding: EdgeInsets.all(8.0)),
-          new CupertinoButton(
+          CupertinoButton(
             child: const Text('Alert with Buttons'),
             color: CupertinoColors.activeBlue,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
@@ -133,7 +133,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             },
           ),
           const Padding(padding: EdgeInsets.all(8.0)),
-          new CupertinoButton(
+          CupertinoButton(
             child: const Text('Alert Buttons Only'),
             color: CupertinoColors.activeBlue,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
@@ -145,37 +145,37 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
             },
           ),
           const Padding(padding: EdgeInsets.all(8.0)),
-          new CupertinoButton(
+          CupertinoButton(
             child: const Text('Action Sheet'),
             color: CupertinoColors.activeBlue,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
             onPressed: () {
               showDemoActionSheet<String>(
                 context: context,
-                child: new CupertinoActionSheet(
+                child: CupertinoActionSheet(
                   title: const Text('Favorite Dessert'),
                   message: const Text('Please select the best dessert from the options below.'),
                   actions: <Widget>[
-                    new CupertinoActionSheetAction(
+                    CupertinoActionSheetAction(
                       child: const Text('Profiteroles'),
                       onPressed: () {
                         Navigator.pop(context, 'Profiteroles');
                       },
                     ),
-                    new CupertinoActionSheetAction(
+                    CupertinoActionSheetAction(
                       child: const Text('Cannolis'),
                       onPressed: () {
                         Navigator.pop(context, 'Cannolis');
                       },
                     ),
-                    new CupertinoActionSheetAction(
+                    CupertinoActionSheetAction(
                       child: const Text('Trifle'),
                       onPressed: () {
                         Navigator.pop(context, 'Trifle');
                       },
                     ),
                   ],
-                  cancelButton: new CupertinoActionSheetAction(
+                  cancelButton: CupertinoActionSheetAction(
                     child: const Text('Cancel'),
                     isDefaultAction: true,
                     onPressed: () {
@@ -200,53 +200,53 @@ class CupertinoDessertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new CupertinoAlertDialog(
+    return CupertinoAlertDialog(
       title: title,
       content: content,
       actions: <Widget>[
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Cheesecake'),
           onPressed: () {
             Navigator.pop(context, 'Cheesecake');
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Tiramisu'),
           onPressed: () {
             Navigator.pop(context, 'Tiramisu');
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Apple Pie'),
           onPressed: () {
             Navigator.pop(context, 'Apple Pie');
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text("Devil's food cake"),
           onPressed: () {
             Navigator.pop(context, "Devil's food cake");
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Banana Split'),
           onPressed: () {
             Navigator.pop(context, 'Banana Split');
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Oatmeal Cookie'),
           onPressed: () {
             Navigator.pop(context, 'Oatmeal Cookies');
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Chocolate Brownie'),
           onPressed: () {
             Navigator.pop(context, 'Chocolate Brownies');
           },
         ),
-        new CupertinoDialogAction(
+        CupertinoDialogAction(
           child: const Text('Cancel'),
           isDestructiveAction: true,
           onPressed: () {

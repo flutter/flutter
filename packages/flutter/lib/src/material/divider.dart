@@ -87,7 +87,7 @@ class Divider extends StatelessWidget {
   /// ```
   static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
     assert(width != null);
-    return new BorderSide(
+    return BorderSide(
       color: color ?? Theme.of(context).dividerColor,
       width: width,
     );
@@ -95,14 +95,14 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new SizedBox(
+    return SizedBox(
       height: height,
-      child: new Center(
-        child: new Container(
+      child: Center(
+        child: Container(
           height: 0.0,
-          margin: new EdgeInsetsDirectional.only(start: indent),
-          decoration: new BoxDecoration(
-            border: new Border(
+          margin: EdgeInsetsDirectional.only(start: indent),
+          decoration: BoxDecoration(
+            border: Border(
               bottom: createBorderSide(context, color: color),
             ),
           ),

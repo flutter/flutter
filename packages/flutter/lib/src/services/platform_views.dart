@@ -82,7 +82,7 @@ class PlatformViewsService {
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
-    return new AndroidViewController._(
+    return AndroidViewController._(
       id,
       viewType,
       creationParams,
@@ -456,7 +456,7 @@ class AndroidViewController {
   /// The first time a size is set triggers the creation of the Android view.
   Future<void> setSize(Size size) async {
     if (_state == _AndroidViewState.disposed)
-      throw new FlutterError('trying to size a disposed Android View. View id: $id');
+      throw FlutterError('trying to size a disposed Android View. View id: $id');
 
     assert(size != null);
     assert(!size.isEmpty);
@@ -474,7 +474,7 @@ class AndroidViewController {
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     if (_state == _AndroidViewState.disposed)
-      throw new FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
+      throw FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
 
     if (layoutDirection == _layoutDirection)
       return;

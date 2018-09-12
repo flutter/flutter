@@ -15,13 +15,13 @@ import 'test_driver.dart';
 void main() {
   group('hot', () {
     Directory tempDir;
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
     FlutterTestDriver _flutter;
 
     setUp(() async {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_hot_reload_test_app.');
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -46,7 +46,7 @@ void main() {
 
       // Hit breakpoint using a file:// URI.
       final VMIsolate isolate = await _flutter.breakAt(
-          new Uri.file(_project.breakpointFile).toString(),
+          Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
 

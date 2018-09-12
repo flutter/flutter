@@ -81,7 +81,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
-Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
+Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -194,7 +194,7 @@ final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -211,7 +211,7 @@ Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefe
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
 Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
-  return new _MoreOrLessEquals(value, epsilon);
+  return _MoreOrLessEquals(value, epsilon);
 }
 
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
@@ -228,7 +228,7 @@ Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
 ///  * [TreeDiagnosticsMixin.toStringDeep], a method that returns a [String]
 ///    typically containing multiple hash codes.
 Matcher equalsIgnoringHashCodes(String value) {
-  return new _EqualsIgnoringHashCodes(value);
+  return _EqualsIgnoringHashCodes(value);
 }
 
 /// A matcher for [MethodCall]s, asserting that it has the specified
@@ -236,7 +236,7 @@ Matcher equalsIgnoringHashCodes(String value) {
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
 Matcher isMethodCall(String name, {@required dynamic arguments}) {
-  return new _IsMethodCall(name, arguments);
+  return _IsMethodCall(name, arguments);
 }
 
 /// Asserts that 2 paths cover the same area by sampling multiple points.
@@ -249,7 +249,7 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
-  => new _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
+  => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
 /// golden image file identified by [key].
@@ -279,11 +279,11 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 ///    may swap out the backend for this matcher.
 Matcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
-    return new _MatchesGoldenFile(key);
+    return _MatchesGoldenFile(key);
   } else if (key is String) {
-    return new _MatchesGoldenFile.forStringPath(key);
+    return _MatchesGoldenFile.forStringPath(key);
   }
-  throw new ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+  throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
 
 /// Asserts that a [SemanticsData] contains the specified information.
@@ -448,12 +448,12 @@ Matcher matchesSemanticsData({
     actions.add(SemanticsAction.moveCursorBackwardByWord);
   SemanticsHintOverrides hintOverrides;
   if (onTapHint != null || onLongPressHint != null)
-    hintOverrides = new SemanticsHintOverrides(
+    hintOverrides = SemanticsHintOverrides(
       onTapHint: onTapHint,
       onLongPressHint: onLongPressHint,
     );
 
-  return new _MatchesSemanticsData(
+  return _MatchesSemanticsData(
     label: label,
     hint: hint,
     value: value,
@@ -489,7 +489,7 @@ Matcher matchesSemanticsData({
 ///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
-  return new _MatchesAccessibilityGuideline(guideline);
+  return _MatchesAccessibilityGuideline(guideline);
 }
 
 /// The inverse matcher of [meetsGuideline].
@@ -497,7 +497,7 @@ AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
 /// This is needed because the [isNot] matcher does not compose with an
 /// [AsyncMatcher].
 AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
-  return new _DoesNotMatchAccessibilityGuideline(guideline);
+  return _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -678,10 +678,10 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   final String _value;
 
-  static final Object _mismatchedValueKey = new Object();
+  static final Object _mismatchedValueKey = Object();
 
   static String _normalize(String s) {
-    return s.replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#00000');
+    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
   }
 
   @override
@@ -751,7 +751,7 @@ bool _isAllTreeConnectorCharacters(String line) {
 class _HasGoodToStringDeep extends Matcher {
   const _HasGoodToStringDeep();
 
-  static final Object _toStringDeepErrorDescriptionKey = new Object();
+  static final Object _toStringDeepErrorDescriptionKey = Object();
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
@@ -810,7 +810,7 @@ class _HasGoodToStringDeep extends Matcher {
         prefixIssues.add('Line ${i+1} does not contain the expected prefix.');
     }
 
-    final StringBuffer errorDescription = new StringBuffer();
+    final StringBuffer errorDescription = StringBuffer();
     if (issues.isNotEmpty) {
       errorDescription.writeln('Bad toStringDeep():');
       errorDescription.writeln(description);
@@ -960,14 +960,14 @@ Matcher within<T>({
   distanceFunction ??= _kStandardDistanceFunctions[from.runtimeType];
 
   if (distanceFunction == null) {
-    throw new ArgumentError(
+    throw ArgumentError(
       'The specified distanceFunction was null, and a standard distance '
       'function was not found for type ${from.runtimeType} of the provided '
       '`from` argument.'
     );
   }
 
-  return new _IsWithinDistance<T>(distanceFunction, from, distance);
+  return _IsWithinDistance<T>(distanceFunction, from, distance);
 }
 
 class _IsWithinDistance<T> extends Matcher {
@@ -986,7 +986,7 @@ class _IsWithinDistance<T> extends Matcher {
     final T test = object;
     final num distance = distanceFunction(test, value);
     if (distance < 0) {
-      throw new ArgumentError(
+      throw ArgumentError(
         'Invalid distance function was used to compare a ${value.runtimeType} '
         'to a ${object.runtimeType}. The function must return a non-negative '
         'double value, but it returned $distance.'
@@ -1098,14 +1098,14 @@ const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
 Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
-  return new _ClipsWithBoundingRRect(borderRadius: borderRadius);
+  return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
 Matcher clipsWithShapeBorder({@required ShapeBorder shape}) {
-  return new _ClipsWithShapeBorder(shape: shape);
+  return _ClipsWithShapeBorder(shape: shape);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
@@ -1130,7 +1130,7 @@ Matcher rendersOnPhysicalModel({
   BorderRadius borderRadius,
   double elevation,
 }) {
-  return new _RendersOnPhysicalModel(
+  return _RendersOnPhysicalModel(
     shape: shape,
     borderRadius: borderRadius,
     elevation: elevation,
@@ -1146,7 +1146,7 @@ Matcher rendersOnPhysicalShape({
   ShapeBorder shape,
   double elevation,
 }) {
-  return new _RendersOnPhysicalShape(
+  return _RendersOnPhysicalShape(
     shape: shape,
     elevation: elevation,
   );
@@ -1438,7 +1438,7 @@ class _CoversSameAreaAs extends Matcher {
   }) : maxHorizontalNoise = areaToCompare.width / sampleSize,
        maxVerticalNoise = areaToCompare.height / sampleSize {
     // Use a fixed random seed to make sure tests are deterministic.
-    random = new math.Random(1);
+    random = math.Random(1);
   }
 
   final Path expectedPath;
@@ -1452,7 +1452,7 @@ class _CoversSameAreaAs extends Matcher {
   bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
     for (int i = 0; i < sampleSize; i += 1) {
       for (int j = 0; j < sampleSize; j += 1) {
-        final Offset offset = new Offset(
+        final Offset offset = Offset(
           i * (areaToCompare.width / sampleSize),
           j * (areaToCompare.height / sampleSize)
         );
@@ -1460,7 +1460,7 @@ class _CoversSameAreaAs extends Matcher {
         if (!_samplePoint(matchState, actualPath, offset))
           return false;
 
-        final Offset noise = new Offset(
+        final Offset noise = Offset(
           maxHorizontalNoise * random.nextDouble(),
           maxVerticalNoise * random.nextDouble(),
         );
@@ -1526,7 +1526,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
     if (item is Future<ui.Image>) {
       imageFuture = item;
     } else if (item is ui.Image) {
-      imageFuture = new Future<ui.Image>.value(item);
+      imageFuture = Future<ui.Image>.value(item);
     } else {
       final Finder finder = item;
       final Iterable<Element> elements = finder.evaluate();
@@ -1661,11 +1661,11 @@ class _MatchesSemanticsData extends Matcher {
       final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds.map((int id) {
         return CustomSemanticsAction.getAction(id);
       }).toList();
-      final List<CustomSemanticsAction> expectedCustomActions = new List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
+      final List<CustomSemanticsAction> expectedCustomActions = List<CustomSemanticsAction>.from(customActions ?? const <int>[]);
       if (hintOverrides?.onTapHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onTapHint, action: SemanticsAction.tap));
       if (hintOverrides?.onLongPressHint != null)
-        expectedCustomActions.add(new CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
+        expectedCustomActions.add(CustomSemanticsAction.overridingAction(hint: hintOverrides.onLongPressHint, action: SemanticsAction.longPress));
       if (expectedCustomActions.length != providedCustomActions.length)
         return failWithDescription(matchState, 'custom actions where: $providedCustomActions');
       int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {

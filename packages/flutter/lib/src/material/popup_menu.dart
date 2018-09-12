@@ -108,12 +108,12 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   bool represents(dynamic value) => false;
 
   @override
-  _PopupMenuDividerState createState() => new _PopupMenuDividerState();
+  _PopupMenuDividerState createState() => _PopupMenuDividerState();
 }
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) => new Divider(height: widget.height);
+  Widget build(BuildContext context) => Divider(height: widget.height);
 }
 
 /// An item in a material design popup menu.
@@ -196,7 +196,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   bool represents(T value) => value == this.value;
 
   @override
-  PopupMenuItemState<T, PopupMenuItem<T>> createState() => new PopupMenuItemState<T, PopupMenuItem<T>>();
+  PopupMenuItemState<T, PopupMenuItem<T>> createState() => PopupMenuItemState<T, PopupMenuItem<T>>();
 }
 
 /// The [State] for [PopupMenuItem] subclasses.
@@ -243,10 +243,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
-    Widget item = new AnimatedDefaultTextStyle(
+    Widget item = AnimatedDefaultTextStyle(
       style: style,
       duration: kThemeChangeDuration,
-      child: new Baseline(
+      child: Baseline(
         baseline: widget.height - _kBaselineOffsetFromBottom,
         baselineType: style.textBaseline,
         child: buildChild(),
@@ -255,14 +255,14 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
     if (!widget.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
       item = IconTheme.merge(
-        data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
+        data: IconThemeData(opacity: isDark ? 0.5 : 0.38),
         child: item,
       );
     }
 
-    return new InkWell(
+    return InkWell(
       onTap: widget.enabled ? handleTap : null,
-      child: new Container(
+      child: Container(
         height: widget.height,
         padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
         child: item,
@@ -373,7 +373,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   Widget get child => super.child;
 
   @override
-  _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
+  _CheckedPopupMenuItemState<T> createState() => _CheckedPopupMenuItemState<T>();
 }
 
 class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
@@ -384,7 +384,7 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: _fadeDuration, vsync: this)
+    _controller = AnimationController(duration: _fadeDuration, vsync: this)
       ..value = widget.checked ? 1.0 : 0.0
       ..addListener(() => setState(() { /* animation changed */ }));
   }
@@ -401,11 +401,11 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 
   @override
   Widget buildChild() {
-    return new ListTile(
+    return ListTile(
       enabled: widget.enabled,
-      leading: new FadeTransition(
+      leading: FadeTransition(
         opacity: _opacity,
-        child: new Icon(_controller.isDismissed ? null : Icons.done)
+        child: Icon(_controller.isDismissed ? null : Icons.done)
       ),
       title: widget.child,
     );
@@ -430,58 +430,58 @@ class _PopupMenu<T> extends StatelessWidget {
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-      final CurvedAnimation opacity = new CurvedAnimation(
+      final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation,
-        curve: new Interval(start, end)
+        curve: Interval(start, end)
       );
       Widget item = route.items[i];
       if (route.initialValue != null && route.items[i].represents(route.initialValue)) {
-        item = new Container(
+        item = Container(
           color: Theme.of(context).highlightColor,
           child: item,
         );
       }
-      children.add(new FadeTransition(
+      children.add(FadeTransition(
         opacity: opacity,
         child: item,
       ));
     }
 
-    final CurveTween opacity = new CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
-    final CurveTween width = new CurveTween(curve: new Interval(0.0, unit));
-    final CurveTween height = new CurveTween(curve: new Interval(0.0, unit * route.items.length));
+    final CurveTween opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
+    final CurveTween width = CurveTween(curve: Interval(0.0, unit));
+    final CurveTween height = CurveTween(curve: Interval(0.0, unit * route.items.length));
 
-    final Widget child = new ConstrainedBox(
+    final Widget child = ConstrainedBox(
       constraints: const BoxConstraints(
         minWidth: _kMenuMinWidth,
         maxWidth: _kMenuMaxWidth,
       ),
-      child: new IntrinsicWidth(
+      child: IntrinsicWidth(
         stepWidth: _kMenuWidthStep,
-        child: new Semantics(
+        child: Semantics(
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
           label: semanticLabel,
-          child: new SingleChildScrollView(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               vertical: _kMenuVerticalPadding
             ),
-            child: new ListBody(children: children),
+            child: ListBody(children: children),
           ),
         ),
       ),
     );
 
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: route.animation,
       builder: (BuildContext context, Widget child) {
-        return new Opacity(
+        return Opacity(
           opacity: opacity.evaluate(route.animation),
-          child: new Material(
+          child: Material(
             type: MaterialType.card,
             elevation: route.elevation,
-            child: new Align(
+            child: Align(
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
@@ -518,7 +518,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
-    return new BoxConstraints.loose(constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0));
+    return BoxConstraints.loose(constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0));
   }
 
   @override
@@ -566,7 +566,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       y = _kMenuScreenPadding;
     else if (y + childSize.height > size.height - _kMenuScreenPadding)
       y = size.height - childSize.height - _kMenuScreenPadding;
-    return new Offset(x, y);
+    return Offset(x, y);
   }
 
   @override
@@ -595,7 +595,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Animation<double> createAnimation() {
-    return new CurvedAnimation(
+    return CurvedAnimation(
       parent: super.createAnimation(),
       curve: Curves.linear,
       reverseCurve: const Interval(0.0, _kMenuCloseIntervalEnd)
@@ -628,20 +628,20 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    Widget menu = new _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
+    Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
     if (theme != null)
-      menu = new Theme(data: theme, child: menu);
+      menu = Theme(data: theme, child: menu);
 
-    return new MediaQuery.removePadding(
+    return MediaQuery.removePadding(
       context: context,
       removeTop: true,
       removeBottom: true,
       removeLeft: true,
       removeRight: true,
-      child: new Builder(
+      child: Builder(
         builder: (BuildContext context) {
-          return new CustomSingleChildLayout(
-            delegate: new _PopupMenuRouteLayout(
+          return CustomSingleChildLayout(
+            delegate: _PopupMenuRouteLayout(
               position,
               selectedItemOffset,
               Directionality.of(context),
@@ -723,7 +723,7 @@ Future<T> showMenu<T>({
       label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
 
-  return Navigator.push(context, new _PopupMenuRoute<T>(
+  return Navigator.push(context, _PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
@@ -863,15 +863,15 @@ class PopupMenuButton<T> extends StatefulWidget {
   final Icon icon;
 
   @override
-  _PopupMenuButtonState<T> createState() => new _PopupMenuButtonState<T>();
+  _PopupMenuButtonState<T> createState() => _PopupMenuButtonState<T>();
 }
 
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final RenderBox button = context.findRenderObject();
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
-    final RelativeRect position = new RelativeRect.fromRect(
-      new Rect.fromPoints(
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
         button.localToGlobal(Offset.zero, ancestor: overlay),
         button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
@@ -912,11 +912,11 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
     return widget.child != null
-      ? new InkWell(
+      ? InkWell(
           onTap: showButtonMenu,
           child: widget.child,
         )
-      : new IconButton(
+      : IconButton(
           icon: widget.icon ?? _getIcon(Theme.of(context).platform),
           padding: widget.padding,
           tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,

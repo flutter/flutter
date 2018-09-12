@@ -378,7 +378,7 @@ class InkResponse extends StatefulWidget {
   }
 
   @override
-  _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
+  _InkResponseState<InkResponse> createState() => _InkResponseState<InkResponse>();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -394,9 +394,9 @@ class InkResponse extends StatefulWidget {
       gestures.add('tap down');
     if (onTapCancel != null)
       gestures.add('tap cancel');
-    properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-    properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
-    properties.add(new DiagnosticsProperty<BoxShape>(
+    properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+    properties.add(DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
+    properties.add(DiagnosticsProperty<BoxShape>(
       'highlightShape',
       highlightShape,
       description: '${containedInkWell ? "clipped to " : ""}$highlightShape',
@@ -419,7 +419,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     if (value) {
       if (_lastHighlight == null) {
         final RenderBox referenceBox = context.findRenderObject();
-        _lastHighlight = new InkHighlight(
+        _lastHighlight = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
           color: widget.highlightColor ?? Theme.of(context).highlightColor,
@@ -487,7 +487,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   void _handleTapDown(TapDownDetails details) {
     final InteractiveInkFeature splash = _createInkFeature(details);
-    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     if (widget.onTapDown != null) {
@@ -557,7 +557,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     _lastHighlight?.color = widget.highlightColor ?? themeData.highlightColor;
     _currentSplash?.color = widget.splashColor ?? themeData.splashColor;
     final bool enabled = widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
-    return new GestureDetector(
+    return GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,
       onTap: enabled ? () => _handleTap(context) : null,
       onTapCancel: enabled ? _handleTapCancel : null,

@@ -16,10 +16,10 @@ void main() {
   });
 
   group('DecoratedBoxTransition test', () {
-    final DecorationTween decorationTween = new DecorationTween(
-      begin: new BoxDecoration(
+    final DecorationTween decorationTween = DecorationTween(
+      begin: BoxDecoration(
         color: const Color(0xFFFFFFFF),
-        border: new Border.all(
+        border: Border.all(
           color: const Color(0xFF000000),
           style: BorderStyle.solid,
           width: 4.0,
@@ -32,14 +32,14 @@ void main() {
           spreadRadius: 4.0,
         )],
       ),
-      end: new BoxDecoration(
+      end: BoxDecoration(
         color: const Color(0xFF000000),
-        border: new Border.all(
+        border: Border.all(
           color: const Color(0xFF202020),
           style: BorderStyle.solid,
           width: 1.0,
         ),
-        borderRadius: new BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(10.0),
         shape: BoxShape.rectangle,
         // No shadow.
       ),
@@ -48,14 +48,14 @@ void main() {
     AnimationController controller;
 
     setUp(() {
-      controller = new AnimationController(vsync: const TestVSync());
+      controller = AnimationController(vsync: const TestVSync());
     });
 
     testWidgets(
       'decoration test',
       (WidgetTester tester) async {
         final DecoratedBoxTransition transitionUnderTest =
-            new DecoratedBoxTransition(
+            DecoratedBoxTransition(
               decoration: decorationTween.animate(controller),
               child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
             );
@@ -82,7 +82,7 @@ void main() {
         expect(border.left.width, 2.5);
         expect(border.left.style, BorderStyle.solid);
         expect(border.left.color, const Color(0xFF101010));
-        expect(actualDecoration.borderRadius, new BorderRadius.circular(5.0));
+        expect(actualDecoration.borderRadius, BorderRadius.circular(5.0));
         expect(actualDecoration.shape, BoxShape.rectangle);
         expect(actualDecoration.boxShadow[0].blurRadius, 5.0);
         expect(actualDecoration.boxShadow[0].spreadRadius, 2.0);
@@ -102,13 +102,13 @@ void main() {
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
       final Animation<Decoration> curvedDecorationAnimation =
-          decorationTween.animate(new CurvedAnimation(
+          decorationTween.animate(CurvedAnimation(
             parent: controller,
             curve: Curves.easeOut,
           ));
 
       final DecoratedBoxTransition transitionUnderTest =
-          new DecoratedBoxTransition(
+          DecoratedBoxTransition(
             decoration: curvedDecorationAnimation,
             position: DecorationPosition.foreground,
             child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
@@ -148,12 +148,12 @@ void main() {
   });
 
   testWidgets('AlignTransition animates', (WidgetTester tester) async {
-    final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final Animation<Alignment> alignmentTween = new AlignmentTween(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: const Alignment(-1.0, 0.0),
       end: const Alignment(1.0, 1.0),
     ).animate(controller);
-    final Widget widget = new AlignTransition(
+    final Widget widget = AlignTransition(
       alignment: alignmentTween,
       child: const Text('Ready', textDirection: TextDirection.ltr),
     );
@@ -172,12 +172,12 @@ void main() {
   });
 
   testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
-    final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final Animation<Alignment> alignmentTween = new AlignmentTween(
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: const Alignment(-1.0, 0.0),
       end: const Alignment(1.0, 1.0),
     ).animate(controller);
-    final Widget widget = new AlignTransition(
+    final Widget widget = AlignTransition(
       alignment: alignmentTween,
       child: const Text('Ready', textDirection: TextDirection.ltr),
       widthFactor: 0.3,
@@ -193,12 +193,12 @@ void main() {
   });
 
   testWidgets('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
-    final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final Animation<double> animation = new Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget =  new Directionality(
+    final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
-        child: new SizeTransition(
+        child: SizeTransition(
           axis: Axis.vertical,
           sizeFactor: animation,
           child: const Text('Ready'),
@@ -224,12 +224,12 @@ void main() {
   });
 
   testWidgets('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
-    final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final Animation<double> animation = new Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+    final AnimationController controller = AnimationController(vsync: const TestVSync());
+    final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
-    final Widget widget =  new Directionality(
+    final Widget widget =  Directionality(
         textDirection: TextDirection.ltr,
-        child: new SizeTransition(
+        child: SizeTransition(
           axis: Axis.horizontal,
           sizeFactor: animation,
           child: const Text('Ready'),

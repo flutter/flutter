@@ -125,7 +125,7 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
       continue;
     }
     if (allowSkip) {
-      if (!new RegExp(expectationLine).hasMatch(outputLine)) {
+      if (!RegExp(expectationLine).hasMatch(outputLine)) {
         outputLineNumber += 1;
         continue;
       }
@@ -167,7 +167,7 @@ Future<ProcessResult> _runFlutterTest(
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  final Completer<Null> testExclusionCompleter = new Completer<Null>();
+  final Completer<Null> testExclusionCompleter = Completer<Null>();
   _testExclusionLock = testExclusionCompleter.future;
   try {
     return await Process.run(

@@ -15,12 +15,12 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             width: 200.0,
-            child: new GridView.extent(
+            child: GridView.extent(
               maxCrossAxisExtent: 100.0,
               shrinkWrap: true,
               children: children,
@@ -44,12 +44,12 @@ void main() {
     expect(grid.debugNeedsLayout, false);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new Container(
+        child: Center(
+          child: Container(
             width: 200.0,
-            child: new GridView.extent(
+            child: GridView.extent(
               maxCrossAxisExtent: 60.0,
               shrinkWrap: true,
               children: children,
