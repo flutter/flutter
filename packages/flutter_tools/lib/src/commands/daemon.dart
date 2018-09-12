@@ -423,7 +423,12 @@ class AppDomain extends Domain {
     final Completer<void> appStartedCompleter = new Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
+    appStartedCompleter.future.timeout(const Duration(minutes: 1), onTimeout: () { // ignore: unawaited_futures
+      _sendAppEvent(app, 'log', <String, dynamic>{
+        'log': 'timeout waiting for the application to start',
+        'error': true,
+      });
+    }).then<void>((_) {
       _sendAppEvent(app, 'started');
     });
 
