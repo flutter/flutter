@@ -20,7 +20,7 @@ export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'pa
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => new test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
@@ -42,7 +42,7 @@ String getFlutterRoot() {
   if (platform.environment.containsKey('FLUTTER_ROOT'))
     return platform.environment['FLUTTER_ROOT'];
 
-  Error invalidScript() => new StateError('Invalid script: ${platform.script}');
+  Error invalidScript() => StateError('Invalid script: ${platform.script}');
 
   Uri scriptUri;
   switch (platform.script.scheme) {
@@ -50,7 +50,7 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = new RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
       final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null)
         throw invalidScript();
@@ -69,7 +69,7 @@ String getFlutterRoot() {
 }
 
 CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
-  final FlutterCommandRunner runner = new FlutterCommandRunner();
+  final FlutterCommandRunner runner = FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
   return runner;
@@ -79,7 +79,7 @@ CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
 void updateFileModificationTime(String path,
                                 DateTime baseTime,
                                 int seconds) {
-  final DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
+  final DateTime modificationTime = baseTime.add(Duration(seconds: seconds));
   fs.file(path).setLastModifiedSync(modificationTime);
 }
 
@@ -112,7 +112,7 @@ final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 Future<String> createProject(Directory temp, {List<String> arguments}) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
-  final CreateCommand command = new CreateCommand();
+  final CreateCommand command = CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
   await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
   return projectPath;

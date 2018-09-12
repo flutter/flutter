@@ -61,7 +61,7 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   test_package.Timeout timeout
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  final WidgetTester tester = new WidgetTester._(binding);
+  final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test_package.test(
     description,
@@ -131,12 +131,12 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
-  final WidgetTester tester = new WidgetTester._(binding);
+  final WidgetTester tester = WidgetTester._(binding);
   tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
     () => callback(tester),
     tester._endOfTestVerifications,
-  ) ?? new Future<Null>.value();
+  ) ?? Future<Null>.value();
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -296,7 +296,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       do {
         if (binding.clock.now().isAfter(endTime))
-          throw new FlutterError('pumpAndSettle timed out');
+          throw FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
@@ -492,8 +492,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= new Set<_TestTicker>();
-    final _TestTicker result = new _TestTicker(onTick, _removeTicker);
+    _tickers ??= Set<_TestTicker>();
+    final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers.add(result);
     return result;
   }
@@ -515,7 +515,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (_tickers != null) {
       for (Ticker ticker in _tickers) {
         if (ticker.isActive) {
-          throw new FlutterError(
+          throw FlutterError(
             'A Ticker was active $when.\n'
             'All Tickers must be disposed. Tickers used by AnimationControllers '
             'should be disposed by calling dispose() on the AnimationController itself. '
@@ -535,7 +535,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
-      throw new FlutterError(
+      throw FlutterError(
         'A SemanticsHandle was active at the end of the test.\n'
         'All SemanticsHandle instances must be disposed by calling dispose() on '
         'the SemanticsHandle. If your test uses SemanticsTester, it is '
@@ -628,13 +628,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// if no semantics are found or are not enabled.
   SemanticsData getSemanticsData(Finder finder) {
     if (binding.pipelineOwner.semanticsOwner == null)
-      throw new StateError('Semantics are not enabled.');
+      throw StateError('Semantics are not enabled.');
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
-      throw new StateError('Finder returned no matching elements.');
+      throw StateError('Finder returned no matching elements.');
     }
     if (candidates.length > 1) {
-      throw new StateError('Finder returned more than one element.');
+      throw StateError('Finder returned more than one element.');
     }
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
@@ -644,7 +644,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       result = renderObject?.debugSemantics;
     }
     if (result == null)
-      throw new StateError('No Semantics data found.');
+      throw StateError('No Semantics data found.');
     return result.getSemanticsData();
   }
 

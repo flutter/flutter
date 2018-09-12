@@ -59,7 +59,7 @@ class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
   static DevFSFileContent clone(DevFSFileContent fsFileContent) {
-    final DevFSFileContent newFsFileContent = new DevFSFileContent(fsFileContent.file);
+    final DevFSFileContent newFsFileContent = DevFSFileContent(fsFileContent.file);
     newFsFileContent._linkTarget = fsFileContent._linkTarget;
     newFsFileContent._fileStat = fsFileContent._fileStat;
     return newFsFileContent;
@@ -137,14 +137,14 @@ class DevFSByteContent extends DevFSContent {
   List<int> _bytes;
 
   bool _isModified = true;
-  DateTime _modificationTime = new DateTime.now();
+  DateTime _modificationTime = DateTime.now();
 
   List<int> get bytes => _bytes;
 
   set bytes(List<int> value) {
     _bytes = value;
     _isModified = true;
-    _modificationTime = new DateTime.now();
+    _modificationTime = DateTime.now();
   }
 
   /// Return true only once so that the content is written to the device only once.
@@ -168,7 +168,7 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   Stream<List<int>> contentsAsStream() =>
-      new Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
+      Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
 }
 
 /// String content to be copied to the device.
@@ -268,10 +268,10 @@ class _DevFSHttpWriter {
   HttpClient _client;
 
   Future<Null> write(Map<Uri, DevFSContent> entries) async {
-    _client = new HttpClient();
+    _client = HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
-    _completer = new Completer<Null>();
-    _outstanding = new Map<Uri, DevFSContent>.from(entries);
+    _completer = Completer<Null>();
+    _outstanding = Map<Uri, DevFSContent>.from(entries);
     _scheduleWrites();
     await _completer.future;
     _client.close();
@@ -336,8 +336,8 @@ class DevFS {
         this.rootDirectory, {
         String packagesFilePath
       })
-    : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol) {
+    : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
+      _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
@@ -358,7 +358,7 @@ class DevFS {
   final Directory rootDirectory;
   String _packagesFilePath;
   final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
-  final Set<String> assetPathsToEvict = new Set<String>();
+  final Set<String> assetPathsToEvict = Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
       <Future<Map<String, dynamic>>>[];
@@ -485,7 +485,7 @@ class DevFS {
     // run with no changes is supposed to be fast (considering that it is
     // initiated by user key press).
     final List<String> invalidatedFiles = <String>[];
-    final Set<Uri> filesUris = new Set<Uri>();
+    final Set<Uri> filesUris = Set<Uri>();
     for (Uri uri in dirtyEntries.keys.toList()) {
       if (!uri.path.startsWith(assetBuildDirPrefix)) {
         final DevFSContent content = dirtyEntries[uri];
@@ -516,7 +516,7 @@ class DevFS {
         : pathToReload,
       );
       if (!dirtyEntries.containsKey(entryUri)) {
-        final DevFSFileContent content = new DevFSFileContent(fs.file(compiledBinary));
+        final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
         dirtyEntries[entryUri] = content;
         numBytes += content.size;
       }
@@ -528,10 +528,10 @@ class DevFS {
           await _httpWriter.write(dirtyEntries);
         } on SocketException catch (socketException, stackTrace) {
           printTrace('DevFS sync failed. Lost connection to device: $socketException');
-          throw new DevFSException('Lost connection to device.', socketException, stackTrace);
+          throw DevFSException('Lost connection to device.', socketException, stackTrace);
         } catch (exception, stackTrace) {
           printError('Could not update files on device: $exception');
-          throw new DevFSException('Sync failed', exception, stackTrace);
+          throw DevFSException('Sync failed', exception, stackTrace);
         }
       } else {
         // Make service protocol requests for each.
@@ -552,7 +552,7 @@ class DevFS {
   }
 
   void _scanFile(Uri deviceUri, FileSystemEntity file) {
-    final DevFSContent content = _entries.putIfAbsent(deviceUri, () => new DevFSFileContent(file));
+    final DevFSContent content = _entries.putIfAbsent(deviceUri, () => DevFSFileContent(file));
     content._exists = true;
   }
 
@@ -601,7 +601,7 @@ class DevFS {
     if (directoryUriOnDevice == null) {
       final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
       if (relativeRootPath == '.') {
-        directoryUriOnDevice = new Uri();
+        directoryUriOnDevice = Uri();
       } else {
         directoryUriOnDevice = fs.path.toUri(relativeRootPath);
       }
@@ -699,7 +699,7 @@ class DevFS {
 
   Future<Null> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
-    final PackageMap packageMap = new PackageMap(_packagesFilePath);
+    final PackageMap packageMap = PackageMap(_packagesFilePath);
 
     for (String packageName in packageMap.map.keys) {
       final Uri packageUri = packageMap.map[packageName];
@@ -726,7 +726,7 @@ class DevFS {
                                  fileFilter: fileFilter);
       }
       if (packageExists) {
-        sb ??= new StringBuffer();
+        sb ??= StringBuffer();
         sb.writeln('$packageName:$directoryUriOnDevice');
       }
     }

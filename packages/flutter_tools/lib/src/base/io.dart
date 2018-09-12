@@ -97,7 +97,7 @@ ExitFunction get exit => _exitFunction;
 @visibleForTesting
 void setExitFunctionForTests([ExitFunction exitFunction]) {
   _exitFunction = exitFunction ?? (int exitCode) {
-    throw new ProcessExit(exitCode, immediate: true);
+    throw ProcessExit(exitCode, immediate: true);
   };
 }
 

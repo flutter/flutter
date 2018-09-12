@@ -79,7 +79,7 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
   // extended directly.
   factory AnimationLocalListenersMixin._() => null;
 
-  final ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
+  final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   /// Calls the listener every time the value of the animation changes.
   ///
@@ -102,13 +102,13 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyListeners() {
-    final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
+    final List<VoidCallback> localListeners = List<VoidCallback>.from(_listeners);
     for (VoidCallback listener in localListeners) {
       try {
         if (_listeners.contains(listener))
           listener();
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'animation library',
@@ -131,7 +131,7 @@ abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
   // extended directly.
   factory AnimationLocalStatusListenersMixin._() => null;
 
-  final ObserverList<AnimationStatusListener> _statusListeners = new ObserverList<AnimationStatusListener>();
+  final ObserverList<AnimationStatusListener> _statusListeners = ObserverList<AnimationStatusListener>();
 
   /// Calls listener every time the status of the animation changes.
   ///
@@ -154,13 +154,13 @@ abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyStatusListeners(AnimationStatus status) {
-    final List<AnimationStatusListener> localListeners = new List<AnimationStatusListener>.from(_statusListeners);
+    final List<AnimationStatusListener> localListeners = List<AnimationStatusListener>.from(_statusListeners);
     for (AnimationStatusListener listener in localListeners) {
       try {
         if (_statusListeners.contains(listener))
           listener(status);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'animation library',

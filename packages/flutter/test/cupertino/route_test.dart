@@ -9,13 +9,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Middle auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -39,17 +39,17 @@ void main() {
 
   testWidgets('Large title auto-populates with title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         title: 'An iPod',
         builder: (BuildContext context) {
-          return new CupertinoPageScaffold(
-            child: new CustomScrollView(
+          return CupertinoPageScaffold(
+            child: CustomScrollView(
               slivers: const <Widget>[
                 CupertinoSliverNavigationBar(),
               ],
@@ -104,13 +104,13 @@ void main() {
 
   testWidgets('Leading auto-populates with back button with previous title', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -125,7 +125,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         title: 'A Phone',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -150,13 +150,13 @@ void main() {
 
   testWidgets('Previous title is correct on first transition frame', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         title: 'An iPod',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -171,7 +171,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         title: 'A Phone',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
@@ -193,12 +193,12 @@ void main() {
 
   testWidgets('Previous title stays up to date with changing routes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
-    final CupertinoPageRoute<void> route2 = new CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
       title: 'An iPod',
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
@@ -208,7 +208,7 @@ void main() {
       }
     );
 
-    final CupertinoPageRoute<void> route3 = new CupertinoPageRoute<void>(
+    final CupertinoPageRoute<void> route3 = CupertinoPageRoute<void>(
       title: 'A Phone',
       builder: (BuildContext context) {
         return const CupertinoPageScaffold(
@@ -230,7 +230,7 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).replace(
       oldRoute: route2,
-      newRoute: new CupertinoPageRoute<void>(
+      newRoute: CupertinoPageRoute<void>(
         title: 'An Internet communicator',
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(

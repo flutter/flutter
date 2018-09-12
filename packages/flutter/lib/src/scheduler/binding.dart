@@ -64,7 +64,7 @@ class _TaskEntry<T> {
       debugStack = StackTrace.current;
       return true;
     }());
-    completer = new Completer<T>();
+    completer = Completer<T>();
   }
   final TaskCallback<T> task;
   final int priority;
@@ -91,7 +91,7 @@ class _FrameCallbackEntry {
       if (rescheduling) {
         assert(() {
           if (debugCurrentCallbackStack == null) {
-            throw new FlutterError(
+            throw FlutterError(
               'scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
               'The "rescheduling" argument should only be set to true if the '
               'callback is being reregistered from within the callback itself, '
@@ -277,7 +277,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   static int _taskSorter (_TaskEntry<dynamic> e1, _TaskEntry<dynamic> e2) {
     return -e1.priority.compareTo(e2.priority);
   }
-  final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = new HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
+  final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
 
   /// Schedules the given `task` with the given `priority` and returns a
   /// [Future] that completes to the `task`'s eventual return value.
@@ -303,7 +303,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     Flow flow,
   }) {
     final bool isFirstTask = _taskQueue.isEmpty;
-    final _TaskEntry<T> entry = new _TaskEntry<T>(
+    final _TaskEntry<T> entry = _TaskEntry<T>(
       task,
       priority.value,
       debugLabel,
@@ -367,7 +367,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
           callbackStack = entry.debugStack;
           return true;
         }());
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: exceptionStack,
           library: 'scheduler library',
@@ -389,7 +389,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
 
   int _nextFrameCallbackId = 0; // positive
   Map<int, _FrameCallbackEntry> _transientCallbacks = <int, _FrameCallbackEntry>{};
-  final Set<int> _removedIds = new HashSet<int>();
+  final Set<int> _removedIds = HashSet<int>();
 
   /// The current number of transient frame callbacks scheduled.
   ///
@@ -423,7 +423,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false }) {
     scheduleFrame();
     _nextFrameCallbackId += 1;
-    _transientCallbacks[_nextFrameCallbackId] = new _FrameCallbackEntry(callback, rescheduling: rescheduling);
+    _transientCallbacks[_nextFrameCallbackId] = _FrameCallbackEntry(callback, rescheduling: rescheduling);
     return _nextFrameCallbackId;
   }
 
@@ -467,8 +467,8 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
         // even if the information collector is called after
         // the problem has been resolved.
         final int count = transientCallbackCount;
-        final Map<int, _FrameCallbackEntry> callbacks = new Map<int, _FrameCallbackEntry>.from(_transientCallbacks);
-        FlutterError.reportError(new FlutterErrorDetails(
+        final Map<int, _FrameCallbackEntry> callbacks = Map<int, _FrameCallbackEntry>.from(_transientCallbacks);
+        FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
           informationCollector: (StringBuffer information) {
@@ -590,7 +590,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     if (_nextFrameCompleter == null) {
       if (schedulerPhase == SchedulerPhase.idle)
         scheduleFrame();
-      _nextFrameCompleter = new Completer<Null>();
+      _nextFrameCompleter = Completer<Null>();
       addPostFrameCallback((Duration timeStamp) {
         _nextFrameCompleter.complete();
         _nextFrameCompleter = null;
@@ -807,7 +807,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// during frame callbacks are monotonically increasing.
   Duration _adjustForEpoch(Duration rawTimeStamp) {
     final Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.zero : rawTimeStamp - _firstRawTimeStampInEpoch;
-    return new Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
+    return Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
   }
 
   /// The time stamp for the frame currently being processed.
@@ -821,7 +821,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   Duration _currentFrameTimeStamp;
 
   int _profileFrameNumber = 0;
-  final Stopwatch _profileFrameStopwatch = new Stopwatch();
+  final Stopwatch _profileFrameStopwatch = Stopwatch();
   String _debugBanner;
   bool _ignoreNextEngineDrawFrame = false;
 
@@ -880,7 +880,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
 
     assert(() {
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
-        final StringBuffer frameTimeStampDescription = new StringBuffer();
+        final StringBuffer frameTimeStampDescription = StringBuffer();
         if (rawTimeStamp != null) {
           _debugDescribeTimeStamp(_currentFrameTimeStamp, frameTimeStampDescription);
         } else {
@@ -932,7 +932,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
       final List<FrameCallback> localPostFrameCallbacks =
-          new List<FrameCallback>.from(_postFrameCallbacks);
+          List<FrameCallback>.from(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       for (FrameCallback callback in localPostFrameCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
@@ -989,7 +989,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: exceptionStack,
         library: 'scheduler library',

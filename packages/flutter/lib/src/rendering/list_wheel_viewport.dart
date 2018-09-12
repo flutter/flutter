@@ -437,7 +437,7 @@ class RenderListWheelViewport
   @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! ListWheelParentData)
-      child.parentData = new ListWheelParentData();
+      child.parentData = ListWheelParentData();
   }
 
   @override
@@ -591,7 +591,7 @@ class RenderListWheelViewport
     final ListWheelParentData childParentData = child.parentData;
     // Centers the child horizontally.
     final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
-    childParentData.offset = new Offset(crossPosition, indexToScrollOffset(index));
+    childParentData.offset = Offset(crossPosition, indexToScrollOffset(index));
   }
 
   /// Performs layout based on how [childManager] provides children.
@@ -761,7 +761,7 @@ class RenderListWheelViewport
     Offset layoutOffset,
   ) {
     final Offset untransformedPaintingCoordinates = offset
-        + new Offset(
+        + Offset(
             layoutOffset.dx,
             _getUntransformedPaintingCoordinateY(layoutOffset.dy)
         );
@@ -784,7 +784,7 @@ class RenderListWheelViewport
     );
 
     // Offset that helps painting everything in the center (e.g. angle = 0).
-    final Offset offsetToCenter = new Offset(
+    final Offset offsetToCenter = Offset(
         untransformedPaintingCoordinates.dx,
         -_topScrollMarginExtent);
 
@@ -823,17 +823,17 @@ class RenderListWheelViewport
 
     // Some part of the child is in the center magnifier.
     if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
-      final Rect centerRect = new Rect.fromLTWH(
+      final Rect centerRect = Rect.fromLTWH(
           0.0,
           magnifierTopLinePosition,
           size.width,
           _itemExtent * _magnification);
-      final Rect topHalfRect = new Rect.fromLTWH(
+      final Rect topHalfRect = Rect.fromLTWH(
           0.0,
           0.0,
           size.width,
           magnifierTopLinePosition);
-      final Rect bottomHalfRect = new Rect.fromLTWH(
+      final Rect bottomHalfRect = Rect.fromLTWH(
           0.0,
           magnifierBottomLinePosition,
           size.width,
@@ -920,7 +920,7 @@ class RenderListWheelViewport
   /// Apply incoming transformation with the transformation's origin at the
   /// viewport's center or horizontally off to the side based on offAxisFraction.
   Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
-    final Matrix4 result = new Matrix4.identity();
+    final Matrix4 result = Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
     result.translate(centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
                      centerOriginTranslation.dy);
@@ -971,7 +971,7 @@ class RenderListWheelViewport
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Rect targetRect = bounds.translate(0.0, (size.height - itemExtent) / 2);
 
-    return new RevealedOffset(offset: targetOffset, rect: targetRect);
+    return RevealedOffset(offset: targetOffset, rect: targetRect);
   }
 
   @override

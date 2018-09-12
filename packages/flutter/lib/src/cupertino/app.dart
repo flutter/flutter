@@ -303,7 +303,7 @@ class CupertinoApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   @override
-  _CupertinoAppState createState() => new _CupertinoAppState();
+  _CupertinoAppState createState() => _CupertinoAppState();
 }
 
 class _AlwaysCupertinoScrollBehavior extends ScrollBehavior {
@@ -348,7 +348,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     assert(child == null);
     if (_haveNavigator) {
       // Reuse CupertinoTabView which creates a routing Navigator for us.
-      final Widget navigator = new CupertinoTabView(
+      final Widget navigator = CupertinoTabView(
         builder: widget.home != null
             ? (BuildContext context) => widget.home
             : null,
@@ -370,10 +370,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new ScrollConfiguration(
-      behavior: new _AlwaysCupertinoScrollBehavior(),
-      child: new WidgetsApp(
-        key: new GlobalObjectKey(this),
+    return ScrollConfiguration(
+      behavior: _AlwaysCupertinoScrollBehavior(),
+      child: WidgetsApp(
+        key: GlobalObjectKey(this),
         // We're passing in a builder and nothing else that the WidgetsApp uses
         // to build its own Navigator because we're building a Navigator with
         // routes in this class.
@@ -392,7 +392,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-          return new CupertinoButton(
+          return CupertinoButton(
             child: const Icon(
               CupertinoIcons.search,
               size: 28.0,

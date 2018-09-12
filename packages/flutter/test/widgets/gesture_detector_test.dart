@@ -13,7 +13,7 @@ void main() {
     double updatedDragDelta;
     bool didEndDrag = false;
 
-    final Widget widget = new GestureDetector(
+    final Widget widget = GestureDetector(
       onVerticalDragStart: (DragStartDetails details) {
         didStartDrag = true;
       },
@@ -23,7 +23,7 @@ void main() {
       onVerticalDragEnd: (DragEndDetails details) {
         didEndDrag = true;
       },
-      child: new Container(
+      child: Container(
         color: const Color(0xFF00FF00),
       ),
     );
@@ -53,7 +53,7 @@ void main() {
     expect(didEndDrag, isTrue);
     didEndDrag = false;
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
@@ -63,12 +63,12 @@ void main() {
     const Offset downLocation = Offset(10.0, 10.0);
     const Offset upLocation = Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
-    final Widget widget = new GestureDetector(
+    final Widget widget = GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
       onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
       onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
       onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
-      child: new Container(
+      child: Container(
         color: const Color(0xFF00FF00),
       ),
     );
@@ -85,7 +85,7 @@ void main() {
     expect(gestureCount, 2);
     expect(dragDistance, 40.0 * 2.0); // delta between down and up, twice
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Pan doesn\'t crash', (WidgetTester tester) async {
@@ -94,7 +94,7 @@ void main() {
     bool didEndPan = false;
 
     await tester.pumpWidget(
-      new GestureDetector(
+      GestureDetector(
         onPanStart: (DragStartDetails details) {
           didStartPan = true;
         },
@@ -104,7 +104,7 @@ void main() {
         onPanEnd: (DragEndDetails details) {
           didEndPan = true;
         },
-        child: new Container(
+        child: Container(
           color: const Color(0xFF00FF00),
         ),
       ),
@@ -128,24 +128,24 @@ void main() {
 
     Future<Null> pumpWidgetTree(HitTestBehavior behavior) {
       return tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Stack(
+          child: Stack(
             children: <Widget>[
-              new Listener(
+              Listener(
                 onPointerDown: (_) {
                   didReceivePointerDown = true;
                 },
-                child: new Container(
+                child: Container(
                   width: 100.0,
                   height: 100.0,
                   color: const Color(0xFF00FF00),
                 ),
               ),
-              new Container(
+              Container(
                 width: 100.0,
                 height: 100.0,
-                child: new GestureDetector(
+                child: GestureDetector(
                   onTap: () {
                     didTap = true;
                   },
@@ -191,8 +191,8 @@ void main() {
   testWidgets('Empty', (WidgetTester tester) async {
     bool didTap = false;
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: () {
             didTap = true;
           },
@@ -207,12 +207,12 @@ void main() {
   testWidgets('Only container', (WidgetTester tester) async {
     bool didTap = false;
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: () {
             didTap = true;
           },
-          child: new Container(),
+          child: Container(),
         ),
       ),
     );
@@ -225,10 +225,10 @@ void main() {
     final GestureTapCallback inputCallback = () {};
 
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: inputCallback,
-          child: new Container(),
+          child: Container(),
         ),
       ),
     );
@@ -237,10 +237,10 @@ void main() {
     final GestureTapCallback actualCallback1 = renderObj1.onTap;
 
     await tester.pumpWidget(
-      new Center(
-        child: new GestureDetector(
+      Center(
+        child: GestureDetector(
           onTap: inputCallback,
-          child: new Container(),
+          child: Container(),
         ),
       ),
     );
@@ -259,13 +259,13 @@ void main() {
     int longPress = 0;
 
     await tester.pumpWidget(
-      new Container(
+      Container(
         alignment: Alignment.topLeft,
-        child: new Container(
+        child: Container(
           alignment: Alignment.center,
           height: 100.0,
           color: const Color(0xFF00FF00),
-          child: new GestureDetector(
+          child: GestureDetector(
             onTapDown: (TapDownDetails details) {
               tapDown += 1;
             },

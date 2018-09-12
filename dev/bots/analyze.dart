@@ -94,7 +94,7 @@ Future<Null> _verifyInternationalizations() async {
   );
 
   final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
-  final String expectedResult = await new File(localizationsFile).readAsString();
+  final String expectedResult = await File(localizationsFile).readAsString();
 
   if (genResult.stdout.trim() != expectedResult.trim()) {
     stderr
@@ -153,7 +153,7 @@ Future<Null> _checkForTrailingSpaces() async {
     // Only include files that actually exist, so that we don't try and grep for
     // nonexistent files, which can occur when files are deleted or moved.
     final List<String> changedFiles = changedFilesResult.stdout.split('\n').where((String filename) {
-      return new File(filename).existsSync();
+      return File(filename).existsSync();
     }).toList();
     if (changedFiles.isNotEmpty) {
       await runCommand('grep',
@@ -197,7 +197,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = new DateTime.now();
+  final DateTime start = DateTime.now();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -206,7 +206,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final Future<List<List<int>>> savedStdout = process.stdout.toList();
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
   final int exitCode = await process.exitCode;
-  final EvalResult result = new EvalResult(
+  final EvalResult result = EvalResult(
     stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
     stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
     exitCode: exitCode,
@@ -240,7 +240,7 @@ Future<Null> _runFlutterAnalyze(String workingDirectory, {
 Future<Null> _verifyNoTestPackageImports(String workingDirectory) async {
   // TODO(ianh): Remove this whole test once https://github.com/dart-lang/matcher/issues/98 is fixed.
   final List<String> shims = <String>[];
-  final List<String> errors = new Directory(workingDirectory)
+  final List<String> errors = Directory(workingDirectory)
     .listSync(recursive: true)
     .where((FileSystemEntity entity) {
       return entity is File && entity.path.endsWith('.dart');
@@ -320,11 +320,11 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
   // Verify there's one libPath/*.dart for each srcPath/*/.
-  final List<String> packages = new Directory(libPath).listSync()
+  final List<String> packages = Directory(libPath).listSync()
     .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')
     .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
     .toList()..sort();
-  final List<String> directories = new Directory(srcPath).listSync()
+  final List<String> directories = Directory(srcPath).listSync()
     .whereType<Directory>()
     .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
@@ -384,14 +384,14 @@ bool _matches<T>(List<T> a, List<T> b) {
   return true;
 }
 
-final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart'");
-final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
+final RegExp _importPattern = RegExp(r"import 'package:flutter/([^.]+)\.dart'");
+final RegExp _importMetaPattern = RegExp(r"import 'package:meta/meta.dart'");
 
 Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
-  return new Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
+  return Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {
-    final Set<String> result = new Set<String>();
+    final Set<String> result = Set<String>();
     final File file = entity;
     for (String line in file.readAsLinesSync()) {
       Match match = _importPattern.firstMatch(line);
@@ -409,7 +409,7 @@ Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkF
     }
     return result;
   }).reduce((Set<String> value, Set<String> element) {
-    value ??= new Set<String>();
+    value ??= Set<String>();
     value.addAll(element);
     return value;
   });
@@ -424,7 +424,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
     final List<T> result = _deepSearch(
       map,
       key,
-      (seen == null ? new Set<T>.from(<T>[start]) : new Set<T>.from(seen))..add(key),
+      (seen == null ? Set<T>.from(<T>[start]) : Set<T>.from(seen))..add(key),
     );
     if (result != null) {
       result.insert(0, start);
@@ -441,7 +441,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
 
 Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in new Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
+  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
     .listSync(recursive: true)
     .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
     final File file = entity;
@@ -464,7 +464,7 @@ Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
 }
 
 Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
-  final Directory flutterRootDir = new Directory(flutterRoot);
+  final Directory flutterRootDir = Directory(flutterRoot);
 
   final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
 
@@ -478,7 +478,7 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     }
   }
 
-  final Set<String> outOfDate = new Set<String>();
+  final Set<String> outOfDate = Set<String>();
 
   for (String package in packageToRegistrants.keys) {
     final Map<File, String> fileToContent = <File, String>{};
@@ -510,11 +510,11 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
 String _getPackageFor(File entity, Directory flutterRootDir) {
   for (Directory dir = entity.parent; dir != flutterRootDir; dir = dir.parent) {
-    if (new File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
+    if (File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
       return dir.path;
     }
   }
-  throw new ArgumentError('$entity is not within a dart package.');
+  throw ArgumentError('$entity is not within a dart package.');
 }
 
 bool _isGeneratedPluginRegistrant(File file) {

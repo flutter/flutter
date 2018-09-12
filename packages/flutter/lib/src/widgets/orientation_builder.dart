@@ -50,6 +50,6 @@ class OrientationBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(builder: _buildWithConstraints);
+    return LayoutBuilder(builder: _buildWithConstraints);
   }
 }

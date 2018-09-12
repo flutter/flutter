@@ -56,6 +56,6 @@ class PrimaryScrollController extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
+    properties.add(DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
   }
 }

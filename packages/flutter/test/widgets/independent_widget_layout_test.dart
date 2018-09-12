@@ -23,13 +23,13 @@ class OffscreenWidgetTree {
     renderView.scheduleInitialFrame();
   }
 
-  final RenderView renderView = new OffscreenRenderView();
-  final BuildOwner buildOwner = new BuildOwner();
-  final PipelineOwner pipelineOwner = new PipelineOwner();
+  final RenderView renderView = OffscreenRenderView();
+  final BuildOwner buildOwner = BuildOwner();
+  final PipelineOwner pipelineOwner = PipelineOwner();
   RenderObjectToWidgetElement<RenderBox> root;
 
   void pumpWidget(Widget app) {
-    root = new RenderObjectToWidgetAdapter<RenderBox>(
+    root = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: app
@@ -66,7 +66,7 @@ class TriggerableWidget extends StatefulWidget {
   final Trigger trigger;
   final Counter counter;
   @override
-  TriggerableState createState() => new TriggerableState();
+  TriggerableState createState() => TriggerableState();
 }
 
 class TriggerableState extends State<TriggerableWidget> {
@@ -92,7 +92,7 @@ class TriggerableState extends State<TriggerableWidget> {
   @override
   Widget build(BuildContext context) {
     widget.counter.count++;
-    return new Text('Bang $_count!', textDirection: TextDirection.ltr);
+    return Text('Bang $_count!', textDirection: TextDirection.ltr);
   }
 }
 
@@ -107,7 +107,7 @@ class TestFocusable extends StatefulWidget {
   final FocusNode focusNode;
 
   @override
-  TestFocusableState createState() => new TestFocusableState();
+  TestFocusableState createState() => TestFocusableState();
 }
 
 class TestFocusableState extends State<TestFocusable> {
@@ -130,21 +130,21 @@ class TestFocusableState extends State<TestFocusable> {
 
 void main() {
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
-    final Trigger trigger1 = new Trigger();
-    final Counter counter1 = new Counter();
-    final Trigger trigger2 = new Trigger();
-    final Counter counter2 = new Counter();
-    final OffscreenWidgetTree tree = new OffscreenWidgetTree();
+    final Trigger trigger1 = Trigger();
+    final Counter counter1 = Counter();
+    final Trigger trigger2 = Trigger();
+    final Counter counter2 = Counter();
+    final OffscreenWidgetTree tree = OffscreenWidgetTree();
     // Both counts should start at zero
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));
     // Lay out the "onscreen" in the default test binding
-    await tester.pumpWidget(new TriggerableWidget(trigger: trigger1, counter: counter1));
+    await tester.pumpWidget(TriggerableWidget(trigger: trigger1, counter: counter1));
     // Only the "onscreen" widget should have built
     expect(counter1.count, equals(1));
     expect(counter2.count, equals(0));
     // Lay out the "offscreen" in a separate tree
-    tree.pumpWidget(new TriggerableWidget(trigger: trigger2, counter: counter2));
+    tree.pumpWidget(TriggerableWidget(trigger: trigger2, counter: counter2));
     // Now both widgets should have built
     expect(counter1.count, equals(1));
     expect(counter2.count, equals(1));
@@ -180,16 +180,16 @@ void main() {
   });
 
   testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
-    final OffscreenWidgetTree tree = new OffscreenWidgetTree();
-    final FocusNode onscreenFocus = new FocusNode();
-    final FocusNode offscreenFocus = new FocusNode();
+    final OffscreenWidgetTree tree = OffscreenWidgetTree();
+    final FocusNode onscreenFocus = FocusNode();
+    final FocusNode offscreenFocus = FocusNode();
     await tester.pumpWidget(
-      new TestFocusable(
+      TestFocusable(
         focusNode: onscreenFocus,
       ),
     );
     tree.pumpWidget(
-      new TestFocusable(
+      TestFocusable(
         focusNode: offscreenFocus,
       ),
     );

@@ -68,7 +68,7 @@ Branch fromBranchName(String name) {
     case 'release':
       return Branch.release;
     default:
-      throw new ArgumentError('Invalid branch name.');
+      throw ArgumentError('Invalid branch name.');
   }
 }
 
@@ -82,7 +82,7 @@ class ProcessRunner {
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
   }) : processManager = processManager ?? const LocalProcessManager() {
-    environment = new Map<String, String>.from(platform.environment);
+    environment = Map<String, String>.from(platform.environment);
   }
 
   /// The platform to use for a starting environment.
@@ -119,8 +119,8 @@ class ProcessRunner {
       stderr.write('Running "${commandLine.join(' ')}" in ${workingDirectory.path}.\n');
     }
     final List<int> output = <int>[];
-    final Completer<Null> stdoutComplete = new Completer<Null>();
-    final Completer<Null> stderrComplete = new Completer<Null>();
+    final Completer<Null> stdoutComplete = Completer<Null>();
+    final Completer<Null> stderrComplete = Completer<Null>();
     Process process;
     Future<int> allComplete() async {
       await stderrComplete.future;
@@ -156,19 +156,19 @@ class ProcessRunner {
     } on ProcessException catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
-      throw new ProcessRunnerException(message);
+      throw ProcessRunnerException(message);
     } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
-      throw new ProcessRunnerException(message);
+      throw ProcessRunnerException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
-      throw new ProcessRunnerException(
+      throw ProcessRunnerException(
         message,
-        new ProcessResult(0, exitCode, null, 'returned $exitCode'),
+        ProcessResult(0, exitCode, null, 'returned $exitCode'),
       );
     }
     return utf8.decoder.convert(output).trim();
@@ -197,9 +197,9 @@ class ArchiveCreator {
     this.platform = const LocalPlatform(),
     HttpReader httpReader,
   }) : assert(revision.length == 40),
-       flutterRoot = new Directory(path.join(tempDir.path, 'flutter')),
+       flutterRoot = Directory(path.join(tempDir.path, 'flutter')),
        httpReader = httpReader ?? http.readBytes,
-       _processRunner = new ProcessRunner(
+       _processRunner = ProcessRunner(
          processManager: processManager,
          subprocessOutput: subprocessOutput,
          platform: platform,
@@ -276,7 +276,7 @@ class ArchiveCreator {
   /// Performs all of the steps needed to create an archive.
   Future<File> createArchive() async {
     assert(_version != null, 'Must run initializeRepo before createArchive');
-    _outputFile = new File(path.join(outputDir.absolute.path, _archiveName));
+    _outputFile = File(path.join(outputDir.absolute.path, _archiveName));
     await _installMinGitIfNeeded();
     await _populateCaches();
     await _archiveFiles(_outputFile);
@@ -308,11 +308,11 @@ class ArchiveCreator {
       return;
     }
     final Uint8List data = await httpReader(_minGitUri);
-    final File gitFile = new File(path.join(tempDir.absolute.path, 'mingit.zip'));
+    final File gitFile = File(path.join(tempDir.absolute.path, 'mingit.zip'));
     await gitFile.writeAsBytes(data, flush: true);
 
     final Directory minGitPath =
-        new Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
+        Directory(path.join(flutterRoot.absolute.path, 'bin', 'mingit'));
     await minGitPath.create(recursive: true);
     await _unzipArchive(gitFile, workingDirectory: minGitPath);
   }
@@ -367,7 +367,7 @@ class ArchiveCreator {
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
   Future<String> _unzipArchive(File archive, {Directory workingDirectory}) {
-    workingDirectory ??= new Directory(path.dirname(archive.absolute.path));
+    workingDirectory ??= Directory(path.dirname(archive.absolute.path));
     List<String> commandLine;
     if (platform.isWindows) {
       commandLine = <String>[
@@ -407,7 +407,7 @@ class ArchiveCreator {
     }
     return _processRunner.runProcess(
       commandLine,
-      workingDirectory: new Directory(path.dirname(source.absolute.path)),
+      workingDirectory: Directory(path.dirname(source.absolute.path)),
     );
   }
 
@@ -418,7 +418,7 @@ class ArchiveCreator {
       'cJf',
       output.absolute.path,
       path.basename(source.absolute.path),
-    ], workingDirectory: new Directory(path.dirname(source.absolute.path)));
+    ], workingDirectory: Directory(path.dirname(source.absolute.path)));
   }
 }
 
@@ -435,7 +435,7 @@ class ArchivePublisher {
   }) : assert(revision.length == 40),
        platformName = platform.operatingSystem.toLowerCase(),
        metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
-       _processRunner = new ProcessRunner(
+       _processRunner = ProcessRunner(
          processManager: processManager,
          subprocessOutput: subprocessOutput,
        );
@@ -475,7 +475,7 @@ class ArchivePublisher {
     newEntry['hash'] = revision;
     newEntry['channel'] = branchName;
     newEntry['version'] = version;
-    newEntry['release_date'] = new DateTime.now().toUtc().toIso8601String();
+    newEntry['release_date'] = DateTime.now().toUtc().toIso8601String();
     newEntry['archive'] = destinationArchivePath;
 
     // Search for any entries with the same hash and channel and remove them.
@@ -502,20 +502,20 @@ class ArchivePublisher {
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
     // back in.
-    final File metadataFile = new File(
+    final File metadataFile = File(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
     await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path]);
     final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
-      throw new ProcessRunnerException('Empty metadata received from server');
+      throw ProcessRunnerException('Empty metadata received from server');
     }
 
     Map<String, dynamic> jsonData;
     try {
       jsonData = json.decode(currentMetadata);
     } on FormatException catch (e) {
-      throw new ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
+      throw ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
     }
 
     jsonData = _addRelease(jsonData);
@@ -570,7 +570,7 @@ class ArchivePublisher {
 /// Note that archives contain the executables and customizations for the
 /// platform that they are created on.
 Future<Null> main(List<String> argList) async {
-  final ArgParser argParser = new ArgParser();
+  final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
     defaultsTo: null,
@@ -643,7 +643,7 @@ Future<Null> main(List<String> argList) async {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
-    tempDir = new Directory(args['temp_dir']);
+    tempDir = Directory(args['temp_dir']);
     if (!tempDir.existsSync()) {
       errorExit("Temporary directory ${args['temp_dir']} doesn't exist.");
     }
@@ -653,21 +653,21 @@ Future<Null> main(List<String> argList) async {
   if (args['output'] == null) {
     outputDir = tempDir;
   } else {
-    outputDir = new Directory(args['output']);
+    outputDir = Directory(args['output']);
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
     }
   }
 
   final Branch branch = fromBranchName(args['branch']);
-  final ArchiveCreator creator = new ArchiveCreator(tempDir, outputDir, revision, branch);
+  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch);
   int exitCode = 0;
   String message;
   try {
     final String version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
     if (args['publish']) {
-      final ArchivePublisher publisher = new ArchivePublisher(
+      final ArchivePublisher publisher = ArchivePublisher(
         tempDir,
         revision,
         branch,

@@ -33,5 +33,5 @@ Future<TaskResult> runEndToEndTests() async {
     }
   });
 
-  return new TaskResult.success(<String, dynamic>{});
+  return TaskResult.success(<String, dynamic>{});
 }

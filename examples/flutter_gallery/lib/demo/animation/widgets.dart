@@ -18,12 +18,12 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Semantics(
+    return Semantics(
       label: section.title,
       button: true,
-      child: new DecoratedBox(
-        decoration: new BoxDecoration(
-          gradient: new LinearGradient(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: <Color>[
@@ -32,7 +32,7 @@ class SectionCard extends StatelessWidget {
             ],
           ),
         ),
-        child: new Image.asset(
+        child: Image.asset(
           section.backgroundAsset,
           package: section.backgroundAssetPackage,
           color: const Color.fromRGBO(255, 255, 255, 0.075),
@@ -76,19 +76,19 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new IgnorePointer(
-      child: new Opacity(
+    return IgnorePointer(
+      child: Opacity(
         opacity: opacity,
-        child: new Transform(
-          transform: new Matrix4.identity()..scale(scale),
+        child: Transform(
+          transform: Matrix4.identity()..scale(scale),
           alignment: Alignment.center,
-          child: new Stack(
+          child: Stack(
             children: <Widget>[
-              new Positioned(
+              Positioned(
                 top: 4.0,
-                child: new Text(section.title, style: sectionTitleShadowStyle),
+                child: Text(section.title, style: sectionTitleShadowStyle),
               ),
-              new Text(section.title, style: sectionTitleStyle),
+              Text(section.title, style: sectionTitleStyle),
             ],
           ),
         ),
@@ -105,8 +105,8 @@ class SectionIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new IgnorePointer(
-      child: new Container(
+    return IgnorePointer(
+      child: Container(
         width: kSectionIndicatorWidth,
         height: 3.0,
         color: Colors.white.withOpacity(opacity),
@@ -126,11 +126,11 @@ class SectionDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget image = new DecoratedBox(
-      decoration: new BoxDecoration(
-        borderRadius: new BorderRadius.circular(6.0),
-        image: new DecorationImage(
-          image: new AssetImage(
+    final Widget image = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6.0),
+        image: DecorationImage(
+          image: AssetImage(
             detail.imageAsset,
             package: detail.imageAssetPackage,
           ),
@@ -142,25 +142,25 @@ class SectionDetailView extends StatelessWidget {
 
     Widget item;
     if (detail.title == null && detail.subtitle == null) {
-      item = new Container(
+      item = Container(
         height: 240.0,
         padding: const EdgeInsets.all(16.0),
-        child: new SafeArea(
+        child: SafeArea(
           top: false,
           bottom: false,
           child: image,
         ),
       );
     } else {
-      item = new ListTile(
-        title: new Text(detail.title),
-        subtitle: new Text(detail.subtitle),
-        leading: new SizedBox(width: 32.0, height: 32.0, child: image),
+      item = ListTile(
+        title: Text(detail.title),
+        subtitle: Text(detail.subtitle),
+        leading: SizedBox(width: 32.0, height: 32.0, child: image),
       );
     }
 
-    return new DecoratedBox(
-      decoration: new BoxDecoration(color: Colors.grey.shade200),
+    return DecoratedBox(
+      decoration: BoxDecoration(color: Colors.grey.shade200),
       child: item,
     );
   }

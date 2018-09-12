@@ -22,7 +22,7 @@ import 'material.dart';
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln('No Material widget found.');
       message.writeln(
         '${context.widget.runtimeType} widgets require a Material '
@@ -60,7 +60,7 @@ bool debugCheckHasMaterial(BuildContext context) {
           'ancestors, let alone a "Material" ancestor.'
         );
       }
-      throw new FlutterError(message.toString());
+      throw FlutterError(message.toString());
     }
     return true;
   }());

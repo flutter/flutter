@@ -42,12 +42,12 @@ void main() {
 
   setUp(() async {
     Cache.flutterRoot = 'flutter';
-    fs = new MemoryFileSystem();
-    mockProcessManager = new MockProcessManager();
-    mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
+    fs = MemoryFileSystem();
+    mockProcessManager = MockProcessManager();
+    mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
     projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
     projectUnderTest.ios.directory.childDirectory('Runner.xcodeproj').createSync(recursive: true);
-    cocoaPodsUnderTest = new CocoaPods();
+    cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
@@ -399,7 +399,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.ios.podManifestLock
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing lock file.');
-      await new Future<void>.delayed(const Duration(milliseconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.ios.podfile
         ..writeAsStringSync('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
@@ -488,5 +488,5 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
-ProcessResult exitsWithError([String stdout = '']) => new ProcessResult(1, 1, stdout, '');
-ProcessResult exitsHappy([String stdout = '']) => new ProcessResult(1, 0, stdout, '');
+ProcessResult exitsWithError([String stdout = '']) => ProcessResult(1, 1, stdout, '');
+ProcessResult exitsHappy([String stdout = '']) => ProcessResult(1, 0, stdout, '');

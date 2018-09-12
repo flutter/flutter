@@ -27,13 +27,13 @@ class HelloWorldMemoryTest extends MemoryTest {
       '-d', device.deviceId,
       test,
     ]);
-    await new Future<Null>.delayed(const Duration(milliseconds: 1500));
+    await Future<Null>.delayed(const Duration(milliseconds: 1500));
     await recordStart();
-    await new Future<Null>.delayed(const Duration(milliseconds: 3000));
+    await Future<Null>.delayed(const Duration(milliseconds: 3000));
     await recordEnd();
   }
 }
 
 Future<Null> main() async {
-  await task(new HelloWorldMemoryTest().run);
+  await task(HelloWorldMemoryTest().run);
 }

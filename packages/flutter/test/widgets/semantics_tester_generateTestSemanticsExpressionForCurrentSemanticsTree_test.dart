@@ -23,11 +23,11 @@ void _tests() {
   });
 
   Future<Null> pumpTestWidget(WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      home: new ListView(
+    await tester.pumpWidget(MaterialApp(
+      home: ListView(
         children: <Widget>[
           const Text('Plain text'),
-          new Semantics(
+          Semantics(
             selected: true,
             checked: true,
             onTap: () {},
@@ -51,7 +51,7 @@ void _tests() {
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
   testWidgets('generates code', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
       .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
@@ -90,7 +90,7 @@ void _tests() {
   });
 
   testWidgets('generated code is correct', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     expect(
       semantics,
@@ -101,30 +101,30 @@ void _tests() {
         // generateTestSemanticsExpressionForCurrentSemanticsTree. Otherwise,
         // the test 'generates code', defined above, will fail.
         // vvvvvvvvvvvv
-        new TestSemantics.root(
+        TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               id: 1,
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 2,
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       id: 3,
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           id: 6,
                           flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                           children: <TestSemantics>[
-                            new TestSemantics(
+                            TestSemantics(
                               id: 4,
                               tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                               label: 'Plain text',
                               textDirection: TextDirection.ltr,
                             ),
-                            new TestSemantics(
+                            TestSemantics(
                               id: 5,
                               tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                               flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],

@@ -52,12 +52,12 @@ class CrashReportSender {
 
   CrashReportSender._(this._client);
 
-  static CrashReportSender get instance => _instance ?? new CrashReportSender._(new http.Client());
+  static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
 
   /// Overrides the default [http.Client] with [client] for testing purposes.
   @visibleForTesting
   static void initializeWith(http.Client client) {
-    _instance = new CrashReportSender._(client);
+    _instance = CrashReportSender._(client);
   }
 
   final http.Client _client;
@@ -69,7 +69,7 @@ class CrashReportSender {
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
     }
-    return new Uri(
+    return Uri(
       scheme: 'https',
       host: _kCrashServerHost,
       port: 443,
@@ -99,7 +99,7 @@ class CrashReportSender {
         },
       );
 
-      final http.MultipartRequest req = new http.MultipartRequest('POST', uri);
+      final http.MultipartRequest req = http.MultipartRequest('POST', uri);
       req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
@@ -108,8 +108,8 @@ class CrashReportSender {
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
 
-      final String stackTraceWithRelativePaths = new Chain.parse(stackTrace.toString()).terse.toString();
-      req.files.add(new http.MultipartFile.fromString(
+      final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
+      req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
         stackTraceWithRelativePaths,
         filename: _kStackTraceFilename,
@@ -118,7 +118,7 @@ class CrashReportSender {
       final http.StreamedResponse resp = await _client.send(req);
 
       if (resp.statusCode == 200) {
-        final String reportId = await new http.ByteStream(resp.stream)
+        final String reportId = await http.ByteStream(resp.stream)
             .bytesToString();
         printStatus('Crash report sent (report ID: $reportId)');
       } else {

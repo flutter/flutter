@@ -40,7 +40,7 @@ abstract class AlignmentGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [Alignment] using [resolve].
   AlignmentGeometry add(AlignmentGeometry other) {
-    return new _MixedAlignment(
+    return _MixedAlignment(
       _x + other._x,
       _start + other._start,
       _y + other._y,
@@ -108,7 +108,7 @@ abstract class AlignmentGeometry {
       return Alignment.lerp(a, b, t);
     if (a is AlignmentDirectional && b is AlignmentDirectional)
       return AlignmentDirectional.lerp(a, b, t);
-    return new _MixedAlignment(
+    return _MixedAlignment(
       ui.lerpDouble(a._x, b._x, t),
       ui.lerpDouble(a._start, b._start, t),
       ui.lerpDouble(a._y, b._y, t),
@@ -251,63 +251,63 @@ class Alignment extends AlignmentGeometry {
 
   /// Returns the difference between two [Alignment]s.
   Alignment operator -(Alignment other) {
-    return new Alignment(x - other.x, y - other.y);
+    return Alignment(x - other.x, y - other.y);
   }
 
   /// Returns the sum of two [Alignment]s.
   Alignment operator +(Alignment other) {
-    return new Alignment(x + other.x, y + other.y);
+    return Alignment(x + other.x, y + other.y);
   }
 
   /// Returns the negation of the given [Alignment].
   @override
   Alignment operator -() {
-    return new Alignment(-x, -y);
+    return Alignment(-x, -y);
   }
 
   /// Scales the [Alignment] in each dimension by the given factor.
   @override
   Alignment operator *(double other) {
-    return new Alignment(x * other, y * other);
+    return Alignment(x * other, y * other);
   }
 
   /// Divides the [Alignment] in each dimension by the given factor.
   @override
   Alignment operator /(double other) {
-    return new Alignment(x / other, y / other);
+    return Alignment(x / other, y / other);
   }
 
   /// Integer divides the [Alignment] in each dimension by the given factor.
   @override
   Alignment operator ~/(double other) {
-    return new Alignment((x ~/ other).toDouble(), (y ~/ other).toDouble());
+    return Alignment((x ~/ other).toDouble(), (y ~/ other).toDouble());
   }
 
   /// Computes the remainder in each dimension by the given factor.
   @override
   Alignment operator %(double other) {
-    return new Alignment(x % other, y % other);
+    return Alignment(x % other, y % other);
   }
 
   /// Returns the offset that is this fraction in the direction of the given offset.
   Offset alongOffset(Offset other) {
     final double centerX = other.dx / 2.0;
     final double centerY = other.dy / 2.0;
-    return new Offset(centerX + x * centerX, centerY + y * centerY);
+    return Offset(centerX + x * centerX, centerY + y * centerY);
   }
 
   /// Returns the offset that is this fraction within the given size.
   Offset alongSize(Size other) {
     final double centerX = other.width / 2.0;
     final double centerY = other.height / 2.0;
-    return new Offset(centerX + x * centerX, centerY + y * centerY);
+    return Offset(centerX + x * centerX, centerY + y * centerY);
   }
 
   /// Returns the point that is this fraction within the given rect.
   Offset withinRect(Rect rect) {
     final double halfWidth = rect.width / 2.0;
     final double halfHeight = rect.height / 2.0;
-    return new Offset(
+    return Offset(
       rect.left + halfWidth + x * halfWidth,
       rect.top + halfHeight + y * halfHeight,
     );
@@ -322,7 +322,7 @@ class Alignment extends AlignmentGeometry {
   Rect inscribe(Size size, Rect rect) {
     final double halfWidthDelta = (rect.width - size.width) / 2.0;
     final double halfHeightDelta = (rect.height - size.height) / 2.0;
-    return new Rect.fromLTWH(
+    return Rect.fromLTWH(
       rect.left + halfWidthDelta + x * halfWidthDelta,
       rect.top + halfHeightDelta + y * halfHeightDelta,
       size.width,
@@ -350,10 +350,10 @@ class Alignment extends AlignmentGeometry {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new Alignment(ui.lerpDouble(0.0, b.x, t), ui.lerpDouble(0.0, b.y, t));
+      return Alignment(ui.lerpDouble(0.0, b.x, t), ui.lerpDouble(0.0, b.y, t));
     if (b == null)
-      return new Alignment(ui.lerpDouble(a.x, 0.0, t), ui.lerpDouble(a.y, 0.0, t));
-    return new Alignment(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
+      return Alignment(ui.lerpDouble(a.x, 0.0, t), ui.lerpDouble(a.y, 0.0, t));
+    return Alignment(ui.lerpDouble(a.x, b.x, t), ui.lerpDouble(a.y, b.y, t));
   }
 
   @override
@@ -483,42 +483,42 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   /// Returns the difference between two [AlignmentDirectional]s.
   AlignmentDirectional operator -(AlignmentDirectional other) {
-    return new AlignmentDirectional(start - other.start, y - other.y);
+    return AlignmentDirectional(start - other.start, y - other.y);
   }
 
   /// Returns the sum of two [AlignmentDirectional]s.
   AlignmentDirectional operator +(AlignmentDirectional other) {
-    return new AlignmentDirectional(start + other.start, y + other.y);
+    return AlignmentDirectional(start + other.start, y + other.y);
   }
 
   /// Returns the negation of the given [AlignmentDirectional].
   @override
   AlignmentDirectional operator -() {
-    return new AlignmentDirectional(-start, -y);
+    return AlignmentDirectional(-start, -y);
   }
 
   /// Scales the [AlignmentDirectional] in each dimension by the given factor.
   @override
   AlignmentDirectional operator *(double other) {
-    return new AlignmentDirectional(start * other, y * other);
+    return AlignmentDirectional(start * other, y * other);
   }
 
   /// Divides the [AlignmentDirectional] in each dimension by the given factor.
   @override
   AlignmentDirectional operator /(double other) {
-    return new AlignmentDirectional(start / other, y / other);
+    return AlignmentDirectional(start / other, y / other);
   }
 
   /// Integer divides the [AlignmentDirectional] in each dimension by the given factor.
   @override
   AlignmentDirectional operator ~/(double other) {
-    return new AlignmentDirectional((start ~/ other).toDouble(), (y ~/ other).toDouble());
+    return AlignmentDirectional((start ~/ other).toDouble(), (y ~/ other).toDouble());
   }
 
   /// Computes the remainder in each dimension by the given factor.
   @override
   AlignmentDirectional operator %(double other) {
-    return new AlignmentDirectional(start % other, y % other);
+    return AlignmentDirectional(start % other, y % other);
   }
 
   /// Linearly interpolate between two [AlignmentDirectional]s.
@@ -541,10 +541,10 @@ class AlignmentDirectional extends AlignmentGeometry {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new AlignmentDirectional(ui.lerpDouble(0.0, b.start, t), ui.lerpDouble(0.0, b.y, t));
+      return AlignmentDirectional(ui.lerpDouble(0.0, b.start, t), ui.lerpDouble(0.0, b.y, t));
     if (b == null)
-      return new AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t), ui.lerpDouble(a.y, 0.0, t));
-    return new AlignmentDirectional(ui.lerpDouble(a.start, b.start, t), ui.lerpDouble(a.y, b.y, t));
+      return AlignmentDirectional(ui.lerpDouble(a.start, 0.0, t), ui.lerpDouble(a.y, 0.0, t));
+    return AlignmentDirectional(ui.lerpDouble(a.start, b.start, t), ui.lerpDouble(a.y, b.y, t));
   }
 
   @override
@@ -552,9 +552,9 @@ class AlignmentDirectional extends AlignmentGeometry {
     assert(direction != null);
     switch (direction) {
       case TextDirection.rtl:
-        return new Alignment(-start, y);
+        return Alignment(-start, y);
       case TextDirection.ltr:
-        return new Alignment(start, y);
+        return Alignment(start, y);
     }
     return null;
   }
@@ -600,7 +600,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator -() {
-    return new _MixedAlignment(
+    return _MixedAlignment(
       -_x,
       -_start,
       -_y,
@@ -609,7 +609,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator *(double other) {
-    return new _MixedAlignment(
+    return _MixedAlignment(
       _x * other,
       _start * other,
       _y * other,
@@ -618,7 +618,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator /(double other) {
-    return new _MixedAlignment(
+    return _MixedAlignment(
       _x / other,
       _start / other,
       _y / other,
@@ -627,7 +627,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator ~/(double other) {
-    return new _MixedAlignment(
+    return _MixedAlignment(
       (_x ~/ other).toDouble(),
       (_start ~/ other).toDouble(),
       (_y ~/ other).toDouble(),
@@ -636,7 +636,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator %(double other) {
-    return new _MixedAlignment(
+    return _MixedAlignment(
       _x % other,
       _start % other,
       _y % other,
@@ -648,9 +648,9 @@ class _MixedAlignment extends AlignmentGeometry {
     assert(direction != null);
     switch (direction) {
       case TextDirection.rtl:
-        return new Alignment(_x - _start, _y);
+        return Alignment(_x - _start, _y);
       case TextDirection.ltr:
-        return new Alignment(_x + _start, _y);
+        return Alignment(_x + _start, _y);
     }
     return null;
   }

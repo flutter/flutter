@@ -124,7 +124,7 @@ void main() {
     });
 
     testWidgets('interrupts in-progress animations without jumps', (WidgetTester tester) async {
-      final _GeometryListener geometryListener = new _GeometryListener();
+      final _GeometryListener geometryListener = _GeometryListener();
       ScaffoldGeometry geometry;
       _GeometryListenerState listenerState;
       Size previousRect;
@@ -225,13 +225,13 @@ void main() {
 
 class _GeometryListener extends StatefulWidget {
   @override
-  State createState() => new _GeometryListenerState();
+  State createState() => _GeometryListenerState();
 }
 
 class _GeometryListenerState extends State<_GeometryListener> {
   @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
+    return CustomPaint(
       painter: cache
     );
   }
@@ -252,7 +252,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
 
     geometryListenable = newListenable;
     geometryListenable.addListener(onGeometryChanged);
-    cache = new _GeometryCachePainter(geometryListenable);
+    cache = _GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {
@@ -292,12 +292,12 @@ Widget buildFrame({
   EdgeInsets viewInsets = const EdgeInsets.only(bottom: 200.0),
   Widget bab,
 }) {
-  return new Directionality(
+  return Directionality(
     textDirection: textDirection,
-    child: new MediaQuery(
-      data: new MediaQueryData(viewInsets: viewInsets),
-      child: new Scaffold(
-        appBar: new AppBar(title: const Text('FabLocation Test')),
+    child: MediaQuery(
+      data: MediaQueryData(viewInsets: viewInsets),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('FabLocation Test')),
         floatingActionButtonLocation: location,
         floatingActionButton: fab,
         bottomNavigationBar: bab,
@@ -325,6 +325,6 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
         break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
-    return new Offset(fabX, fabY);
+    return Offset(fabX, fabY);
   }
 }

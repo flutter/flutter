@@ -21,7 +21,7 @@ class Tap extends CommandWithTarget {
 class TapResult extends Result {
   /// Deserializes this result from JSON.
   static TapResult fromJson(Map<String, dynamic> json) {
-    return new TapResult();
+    return TapResult();
   }
 
   @override
@@ -46,7 +46,7 @@ class Scroll extends CommandWithTarget {
   Scroll.deserialize(Map<String, String> json)
       : this.dx = double.parse(json['dx']),
         this.dy = double.parse(json['dy']),
-        this.duration = new Duration(microseconds: int.parse(json['duration'])),
+        this.duration = Duration(microseconds: int.parse(json['duration'])),
         this.frequency = int.parse(json['frequency']),
         super.deserialize(json);
 
@@ -78,7 +78,7 @@ class Scroll extends CommandWithTarget {
 class ScrollResult extends Result {
   /// Deserializes this result from JSON.
   static ScrollResult fromJson(Map<String, dynamic> json) {
-    return new ScrollResult();
+    return ScrollResult();
   }
 
   @override
