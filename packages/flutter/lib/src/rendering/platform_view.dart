@@ -67,7 +67,7 @@ class RenderAndroidView extends RenderBox {
        assert(gestureRecognizers != null),
        _viewController = viewController
   {
-    _motionEventsDispatcher = new _MotionEventsDispatcher(globalToLocal, viewController);
+    _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
     this.gestureRecognizers = gestureRecognizers;
   }
 
@@ -104,7 +104,7 @@ class RenderAndroidView extends RenderBox {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = new _AndroidViewGestureRecognizer(_motionEventsDispatcher, recognizers);
+    _gestureRecognizer = _AndroidViewGestureRecognizer(_motionEventsDispatcher, recognizers);
   }
 
   @override
@@ -178,7 +178,7 @@ class RenderAndroidView extends RenderBox {
     // we know that a frame with the new size is in the buffer.
     // This guarantees that the size of the texture frame we're painting is always
     // _currentAndroidViewSize.
-    context.addLayer(new TextureLayer(
+    context.addLayer(TextureLayer(
       rect: offset & _currentAndroidViewSize,
       textureId: _viewController.textureId,
       freeze: _state == _PlatformViewState.resizing,
@@ -189,7 +189,7 @@ class RenderAndroidView extends RenderBox {
   bool hitTest(HitTestResult result, { Offset position }) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position))
       return false;
-    result.add(new BoxHitTestEntry(this, position));
+    result.add(BoxHitTestEntry(this, position));
     return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
 
@@ -225,7 +225,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   // Pointer for which we have already won the arena, events for pointers in this set are
   // immediately dispatched to the Android view.
-  final Set<int> forwardedPointers = new Set<int>();
+  final Set<int> forwardedPointers = Set<int>();
 
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
@@ -234,7 +234,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   List<OneSequenceGestureRecognizer> get gestureRecognizers => _gestureRecognizers;
   set gestureRecognizers(List<OneSequenceGestureRecognizer> recognizers) {
     _gestureRecognizers = recognizers;
-    team = new GestureArenaTeam();
+    team = GestureArenaTeam();
     team.captain = this;
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.team = team;
@@ -377,7 +377,7 @@ class _MotionEventsDispatcher {
         return;
     }
 
-    final AndroidMotionEvent androidMotionEvent = new AndroidMotionEvent(
+    final AndroidMotionEvent androidMotionEvent = AndroidMotionEvent(
         downTime: downTimeMillis,
         eventTime: event.timeStamp.inMilliseconds,
         action: action,
@@ -398,7 +398,7 @@ class _MotionEventsDispatcher {
 
   AndroidPointerCoords coordsFor(PointerEvent event) {
     final Offset position = globalToLocal(event.position);
-    return new AndroidPointerCoords(
+    return AndroidPointerCoords(
         orientation: event.orientation,
         pressure: event.pressure,
         // Currently the engine omits the pointer size, for now I'm fixing this to 0.33 which is roughly
@@ -435,7 +435,7 @@ class _MotionEventsDispatcher {
         toolType = AndroidPointerProperties.kToolTypeUnknown;
         break;
     }
-    return new AndroidPointerProperties(id: pointerId, toolType: toolType);
+    return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
   bool isSinglePointerAction(PointerEvent event) =>

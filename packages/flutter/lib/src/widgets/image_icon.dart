@@ -71,7 +71,7 @@ class ImageIcon extends StatelessWidget {
     final double iconSize = size ?? iconTheme.size;
 
     if (image == null)
-      return new Semantics(
+      return Semantics(
         label: semanticLabel,
         child: SizedBox(width: iconSize, height: iconSize)
       );
@@ -82,7 +82,7 @@ class ImageIcon extends StatelessWidget {
     if (iconOpacity != null && iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    return new Semantics(
+    return Semantics(
       label: semanticLabel,
       child: Image(
         image: image,
@@ -99,8 +99,8 @@ class ImageIcon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
-    properties.add(new DoubleProperty('size', size, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
+    properties.add(DoubleProperty('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

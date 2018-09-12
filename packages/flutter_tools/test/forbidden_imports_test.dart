@@ -21,7 +21,7 @@ void main() {
         .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
-          if (line.startsWith(new RegExp(r'import.*dart:io')) &&
+          if (line.startsWith(RegExp(r'import.*dart:io')) &&
               !line.contains('ignore: dart_io_import')) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
@@ -39,7 +39,7 @@ void main() {
         .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
-          if (line.startsWith(new RegExp(r'import.*package:path/path.dart'))) {
+          if (line.startsWith(RegExp(r'import.*package:path/path.dart'))) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:path/path.dart'; use 'fs.path' instead");
           }

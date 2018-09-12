@@ -39,14 +39,14 @@ class Evaluation {
   Evaluation operator +(Evaluation other) {
     if (other == null)
       return this;
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if (reason != null) {
       buffer.write(reason);
       buffer.write(' ');
     }
     if (other.reason != null)
       buffer.write(other.reason);
-    return new Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
+    return Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
   }
 }
 
@@ -112,7 +112,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
-        result += new Evaluation.fail(
+        result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
           'See also: $link');
       return result;
@@ -203,7 +203,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           assert(false);
         }
       } else if (elements.length > 1) {
-        return new Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
+        return Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
       } else {
         // If we can't find the text node then assume the label does not
         // correspond to actual text.
@@ -225,7 +225,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       // Node was too far off screen.
      if (subset.isEmpty)
        return result;
-      final _ContrastReport report = new _ContrastReport(subset);
+      final _ContrastReport report = _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
       const double delta = -0.01;
       double targetContrastRatio;
@@ -236,7 +236,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       }
       if (contrastRatio - targetContrastRatio >= delta)
         return result + const Evaluation.pass();
-      return result + new Evaluation.fail(
+      return result + Evaluation.fail(
         '$node:\nExpected contrast ratio of at least '
         '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
         'The computed foreground color was: ${report.lightColor}, '
@@ -306,14 +306,14 @@ class _ContrastReport {
     for (int color in colors)
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
     if (colorHistogram.length == 1) {
-      final Color hslColor = new Color(colorHistogram.keys.first);
-      return new _ContrastReport._(hslColor, hslColor);
+      final Color hslColor = Color(colorHistogram.keys.first);
+      return _ContrastReport._(hslColor, hslColor);
     }
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
     double averageLightness = 0.0;
     for (int color in colorHistogram.keys) {
-      final HSLColor hslColor = new HSLColor.fromColor(new Color(color));
+      final HSLColor hslColor = HSLColor.fromColor(Color(color));
       averageLightness += hslColor.lightness * colorHistogram[color];
     }
     averageLightness /= colors.length;
@@ -324,7 +324,7 @@ class _ContrastReport {
     int darkCount = 0;
     // Find the most frequently occurring light and dark color.
     for (MapEntry<int, int> entry in colorHistogram.entries) {
-      final HSLColor color = new HSLColor.fromColor(new Color(entry.key));
+      final HSLColor color = HSLColor.fromColor(Color(entry.key));
       final int count = entry.value;
       if (color.lightness <= averageLightness && count > darkCount) {
         darkColor = entry.key;
@@ -335,7 +335,7 @@ class _ContrastReport {
       }
     }
     assert (lightColor != 0 && darkColor != 0);
-    return new _ContrastReport._(new Color(lightColor), new Color(darkColor));
+    return _ContrastReport._(Color(lightColor), Color(darkColor));
   }
 
   const _ContrastReport._(this.lightColor, this.darkColor);

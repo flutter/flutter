@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 import 'utils.dart';
 
 /// The root of the API for controlling devices.
-DeviceDiscovery get devices => new DeviceDiscovery();
+DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
 enum DeviceOperatingSystem { android, ios }
@@ -26,11 +26,11 @@ abstract class DeviceDiscovery {
   factory DeviceDiscovery() {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
-        return new AndroidDeviceDiscovery();
+        return AndroidDeviceDiscovery();
       case DeviceOperatingSystem.ios:
-        return new IosDeviceDiscovery();
+        return IosDeviceDiscovery();
       default:
-        throw new StateError('Unsupported device operating system: {config.deviceOperatingSystem}');
+        throw StateError('Unsupported device operating system: {config.deviceOperatingSystem}');
     }
   }
 
@@ -103,12 +103,12 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   // Parses information about a device. Example:
   //
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  static final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
+  static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
 
   static AndroidDeviceDiscovery _instance;
 
   factory AndroidDeviceDiscovery() {
-    return _instance ??= new AndroidDeviceDiscovery._();
+    return _instance ??= AndroidDeviceDiscovery._();
   }
 
   AndroidDeviceDiscovery._();
@@ -129,14 +129,14 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Null> chooseWorkingDevice() async {
     final List<Device> allDevices = (await discoverDevices())
-      .map((String id) => new AndroidDevice(deviceId: id))
+      .map((String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)
       throw 'No Android devices detected';
 
     // TODO(yjbanov): filter out and warn about those with low battery level
-    _workingDevice = allDevices[new math.Random().nextInt(allDevices.length)];
+    _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
   @override
@@ -174,13 +174,13 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (String deviceId in await discoverDevices()) {
       try {
-        final AndroidDevice device = new AndroidDevice(deviceId: deviceId);
+        final AndroidDevice device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
-        results['android-device-$deviceId'] = new HealthCheckResult.success();
+        results['android-device-$deviceId'] = HealthCheckResult.success();
       } catch (e, s) {
-        results['android-device-$deviceId'] = new HealthCheckResult.error(e, s);
+        results['android-device-$deviceId'] = HealthCheckResult.error(e, s);
       }
     }
     return results;
@@ -278,7 +278,7 @@ class AndroidDevice implements Device {
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
     final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
-    final Match match = new RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
+    final Match match = RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
     assert(match != null, 'could not parse dumpsys meminfo output');
     return <String, dynamic>{
       'total_kb': int.parse(match.group(1)),
@@ -287,13 +287,13 @@ class AndroidDevice implements Device {
 
   @override
   Stream<String> get logcat {
-    final Completer<void> stdoutDone = new Completer<void>();
-    final Completer<void> stderrDone = new Completer<void>();
-    final Completer<void> processDone = new Completer<void>();
-    final Completer<void> abort = new Completer<void>();
+    final Completer<void> stdoutDone = Completer<void>();
+    final Completer<void> stderrDone = Completer<void>();
+    final Completer<void> processDone = Completer<void>();
+    final Completer<void> abort = Completer<void>();
     bool aborted = false;
     StreamController<String> stream;
-    stream = new StreamController<String>(
+    stream = StreamController<String>(
       onListen: () async {
         await adb(<String>['logcat', '--clear']);
         final Process process = await startProcess(adbPath, <String>['-s', deviceId, 'logcat']);
@@ -353,7 +353,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   static IosDeviceDiscovery _instance;
 
   factory IosDeviceDiscovery() {
-    return _instance ??= new IosDeviceDiscovery._();
+    return _instance ??= IosDeviceDiscovery._();
   }
 
   IosDeviceDiscovery._();
@@ -374,14 +374,14 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Null> chooseWorkingDevice() async {
     final List<IosDevice> allDevices = (await discoverDevices())
-      .map((String id) => new IosDevice(deviceId: id))
+      .map((String id) => IosDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)
       throw 'No iOS devices detected';
 
     // TODO(yjbanov): filter out and warn about those with low battery level
-    _workingDevice = allDevices[new math.Random().nextInt(allDevices.length)];
+    _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
   @override
@@ -400,7 +400,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (String deviceId in await discoverDevices()) {
       // TODO(ianh): do a more meaningful connectivity check than just recording the ID
-      results['ios-device-$deviceId'] = new HealthCheckResult.success();
+      results['ios-device-$deviceId'] = HealthCheckResult.success();
     }
     return results;
   }

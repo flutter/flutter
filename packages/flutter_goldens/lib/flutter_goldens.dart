@@ -65,21 +65,21 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     defaultComparator ??= goldenFileComparator;
 
     // Prepare the goldens repo.
-    goldens ??= new GoldensClient();
+    goldens ??= GoldensClient();
     await goldens.prepare();
 
     // Calculate the appropriate basedir for the current test context.
     final FileSystem fs = goldens.fs;
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
     final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
-    return new FlutterGoldenFileComparator(goldens.repositoryRoot.childDirectory(testDirectoryRelativePath).uri);
+    return FlutterGoldenFileComparator(goldens.repositoryRoot.childDirectory(testDirectoryRelativePath).uri);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
-      throw new TestFailure('Could not be compared against non-existent file: "$golden"');
+      throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
     // TODO(tvolkert): Improve the intelligence of this comparison.

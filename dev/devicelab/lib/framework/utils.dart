@@ -24,7 +24,7 @@ ProcessManager _processManager = const LocalProcessManager();
 class ProcessInfo {
   ProcessInfo(this.command, this.process);
 
-  final DateTime startTime = new DateTime.now();
+  final DateTime startTime = DateTime.now();
   final String command;
   final Process process;
 
@@ -52,7 +52,7 @@ class HealthCheckResult {
 
   @override
   String toString() {
-    final StringBuffer buf = new StringBuffer(succeeded ? 'succeeded' : 'failed');
+    final StringBuffer buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
     if (details != null && details.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
@@ -74,7 +74,7 @@ class BuildFailedError extends Error {
 }
 
 void fail(String message) {
-  throw new BuildFailedError(message);
+  throw BuildFailedError(message);
 }
 
 // Remove the given file or directory.
@@ -98,9 +98,9 @@ void rmTree(FileSystemEntity entity) {
 
 List<FileSystemEntity> ls(Directory directory) => directory.listSync();
 
-Directory dir(String path) => new Directory(path);
+Directory dir(String path) => Directory(path);
 
-File file(String path) => new File(path);
+File file(String path) => File(path);
 
 void copy(File sourceFile, Directory targetDirectory, {String name}) {
   final File target = file(
@@ -115,9 +115,9 @@ void recursiveCopy(Directory source, Directory target) {
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is Directory)
-      recursiveCopy(entity, new Directory(path.join(target.path, name)));
+      recursiveCopy(entity, Directory(path.join(target.path, name)));
     else if (entity is File) {
-      final File dest = new File(path.join(target.path, name));
+      final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
@@ -187,7 +187,7 @@ Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
       commit,
     ]);
     final int secondsSinceEpoch = int.parse(unixTimestamp);
-    return new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
+    return DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
   });
 }
 
@@ -232,7 +232,7 @@ Future<Process> startProcess(
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );
-  final ProcessInfo processInfo = new ProcessInfo(command, process);
+  final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
   process.exitCode.then((int exitCode) {
@@ -248,7 +248,7 @@ Future<Null> forceQuitRunningProcesses() async {
     return;
 
   // Give normally quitting processes a chance to report their exit code.
-  await new Future<Null>.delayed(const Duration(seconds: 1));
+  await Future<Null>.delayed(const Duration(seconds: 1));
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
@@ -270,8 +270,8 @@ Future<int> exec(
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
-  final Completer<Null> stdoutDone = new Completer<Null>();
-  final Completer<Null> stderrDone = new Completer<Null>();
+  final Completer<Null> stdoutDone = Completer<Null>();
+  final Completer<Null> stderrDone = Completer<Null>();
   process.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -306,9 +306,9 @@ Future<String> eval(
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
-  final StringBuffer output = new StringBuffer();
-  final Completer<Null> stdoutDone = new Completer<Null>();
-  final Completer<Null> stderrDone = new Completer<Null>();
+  final StringBuffer output = StringBuffer();
+  final Completer<Null> stdoutDone = Completer<Null>();
+  final Completer<Null> stderrDone = Completer<Null>();
   process.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -496,7 +496,7 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///
 ///     }
 Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
-  final Completer<Null> completer = new Completer<Null>();
+  final Completer<Null> completer = Completer<Null>();
   Chain.capture(() async {
     await callback();
     completer.complete();
@@ -507,7 +507,7 @@ Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
 bool canRun(String path) => _processManager.canRun(path);
 
 String extractCloudAuthTokenArg(List<String> rawArgs) {
-  final ArgParser argParser = new ArgParser()..addOption('cloud-auth-token');
+  final ArgParser argParser = ArgParser()..addOption('cloud-auth-token');
   ArgResults args;
   try {
     args = argParser.parse(rawArgs);
@@ -536,7 +536,7 @@ int parseServicePort(String line, {
   bool multiLine = false,
 }) {
   // e.g. "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
-  final RegExp pattern = new RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
+  final RegExp pattern = RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
   final Match match = pattern.firstMatch(line);
   return match == null ? null : int.parse(match.group(2));
 }

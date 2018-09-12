@@ -41,7 +41,7 @@ class DisabledUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => null;
 
   @override
-  Future<Null> ensureAnalyticsSent() => new Future<Null>.value();
+  Future<Null> ensureAnalyticsSent() => Future<Null>.value();
 
   @override
   void printWelcome() { }

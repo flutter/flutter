@@ -35,7 +35,7 @@ class FlutterDevice {
     this.fileSystemRoots,
     this.fileSystemScheme,
     ResidentCompiler generator,
-  }) : this.generator = generator ?? new ResidentCompiler(
+  }) : this.generator = generator ?? ResidentCompiler(
          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
@@ -65,7 +65,7 @@ class FlutterDevice {
   Future<Null> _connect({ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (vmServices != null)
       return;
-    final List<VMService> localVmServices = new List<VMService>(observatoryUris.length);
+    final List<VMService> localVmServices = List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
       localVmServices[i] = await VMService.connect(observatoryUris[i],
@@ -116,7 +116,7 @@ class FlutterDevice {
         view.uiIsolate.flutterExit(); // ignore: unawaited_futures
       }
     }
-    await new Future<Null>.delayed(const Duration(milliseconds: 100));
+    await Future<Null>.delayed(const Duration(milliseconds: 100));
   }
 
   Future<Uri> setupDevFS(String fsName,
@@ -124,7 +124,7 @@ class FlutterDevice {
     String packagesFilePath
   }) {
     // One devFS per device. Shared by all running instances.
-    devFS = new DevFS(
+    devFS = DevFS(
       vmServices[0],
       fsName,
       rootDirectory,
@@ -170,7 +170,7 @@ class FlutterDevice {
     final List<ProgramElement> elements = <ProgramElement>[];
     for (Future<List<ProgramElement>> report in reports) {
       for (ProgramElement element in await report)
-        elements.add(new ProgramElement(element.qualifiedName,
+        elements.add(ProgramElement(element.qualifiedName,
                                         devFS.deviceUriToHostUri(element.uri),
                                         element.line,
                                         element.column));
@@ -439,7 +439,7 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final bool stayResident;
   final bool ipv6;
-  final Completer<int> _finished = new Completer<int>();
+  final Completer<int> _finished = Completer<int>();
   bool _stopped = false;
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
@@ -627,7 +627,7 @@ abstract class ResidentRunner {
   Future<Null> connectToServiceProtocol({String viewFilter,
       ReloadSources reloadSources, CompileExpression compileExpression}) async {
     if (!debuggingOptions.debuggingEnabled)
-      return new Future<Null>.error('Error the service protocol is not enabled.');
+      return Future<Null>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -660,12 +660,12 @@ abstract class ResidentRunner {
 
   Future<Null> _serviceProtocolDone(dynamic object) {
     printTrace('Service protocol connection closed.');
-    return new Future<Null>.value(object);
+    return Future<Null>.value(object);
   }
 
   Future<Null> _serviceProtocolError(dynamic error, StackTrace stack) {
     printTrace('Service protocol connection closed with an error: $error\n$stack');
-    return new Future<Null>.error(error, stack);
+    return Future<Null>.error(error, stack);
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -805,9 +805,9 @@ abstract class ResidentRunner {
 
   bool hasDirtyDependencies(FlutterDevice device) {
     final DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(mainPath, packagesFilePath);
+        DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =
-        new DependencyChecker(dartDependencySetBuilder, assetBundle);
+        DependencyChecker(dartDependencySetBuilder, assetBundle);
     if (device.package.packagesFile == null || !device.package.packagesFile.existsSync()) {
       return true;
     }
@@ -876,7 +876,7 @@ class OperationResult {
 
   bool get isOk => code == 0;
 
-  static final OperationResult ok = new OperationResult(0, '');
+  static final OperationResult ok = OperationResult(0, '');
 }
 
 /// Given the value of the --target option, return the path of the Dart file

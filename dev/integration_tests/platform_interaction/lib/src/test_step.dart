@@ -46,15 +46,15 @@ class TestStepResult {
   final TestStatus status;
 
   Widget asWidget(BuildContext context) {
-    return new Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Text('Step: $name', style: bold),
-        new Text(description),
+        Text('Step: $name', style: bold),
+        Text(description),
         const Text(' '),
-        new Text(
+        Text(
           status.toString().substring('TestStatus.'.length),
-          key: new ValueKey<String>(
+          key: ValueKey<String>(
               status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
         ),

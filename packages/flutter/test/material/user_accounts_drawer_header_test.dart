@@ -18,8 +18,8 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
   bool withOnDetailsPressedHandler = true,
 }) async {
   await tester.pumpWidget(
-    new MaterialApp(
-      home: new MediaQuery(
+    MaterialApp(
+      home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
             left: 10.0,
@@ -28,9 +28,9 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
             bottom: 40.0,
           ),
         ),
-        child: new Material(
-          child: new Center(
-            child: new UserAccountsDrawerHeader(
+        child: Material(
+          child: Center(
+            child: UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
               currentAccountPicture: const ExcludeSemantics(
                 child: CircleAvatar(
@@ -113,10 +113,10 @@ void main() {
       VoidCallback onDetailsPressed,
       EdgeInsets margin,
     }) {
-      return new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new UserAccountsDrawerHeader(
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: UserAccountsDrawerHeader(
               currentAccountPicture: currentAccountPicture,
               otherAccountsPictures: otherAccountsPictures,
               accountName: accountName,
@@ -221,12 +221,12 @@ void main() {
       VoidCallback onDetailsPressed,
       EdgeInsets margin,
     }) {
-      return new MaterialApp(
-        home: new Directionality(
+      return MaterialApp(
+        home: Directionality(
           textDirection: TextDirection.rtl,
-          child: new Material(
-            child: new Center(
-              child: new UserAccountsDrawerHeader(
+          child: Material(
+            child: Center(
+              child: UserAccountsDrawerHeader(
                 currentAccountPicture: currentAccountPicture,
                 otherAccountsPictures: otherAccountsPictures,
                 accountName: accountName,
@@ -324,36 +324,36 @@ void main() {
   });
 
   testWidgets('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
 
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics(
+        TestSemantics(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       label: 'Signed in\nname\nemail',
                       textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'B',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'C',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'D',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isButton],
                           actions: <SemanticsAction>[SemanticsAction.tap],
                           label: r'Show accounts',
@@ -396,7 +396,7 @@ void main() {
   });
 
   testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(
       tester,
       withEmail: false,
@@ -407,26 +407,26 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics(
+        TestSemantics(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       label: 'Signed in',
                       textDirection: TextDirection.ltr,
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'B',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'C',
                           textDirection: TextDirection.ltr,
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: r'D',
                           textDirection: TextDirection.ltr,
                         ),

@@ -8,18 +8,18 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TwoLevelList basics', (WidgetTester tester) async {
-    final Key topKey = new UniqueKey();
-    final Key sublistKey = new UniqueKey();
-    final Key bottomKey = new UniqueKey();
+    final Key topKey = UniqueKey();
+    final Key sublistKey = UniqueKey();
+    final Key bottomKey = UniqueKey();
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
-        return new Material(
-          child: new SingleChildScrollView(
-            child: new Column(
+        return Material(
+          child: SingleChildScrollView(
+            child: Column(
               children: <Widget>[
-                new ListTile(title: const Text('Top'), key: topKey),
-                new ExpansionTile(
+                ListTile(title: const Text('Top'), key: topKey),
+                ExpansionTile(
                   key: sublistKey,
                   title: const Text('Sublist'),
                   children: const <Widget>[
@@ -27,7 +27,7 @@ void main() {
                     ListTile(title: Text('1'))
                   ]
                 ),
-                new ListTile(title: const Text('Bottom'), key: bottomKey)
+                ListTile(title: const Text('Bottom'), key: bottomKey)
               ]
             )
           )
@@ -35,7 +35,7 @@ void main() {
       }
     };
 
-    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     expect(find.text('Top'), findsOneWidget);
     expect(find.text('Sublist'), findsOneWidget);
@@ -72,11 +72,11 @@ void main() {
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
-        return new Material(
-          child: new SingleChildScrollView(
-            child: new Column(
+        return Material(
+          child: SingleChildScrollView(
+            child: Column(
               children: <Widget>[
-                new ExpansionTile(
+                ExpansionTile(
                   title: const Text('Sublist'),
                   onExpansionChanged: (bool opened) {
                     didChangeOpen = opened;
@@ -93,7 +93,7 @@ void main() {
       }
     };
 
-    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     expect(didChangeOpen, isNull);
     await tester.tap(find.text('Sublist'));
@@ -107,9 +107,9 @@ void main() {
   testWidgets('trailing override', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
-        return new Material(
-          child: new SingleChildScrollView(
-            child: new Column(
+        return Material(
+          child: SingleChildScrollView(
+            child: Column(
               children: const <Widget>[
                 ListTile(title: Text('Top')),
                 ExpansionTile(
@@ -128,7 +128,7 @@ void main() {
       }
     };
 
-    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
     expect(find.byIcon(Icons.inbox), findsOneWidget);
     expect(find.byIcon(Icons.expand_more), findsNothing);
   });

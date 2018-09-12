@@ -94,7 +94,7 @@ class Feedback {
       case TargetPlatform.fuchsia:
         return SystemSound.play(SystemSoundType.click);
       default:
-        return new Future<Null>.value();
+        return Future<Null>.value();
     }
   }
 
@@ -133,7 +133,7 @@ class Feedback {
       case TargetPlatform.fuchsia:
         return HapticFeedback.vibrate();
       default:
-        return new Future<Null>.value();
+        return Future<Null>.value();
     }
   }
 

@@ -60,7 +60,7 @@ class IOSDeploy {
     // python at the front of the path, which may not include package 'six'.
     // Ensure that we pick up the system install of python, which does include
     // it.
-    final Map<String, String> iosDeployEnv = new Map<String, String>.from(platform.environment);
+    final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
 
     return await runCommandAndStreamOutput(
@@ -151,7 +151,7 @@ class IOSDevice extends Device {
 
       final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
       final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
-      devices.add(new IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
+      devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
     }
     return devices;
   }
@@ -177,7 +177,7 @@ class IOSDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     try {
       final RunResult apps = await runCheckedAsync(<String>[_installerPath, '--list-apps']);
-      if (new RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
+      if (RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
         return true;
       }
     } catch (e) {
@@ -247,11 +247,11 @@ class IOSDevice extends Device {
         printError('Could not build the precompiled application for the device.');
         await diagnoseXcodeBuildFailure(buildResult);
         printError('');
-        return new LaunchResult.failed();
+        return LaunchResult.failed();
       }
     } else {
       if (!await installApp(package))
-        return new LaunchResult.failed();
+        return LaunchResult.failed();
     }
 
     // Step 2: Check that the application exists at the specified path.
@@ -259,7 +259,7 @@ class IOSDevice extends Device {
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
-      return new LaunchResult.failed();
+      return LaunchResult.failed();
     }
 
     // Step 3: Attempt to install the application on the device.
@@ -305,7 +305,7 @@ class IOSDevice extends Device {
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
-      final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(app: package),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.observatoryPort,
@@ -341,10 +341,10 @@ class IOSDevice extends Device {
       printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
       printError('  open ios/Runner.xcworkspace');
       printError('');
-      return new LaunchResult.failed();
+      return LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded(observatoryUri: localObservatoryUri);
+    return LaunchResult.succeeded(observatoryUri: localObservatoryUri);
   }
 
   @override
@@ -362,11 +362,11 @@ class IOSDevice extends Device {
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
     _logReaders ??= <ApplicationPackage, _IOSDeviceLogReader>{};
-    return _logReaders.putIfAbsent(app, () => new _IOSDeviceLogReader(this, app));
+    return _logReaders.putIfAbsent(app, () => _IOSDeviceLogReader(this, app));
   }
 
   @override
-  DevicePortForwarder get portForwarder => _portForwarder ??= new _IOSDevicePortForwarder(this);
+  DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
 
   @override
   void clearLogs() {
@@ -446,7 +446,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   RegExp _anyLineRegex;
 
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
-    _linesController = new StreamController<String>.broadcast(
+    _linesController = StreamController<String>.broadcast(
       onListen: _start,
       onCancel: _stop
     );
@@ -456,11 +456,11 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // iOS 9 format:  Runner[297] <Notice>:
     // iOS 10 format: Runner(Flutter)[297] <Notice>:
     final String appName = app == null ? '' : app.name.replaceAll('.app', '');
-    _runnerLineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
+    _runnerLineRegex = RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
     // Similar to above, but allows ~arbitrary components instead of "Runner"
     // and "Flutter". The regex tries to strike a balance between not producing
     // false positives and not producing false negatives.
-    _anyLineRegex = new RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
+    _anyLineRegex = RegExp(r'\w+(\([^)]*\))?\[\d+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;
@@ -558,16 +558,16 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
         if (autoselect) {
           hostPort += 1;
           if (hostPort > 65535)
-            throw new Exception('Could not find open port on host.');
+            throw Exception('Could not find open port on host.');
         } else {
-          throw new Exception('Port $hostPort is not available.');
+          throw Exception('Port $hostPort is not available.');
         }
       }
     }
     assert(connected);
     assert(process != null);
 
-    final ForwardedPort forwardedPort = new ForwardedPort.withContext(
+    final ForwardedPort forwardedPort = ForwardedPort.withContext(
       hostPort, devicePort, process,
     );
     printTrace('Forwarded port $forwardedPort');

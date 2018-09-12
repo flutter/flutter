@@ -38,13 +38,13 @@ Future<Null> main(List<String> arguments) async {
     Directory.current = Directory.current.parent.parent;
 
   final ProcessResult flutter = Process.runSync('flutter', <String>[]);
-  final File versionFile = new File('version');
+  final File versionFile = File('version');
   if (flutter.exitCode != 0 || !versionFile.existsSync())
-    throw new Exception('Failed to determine Flutter version.');
+    throw Exception('Failed to determine Flutter version.');
   final String version = versionFile.readAsStringSync();
 
   // Create the pubspec.yaml file.
-  final StringBuffer buf = new StringBuffer();
+  final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
   buf.writeln('homepage: https://flutter.io');
   buf.writeln('version: $version');
@@ -57,17 +57,17 @@ Future<Null> main(List<String> arguments) async {
   buf.writeln('dependency_overrides:');
   buf.writeln('  platform_integration:');
   buf.writeln('    path: platform_integration');
-  new File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
+  File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
-  final Directory libDir = new Directory('dev/docs/lib');
+  final Directory libDir = Directory('dev/docs/lib');
   libDir.createSync();
 
-  final StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
+  final StringBuffer contents = StringBuffer('library temp_doc;\n\n');
   for (String libraryRef in libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
-  new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
+  File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   final String flutterRoot = Directory.current.path;
   final Map<String, String> pubEnvironment = <String, String>{
@@ -76,7 +76,7 @@ Future<Null> main(List<String> arguments) async {
 
   // If there's a .pub-cache dir in the flutter root, use that.
   final String pubCachePath = '$flutterRoot/.pub-cache';
-  if (new Directory(pubCachePath).existsSync()) {
+  if (Directory(pubCachePath).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCachePath;
   }
 
@@ -156,14 +156,14 @@ Future<Null> main(List<String> arguments) async {
   );
   printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
-      new RegExp(r'^generating docs for library '), // unnecessary verbosity
-      new RegExp(r'^pars'), // unnecessary verbosity
+      RegExp(r'^generating docs for library '), // unnecessary verbosity
+      RegExp(r'^pars'), // unnecessary verbosity
     ],
   );
   printStream(process.stderr, prefix: args['json'] ? '' : 'dartdoc:stderr: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
-      new RegExp(r'^[ ]+warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
-      new RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
+      RegExp(r'^[ ]+warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
+      RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
   final int exitCode = await process.exitCode;
@@ -177,7 +177,7 @@ Future<Null> main(List<String> arguments) async {
 }
 
 ArgParser _createArgsParser() {
-  final ArgParser parser = new ArgParser();
+  final ArgParser parser = ArgParser();
   parser.addFlag('help', abbr: 'h', negatable: false,
       help: 'Show command help.');
   parser.addFlag('verbose', negatable: true, defaultsTo: true,
@@ -193,7 +193,7 @@ ArgParser _createArgsParser() {
   return parser;
 }
 
-final RegExp gitBranchRegexp = new RegExp(r'^## (.*)');
+final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 
 void createFooter(String footerPath) {
   const int kGitRevisionLength = 10;
@@ -212,9 +212,9 @@ void createFooter(String footerPath) {
 
   gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
-  final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
+  final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
 
-  new File(footerPath).writeAsStringSync(<String>[
+  File(footerPath).writeAsStringSync(<String>[
     '• </span class="no-break">$timestamp<span>',
     '• </span class="no-break">$gitRevision</span>',
     gitBranchOut].join(' '));
@@ -232,8 +232,8 @@ void sanityCheckDocs() {
     '$kDocRoot/api/widgets/Widget-class.html',
   ];
   for (String canary in canaries) {
-    if (!new File(canary).existsSync())
-      throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
+    if (!File(canary).existsSync())
+      throw Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
   }
 }
 
@@ -252,22 +252,22 @@ void createIndexAndCleanup() {
 
 void removeOldFlutterDocsDir() {
   try {
-    new Directory('$kDocRoot/flutter').deleteSync(recursive: true);
+    Directory('$kDocRoot/flutter').deleteSync(recursive: true);
   } on FileSystemException {
     // If the directory does not exist, that's OK.
   }
 }
 
 void renameApiDir() {
-  new Directory('$kDocRoot/api').renameSync('$kDocRoot/flutter');
+  Directory('$kDocRoot/api').renameSync('$kDocRoot/flutter');
 }
 
 void copyIndexToRootOfDocs() {
-  new File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
+  File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
 }
 
 void changePackageToSdkInTitlebar() {
-  final File indexFile = new File('$kDocRoot/index.html');
+  final File indexFile = File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
     '<li><a href="https://flutter.io">Flutter package</a></li>',
@@ -278,7 +278,7 @@ void changePackageToSdkInTitlebar() {
 }
 
 void addHtmlBaseToIndex() {
-  final File indexFile = new File('$kDocRoot/index.html');
+  final File indexFile = File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
     '</title>\n',
@@ -298,7 +298,7 @@ void addHtmlBaseToIndex() {
 
 void putRedirectInOldIndexLocation() {
   const String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
-  new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
+  File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
 List<String> findPackageNames() {
@@ -307,12 +307,12 @@ List<String> findPackageNames() {
 
 /// Finds all packages in the Flutter SDK
 List<FileSystemEntity> findPackages() {
-  return new Directory('packages')
+  return Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {
       if (entity is! Directory)
         return false;
-      final File pubspec = new File('${entity.path}/pubspec.yaml');
+      final File pubspec = File('${entity.path}/pubspec.yaml');
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })
@@ -326,7 +326,7 @@ List<FileSystemEntity> findPackages() {
 Iterable<String> libraryRefs({ bool diskPath = false }) sync* {
   for (Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
-    for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
+    for (FileSystemEntity file in Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart')) {
         if (diskPath)
           yield '$dirName/lib/${path.basename(file.path)}';

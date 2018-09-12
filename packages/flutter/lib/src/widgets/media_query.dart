@@ -59,8 +59,8 @@ class MediaQueryData {
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.accessibleNavigation,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
@@ -184,7 +184,7 @@ class MediaQueryData {
     bool accessibleNavigation,
     bool boldText,
   }) {
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
@@ -220,7 +220,7 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
@@ -259,7 +259,7 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
@@ -392,7 +392,7 @@ class MediaQuery extends InheritedWidget {
     bool removeBottom = false,
     @required Widget child,
   }) {
-    return new MediaQuery(
+    return MediaQuery(
       key: key,
       data: MediaQuery.of(context).removePadding(
         removeLeft: removeLeft,
@@ -434,7 +434,7 @@ class MediaQuery extends InheritedWidget {
     bool removeBottom = false,
     @required Widget child,
   }) {
-    return new MediaQuery(
+    return MediaQuery(
       key: key,
       data: MediaQuery.of(context).removeViewInsets(
         removeLeft: removeLeft,
@@ -478,7 +478,7 @@ class MediaQuery extends InheritedWidget {
       return query.data;
     if (nullOk)
       return null;
-    throw new FlutterError(
+    throw FlutterError(
       'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
       'No MediaQuery ancestor could be found starting from the context that was passed '
       'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
@@ -507,6 +507,6 @@ class MediaQuery extends InheritedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }

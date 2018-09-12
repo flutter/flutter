@@ -49,17 +49,17 @@ class ButtonBar extends StatelessWidget {
   Widget build(BuildContext context) {
     // We divide by 4.0 because we want half of the average of the left and right padding.
     final double paddingUnit = ButtonTheme.of(context).padding.horizontal / 4.0;
-    return new Padding(
-      padding: new EdgeInsets.symmetric(
+    return Padding(
+      padding: EdgeInsets.symmetric(
         vertical: 2.0 * paddingUnit,
         horizontal: paddingUnit
       ),
-      child: new Row(
+      child: Row(
         mainAxisAlignment: alignment,
         mainAxisSize: mainAxisSize,
         children: children.map<Widget>((Widget child) {
-          return new Padding(
-            padding: new EdgeInsets.symmetric(horizontal: paddingUnit),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingUnit),
             child: child
           );
         }).toList()

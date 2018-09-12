@@ -93,35 +93,35 @@ void main() {
   });
 
   group('hotRestart', () {
-    final MockResidentCompiler residentCompiler = new MockResidentCompiler();
+    final MockResidentCompiler residentCompiler = MockResidentCompiler();
     MockLocalEngineArtifacts mockArtifacts;
 
     setUp(() {
-      mockArtifacts = new MockLocalEngineArtifacts();
+      mockArtifacts = MockLocalEngineArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)).thenReturn('some/path');
     });
 
     testUsingContext('no setup', () async {
-      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk, true);
+      final List<FlutterDevice> devices = <FlutterDevice>[FlutterDevice(MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
+      expect((await HotRunner(devices).restart(fullRestart: true)).isOk, true);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('setup function succeeds', () async {
-      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk, true);
+      final List<FlutterDevice> devices = <FlutterDevice>[FlutterDevice(MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
+      expect((await HotRunner(devices).restart(fullRestart: true)).isOk, true);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: true),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
 
     testUsingContext('setup function fails', () async {
-      final List<FlutterDevice> devices = <FlutterDevice>[new FlutterDevice(new MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
-      expect((await new HotRunner(devices).restart(fullRestart: true)).isOk, false);
+      final List<FlutterDevice> devices = <FlutterDevice>[FlutterDevice(MockDevice(), generator: residentCompiler, trackWidgetCreation: false)];
+      expect((await HotRunner(devices).restart(fullRestart: true)).isOk, false);
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
-      HotRunnerConfig: () => new TestHotRunnerConfig(successfulSetup: false),
+      HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: false),
     });
   });
 }

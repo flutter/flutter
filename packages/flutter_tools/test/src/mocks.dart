@@ -26,12 +26,12 @@ import 'common.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
-    android: new AndroidApk(
+    android: AndroidApk(
       id: 'io.flutter.android.mock',
       file: fs.file('/mock/path/to/android/SkyShell.apk'),
       launchActivity: 'io.flutter.android.mock.MockActivity'
     ),
-    iOS: new BuildableIOSApp(new MockIosProject())
+    iOS: BuildableIOSApp(MockIosProject())
   );
 }
 
@@ -113,7 +113,7 @@ typedef Process ProcessFactory(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
-  ProcessFactory processFactory = (List<String> commands) => new MockProcess();
+  ProcessFactory processFactory = (List<String> commands) => MockProcess();
   bool succeed = true;
   List<String> commands;
 
@@ -132,11 +132,11 @@ class MockProcessManager implements ProcessManager {
     if (!succeed) {
       final String executable = command[0];
       final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
-      throw new ProcessException(executable, arguments);
+      throw ProcessException(executable, arguments);
     }
 
     commands = command;
-    return new Future<Process>.value(processFactory(command));
+    return Future<Process>.value(processFactory(command));
   }
 
   @override
@@ -151,8 +151,8 @@ class MockProcess extends Mock implements Process {
     Stream<List<int>> stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
-  }) : exitCode = exitCode ?? new Future<int>.value(0),
-       stdin = stdin ?? new MemoryIOSink();
+  }) : exitCode = exitCode ?? Future<int>.value(0),
+       stdin = stdin ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -185,8 +185,8 @@ class PromptingProcess implements Process {
     await _stdoutController.close();
   }
 
-  final StreamController<List<int>> _stdoutController = new StreamController<List<int>>();
-  final CompleterIOSink _stdin = new CompleterIOSink();
+  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
+  final CompleterIOSink _stdin = CompleterIOSink();
 
   @override
   Stream<List<int>> get stdout => _stdoutController.stream;
@@ -209,7 +209,7 @@ class PromptingProcess implements Process {
 
 /// An IOSink that completes a future with the first line written to it.
 class CompleterIOSink extends MemoryIOSink {
-  final Completer<List<int>> _completer = new Completer<List<int>>();
+  final Completer<List<int>> _completer = Completer<List<int>>();
 
   Future<List<int>> get future => _completer.future;
 
@@ -235,7 +235,7 @@ class MemoryIOSink implements IOSink {
 
   @override
   Future<Null> addStream(Stream<List<int>> stream) {
-    final Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = Completer<Null>();
     stream.listen((List<int> data) {
       add(data);
     }).onDone(() => completer.complete(null));
@@ -271,7 +271,7 @@ class MemoryIOSink implements IOSink {
 
   @override
   void addError(dynamic error, [StackTrace stackTrace]) {
-    throw new UnimplementedError();
+    throw UnimplementedError();
   }
 
   @override
@@ -286,8 +286,8 @@ class MemoryIOSink implements IOSink {
 
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
-  final MemoryIOSink _stdout = new MemoryIOSink();
-  final StreamController<List<int>> _stdin = new StreamController<List<int>>();
+  final MemoryIOSink _stdout = MemoryIOSink();
+  final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
   IOSink get stdout => _stdout;
@@ -304,8 +304,8 @@ class MockStdio extends Stdio {
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final List<Device> _devices = <Device>[];
-  final StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
-  final StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
+  final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
+  final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   MockPollingDeviceDiscovery() : super('mock');
 
@@ -370,7 +370,7 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController = new StreamController<String>.broadcast();
+  final StreamController<String> _linesController = StreamController<String>.broadcast();
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -384,7 +384,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 
 void applyMocksToCommand(FlutterCommand command) {
   command
-    ..applicationPackages = new MockApplicationPackageStore();
+    ..applicationPackages = MockApplicationPackageStore();
 }
 
 /// Common functionality for tracking mock interaction
@@ -392,7 +392,7 @@ class BasicMock {
   final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    final List<String> actualMessages = new List<String>.from(messages);
+    final List<String> actualMessages = List<String>.from(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -461,6 +461,6 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   Future<CompilerOutput> recompile(String mainPath, List<String> invalidatedFiles, {String outputPath, String packagesFilePath}) async {
     fs.file(outputPath).createSync(recursive: true);
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
-    return new CompilerOutput(outputPath, 0);
+    return CompilerOutput(outputPath, 0);
   }
 }

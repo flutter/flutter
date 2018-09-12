@@ -21,14 +21,14 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<Null> ready = Completer<Null>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         <String>['run', '--verbose', '-d', device.deviceId, 'lib/commands.dart'],
       );
-      final StreamController<String> stdout = new StreamController<String>.broadcast();
+      final StreamController<String> stdout = StreamController<String>.broadcast();
       run.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -56,9 +56,9 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = new VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+      final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
 
-      final DriveHelper driver = new DriveHelper(vmServicePort);
+      final DriveHelper driver = DriveHelper(vmServicePort);
 
       await driver.drive('none');
       print('test: pressing "p" to enable debugPaintSize...');
@@ -98,7 +98,7 @@ void main() {
       print('test: validating that the app has in fact closed...');
       await client.done.timeout(const Duration(seconds: 5));
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }
 

@@ -13,6 +13,6 @@ void main() {
   });
 
   testWidgets('Sector Sixes', (WidgetTester tester) async {
-    await tester.pumpWidget(new SectorApp());
+    await tester.pumpWidget(SectorApp());
   });
 }

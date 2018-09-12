@@ -15,14 +15,14 @@ class _TimePickerLauncher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       locale: locale,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: new Material(
-        child: new Center(
-          child: new Builder(
+      home: Material(
+        child: Center(
+          child: Builder(
             builder: (BuildContext context) {
-              return new RaisedButton(
+              return RaisedButton(
                 child: const Text('X'),
                 onPressed: () async {
                   onChanged(await showTimePicker(
@@ -41,7 +41,7 @@ class _TimePickerLauncher extends StatelessWidget {
 
 Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged,
     { Locale locale = const Locale('en', 'US') }) async {
-  await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged, locale: locale,));
+  await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: locale,));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
   return tester.getCenter(find.byKey(const Key('time-picker-dial')));
@@ -84,7 +84,7 @@ void main() {
         }
       });
       expect(actual, locales[locale]);
-      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
     }
   });
@@ -99,7 +99,7 @@ void main() {
       final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
       final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
       final double dy = (size.height / 2.0 / 10) * i;
-      await tester.tapAt(new Offset(center.dx, center.dy - dy));
+      await tester.tapAt(Offset(center.dx, center.dy - dy));
       await finishPicker(tester);
       expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
     }
@@ -119,9 +119,9 @@ void main() {
         final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; }, locale: locale);
         final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
         final double dy = (size.height / 2.0 / 10) * i;
-        await tester.tapAt(new Offset(center.dx, center.dy - dy));
+        await tester.tapAt(Offset(center.dx, center.dy - dy));
         await finishPicker(tester);
-        expect(result, equals(new TimeOfDay(hour: i < 7 ? 12 : 0, minute: 0)));
+        expect(result, equals(TimeOfDay(hour: i < 7 ? 12 : 0, minute: 0)));
       }
     }
   });
@@ -132,21 +132,21 @@ void main() {
 
   Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
     await tester.pumpWidget(
-      new Localizations(
+      Localizations(
         locale: const Locale('en', 'US'),
         delegates: const <LocalizationsDelegate<dynamic>>[
           GlobalMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        child: new MediaQuery(
-          data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-          child: new Material(
-            child: new Directionality(
+        child: MediaQuery(
+          data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+          child: Material(
+            child: Directionality(
               textDirection: TextDirection.ltr,
-              child: new Navigator(
+              child: Navigator(
                 onGenerateRoute: (RouteSettings settings) {
-                  return new MaterialPageRoute<void>(builder: (BuildContext context) {
-                    return new FlatButton(
+                  return MaterialPageRoute<void>(builder: (BuildContext context) {
+                    return FlatButton(
                       onPressed: () {
                         showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
                       },
