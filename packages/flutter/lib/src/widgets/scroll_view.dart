@@ -60,6 +60,7 @@ abstract class ScrollView extends StatelessWidget {
     ScrollPhysics physics,
     this.shrinkWrap = false,
     this.cacheExtent,
+    this.semanticChildren,
   }) : assert(reverse != null),
        assert(shrinkWrap != null),
        assert(!(controller != null && primary == true),
@@ -172,6 +173,8 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
 
+  final int semanticChildren;
+
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
@@ -234,6 +237,7 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
+      semanticChildren: semanticChildren,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -343,6 +347,7 @@ class CustomScrollView extends ScrollView {
     bool shrinkWrap = false,
     double cacheExtent,
     this.slivers = const <Widget>[],
+    int semanticChildren,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -352,6 +357,7 @@ class CustomScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
+    semanticChildren: semanticChildren,
   );
 
   /// The slivers to place inside the viewport.
@@ -383,6 +389,7 @@ abstract class BoxScrollView extends ScrollView {
     bool shrinkWrap = false,
     this.padding,
     double cacheExtent,
+    int semanticChildren,
   }) : super(
     key: key,
     scrollDirection: scrollDirection,
@@ -392,6 +399,7 @@ abstract class BoxScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
+    semanticChildren: semanticChildren,
   );
 
   /// The amount of space by which to inset the children.
@@ -672,12 +680,15 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
+    bool addSemanticIndexes = true,
     double cacheExtent,
     List<Widget> children = const <Widget>[],
+    int semanticChildren,
   }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
+         addSemanticIndexes: addSemanticIndexes,
        ), super(
     key: key,
     scrollDirection: scrollDirection,
@@ -688,6 +699,7 @@ class ListView extends BoxScrollView {
     shrinkWrap: shrinkWrap,
     padding: padding,
     cacheExtent: cacheExtent,
+    semanticChildren: semanticChildren ?? children.length,
   );
 
   /// Creates a scrollable, linear array of widgets that are created on demand.

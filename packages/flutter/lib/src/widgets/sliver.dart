@@ -311,6 +311,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
     this.children, {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
   }) : assert(children != null),
        assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
@@ -340,6 +341,8 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
+  final bool addSemanticIndexes;
+
   /// The widgets to display.
   final List<Widget> children;
 
@@ -350,6 +353,8 @@ class SliverChildListDelegate extends SliverChildDelegate {
       return null;
     Widget child = children[index];
     assert(child != null);
+    if (addSemanticIndexes)
+      child = IndexedChildSemantics(index: index, child: child);
     if (addRepaintBoundaries)
       child = RepaintBoundary.wrap(child, index);
     if (addAutomaticKeepAlives)
