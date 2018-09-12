@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Default PageTranstionsTheme includes a builder with a null platform', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(home: const Text('home')));
+    await tester.pumpWidget(MaterialApp(home: const Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
     expect(theme.builders.map((PageTransitionsBuilder builder) => builder.platform), contains(null));
@@ -16,8 +16,8 @@ void main() {
 
   testWidgets('Default PageTranstionsTheme builds a CupertionPageTransition for iOS', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new Material(
-        child: new FlatButton(
+      '/': (BuildContext context) => Material(
+        child: FlatButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -26,8 +26,8 @@ void main() {
     };
 
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.iOS),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
         routes: routes,
       ),
     );
@@ -43,8 +43,8 @@ void main() {
 
   testWidgets('Default PageTranstionsTheme builds a _GenericPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new Material(
-        child: new FlatButton(
+      '/': (BuildContext context) => Material(
+        child: FlatButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -53,8 +53,8 @@ void main() {
     };
 
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(platform: TargetPlatform.android),
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
         routes: routes,
       ),
     );
@@ -77,8 +77,8 @@ void main() {
 
   testWidgets('pageTranstionsTheme override builds a _MountainViewPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new Material(
-        child: new FlatButton(
+      '/': (BuildContext context) => Material(
+        child: FlatButton(
           child: const Text('push'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
@@ -87,8 +87,8 @@ void main() {
     };
 
     await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(
+      MaterialApp(
+        theme: ThemeData(
           platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <PageTransitionsBuilder>[

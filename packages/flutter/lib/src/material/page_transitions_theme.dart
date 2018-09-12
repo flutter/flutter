@@ -10,7 +10,7 @@ import 'colors.dart';
 import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
-final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
+final Tween<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 0.25),
   end: Offset.zero,
 );
@@ -20,7 +20,7 @@ final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
 class _GenericPageTransition extends StatelessWidget {
   _GenericPageTransition({
     Key key,
-    @required Animation<double> routeAnimation,
+    @required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     @required this.child,
   }) : _positionAnimation = routeAnimation.drive(_kBottomUpTween.chain(_fastOutSlowInTween)),
        _opacityAnimation = routeAnimation.drive(_easeInTween),
@@ -36,9 +36,9 @@ class _GenericPageTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
-    return new SlideTransition(
+    return SlideTransition(
       position: _positionAnimation,
-      child: new FadeTransition(
+      child: FadeTransition(
         opacity: _opacityAnimation,
         child: child,
       ),
@@ -57,19 +57,19 @@ class _MountainViewPageTransition extends StatelessWidget {
 
   // The new page slides upwards just a little as its clip
   // rectangle exposes the page from bottom to top.
-  static final Tween<Offset> _primaryTranslationTween = new Tween<Offset>(
+  static final Tween<Offset> _primaryTranslationTween = Tween<Offset>(
     begin: const Offset(0.0, 0.05),
     end: Offset.zero,
   );
 
   // The old page slides downwards a little as the new page appears.
-  static final Tween<Offset> _secondaryTranslationTween = new Tween<Offset>(
+  static final Tween<Offset> _secondaryTranslationTween = Tween<Offset>(
     begin: Offset.zero,
-    end: const Offset(0.0, -0.025),
+    end: const Offset(0.0, 0.025),
   );
 
   // The scrim obscures the old page by becoming increasingly opaque.
-  static final Tween<double> _scrimOpacityTween = new Tween<double>(
+  static final Tween<double> _scrimOpacityTween = Tween<double>(
     begin: 0.0,
     end: 0.25,
   );
@@ -83,16 +83,16 @@ class _MountainViewPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(
+    return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size size = constraints.biggest;
 
         // Gradually expose the new page from bottom to top.
-        final Animation<double> clipAnimation = new Tween<double>(
+        final Animation<double> clipAnimation = Tween<double>(
           begin: 0.0,
           end: size.height,
         ).animate(
-          new CurvedAnimation(
+          CurvedAnimation(
             parent: animation,
             curve: _transitionCurve,
             reverseCurve: _transitionCurve.flipped,
@@ -100,7 +100,7 @@ class _MountainViewPageTransition extends StatelessWidget {
         );
 
         final Animation<double> opacityAnimation = _scrimOpacityTween.animate(
-          new CurvedAnimation(
+          CurvedAnimation(
             parent: animation,
             curve: _transitionCurve,
             reverseCurve: _transitionCurve.flipped,
@@ -108,7 +108,7 @@ class _MountainViewPageTransition extends StatelessWidget {
         );
 
         final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(
-          new CurvedAnimation(
+          CurvedAnimation(
             parent: animation,
             curve: _transitionCurve,
             reverseCurve: _transitionCurve.flipped,
@@ -116,33 +116,33 @@ class _MountainViewPageTransition extends StatelessWidget {
         );
 
         final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
-          new CurvedAnimation(
+          CurvedAnimation(
             parent: secondaryAnimation,
             curve: _transitionCurve,
             reverseCurve: _transitionCurve.flipped,
           ),
         );
 
-        return new AnimatedBuilder(
+        return AnimatedBuilder(
           animation: animation,
           builder: (BuildContext context, Widget _) {
-            return new Container(
+            return Container(
               color: Colors.black.withOpacity(opacityAnimation.value),
               alignment: Alignment.bottomLeft,
-              child: new ClipRect(
-                child: new SizedBox(
+              child: ClipRect(
+                child: SizedBox(
                   height: clipAnimation.value,
-                  child: new OverflowBox(
+                  child: OverflowBox(
                     alignment: Alignment.bottomLeft,
                     maxHeight: size.height,
-                    child: new AnimatedBuilder(
+                    child: AnimatedBuilder(
                       animation: secondaryAnimation,
-                      child: new FractionalTranslation(
+                      child: FractionalTranslation(
                         translation: primaryTranslationAnimation.value,
                         child: child,
                       ),
                       builder: (BuildContext context, Widget child) {
-                        return new FractionalTranslation(
+                        return FractionalTranslation(
                           translation: secondaryTranslationAnimation.value,
                           child: child,
                         );
@@ -221,7 +221,7 @@ class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return new _GenericPageTransition(routeAnimation: animation, child: child);
+    return _GenericPageTransition(routeAnimation: animation, child: child);
   }
 }
 
@@ -246,7 +246,7 @@ class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return new _MountainViewPageTransition(
+    return _MountainViewPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       child: child,
@@ -344,6 +344,6 @@ class PageTransitionsTheme extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const PageTransitionsTheme defaultTheme = PageTransitionsTheme();
-    properties.add(new DiagnosticsProperty<Iterable<PageTransitionsBuilder>>('builders', builders, defaultValue: defaultTheme.builders));
+    properties.add(DiagnosticsProperty<Iterable<PageTransitionsBuilder>>('builders', builders, defaultValue: defaultTheme.builders));
   }
 }

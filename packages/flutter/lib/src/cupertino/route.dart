@@ -187,7 +187,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///  * [popGestureEnabled], which returns whether a pop gesture is appropriate
   ///    in the first place.
   static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
-  static final Set<PageRoute<dynamic>> _popGestureInProgress = new Set<PageRoute<dynamic>>();
+  static final Set<PageRoute<dynamic>> _popGestureInProgress = Set<PageRoute<dynamic>>();
 
   /// Whether a pop gesture can be started by the user.
   ///
@@ -256,7 +256,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     _popGestureInProgress.add(route);
 
     _CupertinoBackGestureController<T> backController;
-    backController = new _CupertinoBackGestureController<T>(
+    backController = _CupertinoBackGestureController<T>(
       navigator: route.navigator,
       controller: route.controller,
       onEnded: () {
@@ -288,7 +288,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     Widget child,
   ) {
     if (route.fullscreenDialog) {
-      return new CupertinoFullscreenDialogTransition(
+      return CupertinoFullscreenDialogTransition(
         animation: animation,
         child: child,
       );
@@ -299,7 +299,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
         // In the middle of a back gesture drag, let the transition be linear to
         // match finger motions.
         linearTransition: _popGestureInProgress.contains(route),
-        child: new _CupertinoBackGestureDetector<T>(
+        child: _CupertinoBackGestureDetector<T>(
           enabledCallback: () => _isPopGestureEnabled<T>(route),
           onStartPopGesture: () => _startPopGesture<T>(route),
           child: child,

@@ -912,7 +912,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
-    properties.add(new DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
+    properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
   }
 }
 
