@@ -143,7 +143,6 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
     }
     properties.add(new DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
   }
-
 }
 
 /// Provides [Ticker] objects that are configured to only tick while the current
@@ -205,8 +204,9 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
   void didChangeDependencies() {
     final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
-      for (Ticker ticker in _tickers)
+      for (Ticker ticker in _tickers) {
         ticker.muted = muted;
+      }
     }
     super.didChangeDependencies();
   }
@@ -223,7 +223,6 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
       defaultValue: null,
     ));
   }
-
 }
 
 // This class should really be called _DisposingTicker or some such, but this

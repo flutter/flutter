@@ -76,7 +76,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 ///
 /// Then, to fetch the image, use
 /// ```dart
-/// new AssetImage('icons/heart.png')
+/// AssetImage('icons/heart.png')
 /// ```
 ///
 /// ## Assets in packages
@@ -86,7 +86,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// `my_icons`. Then to fetch the image, use:
 ///
 /// ```dart
-/// new AssetImage('icons/heart.png', package: 'my_icons')
+/// AssetImage('icons/heart.png', package: 'my_icons')
 /// ```
 ///
 /// Assets used by the package itself should also be fetched using the [package]

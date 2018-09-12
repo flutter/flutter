@@ -53,7 +53,7 @@ class SliderTheme extends InheritedWidget {
   /// ```dart
   /// class Launch extends StatefulWidget {
   ///   @override
-  ///   State createState() => new LaunchState();
+  ///   State createState() => LaunchState();
   /// }
   ///
   /// class LaunchState extends State<Launch> {
@@ -61,9 +61,9 @@ class SliderTheme extends InheritedWidget {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new SliderTheme(
+  ///     return SliderTheme(
   ///       data: SliderTheme.of(context).copyWith(activeTrackColor: const Color(0xff804040)),
-  ///       child: new Slider(
+  ///       child: Slider(
   ///         onChanged: (double value) { setState(() { _rocketThrust = value; }); },
   ///         value: _rocketThrust,
   ///       ),
@@ -160,7 +160,7 @@ class SliderThemeData extends Diagnosticable {
   /// ```dart
   /// class Blissful extends StatefulWidget {
   ///   @override
-  ///   State createState() => new BlissfulState();
+  ///   State createState() => BlissfulState();
   /// }
   ///
   /// class BlissfulState extends State<Blissful> {
@@ -168,9 +168,9 @@ class SliderThemeData extends Diagnosticable {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new SliderTheme(
+  ///     return SliderTheme(
   ///       data: SliderTheme.of(context).copyWith(activeTrackColor: const Color(0xff404080)),
-  ///       child: new Slider(
+  ///       child: Slider(
   ///         onChanged: (double value) { setState(() { _bliss = value; }); },
   ///         value: _bliss,
   ///       ),

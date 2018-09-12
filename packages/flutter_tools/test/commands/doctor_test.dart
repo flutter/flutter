@@ -183,6 +183,86 @@ void main() {
       ));
     });
   });
+
+
+  group('doctor with grouped validators', () {
+    testUsingContext('validate diagnose combines validator output', () async {
+      expect(await new FakeGroupedDoctor().diagnose(), isTrue);
+      expect(testLogger.statusText, equals(
+              '[✓] Category 1\n'
+              '    • A helpful message\n'
+              '    • A helpful message\n'
+              '\n'
+              '[!] Category 2\n'
+              '    • A helpful message\n'
+              '    ✗ A useful error message\n'
+              '\n'
+              '! Doctor found issues in 1 category.\n'
+      ));
+    });
+
+    testUsingContext('validate summary combines validator output', () async {
+      expect(await new FakeGroupedDoctor().summaryText, equals(
+              '[✓] Category 1 is fully installed.\n'
+              '[!] Category 2 is partially installed; more components are available.\n'
+              '\n'
+              'Run "flutter doctor" for information about installing additional components.\n'
+
+      ));
+    });
+  });
+
+
+  group('doctor merging validator results', () {
+    final PassingGroupedValidator installed = new PassingGroupedValidator('Category', groupedCategory1);
+    final PartialGroupedValidator partial = new PartialGroupedValidator('Category', groupedCategory1);
+    final MissingGroupedValidator missing = new MissingGroupedValidator('Category', groupedCategory1);
+
+    testUsingContext('validate installed + installed = installed', () async {
+      expect(await new FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[✓]'));
+    });
+
+    testUsingContext('validate installed + partial = partial', () async {
+      expect(await new FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate installed + missing = partial', () async {
+      expect(await new FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate partial + installed = partial', () async {
+      expect(await new FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate partial + partial = partial', () async {
+      expect(await new FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate partial + missing = partial', () async {
+      expect(await new FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate missing + installed = partial', () async {
+      expect(await new FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate missing + partial = partial', () async {
+      expect(await new FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
+      expect(testLogger.statusText, startsWith('[!]'));
+    });
+
+    testUsingContext('validate missing + missing = missing', () async {
+      expect(await new FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
+      expect(testLogger.statusText, startsWith('[✗]'));
+    });
+  });
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
@@ -319,6 +399,74 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
       new PassingValidator('Providing validators is fun')
     ];
   }
+
+  @override
+  List<Workflow> get workflows => <Workflow>[];
+}
+
+
+ValidatorCategory groupedCategory1 = const ValidatorCategory('group 1', true);
+ValidatorCategory groupedCategory2 = const ValidatorCategory('group 2', true);
+
+class PassingGroupedValidator extends DoctorValidator {
+  PassingGroupedValidator(String name, ValidatorCategory group) : super(name, group);
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage('A helpful message'));
+    return new ValidationResult(ValidationType.installed, messages);
+  }
+
+}
+
+class MissingGroupedValidator extends DoctorValidator {
+  MissingGroupedValidator(String name, ValidatorCategory group): super(name, group);
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage.error('A useful error message'));
+    return new ValidationResult(ValidationType.missing, messages);
+  }
+}
+
+class PartialGroupedValidator extends DoctorValidator {
+  PartialGroupedValidator(String name, ValidatorCategory group): super(name, group);
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage.error('An error message for partial installation'));
+    return new ValidationResult(ValidationType.partial, messages);
+  }
+}
+
+/// A doctor that has two category groups of two validators each.
+class FakeGroupedDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
+      _validators.add(new PassingGroupedValidator('Category 1', groupedCategory1));
+      _validators.add(new PassingGroupedValidator('Category 2', groupedCategory2));
+      _validators.add(new MissingGroupedValidator('Category 2', groupedCategory2));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor that takes any two validators. Used to check behavior when
+/// merging ValidationTypes (installed, missing, partial).
+class FakeSmallGroupDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  FakeSmallGroupDoctor(DoctorValidator val1, DoctorValidator val2) {
+    _validators = <DoctorValidator>[val1, val2];
+  }
+  @override
+  List<DoctorValidator> get validators => _validators;
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
@@ -326,14 +474,14 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
   VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition})
-    : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
+      : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
-    new VsCodeValidatorTestTargets._(validInstall, validExtensions);
+      new VsCodeValidatorTestTargets._(validInstall, validExtensions);
 
-    static VsCodeValidatorTestTargets get installedWithExtension64bit =>
-    new VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
+  static VsCodeValidatorTestTargets get installedWithExtension64bit =>
+      new VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
 
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
-    new VsCodeValidatorTestTargets._(validInstall, missingExtensions);
+      new VsCodeValidatorTestTargets._(validInstall, missingExtensions);
 }

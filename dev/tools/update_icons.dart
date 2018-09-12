@@ -216,7 +216,7 @@ String getIconDeclaration(String line) {
   final String rtl = kMirroredIcons.contains(name) ? ', matchTextDirection: true' : '';
   return '''
 
-  /// <p><i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".</p>
-  static const IconData $identifier = const IconData(0x$codepoint, fontFamily: 'MaterialIcons'$rtl);
+  /// <i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".
+  static const IconData $identifier = IconData(0x$codepoint, fontFamily: 'MaterialIcons'$rtl);
 ''';
 }

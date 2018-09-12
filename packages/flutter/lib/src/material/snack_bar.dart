@@ -38,7 +38,7 @@ const Curve _snackBarFadeCurve = Interval(0.72, 1.0, curve: Curves.fastOutSlowIn
 ///
 /// ```dart
 /// Scaffold.of(context).showSnackBar(
-///   new SnackBar( ... )
+///   SnackBar( ... )
 /// ).closed.then((SnackBarClosedReason reason) {
 ///    ...
 /// });

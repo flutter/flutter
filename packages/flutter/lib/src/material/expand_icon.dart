@@ -110,13 +110,14 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final ThemeData theme = Theme.of(context);
     final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
 
     return new Semantics(
       onTapHint: widget.onPressed == null ? null : onTapHint,
       child: new IconButton(
         padding: widget.padding,
-        color: Colors.black38,
+        color: theme.brightness == Brightness.dark ? Colors.white54 : Colors.black54,
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: new RotationTransition(
           turns: _iconTurns,

@@ -52,6 +52,13 @@ TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
   );
 }
 
+TaskFunction createAndroidSemanticsIntegrationTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
+    'lib/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(

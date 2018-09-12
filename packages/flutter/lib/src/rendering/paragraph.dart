@@ -78,6 +78,7 @@ class RenderParagraph extends RenderBox {
       case RenderComparison.paint:
         _textPainter.text = value;
         markNeedsPaint();
+        markNeedsSemanticsUpdate();
         break;
       case RenderComparison.layout:
         _textPainter.text = value;
@@ -437,12 +438,105 @@ class RenderParagraph extends RenderBox {
     return _textPainter.size;
   }
 
+  final List<int> _recognizerOffsets = <int>[];
+  final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config
-      ..label = text.toPlainText()
-      ..textDirection = textDirection;
+    _recognizerOffsets.clear();
+    _recognizers.clear();
+    int offset = 0;
+    text.visitTextSpan((TextSpan span) {
+      if (span.recognizer != null && (span.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
+        _recognizerOffsets.add(offset);
+        _recognizerOffsets.add(offset + span.text.length);
+        _recognizers.add(span.recognizer);
+      }
+      offset += span.text.length;
+      return true;
+    });
+    if (_recognizerOffsets.isNotEmpty) {
+      config.explicitChildNodes = true;
+      config.isSemanticBoundary = true;
+    } else {
+      config.label = text.toPlainText();
+      config.textDirection = textDirection;
+    }
+  }
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    assert(_recognizerOffsets.isNotEmpty);
+    assert(_recognizerOffsets.length.isEven);
+    assert(_recognizers.isNotEmpty);
+    assert(children.isEmpty);
+    final List<SemanticsNode> newChildren = <SemanticsNode>[];
+    final String rawLabel = text.toPlainText();
+    int current = 0;
+    double order = -1.0;
+    TextDirection currentDirection = textDirection;
+    Rect currentRect;
+
+    SemanticsConfiguration buildSemanticsConfig(int start, int end) {
+      final TextDirection initialDirection = currentDirection;
+      final TextSelection selection = new TextSelection(baseOffset: start, extentOffset: end);
+      final List<ui.TextBox> rects = getBoxesForSelection(selection);
+      Rect rect;
+      for (ui.TextBox textBox in rects) {
+        rect ??= textBox.toRect();
+        rect = rect.expandToInclude(textBox.toRect());
+        currentDirection = textBox.direction;
+      }
+      // round the current rectangle to make this API testable and add some
+      // padding so that the accessibility rects do not overlap with the text.
+      // TODO(jonahwilliams): implement this for all text accessibility rects.
+      currentRect = new Rect.fromLTRB(
+        rect.left.floorToDouble() - 4.0,
+        rect.top.floorToDouble() - 4.0,
+        rect.right.ceilToDouble() + 4.0,
+        rect.bottom.ceilToDouble() + 4.0,
+      );
+      order += 1;
+      return new SemanticsConfiguration()
+        ..sortKey = new OrdinalSortKey(order)
+        ..textDirection = initialDirection
+        ..label = rawLabel.substring(start, end);
+    }
+
+    for (int i = 0, j = 0; i < _recognizerOffsets.length; i += 2, j++) {
+      final int start = _recognizerOffsets[i];
+      final int end = _recognizerOffsets[i + 1];
+      if (current != start) {
+        final SemanticsNode node = new SemanticsNode();
+        final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
+        node.updateWith(config: configuration);
+        node.rect = currentRect;
+        newChildren.add(node);
+      }
+      final SemanticsNode node = new SemanticsNode();
+      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
+      final GestureRecognizer recognizer = _recognizers[j];
+      if (recognizer is TapGestureRecognizer) {
+        configuration.onTap = recognizer.onTap;
+      } else if (recognizer is LongPressGestureRecognizer) {
+        configuration.onLongPress = recognizer.onLongPress;
+      } else {
+        assert(false);
+      }
+      node.updateWith(config: configuration);
+      node.rect = currentRect;
+      newChildren.add(node);
+      current = end;
+    }
+    if (current < rawLabel.length) {
+      final SemanticsNode node = new SemanticsNode();
+      final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
+      node.updateWith(config: configuration);
+      node.rect = currentRect;
+      newChildren.add(node);
+    }
+    node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
 
   @override

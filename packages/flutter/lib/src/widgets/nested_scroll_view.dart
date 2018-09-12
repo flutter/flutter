@@ -75,13 +75,13 @@ typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, 
 /// data model being represented.
 ///
 /// ```dart
-/// new DefaultTabController(
+/// DefaultTabController(
 ///   length: _tabs.length, // This is the number of tabs.
-///   child: new NestedScrollView(
+///   child: NestedScrollView(
 ///     headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
 ///       // These are the slivers that show up in the "outer" scroll view.
 ///       return <Widget>[
-///         new SliverOverlapAbsorber(
+///         SliverOverlapAbsorber(
 ///           // This widget takes the overlapping behavior of the SliverAppBar,
 ///           // and redirects it to the SliverOverlapInjector below. If it is
 ///           // missing, then it is possible for the nested "inner" scroll view
@@ -90,7 +90,7 @@ typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, 
 ///           // This is not necessary if the "headerSliverBuilder" only builds
 ///           // widgets that do not overlap the next sliver.
 ///           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///           child: new SliverAppBar(
+///           child: SliverAppBar(
 ///             title: const Text('Books'), // This is the title in the app bar.
 ///             pinned: true,
 ///             expandedHeight: 150.0,
@@ -103,26 +103,26 @@ typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, 
 ///             // not actually aware of the precise position of the inner
 ///             // scroll views.
 ///             forceElevated: innerBoxIsScrolled,
-///             bottom: new TabBar(
+///             bottom: TabBar(
 ///               // These are the widgets to put in each tab in the tab bar.
-///               tabs: _tabs.map((String name) => new Tab(text: name)).toList(),
+///               tabs: _tabs.map((String name) => Tab(text: name)).toList(),
 ///             ),
 ///           ),
 ///         ),
 ///       ];
 ///     },
-///     body: new TabBarView(
+///     body: TabBarView(
 ///       // These are the contents of the tab views, below the tabs.
 ///       children: _tabs.map((String name) {
-///         return new SafeArea(
+///         return SafeArea(
 ///           top: false,
 ///           bottom: false,
-///           child: new Builder(
+///           child: Builder(
 ///             // This Builder is needed to provide a BuildContext that is "inside"
 ///             // the NestedScrollView, so that sliverOverlapAbsorberHandleFor() can
 ///             // find the NestedScrollView.
 ///             builder: (BuildContext context) {
-///               return new CustomScrollView(
+///               return CustomScrollView(
 ///                 // The "controller" and "primary" members should be left
 ///                 // unset, so that the NestedScrollView can control this
 ///                 // inner scroll view.
@@ -131,29 +131,29 @@ typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, 
 ///                 // The PageStorageKey should be unique to this ScrollView;
 ///                 // it allows the list to remember its scroll position when
 ///                 // the tab view is not on the screen.
-///                 key: new PageStorageKey<String>(name),
+///                 key: PageStorageKey<String>(name),
 ///                 slivers: <Widget>[
-///                   new SliverOverlapInjector(
+///                   SliverOverlapInjector(
 ///                     // This is the flip side of the SliverOverlapAbsorber above.
 ///                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
 ///                   ),
-///                   new SliverPadding(
+///                   SliverPadding(
 ///                     padding: const EdgeInsets.all(8.0),
 ///                     // In this example, the inner scroll view has
 ///                     // fixed-height list items, hence the use of
 ///                     // SliverFixedExtentList. However, one could use any
 ///                     // sliver widget here, e.g. SliverList or SliverGrid.
-///                     sliver: new SliverFixedExtentList(
+///                     sliver: SliverFixedExtentList(
 ///                       // The items in this example are fixed to 48 pixels
 ///                       // high. This matches the Material Design spec for
 ///                       // ListTile widgets.
 ///                       itemExtent: 48.0,
-///                       delegate: new SliverChildBuilderDelegate(
+///                       delegate: SliverChildBuilderDelegate(
 ///                         (BuildContext context, int index) {
 ///                           // This builder is called for each child.
 ///                           // In this example, we just number each list item.
-///                           return new ListTile(
-///                             title: new Text('Item $index'),
+///                           return ListTile(
+///                             title: Text('Item $index'),
 ///                           );
 ///                         },
 ///                         // The childCount of the SliverChildBuilderDelegate

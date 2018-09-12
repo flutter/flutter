@@ -40,8 +40,10 @@ class Evaluation {
     if (other == null)
       return this;
     final StringBuffer buffer = new StringBuffer();
-    if (reason != null)
+    if (reason != null) {
       buffer.write(reason);
+      buffer.write(' ');
+    }
     if (other.reason != null)
       buffer.write(other.reason);
     return new Evaluation._(passed && other.passed, buffer.isEmpty ? null : buffer.toString());
@@ -84,8 +86,13 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         result += traverse(child);
         return true;
       });
+      if (node.isMergedIntoParent)
+        return result;
       final SemanticsData data = node.getSemanticsData();
-      if (!data.hasAction(ui.SemanticsAction.longPress) && !data.hasAction(ui.SemanticsAction.tap))
+      // Skip node if it has no actions, or is marked as hidden.
+      if ((!data.hasAction(ui.SemanticsAction.longPress)
+        && !data.hasAction(ui.SemanticsAction.tap))
+        || data.hasFlag(ui.SemanticsFlag.isHidden))
         return result;
       Rect paintBounds = node.rect;
       SemanticsNode current = node;
@@ -94,6 +101,14 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
           paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
         current = current.parent;
       }
+      // skip node if it is touching the edge of the screen, since it might
+      // be partially scrolled offscreen.
+      const double delta = 0.001;
+      if (paintBounds.left <= delta
+        || paintBounds.top <= delta
+        || (paintBounds.bottom - ui.window.physicalSize.height).abs() <= delta
+        || (paintBounds.right - ui.window.physicalSize.width).abs() <= delta)
+        return result;
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / ui.window.devicePixelRatio;
       if (candidateSize.width < size.width || candidateSize.height < size.height)
@@ -146,6 +161,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     final OffsetLayer layer = renderView.layer;
     ui.Image image;
     final ByteData byteData = await tester.binding.runAsync<ByteData>(() async  {
+      // Needs to be the same pixel ratio otherwise our dimensions won't match the
+      // last transform layer.
       image = await layer.toImage(renderView.paintBounds, pixelRatio: 1.0);
       return image.toByteData();
     });
@@ -168,7 +185,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       double fontSize;
       bool isBold;
       final String text = (data.label?.isEmpty == true) ? data.value : data.label;
-      final List<Element> elements = find.text(text).evaluate().toList();
+      final List<Element> elements = find.text(text).hitTestable().evaluate().toList();
       if (elements.length == 1) {
         final Element element = elements.single;
         final Widget widget = element.widget;
@@ -186,28 +203,38 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           assert(false);
         }
       } else if (elements.length > 1) {
-        return const Evaluation.fail('Multiple nodes with the same label');
+        return new Evaluation.fail('Multiple nodes with the same label: ${data.label}\n');
       } else {
-        // If we can't find the text node, then look up the default text
-        fontSize = 12.0;
-        isBold = false;
+        // If we can't find the text node then assume the label does not
+        // correspond to actual text.
+        return result;
       }
 
       // Transform local coordinate to screen coordinates.
       Rect paintBounds = node.rect;
       SemanticsNode current = node;
-      while (current != null) {
+      while (current != null && current.parent != null) {
         if (current.transform != null)
           paintBounds = MatrixUtils.transformRect(current.transform, paintBounds);
         paintBounds = paintBounds.shift(current.parent?.rect?.topLeft ?? Offset.zero);
         current = current.parent;
       }
+      if (_isNodeOffScreen(paintBounds))
+        return result;
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
+      // Node was too far off screen.
+     if (subset.isEmpty)
+       return result;
       final _ContrastReport report = new _ContrastReport(subset);
       final double contrastRatio = report.contrastRatio();
-      final double targetContrastRatio = (isBold && fontSize > kBoldTextMinimumSize) ?
-        kMinimumRatioLargeText : kMinimumRatioNormalText;
-      if (contrastRatio >= targetContrastRatio)
+      const double delta = -0.01;
+      double targetContrastRatio;
+      if ((isBold && fontSize > kBoldTextMinimumSize) || (fontSize ?? 12.0) > kLargeTextMinimumSize) {
+        targetContrastRatio = kMinimumRatioLargeText;
+      } else {
+        targetContrastRatio = kMinimumRatioNormalText;
+      }
+      if (contrastRatio - targetContrastRatio >= delta)
         return result + const Evaluation.pass();
       return result + new Evaluation.fail(
         '$node:\nExpected contrast ratio of at least '
@@ -229,6 +256,17 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     return false;
   }
 
+  // Returns a rect that is entirely on screen, or null if it is too far off.
+  //
+  // Given an 1800 * 2400 pixel buffer, can we actually get all the data from
+  // this node? allow a small delta overlap before culling the node.
+  bool _isNodeOffScreen(Rect paintBounds) {
+    return paintBounds.top < -50.0
+      || paintBounds.left <  -50.0
+      || paintBounds.bottom > 2400.0 + 50.0
+      || paintBounds.right > 1800.0 + 50.0;
+  }
+
   List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {
     final int newWidth = paintBounds.size.width.ceil();
     final int newHeight = paintBounds.size.height.ceil();
@@ -241,8 +279,8 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
     // Data is stored in row major order.
     for (int i = 0; i < data.lengthInBytes; i+=4) {
       final int index = i ~/ 4;
-      final int dy = index % width;
-      final int dx = index ~/ width;
+      final int dx = index % width;
+      final int dy = index ~/ width;
       if (dx >= leftX && dx <= rightX && dy >= topY && dy <= bottomY) {
         final int r = data.getUint8(i);
         final int g = data.getUint8(i + 1);
@@ -271,19 +309,15 @@ class _ContrastReport {
       final Color hslColor = new Color(colorHistogram.keys.first);
       return new _ContrastReport._(hslColor, hslColor);
     }
-    if (colorHistogram.length == 2) {
-      final Color firstColor = new Color(colorHistogram.keys.first);
-      final Color lastColor =  new Color(colorHistogram.keys.last);
-      if (firstColor.computeLuminance() < lastColor.computeLuminance()) {
-        return new _ContrastReport._(lastColor, firstColor);
-      }
-      return new _ContrastReport._(firstColor, lastColor);
-    }
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
-    final double averageLightness = colorHistogram.keys.fold(0.0, (double total, int color) {
-      return total + new HSLColor.fromColor(new Color(color)).lightness;
-    }) / colorHistogram.length;
+    double averageLightness = 0.0;
+    for (int color in colorHistogram.keys) {
+      final HSLColor hslColor = new HSLColor.fromColor(new Color(color));
+      averageLightness += hslColor.lightness * colorHistogram[color];
+    }
+    averageLightness /= colors.length;
+    assert(averageLightness != double.nan);
     int lightColor = 0;
     int darkColor = 0;
     int lightCount = 0;
@@ -292,14 +326,15 @@ class _ContrastReport {
     for (MapEntry<int, int> entry in colorHistogram.entries) {
       final HSLColor color = new HSLColor.fromColor(new Color(entry.key));
       final int count = entry.value;
-      if (color.lightness <= averageLightness && count > lightCount) {
+      if (color.lightness <= averageLightness && count > darkCount) {
         darkColor = entry.key;
         darkCount = count;
-      } else if (color.lightness > averageLightness && count > darkCount) {
+      } else if (color.lightness > averageLightness && count > lightCount) {
         lightColor = entry.key;
         lightCount = count;
       }
     }
+    assert (lightColor != 0 && darkColor != 0);
     return new _ContrastReport._(new Color(lightColor), new Color(darkColor));
   }
 

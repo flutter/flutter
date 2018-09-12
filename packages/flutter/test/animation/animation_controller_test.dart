@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/scheduler.dart';
@@ -588,8 +589,8 @@ void main() {
       expect(repeating.animationBehavior, AnimationBehavior.preserve);
     });
 
-    testWidgets('AnimationBehavior.preserve runs at normal speed when animatingTo', (WidgetTester tester) async {
-      tester.binding.disableAnimations = true;
+    test('AnimationBehavior.preserve runs at normal speed when animatingTo', () async {
+      debugSemanticsDisableAnimations = true;
       final AnimationController controller = new AnimationController(
         vsync: const TestVSync(),
         animationBehavior: AnimationBehavior.preserve,
@@ -610,11 +611,11 @@ void main() {
 
       expect(controller.value, 1.0);
       expect(controller.status, AnimationStatus.completed);
-      tester.binding.disableAnimations = false;
+      debugSemanticsDisableAnimations = false;
     });
 
-    testWidgets('AnimationBehavior.normal runs at 20x speed when animatingTo', (WidgetTester tester) async {
-      tester.binding.disableAnimations = true;
+    test('AnimationBehavior.normal runs at 20x speed when animatingTo', () async {
+      debugSemanticsDisableAnimations = true;
       final AnimationController controller = new AnimationController(
         vsync: const TestVSync(),
         animationBehavior: AnimationBehavior.normal,
@@ -635,12 +636,11 @@ void main() {
 
       expect(controller.value, 1.0);
       expect(controller.status, AnimationStatus.completed);
-
-      tester.binding.disableAnimations = false;
+      debugSemanticsDisableAnimations = null;
     });
 
-    testWidgets('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', (WidgetTester tester) async {
-      tester.binding.disableAnimations = true;
+    test('AnimationBehavior.normal runs "faster" whan AnimationBehavior.preserve', () {
+      debugSemanticsDisableAnimations = true;
       final AnimationController controller = new AnimationController(
         vsync: const TestVSync(),
       );
@@ -655,7 +655,7 @@ void main() {
 
       // We don't assert a specific faction that normal animation.
       expect(controller.value < fastController.value, true);
-      tester.binding.disableAnimations = false;
+      debugSemanticsDisableAnimations = null;
     });
   });
 }

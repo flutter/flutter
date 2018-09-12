@@ -22,6 +22,7 @@ class TestInkSplash extends InkSplash {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
+    TextDirection textDirection
   }) : super(
     controller: controller,
     referenceBox: referenceBox,
@@ -33,6 +34,7 @@ class TestInkSplash extends InkSplash {
     customBorder: customBorder,
     radius: radius,
     onRemoved: onRemoved,
+    textDirection: textDirection,
   );
 
   @override
@@ -63,6 +65,7 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
+    TextDirection textDirection,
   }) {
     return new TestInkSplash(
       controller: controller,
@@ -75,6 +78,7 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      textDirection: textDirection,
     );
   }
 }

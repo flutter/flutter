@@ -130,8 +130,9 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   /// Whether to keep the child alive even when it is no longer visible.
   bool keepAlive = false;
 
-  /// Whether the widget is currently in the
-  /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
+  /// Whether the widget is currently being kept alive, i.e. has [keepAlive] set
+  /// to true and is offscreen.
+  bool get keptAlive => _keptAlive;
   bool _keptAlive = false;
 
   @override
@@ -206,6 +207,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void insert(RenderBox child, { RenderBox after }) {
+    assert(!_keepAliveBucket.containsValue(child));
     super.insert(child, after: after);
     assert(firstChild != null);
     assert(() {

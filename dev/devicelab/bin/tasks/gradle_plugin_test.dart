@@ -36,7 +36,7 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
-void main() async {
+Future<void> main() async {
   await task(() async {
     section('Find Java');
 
@@ -53,12 +53,6 @@ void main() async {
         if (errorMessage != null) {
           throw new TaskResult.failure(errorMessage);
         }
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleDebug no-preview-dart-2');
-        await project.runGradleTask('assembleDebug',
-            options: <String>['-Ppreview-dart-2=false']);
       });
 
       await runProjectTest((FlutterProject project) async {

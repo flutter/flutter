@@ -5,12 +5,14 @@
 import 'dart:ui' as ui show AccessibilityFeatures, window;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
+import 'debug.dart';
+
+export 'dart:ui' show AccessibilityFeatures;
 
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(jonahwilliams): move the remaining semantic related bindings here.
-class SemanticsBinding extends BindingBase with ServicesBinding {
+class SemanticsBinding extends BindingBase {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory SemanticsBinding._() => null;
@@ -44,6 +46,17 @@ class SemanticsBinding extends BindingBase with ServicesBinding {
   ui.AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
   ui.AccessibilityFeatures _accessibilityFeatures;
 
-  /// Whether the device is requesting that animations be disabled.
-  bool get disableAnimations => accessibilityFeatures.disableAnimations;
+  /// The platform is requesting that animations be disabled or simplified.
+  ///
+  /// This setting can be overriden for testing or debugging by setting
+  /// [debugSemanticsDisableAnimations].
+  bool get disableAnimations {
+    bool value = _accessibilityFeatures.disableAnimations;
+    assert(() {
+      if (debugSemanticsDisableAnimations != null)
+          value = debugSemanticsDisableAnimations;
+      return true;
+    }());
+    return value;
+  }
 }

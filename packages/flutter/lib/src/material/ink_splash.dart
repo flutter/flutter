@@ -51,6 +51,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
@@ -69,6 +70,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      textDirection: textDirection,
     );
   }
 }
@@ -116,6 +118,7 @@ class InkSplash extends InteractiveInkFeature {
   InkSplash({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
+    @required TextDirection textDirection,
     Offset position,
     Color color,
     bool containedInkWell = false,
@@ -124,12 +127,14 @@ class InkSplash extends InteractiveInkFeature {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
-  }) : _position = position,
+  }) : assert(textDirection != null),
+       _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
+       _textDirection = textDirection,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
     _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
@@ -156,6 +161,7 @@ class InkSplash extends InteractiveInkFeature {
   final double _targetRadius;
   final RectCallback _clipCallback;
   final bool _repositionToReferenceBox;
+  final TextDirection _textDirection;
 
   Animation<double> _radius;
   AnimationController _radiusController;
@@ -206,7 +212,7 @@ class InkSplash extends InteractiveInkFeature {
     if (_clipCallback != null) {
       final Rect rect = _clipCallback();
       if (_customBorder != null) {
-        canvas.clipPath(_customBorder.getOuterPath(rect));
+        canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
       } else if (_borderRadius != BorderRadius.zero) {
         canvas.clipRRect(new RRect.fromRectAndCorners(
           rect,

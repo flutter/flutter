@@ -89,7 +89,7 @@ class Theme extends StatelessWidget {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return new Text(
+  ///   return Text(
   ///     'Example',
   ///     style: Theme.of(context).textTheme.title,
   ///   );
@@ -106,14 +106,14 @@ class Theme extends StatelessWidget {
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
-  ///   return new MaterialApp(
-  ///     theme: new ThemeData.light(),
-  ///     body: new Builder(
+  ///   return MaterialApp(
+  ///     theme: ThemeData.light(),
+  ///     body: Builder(
   ///       // Create an inner BuildContext so that we can refer to
   ///       // the Theme with Theme.of().
   ///       builder: (BuildContext context) {
-  ///         return new Center(
-  ///           child: new Text(
+  ///         return Center(
+  ///           child: Text(
   ///             'Example',
   ///             style: Theme.of(context).textTheme.title,
   ///           ),
@@ -190,6 +190,10 @@ class ThemeDataTween extends Tween<ThemeData> {
 
 /// Animated version of [Theme] which automatically transitions the colors,
 /// etc, over a given duration whenever the given theme changes.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.elasticInOut].
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_theme.mp4}
 ///
 /// See also:
 ///
