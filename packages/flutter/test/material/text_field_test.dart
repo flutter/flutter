@@ -2934,6 +2934,9 @@ void main() {
             TestSemantics(
               label: '0 out of 10',
               textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isLiveRegion,
+              ],
             ),
           ],
         ),

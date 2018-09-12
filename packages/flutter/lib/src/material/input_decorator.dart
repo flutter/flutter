@@ -1815,6 +1815,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget counter = decoration.counterText == null ? null :
       Semantics(
         container: true,
+        liveRegion: isFocused,
         child: Text(
           decoration.counterText,
           style: _getHelperStyle(themeData).merge(decoration.counterStyle),
