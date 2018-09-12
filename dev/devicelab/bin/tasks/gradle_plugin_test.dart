@@ -36,7 +36,7 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
-void main() async {
+Future<void> main() async {
   await task(() async {
     section('Find Java');
 

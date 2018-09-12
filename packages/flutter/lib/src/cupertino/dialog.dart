@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'localizations.dart';
 import 'scrollbar.dart';
 
 // TODO(abarth): These constants probably belong somewhere more general.
@@ -218,6 +219,8 @@ class CupertinoAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context)
+                                              ?? const DefaultCupertinoLocalizations();
     final bool isInAccessibilityMode = _isInAccessibilityMode(context);
     final double textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return MediaQuery(
@@ -235,9 +238,15 @@ class CupertinoAlertDialog extends StatelessWidget {
                   : _kCupertinoDialogWidth,
               child: CupertinoPopupSurface(
                 isSurfacePainted: false,
-                child: _CupertinoDialogRenderWidget(
-                  contentSection: _buildContent(),
-                  actionsSection: _buildActions(),
+                child: Semantics(
+                  namesRoute: true,
+                  scopesRoute: true,
+                  explicitChildNodes: true,
+                  label: localizations.alertDialogLabel,
+                  child: _CupertinoDialogRenderWidget(
+                    contentSection: _buildContent(),
+                    actionsSection: _buildActions(),
+                  ),
                 ),
               ),
             ),
@@ -949,18 +958,21 @@ class _PressableActionButtonState extends State<_PressableActionButton> {
   Widget build(BuildContext context) {
     return _ActionButtonParentDataWidget(
       isPressed: _isPressed,
-      // TODO(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (TapDownDetails details) => setState(() {
-          _isPressed = true;
-        }),
-        onTapUp: (TapUpDetails details) => setState(() {
-          _isPressed = false;
-        }),
-        // TODO(mattcarroll): Cancel is currently triggered when user moves past slop instead of off button: https://github.com/flutter/flutter/issues/19783
-        onTapCancel: () => setState(() => _isPressed = false),
-        child: widget.child,
+      child: MergeSemantics(
+        // TODO(mattcarroll): Button press dynamics need overhaul for iOS: https://github.com/flutter/flutter/issues/19786
+        child: GestureDetector(
+          excludeFromSemantics: true,
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails details) => setState(() {
+            _isPressed = true;
+          }),
+          onTapUp: (TapUpDetails details) => setState(() {
+            _isPressed = false;
+          }),
+          // TODO(mattcarroll): Cancel is currently triggered when user moves past slop instead of off button: https://github.com/flutter/flutter/issues/19783
+          onTapCancel: () => setState(() => _isPressed = false),
+          child: widget.child,
+        ),
       ),
     );
   }
@@ -1091,12 +1103,16 @@ class CupertinoDialogAction extends StatelessWidget {
             constraints: BoxConstraints(
               maxWidth: fontSizeRatio * (dialogWidth - (2 * padding)),
             ),
-            child: DefaultTextStyle(
-              style: textStyle,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              child: content,
+            child: Semantics(
+              button: true,
+              onTap: onPressed,
+              child: DefaultTextStyle(
+                style: textStyle,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                child: content,
+              ),
             ),
           ),
         ),
@@ -1149,6 +1165,7 @@ class CupertinoDialogAction extends StatelessWidget {
         );
 
     return GestureDetector(
+      excludeFromSemantics: true,
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
       child: ConstrainedBox(

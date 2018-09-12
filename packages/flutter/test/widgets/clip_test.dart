@@ -291,6 +291,46 @@ void main() {
     );
   });
 
+  testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(
+        child: Stack(
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              width: 100.0,
+              height: 100.0,
+              child: ClipRect(
+                child: Container(
+                  color: Colors.blue,
+                ),
+                clipBehavior: Clip.hardEdge,
+              ),
+            ),
+            Positioned(
+              top: 50.0,
+              left: 50.0,
+              width: 100.0,
+              height: 100.0,
+              child: Transform.rotate(
+                angle: 1.0,
+                child: Container(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await expectLater(
+      find.byType(RepaintBoundary).first,
+      matchesGoldenFile('clip.ClipRectOverlay.1.png'),
+    );
+  });
+
   testWidgets('ClipRRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(

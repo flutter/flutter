@@ -48,6 +48,23 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
+class AlwaysKeepAliveWidget extends StatefulWidget {
+  static String text = 'AlwaysKeepAlive';
+  @override
+  AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
+}
+
+class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(AlwaysKeepAliveWidget.text);
+  }
+}
+
 Widget buildFrame({
     Key tabBarKey,
     List<String> tabs,
@@ -1754,4 +1771,56 @@ void main() {
 
   });
 
+  testWidgets('Skipping tabs with a KeepAlive child works', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/11895
+    final List<String> tabs = <String>[
+      'Tab1',
+      'Tab2',
+      'Tab3',
+      'Tab4',
+      'Tab5',
+    ];
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('tabs'),
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: tabs.map((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+              body: TabBarView(
+                controller: controller,
+                children: <Widget>[
+                  AlwaysKeepAliveWidget(),
+                  const Text('2'),
+                  const Text('3'),
+                  const Text('4'),
+                  const Text('5'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text(AlwaysKeepAliveWidget.text), findsOneWidget);
+    expect(find.text('4'), findsNothing);
+    await tester.tap(find.text('Tab4'));
+    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(controller.index, 3);
+    expect(find.text(AlwaysKeepAliveWidget.text, skipOffstage: false), findsOneWidget);
+    expect(find.text('4'), findsOneWidget);
+  });
 }
