@@ -25,7 +25,7 @@ void main() {
 
     test('inital tree creation', () async {
       // Let app become fully idle.
-      await Future<Null>.delayed(const Duration(seconds: 1));
+      await Future<Null>.delayed(const Duration(seconds: 2));
 
       final Timeline timeline = await driver.traceAction(() async {
         expect(await driver.setSemantics(true), isTrue);
