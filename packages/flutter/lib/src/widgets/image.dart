@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -550,9 +551,12 @@ class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   bool _isListeningToStream = false;
+  bool _invertColors;
 
   @override
   void didChangeDependencies() {
+    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
     _resolveImage();
 
     if (TickerMode.of(context))
@@ -645,6 +649,7 @@ class _ImageState extends State<Image> {
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
+      invertColors: _invertColors,
     );
     if (widget.excludeFromSemantics)
       return image;
