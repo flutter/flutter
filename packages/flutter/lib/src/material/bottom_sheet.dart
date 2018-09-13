@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'scaffold.dart';
@@ -315,6 +316,7 @@ Future<T> showModalBottomSheet<T>({
 }) {
   assert(context != null);
   assert(builder != null);
+  assert(debugCheckHasMaterialLocalizations(context));
   return Navigator.push(context, _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),

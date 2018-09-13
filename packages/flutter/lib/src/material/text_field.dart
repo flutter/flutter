@@ -540,6 +540,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
+    // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
+    // assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;

@@ -12,9 +12,20 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = UniqueKey();
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Scaffold(
+    Widget boilerplate(Widget child) {
+      return Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: child,
+        ),
+      );
+    }
+    await tester.pumpWidget(boilerplate(Scaffold(
         appBar: AppBar(title: const Text('Title')),
         body: Container(key: bodyKey),
       ),
@@ -30,9 +41,7 @@ void main() {
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
+    await tester.pumpWidget(boilerplate(MediaQuery(
         data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
         child: Scaffold(
           appBar: AppBar(title: const Text('Title')),
@@ -44,17 +53,14 @@ void main() {
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 444.0)));
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
-        child: Scaffold(
-          appBar: AppBar(title: const Text('Title')),
-          body: Container(key: bodyKey),
-          resizeToAvoidBottomPadding: false,
-        ),
+    await tester.pumpWidget(boilerplate(MediaQuery(
+      data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Title')),
+        body: Container(key: bodyKey),
+        resizeToAvoidBottomPadding: false,
       ),
-    ));
+    )));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
@@ -62,24 +68,34 @@ void main() {
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = UniqueKey();
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(
-          viewInsets: EdgeInsets.only(bottom: 700.0),
+
+    Widget boilerplate(Widget child) {
+      return Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: child,
         ),
-        child: Scaffold(
-          body: Container(key: bodyKey),
-        ),
+      );
+    }
+
+    await tester.pumpWidget(boilerplate(MediaQuery(
+      data: const MediaQueryData(
+        viewInsets: EdgeInsets.only(bottom: 700.0),
       ),
+      child: Scaffold(
+        body: Container(key: bodyKey),
+      ))
     ));
 
     final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
+    await tester.pumpWidget(boilerplate(MediaQuery(
         data: const MediaQueryData(
           viewInsets: EdgeInsets.only(bottom: 500.0),
         ),
@@ -91,9 +107,7 @@ void main() {
 
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
+    await tester.pumpWidget(boilerplate(MediaQuery(
         data: const MediaQueryData(
           viewInsets: EdgeInsets.only(bottom: 580.0),
         ),
@@ -597,64 +611,71 @@ void main() {
     final Key insideDrawer = UniqueKey();
     final Key insideBottomNavigationBar = UniqueKey();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.rtl,
-        child: MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.only(
-              left: 20.0,
-              top: 30.0,
-              right: 50.0,
-              bottom: 60.0,
+      Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                left: 20.0,
+                top: 30.0,
+                right: 50.0,
+                bottom: 60.0,
+              ),
+              viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
-            viewInsets: EdgeInsets.only(bottom: 200.0),
-          ),
-          child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: const Size(11.0, 13.0),
-              child: Container(
-                key: appBar,
-                child: SafeArea(
-                  child: Placeholder(key: insideAppBar),
+            child: Scaffold(
+              appBar: PreferredSize(
+                preferredSize: const Size(11.0, 13.0),
+                child: Container(
+                  key: appBar,
+                  child: SafeArea(
+                    child: Placeholder(key: insideAppBar),
+                  ),
                 ),
               ),
-            ),
-            body: Container(
-              key: body,
-              child: SafeArea(
-                child: Placeholder(key: insideBody),
-              ),
-            ),
-            floatingActionButton: SizedBox(
-              key: floatingActionButton,
-              width: 77.0,
-              height: 77.0,
-              child: SafeArea(
-                child: Placeholder(key: insideFloatingActionButton),
-              ),
-            ),
-            persistentFooterButtons: <Widget>[
-              SizedBox(
-                key: persistentFooterButton,
-                width: 100.0,
-                height: 90.0,
+              body: Container(
+                key: body,
                 child: SafeArea(
-                  child: Placeholder(key: insidePersistentFooterButton),
+                  child: Placeholder(key: insideBody),
                 ),
               ),
-            ],
-            drawer: Container(
-              key: drawer,
-              width: 204.0,
-              child: SafeArea(
-                child: Placeholder(key: insideDrawer),
+              floatingActionButton: SizedBox(
+                key: floatingActionButton,
+                width: 77.0,
+                height: 77.0,
+                child: SafeArea(
+                  child: Placeholder(key: insideFloatingActionButton),
+                ),
               ),
-            ),
-            bottomNavigationBar: SizedBox(
-              key: bottomNavigationBar,
-              height: 85.0,
-              child: SafeArea(
-                child: Placeholder(key: insideBottomNavigationBar),
+              persistentFooterButtons: <Widget>[
+                SizedBox(
+                  key: persistentFooterButton,
+                  width: 100.0,
+                  height: 90.0,
+                  child: SafeArea(
+                    child: Placeholder(key: insidePersistentFooterButton),
+                  ),
+                ),
+              ],
+              drawer: Container(
+                key: drawer,
+                width: 204.0,
+                child: SafeArea(
+                  child: Placeholder(key: insideDrawer),
+                ),
+              ),
+              bottomNavigationBar: SizedBox(
+                key: bottomNavigationBar,
+                height: 85.0,
+                child: SafeArea(
+                  child: Placeholder(key: insideBottomNavigationBar),
+                ),
               ),
             ),
           ),
@@ -692,57 +713,64 @@ void main() {
     final Key insidePersistentFooterButton = UniqueKey();
     final Key insideDrawer = UniqueKey();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.rtl,
-        child: MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.only(
-              left: 20.0,
-              top: 30.0,
-              right: 50.0,
-              bottom: 60.0,
+      Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(
+                left: 20.0,
+                top: 30.0,
+                right: 50.0,
+                bottom: 60.0,
+              ),
+              viewInsets: EdgeInsets.only(bottom: 200.0),
             ),
-            viewInsets: EdgeInsets.only(bottom: 200.0),
-          ),
-          child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: const Size(11.0, 13.0),
-              child: Container(
-                key: appBar,
-                child: SafeArea(
-                  child: Placeholder(key: insideAppBar),
+            child: Scaffold(
+              appBar: PreferredSize(
+                preferredSize: const Size(11.0, 13.0),
+                child: Container(
+                  key: appBar,
+                  child: SafeArea(
+                    child: Placeholder(key: insideAppBar),
+                  ),
                 ),
               ),
-            ),
-            body: Container(
-              key: body,
-              child: SafeArea(
-                child: Placeholder(key: insideBody),
-              ),
-            ),
-            floatingActionButton: SizedBox(
-              key: floatingActionButton,
-              width: 77.0,
-              height: 77.0,
-              child: SafeArea(
-                child: Placeholder(key: insideFloatingActionButton),
-              ),
-            ),
-            persistentFooterButtons: <Widget>[
-              SizedBox(
-                key: persistentFooterButton,
-                width: 100.0,
-                height: 90.0,
+              body: Container(
+                key: body,
                 child: SafeArea(
-                  child: Placeholder(key: insidePersistentFooterButton),
+                  child: Placeholder(key: insideBody),
                 ),
               ),
-            ],
-            drawer: Container(
-              key: drawer,
-              width: 204.0,
-              child: SafeArea(
-                child: Placeholder(key: insideDrawer),
+              floatingActionButton: SizedBox(
+                key: floatingActionButton,
+                width: 77.0,
+                height: 77.0,
+                child: SafeArea(
+                  child: Placeholder(key: insideFloatingActionButton),
+                ),
+              ),
+              persistentFooterButtons: <Widget>[
+                SizedBox(
+                  key: persistentFooterButton,
+                  width: 100.0,
+                  height: 90.0,
+                  child: SafeArea(
+                    child: Placeholder(key: insidePersistentFooterButton),
+                  ),
+                ),
+              ],
+              drawer: Container(
+                key: drawer,
+                width: 204.0,
+                child: SafeArea(
+                  child: Placeholder(key: insideDrawer),
+                ),
               ),
             ),
           ),

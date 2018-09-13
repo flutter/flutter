@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'debug.dart';
 import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -116,6 +117,7 @@ class Drawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     String label = semanticLabel;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
@@ -431,6 +433,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     return ListTileTheme(
       style: ListTileStyle.drawer,
       child: _buildDrawer(context),

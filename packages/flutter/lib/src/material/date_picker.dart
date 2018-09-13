@@ -945,6 +945,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final Widget picker = Flexible(
       child: SizedBox(

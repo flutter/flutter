@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+import 'debug.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 
@@ -510,6 +511,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     // We use the layout builder to constrain the cross-axis size of dragging child widgets.
     return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         final List<Widget> wrappedChildren = <Widget>[];

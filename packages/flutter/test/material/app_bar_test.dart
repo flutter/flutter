@@ -845,7 +845,13 @@ void main() {
     const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
-      Directionality(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: topPadding100,
@@ -855,48 +861,66 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), kToolbarHeight);
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: topPadding100,
-          child: Scaffold(
-            primary: true,
-            appBar: AppBar(title: const Text('title'))
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: topPadding100,
+            child: Scaffold(
+              primary: true,
+              appBar: AppBar(title: const Text('title'))
           ),
         ),
       ),
-    );
+    ));
     expect(appBarTop(tester), 0.0);
     expect(tester.getTopLeft(find.text('title')).dy, greaterThan(100.0));
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: topPadding100,
-          child: Scaffold(
-            primary: false,
-            appBar: AppBar(
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(200.0),
-                child: Container(),
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: topPadding100,
+            child: Scaffold(
+              primary: false,
+              appBar: AppBar(
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(200.0),
+                  child: Container(),
               ),
             ),
           ),
         ),
       ),
-    );
+    ));
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), kToolbarHeight + 200.0);
 
     await tester.pumpWidget(
-      Directionality(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: topPadding100,
@@ -911,18 +935,25 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
 
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: topPadding100,
-          child: AppBar(
-            primary: false,
-            title: const Text('title'),
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: topPadding100,
+            child: AppBar(
+              primary: false,
+              title: const Text('title'),
+            ),
           ),
         ),
       ),
@@ -1095,7 +1126,13 @@ void main() {
     final Key trailingKey = UniqueKey();
 
     await tester.pumpWidget(
-      Directionality(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
         textDirection: TextDirection.rtl,
         child: MediaQuery(
           data: topPadding100,
@@ -1109,7 +1146,7 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
     expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
@@ -1124,7 +1161,13 @@ void main() {
     final Key trailingKey = UniqueKey();
 
     await tester.pumpWidget(
-      Directionality(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
         textDirection: TextDirection.rtl,
         child: MediaQuery(
           data: topPadding100,
@@ -1140,7 +1183,7 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
     expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
     expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
@@ -1155,7 +1198,13 @@ void main() {
     final Key trailingKey = UniqueKey();
 
     await tester.pumpWidget(
-      Directionality(
+      Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: Directionality(
         textDirection: TextDirection.rtl,
         child: MediaQuery(
           data: topPadding100,
@@ -1171,7 +1220,7 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
     expect(tester.getRect(find.byType(AppBar)), Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(leadingKey)), Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(trailingKey)), Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
