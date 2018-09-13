@@ -144,8 +144,8 @@ class AccessibilityBridge
         }
 
         AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner, virtualViewId);
-        // Work around for https://github.com/flutter/flutter/issues/2101 
-        result.setViewIdResourceName(""); 
+        // Work around for https://github.com/flutter/flutter/issues/2101
+        result.setViewIdResourceName("");
         result.setPackageName(mOwner.getContext().getPackageName());
         result.setClassName("android.view.View");
         result.setSource(mOwner, virtualViewId);
@@ -717,6 +717,20 @@ class AccessibilityBridge
                     event.setScrollX((int) position);
                     event.setMaxScrollX((int) max);
                 }
+                if (object.scrollChildren > 0) {
+                    event.setItemCount(object.scrollChildren);
+                    event.setFromIndex(object.scrollIndex);
+                    int visibleChildren = object.childrenInHitTestOrder.size() - 1;
+                    // We assume that only children at the end of the list can be hidden.
+                    assert(!object.childrenInHitTestOrder.get(object.scrollIndex).hasFlag(Flag.IS_HIDDEN));
+                    for (; visibleChildren >= 0; visibleChildren--) {
+                        SemanticsObject child = object.childrenInHitTestOrder.get(visibleChildren);
+                        if (!child.hasFlag(Flag.IS_HIDDEN)) {
+                            break;
+                        }
+                    }
+                    event.setToIndex(object.scrollIndex + visibleChildren);
+                }
                 sendAccessibilityEvent(event);
             }
             if (object.hasFlag(Flag.IS_LIVE_REGION) && !object.hadFlag(Flag.IS_LIVE_REGION)) {
@@ -947,6 +961,8 @@ class AccessibilityBridge
         int actions;
         int textSelectionBase;
         int textSelectionExtent;
+        int scrollChildren;
+        int scrollIndex;
         float scrollPosition;
         float scrollExtentMax;
         float scrollExtentMin;
@@ -1048,6 +1064,8 @@ class AccessibilityBridge
             actions = buffer.getInt();
             textSelectionBase = buffer.getInt();
             textSelectionExtent = buffer.getInt();
+            scrollChildren = buffer.getInt();
+            scrollIndex = buffer.getInt();
             scrollPosition = buffer.getFloat();
             scrollExtentMax = buffer.getFloat();
             scrollExtentMin = buffer.getFloat();
