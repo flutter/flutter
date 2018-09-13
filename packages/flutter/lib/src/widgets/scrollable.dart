@@ -163,6 +163,18 @@ class Scrollable extends StatefulWidget {
   ///    exclusion.
   final bool excludeFromSemantics;
 
+  /// The number of children which will contribute semantic information.
+  ///
+  /// Some subtypes of [ScrollView] can infer this value automatically. For
+  /// example [ListView] will use the number of widgets in the child list,
+  /// while the [new ListView.separated] constructor will use half that amount.
+  ///
+  /// For [CustomScrollView] and other types which do not receive a builder
+  /// or list of widgets, the child count must be explicitly provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.scrollChildren], the corresponding semantics property.
   final int semanticChildren;
 
   /// The axis along which the scroll view scrolls.

@@ -4332,8 +4332,10 @@ class RenderExcludeSemantics extends RenderProxyBox {
 
 /// A render objects that annotates semantics with an index.
 ///
-/// The index is used by certain widgets such as the [CupertinoPicker] that have
-/// specific strategies for assembling semantics nodes.
+/// Certain widgets will automatically provide a child index for building
+/// semantics. For example, the [ScrollView] uses the index of the first
+/// visible child semantics node to determine the
+/// [SemanticsConfiguration.scrollIndex].
 class RenderIndexedChildSemantics extends RenderProxyBox {
   /// Creates a render object that annotates the child semantics with an index.
   RenderIndexedChildSemantics({
@@ -4342,6 +4344,7 @@ class RenderIndexedChildSemantics extends RenderProxyBox {
   }) : assert(index != null),
         _index = index,
         super(child);
+
   /// The index used to annotated child semantics.
   int get index => _index;
   int _index;
@@ -4349,14 +4352,15 @@ class RenderIndexedChildSemantics extends RenderProxyBox {
     if (value == index)
       return;
     _index = value;
+    markNeedsSemanticsUpdate();
   }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
     config.indexInParent = index;
-    config.isMergingSemanticsOfDescendants = true;
   }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);

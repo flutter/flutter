@@ -251,9 +251,11 @@ class SemanticsData extends Diagnosticable {
   /// if this node represents a text field.
   final TextSelection textSelection;
 
-  final int scrollIndex;
-
+  /// The count of children of a scroll node which contribute semantics.
   final int scrollChildren;
+
+  /// The index of the first visible semantic child of a scroll node.
+  final int scrollIndex;
 
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
@@ -1497,9 +1499,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
 
+  /// The count of children of a scroll node which contribute semantics.
   int get scrollChildren => _scrollChildren;
   int _scrollChildren;
 
+  /// The index of the first visible semantic child of a scroll node.
   int get scrollIndex => _scrollIndex;
   int _scrollIndex;
 

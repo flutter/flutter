@@ -5519,10 +5519,12 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that annotated the first child semantics node with an index.
+/// A widget that annotates the child semantics with an index.
 ///
-/// The index is used by certain widgets such as the [CupertinoPicker] that have
-/// specific strategies for assembling semantics nodes.
+/// Certain widgets will automatically provide a child index for building
+/// semantics. For example, the [ScrollView] uses the index of the first
+/// visible child semantics node to determine the
+/// [SemanticsConfiguration.scrollIndex].
 class IndexedChildSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that annotated the first child semantics node with an index.
   ///
@@ -5532,11 +5534,14 @@ class IndexedChildSemantics extends SingleChildRenderObjectWidget {
     @required this.index,
     Widget child,
   }) : assert(index != null),
-        super(key: key, child: child);
+       super(key: key, child: child);
+
   /// The index used to annotated the first child semantics node.
   final int index;
+
   @override
   RenderIndexedChildSemantics createRenderObject(BuildContext context) => RenderIndexedChildSemantics(index: index);
+
   @override
   void updateRenderObject(BuildContext context, RenderIndexedChildSemantics renderObject) {
     renderObject.index = index;

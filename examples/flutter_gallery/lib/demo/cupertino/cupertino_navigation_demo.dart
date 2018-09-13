@@ -135,6 +135,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: CustomScrollView(
+        semanticChildren: 50,
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             trailing: ExitButton(),
