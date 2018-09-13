@@ -17,6 +17,8 @@ def main():
   parser.add_argument('--arm64-out-dir', type=str, required=True)
   parser.add_argument('--armv7-out-dir', type=str, required=True)
   parser.add_argument('--simulator-out-dir', type=str, required=True)
+  parser.add_argument('--strip', action="store_true", default=False)
+  parser.add_argument('--dsym', action="store_true", default=False)
 
   args = parser.parse_args()
 
@@ -56,6 +58,8 @@ def main():
   shutil.rmtree(fat_framework, True)
   shutil.copytree(arm64_framework, fat_framework)
 
+  linker_out = os.path.join(fat_framework, 'Flutter')
+
   subprocess.call([
     'lipo',
     arm64_dylib,
@@ -63,8 +67,19 @@ def main():
     simulator_dylib,
     '-create',
     '-output',
-    os.path.join(fat_framework, 'Flutter')
+    linker_out
   ])
+
+  if args.dsym:
+    dsym_out = os.path.splitext(fat_framework)[0] + '.dSYM'
+    subprocess.call(['dsymutil', '-o', dsym_out, linker_out])
+
+  if args.strip:
+    # copy unstripped
+    unstripped_out = os.path.join(args.dst, 'Flutter.unstripped')
+    shutil.copyfile(linker_out, unstripped_out)
+
+    subprocess.call(["strip", "-x", "-S", linker_out])
 
 
 if __name__ == '__main__':
