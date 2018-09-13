@@ -534,6 +534,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicatorSize,
     this.labelColor,
     this.labelStyle,
+    this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
   }) : assert(tabs != null),
@@ -636,6 +637,11 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null then the text style of the theme's body2
   /// definition is used.
   final TextStyle labelStyle;
+
+  /// The padding added to each of the tab labels.
+  ///
+  /// If this property is null then kTabLabelPadding is used.
+  final EdgeInsetsGeometry labelPadding;
 
   /// The text style of the unselected tab labels
   ///
@@ -891,7 +897,7 @@ class _TabBarState extends State<TabBar> {
       wrappedTabs[i] = Center(
         heightFactor: 1.0,
         child: Padding(
-          padding: kTabLabelPadding,
+          padding: widget.labelPadding ?? kTabLabelPadding,
           child: KeyedSubtree(
             key: _tabKeys[i],
             child: widget.tabs[i],
