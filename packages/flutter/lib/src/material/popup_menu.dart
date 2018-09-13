@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'debug.dart';
 import 'divider.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -713,6 +714,7 @@ Future<T> showMenu<T>({
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
+  assert(debugCheckHasMaterialLocalizations(context));
   String label = semanticLabel;
   switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
@@ -911,6 +913,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     return widget.child != null
       ? InkWell(
           onTap: showButtonMenu,

@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
@@ -81,6 +82,7 @@ class BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: const BackButtonIcon(),
       color: color,
