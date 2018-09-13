@@ -29,6 +29,8 @@ class SemanticsUpdateBuilder
                   int actions,
                   int textSelectionBase,
                   int textSelectionExtent,
+                  int scrollChildren,
+                  int scrollIndex,
                   double scrollPosition,
                   double scrollExtentMax,
                   double scrollExtentMin,

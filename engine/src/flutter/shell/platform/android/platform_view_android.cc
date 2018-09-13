@@ -207,7 +207,7 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
 void PlatformViewAndroid::UpdateSemantics(
     blink::SemanticsNodeUpdates update,
     blink::CustomAccessibilityActionUpdates actions) {
-  constexpr size_t kBytesPerNode = 36 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 38 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
   constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
 
@@ -243,6 +243,8 @@ void PlatformViewAndroid::UpdateSemantics(
       buffer_int32[position++] = node.actions;
       buffer_int32[position++] = node.textSelectionBase;
       buffer_int32[position++] = node.textSelectionExtent;
+      buffer_int32[position++] = node.scrollChildren;
+      buffer_int32[position++] = node.scrollIndex;
       buffer_float32[position++] = (float)node.scrollPosition;
       buffer_float32[position++] = (float)node.scrollExtentMax;
       buffer_float32[position++] = (float)node.scrollExtentMin;
