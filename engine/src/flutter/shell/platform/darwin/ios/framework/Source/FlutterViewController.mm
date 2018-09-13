@@ -392,6 +392,9 @@
   if (_splashScreenView == nullptr) {
     NSString* launchStoryboardName =
         [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
+    if (launchStoryboardName == nil) {
+      return nil;
+    }
     UIStoryboard* storyboard = [UIStoryboard storyboardWithName:launchStoryboardName bundle:nil];
     if (storyboard == nil) {
       return nil;
