@@ -4,8 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
-import 'dart:math' show max;
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -78,6 +76,7 @@ void installHook({
   int observatoryPort,
   InternetAddressType serverType = InternetAddressType.IPv4,
   Uri projectRootDirectory,
+  @required int concurrency,
 }) {
   assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
@@ -96,6 +95,7 @@ void installHook({
       trackWidgetCreation: trackWidgetCreation,
       updateGoldens: updateGoldens,
       projectRootDirectory: projectRootDirectory,
+      concurrency: concurrency,
     ),
   );
 }
@@ -203,7 +203,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory) {
+  _Compiler(bool trackWidgetCreation, Uri projectRootDirectory, int concurrency) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -245,7 +245,7 @@ class _Compiler {
       // compilation request at a time".
       ResidentCompiler compiler;
       String outputDill;
-      if (idleCompilers.isEmpty && compilers < max(1, Platform.numberOfProcessors - 2) /* concurrency */) {
+      if (idleCompilers.isEmpty && compilers < concurrency ) {
         // Create compiler
         compiler = ResidentCompiler(
             artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -365,6 +365,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.trackWidgetCreation,
     this.updateGoldens,
     this.projectRootDirectory,
+    @required this.concurrency,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -380,6 +381,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool trackWidgetCreation;
   final bool updateGoldens;
   final Uri projectRootDirectory;
+  final int concurrency;
 
   Directory fontsDirectory;
   _Compiler compiler;
@@ -480,7 +482,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (precompiledDillPath == null && precompiledDillFiles == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory);
+        compiler ??= _Compiler(trackWidgetCreation, projectRootDirectory, concurrency);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
