@@ -509,16 +509,20 @@ class DevFS {
       outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
       packagesFilePath : _packagesFilePath,
     );
-    final String compiledBinary = compilerOutput?.outputFilename;
-    if (compiledBinary != null && compiledBinary.isNotEmpty) {
-      final Uri entryUri = fs.path.toUri(projectRootPath != null
-        ? fs.path.relative(pathToReload, from: projectRootPath)
-        : pathToReload,
-      );
-      if (!dirtyEntries.containsKey(entryUri)) {
-        final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
-        dirtyEntries[entryUri] = content;
-        numBytes += content.size;
+    // Don't send full kernel file that would overwrite what VM already
+    // started loading from.
+    if (!bundleFirstUpload) {
+      final String compiledBinary = compilerOutput?.outputFilename;
+      if (compiledBinary != null && compiledBinary.isNotEmpty) {
+        final Uri entryUri = fs.path.toUri(projectRootPath != null
+          ? fs.path.relative(pathToReload, from: projectRootPath)
+          : pathToReload,
+        );
+        if (!dirtyEntries.containsKey(entryUri)) {
+          final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
+          dirtyEntries[entryUri] = content;
+          numBytes += content.size;
+        }
       }
     }
     if (dirtyEntries.isNotEmpty) {
