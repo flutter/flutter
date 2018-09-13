@@ -27,6 +27,9 @@ import 'theme.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
+/// The minimum allowable height for a [BottomSheet].
+const double kBottomSheetMinHeight = 56.0;
+
 enum _ScaffoldSlot {
   body,
   appBar,
@@ -358,8 +361,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final BoxConstraints bottomSheetConstraints = BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
         maxHeight: math.max(0.0, contentBottom - contentTop),
+        minHeight: kBottomSheetMinHeight,
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
+      print(bottomSheetSize);
       positionChild(_ScaffoldSlot.bottomSheet, Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
     }
 
@@ -1234,7 +1239,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     bottomSheet = _PersistentBottomSheet(
       key: bottomSheetKey,
-      animationController: controller,
       enableDrag: isLocalHistoryEntry,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
@@ -1245,7 +1249,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
-          bottomSheet.animationController.dispose();
           setState(() {
             _dismissedBottomSheets.remove(bottomSheet);
           });
@@ -1456,10 +1459,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _geometryNotifier.dispose();
-    for (_PersistentBottomSheet bottomSheet in _dismissedBottomSheets)
-      bottomSheet.animationController.dispose();
-    if (_currentBottomSheet != null)
-      _currentBottomSheet._widget.animationController.dispose();
     _floatingActionButtonMoveController.dispose();
     _floatingActionButtonVisibilityController.dispose();
     super.dispose();
@@ -1764,14 +1763,12 @@ class ScaffoldFeatureController<T extends Widget, U> {
 class _PersistentBottomSheet extends StatefulWidget {
   const _PersistentBottomSheet({
     Key key,
-    this.animationController,
     this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
     this.builder
   }) : super(key: key);
 
-  final AnimationController animationController; // we control it, but it must be disposed by whoever created it
   final bool enableDrag;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
@@ -1782,48 +1779,50 @@ class _PersistentBottomSheet extends StatefulWidget {
 }
 
 class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
+  ScrollTopThenContentController _scrollController;
+
   @override
   void initState() {
     super.initState();
-    assert(widget.animationController.status == AnimationStatus.forward
-        || widget.animationController.status == AnimationStatus.completed);
-    widget.animationController.addStatusListener(_handleStatusChange);
+
+    _scrollController = ScrollTopThenContentController(
+      debugLabel: 'BottomSheetScrollController',
+      top: 300.0,
+    );
+    _scrollController.addTopListener(() {
+      // TODO(dnfield) get rid of magic, handle dismissed
+      if (_scrollController.top >= 640) {
+//        widget.onDismissed?.call();
+        widget.onClosing?.call();
+      }
+      setState(() {});
+    });
   }
 
   @override
-  void didUpdateWidget(_PersistentBottomSheet oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    assert(widget.animationController == oldWidget.animationController);
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void close() {
-    widget.animationController.reverse();
-  }
-
-  void _handleStatusChange(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && widget.onDismissed != null)
-      widget.onDismissed();
+    _scrollController.dismiss();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.animationController,
-      builder: (BuildContext context, Widget child) {
-        return Align(
-          alignment: AlignmentDirectional.topStart,
-          heightFactor: widget.animationController.value,
-          child: child
-        );
-      },
+    return  Positioned.fill(
+      top: _scrollController.top,
       child: Semantics(
+        key: const Key('BottomSheetSemantics'),
         container: true,
         onDismiss: () {
           close();
-          widget.onClosing();
+          widget.onClosing?.call();
         },
         child: BottomSheet(
-          animationController: widget.animationController,
+          key: const Key('BottomSheet'),
+          scrollController: _scrollController,
           enableDrag: widget.enableDrag,
           onClosing: widget.onClosing,
           builder: widget.builder

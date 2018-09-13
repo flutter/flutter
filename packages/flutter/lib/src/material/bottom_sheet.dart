@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -17,7 +16,6 @@ import 'theme.dart';
 const Duration _kBottomSheetDuration = Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
-const double _kBottomSheetSnapHeight = 0.60;
 
 /// A material design bottom sheet.
 ///
@@ -34,9 +32,6 @@ const double _kBottomSheetSnapHeight = 0.60;
 ///    prevents the user from interacting with the rest of the app. Modal bottom
 ///    sheets can be created and displayed with the [showModalBottomSheet]
 ///    function.
-///
-/// The `initialHeight` must be a minimum of 56.0 and should not exceed 50% of
-/// the screen height.
 ///
 /// The [BottomSheet] widget itself is rarely used directly. Instead, prefer to
 /// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] or
@@ -55,22 +50,16 @@ class BottomSheet extends StatefulWidget {
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
     Key key,
-    this.animationController,
+    this.scrollController,
     this.enableDrag = true,
-    this.initialHeight = 56.0,
     @required this.onClosing,
     @required this.builder
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(initialHeight != null && initialHeight >= 56.0),
        super(key: key);
 
-  /// The animation that controls the bottom sheet's position.
-  ///
-  /// The BottomSheet widget will manipulate the position of this animation, it
-  /// is not just a passive observer.
-  final AnimationController animationController;
+  final ScrollTopThenContentController scrollController;
 
   /// Called when the bottom sheet begins to close.
   ///
@@ -91,14 +80,8 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
-  /// The initial height of the bottom sheet.
-  ///
-  /// For Modal Bottom Sheets, this should be 50% of the screen height.
-  /// For Modeless Bottom Sheets, this should be a minimum of 56dp.
-  final double initialHeight;
-
   @override
-  _BottomSheetState createState() => _BottomSheetState(initialHeight);
+  _BottomSheetState createState() => _BottomSheetState();
 
   /// Creates an animation controller suitable for controlling a [BottomSheet].
   static AnimationController createAnimationController(TickerProvider vsync) {
@@ -111,100 +94,14 @@ class BottomSheet extends StatefulWidget {
 }
 
 class _BottomSheetState extends State<BottomSheet> {
-  _BottomSheetState(this._renderedHeight);
-
-  double _renderedHeight;
-  ScaffoldState _scaffold;
-
-  bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
-
-  bool get _snapToFullScreen {
-    final MediaQueryData mediaData = MediaQuery.of(context);
-    return mediaData.size.height * _kBottomSheetSnapHeight <= _renderedHeight;
-  }
-
-  double get _screenHeight {
-    final MediaQueryData mediaData = MediaQuery.of(context);
-    return mediaData.size.height;
-  }
-
-  bool get _isFullScreen {
-    return _renderedHeight >= _screenHeight - 1;
-  }
-
-  @override
-  void didChangeDependencies() {
-    _scaffold = Scaffold.of(context);
-    super.didChangeDependencies();
-  }
-
-  @override
-  void deactivate() {
-    _scaffold.showFloatingActionButton();
-    super.deactivate();
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    if (_dismissUnderway)
-      return;
-
-    if (_snapToFullScreen) {
-      final double fabVisibility = -((_renderedHeight / (_screenHeight * .85)) - 1.0) / (1.0 - _kBottomSheetSnapHeight * 1.1765);
-      _scaffold.floatingActionButtonVisbilityValue = fabVisibility;
-    }
-    setState(() {
-      _renderedHeight = _renderedHeight - details.primaryDelta;
-    });
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    if (_dismissUnderway)
-      return;
-
-    if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
-      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / widget.initialHeight;
-      if (widget.animationController.value > 0.0) {
-        widget.animationController.fling(velocity: flingVelocity);
-      }
-      if (flingVelocity < 0.0) {
-        _scaffold.showFloatingActionButton();
-        widget.onClosing();
-      }
-    } else if (details.velocity.pixelsPerSecond.dy < -_kMinFlingVelocity) {
-      _scaffold.hideFloatingActionButton();
-      setState(() {
-        _renderedHeight = double.infinity;
-      });
-    } else if (widget.animationController.value < _kCloseProgressThreshold) {
-      if (widget.animationController.value > 0.0) {
-        widget.animationController.fling(velocity: -1.0);
-      }
-      _scaffold.showFloatingActionButton();
-      widget.onClosing();
-    } else {
-      widget.animationController.forward();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: !widget.enableDrag
-        ? widget.builder(context)
-        : SizedBox(
-        height: _renderedHeight,
-        child: Stack(
-          children: <Widget>[
-            CustomSingleChildLayout(
-              delegate: _StandardBottomSheetLayout(_renderedHeight),
-              child: widget.builder(context),
-            ),
-            GestureDetector(
-              onVerticalDragUpdate: _handleDragUpdate,
-              onVerticalDragEnd: _handleDragEnd,
-              child: _isFullScreen ? const LimitedBox() : null,
-            ),
-          ],
+    return CustomSingleChildLayout(
+      delegate: _StandardBottomSheetLayout(widget.scrollController.top),
+      child: PrimaryScrollController(
+        controller: widget.scrollController,
+        child: Material(
+          child: widget.builder(context),
         ),
       ),
     );
@@ -212,32 +109,26 @@ class _BottomSheetState extends State<BottomSheet> {
 }
 
 class _StandardBottomSheetLayout extends SingleChildLayoutDelegate {
-  _StandardBottomSheetLayout(this.renderHeight);
+  _StandardBottomSheetLayout(this.top);
 
-  final double renderHeight;
+  final double top;
 
   @override
   Size getSize(BoxConstraints constraints) {
-//    print(constraints);
-
-    return super.getSize(constraints);
+    print(Size(constraints.maxWidth, top));
+    return Size(constraints.maxWidth, top);
   }
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-//    print(constraints.maxHeight);
-    return BoxConstraints(
-      minWidth: constraints.maxWidth,
-      maxWidth: constraints.maxWidth,
-      minHeight: 56.0,
-      maxHeight: math.max(56.0, constraints.maxHeight * .5),
-    );
+    return constraints.tighten(height: top);
   }
 
   @override
   bool shouldRelayout(_StandardBottomSheetLayout oldDelegate) {
-    return renderHeight != oldDelegate.renderHeight;
+    return oldDelegate.top != top;
   }
+
 }
 
 // PERSISTENT BOTTOM SHEETS
@@ -257,8 +148,8 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
-      minHeight: 56.0,
-      maxHeight: math.max(56.0, constraints.maxHeight * .5),
+      minHeight: 0.0,
+      maxHeight: constraints.maxHeight * 9.0 / 16.0
     );
   }
 
@@ -316,7 +207,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue),
                 child: BottomSheet(
-                  animationController: widget.route._animationController,
+//                  animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
                   builder: widget.route.builder,
                 ),

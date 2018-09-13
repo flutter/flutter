@@ -138,7 +138,11 @@ abstract class MultiChildLayoutDelegate {
       }
       return true;
     }());
+    if (childId.toString() == '_ScaffoldSlot.bottomSheet')
+    print('calling child.layout for $childId');
     child.layout(constraints, parentUsesSize: true);
+    if (childId.toString() == '_ScaffoldSlot.bottomSheet')
+    print('child says it is ${child.size}');
     return child.size;
   }
 

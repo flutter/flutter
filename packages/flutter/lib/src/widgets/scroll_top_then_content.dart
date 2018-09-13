@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
@@ -52,6 +56,14 @@ class ScrollTopThenContentController extends ScrollController {
   /// The maximum allowable value for [top].
   final double maxTop;
 
+  /// Dismisses the [Scrollable] from view with [velocity].
+  ///
+  /// The [velocity] parameter must not be null and must be less than 0.
+  void dismiss({double velocity = -500.0}) {
+    assert(velocity != null && velocity < 0);
+    _position?.goBallistic(velocity);
+  }
+
   @override
   ScrollTopThenContentPosition createScrollPosition(ScrollPhysics physics,
       ScrollContext context, ScrollPosition oldPosition) {
@@ -66,6 +78,8 @@ class ScrollTopThenContentController extends ScrollController {
     );
     return _position;
   }
+
+  // NotificationCallback handling for top.
 
   List<VoidCallback> _topListeners = <VoidCallback>[];
 
@@ -205,6 +219,8 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   // Tracks whether a fling down can affect the [top].
   bool _canFlingDown = false;
 
+  AnimationController _ballisticController;
+
   // Ensure that top stays between _minTop and _maxTop, and update listeners
   void _setTop(double delta) {
     _top = (_top + delta).clamp(minTop, maxTop);
@@ -255,19 +271,23 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
     // Scrollable expects that we will dispose of its current _drag
     _dragCancelCallback?.call();
 
-    AnimationController controller;
+
+    _ballisticController = AnimationController.unbounded(
+      debugLabel: '$runtimeType',
+      vsync: context.vsync,
+    );
     void _tickUp() {
-      _setTop(-controller.value);
+      _setTop(-_ballisticController.value);
       if (_top == minTop) {
-        controller.stop();
+        _ballisticController.stop();
         super.goBallistic(velocity);
       }
     }
 
     void _tickDown() {
-      _setTop(controller.value.abs());
+      _setTop(_ballisticController.value.abs());
       if (_top == maxTop) {
-        controller.stop();
+        _ballisticController.stop();
         super.goBallistic(velocity);
       }
     }
@@ -277,10 +297,7 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
     physics.createBallisticSimulation(this, velocity);
 
     if (simulation != null) {
-      controller = AnimationController.unbounded(
-        debugLabel: '$runtimeType',
-        vsync: context.vsync,
-      )
+      _ballisticController
         ..addListener(velocity > 0 ? _tickUp : _tickDown)
         ..animateWith(simulation);
       _canFlingDown = false;
@@ -292,5 +309,11 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
     // Save this so we can call it later if we have to [goBallistic] on our own.
     _dragCancelCallback = dragCancelCallback;
     return super.drag(details, dragCancelCallback);
+  }
+
+  @override
+  void dispose() {
+    _ballisticController.dispose();
+    super.dispose();
   }
 }
