@@ -239,7 +239,6 @@ class _Compiler {
 
     printTrace('Listening to compiler controller...');
     compilerController.stream.listen((_CompilationRequest request) async {
-      final bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
       // Only trigger processing if queue was empty - i.e. no other requests
       // are currently being processed. This effectively enforces "one
@@ -248,13 +247,13 @@ class _Compiler {
       String outputDill;
       if (idleCompilers.isEmpty && compilers < max(1, Platform.numberOfProcessors - 2) /* concurrency */) {
         // Create compiler
-        compiler = new ResidentCompiler(
+        compiler = ResidentCompiler(
             artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
             packagesPath: PackageMap.globalPackagesPath,
             trackWidgetCreation: trackWidgetCreation);
         compilers++;
         outputDill = outputDillDirectory.childFile('output_$compilers.dill').path;
-        printTrace('Compiler will use the following file as its incremental dill file: ${outputDill}');
+        printTrace('Compiler will use the following file as its incremental dill file: $outputDill');
       } else if (idleCompilers.isEmpty) {
         // The request was added to the queue, but we can't process it now.
         return;
@@ -266,7 +265,7 @@ class _Compiler {
         // Only remove now when we finished processing the element
         compilationQueue.removeAt(0);
         printTrace('Compiling ${request.path}');
-        final Stopwatch compilerTime = new Stopwatch()..start();
+        final Stopwatch compilerTime = Stopwatch()..start();
         bool firstCompile = false;
         if (compiler == null) {
           compiler = createCompiler();
