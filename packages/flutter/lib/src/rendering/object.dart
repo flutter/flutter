@@ -385,7 +385,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
   /// * `clipBehavior` controls how the rectangle is clipped.
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge}) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       pushLayer(ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
