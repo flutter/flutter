@@ -145,8 +145,10 @@ template("mac_toolchain") {
       tocname = dylib + ".TOC"
       temporary_tocname = dylib + ".tmp"
 
+      lto_object_file = "{{root_out_dir}}/lto_{{target_output_name}}.o"
+
       does_reexport_command = "[ ! -e $dylib -o ! -e $tocname ] || otool -l $dylib | grep -q LC_REEXPORT_DYLIB"
-      link_command = "$ld -shared $sysroot_flags $toolchain_flags $lto_flags {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      link_command = "$ld -shared $sysroot_flags $toolchain_flags $lto_flags -Wl,-object_path_lto,$lto_object_file {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       replace_command = "if ! cmp -s $temporary_tocname $tocname; then mv $temporary_tocname $tocname"
       extract_toc_command = "{ otool -l $dylib | grep LC_ID_DYLIB -A 5; nm -gP $dylib | cut -f1-2 -d' ' | grep -v U\$\$; true; }"
 
