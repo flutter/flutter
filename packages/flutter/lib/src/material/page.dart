@@ -33,16 +33,22 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [PageTransitionTheme], which defines the default page transitions used
-///    by [MaterialPageRoute].
+///  * [PageTransitionsTheme], which defines the default page transitions used
+///    by [MaterialPageRoute.buildTransitions].
 ///
 class MaterialPageRoute<T> extends PageRoute<T> {
+  /// Construct a MaterialPageRoute whose contents are defined by [builder].
+  ///
+  /// The values of [builder], [maintainState], and [fullScreenDialog] must not
+  /// be null.
   MaterialPageRoute({
     @required this.builder,
     RouteSettings settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
   }) : assert(builder != null),
+       assert(maintainState != null),
+       assert(fullscreenDialog != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
     // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
     assert(opaque);

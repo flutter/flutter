@@ -35,9 +35,9 @@ class _GenericPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(ianh): tell the transform to be un-transformed for hit testing
     return SlideTransition(
       position: _positionAnimation,
+      // TODO(ianh): tell the transform to be un-transformed for hit testing
       child: FadeTransition(
         opacity: _opacityAnimation,
         child: child,
@@ -178,10 +178,21 @@ class _MountainViewPageTransition extends StatelessWidget {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 abstract class PageTransitionsBuilder {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const PageTransitionsBuilder({ this.platform });
 
+  /// The [TargetPlatform] this builder is to be used for or null if the
+  /// builder is not platform-specific.
   final TargetPlatform platform;
 
+  /// Wraps the child with one or more transition widgets which define how [route]
+  /// arrives on and leaves the screen.
+  ///
+  /// The [MaterialPageRoute.buildTransitions] method looks up the current
+  /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
+  /// and delegates to this method with a [PageTransitionsBuilder] that has
+  /// a matching [PageTransitionsBuilder.platform].
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -212,6 +223,7 @@ abstract class PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a GenericPageTransitionsBuilder with a null [platform].
   const GenericPageTransitionsBuilder() : super(platform: null);
 
   @override
@@ -237,6 +249,8 @@ class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a MountainViewPageTransitionsBuilder with a
+  /// [TargetPlatform.android] [platform].
   const MountainViewPageTransitionsBuilder() : super(platform: TargetPlatform.android);
 
   @override
@@ -266,6 +280,8 @@ class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [MountainViewPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a CupertinoPageTransitionsBuilder with a
+  /// [TargetPlatform.iOS] [platform].
   const CupertinoPageTransitionsBuilder() : super(platform: TargetPlatform.iOS);
 
   @override
@@ -284,7 +300,7 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// for different [TargetPlatform]s.
 ///
 /// The [MaterialPageRoute.buildTransitions] method looks up the current
-/// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionTheme`
+/// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
 /// and delegates to [buildTransitions].
 ///
 /// If a builder with a matching platform is not found, the first builder
@@ -292,6 +308,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 /// See also:
 ///
+///  * [ThemeData.pageTransitionsTheme], which defines the default page
+///    transitions for the overall theme.
 ///  * [GenericPageTransitionsBuilder], which defines a default page transition.
 ///  * [MountainViewPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
@@ -299,9 +317,12 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///    transition that matches native iOS page transitions.
 @immutable
 class PageTransitionsTheme extends Diagnosticable {
-  /// Construct a PageTransitionsTheme [ThemeData] value.
+  /// Construct a PageTransitionsTheme.
   ///
   /// The [builders] parameter must not be null.
+  ///
+  /// By default the list of builders is: [GenericPageTransitionBuilder],
+  /// [CupertinoPageTransitionsBuilder].
   const PageTransitionsTheme({
     this.builders = const <PageTransitionsBuilder>[
       GenericPageTransitionsBuilder(),
@@ -309,10 +330,16 @@ class PageTransitionsTheme extends Diagnosticable {
     ],
   }) : assert(builders != null);
 
+  /// The [PageTransitionsBuilder]s supported by this theme.
   final Iterable<PageTransitionsBuilder> builders;
 
-  /// Wraps the child with one or more transition widgets which define how [route]
-  /// arrives on and leaves the screen.
+  /// Delegates to the first builder in [builders] whose
+  /// [PageTransitionsBuilder.platform] matches the current target
+  /// platform: `Theme.of(context).platform`.
+  ///
+  /// If a builder with a matching platform is not found, the first
+  /// builder whose platform is null is used. By default that's the
+  /// [GenericPageTransitionBuilder].
   ///
   /// [MaterialPageRoute.builderTransitions] delegates to this method.
   Widget buildTransitions<T>(

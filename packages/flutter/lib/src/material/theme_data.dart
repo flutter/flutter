@@ -879,8 +879,8 @@ class ThemeData extends Diagnosticable {
         accentIconTheme,
         sliderTheme,
         chipTheme,
-        platform,
         hashValues(
+          platform,
           materialTapTargetSize,
           pageTransitionsTheme,
         ),

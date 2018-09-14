@@ -274,7 +274,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   /// See also:
   ///
   ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
-  ///    [PageTransitionsBuilder] for the [PageTransitionTheme].
+  ///    [PageTransitionsBuilder] for the [PageTransitionsTheme].
   static Widget buildPageTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -301,8 +301,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
         ),
       );
     }
-    assert(false);
-    return null;
   }
 
   @override
