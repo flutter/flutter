@@ -1,4 +1,4 @@
-Signature: 8ed6cf53af997d9ca12acc3f132a0a3d
+Signature: b0d224dbe1bddd5c441cee3e8f9d1562
 
 UNUSED LICENSES:
 
@@ -1524,6 +1524,9 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrDualIntervalGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrDualIntervalGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrDualIntervalGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.cpp
