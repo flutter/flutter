@@ -184,7 +184,8 @@ abstract class Domain {
   String toString() => name;
 
   void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
-    //ignore: Remove 'new' once Google catches up to dev4.0 Dart SDK.
+    // Remove 'new' once Google catches up to dev4.0 Dart SDK.
+    //ignore: unnecessary_new
     new Future<dynamic>.sync(() {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
