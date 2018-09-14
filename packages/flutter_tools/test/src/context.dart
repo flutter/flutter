@@ -34,7 +34,7 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef void ContextInitializer(AppContext testContext);
+typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(String description, dynamic testMethod(), {

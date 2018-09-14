@@ -251,7 +251,7 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
 
 Clock get clock => context[Clock];
 
-typedef Future<Null> AsyncCallback();
+typedef AsyncCallback = Future<Null> Function();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay

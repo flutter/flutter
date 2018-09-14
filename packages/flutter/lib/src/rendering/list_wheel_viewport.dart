@@ -13,7 +13,7 @@ import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-typedef double _ChildSizingFunction(RenderBox child);
+typedef _ChildSizingFunction = double Function(RenderBox child);
 
 /// A delegate used by [RenderListWheelViewport] to manage its children.
 ///

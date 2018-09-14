@@ -73,9 +73,9 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-typedef void DispatchCommand(Map<String, dynamic> command);
+typedef DispatchCommand = void Function(Map<String, dynamic> command);
 
-typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
+typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
@@ -305,7 +305,7 @@ class DaemonDomain extends Domain {
   }
 }
 
-typedef Future<void> _RunOrAttach({
+typedef _RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
   Completer<void> appStartedCompleter
 });
@@ -553,7 +553,7 @@ class AppDomain extends Domain {
   }
 }
 
-typedef void _DeviceEventHandler(Device device);
+typedef _DeviceEventHandler = void Function(Device device);
 
 /// This domain lets callers list and monitor connected devices.
 ///

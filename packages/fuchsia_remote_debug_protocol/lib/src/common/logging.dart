@@ -43,7 +43,7 @@ enum LoggingLevel {
 }
 
 /// Signature of a function that logs a [LogMessage].
-typedef void LoggingFunction(LogMessage log);
+typedef LoggingFunction = void Function(LogMessage log);
 
 /// The default logging function.
 ///

@@ -92,7 +92,7 @@ class OverlayGeometryApp extends StatefulWidget {
   OverlayGeometryAppState createState() => OverlayGeometryAppState();
 }
 
-typedef void CardTapCallback(GlobalKey targetKey, Offset globalPosition);
+typedef CardTapCallback = void Function(GlobalKey targetKey, Offset globalPosition);
 
 class CardBuilder extends SliverChildDelegate {
   CardBuilder({ this.cardModels, this.onTapUp });

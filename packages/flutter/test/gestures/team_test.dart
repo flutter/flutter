@@ -103,7 +103,7 @@ void main() {
   });
 }
 
-typedef void GestureAcceptedCallback();
+typedef GestureAcceptedCallback = void Function();
 
 class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
   GestureAcceptedCallback onGestureAccepted;
