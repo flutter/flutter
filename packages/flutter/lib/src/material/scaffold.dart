@@ -1220,6 +1220,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void _closeCurrentBottomSheet() {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
+      // TODO(dnfield): properly use 
 //      assert(_currentBottomSheet == null);
     }
   }
