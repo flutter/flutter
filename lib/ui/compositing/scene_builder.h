@@ -9,7 +9,6 @@
 #include <memory>
 #include <stack>
 
-#include "flutter/flow/layers/layer_builder.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_host.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -92,7 +91,19 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
  private:
   SceneBuilder();
 
-  std::unique_ptr<flow::LayerBuilder> layer_builder_;
+  std::unique_ptr<flow::ContainerLayer> root_layer_;
+  flow::ContainerLayer* current_layer_ = nullptr;
+
+  std::stack<SkRect> cull_rects_;
+
+  int rasterizer_tracing_threshold_ = 0;
+  bool checkerboard_raster_cache_images_ = false;
+  bool checkerboard_offscreen_layers_ = false;
+
+  void PushLayer(std::unique_ptr<flow::ContainerLayer> layer,
+                 const SkRect& cullRect);
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SceneBuilder);
 };
 
 }  // namespace blink

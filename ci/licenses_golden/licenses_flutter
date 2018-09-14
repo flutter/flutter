@@ -248,10 +248,6 @@ FILE: ../../../flutter/assets/asset_manager.h
 FILE: ../../../flutter/assets/asset_resolver.h
 FILE: ../../../flutter/common/task_runners.cc
 FILE: ../../../flutter/common/task_runners.h
-FILE: ../../../flutter/flow/layers/default_layer_builder.cc
-FILE: ../../../flutter/flow/layers/default_layer_builder.h
-FILE: ../../../flutter/flow/layers/layer_builder.cc
-FILE: ../../../flutter/flow/layers/layer_builder.h
 FILE: ../../../flutter/flow/skia_gpu_object.cc
 FILE: ../../../flutter/flow/skia_gpu_object.h
 FILE: ../../../flutter/runtime/dart_isolate.cc
