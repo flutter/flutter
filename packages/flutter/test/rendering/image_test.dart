@@ -92,6 +92,7 @@ void main() {
         '   size: Size(25.0, 25.0)\n'
         '   image: [10×10]\n'
         '   alignment: center\n'
+        '   invertColors: false\n'
       ),
     );
 

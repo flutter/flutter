@@ -10,6 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'colors.dart';
 import 'constants.dart';
+import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -495,6 +496,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
     final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);

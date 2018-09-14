@@ -58,7 +58,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: DateAndTimePickerDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
-    }, skip: true); // https://github.com/flutter/flutter/issues/21578
+    });
 
     testWidgets('dialog_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

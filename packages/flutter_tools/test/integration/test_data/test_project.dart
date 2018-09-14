@@ -16,7 +16,8 @@ abstract class TestProject {
   String get main;
 
   // Valid locations for a breakpoint for tests that just need to break somewhere.
-  String get breakpointFile => fs.path.join(dir.path, 'lib', 'main.dart');
+  String get breakpointFile => fs.file(fs.path.join(
+      dir.path, 'lib', 'main.dart')).resolveSymbolicLinksSync();
   int get breakpointLine => lineContaining(main, '// BREAKPOINT');
 
   Future<void> setUpIn(Directory dir) async {

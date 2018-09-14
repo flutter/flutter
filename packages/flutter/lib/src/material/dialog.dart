@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -232,6 +233,7 @@ class AlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final List<Widget> children = <Widget>[];
     String label = semanticLabel;
 
@@ -490,6 +492,7 @@ class SimpleDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     final List<Widget> body = <Widget>[];
     String label = semanticLabel;
 
@@ -596,6 +599,7 @@ Future<T> showDialog<T>({
   WidgetBuilder builder,
 }) {
   assert(child == null || builder == null);
+  assert(debugCheckHasMaterialLocalizations(context));
   return showGeneralDialog(
     context: context,
     pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
