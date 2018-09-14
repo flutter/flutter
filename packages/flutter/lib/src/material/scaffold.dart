@@ -30,10 +30,16 @@ const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = Float
 
 /// The minimum allowable height for a [BottomSheet].
 const double kBottomSheetMinHeight = 56.0;
+// When the top of the BottomSheet crosses this threshold, it will start to
+// shrink the FAB and show a scrim.
+const double _kBottomSheetDominatesPercentage = 0.3;
+const double _kMinBottomSheetScrimOpacity = 0.1;
+const double _kMaxBottomSheetScrimOpacity = 0.6;
 
 enum _ScaffoldSlot {
   body,
   appBar,
+  bodyScrim,
   bottomSheet,
   snackBar,
   persistentFooter,
@@ -282,7 +288,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.floatingActionButtonMotionAnimator,
     // for bottom sheet
     this.bottomSheetTop,
-    this.onContentHeightCalculated,
   }) : assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
 
@@ -296,8 +301,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
   final double bottomSheetTop;
-
-  final ValueChanged<double> onContentHeightCalculated;
 
   @override
   void performLayout(Size size) {
@@ -340,7 +343,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // bottom-anchored material widgets or of the keyboard or other
     // bottom-anchored system UI.
     final double contentBottom = math.max(0.0, bottom - math.max(minInsets.bottom, bottomWidgetsHeight));
-    onContentHeightCalculated?.call(math.max(0.0, contentBottom - contentTop));
 
     if (hasChild(_ScaffoldSlot.body)) {
       final BoxConstraints bodyConstraints = BoxConstraints(
@@ -365,6 +367,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     Size bottomSheetSize = Size.zero;
     Size snackBarSize = Size.zero;
+
+    if (hasChild(_ScaffoldSlot.bodyScrim)) {
+      final BoxConstraints bottomSheetScrimConstraints = BoxConstraints(
+        maxWidth: fullWidthConstraints.maxWidth,
+        maxHeight: bottomSheetTop + contentTop,
+      );
+      layoutChild(_ScaffoldSlot.bodyScrim, bottomSheetScrimConstraints);
+      positionChild(_ScaffoldSlot.bottomSheet, Offset.zero);
+    }
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
       final BoxConstraints bottomSheetConstraints = BoxConstraints(
@@ -1201,9 +1212,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // PERSISTENT BOTTOM SHEET API
 
+  // Contains bottom sheets that may still be animating out of view.
+  // Important if the app/user takes an action that could repeatedly show a
+  // bottom sheet.
   final List<_PersistentBottomSheet> _dismissedBottomSheets = <_PersistentBottomSheet>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
   ScrollTopThenContentController _bottomSheetScrollController;
+  bool _showBodyScrim = false;
+  Color _bodyScrimColor;
 
   void _maybeBuildCurrentBottomSheet() {
     if (widget.bottomSheet != null) {
@@ -1224,17 +1240,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  PersistentBottomSheetController<T> _buildBottomSheet<T>(WidgetBuilder builder, bool isLocalHistoryEntry, {double initialHeight}) {
+  PersistentBottomSheetController<T> _buildBottomSheet<T>(
+      WidgetBuilder builder,
+      bool isLocalHistoryEntry, {
+      double initialHeight,
+    }) {
     _bottomSheetScrollController = BottomSheet.createScrollController(
       top: initialHeight ?? window.physicalSize.height / window.devicePixelRatio / 2,
     )..addTopListener(() => setState(() {
       final double screenHeight = window.physicalSize.height / window.devicePixelRatio;
-      floatingActionButtonVisibilityValue = _bottomSheetScrollController.top / (screenHeight * .3);
-      if (floatingActionButtonVisibilityValue < 1) {
-//        print('TODO: Show Scrim/ModalBarrier');
-      } else {
-//        print('TODO: Hide scrim if shown');
-      }
+      floatingActionButtonVisibilityValue =
+          _bottomSheetScrollController.top / (screenHeight * _kBottomSheetDominatesPercentage);
+      _bodyScrimColor = const Color(0xFF000000).withOpacity(
+        math.max(
+          _kMinBottomSheetScrimOpacity,
+          _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
+        ),
+      );
+      _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
     }));
     final Completer<T> completer = Completer<T>();
     final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = GlobalKey<_PersistentBottomSheetState>();
@@ -1252,9 +1275,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           _currentBottomSheet = null;
           _bottomSheetScrollController.dispose();
         });
-//
-//      if (controller.status != AnimationStatus.dismissed)
-//        _dismissedBottomSheets.add(bottomSheet);
+      if (_bottomSheetScrollController.animationStatus != AnimationStatus.completed)
+        _dismissedBottomSheets.add(bottomSheet);
 
         completer.complete();
       });
@@ -1599,6 +1621,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         widget.persistentFooterButtons != null,
     );
 
+    if (_showBodyScrim == true) {
+      _addIfNonNull(
+        children,
+        ModalBarrier(
+          dismissible: false,
+          color: _bodyScrimColor
+        ),
+        _ScaffoldSlot.bodyScrim,
+        removeLeftPadding: true,
+        removeTopPadding: true,
+        removeRightPadding: true,
+        removeBottomPadding: true,
+      );
+    }
+
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
       _appBarMaxHeight = widget.appBar.preferredSize.height + topPadding;
@@ -1761,11 +1798,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
                 bottomSheetTop: _bottomSheetScrollController?.top,
-//                onContentHeightCalculated: (double value) => print(value),
-//                  _bottomSheetScrollController = BottomSheet.createScrollController(
-//                      top: _bottomSheetScrollController?.top ?? 0.0,
-//                      maxTop: value
-//                  ),
               ),
             );
           }),

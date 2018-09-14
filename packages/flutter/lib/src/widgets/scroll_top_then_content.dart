@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
@@ -56,6 +57,8 @@ class ScrollTopThenContentController extends ScrollController {
 
   /// The maximum allowable value for [top].
   final double maxTop;
+
+  AnimationStatus get animationStatus => _position?._topAnimationController?.status;
 
   /// Animate the [top] value to [maxTop].
   Future<Null> dismiss() {
@@ -169,7 +172,9 @@ class ScrollTopThenContentController extends ScrollController {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('minTop: $minTop');
     description.add('top: $top');
+    description.add('maxTop: $maxTop');
   }
 }
 
@@ -293,7 +298,16 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   double get minScrollExtent {
     // This prevents the physics simulation from thinking it shouldn't be
     // doing anything when a user flings down from top == minTop.
-    return _canFlingDown ? super.minScrollExtent + 1 : super.minScrollExtent;
+    return _canFlingDown ? super.minScrollExtent + .01 : super.minScrollExtent;
+  }
+
+  @override
+  double get maxScrollExtent {
+    // SingleChildScrollView will mess us up by reporting that it has no more
+    // scroll extent, but we still may want to move it up.
+    return super.maxScrollExtent != null
+      ? super.maxScrollExtent + .01
+      : window.physicalSize.height / window.devicePixelRatio;
   }
 
   @override
