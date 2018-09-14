@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -59,6 +60,8 @@ class BottomSheet extends StatefulWidget {
        assert(builder != null),
        super(key: key);
 
+  /// The [ScrollTopThenContentController] that will act as the [PrimaryScrollController]
+  /// for this [BottomSheet], controlling its height and its child's scroll offset.
   final ScrollTopThenContentController scrollController;
 
   /// Called when the bottom sheet begins to close.
@@ -75,7 +78,7 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can dragged up and down and dismissed by swiping
-  /// downards.
+  /// downwards.
   ///
   /// Default is true.
   final bool enableDrag;
@@ -83,52 +86,48 @@ class BottomSheet extends StatefulWidget {
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
-  /// Creates an animation controller suitable for controlling a [BottomSheet].
-  static AnimationController createAnimationController(TickerProvider vsync) {
-    return AnimationController(
-      duration: _kBottomSheetDuration,
-      debugLabel: 'BottomSheet',
-      vsync: vsync,
+  /// Creates a [ScrollTopThenContentController] suitable for animating the
+  /// [BottomSheet].
+  static ScrollTopThenContentController createScrollController({
+    double top = 0.0,
+    double minTop = 0.0,
+    double maxTop,
+  }) {
+    maxTop ??= window.physicalSize.height / window.devicePixelRatio;
+    assert(top != null);
+    assert(minTop != null);
+    assert(maxTop != null && maxTop > minTop);
+    assert(minTop <= top && top <= maxTop);
+    return ScrollTopThenContentController(
+      debugLabel: 'BottomSheetScrollController',
+      top: top,
+      minTop: minTop,
+      maxTop: maxTop,
     );
   }
 }
 
 class _BottomSheetState extends State<BottomSheet> {
   @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addTopListener(() {
+      if (widget.scrollController.top == widget.scrollController.maxTop) {
+        widget.onClosing.call();
+      }
+    });
+  }
+  @override
   Widget build(BuildContext context) {
-    return CustomSingleChildLayout(
-      delegate: _StandardBottomSheetLayout(widget.scrollController.top),
-      child: PrimaryScrollController(
-        controller: widget.scrollController,
-        child: Material(
+    return PrimaryScrollController(
+      controller: widget.scrollController,
+      child: Material(
+        child: SizedBox.expand(
           child: widget.builder(context),
         ),
       ),
     );
   }
-}
-
-class _StandardBottomSheetLayout extends SingleChildLayoutDelegate {
-  _StandardBottomSheetLayout(this.top);
-
-  final double top;
-
-  @override
-  Size getSize(BoxConstraints constraints) {
-    print(Size(constraints.maxWidth, top));
-    return Size(constraints.maxWidth, top);
-  }
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return constraints.tighten(height: top);
-  }
-
-  @override
-  bool shouldRelayout(_StandardBottomSheetLayout oldDelegate) {
-    return oldDelegate.top != top;
-  }
-
 }
 
 // PERSISTENT BOTTOM SHEETS
@@ -242,15 +241,6 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Color get barrierColor => Colors.black54;
-
-  AnimationController _animationController;
-
-  @override
-  AnimationController createAnimationController() {
-    assert(_animationController == null);
-    _animationController = BottomSheet.createAnimationController(navigator.overlay);
-    return _animationController;
-  }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {

@@ -34,11 +34,12 @@ class ScrollTopThenContentController extends ScrollController {
     double initialScrollOffset = 0.0,
     double top = 0.0,
     this.minTop = 0.0,
-    this.maxTop,
+    this.maxTop = double.maxFinite,
     String debugLabel,
   })  : assert(top != null),
         assert(minTop != null),
-        _top = top,
+        assert(maxTop != null),
+        _initialTop = top,
         super(
         debugLabel: debugLabel,
         initialScrollOffset: initialScrollOffset,
@@ -47,8 +48,8 @@ class ScrollTopThenContentController extends ScrollController {
   ScrollTopThenContentPosition _position;
 
   /// The current value of [top].  This controller will
-  double get top => _position?.top ?? _top;
-  final double _top;
+  double get top => _position?.top ?? double.maxFinite;
+  final double _initialTop;
 
   /// The minimum allowable value for [top].
   final double minTop;
@@ -56,12 +57,17 @@ class ScrollTopThenContentController extends ScrollController {
   /// The maximum allowable value for [top].
   final double maxTop;
 
-  /// Dismisses the [Scrollable] from view with [velocity].
-  ///
-  /// The [velocity] parameter must not be null and must be less than 0.
-  void dismiss({double velocity = -500.0}) {
-    assert(velocity != null && velocity < 0);
-    _position?.goBallistic(velocity);
+  /// Animate the [top] value to [maxTop].
+  Future<Null> dismiss() {
+    return _position.dismiss();
+  }
+
+  /// Animate the [top] value to [newTop].
+  Future<Null> animateTopTo(double newTop, {
+    @required Duration duration,
+    @required Curve curve,
+  }) {
+    return _position?.animateTopTo(newTop, duration: duration, curve: curve);
   }
 
   @override
@@ -70,7 +76,7 @@ class ScrollTopThenContentController extends ScrollController {
     _position = ScrollTopThenContentPosition(
       physics: physics,
       context: context,
-      top: _top,
+      top: _initialTop,
       minTop: minTop,
       maxTop: maxTop,
       oldPosition: oldPosition,
@@ -159,6 +165,12 @@ class ScrollTopThenContentController extends ScrollController {
     _topListeners = null;
     super.dispose();
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('top: $top');
+  }
 }
 
 /// A scroll position that manages scroll activities for
@@ -178,40 +190,46 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   /// Creates a new [ScrollTopThenContentPosition].
   ///
   /// The [top], [notifier], and [minTop] parameters must not be null.  If [maxTop]
-  /// is null, it will be defaulted to the [ui.window] height.
+  /// is null, it will be defaulted to [double.maxFinite].
   ScrollTopThenContentPosition({
     @required double top,
     @required this.notifier,
     this.minTop = 0.0,
-    double maxTop,
+    @required this.maxTop,
     ScrollPosition oldPosition,
     ScrollPhysics physics,
-    ScrollContext context,
+    @required ScrollContext context,
   })  : assert(top != null),
         assert(notifier != null),
         assert(minTop != null),
-        _top = top,
-        this.maxTop =
-            maxTop ?? (window.physicalSize.height / window.devicePixelRatio),
+        assert(maxTop != null),
+        assert(context != null),
         super(
         physics: physics,
         context: context,
         initialPixels: 0.0,
         oldPosition: oldPosition,
-      );
+      ) {
+    _topAnimationController = AnimationController(
+      value: 1.0,
+      vsync: context.vsync,
+      duration: const Duration(milliseconds: 200),
+      debugLabel: 'ScrollTopThenContentTopController',
+    )..addListener(notifier)..animateTo(top / maxTop);
+  }
 
   /// The [VoidCallback] to use when [top] is modified.
   final VoidCallback notifier;
 
-  /// The current veritcal offset.  When this is modified, [notifier] will be called.
-  double get top => _top;
-  double _top;
+  /// The current vertical offset.
+  double get top => _topAnimationController.value * maxTop;
 
   /// The minimum allowable vertical offset.
   final double minTop;
 
   /// The maximum allowable vertical offset.
   final double maxTop;
+
 
   VoidCallback _dragCancelCallback;
   // Tracks whether a drag down can affect the [top].
@@ -220,13 +238,30 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   bool _canFlingDown = false;
 
   AnimationController _ballisticController;
+  AnimationController _topAnimationController;
 
   // Ensure that top stays between _minTop and _maxTop, and update listeners
-  void _setTop(double delta) {
-    _top = (_top + delta).clamp(minTop, maxTop);
-    notifier();
+  void _addDeltaToTop(double delta) {
+    _topAnimationController.value += delta / maxTop;
   }
 
+  /// Animate the [top] value to [maxTop].
+  Future<Null> dismiss() {
+    return _topAnimationController.forward();
+  }
+
+  /// Animate the top value to [newTop], which will be clamped
+  /// between [minTop]..[maxTop].
+  ///
+  /// The [newTop] parameter must not be null.
+  Future<Null> animateTopTo(double newTop, {
+    Duration duration,
+    Curve curve,
+  }) {
+    assert(newTop != null);
+    newTop = newTop.clamp(minTop, maxTop);
+    return _topAnimationController.animateTo(newTop, duration: duration, curve: curve);
+  }
   @override
   void absorb(ScrollPosition other) {
     // Need to make sure these get reset -
@@ -241,7 +276,7 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
     if (top == minTop) {
       // <= because of iOS bounce overscroll
       if (pixels <= 0.0 && _canScrollDown) {
-        _setTop(delta);
+        _addDeltaToTop(delta);
         _canScrollDown = false;
       } else {
         if (pixels <= 0.0) {
@@ -250,7 +285,7 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
         super.applyUserOffset(delta);
       }
     } else {
-      _setTop(delta);
+      _addDeltaToTop(delta);
     }
   }
 
@@ -277,16 +312,16 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
       vsync: context.vsync,
     );
     void _tickUp() {
-      _setTop(-_ballisticController.value);
-      if (_top == minTop) {
+      _addDeltaToTop(-_ballisticController.value);
+      if (top == minTop) {
         _ballisticController.stop();
         super.goBallistic(velocity);
       }
     }
 
     void _tickDown() {
-      _setTop(_ballisticController.value.abs());
-      if (_top == maxTop) {
+      _addDeltaToTop(_ballisticController.value.abs());
+      if (top == maxTop) {
         _ballisticController.stop();
         super.goBallistic(velocity);
       }
@@ -313,7 +348,8 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
 
   @override
   void dispose() {
-    _ballisticController.dispose();
+    _ballisticController?.dispose();
+    _topAnimationController?.dispose();
     super.dispose();
   }
 }
