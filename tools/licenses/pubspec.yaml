@@ -1,6 +1,6 @@
 name: licenses
 dependencies:
   path: ^1.3.0
-  archive: ^1.0.24
-  args: 0.13.7
+  archive: ^2.0.4
+  args: 1.5.0
   crypto: ^2.0.2+1
