@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+//ignore: Remove this once Google catches up with dev.4 Dart.
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
 
