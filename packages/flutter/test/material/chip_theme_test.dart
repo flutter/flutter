@@ -64,7 +64,9 @@ void main() {
     bool value;
 
     Widget buildChip(ChipThemeData data) {
-      return Directionality(
+      return MaterialApp(
+        locale: const Locale('en', 'us'),
+        home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: MediaQueryData.fromWindow(window),
@@ -88,7 +90,7 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -111,7 +113,8 @@ void main() {
     );
     const bool value = false;
     Widget buildChip(ChipThemeData data) {
-      return Directionality(
+      return MaterialApp(
+        home: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: MediaQueryData.fromWindow(window),
@@ -138,7 +141,7 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
     }
 
     await tester.pumpWidget(buildChip(chipTheme));

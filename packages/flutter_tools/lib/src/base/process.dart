@@ -11,10 +11,10 @@ import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
 
-typedef String StringConverter(String string);
+typedef StringConverter = String Function(String string);
 
 /// A function that will be run before the VM exits.
-typedef Future<dynamic> ShutdownHook();
+typedef ShutdownHook = Future<dynamic> Function();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 // Convert most of these into one or more lightweight wrappers around the

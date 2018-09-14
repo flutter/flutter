@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 
 /// Signature for [debugPrint] implementations.
-typedef void DebugPrintCallback(String message, { int wrapWidth });
+typedef DebugPrintCallback = void Function(String message, { int wrapWidth });
 
 /// Prints a message to the console, which you can access using the "flutter"
 /// tool's "logs" command ("flutter logs").
