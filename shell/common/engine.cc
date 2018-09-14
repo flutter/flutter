@@ -47,7 +47,6 @@ Engine::Engine(Delegate& delegate,
     : delegate_(delegate),
       settings_(std::move(settings)),
       animator_(std::move(animator)),
-      load_script_error_(tonic::kNoError),
       activity_running_(false),
       have_surface_(false),
       weak_factory_(this) {
@@ -203,10 +202,6 @@ bool Engine::UIIsolateHasLivePorts() {
 
 tonic::DartErrorHandleType Engine::GetUIIsolateLastError() {
   return runtime_controller_->GetLastError();
-}
-
-tonic::DartErrorHandleType Engine::GetLoadScriptError() {
-  return load_script_error_;
 }
 
 void Engine::OnOutputSurfaceCreated() {
