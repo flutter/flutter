@@ -1217,7 +1217,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // bottom sheet.
   final List<_PersistentBottomSheet> _dismissedBottomSheets = <_PersistentBottomSheet>[];
   PersistentBottomSheetController<dynamic> _currentBottomSheet;
-  ScrollTopThenContentController _bottomSheetScrollController;
+  BottomSheetScrollController _bottomSheetScrollController;
   bool _showBodyScrim = false;
   Color _bodyScrimColor;
 
@@ -1236,8 +1236,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void _closeCurrentBottomSheet() {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
-      // TODO(dnfield): properly use 
-//      assert(_currentBottomSheet == null);
+      assert(() {
+        _currentBottomSheet._completer.future.whenComplete(() {
+          assert(_currentBottomSheet = null);
+        });
+        return true;
+      }());
     }
   }
 
@@ -1249,9 +1253,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _bottomSheetScrollController = BottomSheet.createScrollController(
       top: initialHeight ?? window.physicalSize.height / window.devicePixelRatio / 2,
     )..addTopListener(() => setState(() {
-      final double screenHeight = window.physicalSize.height / window.devicePixelRatio;
+      final double screenHeight = window.physicalSize.height /
+          window.devicePixelRatio;
       floatingActionButtonVisibilityValue =
-          _bottomSheetScrollController.top / (screenHeight * _kBottomSheetDominatesPercentage);
+          _bottomSheetScrollController.top /
+              (screenHeight * _kBottomSheetDominatesPercentage);
       _bodyScrimColor = const Color(0xFF000000).withOpacity(
         math.max(
           _kMinBottomSheetScrimOpacity,
@@ -1271,16 +1277,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       assert(_currentBottomSheet._widget == bottomSheet);
       assert(bottomSheetKey.currentState != null);
       showFloatingActionButton();
-      bottomSheetKey.currentState.close().then((Null value) {
+
+      final Future<Null> closing = bottomSheetKey.currentState.close();
+
+      void _closed(Null value) {
         setState(() {
           _currentBottomSheet = null;
-          _bottomSheetScrollController.dispose();
         });
-      if (_bottomSheetScrollController.animationStatus != AnimationStatus.completed)
-        _dismissedBottomSheets.add(bottomSheet);
+
+
+        if (_bottomSheetScrollController.animationStatus != AnimationStatus.completed)
+          _dismissedBottomSheets.add(bottomSheet);
+
+        _bottomSheetScrollController.dispose();
 
         completer.complete();
-      });
+      }
+
+      if (closing != null)
+        closing.then(_closed);
+      else
+        _closed(null);
     }
 
     final LocalHistoryEntry entry = isLocalHistoryEntry
@@ -1289,7 +1306,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     bottomSheet = _PersistentBottomSheet(
       key: bottomSheetKey,
-      enableDrag: isLocalHistoryEntry,
       onClosing: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         if (isLocalHistoryEntry)
@@ -1310,6 +1326,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (isLocalHistoryEntry)
       ModalRoute.of(context).addLocalHistoryEntry(entry);
+
+    // If the BottomSheet's child doesn't have a Scrollable widget in it that
+    // inherits our PrimaryScrollController, it will never become visible.
+    assert(() {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        assert(
+          _bottomSheetScrollController.top == _bottomSheetScrollController.maxTop,
+          'BottomSheets must be created with a scrollable widget that has primary set to true.\n\n'
+          'If you have content that you do not wish to have scrolled beyond its viewable '
+          'area, you should consider using a SingleChildScrollView.  Otherwise, consider using '
+          'a ListView or GridView.',
+        );
+      });
+      return true;
+    }());
 
     return PersistentBottomSheetController<T>._(
       bottomSheet,
@@ -1829,7 +1860,6 @@ class ScaffoldFeatureController<T extends Widget, U> {
 class _PersistentBottomSheet extends StatefulWidget {
   const _PersistentBottomSheet({
     Key key,
-    this.enableDrag = true,
     this.onClosing,
     this.onDismissed,
     this.builder,
@@ -1837,11 +1867,10 @@ class _PersistentBottomSheet extends StatefulWidget {
   }) : assert(scrollController != null),
        super(key: key);
 
-  final bool enableDrag;
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
-  final ScrollTopThenContentController scrollController;
+  final BottomSheetScrollController scrollController;
 
   @override
   _PersistentBottomSheetState createState() => _PersistentBottomSheetState();
@@ -1862,7 +1891,6 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       },
       child: BottomSheet(
         scrollController: widget.scrollController,
-        enableDrag: widget.enableDrag,
         onClosing: widget.onClosing,
         builder: widget.builder
       ),

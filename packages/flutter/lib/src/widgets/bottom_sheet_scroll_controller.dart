@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
 /// Conrolls a scrollable widget that is not fully visible on screen yet. While
@@ -21,17 +22,17 @@ import 'package:flutter/widgets.dart';
 ///
 /// See also:
 ///
-///  * [ScrollTopThenContentPosition], which manages the positioning logic for
+///  * [BottomSheetScrollPosition], which manages the positioning logic for
 ///    this controller.
 ///  * [PrimaryScrollController], which can be used to establish a
-///    [ScrollTopThenContentController] as the primary contorller for
+///    [BottomSheetScrollController] as the primary controller for
 ///    descendants.
-class ScrollTopThenContentController extends ScrollController {
-  /// Creates a new [ScrollTopThenContentController].
+class BottomSheetScrollController extends ScrollController {
+  /// Creates a new [BottomSheetScrollController].
   ///
   /// The [top] and [minTop] parameters must not be null. If [maxTop]
   /// is provided as null, it will be defaulted to the [ui.window] height.
-  ScrollTopThenContentController({
+  BottomSheetScrollController({
     double initialScrollOffset = 0.0,
     double top = 0.0,
     this.minTop = 0.0,
@@ -46,7 +47,7 @@ class ScrollTopThenContentController extends ScrollController {
         initialScrollOffset: initialScrollOffset,
       );
 
-  ScrollTopThenContentPosition _position;
+  BottomSheetScrollPosition _position;
 
   /// The current value of [top].  This controller will
   double get top => _position?.top ?? double.maxFinite;
@@ -58,12 +59,16 @@ class ScrollTopThenContentController extends ScrollController {
   /// The maximum allowable value for [top].
   final double maxTop;
 
+  /// The [AnimationStatus] of the [AnimationController] for the [top].
   AnimationStatus get animationStatus => _position?._topAnimationController?.status;
 
   /// Animate the [top] value to [maxTop].
   Future<Null> dismiss() {
-    return _position.dismiss();
+    return _position?.dismiss();
   }
+
+  /// Returns true if the widget would continue scrolling after [top] == [minTop].
+  bool get hasMoreScrollExtentThanTop => (_position?.maxScrollExtent ?? 0.0) >= top;
 
   /// Animate the [top] value to [newTop].
   Future<Null> animateTopTo(double newTop, {
@@ -74,9 +79,9 @@ class ScrollTopThenContentController extends ScrollController {
   }
 
   @override
-  ScrollTopThenContentPosition createScrollPosition(ScrollPhysics physics,
+  BottomSheetScrollPosition createScrollPosition(ScrollPhysics physics,
       ScrollContext context, ScrollPosition oldPosition) {
-    _position = ScrollTopThenContentPosition(
+    _position = BottomSheetScrollPosition(
       physics: physics,
       context: context,
       top: _initialTop,
@@ -179,24 +184,24 @@ class ScrollTopThenContentController extends ScrollController {
 }
 
 /// A scroll position that manages scroll activities for
-/// [ScrollTopThenContentController], which delegates its [top]
+/// [BottomSheetScrollController], which delegates its [top]
 /// member to this class.
 ///
 /// This class is a concrete subclass of [ScrollPosition] logic that handles a
 /// single [ScrollContext], such as a [Scrollable]. An instance of this class
 /// manages [ScrollActivity] instances, which changes the
-/// [ScrollTopThenContentController.top] or visible content offset in the
+/// [BottomSheetScrollController.top] or visible content offset in the
 /// [Scrollable]'s [Viewport].
 ///
 /// See also:
 ///
-///  * [ScrollTopThenContentController], which uses this as its [ScrollPosition].
-class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
-  /// Creates a new [ScrollTopThenContentPosition].
+///  * [BottomSheetScrollController], which uses this as its [ScrollPosition].
+class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
+  /// Creates a new [BottomSheetScrollPosition].
   ///
   /// The [top], [notifier], and [minTop] parameters must not be null.  If [maxTop]
   /// is null, it will be defaulted to [double.maxFinite].
-  ScrollTopThenContentPosition({
+  BottomSheetScrollPosition({
     @required double top,
     @required this.notifier,
     this.minTop = 0.0,
@@ -204,22 +209,23 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
     ScrollPosition oldPosition,
     ScrollPhysics physics,
     @required ScrollContext context,
+    this.freeze = false,
   })  : assert(top != null),
         assert(notifier != null),
         assert(minTop != null),
         assert(maxTop != null),
         assert(context != null),
         super(
-        physics: physics,
-        context: context,
-        initialPixels: 0.0,
-        oldPosition: oldPosition,
+          physics: physics,
+          context: context,
+          initialPixels: 0.0,
+          oldPosition: oldPosition,
       ) {
     _topAnimationController = AnimationController(
       value: 1.0,
       vsync: context.vsync,
       duration: const Duration(milliseconds: 200),
-      debugLabel: 'ScrollTopThenContentTopController',
+      debugLabel: 'BottomSheetScrollPositoinTopAnimationController',
     )..addListener(notifier)..animateTo(top / maxTop);
   }
 
@@ -235,6 +241,8 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   /// The maximum allowable vertical offset.
   final double maxTop;
 
+  /// Whether to allow scrolling/dragging after initial animation in.
+  final bool freeze;
 
   VoidCallback _dragCancelCallback;
   // Tracks whether a drag down can affect the [top].
@@ -260,12 +268,18 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   ///
   /// The [newTop] parameter must not be null.
   Future<Null> animateTopTo(double newTop, {
-    Duration duration,
-    Curve curve,
+    Duration duration = const Duration(milliseconds: 200),
+    Curve curve = Curves.linear,
   }) {
     assert(newTop != null);
+    assert(duration != null);
+    assert(curve != null);
     newTop = newTop.clamp(minTop, maxTop);
-    return _topAnimationController.animateTo(newTop, duration: duration, curve: curve);
+    return _topAnimationController.animateTo(
+      newTop / maxTop,
+      duration: duration,
+      curve: curve,
+    );
   }
   @override
   void absorb(ScrollPosition other) {
@@ -304,7 +318,10 @@ class ScrollTopThenContentPosition extends ScrollPositionWithSingleContext {
   @override
   double get maxScrollExtent {
     // SingleChildScrollView will mess us up by reporting that it has no more
-    // scroll extent, but we still may want to move it up.
+    // scroll extent, but we still may want to move it up or down.
+    if (freeze) {
+      return super.maxScrollExtent;
+    }
     return super.maxScrollExtent != null
       ? super.maxScrollExtent + .01
       : window.physicalSize.height / window.devicePixelRatio;

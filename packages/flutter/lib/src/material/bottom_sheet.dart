@@ -51,17 +51,15 @@ class BottomSheet extends StatefulWidget {
   const BottomSheet({
     Key key,
     this.scrollController,
-    this.enableDrag = true,
     @required this.onClosing,
     @required this.builder
-  }) : assert(enableDrag != null),
-       assert(onClosing != null),
+  }) : assert(onClosing != null),
        assert(builder != null),
        super(key: key);
 
-  /// The [ScrollTopThenContentController] that will act as the [PrimaryScrollController]
+  /// The [BottomSheetScrollController] that will act as the [PrimaryScrollController]
   /// for this [BottomSheet], controlling its height and its child's scroll offset.
-  final ScrollTopThenContentController scrollController;
+  final BottomSheetScrollController scrollController;
 
   /// Called when the bottom sheet begins to close.
   ///
@@ -76,18 +74,12 @@ class BottomSheet extends StatefulWidget {
   /// [Material] widget.
   final WidgetBuilder builder;
 
-  /// If true, the bottom sheet can dragged up and down and dismissed by swiping
-  /// downwards.
-  ///
-  /// Default is true.
-  final bool enableDrag;
-
   @override
   _BottomSheetState createState() => _BottomSheetState();
 
-  /// Creates a [ScrollTopThenContentController] suitable for animating the
+  /// Creates a [BottomSheetScrollController] suitable for animating the
   /// [BottomSheet].
-  static ScrollTopThenContentController createScrollController({
+  static BottomSheetScrollController createScrollController({
     double top = 0.0,
     double minTop = 0.0,
     double maxTop,
@@ -97,7 +89,7 @@ class BottomSheet extends StatefulWidget {
     assert(minTop != null);
     assert(maxTop != null && maxTop > minTop);
     assert(minTop <= top && top <= maxTop);
-    return ScrollTopThenContentController(
+    return BottomSheetScrollController(
       debugLabel: 'BottomSheetScrollController',
       top: top,
       minTop: minTop,
