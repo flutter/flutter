@@ -1248,10 +1248,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   PersistentBottomSheetController<T> _buildBottomSheet<T>(
       WidgetBuilder builder,
       bool isLocalHistoryEntry, {
-      double initialHeight,
+      double initialTop,
     }) {
     _bottomSheetScrollController = BottomSheet.createScrollController(
-      top: initialHeight ?? window.physicalSize.height / window.devicePixelRatio / 2,
+      top: initialTop ?? window.physicalSize.height / window.devicePixelRatio / 2,
     )..addTopListener(() => setState(() {
       final double screenHeight = window.physicalSize.height /
           window.devicePixelRatio;
@@ -1385,10 +1385,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder, { double initialTop }) {
     _closeCurrentBottomSheet();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, true);
+      _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialTop: initialTop);
     });
     return _currentBottomSheet;
   }
@@ -1658,7 +1658,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         ModalBarrier(
           dismissible: false,
-          color: _bodyScrimColor
+          color: _bodyScrimColor,
         ),
         _ScaffoldSlot.bodyScrim,
         removeLeftPadding: true,

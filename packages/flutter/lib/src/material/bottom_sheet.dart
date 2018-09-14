@@ -197,7 +197,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue),
                 child: BottomSheet(
-//                  animationController: widget.route._animationController,
                   onClosing: () => Navigator.pop(context),
                   builder: widget.route.builder,
                 ),
@@ -328,8 +327,9 @@ Future<T> showModalBottomSheet<T>({
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  double initialTop,
 }) {
   assert(context != null);
   assert(builder != null);
-  return Scaffold.of(context).showBottomSheet<T>(builder);
+  return Scaffold.of(context).showBottomSheet<T>(builder, initialTop: initialTop);
 }
