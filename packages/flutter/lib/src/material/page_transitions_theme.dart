@@ -17,8 +17,8 @@ final Tween<Offset> _kBottomUpTween = Tween<Offset>(
 
 // Slides the page upwards and fades it in, starting from 1/4 screen
 // below the top.
-class _GenericPageTransition extends StatelessWidget {
-  _GenericPageTransition({
+class _FadeUpwardsPageTransition extends StatelessWidget {
+  _FadeUpwardsPageTransition({
     Key key,
     @required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     @required this.child,
@@ -47,8 +47,8 @@ class _GenericPageTransition extends StatelessWidget {
 }
 
 // This transition is intended to match the default for Android P.
-class _MountainViewPageTransition extends StatelessWidget {
-  const _MountainViewPageTransition({
+class _OpenUpwardsPageTransition extends StatelessWidget {
+  const _OpenUpwardsPageTransition({
     Key key,
     this.animation,
     this.secondaryAnimation,
@@ -172,8 +172,8 @@ class _MountainViewPageTransition extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [GenericPageTransitionsBuilder], which defines a default page transition.
-///  * [MountainViewPageTransitionsBuilder], which defines a page transition
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
@@ -218,13 +218,13 @@ abstract class PageTransitionsBuilder {
 ///
 /// See also:
 ///
-///  * [MountainViewPageTransitionsBuilder], which defines a page transition
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
-class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a GenericPageTransitionsBuilder with a null [platform].
-  const GenericPageTransitionsBuilder() : super(platform: null);
+class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a FadeUpwardsPageTransitionsBuilder with a null [platform].
+  const FadeUpwardsPageTransitionsBuilder() : super(platform: null);
 
   @override
   Widget buildTransitions<T>(
@@ -234,7 +234,7 @@ class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return _GenericPageTransition(routeAnimation: animation, child: child);
+    return _FadeUpwardsPageTransition(routeAnimation: animation, child: child);
   }
 }
 
@@ -245,13 +245,13 @@ class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
 /// The [platform] for this builder [TargetPlatform.android].
 ///
 /// See also:
-///  * [GenericPageTransitionsBuilder], which defines a default page transition.
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
-class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a MountainViewPageTransitionsBuilder with a
+class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
+  /// Construct a OpenUpwardsPageTransitionsBuilder with a
   /// [TargetPlatform.android] [platform].
-  const MountainViewPageTransitionsBuilder() : super(platform: TargetPlatform.android);
+  const OpenUpwardsPageTransitionsBuilder() : super(platform: TargetPlatform.android);
 
   @override
   Widget buildTransitions<T>(
@@ -261,7 +261,7 @@ class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return _MountainViewPageTransition(
+    return _OpenUpwardsPageTransition(
       animation: animation,
       secondaryAnimation: secondaryAnimation,
       child: child,
@@ -276,8 +276,8 @@ class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 /// See also:
 ///
-///  * [GenericPageTransitionsBuilder], which defines a default page transition.
-///  * [MountainViewPageTransitionsBuilder], which defines a page transition
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Construct a CupertinoPageTransitionsBuilder with a
@@ -310,8 +310,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 ///  * [ThemeData.pageTransitionsTheme], which defines the default page
 ///    transitions for the overall theme.
-///  * [GenericPageTransitionsBuilder], which defines a default page transition.
-///  * [MountainViewPageTransitionsBuilder], which defines a page transition
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
@@ -321,11 +321,11 @@ class PageTransitionsTheme extends Diagnosticable {
   ///
   /// The [builders] parameter must not be null.
   ///
-  /// By default the list of builders is: [GenericPageTransitionBuilder],
+  /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder],
   /// [CupertinoPageTransitionsBuilder].
   const PageTransitionsTheme({
     this.builders = const <PageTransitionsBuilder>[
-      GenericPageTransitionsBuilder(),
+      FadeUpwardsPageTransitionsBuilder(),
       CupertinoPageTransitionsBuilder(),
     ],
   }) : assert(builders != null);
@@ -339,7 +339,7 @@ class PageTransitionsTheme extends Diagnosticable {
   ///
   /// If a builder with a matching platform is not found, the first
   /// builder whose platform is null is used. By default that's the
-  /// [GenericPageTransitionBuilder].
+  /// [FadeUpwardsPageTransitionsBuilder].
   ///
   /// [MaterialPageRoute.builderTransitions] delegates to this method.
   Widget buildTransitions<T>(

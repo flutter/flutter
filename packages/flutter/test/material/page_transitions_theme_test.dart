@@ -41,7 +41,7 @@ void main() {
     expect(find.byType(CupertinoPageTransition), findsOneWidget);
   });
 
-  testWidgets('Default PageTranstionsTheme builds a _GenericPageTransition for android', (WidgetTester tester) async {
+  testWidgets('Default PageTranstionsTheme builds a _FadeUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(
@@ -59,23 +59,23 @@ void main() {
       ),
     );
 
-    Finder findGenericPageTransition() {
+    Finder findFadeUpwardsPageTransition() {
       return find.descendant(
         of: find.byType(MaterialApp),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_GenericPageTransition'),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_FadeUpwardsPageTransition'),
       );
     }
 
     expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
-    expect(findGenericPageTransition(), findsOneWidget);
+    expect(findFadeUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
-    expect(findGenericPageTransition(), findsOneWidget);
+    expect(findFadeUpwardsPageTransition(), findsOneWidget);
   });
 
-  testWidgets('pageTranstionsTheme override builds a _MountainViewPageTransition for android', (WidgetTester tester) async {
+  testWidgets('pageTranstionsTheme override builds a _OpenUpwardsPageTransition for android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => Material(
         child: FlatButton(
@@ -92,8 +92,8 @@ void main() {
           platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: <PageTransitionsBuilder>[
-              GenericPageTransitionsBuilder(),
-              MountainViewPageTransitionsBuilder(), // creates a _MoutainViewPageTransition
+              FadeUpwardsPageTransitionsBuilder(),
+              OpenUpwardsPageTransitionsBuilder(), // creates a _MoutainViewPageTransition
             ],
           ),
         ),
@@ -101,20 +101,20 @@ void main() {
       ),
     );
 
-    Finder findMountainViewPageTransition() {
+    Finder findOpenUpwardsPageTransition() {
       return find.descendant(
         of: find.byType(MaterialApp),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_MountainViewPageTransition'),
+        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_OpenUpwardsPageTransition'),
       );
     }
 
     expect(Theme.of(tester.element(find.text('push'))).platform, TargetPlatform.android);
-    expect(findMountainViewPageTransition(), findsOneWidget);
+    expect(findOpenUpwardsPageTransition(), findsOneWidget);
 
     await tester.tap(find.text('push'));
     await tester.pumpAndSettle();
     expect(find.text('page b'), findsOneWidget);
-    expect(findMountainViewPageTransition(), findsOneWidget);
+    expect(findOpenUpwardsPageTransition(), findsOneWidget);
   });
 
 }
