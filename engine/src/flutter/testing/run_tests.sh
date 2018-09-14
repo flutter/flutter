@@ -2,7 +2,7 @@
 
 set -ex
 
-out/host_debug_unopt/fxl_unittests
+out/host_debug_unopt/fml_unittests
 out/host_debug_unopt/synchronization_unittests
 
 flutter/ci/analyze.sh

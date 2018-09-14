@@ -29,9 +29,9 @@ void main() {
     dynamic fake = new FakeEverything();
     dynamic no = new NegativeSpace();
     Paint paint = new Paint();
-    Rect rect = new Rect.fromLTRB(double.NAN, double.NAN, double.NAN, double.NAN);
+    Rect rect = new Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
     List<dynamic> list = <dynamic>[fake, fake];
-    Offset offset = new Offset(double.NAN, double.NAN);
+    Offset offset = new Offset(double.nan, double.nan);
     Path path = new Path();
 
     try { new Canvas(null, null); } catch (error) { }
@@ -53,7 +53,7 @@ void main() {
     testCanvas((Canvas canvas) => canvas.drawArc(fake, 0.0, 0.0, false, paint));
     testCanvas((Canvas canvas) => canvas.drawArc(rect, 0.0, 0.0, false, fake));
     testCanvas((Canvas canvas) => canvas.drawAtlas(fake, list, list, list, fake, rect, paint));
-    testCanvas((Canvas canvas) => canvas.drawCircle(offset, double.NAN, paint));
+    testCanvas((Canvas canvas) => canvas.drawCircle(offset, double.nan, paint));
     testCanvas((Canvas canvas) => canvas.drawColor(fake, fake));
     testCanvas((Canvas canvas) => canvas.drawDRRect(fake, fake, fake));
     testCanvas((Canvas canvas) => canvas.drawImage(fake, offset, paint));
@@ -72,24 +72,24 @@ void main() {
     testCanvas((Canvas canvas) => canvas.drawRawPoints(fake, list, paint));
     testCanvas((Canvas canvas) => canvas.drawRect(rect, paint));
     testCanvas((Canvas canvas) => canvas.drawRRect(fake, paint));
-    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.NAN, null));
-    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.NAN, false));
-    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.NAN, true));
-    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.NAN, no));
-    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.NAN, fake));
+    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, null));
+    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, false));
+    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, true));
+    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, no));
+    testCanvas((Canvas canvas) => canvas.drawShadow(path, color, double.nan, fake));
     testCanvas((Canvas canvas) => canvas.drawVertices(fake, null, paint));
     testCanvas((Canvas canvas) => canvas.getSaveCount());
     testCanvas((Canvas canvas) => canvas.restore());
-    testCanvas((Canvas canvas) => canvas.rotate(double.NAN));
+    testCanvas((Canvas canvas) => canvas.rotate(double.nan));
     testCanvas((Canvas canvas) => canvas.save());
     testCanvas((Canvas canvas) => canvas.saveLayer(rect, paint));
     testCanvas((Canvas canvas) => canvas.saveLayer(fake, fake));
     testCanvas((Canvas canvas) => canvas.saveLayer(null, null));
-    testCanvas((Canvas canvas) => canvas.scale(double.NAN, double.NAN));
-    testCanvas((Canvas canvas) => canvas.skew(double.NAN, double.NAN));
+    testCanvas((Canvas canvas) => canvas.scale(double.nan, double.nan));
+    testCanvas((Canvas canvas) => canvas.skew(double.nan, double.nan));
     testCanvas((Canvas canvas) => canvas.transform(fake));
     testCanvas((Canvas canvas) => canvas.transform(no));
     testCanvas((Canvas canvas) => canvas.transform(null));
-    testCanvas((Canvas canvas) => canvas.translate(double.NAN, double.NAN));
+    testCanvas((Canvas canvas) => canvas.translate(double.nan, double.nan));
   });
 }
