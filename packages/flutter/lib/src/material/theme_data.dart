@@ -212,6 +212,7 @@ class ThemeData extends Diagnosticable {
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
+
     return ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -265,6 +266,9 @@ class ThemeData extends Diagnosticable {
   /// create intermediate themes based on two themes created with the
   /// [new ThemeData] constructor.
   const ThemeData.raw({
+    // Warning: make sure these properties are in the exact same order as in
+    // operator == and in the hashValues method and in the order of fields
+    // in this class, and in the lerp() method.
     @required this.brightness,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
@@ -549,7 +553,11 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// Default [PageRoute] transitions per [TargetPlatform].
+  /// Default [MaterialPageRoute] transitions per [TargetPlatform].
+  ///
+  /// [MaterialPageRoute.buildTransitions] delegates to a [PageTransitionsBuilder]
+  /// whose [PageTransitionsBuilder.platform] matches [platform]. If a matching
+  /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
@@ -734,6 +742,8 @@ class ThemeData extends Diagnosticable {
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t),
+      accentColor: Color.lerp(a.accentColor, b.accentColor, t),
+      accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t),
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
       cardColor: Color.lerp(a.cardColor, b.cardColor, t),
@@ -745,6 +755,7 @@ class ThemeData extends Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
+      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t),
@@ -752,12 +763,9 @@ class ThemeData extends Diagnosticable {
       textSelectionHandleColor: Color.lerp(a.textSelectionHandleColor, b.textSelectionHandleColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t),
-      accentColor: Color.lerp(a.accentColor, b.accentColor, t),
-      accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       hintColor: Color.lerp(a.hintColor, b.hintColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
-      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       primaryTextTheme: TextTheme.lerp(a.primaryTextTheme, b.primaryTextTheme, t),
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
@@ -778,9 +786,16 @@ class ThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final ThemeData otherData = other;
+    // Warning: make sure these properties are in the exact same order as in
+    // hashValues() and in the raw constructor and in the order of fields in
+    // the class and in the lerp() method.
     return (otherData.brightness == brightness) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&
+           (otherData.primaryColorLight == primaryColorLight) &&
+           (otherData.primaryColorDark == primaryColorDark) &&
+           (otherData.accentColor == accentColor) &&
+           (otherData.accentColorBrightness == accentColorBrightness) &&
            (otherData.canvasColor == canvasColor) &&
            (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
            (otherData.bottomAppBarColor == bottomAppBarColor) &&
@@ -801,8 +816,6 @@ class ThemeData extends Diagnosticable {
            (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
            (otherData.backgroundColor == backgroundColor) &&
            (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
-           (otherData.accentColor == accentColor) &&
-           (otherData.accentColorBrightness == accentColorBrightness) &&
            (otherData.indicatorColor == indicatorColor) &&
            (otherData.hintColor == hintColor) &&
            (otherData.errorColor == errorColor) &&
@@ -822,10 +835,18 @@ class ThemeData extends Diagnosticable {
 
   @override
   int get hashCode {
+    // The hashValues() function supports up to 20 arguments.
     return hashValues(
+      // Warning: make sure these properties are in the exact same order as in
+      // operator == and in the raw constructor and in the order of fields in
+      // the class and in the lerp() method.
       brightness,
       primaryColor,
       primaryColorBrightness,
+      primaryColorLight,
+      primaryColorDark,
+      accentColor,
+      accentColorBrightness,
       canvasColor,
       scaffoldBackgroundColor,
       bottomAppBarColor,
@@ -836,35 +857,32 @@ class ThemeData extends Diagnosticable {
       splashFactory,
       selectedRowColor,
       unselectedWidgetColor,
-      disabledColor,
       buttonColor,
       buttonTheme,
-      secondaryHeaderColor,
-      textSelectionColor,
-      textSelectionHandleColor,
-      hashValues(  // hashValues only supports 20 arguments
-        toggleableActiveColor,
+      hashValues(
+        secondaryHeaderColor,
+        textSelectionColor,
+        cursorColor,
+        textSelectionHandleColor,
         backgroundColor,
-        accentColor,
-        accentColorBrightness,
-        indicatorColor,
         dialogBackgroundColor,
+        indicatorColor,
         hintColor,
         errorColor,
+        toggleableActiveColor,
         textTheme,
         primaryTextTheme,
         accentTextTheme,
-        iconTheme,
         inputDecorationTheme,
+        iconTheme,
         primaryIconTheme,
         accentIconTheme,
         sliderTheme,
         chipTheme,
         platform,
-        materialTapTargetSize,
         hashValues(
+          materialTapTargetSize,
           pageTransitionsTheme,
-          cursorColor,
         ),
       ),
     );

@@ -125,7 +125,7 @@ class _MountainViewPageTransition extends StatelessWidget {
 
         return AnimatedBuilder(
           animation: animation,
-          builder: (BuildContext context, Widget _) {
+          builder: (BuildContext context, Widget child) {
             return Container(
               color: Colors.black.withOpacity(opacityAnimation.value),
               alignment: Alignment.bottomLeft,
@@ -135,24 +135,25 @@ class _MountainViewPageTransition extends StatelessWidget {
                   child: OverflowBox(
                     alignment: Alignment.bottomLeft,
                     maxHeight: size.height,
-                    child: AnimatedBuilder(
-                      animation: secondaryAnimation,
-                      child: FractionalTranslation(
-                        translation: primaryTranslationAnimation.value,
-                        child: child,
-                      ),
-                      builder: (BuildContext context, Widget child) {
-                        return FractionalTranslation(
-                          translation: secondaryTranslationAnimation.value,
-                          child: child,
-                        );
-                      },
-                    ),
+                    child: child,
                   ),
                 ),
               ),
             );
           },
+          child: AnimatedBuilder(
+            animation: secondaryAnimation,
+            child: FractionalTranslation(
+              translation: primaryTranslationAnimation.value,
+              child: child,
+            ),
+            builder: (BuildContext context, Widget child) {
+              return FractionalTranslation(
+                translation: secondaryTranslationAnimation.value,
+                child: child,
+              );
+            },
+          ),
         );
       },
     );
@@ -175,7 +176,7 @@ class _MountainViewPageTransition extends StatelessWidget {
 ///  * [MountainViewPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches nativer iOS page transitions.
+///    transition that matches native iOS page transitions.
 abstract class PageTransitionsBuilder {
   const PageTransitionsBuilder({ this.platform });
 
@@ -209,7 +210,7 @@ abstract class PageTransitionsBuilder {
 ///  * [MountainViewPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches nativer iOS page transitions.
+///    transition that matches native iOS page transitions.
 class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
   const GenericPageTransitionsBuilder() : super(platform: null);
 
@@ -234,7 +235,7 @@ class GenericPageTransitionsBuilder extends PageTransitionsBuilder {
 /// See also:
 ///  * [GenericPageTransitionsBuilder], which defines a default page transition.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
-///    transition that matches nativer iOS page transitions.
+///    transition that matches native iOS page transitions.
 class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
   const MountainViewPageTransitionsBuilder() : super(platform: TargetPlatform.android);
 
@@ -264,7 +265,6 @@ class MountainViewPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [GenericPageTransitionsBuilder], which defines a default page transition.
 ///  * [MountainViewPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
-///  * [GenericPageTransitionsBuilder], which defines a default page transition.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const CupertinoPageTransitionsBuilder() : super(platform: TargetPlatform.iOS);
 
@@ -289,8 +289,19 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 /// If a builder with a matching platform is not found, the first builder
 /// with a null [PageTransitionsBuilder.platform] is used.
+///
+/// See also:
+///
+///  * [GenericPageTransitionsBuilder], which defines a default page transition.
+///  * [MountainViewPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
 @immutable
 class PageTransitionsTheme extends Diagnosticable {
+  /// Construct a PageTransitionsTheme [ThemeData] value.
+  ///
+  /// The [builders] parameter must not be null.
   const PageTransitionsTheme({
     this.builders = const <PageTransitionsBuilder>[
       GenericPageTransitionsBuilder(),
@@ -300,6 +311,10 @@ class PageTransitionsTheme extends Diagnosticable {
 
   final Iterable<PageTransitionsBuilder> builders;
 
+  /// Wraps the child with one or more transition widgets which define how [route]
+  /// arrives on and leaves the screen.
+  ///
+  /// [MaterialPageRoute.builderTransitions] delegates to this method.
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,

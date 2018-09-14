@@ -176,26 +176,21 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     super.dispose();
   }
 
-  /// Whether a pop gesture is currently underway.
-  ///
-  /// This starts returning true when pop gesture is started by the user. It
-  /// returns false if that has not yet occurred or if the most recent such
-  /// gesture has completed.
+  /// True if a Cupertino pop gesture is currently underway for [route].
   ///
   /// See also:
   ///
-  ///  * [popGestureEnabled], which returns whether a pop gesture is appropriate
-  ///    in the first place.
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
   static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
   static final Set<PageRoute<dynamic>> _popGestureInProgress = Set<PageRoute<dynamic>>();
 
   /// Whether a pop gesture can be started by the user.
   ///
-  /// This returns true if the user can edge-swipe to a previous route,
-  /// otherwise false.
+  /// Returns true if the user can edge-swipe to a previous route.
   ///
-  /// This will return false once [popGestureInProgress] is true, but
-  /// [popGestureInProgress] can only become true if [popGestureEnabled] was
+  /// Returns false once [isPopGestureInProgress] is true, but
+  /// [isPopGestureInProgress] can only become true if [popGestureEnabled] was
   /// true first.
   ///
   /// This should only be used between frames, not during build.
@@ -278,7 +273,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///
   /// See also:
   ///
-  ///  * [CupertinoPageTransitionsBuilder] - which uses this method to define a
+  ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
   ///    [PageTransitionsBuilder] for the [PageTransitionTheme].
   static Widget buildPageTransitions<T>(
     PageRoute<T> route,
@@ -306,6 +301,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
         ),
       );
     }
+    assert(false);
+    return null;
   }
 
   @override
@@ -368,11 +365,10 @@ class CupertinoPageTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    // TODO(ianh): tell the transform to be un-transformed for hit testing
-    // but not while being controlled by a gesture.
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
+      transformHitTests: false,
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,
