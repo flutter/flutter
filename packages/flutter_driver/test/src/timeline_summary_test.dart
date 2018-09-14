@@ -266,6 +266,8 @@ void main() {
           ]).summaryJson,
           <String, dynamic>{
             'average_frame_build_time_millis': 7.0,
+            '90th_percentile_frame_build_time_millis': 11.0,
+            '99th_percentile_frame_build_time_millis': 11.0,
             'worst_frame_build_time_millis': 11.0,
             'missed_frame_build_budget_count': 2,
             'average_frame_rasterizer_time_millis': 8.0,
@@ -317,6 +319,8 @@ void main() {
         expect(json.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,
           'worst_frame_build_time_millis': 11.0,
+          '90th_percentile_frame_build_time_millis': 11.0,
+          '99th_percentile_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,
           'average_frame_rasterizer_time_millis': 8.0,
           '90th_percentile_frame_rasterizer_time_millis': 12.0,
