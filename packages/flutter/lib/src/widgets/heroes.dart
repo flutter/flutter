@@ -18,12 +18,12 @@ import 'transitions.dart';
 /// This is typically used with a [HeroController] to provide an animation for
 /// [Hero] positions that looks nicer than a linear movement. For example, see
 /// [MaterialRectArcTween].
-typedef Tween<Rect> CreateRectTween(Rect begin, Rect end);
+typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
 /// A function that lets [Hero]s self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
-typedef Widget HeroFlightShuttleBuilder(
+typedef HeroFlightShuttleBuilder = Widget Function(
   BuildContext flightContext,
   Animation<double> animation,
   HeroFlightDirection flightDirection,
@@ -31,7 +31,7 @@ typedef Widget HeroFlightShuttleBuilder(
   BuildContext toHeroContext,
 );
 
-typedef void _OnFlightEnded(_HeroFlight flight);
+typedef _OnFlightEnded = void Function(_HeroFlight flight);
 
 /// Direction of the hero's flight based on the navigation operation.
 enum HeroFlightDirection {

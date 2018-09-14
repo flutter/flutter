@@ -109,7 +109,7 @@ ro.build.version.codename=REL
 }
 
 /// A strategy for creating Process objects from a list of commands.
-typedef Process ProcessFactory(List<String> command);
+typedef ProcessFactory = Process Function(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {

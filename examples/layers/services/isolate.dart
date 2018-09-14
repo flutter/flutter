@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-typedef void OnProgressListener(double completed, double total);
-typedef void OnResultListener(String result);
+typedef OnProgressListener = void Function(double completed, double total);
+typedef OnResultListener = void Function(String result);
 
 // An encapsulation of a large amount of synchronous processing.
 //
