@@ -15,8 +15,6 @@ import 'scaffold.dart';
 import 'theme.dart';
 
 const Duration _kBottomSheetDuration = Duration(milliseconds: 200);
-const double _kMinFlingVelocity = 700.0;
-const double _kCloseProgressThreshold = 0.5;
 
 /// A material design bottom sheet.
 ///
