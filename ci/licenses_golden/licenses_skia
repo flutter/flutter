@@ -1,4 +1,4 @@
-Signature: df6172050acff69f2268723bb4859d7c
+Signature: b2aab89230c83ed1b9a73c02b71dd5d2
 
 UNUSED LICENSES:
 
@@ -3189,8 +3189,6 @@ FILE: ../../../third_party/skia/src/shaders/SkLocalMatrixShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkLocalMatrixShader.h
 FILE: ../../../third_party/skia/src/shaders/SkPictureShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkPictureShader.h
-FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient_gpu.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/SkTwoPointConicalGradient_gpu.h
 FILE: ../../../third_party/skia/src/utils/SkDashPath.cpp
 FILE: ../../../third_party/skia/src/utils/SkDashPathPriv.h
 FILE: ../../../third_party/skia/src/utils/SkEventTracer.cpp
@@ -5199,8 +5197,6 @@ FILE: ../../../third_party/skia/src/gpu/GrRenderTargetOpList.h
 FILE: ../../../third_party/skia/src/gpu/SkGpuDevice.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.cpp
 FILE: ../../../third_party/skia/src/ports/SkDebug_win.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientBitmapCache.cpp
-FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientBitmapCache.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2010 Google Inc.
 
