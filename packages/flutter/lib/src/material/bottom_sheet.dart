@@ -80,15 +80,18 @@ class BottomSheet extends StatefulWidget {
   /// Creates a [BottomSheetScrollController] suitable for animating the
   /// [BottomSheet].
   static BottomSheetScrollController createScrollController({
-    double top = 0.0,
+    double top,
     double minTop = 0.0,
     double maxTop,
   }) {
-    maxTop ??= window.physicalSize.height / window.devicePixelRatio;
-    assert(top != null);
     assert(minTop != null);
-    assert(maxTop != null && maxTop > minTop);
+
+    maxTop ??= window.physicalSize.height / window.devicePixelRatio;
+    top ??= maxTop / 2;
+
+    assert(maxTop > minTop);
     assert(minTop <= top && top <= maxTop);
+
     return BottomSheetScrollController(
       debugLabel: 'BottomSheetScrollController',
       top: top,
@@ -129,35 +132,36 @@ class _BottomSheetState extends State<BottomSheet> {
 // MODAL BOTTOM SHEETS
 
 class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetLayout(this.progress);
+  _ModalBottomSheetLayout(this.top);
 
-  final double progress;
+  final double top;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return BoxConstraints(
-      minWidth: constraints.maxWidth,
-      maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
-      maxHeight: constraints.maxHeight * 9.0 / 16.0
-    );
+  Size getSize(BoxConstraints constraints) {
+    return Size(constraints.maxWidth, top);
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(0.0, size.height - childSize.height * progress);
+    return Offset(0.0, top);
   }
 
   @override
   bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
-    return progress != oldDelegate.progress;
+    return top != oldDelegate.top;
   }
 }
 
 class _ModalBottomSheet<T> extends StatefulWidget {
-  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+  const _ModalBottomSheet({
+    Key key,
+    this.route,
+    @required this.scrollController,
+  }) : assert(scrollController != null),
+       super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
+  final BottomSheetScrollController scrollController;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -165,8 +169,13 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addTopListener(() => setState(() {}));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     String routeLabel;
     switch (defaultTargetPlatform) {
@@ -179,32 +188,21 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         break;
     }
 
-    return GestureDetector(
-      excludeFromSemantics: true,
-      onTap: () => Navigator.pop(context),
-      child: AnimatedBuilder(
-        animation: widget.route.animation,
-        builder: (BuildContext context, Widget child) {
-          // Disable the initial animation when accessible navigation is on so
-          // that the semantics are added to the tree at the correct time.
-          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
-          return Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            label: routeLabel,
-            explicitChildNodes: true,
-            child: ClipRect(
-              child: CustomSingleChildLayout(
-                delegate: _ModalBottomSheetLayout(animationValue),
-                child: BottomSheet(
-                  onClosing: () => Navigator.pop(context),
-                  builder: widget.route.builder,
-                ),
-              ),
-            ),
-          );
-        }
-      )
+    return Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      label: routeLabel,
+      explicitChildNodes: true,
+      child: ClipRect(
+        child: CustomSingleChildLayout(
+          delegate: _ModalBottomSheetLayout(widget.scrollController.top),
+          child: BottomSheet(
+            onClosing: () => Navigator.pop(context),
+            builder: widget.route.builder,
+            scrollController: widget.scrollController,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -214,11 +212,17 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
+    this.initialTop,
+    this.clampTop = false,
     RouteSettings settings,
   }) : super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
+  final double initialTop;
+  final bool clampTop;
+
+  BottomSheetScrollController _scrollController;
 
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
@@ -233,13 +237,23 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Color get barrierColor => Colors.black54;
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    _scrollController = BottomSheet.createScrollController(
+      top: initialTop,
+      minTop: clampTop ? initialTop : 0.0,
+    );
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(route: this),
+      child: _ModalBottomSheet<T>(route: this, scrollController: _scrollController,),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
@@ -263,6 +277,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// corresponding widget can be safely removed from the tree before the bottom
 /// sheet is closed.
 ///
+/// The `initialTop` argument will limit the
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -276,14 +292,21 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  double initialTop,
+  bool clampTop = false,
 }) {
+  assert(clampTop != null);
   assert(context != null);
   assert(builder != null);
+  assert(!clampTop || initialTop != null,
+    'If you wish to clamp the top, you must specify an initial value.');
   assert(debugCheckHasMaterialLocalizations(context));
   return Navigator.push(context, _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    initialTop: initialTop,
+    clampTop: clampTop,
   ));
 }
 
@@ -328,8 +351,16 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   double initialTop,
+  bool clampTop = false,
 }) {
   assert(context != null);
   assert(builder != null);
-  return Scaffold.of(context).showBottomSheet<T>(builder, initialTop: initialTop);
+  assert(clampTop != null);
+  assert(!clampTop || initialTop != null,
+    'If you wish to clamp the top, you must specify an initial value.');
+  return Scaffold.of(context).showBottomSheet<T>(
+    builder,
+    initialTop: initialTop,
+    clampTop: clampTop,
+  );
 }

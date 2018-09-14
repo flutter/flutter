@@ -7,6 +7,7 @@ import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 /// Conrolls a scrollable widget that is not fully visible on screen yet. While
@@ -45,7 +46,21 @@ class BottomSheetScrollController extends ScrollController {
         super(
         debugLabel: debugLabel,
         initialScrollOffset: initialScrollOffset,
-      );
+      ) {
+    // If the BottomSheet's child doesn't have a Scrollable widget in it that
+    // inherits our PrimaryScrollController, it will never become visible.
+    assert(() {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        assert(_position != null,
+          'BottomSheets must be created with a scrollable widget that has primary set to true.\n\n'
+          'If you have content that you do not wish to have scrolled beyond its viewable '
+          'area, you should consider using a SingleChildScrollView and seeting freeze to true. '
+          'Otherwise, consider using a ListView or GridView.',
+        );
+      });
+      return true;
+    }());
+  }
 
   BottomSheetScrollPosition _position;
 
@@ -66,9 +81,6 @@ class BottomSheetScrollController extends ScrollController {
   Future<Null> dismiss() {
     return _position?.dismiss();
   }
-
-  /// Returns true if the widget would continue scrolling after [top] == [minTop].
-  bool get hasMoreScrollExtentThanTop => (_position?.maxScrollExtent ?? 0.0) >= top;
 
   /// Animate the [top] value to [newTop].
   Future<Null> animateTopTo(double newTop, {
@@ -223,6 +235,8 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
       ) {
     _topAnimationController = AnimationController(
       value: 1.0,
+      upperBound: 1.0,
+      lowerBound: minTop / maxTop,
       vsync: context.vsync,
       duration: const Duration(milliseconds: 200),
       debugLabel: 'BottomSheetScrollPositoinTopAnimationController',
@@ -255,7 +269,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
   // Ensure that top stays between _minTop and _maxTop, and update listeners
   void _addDeltaToTop(double delta) {
-    _topAnimationController.value += delta / maxTop;
+    _topAnimationController.value += (delta / maxTop);
   }
 
   /// Animate the [top] value to [maxTop].
@@ -292,7 +306,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void applyUserOffset(double delta) {
-    if (top == minTop) {
+    if (top <= minTop) {
       // <= because of iOS bounce overscroll
       if (pixels <= 0.0 && _canScrollDown) {
         _addDeltaToTop(delta);
@@ -311,7 +325,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   @override
   double get minScrollExtent {
     // This prevents the physics simulation from thinking it shouldn't be
-    // doing anything when a user flings down from top == minTop.
+    // doing anything when a user flings down from top <= minTop.
     return _canFlingDown ? super.minScrollExtent + .01 : super.minScrollExtent;
   }
 
@@ -329,7 +343,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
   @override
   void goBallistic(double velocity) {
-    if (top == minTop || top == maxTop || velocity == 0.0) {
+    if (top <= minTop || top >= maxTop || velocity == 0.0) {
       super.goBallistic(velocity);
       return;
     }
@@ -344,7 +358,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     );
     void _tickUp() {
       _addDeltaToTop(-_ballisticController.value);
-      if (top == minTop) {
+      if (top <= minTop) {
         _ballisticController.stop();
         super.goBallistic(velocity);
       }
@@ -352,7 +366,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
     void _tickDown() {
       _addDeltaToTop(_ballisticController.value.abs());
-      if (top == maxTop) {
+      if (top >= maxTop) {
         _ballisticController.stop();
         super.goBallistic(velocity);
       }

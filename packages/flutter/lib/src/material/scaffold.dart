@@ -9,7 +9,6 @@ import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -1249,9 +1248,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       WidgetBuilder builder,
       bool isLocalHistoryEntry, {
       double initialTop,
+      bool clampTop = false,
     }) {
     _bottomSheetScrollController = BottomSheet.createScrollController(
-      top: initialTop ?? window.physicalSize.height / window.devicePixelRatio / 2,
+      top: initialTop,
+      minTop: clampTop ? initialTop : 0.0,
     )..addTopListener(() => setState(() {
       final double screenHeight = window.physicalSize.height /
           window.devicePixelRatio;
@@ -1284,13 +1285,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         setState(() {
           _currentBottomSheet = null;
         });
-
-
-        if (_bottomSheetScrollController.animationStatus != AnimationStatus.completed)
+        if (_bottomSheetScrollController.animationStatus != AnimationStatus.completed) {
           _dismissedBottomSheets.add(bottomSheet);
-
+        }
         _bottomSheetScrollController.dispose();
-
         completer.complete();
       }
 
@@ -1326,21 +1324,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (isLocalHistoryEntry)
       ModalRoute.of(context).addLocalHistoryEntry(entry);
-
-    // If the BottomSheet's child doesn't have a Scrollable widget in it that
-    // inherits our PrimaryScrollController, it will never become visible.
-    assert(() {
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
-        assert(
-          _bottomSheetScrollController.top == _bottomSheetScrollController.maxTop,
-          'BottomSheets must be created with a scrollable widget that has primary set to true.\n\n'
-          'If you have content that you do not wish to have scrolled beyond its viewable '
-          'area, you should consider using a SingleChildScrollView.  Otherwise, consider using '
-          'a ListView or GridView.',
-        );
-      });
-      return true;
-    }());
 
     return PersistentBottomSheetController<T>._(
       bottomSheet,
@@ -1385,10 +1368,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-  PersistentBottomSheetController<T> showBottomSheet<T>(WidgetBuilder builder, { double initialTop }) {
+  PersistentBottomSheetController<T> showBottomSheet<T>(
+      WidgetBuilder builder, {
+      double initialTop,
+      bool clampTop = false,
+  }) {
     _closeCurrentBottomSheet();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialTop: initialTop);
+      _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialTop: initialTop, clampTop: clampTop);
     });
     return _currentBottomSheet;
   }
