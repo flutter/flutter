@@ -83,13 +83,14 @@ class BottomSheet extends StatefulWidget {
     double top,
     double minTop = 0.0,
     double maxTop,
+    bool isPersistent = false,
   }) {
     assert(minTop != null);
 
     maxTop ??= window.physicalSize.height / window.devicePixelRatio;
     top ??= maxTop / 2;
 
-    assert(maxTop > minTop);
+    assert(maxTop >= minTop, 'Expected $maxTop >= $minTop.');
     assert(minTop <= top && top <= maxTop);
 
     return BottomSheetScrollController(
@@ -97,6 +98,7 @@ class BottomSheet extends StatefulWidget {
       top: top,
       minTop: minTop,
       maxTop: maxTop,
+      isPersistent: isPersistent,
     );
   }
 }
@@ -316,7 +318,7 @@ Future<T> showModalBottomSheet<T>({
 /// bottom sheet.
 ///
 /// To rebuild the bottom sheet (e.g. if it is stateful), call
-/// [PersistentBottomSheetController.setState] on the controller returned by
+/// [StandardBottomSheetController.setState] on the controller returned by
 /// this method.
 ///
 /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
@@ -347,7 +349,7 @@ Future<T> showModalBottomSheet<T>({
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
-PersistentBottomSheetController<T> showBottomSheet<T>({
+StandardBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   double initialTop,

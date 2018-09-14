@@ -39,9 +39,11 @@ class BottomSheetScrollController extends ScrollController {
     this.minTop = 0.0,
     this.maxTop = double.maxFinite,
     String debugLabel,
+    this.isPersistent = false,
   })  : assert(top != null),
         assert(minTop != null),
         assert(maxTop != null),
+        assert(isPersistent != null),
         _initialTop = top,
         super(
         debugLabel: debugLabel,
@@ -65,7 +67,7 @@ class BottomSheetScrollController extends ScrollController {
   BottomSheetScrollPosition _position;
 
   /// The current value of [top].  This controller will
-  double get top => _position?.top ?? double.maxFinite;
+  double get top => _position?.top ?? maxTop;
   final double _initialTop;
 
   /// The minimum allowable value for [top].
@@ -74,12 +76,16 @@ class BottomSheetScrollController extends ScrollController {
   /// The maximum allowable value for [top].
   final double maxTop;
 
+  /// Whether the bottom sheet is persistent or not.
+  final bool isPersistent;
+
   /// The [AnimationStatus] of the [AnimationController] for the [top].
   AnimationStatus get animationStatus => _position?._topAnimationController?.status;
 
   /// Animate the [top] value to [maxTop].
   Future<Null> dismiss() {
-    return _position?.dismiss();
+    if (!isPersistent)
+      return _position?.dismiss();
   }
 
   /// Animate the [top] value to [newTop].
@@ -101,6 +107,7 @@ class BottomSheetScrollController extends ScrollController {
       maxTop: maxTop,
       oldPosition: oldPosition,
       notifier: notifyTopListeners,
+      animateIn: !isPersistent,
     );
     return _position;
   }
@@ -166,15 +173,15 @@ class BottomSheetScrollController extends ScrollController {
           }
         } catch (exception, stack) {
           FlutterError.reportError(FlutterErrorDetails(
-              exception: exception,
-              stack: stack,
-              library: 'widgets library',
-              context: 'while dispatching notifications for $runtimeType',
-              informationCollector: (StringBuffer information) {
-                information
-                    .writeln('The $runtimeType sending notification was:');
-                information.write('  $this');
-              }));
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: 'while dispatching notifications for $runtimeType',
+            informationCollector: (StringBuffer information) {
+              information
+                  .writeln('The $runtimeType sending notification was:');
+              information.write('  $this');
+            }));
         }
       }
     }
@@ -221,12 +228,13 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     ScrollPosition oldPosition,
     ScrollPhysics physics,
     @required ScrollContext context,
-    this.freeze = false,
+    this.animateIn = true,
   })  : assert(top != null),
         assert(notifier != null),
         assert(minTop != null),
         assert(maxTop != null),
         assert(context != null),
+        assert(animateIn != null),
         super(
           physics: physics,
           context: context,
@@ -240,8 +248,13 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
       vsync: context.vsync,
       duration: const Duration(milliseconds: 200),
       debugLabel: 'BottomSheetScrollPositoinTopAnimationController',
-    )..addListener(notifier)..animateTo(top / maxTop);
+    )..addListener(notifier);
+    if (animateIn)
+      _topAnimationController.animateTo(top / maxTop);
   }
+
+  /// Whether the [top] will be animated initially.
+  final bool animateIn;
 
   /// The [VoidCallback] to use when [top] is modified.
   final VoidCallback notifier;
@@ -255,9 +268,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   /// The maximum allowable vertical offset.
   final double maxTop;
 
-  /// Whether to allow scrolling/dragging after initial animation in.
-  final bool freeze;
-
   VoidCallback _dragCancelCallback;
   // Tracks whether a drag down can affect the [top].
   bool _canScrollDown = false;
@@ -269,7 +279,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
 
   // Ensure that top stays between _minTop and _maxTop, and update listeners
   void _addDeltaToTop(double delta) {
-    _topAnimationController.value += (delta / maxTop);
+    _topAnimationController.value += delta / maxTop;
   }
 
   /// Animate the [top] value to [maxTop].
@@ -333,9 +343,6 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
   double get maxScrollExtent {
     // SingleChildScrollView will mess us up by reporting that it has no more
     // scroll extent, but we still may want to move it up or down.
-    if (freeze) {
-      return super.maxScrollExtent;
-    }
     return super.maxScrollExtent != null
       ? super.maxScrollExtent + .01
       : window.physicalSize.height / window.devicePixelRatio;
