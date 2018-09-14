@@ -370,32 +370,33 @@ void main() {
     });
 
     // This test currently fails because of an issue with FixedExtentScrollController.animateToItem().
-//    testWidgets('picker automatically scrolls away from invalid date', (WidgetTester tester) async {
-//      DateTime date;
-//      await tester.pumpWidget(
-//        new SizedBox(
-//          height: 400.0,
-//          width: 400.0,
-//          child: new Directionality(
-//            textDirection: TextDirection.ltr,
-//            child: new CupertinoDatePicker(
-//              mode: CupertinoDatePickerMode.date,
-//              onDateTimeChanged: (DateTime newDate) {
-//                date = newDate;
-//              },
-//              initialDateTime: new DateTime(2018, 3, 30),
-//            ),
-//          ),
-//        ),
-//      );
-//
-//      await tester.drag(find.text('March'), const Offset(0.0, 32.0));
-//
-//      expect(
-//        date,
-//        new DateTime(2018, 2, 28),
-//      );
-//    });
+    testWidgets('picker automatically scrolls away from invalid date', (WidgetTester tester) async {
+      DateTime date;
+      await tester.pumpWidget(
+        new SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+              initialDateTime: new DateTime(2018, 3, 30),
+            ),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('March'), const Offset(0.0, 32.0));
+      await tester.pumpAndSettle();
+      
+      expect(
+        date,
+        new DateTime(2018, 2, 28),
+      );
+    });
 
     testWidgets('picker automatically scrolls the am/pm column when the hour column changes enough', (WidgetTester tester) async {
       DateTime date;

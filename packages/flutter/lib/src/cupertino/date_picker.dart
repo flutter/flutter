@@ -585,10 +585,10 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       ));
     }
 
-    return new MediaQuery(
+    return MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.0),
-      child: new CustomMultiChildLayout(
-        delegate: new _DatePickerLayoutDelegate(
+      child: CustomMultiChildLayout(
+        delegate: _DatePickerLayoutDelegate(
           columnWidths: columnWidths,
           textDirectionFactor: textDirectionFactor,
         ),
@@ -646,6 +646,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   }
 
   Widget _buildDayPicker(double offAxisFraction, Function childPositioning) {
+    int daysInCurrentMonth = new DateTime(selectedYear, (selectedMonth + 1) % 12, 0).day;
     return new CupertinoPicker(
       scrollController: dayController,
       offAxisFraction: offAxisFraction,
@@ -660,7 +661,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
             widget.onDateTimeChanged(new DateTime(selectedYear, selectedMonth, selectedDay));
         });
       },
-      children: new List<Widget>.generate(31, (int index) {
+      children: new List<Widget>.generate(daysInCurrentMonth, (int index) {
         return childPositioning(new Text(localizations.datePickerDayOfMonth(index + 1)));
       }),
       looping: true,
@@ -790,7 +791,8 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         onNotification: (ScrollEndNotification notification) {
           // Whenever scrolling lands on an invalid entry, the picker
           // automatically scrolls to a valid one.
-          if (new DateTime(selectedYear, selectedMonth, selectedDay).day != selectedDay) {
+          int desiredDay = new DateTime(selectedYear, selectedMonth, selectedDay).day;
+          if (desiredDay != selectedDay) {
             // dayController.jumpToItem() won't work here, at least for now,
             // because jumpToItem() calls to goIdle(), which will trigger a
             // ScrollEndNotification at the same scroll position and therefore
@@ -799,10 +801,11 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
             // animateToItem() is not working properly.
             dayController.animateToItem(
-              dayController.selectedItem - 1,
-              duration: const Duration(milliseconds: 1),
+              dayController.selectedItem - desiredDay,
+              duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut);
           }
+          setState(() {});
         },
         child: new CustomMultiChildLayout(
           delegate: new _DatePickerLayoutDelegate(
