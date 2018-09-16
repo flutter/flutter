@@ -505,5 +505,5 @@ class CupertinoIcons {
   /// See also:
   /// 
   /// * [loop], which is similar, but thinner.
-  static const IconData loop_thick = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData loop_thick = IconData(0xf44a, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
