@@ -492,4 +492,18 @@ class CupertinoIcons {
   ///
   ///  * [pause], which is similar, but not filled in.
   static const IconData pause_solid = IconData(0xf478, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The infinity symbol.
+  /// 
+  /// See also:
+  /// 
+  /// * [loop_thick], which is similar, but thicker.
+  static const IconData loop = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The infinity symbol.
+  /// 
+  /// See also:
+  /// 
+  /// * [loop], which is similar, but thinner.
+  static const IconData loop_thick = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
