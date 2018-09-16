@@ -34,7 +34,6 @@ def flutter_root(f)
 end
 
 framework_dir = File.join('..', '.ios', 'Flutter')
-puts framework_dir
 
 engine_dir = File.join(framework_dir, 'engine')
 if !File.exist?(engine_dir)
