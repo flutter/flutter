@@ -24,6 +24,7 @@ Future<Null> main() async {
     section('Create Flutter module project');
 
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_module_test.');
+    final Directory projectDir = Directory(path.join(tempDir.path, 'hello'));
     try {
       await inDirectory(tempDir, () async {
         await flutter(
@@ -34,14 +35,14 @@ Future<Null> main() async {
 
       section('Add plugins');
 
-      final File pubspec = File(path.join(tempDir.path, 'hello', 'pubspec.yaml'));
+      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  battery:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
-      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(projectDir, () async {
         await flutter(
           'packages',
           options: <String>['get'],
@@ -50,7 +51,7 @@ Future<Null> main() async {
 
       section('Build Flutter module library archive');
 
-      await inDirectory(Directory(path.join(tempDir.path, 'hello', '.android')), () async {
+      await inDirectory(Directory(path.join(projectDir.path, '.android')), () async {
         await exec(
           './gradlew',
           <String>['flutter:assembleDebug'],
@@ -59,8 +60,7 @@ Future<Null> main() async {
       });
 
       final bool aarBuilt = exists(File(path.join(
-        tempDir.path,
-        'hello',
+        projectDir.path,
         '.android',
         'Flutter',
         'build',
@@ -75,7 +75,7 @@ Future<Null> main() async {
 
       section('Build ephemeral host app');
 
-      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(projectDir, () async {
         await flutter(
           'build',
           options: <String>['apk'],
@@ -83,8 +83,7 @@ Future<Null> main() async {
       });
 
       final bool ephemeralHostApkBuilt = exists(File(path.join(
-        tempDir.path,
-        'hello',
+        projectDir.path,
         'build',
         'host',
         'outputs',
@@ -99,13 +98,13 @@ Future<Null> main() async {
 
       section('Clean build');
 
-      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(projectDir, () async {
         await flutter('clean');
       });
 
       section('Running `flutter make-host-app-editable` to Materialize host app');
 
-      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(projectDir, () async {
         await flutter(
           'make-host-app-editable',
           options: <String>['android'],
@@ -114,7 +113,7 @@ Future<Null> main() async {
 
       section('Build materialized host app');
 
-      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(projectDir, () async {
         await flutter(
           'build',
           options: <String>['apk'],
@@ -122,8 +121,7 @@ Future<Null> main() async {
       });
 
       final bool materializedHostApkBuilt = exists(File(path.join(
-        tempDir.path,
-        'hello',
+        projectDir.path,
         'build',
         'host',
         'outputs',
@@ -145,11 +143,11 @@ Future<Null> main() async {
         hostApp,
       );
       copy(
-        File(path.join(tempDir.path, 'hello', '.android', 'gradlew')),
+        File(path.join(projectDir.path, '.android', 'gradlew')),
         hostApp,
       );
       copy(
-        File(path.join(tempDir.path, 'hello', '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        File(path.join(projectDir.path, '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
