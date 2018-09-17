@@ -148,9 +148,9 @@ void main() {
         home: Scaffold(
           body: const Placeholder(),
           bottomSheet: SingleChildScrollView(
+            key: bottomSheetKey,
             primary: true,
             child: Container(
-              key: bottomSheetKey,
               alignment: Alignment.center,
               height: 200.0,
               child: Builder(

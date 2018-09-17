@@ -1241,9 +1241,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(() {
-        if (_currentBottomSheet == null)
-          return true;
-        _currentBottomSheet._completer.future.whenComplete(() {
+        _currentBottomSheet?._completer?.future?.whenComplete(() {
           assert(_currentBottomSheet = null);
         });
         return true;
@@ -1306,7 +1304,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         setState(() {
           _currentBottomSheet = null;
         });
-        if (_bottomSheetScrollController.animationStatus != AnimationStatus.completed) {
+        if (!bottomSheet.isPersistent && _bottomSheetScrollController.animationStatus != AnimationStatus.completed) {
           _dismissedBottomSheets.add(bottomSheet);
         }
         _bottomSheetScrollController.dispose();
@@ -1341,6 +1339,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       builder: builder,
       scrollController: _bottomSheetScrollController,
+      isPersistent: !isLocalHistoryEntry,
     );
 
     if (isLocalHistoryEntry)
@@ -1882,6 +1881,7 @@ class _StandardBottomSheet extends StatefulWidget {
     this.onDismissed,
     this.builder,
     @required this.scrollController,
+    this.isPersistent = false,
   }) : assert(scrollController != null),
        super(key: key);
 
@@ -1889,6 +1889,7 @@ class _StandardBottomSheet extends StatefulWidget {
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
   final BottomSheetScrollController scrollController;
+  final bool isPersistent;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();

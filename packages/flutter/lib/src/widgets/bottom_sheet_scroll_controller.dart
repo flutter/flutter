@@ -86,6 +86,7 @@ class BottomSheetScrollController extends ScrollController {
   Future<Null> dismiss() {
     if (!isPersistent)
       return _position?.dismiss();
+    return null;
   }
 
   /// Animate the [top] value to [newTop].
