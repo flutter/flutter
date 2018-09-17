@@ -5,6 +5,9 @@
 #include "flutter/lib/ui/compositing/scene_builder.h"
 
 #include "flutter/flow/layers/backdrop_filter_layer.h"
+#if defined(OS_FUCHSIA)
+#include "flutter/flow/layers/child_scene_layer.h"
+#endif
 #include "flutter/flow/layers/clip_path_layer.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
 #include "flutter/flow/layers/clip_rrect_layer.h"

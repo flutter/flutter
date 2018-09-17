@@ -25,146 +25,148 @@ copy("generate_dart_ui") {
   ]
 }
 
-# Fuchsia's snapshot requires a different platform with extra dart: libraries.
-if (!is_fuchsia) {
-  compiled_action("generate_snapshot_bin") {
-    tool = "//third_party/dart/runtime/bin:gen_snapshot"
+compiled_action("generate_snapshot_bin") {
+  tool = "//third_party/dart/runtime/bin:gen_snapshot"
 
+  if (is_fuchsia || is_fuchsia_host) {
+    platform_kernel = "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
+  } else {
     platform_kernel = "$root_out_dir/flutter_patched_sdk/platform_strong.dill"
-    inputs = [
-      platform_kernel,
-    ]
-    deps = [
-      ":kernel_platform_files",
-    ]
+  }
 
-    vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot.bin"
-    vm_snapshot_instructions = "$target_gen_dir/vm_snapshot_instructions.bin"
-    isolate_snapshot_data = "$target_gen_dir/isolate_snapshot.bin"
-    isolate_snapshot_instructions =
-        "$target_gen_dir/isolate_snapshot_instructions.bin"
-    outputs = [
-      vm_snapshot_data,
-      vm_snapshot_instructions,
-      isolate_snapshot_data,
-      isolate_snapshot_instructions,
-    ]
+  inputs = [
+    platform_kernel,
+  ]
+  deps = [
+    ":kernel_platform_files",
+  ]
 
+  vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot.bin"
+  vm_snapshot_instructions = "$target_gen_dir/vm_snapshot_instructions.bin"
+  isolate_snapshot_data = "$target_gen_dir/isolate_snapshot.bin"
+  isolate_snapshot_instructions =
+      "$target_gen_dir/isolate_snapshot_instructions.bin"
+  outputs = [
+    vm_snapshot_data,
+    vm_snapshot_instructions,
+    isolate_snapshot_data,
+    isolate_snapshot_instructions,
+  ]
+
+  args = [
+    "--strong",
+    "--sync-async",
+    "--reify-generic-functions",
+    "--snapshot_kind=core",
+    "--await_is_keyword",
+    "--enable_mirrors=false",
+    "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
+    "--vm_snapshot_instructions=" + rebase_path(vm_snapshot_instructions),
+    "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
+    "--isolate_snapshot_instructions=" +
+        rebase_path(isolate_snapshot_instructions),
+    rebase_path(platform_kernel),
+  ]
+
+  if (is_debug) {
+    args += [
+      "--enable_asserts",
+      "--enable_type_checks",
+      "--error_on_bad_type",
+      "--error_on_bad_override",
+    ]
+  }
+}
+
+# Generates an assembly file defining a given symbol with the bytes from a
+# binary file. Places the symbol in a text section if 'executable' is true,
+# otherwise places the symbol in a read-only data section.
+template("bin_to_assembly") {
+  assert(defined(invoker.deps), "Must define deps")
+  assert(defined(invoker.input), "Must define input binary file")
+  assert(defined(invoker.output), "Must define output assembly file")
+  assert(defined(invoker.symbol), "Must define symbol name")
+  assert(defined(invoker.executable), "Must define boolean executable")
+
+  action(target_name) {
+    deps = invoker.deps
+    script = "//third_party/dart/runtime/tools/bin_to_assembly.py"
     args = [
-      "--strong",
-      "--sync-async",
-      "--reify-generic-functions",
-      "--snapshot_kind=core",
-      "--await_is_keyword",
-      "--enable_mirrors=false",
-      "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-      "--vm_snapshot_instructions=" + rebase_path(vm_snapshot_instructions),
-      "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-      "--isolate_snapshot_instructions=" +
-          rebase_path(isolate_snapshot_instructions),
-      rebase_path(platform_kernel),
+      "--input",
+      rebase_path(invoker.input),
+      "--output",
+      rebase_path(invoker.output),
+      "--symbol_name",
+      invoker.symbol,
+      "--target_os",
+      current_os,
     ]
-
-    if (is_debug) {
-      args += [
-        "--enable_asserts",
-        "--enable_type_checks",
-        "--error_on_bad_type",
-        "--error_on_bad_override",
-      ]
+    if (invoker.executable) {
+      args += [ "--executable" ]
     }
-  }
-
-  # Generates an assembly file defining a given symbol with the bytes from a
-  # binary file. Places the symbol in a text section if 'executable' is true,
-  # otherwise places the symbol in a read-only data section.
-  template("bin_to_assembly") {
-    assert(defined(invoker.deps), "Must define deps")
-    assert(defined(invoker.input), "Must define input binary file")
-    assert(defined(invoker.output), "Must define output assembly file")
-    assert(defined(invoker.symbol), "Must define symbol name")
-    assert(defined(invoker.executable), "Must define boolean executable")
-
-    action(target_name) {
-      deps = invoker.deps
-      script = "//third_party/dart/runtime/tools/bin_to_assembly.py"
-      args = [
-        "--input",
-        rebase_path(invoker.input),
-        "--output",
-        rebase_path(invoker.output),
-        "--symbol_name",
-        invoker.symbol,
-        "--target_os",
-        current_os,
-      ]
-      if (invoker.executable) {
-        args += [ "--executable" ]
-      }
-      inputs = [
-        script,
-        invoker.input,
-      ]
-      outputs = [
-        invoker.output,
-      ]
-    }
-  }
-
-  bin_to_assembly("vm_snapshot_data_assembly") {
-    deps = [
-      ":generate_snapshot_bin",
+    inputs = [
+      script,
+      invoker.input,
     ]
-    input = "$target_gen_dir/vm_isolate_snapshot.bin"
-    output = "$target_gen_dir/vm_snapshot_data.S"
-    symbol = "kDartVmSnapshotData"
-    executable = false
-  }
-
-  bin_to_assembly("vm_snapshot_instructions_assembly") {
-    deps = [
-      ":generate_snapshot_bin",
-    ]
-    input = "$target_gen_dir/vm_snapshot_instructions.bin"
-    output = "$target_gen_dir/vm_snapshot_instructions.S"
-    symbol = "kDartVmSnapshotInstructions"
-    executable = true
-  }
-
-  bin_to_assembly("isolate_snapshot_data_assembly") {
-    deps = [
-      ":generate_snapshot_bin",
-    ]
-    input = "$target_gen_dir/isolate_snapshot.bin"
-    output = "$target_gen_dir/isolate_snapshot_data.S"
-    symbol = "kDartIsolateSnapshotData"
-    executable = false
-  }
-
-  bin_to_assembly("isolate_snapshot_instructions_assembly") {
-    deps = [
-      ":generate_snapshot_bin",
-    ]
-    input = "$target_gen_dir/isolate_snapshot_instructions.bin"
-    output = "$target_gen_dir/isolate_snapshot_instructions.S"
-    symbol = "kDartIsolateSnapshotInstructions"
-    executable = true
-  }
-
-  source_set("snapshot") {
-    deps = [
-      ":isolate_snapshot_data_assembly",
-      ":isolate_snapshot_instructions_assembly",
-      ":vm_snapshot_data_assembly",
-      ":vm_snapshot_instructions_assembly",
-    ]
-    sources = [
-      "$target_gen_dir/isolate_snapshot_data.S",
-      "$target_gen_dir/isolate_snapshot_instructions.S",
-      "$target_gen_dir/vm_snapshot_data.S",
-      "$target_gen_dir/vm_snapshot_instructions.S",
+    outputs = [
+      invoker.output,
     ]
   }
+}
+
+bin_to_assembly("vm_snapshot_data_assembly") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  input = "$target_gen_dir/vm_isolate_snapshot.bin"
+  output = "$target_gen_dir/vm_snapshot_data.S"
+  symbol = "kDartVmSnapshotData"
+  executable = false
+}
+
+bin_to_assembly("vm_snapshot_instructions_assembly") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  input = "$target_gen_dir/vm_snapshot_instructions.bin"
+  output = "$target_gen_dir/vm_snapshot_instructions.S"
+  symbol = "kDartVmSnapshotInstructions"
+  executable = true
+}
+
+bin_to_assembly("isolate_snapshot_data_assembly") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  input = "$target_gen_dir/isolate_snapshot.bin"
+  output = "$target_gen_dir/isolate_snapshot_data.S"
+  symbol = "kDartIsolateSnapshotData"
+  executable = false
+}
+
+bin_to_assembly("isolate_snapshot_instructions_assembly") {
+  deps = [
+    ":generate_snapshot_bin",
+  ]
+  input = "$target_gen_dir/isolate_snapshot_instructions.bin"
+  output = "$target_gen_dir/isolate_snapshot_instructions.S"
+  symbol = "kDartIsolateSnapshotInstructions"
+  executable = true
+}
+
+source_set("snapshot") {
+  deps = [
+    ":isolate_snapshot_data_assembly",
+    ":isolate_snapshot_instructions_assembly",
+    ":vm_snapshot_data_assembly",
+    ":vm_snapshot_instructions_assembly",
+  ]
+  sources = [
+    "$target_gen_dir/isolate_snapshot_data.S",
+    "$target_gen_dir/isolate_snapshot_instructions.S",
+    "$target_gen_dir/vm_snapshot_data.S",
+    "$target_gen_dir/vm_snapshot_instructions.S",
+  ]
 }
 
 compile_platform("non_strong_platform") {
@@ -196,11 +198,20 @@ compile_platform("strong_platform") {
   ]
 }
 
-group("kernel_platform_files") {
-  public_deps = [
-    ":non_strong_platform",
-    ":strong_platform",
-  ]
+# Fuchsia's snapshot requires a different platform with extra dart: libraries.
+if (is_fuchsia || is_fuchsia_host) {
+  group("kernel_platform_files") {
+    public_deps = [
+      "//topaz/runtime/flutter_runner/kernel:kernel_platform_files"
+    ]
+  }
+} else {
+  group("kernel_platform_files") {
+    public_deps = [
+      ":non_strong_platform",
+      ":strong_platform",
+    ]
+  }
 }
 
 # Template to generate entry points JSON file using gen_snapshot tool.
