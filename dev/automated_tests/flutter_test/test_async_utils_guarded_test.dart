@@ -19,9 +19,9 @@ Future<Null> guardedHelper(WidgetTester tester) {
 }
 
 void main() {
-  new TestTestBinding();
+  TestTestBinding();
   testWidgets('TestAsyncUtils - custom guarded sections', (WidgetTester tester) async {
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(find.byElementType(Container), isNotNull);
     guardedHelper(tester);
     expect(find.byElementType(Container), isNull);

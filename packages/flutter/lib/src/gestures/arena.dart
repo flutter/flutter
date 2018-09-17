@@ -72,7 +72,7 @@ class _GestureArena {
 
   @override
   String toString() {
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
     if (members.isEmpty) {
       buffer.write('<empty>');
     } else {
@@ -106,11 +106,11 @@ class GestureArenaManager {
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
     final _GestureArena state = _arenas.putIfAbsent(pointer, () {
       assert(_debugLogDiagnostic(pointer, '★ Opening new gesture arena.'));
-      return new _GestureArena();
+      return _GestureArena();
     });
     state.add(member);
     assert(_debugLogDiagnostic(pointer, 'Adding: $member'));
-    return new GestureArenaEntry._(this, pointer, member);
+    return GestureArenaEntry._(this, pointer, member);
   }
 
   /// Prevents new members from entering the arena.

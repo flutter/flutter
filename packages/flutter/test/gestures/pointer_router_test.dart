@@ -13,10 +13,10 @@ void main() {
       callbackRan = true;
     }
 
-    final TestPointer pointer2 = new TestPointer(2);
-    final TestPointer pointer3 = new TestPointer(3);
+    final TestPointer pointer2 = TestPointer(2);
+    final TestPointer pointer3 = TestPointer(3);
 
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     router.addRoute(3, callback);
     router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
@@ -33,12 +33,12 @@ void main() {
     void callback(PointerEvent event) {
       callbackRan = true;
     }
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     router.addRoute(2, (PointerEvent event) {
       router.removeRoute(2, callback);
     });
     router.addRoute(2, callback);
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
   });
@@ -50,13 +50,13 @@ void main() {
     }
 
     bool firstCallbackRan = false;
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     router.addGlobalRoute((PointerEvent event) {
       firstCallbackRan = true;
       router.addGlobalRoute(secondCallback);
     });
 
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     router.route(pointer2.down(Offset.zero));
     expect(firstCallbackRan, isTrue);
     expect(secondCallbackRan, isFalse);
@@ -67,12 +67,12 @@ void main() {
     void callback(PointerEvent event) {
       callbackRan = true;
     }
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     router.addGlobalRoute((PointerEvent event) {
       router.removeGlobalRoute(callback);
     });
     router.addGlobalRoute(callback);
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
   });
@@ -82,13 +82,13 @@ void main() {
     void callback(PointerEvent event) {
       callbackRan = true;
     }
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     bool perPointerCallbackRan = false;
     router.addRoute(2, (PointerEvent event) {
       perPointerCallbackRan = true;
       router.addGlobalRoute(callback);
     });
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     router.route(pointer2.down(Offset.zero));
     expect(perPointerCallbackRan, isTrue);
     expect(callbackRan, isFalse);
@@ -96,7 +96,7 @@ void main() {
 
   test('Per-pointer callbacks happen before global callbacks', () {
     final List<String> log = <String>[];
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     router.addGlobalRoute((PointerEvent event) {
       log.add('global 1');
     });
@@ -109,7 +109,7 @@ void main() {
     router.addRoute(2, (PointerEvent event) {
       log.add('per-pointer 2');
     });
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     router.route(pointer2.down(Offset.zero));
     expect(log, equals(<String>[
       'per-pointer 1',
@@ -121,7 +121,7 @@ void main() {
 
   test('Exceptions do not stop pointer routing', () {
     final List<String> log = <String>[];
-    final PointerRouter router = new PointerRouter();
+    final PointerRouter router = PointerRouter();
     router.addRoute(2, (PointerEvent event) {
       log.add('per-pointer 1');
     });
@@ -138,7 +138,7 @@ void main() {
       log.add('error report');
     };
 
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     router.route(pointer2.down(Offset.zero));
     expect(log, equals(<String>[
       'per-pointer 1',

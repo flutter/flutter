@@ -132,13 +132,13 @@ class Switch extends StatefulWidget {
   final MaterialTapTargetSize materialTapTargetSize;
 
   @override
-  _SwitchState createState() => new _SwitchState();
+  _SwitchState createState() => _SwitchState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
-    properties.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
+    properties.add(ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 
@@ -155,8 +155,9 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     Color inactiveThumbColor;
     Color inactiveTrackColor;
     if (widget.onChanged != null) {
+      const Color black32 = Color(0x52000000); // Black with 32% opacity
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
-      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : Colors.black26);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : black32);
     } else {
       inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
@@ -170,9 +171,9 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
         size = const Size(_kSwitchWidth, _kSwitchHeightCollapsed);
         break;
     }
-    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
+    final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
 
-    return new _SwitchRenderObjectWidget(
+    return _SwitchRenderObjectWidget(
       value: widget.value,
       activeColor: activeThumbColor,
       inactiveColor: inactiveThumbColor,
@@ -218,7 +219,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   _RenderSwitch createRenderObject(BuildContext context) {
-    return new _RenderSwitch(
+    return _RenderSwitch(
       value: value,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
@@ -282,7 +283,7 @@ class _RenderSwitch extends RenderToggleable {
          additionalConstraints: additionalConstraints,
          vsync: vsync,
        ) {
-    _drag = new HorizontalDragGestureRecognizer()
+    _drag = HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
       ..onEnd = _handleDragEnd;
@@ -400,9 +401,9 @@ class _RenderSwitch extends RenderToggleable {
   BoxPainter _cachedThumbPainter;
 
   BoxDecoration _createDefaultThumbDecoration(Color color, ImageProvider image) {
-    return new BoxDecoration(
+    return BoxDecoration(
       color: color,
-      image: image == null ? null : new DecorationImage(image: image),
+      image: image == null ? null : DecorationImage(image: image),
       shape: BoxShape.circle,
       boxShadow: kElevationToShadow[1]
     );
@@ -445,19 +446,19 @@ class _RenderSwitch extends RenderToggleable {
     final Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, currentValue) : inactiveTrackColor;
 
     // Paint the track
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = trackColor;
     const double trackHorizontalPadding = kRadialReactionRadius - _kTrackRadius;
-    final Rect trackRect = new Rect.fromLTWH(
+    final Rect trackRect = Rect.fromLTWH(
       offset.dx + trackHorizontalPadding,
       offset.dy + (size.height - _kTrackHeight) / 2.0,
       size.width - 2.0 * trackHorizontalPadding,
       _kTrackHeight
     );
-    final RRect trackRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
+    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    final Offset thumbPosition = new Offset(
+    final Offset thumbPosition = Offset(
       kRadialReactionRadius + visualPosition * _trackInnerLength,
       size.height / 2.0
     );
@@ -481,8 +482,8 @@ class _RenderSwitch extends RenderToggleable {
       final double radius = _kThumbRadius - inset;
       thumbPainter.paint(
         canvas,
-        thumbPosition + offset - new Offset(radius, radius),
-        configuration.copyWith(size: new Size.fromRadius(radius))
+        thumbPosition + offset - Offset(radius, radius),
+        configuration.copyWith(size: Size.fromRadius(radius))
       );
     } finally {
       _isPainting = false;

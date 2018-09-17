@@ -14,14 +14,14 @@ Future<void> startTransitionBetween(
   String toTitle,
 }) async {
   await tester.pumpWidget(
-    new CupertinoApp(
+    CupertinoApp(
       home: const Placeholder(),
     ),
   );
 
   tester
       .state<NavigatorState>(find.byType(Navigator))
-      .push(new CupertinoPageRoute<void>(
+      .push(CupertinoPageRoute<void>(
         title: fromTitle,
         builder: (BuildContext context) => scaffoldForNavBar(from),
       ));
@@ -31,7 +31,7 @@ Future<void> startTransitionBetween(
 
   tester
       .state<NavigatorState>(find.byType(Navigator))
-      .push(new CupertinoPageRoute<void>(
+      .push(CupertinoPageRoute<void>(
         title: toTitle,
         builder: (BuildContext context) => scaffoldForNavBar(to),
       ));
@@ -41,13 +41,13 @@ Future<void> startTransitionBetween(
 
 CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
   if (navBar is CupertinoNavigationBar || navBar == null) {
-    return new CupertinoPageScaffold(
+    return CupertinoPageScaffold(
       navigationBar: navBar ?? const CupertinoNavigationBar(),
       child: const Placeholder(),
     );
   } else if (navBar is CupertinoSliverNavigationBar) {
-    return new CupertinoPageScaffold(
-      child: new CustomScrollView(
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
         slivers: <Widget>[
           navBar,
           // Add filler so it's scrollable.
@@ -195,14 +195,14 @@ void main() {
   testWidgets('Fullscreen dialogs do not create heroes',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(new CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute<void>(
           title: 'Page 1',
           builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
@@ -212,7 +212,7 @@ void main() {
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(new CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute<void>(
           title: 'Page 2',
           fullscreenDialog: true,
           builder: (BuildContext context) => scaffoldForNavBar(null),
@@ -395,14 +395,14 @@ void main() {
   testWidgets('First appearance of back chevron fades in from the right',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: scaffoldForNavBar(null),
       ),
     );
 
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(new CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute<void>(
           title: 'Page 1',
           builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
@@ -411,7 +411,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     final Finder backChevron = flying(tester,
-        find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
+        find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
       backChevron,
@@ -437,7 +437,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     final Finder backChevrons = flying(tester,
-        find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
+        find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     expect(
       backChevrons,
@@ -556,7 +556,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     tester
         .state<NavigatorState>(find.byType(Navigator))
-        .push(new CupertinoPageRoute<void>(
+        .push(CupertinoPageRoute<void>(
           title: 'Page 3',
           builder: (BuildContext context) => scaffoldForNavBar(null),
         ));
@@ -769,14 +769,14 @@ void main() {
     int topBuildTimes = 0;
     await startTransitionBetween(
       tester,
-      from: new CupertinoNavigationBar(
-        middle: new Builder(builder: (BuildContext context) {
+      from: CupertinoNavigationBar(
+        middle: Builder(builder: (BuildContext context) {
           bottomBuildTimes++;
           return const Text('Page 1');
         }),
       ),
-      to: new CupertinoSliverNavigationBar(
-        largeTitle: new Builder(builder: (BuildContext context) {
+      to: CupertinoSliverNavigationBar(
+        largeTitle: Builder(builder: (BuildContext context) {
           topBuildTimes++;
           return const Text('Page 2');
         }),

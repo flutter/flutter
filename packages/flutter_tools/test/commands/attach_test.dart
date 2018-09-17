@@ -21,7 +21,7 @@ import '../src/mocks.dart';
 
 void main() {
   group('attach', () {
-    final FileSystem testFileSystem = new MemoryFileSystem(
+    final FileSystem testFileSystem = MemoryFileSystem(
       style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle
           .posix,
     );
@@ -41,9 +41,9 @@ void main() {
       MockAndroidDevice device;
 
       setUp(() {
-        mockLogReader = new MockDeviceLogReader();
-        portForwarder = new MockPortForwarder();
-        device = new MockAndroidDevice();
+        mockLogReader = MockDeviceLogReader();
+        portForwarder = MockPortForwarder();
+        device = MockAndroidDevice();
         when(device.getLogReader()).thenAnswer((_) {
           // Now that the reader is used, start writing messages to it.
           Timer.run(() {
@@ -58,7 +58,7 @@ void main() {
         when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
             .thenAnswer((_) async => hostPort);
         when(portForwarder.forwardedPorts).thenReturn(
-            <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+            <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any)).thenAnswer((_) async => null);
 
         // We cannot add the device to a device manager because that is
@@ -75,7 +75,7 @@ void main() {
       testUsingContext('finds observatory port and forwards', () async {
         testDeviceManager.addDevice(device);
 
-        final AttachCommand command = new AttachCommand();
+        final AttachCommand command = AttachCommand();
 
         await createTestCommandRunner(command).run(<String>['attach']);
 
@@ -94,7 +94,7 @@ void main() {
         const String projectRoot = '/build-output/project-root';
         const String outputDill = '/tmp/output.dill';
 
-        final MockHotRunnerFactory mockHotRunnerFactory = new MockHotRunnerFactory();
+        final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
         when(
           mockHotRunnerFactory.build(
             any,
@@ -105,9 +105,9 @@ void main() {
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
           ),
-        )..thenReturn(new MockHotRunner());
+        )..thenReturn(MockHotRunner());
 
-        final AttachCommand command = new AttachCommand(
+        final AttachCommand command = AttachCommand(
           hotRunnerFactory: mockHotRunnerFactory,
         );
         await createTestCommandRunner(command).run(<String>[
@@ -156,22 +156,22 @@ void main() {
     testUsingContext('selects specified target', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockDeviceLogReader mockLogReader = new MockDeviceLogReader();
-      final MockPortForwarder portForwarder = new MockPortForwarder();
-      final MockAndroidDevice device = new MockAndroidDevice();
-      final MockHotRunnerFactory mockHotRunnerFactory = new MockHotRunnerFactory();
+      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      final MockPortForwarder portForwarder = MockPortForwarder();
+      final MockAndroidDevice device = MockAndroidDevice();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
       when(device.portForwarder).thenReturn(portForwarder);
       when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
           .thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts).thenReturn(
-          <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+          <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any)).thenAnswer((_) async => null);
       when(mockHotRunnerFactory.build(any,
           target: anyNamed('target'),
           debuggingOptions: anyNamed('debuggingOptions'),
           packagesFilePath: anyNamed('packagesFilePath'),
           usesTerminalUI: anyNamed('usesTerminalUI'))).thenReturn(
-          new MockHotRunner());
+          MockHotRunner());
 
       testDeviceManager.addDevice(device);
       when(device.getLogReader()).thenAnswer((_) {
@@ -190,7 +190,7 @@ void main() {
       // Delete the main.dart file to be sure that attach works without it.
       fs.file('lib/main.dart').deleteSync();
 
-      final AttachCommand command = new AttachCommand(
+      final AttachCommand command = AttachCommand(
           hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(
           <String>['attach', '-t', foo.path, '-v']);
@@ -207,17 +207,17 @@ void main() {
     testUsingContext('forwards to given port', () async {
       const int devicePort = 499;
       const int hostPort = 42;
-      final MockPortForwarder portForwarder = new MockPortForwarder();
-      final MockAndroidDevice device = new MockAndroidDevice();
+      final MockPortForwarder portForwarder = MockPortForwarder();
+      final MockAndroidDevice device = MockAndroidDevice();
 
       when(device.portForwarder).thenReturn(portForwarder);
       when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
       when(portForwarder.forwardedPorts).thenReturn(
-          <ForwardedPort>[new ForwardedPort(hostPort, devicePort)]);
+          <ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any)).thenAnswer((_) async => null);
       testDeviceManager.addDevice(device);
 
-      final AttachCommand command = new AttachCommand();
+      final AttachCommand command = AttachCommand();
 
       await createTestCommandRunner(command).run(
           <String>['attach', '--debug-port', '$devicePort']);
@@ -228,7 +228,7 @@ void main() {
     },);
 
     testUsingContext('exits when no device connected', () async {
-      final AttachCommand command = new AttachCommand();
+      final AttachCommand command = AttachCommand();
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
         throwsA(isInstanceOf<ToolExit>()),
@@ -240,7 +240,7 @@ void main() {
 
     testUsingContext('exits when multiple devices connected', () async {
       Device aDeviceWithId(String id) {
-        final MockAndroidDevice device = new MockAndroidDevice();
+        final MockAndroidDevice device = MockAndroidDevice();
         when(device.name).thenReturn('d$id');
         when(device.id).thenReturn(id);
         when(device.isLocalEmulator).thenAnswer((_) async => false);
@@ -248,7 +248,7 @@ void main() {
         return device;
       }
 
-      final AttachCommand command = new AttachCommand();
+      final AttachCommand command = AttachCommand();
       testDeviceManager.addDevice(aDeviceWithId('xx1'));
       testDeviceManager.addDevice(aDeviceWithId('yy2'));
       await expectLater(

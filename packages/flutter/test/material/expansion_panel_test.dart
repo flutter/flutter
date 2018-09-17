@@ -11,17 +11,17 @@ void main() {
     bool isExpanded;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new SingleChildScrollView(
-          child: new ExpansionPanelList(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
             expansionCallback: (int _index, bool _isExpanded) {
               index = _index;
               isExpanded = _isExpanded;
             },
             children: <ExpansionPanel>[
-              new ExpansionPanel(
+              ExpansionPanel(
                 headerBuilder: (BuildContext context, bool isExpanded) {
-                  return new Text(isExpanded ? 'B' : 'A');
+                  return Text(isExpanded ? 'B' : 'A');
                 },
                 body: const SizedBox(height: 100.0),
               ),
@@ -44,17 +44,17 @@ void main() {
 
     // now expand the child panel
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new SingleChildScrollView(
-          child: new ExpansionPanelList(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
             expansionCallback: (int _index, bool _isExpanded) {
               index = _index;
               isExpanded = _isExpanded;
             },
             children: <ExpansionPanel>[
-              new ExpansionPanel(
+              ExpansionPanel(
                 headerBuilder: (BuildContext context, bool isExpanded) {
-                  return new Text(isExpanded ? 'B' : 'A');
+                  return Text(isExpanded ? 'B' : 'A');
                 },
                 body: const SizedBox(height: 100.0),
                 isExpanded: true, // this is the addition
@@ -74,25 +74,25 @@ void main() {
 
   testWidgets('Multiple Panel List test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new ListView(
+      MaterialApp(
+        home: ListView(
           children: <ExpansionPanelList>[
-            new ExpansionPanelList(
+            ExpansionPanelList(
               children: <ExpansionPanel>[
-                new ExpansionPanel(
+                ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) {
-                    return new Text(isExpanded ? 'B' : 'A');
+                    return Text(isExpanded ? 'B' : 'A');
                   },
                   body: const SizedBox(height: 100.0),
                   isExpanded: true,
                 ),
               ],
             ),
-            new ExpansionPanelList(
+            ExpansionPanelList(
               children: <ExpansionPanel>[
-                new ExpansionPanel(
+                ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) {
-                    return new Text(isExpanded ? 'D' : 'C');
+                    return Text(isExpanded ? 'D' : 'C');
                   },
                   body: const SizedBox(height: 100.0),
                   isExpanded: true,
@@ -119,13 +119,13 @@ void main() {
     expect(kThemeAnimationDuration, lessThan(kSizeAnimationDuration ~/ 2));
 
     Widget build(bool a, bool b, bool c) {
-      return new MaterialApp(
-        home: new Column(
+      return MaterialApp(
+        home: Column(
           children: <Widget>[
-            new ExpansionPanelList(
+            ExpansionPanelList(
               animationDuration: kSizeAnimationDuration,
               children: <ExpansionPanel>[
-                new ExpansionPanel(
+                ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
@@ -134,14 +134,14 @@ void main() {
                   )),
                   isExpanded: a,
                 ),
-                new ExpansionPanel(
+                ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
                   body: const SizedBox(height: 100.0, child: Placeholder()),
                   isExpanded: b,
                 ),
-                new ExpansionPanel(
+                ExpansionPanel(
                   headerBuilder: (BuildContext context, bool isExpanded) => const Placeholder(
                     fallbackHeight: 12.0,
                   ),
@@ -157,37 +157,37 @@ void main() {
 
     await tester.pumpWidget(build(false, false, false));
     expect(tester.renderObjectList(find.byType(AnimatedSize)), hasLength(3));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), new Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), new Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
 
     await tester.pump(const Duration(milliseconds: 200));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), new Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), new Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
 
     await tester.pumpWidget(build(false, true, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), new Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), new Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), Rect.fromLTWH(0.0, 113.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), Rect.fromLTWH(0.0, 170.0, 800.0, 0.0));
 
     await tester.pump(kSizeAnimationDuration ~/ 2);
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     final Rect rect1 = tester.getRect(find.byType(AnimatedSize).at(1));
     expect(rect1.left, 0.0);
     expect(rect1.top, inExclusiveRange(113.0, 113.0 + 16.0 + 32.0)); // 16.0 material gap, plus 16.0 top and bottom margins added to the header
     expect(rect1.width, 800.0);
     expect(rect1.height, inExclusiveRange(0.0, 100.0));
     final Rect rect2 = tester.getRect(find.byType(AnimatedSize).at(2));
-    expect(rect2, new Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
+    expect(rect2, Rect.fromLTWH(0.0, rect1.bottom + 16.0 + 56.0, 800.0, 0.0)); // the 16.0 comes from the MaterialGap being introduced, the 56.0 is the header height.
 
     await tester.pumpWidget(build(false, false, false));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpWidget(build(false, false, true));
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
@@ -195,36 +195,36 @@ void main() {
     await tester.pump();
     await tester.pump();
     await tester.pump();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
     expect(tester.getRect(find.byType(AnimatedSize).at(1)), rect1);
     expect(tester.getRect(find.byType(AnimatedSize).at(2)), rect2);
 
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(AnimatedSize).at(0)), new Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(1)), new Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
-    expect(tester.getRect(find.byType(AnimatedSize).at(2)), new Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(0)), Rect.fromLTWH(0.0, 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(1)), Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0, 800.0, 0.0));
+    expect(tester.getRect(find.byType(AnimatedSize).at(2)), Rect.fromLTWH(0.0, 56.0 + 1.0 + 56.0 + 16.0 + 16.0 + 48.0 + 16.0, 800.0, 100.0));
   });
 
   testWidgets('Single Panel Open Test',  (WidgetTester tester) async {
 
     final List<ExpansionPanel> _demoItemsRadio = <ExpansionPanelRadio>[
-      new ExpansionPanelRadio(
+      ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'B' : 'A');
+          return Text(isExpanded ? 'B' : 'A');
         },
         body: const SizedBox(height: 100.0),
         value: 0,
       ),
-      new ExpansionPanelRadio(
+      ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'D' : 'C');
+          return Text(isExpanded ? 'D' : 'C');
         },
         body: const SizedBox(height: 100.0),
         value: 1,
       ),
-      new ExpansionPanelRadio(
+      ExpansionPanelRadio(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'F' : 'E');
+          return Text(isExpanded ? 'F' : 'E');
         },
         body: const SizedBox(height: 100.0),
         value: 2,
@@ -236,8 +236,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new SingleChildScrollView(
+      MaterialApp(
+        home: SingleChildScrollView(
           child: _expansionListRadio,
         ),
       ),
@@ -304,36 +304,36 @@ void main() {
 
 
     final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
-      new ExpansionPanel(
+      ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'B' : 'A');
+          return Text(isExpanded ? 'B' : 'A');
         },
         body: const SizedBox(height: 100.0),
         isExpanded: false,
       ),
-      new ExpansionPanel(
+      ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'D' : 'C');
+          return Text(isExpanded ? 'D' : 'C');
         },
         body: const SizedBox(height: 100.0),
         isExpanded: false,
       ),
-      new ExpansionPanel(
+      ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
-          return new Text(isExpanded ? 'F' : 'E');
+          return Text(isExpanded ? 'F' : 'E');
         },
         body: const SizedBox(height: 100.0),
         isExpanded: false,
       ),
     ];
 
-    final ExpansionPanelList _expansionList = new ExpansionPanelList(
+    final ExpansionPanelList _expansionList = ExpansionPanelList(
       children: _demoItems,
     );
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new SingleChildScrollView(
+      MaterialApp(
+        home: SingleChildScrollView(
           child: _expansionList,
         ),
       ),
@@ -354,14 +354,14 @@ void main() {
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     final SemanticsHandle handle = tester.ensureSemantics();
     final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
-      new ExpansionPanel(
+      ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return const Text('Expanded', key: expandedKey);
         },
         body: const SizedBox(height: 100.0),
         isExpanded: true,
       ),
-      new ExpansionPanel(
+      ExpansionPanel(
         headerBuilder: (BuildContext context, bool isExpanded) {
           return const Text('Collapsed', key: collapsedKey);
         },
@@ -370,13 +370,13 @@ void main() {
       ),
     ];
 
-    final ExpansionPanelList _expansionList = new ExpansionPanelList(
+    final ExpansionPanelList _expansionList = ExpansionPanelList(
       children: _demoItems,
     );
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new SingleChildScrollView(
+      MaterialApp(
+        home: SingleChildScrollView(
           child: _expansionList,
         ),
       ),

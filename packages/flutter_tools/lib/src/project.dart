@@ -45,7 +45,7 @@ class FlutterProject {
     final FlutterManifest exampleManifest = await _readManifest(
       _exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
     );
-    return new FlutterProject(directory, manifest, exampleManifest);
+    return FlutterProject(directory, manifest, exampleManifest);
   }
 
   /// Returns a future that completes with a [FlutterProject] view of the current directory.
@@ -76,7 +76,7 @@ class FlutterProject {
       example.android.applicationId,
       example.ios.productBundleIdentifier,
     ];
-    return new Set<String>.from(candidates
+    return Set<String>.from(candidates
         .map(_organizationNameFromPackageName)
         .where((String name) => name != null));
   }
@@ -89,10 +89,10 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => new IosProject._(this);
+  IosProject get ios => IosProject._(this);
 
   /// The Android sub project of this project.
-  AndroidProject get android => new AndroidProject._(this);
+  AndroidProject get android => AndroidProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -104,7 +104,7 @@ class FlutterProject {
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
   /// The example sub-project of this project.
-  FlutterProject get example => new FlutterProject(
+  FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(),
@@ -148,7 +148,7 @@ class FlutterProject {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
-  static final RegExp _productBundleIdPattern = new RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
@@ -262,7 +262,7 @@ class IosProject {
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = new Template.fromName(path);
+    final Template template = Template.fromName(path);
     template.render(
       target,
       <String, dynamic>{
@@ -280,8 +280,8 @@ class IosProject {
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter modules.
 class AndroidProject {
-  static final RegExp _applicationIdPattern = new RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
-  static final RegExp _groupPattern = new RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   AndroidProject._(this.parent);
 
@@ -379,7 +379,7 @@ class AndroidProject {
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = new Template.fromName(path);
+    final Template template = Template.fromName(path);
     template.render(
       target,
       <String, dynamic>{

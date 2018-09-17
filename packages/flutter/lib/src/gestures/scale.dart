@@ -84,14 +84,14 @@ class ScaleEndDetails {
 
 /// Signature for when the pointers in contact with the screen have established
 /// a focal point and initial scale of 1.0.
-typedef void GestureScaleStartCallback(ScaleStartDetails details);
+typedef GestureScaleStartCallback = void Function(ScaleStartDetails details);
 
 /// Signature for when the pointers in contact with the screen have indicated a
 /// new focal point and/or scale.
-typedef void GestureScaleUpdateCallback(ScaleUpdateDetails details);
+typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 
 /// Signature for when the pointers are no longer in contact with the screen.
-typedef void GestureScaleEndCallback(ScaleEndDetails details);
+typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
   assert(velocity != null);
@@ -135,7 +135,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
-    _velocityTrackers[event.pointer] = new VelocityTracker();
+    _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
@@ -199,10 +199,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         if (_isFlingGesture(velocity)) {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
-            velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-          invokeCallback<void>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity)));
+            velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+          invokeCallback<void>('onEnd', () => onEnd(ScaleEndDetails(velocity: velocity)));
         } else {
-          invokeCallback<void>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero)));
+          invokeCallback<void>('onEnd', () => onEnd(ScaleEndDetails(velocity: Velocity.zero)));
         }
       }
       _state = _ScaleState.accepted;
@@ -230,13 +230,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint)));
+      invokeCallback<void>('onUpdate', () => onUpdate(ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint)));
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
     assert(_state == _ScaleState.started);
     if (onStart != null)
-      invokeCallback<void>('onStart', () => onStart(new ScaleStartDetails(focalPoint: _currentFocalPoint)));
+      invokeCallback<void>('onStart', () => onStart(ScaleStartDetails(focalPoint: _currentFocalPoint)));
   }
 
   @override

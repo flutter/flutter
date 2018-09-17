@@ -34,10 +34,10 @@ void main() {
     });
 
     setUp(() {
-      loggingProcessManager = new LoggingProcessManager();
+      loggingProcessManager = LoggingProcessManager();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
       projectDir = tempDir.childDirectory('flutter_project');
-      mockFlutterVersion = new MockFlutterVersion();
+      mockFlutterVersion = MockFlutterVersion();
     });
 
     tearDown(() {
@@ -239,7 +239,7 @@ void main() {
       when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
       when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
@@ -303,7 +303,7 @@ void main() {
     testUsingContext('can re-gen over existing project', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -394,7 +394,7 @@ void main() {
     testUsingContext('produces sensible error message', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       expect(
@@ -406,7 +406,7 @@ void main() {
     // Verify that we fail with an error code when the file exists.
     testUsingContext('fails when file exists', () async {
       Cache.flutterRoot = '../..';
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       final File existingFile = fs.file('${projectDir.path.toString()}/bad');
       if (!existingFile.existsSync())
@@ -419,7 +419,7 @@ void main() {
 
     testUsingContext('fails when invalid package name', () async {
       Cache.flutterRoot = '../..';
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       expect(
         runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
@@ -430,7 +430,7 @@ void main() {
     testUsingContext('invokes pub offline when requested', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
@@ -446,7 +446,7 @@ void main() {
     testUsingContext('invokes pub online when offline not requested', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
@@ -465,7 +465,7 @@ Future<Null> _createProject(
     Directory dir, List<String> createArgs, List<String> expectedPaths,
     { List<String> unexpectedPaths = const <String>[], bool plugin = false}) async {
   Cache.flutterRoot = '../..';
-  final CreateCommand command = new CreateCommand();
+  final CreateCommand command = CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
   final List<String> args = <String>['create'];
   args.addAll(createArgs);

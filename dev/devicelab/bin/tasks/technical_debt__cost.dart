@@ -18,10 +18,10 @@ const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 
 const double ignoreForFileCost = 2477.0; // similar thinking as skipCost
 const double asDynamicCost = 2003.0; // same as ignoring analyzer warning
 
-final RegExp todoPattern = new RegExp(r'(?://|#) *TODO');
-final RegExp ignorePattern = new RegExp(r'// *ignore:');
-final RegExp ignoreForFilePattern = new RegExp(r'// *ignore_for_file:');
-final RegExp asDynamicPattern = new RegExp(r'as dynamic');
+final RegExp todoPattern = RegExp(r'(?://|#) *TODO');
+final RegExp ignorePattern = RegExp(r'// *ignore:');
+final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
+final RegExp asDynamicPattern = RegExp(r'as dynamic');
 
 Future<double> findCostsForFile(File file) async {
   if (path.extension(file.path) == '.py')
@@ -55,10 +55,10 @@ Future<double> findCostsForRepo() async {
   );
   double total = 0.0;
   await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
-    total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
+    total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
-    throw new Exception('git exit with unexpected error code $gitExitCode');
+    throw Exception('git exit with unexpected error code $gitExitCode');
   return total;
 }
 
@@ -69,7 +69,7 @@ Future<int> countDependencies() async {
   )).split('\n');
   final int count = lines.where((String line) => line.contains('->')).length;
   if (count < 2) // we'll always have flutter and flutter_test, at least...
-    throw new Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
+    throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
   return count;
 }
 
@@ -78,7 +78,7 @@ const String _kNumberOfDependenciesKey = 'dependencies_count';
 
 Future<Null> main() async {
   await task(() async {
-    return new TaskResult.success(
+    return TaskResult.success(
       <String, dynamic>{
         _kCostBenchmarkKey: await findCostsForRepo(),
         _kNumberOfDependenciesKey: await countDependencies(),

@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 
 Future<Null> main() async {
   await task(() async {
-    final Stopwatch clock = new Stopwatch()..start();
+    final Stopwatch clock = Stopwatch()..start();
     final Process analysis = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
       <String>['analyze', '--no-preamble', '--no-congratulate', '--flutter-repo', '--dartdocs'],
@@ -47,16 +47,16 @@ Future<Null> main() async {
     final int result = await analysis.exitCode;
     clock.stop();
     if (publicMembers == 0 && otherErrors == 0 && result != 0)
-      throw new Exception('flutter analyze exited with unexpected error code $result');
+      throw Exception('flutter analyze exited with unexpected error code $result');
     if (publicMembers != 0 && otherErrors != 0 && result == 0)
-      throw new Exception('flutter analyze exited with successful status code despite reporting errors');
+      throw Exception('flutter analyze exited with successful status code despite reporting errors');
     if (otherLines != 0)
-      throw new Exception('flutter analyze had unexpected output (we saw $otherLines unexpected line${ otherLines == 1 ? "" : "s" })');
+      throw Exception('flutter analyze had unexpected output (we saw $otherLines unexpected line${ otherLines == 1 ? "" : "s" })');
     final Map<String, dynamic> data = <String, dynamic>{
       'members_missing_dartdocs': publicMembers,
       'analysis_errors': otherErrors,
       'elapsed_time_ms': clock.elapsedMilliseconds,
     };
-    return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+    return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
   });
 }

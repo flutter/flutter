@@ -15,7 +15,7 @@ class FakeFrameInfo implements FrameInfo {
   final Image _image;
 
   FakeFrameInfo(int width, int height, this._duration) :
-    _image = new FakeImage(width, height);
+    _image = FakeImage(width, height);
 
   @override
   Duration get duration => _duration;
@@ -41,7 +41,7 @@ class FakeImage implements Image {
 
   @override
   Future<ByteData> toByteData({ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+    throw UnsupportedError('Cannot encode test image');
   }
 }
 
@@ -55,7 +55,7 @@ class MockCodec implements Codec {
 
   int numFramesAsked = 0;
 
-  Completer<FrameInfo> _nextFrameCompleter = new Completer<FrameInfo>();
+  Completer<FrameInfo> _nextFrameCompleter = Completer<FrameInfo>();
 
   @override
   Future<FrameInfo> getNextFrame() {
@@ -65,7 +65,7 @@ class MockCodec implements Codec {
 
   void completeNextFrame(FrameInfo frameInfo) {
     _nextFrameCompleter.complete(frameInfo);
-    _nextFrameCompleter = new Completer<FrameInfo>();
+    _nextFrameCompleter = Completer<FrameInfo>();
   }
 
   void failNextFrame(String err) {
@@ -79,8 +79,8 @@ class MockCodec implements Codec {
 
 void main() {
   testWidgets('Codec future fails', (WidgetTester tester) async {
-    final Completer<Codec> completer = new Completer<Codec>();
-    new MultiFrameImageStreamCompleter(
+    final Completer<Codec> completer = Completer<Codec>();
+    MultiFrameImageStreamCompleter(
       codec: completer.future,
       scale: 1.0,
     );
@@ -90,10 +90,10 @@ void main() {
   });
 
   testWidgets('First frame decoding starts when codec is ready', (WidgetTester tester) async {
-    final Completer<Codec> completer = new Completer<Codec>();
-    final MockCodec mockCodec = new MockCodec();
+    final Completer<Codec> completer = Completer<Codec>();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
-    new MultiFrameImageStreamCompleter(
+    MultiFrameImageStreamCompleter(
       codec: completer.future,
       scale: 1.0,
     );
@@ -104,11 +104,11 @@ void main() {
   });
 
    testWidgets('getNextFrame future fails', (WidgetTester tester) async {
-     final MockCodec mockCodec = new MockCodec();
+     final MockCodec mockCodec = MockCodec();
      mockCodec.frameCount = 1;
-     final Completer<Codec> codecCompleter = new Completer<Codec>();
+     final Completer<Codec> codecCompleter = Completer<Codec>();
 
-     new MultiFrameImageStreamCompleter(
+     MultiFrameImageStreamCompleter(
        codec: codecCompleter.future,
        scale: 1.0,
      );
@@ -127,11 +127,11 @@ void main() {
    });
 
   testWidgets('ImageStream emits frame (static image)', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -144,20 +144,20 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
     mockCodec.completeNextFrame(frame);
     await tester.idle();
 
-    expect(emittedImages, equals(<ImageInfo>[new ImageInfo(image: frame.image)]));
+    expect(emittedImages, equals(<ImageInfo>[ImageInfo(image: frame.image)]));
   });
 
   testWidgets('ImageStream emits frames (animated images)', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -170,7 +170,7 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
     mockCodec.completeNextFrame(frame1);
     await tester.idle();
     // We are waiting for the next animation tick, so at this point no frames
@@ -178,9 +178,9 @@ void main() {
     expect(emittedImages.length, 0);
 
     await tester.pump();
-    expect(emittedImages, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
+    expect(emittedImages, equals(<ImageInfo>[ImageInfo(image: frame1.image)]));
 
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
     mockCodec.completeNextFrame(frame2);
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -190,8 +190,8 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(emittedImages, equals(<ImageInfo>[
-      new ImageInfo(image: frame1.image),
-      new ImageInfo(image: frame2.image),
+      ImageInfo(image: frame1.image),
+      ImageInfo(image: frame2.image),
     ]));
 
     // Let the pending timer for the next frame to complete so we can cleanly
@@ -200,12 +200,12 @@ void main() {
   });
 
   testWidgets('animation wraps back', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -218,8 +218,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -232,9 +232,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400)); // emit 3rd frame
 
     expect(emittedImages, equals(<ImageInfo>[
-      new ImageInfo(image: frame1.image),
-      new ImageInfo(image: frame2.image),
-      new ImageInfo(image: frame1.image),
+      ImageInfo(image: frame1.image),
+      ImageInfo(image: frame2.image),
+      ImageInfo(image: frame1.image),
     ]));
 
     // Let the pending timer for the next frame to complete so we can cleanly
@@ -243,12 +243,12 @@ void main() {
   });
 
   testWidgets('animation doesnt repeat more than specified', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = 0;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -261,8 +261,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -277,18 +277,18 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(emittedImages, equals(<ImageInfo>[
-      new ImageInfo(image: frame1.image),
-      new ImageInfo(image: frame2.image),
+      ImageInfo(image: frame1.image),
+      ImageInfo(image: frame2.image),
     ]));
   });
 
   testWidgets('frames are only decoded when there are active listeners', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -299,8 +299,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -320,12 +320,12 @@ void main() {
   });
 
   testWidgets('multiple stream listeners', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -344,14 +344,14 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
     await tester.pump(); // first animation frame shows on first app frame.
-    expect(emittedImages1, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
-    expect(emittedImages2, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
+    expect(emittedImages1, equals(<ImageInfo>[ImageInfo(image: frame1.image)]));
+    expect(emittedImages2, equals(<ImageInfo>[ImageInfo(image: frame1.image)]));
 
     mockCodec.completeNextFrame(frame2);
     await tester.idle(); // let nextFrameFuture complete
@@ -359,20 +359,20 @@ void main() {
     imageStream.removeListener(listener1);
 
     await tester.pump(const Duration(milliseconds: 400)); // emit 2nd frame.
-    expect(emittedImages1, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
+    expect(emittedImages1, equals(<ImageInfo>[ImageInfo(image: frame1.image)]));
     expect(emittedImages2, equals(<ImageInfo>[
-      new ImageInfo(image: frame1.image),
-      new ImageInfo(image: frame2.image),
+      ImageInfo(image: frame1.image),
+      ImageInfo(image: frame2.image),
     ]));
   });
 
   testWidgets('timer is canceled when listeners are removed', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -383,8 +383,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -400,12 +400,12 @@ void main() {
   });
 
   testWidgets('timeDilation affects animation frame timers', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );
@@ -416,8 +416,8 @@ void main() {
     codecCompleter.complete(mockCodec);
     await tester.idle();
 
-    final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
-    final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+    final FrameInfo frame1 = FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+    final FrameInfo frame2 = FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
 
     mockCodec.completeNextFrame(frame1);
     await tester.idle(); // let nextFrameFuture complete
@@ -436,11 +436,11 @@ void main() {
   });
 
   testWidgets('error handlers can intercept errors', (WidgetTester tester) async {
-    final MockCodec mockCodec = new MockCodec();
+    final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;
-    final Completer<Codec> codecCompleter = new Completer<Codec>();
+    final Completer<Codec> codecCompleter = Completer<Codec>();
 
-    final ImageStreamCompleter streamUnderTest = new MultiFrameImageStreamCompleter(
+    final ImageStreamCompleter streamUnderTest = MultiFrameImageStreamCompleter(
       codec: codecCompleter.future,
       scale: 1.0,
     );

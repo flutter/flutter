@@ -27,7 +27,7 @@ class GetTextResult extends Result {
 
   /// Deserializes the result from JSON.
   static GetTextResult fromJson(Map<String, dynamic> json) {
-    return new GetTextResult(json['text']);
+    return GetTextResult(json['text']);
   }
 
   @override
@@ -65,7 +65,7 @@ class EnterTextResult extends Result {
 
   /// Deserializes the result from JSON.
   static EnterTextResult fromJson(Map<String, dynamic> json) {
-    return new EnterTextResult();
+    return EnterTextResult();
   }
 
   @override
@@ -101,7 +101,7 @@ class SetTextEntryEmulationResult extends Result {
 
   /// Deserializes the result from JSON.
   static SetTextEntryEmulationResult fromJson(Map<String, dynamic> json) {
-    return new SetTextEntryEmulationResult();
+    return SetTextEntryEmulationResult();
   }
 
   @override
