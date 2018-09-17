@@ -247,7 +247,7 @@ class SnackBar extends StatelessWidget {
       children.add(const SizedBox(width: _kSnackBarPadding));
     }
     final CurvedAnimation heightAnimation =
-        new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
+        CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
     final CurvedAnimation fadeInAnimation =
         CurvedAnimation(parent: animation, curve: _snackBarFadeInCurve);
     final CurvedAnimation fadeOutAnimation = CurvedAnimation(
