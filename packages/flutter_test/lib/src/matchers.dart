@@ -194,7 +194,7 @@ final Matcher isAssertionError = isInstanceOf<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
