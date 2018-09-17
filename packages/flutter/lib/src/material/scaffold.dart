@@ -1217,9 +1217,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // bottom sheet.
   final List<_StandardBottomSheet> _dismissedBottomSheets = <_StandardBottomSheet>[];
   StandardBottomSheetController<dynamic> _currentBottomSheet;
-  StandardBottomSheetController<dynamic> _persistentBottomSheet;
   BottomSheetScrollController _bottomSheetScrollController;
-  BottomSheetScrollController _persistentBottomSheetScrollController;
   bool _showBodyScrim = false;
   Color _bodyScrimColor;
 
@@ -1228,13 +1226,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       // The new _currentBottomSheet is not a local history entry so a "back" button
       // will not be added to the Scaffold's appbar and the bottom sheet will not
       // support drag or swipe to dismiss.
-      _persistentBottomSheet = _buildBottomSheet<void>(
+      _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) => widget.bottomSheet,
         false,
         initialTop: 300.0,
         maxTop: 300.0,
         clampTop: true,
-        isPersistent: true,
       );
     }
   }
@@ -1257,19 +1254,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       double initialTop,
       double maxTop,
       bool clampTop = false,
-      bool isPersistent = false,
     }) {
-    if (isPersistent) {
-      _persistentBottomSheetScrollController =  BottomSheet.createScrollController(
-        top: initialTop,
-        minTop: clampTop ? initialTop : 0.0,
-        maxTop: maxTop,
-        isPersistent: isPersistent,
-      )..addTopListener(() => setState(() {
-        final double screenHeight = window.physicalSize.height /
-            window.devicePixelRatio;
+    assert(() {
+      if (widget.bottomSheet != null && isLocalHistoryEntry == false && _currentBottomSheet != null) {
+        throw FlutterError(
+          'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
+          'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
+          'bottomSheet before calling showBottomSheet().'
+        );
+      }
+      return true;
+    }());
+
+    _bottomSheetScrollController = BottomSheet.createScrollController(
+      top: initialTop,
+      minTop: clampTop ? initialTop : 0.0,
+      maxTop: maxTop,
+      isPersistent: !isLocalHistoryEntry,
+    )..addTopListener(() => setState(() {
+      final double screenHeight = window.physicalSize.height / window.devicePixelRatio;
         floatingActionButtonVisibilityValue =
-            _persistentBottomSheetScrollController.top /
+            _bottomSheetScrollController.top /
                 (screenHeight * _kBottomSheetDominatesPercentage);
         _bodyScrimColor = const Color(0xFF000000).withOpacity(
           math.max(
@@ -1277,28 +1282,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
           ),
         );
-        _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
-      }));
-    } else {
-      _bottomSheetScrollController = BottomSheet.createScrollController(
-        top: initialTop,
-        minTop: clampTop ? initialTop : 0.0,
-        maxTop: maxTop,
-        isPersistent: isPersistent,
-      )..addTopListener(() => setState(() {
-        final double screenHeight = window.physicalSize.height / window.devicePixelRatio;
-          floatingActionButtonVisibilityValue =
-              _bottomSheetScrollController.top /
-                  (screenHeight * _kBottomSheetDominatesPercentage);
-          _bodyScrimColor = const Color(0xFF000000).withOpacity(
-            math.max(
-              _kMinBottomSheetScrimOpacity,
-              _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,
-            ),
-          );
-        _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
-      }));
-    }
+      _showBodyScrim = floatingActionButtonVisibilityValue < 1.0;
+    }));
 
     final Completer<T> completer = Completer<T>();
     final GlobalKey<_StandardBottomSheetState> bottomSheetKey = GlobalKey<_StandardBottomSheetState>();
@@ -1337,15 +1322,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     bottomSheet = _StandardBottomSheet(
       key: bottomSheetKey,
-      onClosing: isPersistent
-        ? () {}
-        : () {
-          assert(_currentBottomSheet._widget == bottomSheet);
-          if (isLocalHistoryEntry)
-            entry.remove();
-          else
-            _removeCurrentBottomSheet();
-        },
+      onClosing: () {
+        assert(_currentBottomSheet._widget == bottomSheet);
+        if (isLocalHistoryEntry)
+          entry.remove();
+        else
+          _removeCurrentBottomSheet();
+      },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
           setState(() {
@@ -1354,9 +1337,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         }
       },
       builder: builder,
-      scrollController: isPersistent
-          ? _persistentBottomSheetScrollController
-          : _bottomSheetScrollController,
+      scrollController: _bottomSheetScrollController,
     );
 
     if (isLocalHistoryEntry)
@@ -1365,7 +1346,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return StandardBottomSheetController<T>._(
       bottomSheet,
       completer,
-      isPersistent ? null : isLocalHistoryEntry ? entry.remove : _removeCurrentBottomSheet,
+      isLocalHistoryEntry ? entry.remove : _removeCurrentBottomSheet,
       (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); },
       isLocalHistoryEntry,
     );
@@ -1410,6 +1391,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       double initialTop,
       bool clampTop = false,
   }) {
+    assert(() {
+      if (widget.bottomSheet != null) {
+        throw FlutterError(
+            'Scaffold.bottomSheet cannot be specified while a bottom sheet displayed '
+                'with showBottomSheet() is still visible.\n Rebuild the Scaffold with a null '
+                'bottomSheet before calling showBottomSheet().'
+        );
+      }
+      return true;
+    }());
     _closeCurrentBottomSheet();
     setState(() {
       _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialTop: initialTop, clampTop: clampTop);
@@ -1767,10 +1758,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty || _persistentBottomSheet != null) {
+    if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final List<Widget> bottomSheets = <Widget>[];
-      if (_persistentBottomSheet != null)
-        bottomSheets.add(_persistentBottomSheet._widget);
       if (_dismissedBottomSheets.isNotEmpty)
         bottomSheets.addAll(_dismissedBottomSheets);
       if (_currentBottomSheet != null)
@@ -1855,7 +1844,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 geometryNotifier: _geometryNotifier,
                 previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation,
                 textDirection: textDirection,
-                bottomSheetTop: _bottomSheetScrollController?.top ?? _persistentBottomSheetScrollController?.top,
+                bottomSheetTop: _bottomSheetScrollController?.top,
               ),
             );
           }),
