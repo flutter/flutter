@@ -88,6 +88,6 @@ File _getSkiaResource(String fileName) {
 
 Matcher exceptionWithMessage(String m) {
   return predicate((e) {
-    return e is Exception && e.message == m;
+    return e is Exception && e.toString().contains(m);
   });
 }
