@@ -315,6 +315,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -345,6 +346,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();

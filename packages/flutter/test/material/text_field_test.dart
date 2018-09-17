@@ -1858,7 +1858,7 @@ void main() {
 
       await tester.idle();
       await tester.tap(find.byType(TextField));
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(doubleTapTimeout);
 
       sendKeyEventWithCode(22, true, true, false);     // RIGHT_ARROW keydown, SHIFT_ON
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
@@ -1871,7 +1871,7 @@ void main() {
 
       await tester.idle();
       await tester.tap(find.byType(TextField));
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(doubleTapTimeout);
       await tester.pumpAndSettle();
       sendKeyEventWithCode(22, true, true, true);         // RIGHT_ARROW keydown SHIFT_ON, CONTROL_ON
 
@@ -1887,7 +1887,7 @@ void main() {
 
       await tester.idle();
       await tester.tap(find.byType(TextField));
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(doubleTapTimeout);
 
       sendKeyEventWithCode(20, true, true, false);         // DOWN_ARROW keydown
       await tester.pumpAndSettle();
@@ -1910,7 +1910,7 @@ void main() {
 
       await tester.idle();
       await tester.tap(find.byType(TextField));
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(doubleTapTimeout);
 
       for (int i = 0; i < 5; i += 1) {
         sendKeyEventWithCode(22, true, false, false);             // RIGHT_ARROW keydown
@@ -1997,7 +1997,7 @@ void main() {
 
     await tester.idle();
     await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     // Select the first 5 characters
     for (int i = 0; i < 5; i += 1) {
@@ -2067,7 +2067,7 @@ void main() {
 
     await tester.idle();
     await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     // Select the first 5 characters
     for (int i = 0; i < 5; i += 1) {
@@ -2130,7 +2130,7 @@ void main() {
 
     await tester.idle();
     await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     // Select All
     sendKeyEventWithCode(_kAKeyCode, true, false, true);    // keydown control A
@@ -2176,7 +2176,7 @@ void main() {
 
     await tester.idle();
     await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     // Delete
     for (int i = 0; i < 6; i += 1) {
@@ -2246,7 +2246,7 @@ void main() {
 
     await tester.idle();
     await tester.tap(find.byType(TextField).first);
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     for (int i = 0; i < 5; i += 1) {
       sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
@@ -2333,7 +2333,7 @@ void main() {
     const String testValue = 'a big house';
     await tester.enterText(find.byType(TextField).first, testValue);
 
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     for (int i = 0; i < 5; i += 1) {
       sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
@@ -2348,7 +2348,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField).last, testValue);
 
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(doubleTapTimeout);
 
     for (int i = 0; i < 5; i += 1) {
       sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
