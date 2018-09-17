@@ -13,7 +13,7 @@ import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
 
-typedef void VoidCallback();
+typedef VoidCallback = void Function();
 
 abstract class Logger {
   bool get isVerbose => false;

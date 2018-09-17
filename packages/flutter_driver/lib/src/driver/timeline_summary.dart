@@ -33,6 +33,13 @@ class TimelineSummary {
     return _averageInMillis(_extractFrameDurations());
   }
 
+  /// The [p]-th percentile frame rasterization time in milliseconds.
+  ///
+  /// Returns null if no frames were recorded.
+  double computePercentileFrameBuildTimeMillis(double p) {
+    return _percentileInMillis(_extractFrameDurations(), p);
+  }
+
   /// The longest frame build time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
@@ -80,6 +87,8 @@ class TimelineSummary {
   Map<String, dynamic> get summaryJson {
     return <String, dynamic> {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
+      '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
+      '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
