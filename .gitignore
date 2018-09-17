@@ -22,7 +22,5 @@ Thumbs.db
 # directories pulled in via deps or hooks
 /buildtools/
 /flutter/
-/garnet/
 /ios_tools/
 /out/
-/topaz/
