@@ -78,7 +78,7 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
 /// version for testing.
 Future<int> starter(
     List<String> args, {
-      _FlutterFrontendCompiler compiler,
+      frontend.CompilerInterface compiler,
       Stream<List<int>> input,
       StringSink output,
     }) async {
