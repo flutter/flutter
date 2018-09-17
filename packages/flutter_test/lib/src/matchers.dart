@@ -280,7 +280,7 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-Matcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
     return _MatchesGoldenFile(key);
   } else if (key is String) {
@@ -303,6 +303,15 @@ Matcher matchesGoldenFile(dynamic key) {
 /// ## Sample code
 ///
 /// ```dart
+/// final ui.Paint paint = ui.Paint()
+///   ..style = ui.PaintingStyle.stroke
+///   ..strokeWidth = 1.0;
+/// final ui.PictureRecorder recorder = ui.PictureRecorder();
+/// final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+/// pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+/// final ui.Picture picture = recorder.endRecording();
+/// ui.Image referenceImage = picture.toImage(50, 50);
+///
 /// await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
 /// await expectLater(image, matchesReferenceImage(referenceImage);
 /// await expectLater(imageFuture, matchesReferenceImage(referenceImage));
@@ -312,7 +321,7 @@ Matcher matchesGoldenFile(dynamic key) {
 ///
 ///  * [matchesGoldenFile], which should be used instead if you need to verify
 ///    that a [Finder] or [ui.Image] matches a golden image.
-Matcher matchesReferenceImage(ui.Image image) {
+AsyncMatcher matchesReferenceImage(ui.Image image) {
   return _MatchesReferenceImage(image);
 }
 

@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test/src/frontend/async_matcher.dart'; // ignore: implementation_imports
 
 ui.Image createTestImage(int width, int height, ui.Color color) {
   final ui.Paint paint = ui.Paint()
@@ -49,21 +48,19 @@ void main() {
 
   group('fails', () {
     testWidgets('when image sizes do not match', (WidgetTester tester) async {
-      final AsyncMatcher matcher = matchesReferenceImage(createTestImage(50, 50, red));
       expect(
-        await matcher.matchAsync(createTestImage(100, 100, red)),
+        await matchesReferenceImage(createTestImage(50, 50, red)).matchAsync(createTestImage(100, 100, red)),
         equals('does not match as width or height do not match. [100×100] != [50×50]'),
       );
     });
 
     testWidgets('when image pixels do not match', (WidgetTester tester) async {
-      final AsyncMatcher matcher = matchesReferenceImage(createTestImage(100, 100, red));
       expect(
-        await matcher.matchAsync(createTestImage(100, 100, transparentRed)),
+        await matchesReferenceImage(createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, transparentRed)),
         equals('does not match on 53 pixels'),
       );
       expect(
-        await matcher.matchAsync(createTestImage(100, 100, green)),
+        await matchesReferenceImage(createTestImage(100, 100, red)).matchAsync(createTestImage(100, 100, green)),
         equals('does not match on 57 pixels'),
       );
     });
