@@ -14,7 +14,8 @@ void ShaderMaskLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");
   FML_DCHECK(needs_painting());
 
-  Layer::AutoSaveLayer(context, paint_bounds(), nullptr);
+  Layer::AutoSaveLayer save =
+      Layer::AutoSaveLayer::Create(context, paint_bounds(), nullptr);
   PaintChildren(context);
 
   SkPaint paint;

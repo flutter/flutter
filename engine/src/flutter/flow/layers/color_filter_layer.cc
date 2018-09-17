@@ -19,7 +19,8 @@ void ColorFilterLayer::Paint(PaintContext& context) const {
   SkPaint paint;
   paint.setColorFilter(std::move(color_filter));
 
-  Layer::AutoSaveLayer(context, paint_bounds(), &paint);
+  Layer::AutoSaveLayer save =
+      Layer::AutoSaveLayer::Create(context, paint_bounds(), &paint);
   PaintChildren(context);
 }
 

@@ -35,6 +35,19 @@ Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
   paint_context_.canvas.saveLayer(layer_rec);
 }
 
+Layer::AutoSaveLayer Layer::AutoSaveLayer::Create(
+    const PaintContext& paint_context,
+    const SkRect& bounds,
+    const SkPaint* paint) {
+  return Layer::AutoSaveLayer(paint_context, bounds, paint);
+}
+
+Layer::AutoSaveLayer Layer::AutoSaveLayer::Create(
+    const PaintContext& paint_context,
+    const SkCanvas::SaveLayerRec& layer_rec) {
+  return Layer::AutoSaveLayer(paint_context, layer_rec);
+}
+
 Layer::AutoSaveLayer::~AutoSaveLayer() {
   if (paint_context_.checkerboard_offscreen_layers) {
     DrawCheckerboard(&paint_context_.canvas, bounds_);
