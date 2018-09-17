@@ -22,7 +22,11 @@ void main() {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
-          return Container(height: 200.0);
+          print('building $buildCount');
+          return SingleChildScrollView(
+            primary: true,
+            child: Container(height: 200.0),
+          );
         }
       );
     });
@@ -48,7 +52,7 @@ void main() {
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return ListView(
         shrinkWrap: true,
-        primary: false,
+        primary: true,
         children: <Widget>[
           Container(height: 100.0, child: const Text('One')),
           Container(height: 100.0, child: const Text('Two')),
@@ -82,7 +86,10 @@ void main() {
         return Builder(
           builder: (BuildContext context) {
             buildCount += 1;
-            return Container(height: 200.0);
+            return SingleChildScrollView(
+              primary: true,
+              child: Container(height: 200.0),
+            );
           }
         );
       },
@@ -118,7 +125,7 @@ void main() {
       context: scaffoldContext,
       builder: (BuildContext context) {
         bottomSheetContext = context;
-        return Container();
+        return SingleChildScrollView(primary: true, child: Container());
       },
     );
 
@@ -141,22 +148,25 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: const Placeholder(),
-          bottomSheet: Container(
-            key: bottomSheetKey,
-            alignment: Alignment.center,
-            height: 200.0,
-            child: Builder(
-              builder: (BuildContext context) {
-                return RaisedButton(
-                  child: const Text('showModalBottomSheet'),
-                  onPressed: () {
-                    showModalBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext context) => const Text('modal bottom sheet'),
-                    );
-                  },
-                );
-              },
+          bottomSheet: SingleChildScrollView(
+            primary: true,
+            child: Container(
+              key: bottomSheetKey,
+              alignment: Alignment.center,
+              height: 200.0,
+              child: Builder(
+                builder: (BuildContext context) {
+                  return RaisedButton(
+                    child: const Text('showModalBottomSheet'),
+                    onPressed: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        builder: (BuildContext context) => const Text('modal bottom sheet'),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ),

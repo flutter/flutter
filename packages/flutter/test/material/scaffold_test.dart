@@ -325,12 +325,18 @@ void main() {
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
-                  Scaffold.of(context).showBottomSheet<Null>((BuildContext context) {
-                    return Container(
-                      key: sheetKey,
-                      color: Colors.blue[500],
-                    );
-                  });
+                  Scaffold.of(context).showBottomSheet<Null>(
+                    (BuildContext context) {
+                      return SingleChildScrollView(
+                        primary: true,
+                        child: Container(
+                          key: sheetKey,
+                          color: Colors.blue[500],
+                        ),
+                      );
+                    },
+                    initialTop: 0.0,
+                  );
                 },
                 child: const Text('X'),
               );
@@ -339,7 +345,6 @@ void main() {
         ),
       ),
     );
-
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));

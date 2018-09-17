@@ -187,10 +187,14 @@ class BottomSheetScrollController extends ScrollController {
     }
   }
 
+  bool _disposed = false;
   @override
   void dispose() {
-    _topListeners = null;
-    super.dispose();
+    if (!_disposed) {
+      _disposed = true;
+      _topListeners = null;
+      super.dispose();
+    }
   }
 
   @override
@@ -398,10 +402,14 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     return super.drag(details, dragCancelCallback);
   }
 
+  bool _disposed = false;
   @override
   void dispose() {
-    _ballisticController?.dispose();
-    _topAnimationController?.dispose();
-    super.dispose();
+    if (!_disposed) {
+      _disposed = true;
+      _ballisticController?.dispose();
+      _topAnimationController?.dispose();
+      super.dispose();
+    }
   }
 }

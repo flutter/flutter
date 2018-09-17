@@ -28,7 +28,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<Null>(
       context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet')
+      builder: (BuildContext context) => SingleChildScrollView(primary: true, child: const Text('BottomSheet'))
     ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
@@ -39,8 +39,8 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the bottom sheet itself to dismiss it
-    await tester.tap(find.text('BottomSheet'));
+    // Tap on the modal barrier area dismisses
+    await tester.tapAt(const Offset(100.0, 100.0));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
     await tester.pump(const Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
@@ -50,7 +50,7 @@ void main() {
     showBottomSheetThenCalled = false;
     showModalBottomSheet<Null>(
       context: savedContext,
-      builder: (BuildContext context) => const Text('BottomSheet'),
+      builder: (BuildContext context) => SingleChildScrollView(primary: true, child: const Text('BottomSheet')),
     ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
@@ -84,11 +84,15 @@ void main() {
     expect(find.text('BottomSheet'), findsNothing);
 
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return Container(
-        margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet')
+      return SingleChildScrollView(
+        primary: true,
+        child: Container(
+          margin: const EdgeInsets.all(40.0),
+          child: const Text('BottomSheet')
+        ),
       );
     }).closed.whenComplete(() {
+      print('POPPED');
       showBottomSheetThenCalled = true;
     });
 
@@ -105,22 +109,8 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    // The fling below must be such that the velocity estimation examines an
-    // offset greater than the kTouchSlop. Too slow or too short a distance, and
-    // it won't trigger. Also, it musn't be so much that it drags the bottom
-    // sheet off the screen, or we won't see it after we pump!
-    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 50.0), 2000.0);
-    await tester.pump(); // drain the microtask queue (Future completion callback)
-
-    expect(showBottomSheetThenCalled, isTrue);
-    expect(find.text('BottomSheet'), findsOneWidget);
-
-    await tester.pump(); // bottom sheet dismiss animation starts
-
-    expect(showBottomSheetThenCalled, isTrue);
-    expect(find.text('BottomSheet'), findsOneWidget);
-
-    await tester.pump(const Duration(seconds: 1)); // animation done
+    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 500.0), 2000.0);
+    await tester.pumpAndSettle(); // drain the microtask queue (Future completion callback)
 
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
@@ -138,9 +128,12 @@ void main() {
     ));
 
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return Container(
-        margin: const EdgeInsets.all(40.0),
-        child: const Text('BottomSheet')
+      return SingleChildScrollView(
+        primary: true,
+        child: Container(
+          margin: const EdgeInsets.all(40.0),
+          child: const Text('BottomSheet')
+        ),
       );
     });
 
@@ -190,7 +183,7 @@ void main() {
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;
-        return Container();
+        return SingleChildScrollView(primary: true, child: Container());
       },
     );
     await tester.pump();
@@ -219,8 +212,11 @@ void main() {
 
 
     showModalBottomSheet<void>(context: scaffoldKey.currentContext, builder: (BuildContext context) {
-      return Container(
-        child: const Text('BottomSheet')
+      return SingleChildScrollView(
+        primary: true,
+        child: Container(
+          child: const Text('BottomSheet')
+        ),
       );
     });
 
@@ -240,8 +236,13 @@ void main() {
               ],
               children: <TestSemantics>[
                 TestSemantics(
-                  label: 'BottomSheet',
-                  textDirection: TextDirection.ltr,
+                  actions: <SemanticsAction>[SemanticsAction.scrollUp],
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'BottomSheet',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),
