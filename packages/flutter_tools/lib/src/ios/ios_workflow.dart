@@ -177,13 +177,13 @@ class IOSValidator extends DoctorValidator {
 
     } else {
       brewStatus = ValidationType.missing;
-      messages.add(new ValidationMessage.error(
+      messages.add(ValidationMessage.error(
           'Brew not installed; use this to install tools for iOS device development.\n'
               'Download brew at https://brew.sh/.'
       ));
     }
 
-    return new ValidationResult(
+    return ValidationResult(
         <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
         messages,
         statusInfo: xcodeVersionInfo

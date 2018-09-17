@@ -447,8 +447,8 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    messages.add(new ValidationMessage('A different message'));
-    return new ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+    messages.add(ValidationMessage('A different message'));
+    return ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
   }
 }
 

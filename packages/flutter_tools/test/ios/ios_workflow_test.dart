@@ -197,7 +197,7 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(false);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
