@@ -141,7 +141,6 @@ tasks:
       Tests that the Android accessibility bridge produces correct semantics.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   run_release_test:
     description: >
@@ -277,7 +276,6 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_attach_test:
     description: >
@@ -451,7 +449,6 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__transition_perf_with_semantics:
     description: >
@@ -459,14 +456,12 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__memory_nav:
     description: >
       Measures memory usage after repeated navigation in Gallery.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__back_button_memory:
     description: >
