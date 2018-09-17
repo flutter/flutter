@@ -22,7 +22,6 @@ void main() {
       return Builder(
         builder: (BuildContext context) {
           buildCount += 1;
-          print('building $buildCount');
           return SingleChildScrollView(
             primary: true,
             child: Container(height: 200.0),
@@ -35,7 +34,7 @@ void main() {
     expect(buildCount, equals(1));
 
     bottomSheet.setState(() { });
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(buildCount, equals(2));
   });
 
@@ -161,7 +160,10 @@ void main() {
                     onPressed: () {
                       showModalBottomSheet<void>(
                         context: context,
-                        builder: (BuildContext context) => const Text('modal bottom sheet'),
+                        builder: (BuildContext context) => SingleChildScrollView(
+                          primary: true,
+                          child: const Text('modal bottom sheet'),
+                        ),
                       );
                     },
                   );
@@ -183,7 +185,7 @@ void main() {
     expect(find.text('modal bottom sheet'), findsOneWidget);
 
     // Dismiss the modal bottomSheet
-    await tester.tap(find.text('modal bottom sheet'));
+    await tester.tapAt(const Offset(100.0, 100.0));
     await tester.pumpAndSettle();
     expect(find.text('modal bottom sheet'), findsNothing);
     expect(find.text('showModalBottomSheet'), findsOneWidget);

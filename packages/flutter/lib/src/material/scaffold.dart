@@ -1229,8 +1229,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet = _buildBottomSheet<void>(
         (BuildContext context) => widget.bottomSheet,
         false,
-        initialTop: 300.0,
-        maxTop: 300.0,
+        // TODO(dnfield): don't hard code this
+        initialTop: 400.0,
+        maxTop: 400.0,
         clampTop: true,
       );
     }
@@ -1240,6 +1241,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_currentBottomSheet != null) {
       _currentBottomSheet.close();
       assert(() {
+        if (_currentBottomSheet == null)
+          return true;
         _currentBottomSheet._completer.future.whenComplete(() {
           assert(_currentBottomSheet = null);
         });
