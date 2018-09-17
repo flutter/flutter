@@ -1,4 +1,4 @@
-Signature: d2753c18f5888758e87aa10c270fa760
+Signature: 23f7e8d39ec24c9954fd6a342b83e480
 
 UNUSED LICENSES:
 
@@ -4436,6 +4436,8 @@ FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
+FILE: ../../../third_party/dart/runtime/docs/compiler/images/catch-block-entry-0.png
+FILE: ../../../third_party/dart/runtime/docs/compiler/images/catch-block-entry-1.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/chromium_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/dart_icon.png
@@ -5466,6 +5468,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_state.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/base_flow_graph_builder.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_flow_graph_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/bytecode_reader.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/constant_evaluator.cc
