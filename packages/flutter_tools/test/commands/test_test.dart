@@ -169,7 +169,7 @@ Future<ProcessResult> _runFlutterTest(
   String testName,
   List<String> extraArgs = const <String>[],
 }) async {
-  String testFilePath = '';
+  String testFilePath = '.'; // run all tests in the [workingDirectory]
   if (testName != null) {
     testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
     final File testFile = fs.file(testFilePath);
