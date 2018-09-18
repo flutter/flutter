@@ -71,7 +71,6 @@ Future<T> runInContext<T>(
       KernelCompiler: () => const KernelCompiler(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
-      PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
       Usage: () => Usage(),
