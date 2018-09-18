@@ -1,4 +1,4 @@
-Signature: 50b3d2570775ed8879ed4580b0909186
+Signature: e92b7f75b17722f80e97fdfa2944220f
 
 UNUSED LICENSES:
 
@@ -768,11 +768,12 @@ FILE: ../../../third_party/skia/experimental/svg/model/SkSVGTypes.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGValue.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGValue.h
 FILE: ../../../third_party/skia/experimental/xps_to_png/xps_to_png.cs
+FILE: ../../../third_party/skia/fuzz/Fuzz.cpp
 FILE: ../../../third_party/skia/fuzz/Fuzz.h
 FILE: ../../../third_party/skia/fuzz/FuzzGradients.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzMain.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzParsePath.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathop.cpp
-FILE: ../../../third_party/skia/fuzz/fuzz.cpp
 FILE: ../../../third_party/skia/gm/OverStroke.cpp
 FILE: ../../../third_party/skia/gm/animatedGif.cpp
 FILE: ../../../third_party/skia/gm/animatedimageblurs.cpp
