@@ -247,10 +247,7 @@ class _Compiler {
       String outputDill;
       if (idleCompilers.isEmpty && compilers < concurrency ) {
         // Create compiler
-        compiler = ResidentCompiler(
-            artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-            packagesPath: PackageMap.globalPackagesPath,
-            trackWidgetCreation: trackWidgetCreation);
+        compiler = createCompiler();
         compilers++;
         outputDill = outputDillDirectory.childFile('output_$compilers.dill').path;
         printTrace('Compiler will use the following file as its incremental dill file: $outputDill');
