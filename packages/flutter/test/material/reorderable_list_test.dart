@@ -462,10 +462,10 @@ void main() {
           ));
 
           // Get the switch tile's semantics:
-          final SemanticsData semanticsData = tester.getSemanticsData(find.byKey(const Key('Switch tile')));
+          final SemanticsNode semanticsNode = tester.getSemantics(find.byKey(const Key('Switch tile')));
 
           // Check for properties of both SwitchTile semantics and the ReorderableListView custom semantics actions.
-          expect(semanticsData, matchesSemanticsData(
+          expect(semanticsNode, matchesSemantics(
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,

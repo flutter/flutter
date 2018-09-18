@@ -325,13 +325,13 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
   return _MatchesReferenceImage(image);
 }
 
-/// Asserts that a [SemanticsData] contains the specified information.
+/// Asserts that a [SemanticsNode] contains the specified information.
 ///
 /// If either the label, hint, value, textDirection, or rect fields are not
 /// provided, then they are not part of the comparison.  All of the boolean
 /// flag and action fields must match, and default to false.
 ///
-/// To retrieve the semantics data of a widget, use [tester.getSemanticsData]
+/// To retrieve the semantics data of a widget, use [tester.getSemantics]
 /// with a [Finder] that returns a single widget. Semantics must be enabled
 /// in order to use this method.
 ///
@@ -339,14 +339,178 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///
 /// ```dart
 /// final SemanticsHandle handle = tester.ensureSemantics();
-/// final SemanticsData data = tester.getSemanticsData(find.text('hello'));
-/// expect(data, matchesSemanticsData(label: 'hello'));
+/// expect(tester.getSemantics(find.text('hello')), matchesSemanticsNode(label: 'hello'));
 /// handle.dispose();
 /// ```
 ///
 /// See also:
 ///
-///   * [WidgetTester.getSemanticsData], the tester method which retrieves data.
+///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
+Matcher matchesSemantics({
+  String label,
+  String hint,
+  String value,
+  String increasedValue,
+  String decreasedValue,
+  TextDirection textDirection,
+  Rect rect,
+  Size size,
+  // Flags //
+  bool hasCheckedState = false,
+  bool isChecked = false,
+  bool isSelected = false,
+  bool isButton = false,
+  bool isFocused = false,
+  bool isTextField = false,
+  bool hasEnabledState = false,
+  bool isEnabled = false,
+  bool isInMutuallyExclusiveGroup = false,
+  bool isHeader = false,
+  bool isObscured = false,
+  bool namesRoute = false,
+  bool scopesRoute = false,
+  bool isHidden = false,
+  bool isImage = false,
+  bool isLiveRegion = false,
+  bool hasToggledState = false,
+  bool isToggled = false,
+  bool hasImplicitScrolling = false,
+  // Actions //
+  bool hasTapAction = false,
+  bool hasLongPressAction = false,
+  bool hasScrollLeftAction = false,
+  bool hasScrollRightAction = false,
+  bool hasScrollUpAction = false,
+  bool hasScrollDownAction = false,
+  bool hasIncreaseAction = false,
+  bool hasDecreaseAction = false,
+  bool hasShowOnScreenAction = false,
+  bool hasMoveCursorForwardByCharacterAction = false,
+  bool hasMoveCursorBackwardByCharacterAction = false,
+  bool hasMoveCursorForwardByWordAction = false,
+  bool hasMoveCursorBackwardByWordAction = false,
+  bool hasSetSelectionAction = false,
+  bool hasCopyAction = false,
+  bool hasCutAction = false,
+  bool hasPasteAction = false,
+  bool hasDidGainAccessibilityFocusAction = false,
+  bool hasDidLoseAccessibilityFocusAction = false,
+  bool hasDismissAction = false,
+  // Custom actions and overrides
+  String onTapHint,
+  String onLongPressHint,
+  List<CustomSemanticsAction> customActions,
+  List<Matcher> children,
+}) {
+  final List<SemanticsFlag> flags = <SemanticsFlag>[];
+  if (hasCheckedState)
+    flags.add(SemanticsFlag.hasCheckedState);
+  if (isChecked)
+    flags.add(SemanticsFlag.isChecked);
+  if (isSelected)
+    flags.add(SemanticsFlag.isSelected);
+  if (isButton)
+    flags.add(SemanticsFlag.isButton);
+  if (isTextField)
+    flags.add(SemanticsFlag.isTextField);
+  if (isFocused)
+    flags.add(SemanticsFlag.isFocused);
+  if (hasEnabledState)
+    flags.add(SemanticsFlag.hasEnabledState);
+  if (isEnabled)
+    flags.add(SemanticsFlag.isEnabled);
+  if (isInMutuallyExclusiveGroup)
+    flags.add(SemanticsFlag.isInMutuallyExclusiveGroup);
+  if (isHeader)
+    flags.add(SemanticsFlag.isHeader);
+  if (isObscured)
+    flags.add(SemanticsFlag.isObscured);
+  if (namesRoute)
+    flags.add(SemanticsFlag.namesRoute);
+  if (scopesRoute)
+    flags.add(SemanticsFlag.scopesRoute);
+  if (isHidden)
+    flags.add(SemanticsFlag.isHidden);
+  if (isImage)
+    flags.add(SemanticsFlag.isImage);
+  if (isLiveRegion)
+    flags.add(SemanticsFlag.isLiveRegion);
+  if (hasToggledState)
+    flags.add(SemanticsFlag.hasToggledState);
+  if (isToggled)
+    flags.add(SemanticsFlag.isToggled);
+  if (hasImplicitScrolling)
+    flags.add(SemanticsFlag.hasImplicitScrolling);
+
+  final List<SemanticsAction> actions = <SemanticsAction>[];
+  if (hasTapAction)
+    actions.add(SemanticsAction.tap);
+  if (hasLongPressAction)
+    actions.add(SemanticsAction.longPress);
+  if (hasScrollLeftAction)
+    actions.add(SemanticsAction.scrollLeft);
+  if (hasScrollRightAction)
+    actions.add(SemanticsAction.scrollRight);
+  if (hasScrollUpAction)
+    actions.add(SemanticsAction.scrollUp);
+  if (hasScrollDownAction)
+    actions.add(SemanticsAction.scrollDown);
+  if (hasIncreaseAction)
+    actions.add(SemanticsAction.increase);
+  if (hasDecreaseAction)
+    actions.add(SemanticsAction.decrease);
+  if (hasShowOnScreenAction)
+    actions.add(SemanticsAction.showOnScreen);
+  if (hasMoveCursorForwardByCharacterAction)
+    actions.add(SemanticsAction.moveCursorForwardByCharacter);
+  if (hasMoveCursorBackwardByCharacterAction)
+    actions.add(SemanticsAction.moveCursorBackwardByCharacter);
+  if (hasSetSelectionAction)
+    actions.add(SemanticsAction.setSelection);
+  if (hasCopyAction)
+    actions.add(SemanticsAction.copy);
+  if (hasCutAction)
+    actions.add(SemanticsAction.cut);
+  if (hasPasteAction)
+    actions.add(SemanticsAction.paste);
+  if (hasDidGainAccessibilityFocusAction)
+    actions.add(SemanticsAction.didGainAccessibilityFocus);
+  if (hasDidLoseAccessibilityFocusAction)
+    actions.add(SemanticsAction.didLoseAccessibilityFocus);
+  if (customActions != null && customActions.isNotEmpty)
+    actions.add(SemanticsAction.customAction);
+  if (hasDismissAction)
+    actions.add(SemanticsAction.dismiss);
+  if (hasMoveCursorForwardByWordAction)
+    actions.add(SemanticsAction.moveCursorForwardByWord);
+  if (hasMoveCursorBackwardByWordAction)
+    actions.add(SemanticsAction.moveCursorBackwardByWord);
+  SemanticsHintOverrides hintOverrides;
+  if (onTapHint != null || onLongPressHint != null)
+    hintOverrides = SemanticsHintOverrides(
+      onTapHint: onTapHint,
+      onLongPressHint: onLongPressHint,
+    );
+
+  return _MatchesSemanticsData(
+    label: label,
+    hint: hint,
+    value: value,
+    increasedValue: increasedValue,
+    decreasedValue: decreasedValue,
+    actions: actions,
+    flags: flags,
+    textDirection: textDirection,
+    rect: rect,
+    size: size,
+    customActions: customActions,
+    hintOverrides: hintOverrides,
+    children: children,
+  );
+}
+
+/// DEPRECATED: use [matchesSemantics] instead.
+@Deprecated('use matchesSemantics instead')
 Matcher matchesSemanticsData({
   String label,
   String hint,
@@ -402,7 +566,7 @@ Matcher matchesSemanticsData({
   String onLongPressHint,
   List<CustomSemanticsAction> customActions,
 }) {
-  final List<SemanticsFlag> flags = <SemanticsFlag>[];
+    final List<SemanticsFlag> flags = <SemanticsFlag>[];
   if (hasCheckedState)
     flags.add(SemanticsFlag.hasCheckedState);
   if (isChecked)
@@ -1686,6 +1850,7 @@ class _MatchesSemanticsData extends Matcher {
     this.size,
     this.customActions,
     this.hintOverrides,
+    this.children,
   });
 
   final String label;
@@ -1700,43 +1865,51 @@ class _MatchesSemanticsData extends Matcher {
   final TextDirection textDirection;
   final Rect rect;
   final Size size;
+  final List<Matcher> children;
 
   @override
   Description describe(Description description) {
     description.add('has semantics');
     if (label != null)
-      description.add('with label: $label ');
+      description.add(' with label: $label');
     if (value != null)
-      description.add('with value: $value ');
+      description.add(' with value: $value');
     if (hint != null)
-      description.add('with hint: $hint ');
+      description.add(' with hint: $hint');
     if (increasedValue != null)
-      description.add('with increasedValue: $increasedValue');
+      description.add(' with increasedValue: $increasedValue ');
     if (decreasedValue != null)
-      description.add('with decreasedValue: $decreasedValue');
+      description.add(' with decreasedValue: $decreasedValue ');
     if (actions != null)
-      description.add('with actions:').addDescriptionOf(actions);
+      description.add(' with actions: ').addDescriptionOf(actions);
     if (flags != null)
-      description.add('with flags:').addDescriptionOf(flags);
+      description.add(' with flags: ').addDescriptionOf(flags);
     if (textDirection != null)
-      description.add('with textDirection: $textDirection ');
+      description.add(' with textDirection: $textDirection ');
     if (rect != null)
-      description.add('with rect: $rect');
+      description.add(' with rect: $rect');
     if (size != null)
-      description.add('with size: $size');
+      description.add(' with size: $size');
     if (customActions != null)
-      description.add('with custom actions: $customActions');
+      description.add(' with custom actions: $customActions');
     if (hintOverrides != null)
-      description.add('with custom hints: $hintOverrides');
+      description.add(' with custom hints: $hintOverrides');
+    if (children != null) {
+      description.add(' with children:\n');
+      for (_MatchesSemanticsData child in children)
+        child.describe(description);
+    }
     return description;
   }
 
 
   @override
-  bool matches(covariant SemanticsData data, Map<dynamic, dynamic> matchState) {
-    if (data == null)
+  bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
+    // TODO(jonahwilliams): remove dynamic once we have removed getSemanticsData.
+    if (node == null)
       return failWithDescription(matchState, 'No SemanticsData provided. '
-        'Maybe you forgot to enabled semantics?');
+        'Maybe you forgot to enable semantics?');
+    final SemanticsData data = node is SemanticsNode ? node.getSemanticsData() : node;
     if (label != null && label != data.label)
       return failWithDescription(matchState, 'label was: ${data.label}');
     if (hint != null && hint != data.hint)
@@ -1800,7 +1973,16 @@ class _MatchesSemanticsData extends Matcher {
         return failWithDescription(matchState, 'flags were: $flagSummary');
       }
     }
-    return true;
+    bool allMatched = true;
+    if (children != null) {
+      int i = 0;
+      node.visitChildren((SemanticsNode child) {
+        allMatched = children[i].matches(child, matchState) && allMatched;
+        i += 1;
+        return allMatched;
+      });
+    }
+    return allMatched;
   }
 
   bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {

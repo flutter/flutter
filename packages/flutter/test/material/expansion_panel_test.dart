@@ -382,7 +382,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSemanticsData(find.byKey(expandedKey)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
       label: 'Expanded',
       isButton: true,
       hasEnabledState: true,
@@ -391,7 +391,7 @@ void main() {
       onTapHint: localizations.expandedIconTapHint,
     ));
 
-    expect(tester.getSemanticsData(find.byKey(collapsedKey)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
       label: 'Collapsed',
       isButton: true,
       hasEnabledState: true,

@@ -330,7 +330,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '50%',
@@ -348,7 +348,7 @@ void main() {
       ),
     ));
 
-    expect(tester.getSemanticsData(find.byType(CupertinoSlider)), matchesSemanticsData(
+    expect(tester.getSemantics(find.byType(CupertinoSlider)), matchesSemantics(
       hasIncreaseAction: true,
       hasDecreaseAction: true,
       value: '60%',

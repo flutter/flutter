@@ -378,17 +378,17 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpTestWidget(tester);
 
-    expect(tester.getSemanticsData(find.text('B')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('B')), matchesSemantics(
       label: 'B',
       size: const Size(48.0, 48.0),
     ));
 
-    expect(tester.getSemanticsData(find.text('C')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('C')), matchesSemantics(
       label: 'C',
       size: const Size(48.0, 48.0),
     ));
 
-    expect(tester.getSemanticsData(find.text('D')), matchesSemanticsData(
+    expect(tester.getSemantics(find.text('D')), matchesSemantics(
       label: 'D',
       size: const Size(48.0, 48.0),
     ));

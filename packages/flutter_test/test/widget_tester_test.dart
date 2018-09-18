@@ -540,7 +540,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemanticsData(find.text('hello')),
+      expect(() => tester.getSemantics(find.text('hello')),
         throwsA(isInstanceOf<StateError>()));
     });
 
@@ -560,7 +560,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemanticsData(find.text('hello')),
+      expect(() => tester.getSemantics(find.text('hello')),
           throwsA(isInstanceOf<StateError>()));
       semanticsHandle.dispose();
     });
@@ -581,7 +581,8 @@ void main() {
         ),
       );
 
-      final SemanticsData semantics = tester.getSemanticsData(find.text('hello'));
+      final SemanticsNode node = tester.getSemantics(find.text('hello'));
+      final SemanticsData semantics = node.getSemanticsData();
       expect(semantics.label, 'hello');
       expect(semantics.hasAction(SemanticsAction.tap), true);
       expect(semantics.hasFlag(SemanticsFlag.isButton), true);
@@ -609,7 +610,8 @@ void main() {
         ),
       );
 
-      final SemanticsData semantics = tester.getSemanticsData(find.byKey(key));
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData semantics = node.getSemanticsData();
       expect(semantics.label, 'A\nB\nC');
       semanticsHandle.dispose();
     });
