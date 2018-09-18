@@ -504,9 +504,10 @@ class _TextFinder extends MatchFinder {
       // twice. We make an exception for semantics since those may be placed
       // between a Text and Rich text.
       candidate.visitAncestorElements((Element parent) {
-        if (parent.widget is Text)
+        if (parent.widget is Text) {
           parentIsText = true;
-        if (parent.widget is ExcludeSemantics || parent.widget is Semantics)
+          return false;
+        } else if (parent.widget is ExcludeSemantics || parent.widget is Semantics)
           return true;
         return false;
       });
