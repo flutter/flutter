@@ -914,7 +914,6 @@ Future<void> longPressDrag(WidgetTester tester, Offset start, Offset end) async 
 
 class _Stateful extends StatefulWidget {
   // Ignoring the preference for const constructors because we want to test with regular non-const instances.
-  // ignore:prefer_const_constructors
   // ignore:prefer_const_constructors_in_immutables
   _Stateful({Key key}) : super(key: key);
 
