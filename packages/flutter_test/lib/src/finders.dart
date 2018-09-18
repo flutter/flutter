@@ -498,6 +498,17 @@ class _TextFinder extends MatchFinder {
     } else if (candidate.widget is EditableText) {
       final EditableText editable = candidate.widget;
       return editable.controller.text == text;
+    } else if (candidate.widget is RichText) {
+      bool parentIsText = false;
+      // check if the direct parent is a Text widget.
+      // if so, do not match it twice.
+      candidate.visitAncestorElements((Element parent) {
+        if (parent.widget is Text)
+          parentIsText = true;
+        return false;
+      });
+      final RichText richText = candidate.widget;
+      return !parentIsText && richText.text.toPlainText() == text;
     }
     return false;
   }

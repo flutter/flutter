@@ -27,6 +27,25 @@ void main() {
 
       expect(find.text('test'), findsOneWidget);
     });
+
+    testWidgets('finds RichText widgets', (WidgetTester tester) async {
+      await tester.pumpWidget(_boilerplate(
+        const RichText(text: TextSpan(text: 't', children: <TextSpan>[
+          TextSpan(text: 'est'),
+        ]))
+      ));
+
+      expect(find.text('test'), findsOneWidget);
+    });
+
+    testWidgets('Does not find Text widgets', (WidgetTester tester) async {
+      // If rich: true found both Text and RichText, this would find two widgets.
+      await tester.pumpWidget(_boilerplate(
+        const Text('test'),
+      ));
+
+      expect(find.text('test'), findsOneWidget);
+    });
   });
 
   group('hitTestable', () {
