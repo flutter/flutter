@@ -12,6 +12,7 @@ dynamic _decodeJSON(String message) {
   return message != null ? json.decode(message) : null;
 }
 
+@pragma('vm:entry-point')
 void _updateWindowMetrics(double devicePixelRatio,
                           double width,
                           double height,
@@ -43,13 +44,16 @@ typedef _LocaleClosure = String Function();
 
 String _localeClosure() => window._locale.toString();
 
+@pragma('vm:entry-point')
 _LocaleClosure _getLocaleClosure() => _localeClosure;
 
+@pragma('vm:entry-point')
 void _updateLocale(String languageCode, String countryCode) {
   window._locale = new Locale(languageCode, countryCode);
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 
+@pragma('vm:entry-point')
 void _updateUserSettingsData(String jsonData) {
   final Map<String, dynamic> data = json.decode(jsonData);
   _updateTextScaleFactor(data['textScaleFactor'].toDouble());
@@ -65,11 +69,13 @@ void _updateAlwaysUse24HourFormat(bool alwaysUse24HourFormat) {
   window._alwaysUse24HourFormat = alwaysUse24HourFormat;
 }
 
+@pragma('vm:entry-point')
 void _updateSemanticsEnabled(bool enabled) {
   window._semanticsEnabled = enabled;
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
+@pragma('vm:entry-point')
 void _updateAccessibilityFeatures(int values) {
   final AccessibilityFeatures newFeatures = new AccessibilityFeatures._(values);
   if (newFeatures == window._accessibilityFeatures)
@@ -78,6 +84,7 @@ void _updateAccessibilityFeatures(int values) {
   _invoke(window.onAccessibilityFeaturesChanged, window._onAccessibilityFlagsChangedZone);
 }
 
+@pragma('vm:entry-point')
 void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
   if (window.onPlatformMessage != null) {
     _invoke3<String, ByteData, PlatformMessageResponseCallback>(
@@ -94,11 +101,13 @@ void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
   }
 }
 
+@pragma('vm:entry-point')
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
     _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
 }
 
+@pragma('vm:entry-point')
 void _dispatchSemanticsAction(int id, int action, ByteData args) {
   _invoke3<int, SemanticsAction, ByteData>(
     window.onSemanticsAction,
@@ -109,10 +118,12 @@ void _dispatchSemanticsAction(int id, int action, ByteData args) {
   );
 }
 
+@pragma('vm:entry-point')
 void _beginFrame(int microseconds) {
   _invoke1<Duration>(window.onBeginFrame, window._onBeginFrameZone, new Duration(microseconds: microseconds));
 }
 
+@pragma('vm:entry-point')
 void _drawFrame() {
   _invoke(window.onDrawFrame, window._onDrawFrameZone);
 }

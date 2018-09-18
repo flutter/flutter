@@ -102,6 +102,7 @@ class Color {
   /// For example, to get a fully opaque orange, you would use `const
   /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
   /// green, and `00` for the blue).
+  @pragma('vm:entry-point')
   const Color(int value) : value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
@@ -1485,9 +1486,14 @@ class _ImageInfo {
   _ImageInfo(this.width, this.height, this.format, this.rowBytes) {
     rowBytes ??= width * 4;
   }
+
+  @pragma('vm:entry-point', 'get')
   int width;
+  @pragma('vm:entry-point', 'get')
   int height;
+  @pragma('vm:entry-point', 'get')
   int format;
+  @pragma('vm:entry-point', 'get')
   int rowBytes;
 }
 
@@ -1502,6 +1508,7 @@ class Image extends NativeFieldWrapperClass2 {
   /// or extended directly.
   ///
   /// To obtain an [Image] object, use [instantiateImageCodec].
+  @pragma('vm:entry-point')
   Image._();
 
   /// The number of image pixels along the image's horizontal axis.
@@ -1549,6 +1556,7 @@ class FrameInfo extends NativeFieldWrapperClass2 {
   ///
   /// To obtain an instance of the [FrameInfo] interface, see
   /// [Codec.getNextFrame].
+  @pragma('vm:entry-point')
   FrameInfo._();
 
   /// The duration this frame should be shown.
@@ -1566,6 +1574,7 @@ class Codec extends NativeFieldWrapperClass2 {
   ///
   /// To obtain an instance of the [Codec] interface, see
   /// [instantiateImageCodec].
+  @pragma('vm:entry-point')
   Codec._();
 
   /// Number of frames in this image.
@@ -1752,6 +1761,7 @@ enum PathOperation {
 /// used to create clip regions using [Canvas.clipPath].
 class Path extends NativeFieldWrapperClass2 {
   /// Create a new empty [Path] object.
+  @pragma('vm:entry-point')
   Path() { _constructor(); }
   void _constructor() native 'Path_constructor';
 
@@ -2401,6 +2411,7 @@ class ImageFilter extends NativeFieldWrapperClass2 {
 class Shader extends NativeFieldWrapperClass2 {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
+  @pragma('vm:entry-point')
   Shader._();
 }
 
@@ -2664,6 +2675,7 @@ class ImageShader extends Shader {
   /// direction and y direction respectively. The fourth argument gives the
   /// matrix to apply to the effect. All the arguments are required and must not
   /// be null.
+  @pragma('vm:entry-point')
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) :
     assert(image != null), // image is checked on the engine side
     assert(tmx != null),
@@ -2828,6 +2840,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// To end the recording, call [PictureRecorder.endRecording] on the
   /// given recorder.
+  @pragma('vm:entry-point')
   Canvas(PictureRecorder recorder, [ Rect cullRect ]) : assert(recorder != null) {
     if (recorder.isRecording)
       throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
@@ -3545,6 +3558,7 @@ class Picture extends NativeFieldWrapperClass2 {
   /// or extended directly.
   ///
   /// To create a [Picture], use a [PictureRecorder].
+  @pragma('vm:entry-point')
   Picture._();
 
   /// Creates an image from this picture.
@@ -3575,6 +3589,7 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// Creates a new idle PictureRecorder. To associate it with a
   /// [Canvas] and begin recording, pass this [PictureRecorder] to the
   /// [Canvas] constructor.
+  @pragma('vm:entry-point')
   PictureRecorder() { _constructor(); }
   void _constructor() native 'PictureRecorder_constructor';
 
@@ -3640,4 +3655,3 @@ Future<T> _futurize<T>(_Callbacker<T> callbacker) {
     throw new Exception(error);
   return completer.future;
 }
-
