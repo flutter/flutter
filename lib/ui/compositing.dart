@@ -15,6 +15,7 @@ class Scene extends NativeFieldWrapperClass2 {
   /// or extended directly.
   ///
   /// To create a Scene object, use a [SceneBuilder].
+  @pragma('vm:entry-point')
   Scene._();
 
 
@@ -45,6 +46,7 @@ class Scene extends NativeFieldWrapperClass2 {
 /// it to the scene using [addPicture].
 class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Creates an empty [SceneBuilder] object.
+  @pragma('vm:entry-point')
   SceneBuilder() { _constructor(); }
   void _constructor() native 'SceneBuilder_constructor';
 

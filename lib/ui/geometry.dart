@@ -589,6 +589,7 @@ class Rect {
   Rect._();
 
   /// Construct a rectangle from its left, top, right, and bottom edges.
+  @pragma('vm:entry-point')
   Rect.fromLTRB(double left, double top, double right, double bottom) {
     _value
       ..[0] = left
