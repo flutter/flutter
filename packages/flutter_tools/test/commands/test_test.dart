@@ -56,7 +56,8 @@ void main() {
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
+      final ProcessResult result = await _runFlutterTest(automatedTestsDirectory, flutterTestDirectory,
+        testName:'filtering',
         extraArgs: const <String>['--name', 'inc.*de']);
       if (!result.stdout.contains('+1: All tests passed'))
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
@@ -65,7 +66,8 @@ void main() {
 
     testUsingContext('run a test when its name contains a string', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
+      final ProcessResult result = await _runFlutterTest(automatedTestsDirectory, flutterTestDirectory,
+        testName:'filtering',
         extraArgs: const <String>['--plain-name', 'include']);
       if (!result.stdout.contains('+1: All tests passed'))
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
@@ -74,7 +76,8 @@ void main() {
 
     testUsingContext('test runs to completion', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
+      final ProcessResult result = await _runFlutterTest(automatedTestsDirectory, flutterTestDirectory,
+        testName: 'trivial',
         extraArgs: const <String>['--verbose']);
       if ((!result.stdout.contains('+1: All tests passed')) ||
           (!result.stdout.contains('test 0: starting shell process')) ||
@@ -87,6 +90,15 @@ void main() {
       expect(result.exitCode, 0);
     });
 
+    testUsingContext('test concurrency option for compilation', () async {
+      const int concurrency = 2;
+      const String compilerName = 'frontend_server.dart.snapshot';
+      Cache.flutterRoot = '../..';
+      final ProcessResult result = await _runFlutterTest(automatedTestsDirectory, flutterTestDirectory,
+          extraArgs: const <String>['--verbose', '-j${concurrency}']);
+      int count = compilerName.allMatches(result.stdout.toString()).length;
+      expect(count, concurrency);
+    });
   });
 }
 
@@ -100,7 +112,7 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  final ProcessResult exec = await _runFlutterTest(testName, workingDirectory, testDirectory);
+  final ProcessResult exec = await _runFlutterTest(workingDirectory, testDirectory, testName: testName);
 
   expect(exec.exitCode, exitCode);
   final List<String> output = exec.stdout.split('\n');
@@ -145,16 +157,18 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
 }
 
 Future<ProcessResult> _runFlutterTest(
-  String testName,
   String workingDirectory,
   String testDirectory, {
+  String testName,
   List<String> extraArgs = const <String>[],
 }) async {
-
-  final String testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
-  final File testFile = fs.file(testFilePath);
-  if (!testFile.existsSync())
-    fail('missing test file: $testFile');
+  String testFilePath = "";
+  if (testName != null) {
+    testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
+    final File testFile = fs.file(testFilePath);
+    if (!testFile.existsSync())
+      fail('missing test file: $testFile');
+  }
 
   final List<String> args = <String>[]
     ..addAll(dartVmFlags)
