@@ -5,7 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-typedef void TestCallback(BuildContext context);
+typedef TestCallback = void Function(BuildContext context);
 
 class TestWidget extends StatefulWidget {
   const TestWidget(this.callback);

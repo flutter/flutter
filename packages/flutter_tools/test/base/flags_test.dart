@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-typedef FutureOr<Null> _TestMethod();
+typedef _TestMethod = FutureOr<Null> Function();
 
 void main() {
   Cache.disableLocking();

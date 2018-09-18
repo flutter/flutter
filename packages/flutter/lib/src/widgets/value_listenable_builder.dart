@@ -16,7 +16,7 @@ import 'framework.dart';
 ///
 ///  * [ValueListenableBuilder], a widget which invokes this builder each time
 ///    a [ValueListenable] changes value.
-typedef Widget ValueWidgetBuilder<T>(BuildContext context, T value, Widget child);
+typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, Widget child);
 
 /// A widget whose content stays sync'ed with a [ValueListenable].
 ///

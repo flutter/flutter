@@ -139,6 +139,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     //
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _DropdownRoute<T> route = widget.route;
     final double unit = 0.5 / (route.items.length + 1.5);
@@ -631,6 +632,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.

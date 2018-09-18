@@ -20,7 +20,7 @@ final Logger _log = Logger('DartVm');
 
 /// Signature of an asynchronous function for astablishing a JSON RPC-2
 /// connection to a [Uri].
-typedef Future<json_rpc.Peer> RpcPeerConnectionFunction(Uri uri);
+typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(Uri uri);
 
 /// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
 ///

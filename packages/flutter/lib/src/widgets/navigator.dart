@@ -23,16 +23,16 @@ import 'ticker_provider.dart';
 /// Creates a route for the given route settings.
 ///
 /// Used by [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute].
-typedef Route<dynamic> RouteFactory(RouteSettings settings);
+typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
 
 /// Signature for the [Navigator.popUntil] predicate argument.
-typedef bool RoutePredicate(Route<dynamic> route);
+typedef RoutePredicate = bool Function(Route<dynamic> route);
 
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
 /// [ModalRoute.removeScopedWillPopCallback], and [WillPopScope].
-typedef Future<bool> WillPopCallback();
+typedef WillPopCallback = Future<bool> Function();
 
 /// Indicates whether the current route should be popped.
 ///

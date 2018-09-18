@@ -243,7 +243,13 @@ Widget buildFrame({
   EdgeInsets viewInsets = const EdgeInsets.only(bottom: 200.0),
   Widget bab,
 }) {
-  return Directionality(
+  return Localizations(
+    locale: const Locale('en', 'us'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultWidgetsLocalizations.delegate,
+      DefaultMaterialLocalizations.delegate,
+    ],
+    child: Directionality(
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(viewInsets: viewInsets),
@@ -255,7 +261,7 @@ Widget buildFrame({
         body: listener,
       ),
     ),
-  );
+  ));
 }
 
 class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {

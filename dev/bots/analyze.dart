@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 
 import 'run_command.dart';
 
-typedef Future<Null> ShardRunner();
+typedef ShardRunner = Future<Null> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
