@@ -90,14 +90,21 @@ void main() {
       expect(result.exitCode, 0);
     });
 
-    testUsingContext('test concurrency option for compilation', () async {
-      const int concurrency = 2;
+    Future<void> _testConcurrency(int concurrency) async {
       const String compilerName = 'frontend_server.dart.snapshot';
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest(automatedTestsDirectory, flutterTestDirectory,
-          extraArgs: const <String>['--verbose', '-j${concurrency}']);
-      int count = compilerName.allMatches(result.stdout.toString()).length;
+          extraArgs: <String>['--verbose', '-j$concurrency']);
+      final int count = compilerName.allMatches(result.stdout.toString()).length;
       expect(count, concurrency);
+    }
+
+    testUsingContext('test concurrency option for compilation', () async {
+      await _testConcurrency(2);
+    });
+
+    testUsingContext('test no concurrency for compilation', () async {
+      await _testConcurrency(1);
     });
   });
 }
@@ -162,7 +169,7 @@ Future<ProcessResult> _runFlutterTest(
   String testName,
   List<String> extraArgs = const <String>[],
 }) async {
-  String testFilePath = "";
+  String testFilePath = '';
   if (testName != null) {
     testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
     final File testFile = fs.file(testFilePath);
