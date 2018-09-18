@@ -186,15 +186,6 @@ class IosProject {
   /// The '.pbxproj' file of the host app.
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
-  /// Xcode workspace directory of the host app.
-  Directory get xcodeWorkspace => directory.childDirectory('$_hostAppBundleName.xcworkspace');
-
-  /// Xcode workspace shared data directory for the host app.
-  Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
-
-  /// Xcode workspace shared workspace settings file for the host app.
-  File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
-
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   String get productBundleIdentifier {
