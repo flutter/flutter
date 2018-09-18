@@ -16,6 +16,9 @@ import 'globals.dart';
 import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
+// TODO(dantup): This MUST be updated to match the real custom dimension configured
+// in the live account before merging.
+const String kEventReasonParameterName = 'cd1';
 
 Usage get flutterUsage => Usage.instance;
 
