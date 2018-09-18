@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui';
 
@@ -275,15 +276,53 @@ Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int s
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.
+///  * [matchesReferenceImage], which should be used instead if you want to
+///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-Matcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key) {
   if (key is Uri) {
     return _MatchesGoldenFile(key);
   } else if (key is String) {
     return _MatchesGoldenFile.forStringPath(key);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
+}
+
+/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
+/// reference image identified by [image].
+///
+/// For the case of a [Finder], the [Finder] must match exactly one widget and
+/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
+/// treated as the image for the widget.
+///
+/// This is an asynchronous matcher, meaning that callers should use
+/// [expectLater] when using this matcher and await the future returned by
+/// [expectLater].
+///
+/// ## Sample code
+///
+/// ```dart
+/// final ui.Paint paint = ui.Paint()
+///   ..style = ui.PaintingStyle.stroke
+///   ..strokeWidth = 1.0;
+/// final ui.PictureRecorder recorder = ui.PictureRecorder();
+/// final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+/// pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+/// final ui.Picture picture = recorder.endRecording();
+/// ui.Image referenceImage = picture.toImage(50, 50);
+///
+/// await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
+/// await expectLater(image, matchesReferenceImage(referenceImage);
+/// await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+/// ```
+///
+/// See also:
+///
+///  * [matchesGoldenFile], which should be used instead if you need to verify
+///    that a [Finder] or [ui.Image] matches a golden image.
+AsyncMatcher matchesReferenceImage(ui.Image image) {
+  return _MatchesReferenceImage(image);
 }
 
 /// Asserts that a [SemanticsData] contains the specified information.
@@ -1511,6 +1550,76 @@ Future<ui.Image> _captureImage(Element element) {
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.layer;
   return layer.toImage(renderObject.paintBounds);
+}
+
+int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
+  assert(imageA.length == imageB.length);
+  int delta = 0;
+  for (int i = 0; i < imageA.length; i+=4) {
+    if (imageA[i] != imageB[i] ||
+      imageA[i+1] != imageB[i+1] ||
+      imageA[i+2] != imageB[i+2] ||
+      imageA[i+3] != imageB[i+3]) {
+      delta++;
+    }
+  }
+  return delta;
+}
+
+class _MatchesReferenceImage extends AsyncMatcher {
+  const _MatchesReferenceImage(this.referenceImage);
+
+  final ui.Image referenceImage;
+
+  @override
+  Future<String> matchAsync(dynamic item) async {
+    Future<ui.Image> imageFuture;
+    if (item is Future<ui.Image>) {
+      imageFuture = item;
+    } else if (item is ui.Image) {
+      imageFuture = Future<ui.Image>.value(item);
+    } else {
+      final Finder finder = item;
+      final Iterable<Element> elements = finder.evaluate();
+      if (elements.isEmpty) {
+        return 'could not be rendered because no widget was found';
+      } else if (elements.length > 1) {
+        return 'matched too many widgets';
+      }
+      imageFuture = _captureImage(elements.single);
+    }
+
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    return binding.runAsync<String>(() async {
+      final ui.Image image = await imageFuture;
+      final ByteData bytes = await image.toByteData()
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (bytes == null) {
+        return 'Failed to generate an image from engine within the 10,000ms timeout.';
+      }
+
+      final ByteData referenceBytes = await referenceImage.toByteData()
+        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      if (referenceBytes == null) {
+        return 'Failed to generate an image from engine within the 10,000ms timeout.';
+      }
+
+      if (referenceImage.height != image.height || referenceImage.width != image.width) {
+        return 'does not match as width or height do not match. $image != $referenceImage';
+      }
+
+      final int countDifferentPixels = _countDifferentPixels(
+        Uint8List.view(bytes.buffer),
+        Uint8List.view(referenceBytes.buffer),
+      );
+      return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+    }, additionalTime: const Duration(seconds: 21));
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('rasterized image matches that of a $referenceImage reference image');
+  }
 }
 
 class _MatchesGoldenFile extends AsyncMatcher {
