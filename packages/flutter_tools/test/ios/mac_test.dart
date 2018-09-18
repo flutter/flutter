@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -21,6 +22,73 @@ class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
 void main() {
+  group('PropertyList', () {
+    MockProcessManager mockProcessManager;
+    MemoryFileSystem fs;
+    Directory workspaceDirectory;
+    File workspaceSettingsFile;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      fs = MemoryFileSystem();
+      workspaceDirectory = fs.directory('Runner.xcworkspace');
+      workspaceSettingsFile = workspaceDirectory.childDirectory('xcshareddata').childFile('WorkspaceSettings.xcsettings');
+    });
+
+    testUsingContext('does nothing if workspace directory does not exist', () async {
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verifyNever(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('creates dict-based plist if settings file does not exist', () async {
+      workspaceSettingsFile.parent.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Clear dict', workspaceSettingsFile.path]));
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Add BuildSystemType string Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('writes legacy build mode settings if requested and not present', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Add BuildSystemType string Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('updates legacy build mode setting if requested and existing setting is present', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'FancyNewOne', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Set BuildSystemType Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('deletes legacy build mode setting if modern build mode requested', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'Original', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: true);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Delete BuildSystemType', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
   group('IMobileDevice', () {
     final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
