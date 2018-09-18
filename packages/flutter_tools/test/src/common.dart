@@ -20,7 +20,7 @@ export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'pa
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>(); // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/32544
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 void tryToDelete(Directory directory) {
   // This should not be necessary, but it turns out that
