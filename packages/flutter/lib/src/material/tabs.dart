@@ -15,7 +15,6 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
 import 'theme.dart';
@@ -690,8 +689,11 @@ class _TabBarState extends State<TabBar> {
   Decoration get _indicator {
     if (widget.indicator != null)
       return widget.indicator;
+    final ThemeData themeData = Theme.of(context);
+    if (themeData.tabBarTheme?.indicator != null)
+      return themeData.tabBarTheme.indicator;
 
-    Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
+    Color color = widget.indicatorColor ?? themeData.indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
     // primaryColor. However, it's possible that the tab bar is on a
     // Material that isn't the primaryColor. In that case, if the indicator
@@ -854,7 +856,7 @@ class _TabBarState extends State<TabBar> {
   void _handleTabControllerTick() {
     if (_controller.index != _currentIndex) {
       _currentIndex = _controller.index;
-      if (_isScrollable)
+      if (widget.isScrollable)
         _scrollToCurrentIndex();
     }
     setState(() {
@@ -874,32 +876,32 @@ class _TabBarState extends State<TabBar> {
     _controller.animateTo(index);
   }
 
-  Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
+  Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation, ThemeData themeData) {
     return _TabStyle(
       animation: animation,
       selected: selected,
-      labelColor: _labelColor,
-      unselectedLabelColor: _unselectedLabelColor,
+      labelColor: _labelColor(themeData),
+      unselectedLabelColor: _unselectedLabelColor(themeData),
       labelStyle: widget.labelStyle,
       unselectedLabelStyle: widget.unselectedLabelStyle,
       child: child,
     );
   }
 
-  bool get _isScrollable {
-    return widget.isScrollable ?? Theme.of(context).tabBarTheme.isScrollable;
+  Color _labelColor(ThemeData themeData) {
+    return widget.labelColor ?? themeData.tabBarTheme.labelColor;
   }
 
-  Color get _labelColor {
-    return widget.labelColor ?? Theme.of(context).tabBarTheme.labelColor;
-  }
-
-  Color get _unselectedLabelColor {
-    return widget.unselectedLabelColor ?? Theme.of(context).tabBarTheme.unselectedLabelColor;
+  Color _unselectedLabelColor(ThemeData themeData) {
+    return widget.unselectedLabelColor ?? themeData.tabBarTheme.unselectedLabelColor;
   }
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    final Color labelColor = _labelColor(themeData);
+    final Color unselectedLabelColor = _unselectedLabelColor(themeData);
+
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -932,22 +934,22 @@ class _TabBarState extends State<TabBar> {
         // The user tapped on a tab, the tab controller's animation is running.
         assert(_currentIndex != previousIndex);
         final Animation<double> animation = _ChangeAnimation(_controller);
-        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation);
-        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation);
+        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation, themeData);
+        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, themeData);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
         final int tabIndex = _currentIndex;
         final Animation<double> centerAnimation = _DragAnimation(_controller, tabIndex);
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, themeData);
         if (_currentIndex > 0) {
           final int tabIndex = _currentIndex - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation, themeData);
         }
         if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
           final Animation<double> nextAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation, themeData);
         }
       }
     }
@@ -972,7 +974,7 @@ class _TabBarState extends State<TabBar> {
           ),
         ),
       );
-      if (!_isScrollable)
+      if (!widget.isScrollable)
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
     }
 
@@ -981,8 +983,8 @@ class _TabBarState extends State<TabBar> {
       child: _TabStyle(
         animation: kAlwaysDismissedAnimation,
         selected: false,
-        labelColor: _labelColor,
-        unselectedLabelColor: _unselectedLabelColor,
+        labelColor: labelColor,
+        unselectedLabelColor: unselectedLabelColor,
         labelStyle: widget.labelStyle,
         unselectedLabelStyle: widget.unselectedLabelStyle,
         child: _TabLabelBar(
@@ -992,7 +994,7 @@ class _TabBarState extends State<TabBar> {
       ),
     );
 
-    if (_isScrollable) {
+    if (widget.isScrollable) {
       _scrollController ??= _TabBarScrollController(this);
       tabBar = SingleChildScrollView(
         scrollDirection: Axis.horizontal,

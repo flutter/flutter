@@ -12,15 +12,11 @@ class TabBarTheme extends Diagnosticable {
   /// Creates a tab bar theme that overrides the defaults for the following
   /// values for any [TabBar] in the context.
   const TabBarTheme({
-      this.isScrollable,
       this.indicator,
       this.indicatorSize,
       this.labelColor,
       this.unselectedLabelColor,
   });
-
-  /// Default value for [TabBar.isScrollable] in this Theme.
-  final bool isScrollable;
 
   /// Default value for [TabBar.indicator] in this Theme.
   final Decoration indicator;
@@ -55,7 +51,6 @@ class TabBarTheme extends Diagnosticable {
     assert(b != null);
     assert(t != null);
     return TabBarTheme(
-      isScrollable: t < 0.5 ? a.isScrollable : b.isScrollable,
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorSize: t < 0.5 ? a.indicatorSize : b.indicatorSize,
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
