@@ -58,8 +58,7 @@ void main() {
     tester.route(pointer.move(const Offset(20.0, 30.0))); // moved 10 horizontally and 20 vertically which is 22 total
     expect(didStartPan, isTrue); // 22 > 18
     didStartPan = false;
-    expect(updatedScrollDelta, const Offset(10.0, 20.0));
-    updatedScrollDelta = null;
+    expect(updatedScrollDelta, null);
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
@@ -249,9 +248,11 @@ void main() {
     expect(updateDelta, const Offset(20.0, 0.0));
   });
 
-  testGesture('Drag with multiple pointers', (GestureTester tester) {
-    final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer();
-    final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer();
+   testGesture('Drag with multiple pointers in down behavior', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 =
+        HorizontalDragGestureRecognizer(dragStartBehavior: DragStartBehavior.down);
+    final VerticalDragGestureRecognizer drag2 =
+        VerticalDragGestureRecognizer(dragStartBehavior: DragStartBehavior.down);
 
     final List<String> log = <String>[];
     drag1.onDown = (_) { log.add('drag1-down'); };
