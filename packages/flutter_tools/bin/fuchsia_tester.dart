@@ -126,7 +126,7 @@ Future<Null> run(List<String> args) async {
       ipv6: false,
       enableObservatory: collector != null,
       precompiledDillFiles: tests,
-      concurrency: math.max(1, platform.numberOfProcessors - 2),
+      concurrency: math.max(1, platform.numberOfProcessors ~/ 2),
     );
 
     if (collector != null) {

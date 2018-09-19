@@ -245,9 +245,11 @@ class _Compiler {
       // compilation request at a time".
       ResidentCompiler compiler;
       String outputDill;
+      bool firstCompile = false;
       if (idleCompilers.isEmpty && compilers < concurrency ) {
         // Create compiler
         compiler = createCompiler();
+        firstCompile = true;
         compilers++;
         outputDill = outputDillDirectory.childFile('output_$compilers.dill').path;
         printTrace('Compiler will use the following file as its incremental dill file: $outputDill');
@@ -263,11 +265,6 @@ class _Compiler {
         compilationQueue.removeAt(0);
         printTrace('Compiling ${request.path}');
         final Stopwatch compilerTime = Stopwatch()..start();
-        bool firstCompile = false;
-        if (compiler == null) {
-          compiler = createCompiler();
-          firstCompile = true;
-        }
         suppressOutput = false;
         final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
             compiler.recompile(
@@ -295,6 +292,7 @@ class _Compiler {
             ensureDirectoryExists(testFilePath);
             await outputFile.copy(testFilePath);
           }
+          firstCompile = false;
           request.result.complete(kernelReadyToRun.path);
           compiler.accept();
           compiler.reset();
