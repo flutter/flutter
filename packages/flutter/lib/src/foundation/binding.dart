@@ -7,6 +7,7 @@ import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 
+import 'package:flutter/src/foundation/logging.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -149,7 +150,10 @@ abstract class BindingBase {
           callback: (Map<String, Object> parameters) async {
             final String channel = parameters['channel'];
             if (channel != null) {
-              debugEnableLogging(channel, parameters['enable'] == 'true');
+              final LoggingChannel registeredChannel = getRegisteredChannel(channel);
+              if (registeredChannel != null) {
+                debugEnableLogging(registeredChannel, parameters['enable'] == 'true');
+              }
             }
             return <String, dynamic>{};
           }

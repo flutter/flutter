@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer' as developer;
 
 import 'assertions.dart';
 import 'platform.dart';
@@ -63,66 +61,6 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   } else {
     return action();
   }
-}
-
-/// A callback that, when evaluated, returns a log message.  Log messages must
-/// be encodable as JSON using `json.encode()`.
-typedef DebugLogMessageCallback = Object Function();
-
-/// Logs a message conditionally if the given identifying event [channel] is
-/// enabled (if `debugShouldLogEvent(key)` is true).
-///
-/// Messages are obtained by evaluating [messageCallback] and must be encodable
-/// as JSON strings using `json.encode()`. In the event that logging is not
-/// enabled for the given [channel], [messageCallback] will not be evaluated.
-/// The cost of logging calls can be further mitigated at call sites by invoking
-/// them in a function that is only evaluated in profile or debug modes. For
-/// example,
-///
-/// ```dart
-/// profile(() {
-///   debugLogEvent(logGestures, () => <String, int> {
-///    'x' : x,
-///    'y' : y,
-///    'z' : z,
-///   });
-/// });
-///```
-///
-/// ignores logging entirely in release mode and no performance penalty is paid.
-///
-/// Logging for a given event channel can be enabled programmatically via
-/// [debugEnableLogging] or using a VM service call.
-///
-void debugLogEvent(String channel, DebugLogMessageCallback messageCallback) {
-  assert(channel != null);
-  if (!debugShouldLogEvent(channel)) {
-    return;
-  }
-
-  assert(messageCallback != null);
-  final Object message = messageCallback();
-  assert(message != null);
-
-  developer.log(json.encode(message), name: channel);
-}
-
-final Set<String> _debugLogEventChannels = Set<String>();
-
-/// Enable (or disable) logging for all events on the given [channel].
-void debugEnableLogging(String channel, [bool enable = true]) {
-  assert(channel != null);
-  if (enable) {
-    _debugLogEventChannels.add(channel);
-  } else {
-    _debugLogEventChannels.remove(channel);
-  }
-}
-
-/// Returns true if events on the given event [channel] should be logged.
-bool debugShouldLogEvent(String channel) {
-  assert(channel != null);
-  return _debugLogEventChannels.contains(channel);
 }
 
 /// Arguments to whitelist [Timeline] events in order to be shown in the
