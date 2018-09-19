@@ -184,7 +184,7 @@ class Doctor {
 
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-      final Status status = Status.withSpinner();
+      final Status status = Status.withSpinner(timeout: fastOperation);
       ValidationResult result;
       try {
         result = await validatorTask.result;

@@ -149,7 +149,7 @@ class AttachCommand extends FlutterCommand {
         }
         final Status status = logger.startProgress(
           'Waiting for a connection from Flutter on ${device.name}...',
-          expectSlowOperation: true,
+          timeout: slowOperation,
         );
         try {
           final int localPort = await device.findIsolatePort(module, localPorts);

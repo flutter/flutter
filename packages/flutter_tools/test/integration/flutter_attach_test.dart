@@ -58,5 +58,5 @@ void main() {
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });
-  }, timeout: const Timeout.factor(6));
+  });
 }

@@ -45,5 +45,5 @@ void main() {
       await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-  }, timeout: const Timeout.factor(6));
+  });
 }

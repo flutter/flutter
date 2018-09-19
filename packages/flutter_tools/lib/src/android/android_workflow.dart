@@ -208,10 +208,8 @@ class AndroidLicenseValidator extends DoctorValidator {
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted status;
 
-    void _onLine(String line) {
-      if (status == null && licenseAccepted.hasMatch(line)) {
-        status = LicensesAccepted.all;
-      } else if (licenseCounts.hasMatch(line)) {
+    void _handleLine(String line) {
+      if (licenseCounts.hasMatch(line)) {
         final Match match = licenseCounts.firstMatch(line);
         if (match.group(1) != match.group(2)) {
           status = LicensesAccepted.some;
@@ -219,9 +217,12 @@ class AndroidLicenseValidator extends DoctorValidator {
           status = LicensesAccepted.none;
         }
       } else if (licenseNotAccepted.hasMatch(line)) {
-        // In case the format changes, a more general match will keep doctor
-        // mostly working.
+        // The licenseNotAccepted pattern is trying to match the same line as
+        // licenseCounts, but is more general. In case the format changes, a
+        // more general match may keep doctor mostly working.
         status = LicensesAccepted.none;
+      } else if (licenseAccepted.hasMatch(line)) {
+        status ??= LicensesAccepted.all;
       }
     }
 
@@ -235,19 +236,14 @@ class AndroidLicenseValidator extends DoctorValidator {
     final Future<void> output = process.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .transform<String>(const LineSplitter())
-      .listen(_onLine)
+      .listen(_handleLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
       .transform<String>(const Utf8Decoder(allowMalformed: true))
       .transform<String>(const LineSplitter())
-      .listen(_onLine)
+      .listen(_handleLine)
       .asFuture<void>(null);
-    try {
-      await Future.wait<void>(<Future<void>>[output, errors]).timeout(const Duration(seconds: 30));
-    } catch (TimeoutException) {
-      printTrace(userMessages.androidLicensesTimeout(androidSdk.sdkManagerPath));
-      processManager.killPid(process.pid);
-    }
+    await Future.wait<void>(<Future<void>>[output, errors]);
     return status ?? LicensesAccepted.unknown;
   }
 
@@ -261,9 +257,10 @@ class AndroidLicenseValidator extends DoctorValidator {
     _ensureCanRunSdkManager();
 
     final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
-    if (sdkManagerVersion == null || sdkManagerVersion.major < 26)
+    if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
       // SDK manager is found, but needs to be updated.
       throwToolExit(userMessages.androidSdkOutdated(androidSdk.sdkManagerPath));
+    }
 
     final Process process = await runCommand(
       <String>[androidSdk.sdkManagerPath, '--licenses'],

@@ -55,5 +55,5 @@ void main() {
       await _flutter.run(pidFile: pidFile);
       expect(pidFile.existsSync(), isTrue);
     });
-  }, timeout: const Timeout.factor(6));
+  });
 }

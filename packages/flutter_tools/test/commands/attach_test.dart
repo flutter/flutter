@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -74,16 +75,13 @@ void main() {
 
       testUsingContext('finds observatory port and forwards', () async {
         testDeviceManager.addDevice(device);
-
-        final AttachCommand command = AttachCommand();
-
-        await createTestCommandRunner(command).run(<String>['attach']);
-
+        await createTestCommandRunner(AttachCommand()).run(<String>['attach']);
         verify(
           portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
         ).called(1);
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
+        Logger: () => VerboseLogger(StdoutLogger()),
       });
 
       testUsingContext('accepts filesystem parameters', () async {

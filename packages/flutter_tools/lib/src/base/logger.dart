@@ -12,6 +12,8 @@ import 'terminal.dart';
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
+const Duration fastOperation = Duration(seconds: 2);
+const Duration slowOperation = Duration(minutes: 2);
 
 typedef VoidCallback = void Function();
 
@@ -89,17 +91,19 @@ abstract class Logger {
 
   /// Start an indeterminate progress display.
   ///
-  /// [message] is the message to display to the user; [progressId] provides an ID which can be
-  /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
+  /// The [message] argument is the message to display to the user.
   ///
-  /// [progressIndicatorPadding] can optionally be used to specify spacing
-  /// between the [message] and the progress indicator.
+  /// The [progressId] argument provides an ID which can be used to identify
+  /// this type of progress (e.g. `hot.reload`, `hot.restart`).
+  ///
+  /// The [progressIndicatorPadding] can optionally be used to specify spacing
+  /// between the [message] and the progress indicator, if any.
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation,
-    bool multilineOutput,
-    int progressIndicatorPadding,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   });
 }
 
@@ -166,29 +170,31 @@ class StdoutLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation,
-    bool multilineOutput,
-    int progressIndicatorPadding,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
-    expectSlowOperation ??= false;
-    progressIndicatorPadding ??= kDefaultStatusPadding;
+    assert(timeout != null);
+    assert(progressIndicatorPadding != null);
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
-      return Status(onFinish: _clearStatus)..start();
+      return SilentStatus(
+        timeout: timeout,
+        onFinish: _clearStatus,
+      )..start();
     }
     if (terminal.supportsColor) {
       _status = AnsiStatus(
         message: message,
-        expectSlowOperation: expectSlowOperation,
-        multilineOutput: multilineOutput,
+        timeout: timeout,
         padding: progressIndicatorPadding,
         onFinish: _clearStatus,
       )..start();
     } else {
       _status = SummaryStatus(
         message: message,
-        expectSlowOperation: expectSlowOperation,
+        timeout: timeout,
         padding: progressIndicatorPadding,
         onFinish: _clearStatus,
       )..start();
@@ -270,13 +276,15 @@ class BufferLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation,
-    bool multilineOutput,
-    int progressIndicatorPadding,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
+    assert(timeout != null);
+    assert(progressIndicatorPadding != null);
     printStatus(message);
-    return Status()..start();
+    return SilentStatus(timeout: timeout)..start();
   }
 
   /// Clears all buffers.
@@ -337,15 +345,31 @@ class VerboseLogger extends Logger {
   @override
   Status startProgress(
     String message, {
+    @required Duration timeout,
     String progressId,
-    bool expectSlowOperation,
-    bool multilineOutput,
-    int progressIndicatorPadding,
+    bool multilineOutput = false,
+    int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
+    assert(timeout != null);
+    assert(progressIndicatorPadding != null);
     printStatus(message);
-    return Status(onFinish: () {
-      printTrace('$message (completed)');
-    })..start();
+    final Stopwatch timer = Stopwatch()..start();
+    return SilentStatus(
+      timeout: timeout,
+      onFinish: () {
+        String time;
+        if (timeout > fastOperation) {
+          time = getElapsedAsSeconds(timer.elapsed);
+        } else {
+          time = getElapsedAsMilliseconds(timer.elapsed);
+        }
+        if (timer.elapsed > timeout) {
+          printTrace('$message (completed in $time, longer than expected)');
+        } else {
+          printTrace('$message (completed in $time)');
+        }
+      },
+    )..start();
   }
 
   void _emit(_LogType type, String message, [StackTrace stackTrace]) {
@@ -386,7 +410,10 @@ enum _LogType { error, status, trace }
 /// A [Status] class begins when start is called, and may produce progress
 /// information asynchronously.
 ///
-/// The [Status] class itself never has any output.
+/// Some subclasses change output once [timeout] has expired, to indicate that
+/// something is taking longer than expected.
+///
+/// The [SilentStatus] class never has any output.
 ///
 /// The [AnsiSpinner] subclass shows a spinner, and replaces it with a single
 /// space character when stopped or canceled.
@@ -395,123 +422,154 @@ enum _LogType { error, status, trace }
 /// information when stopped. When canceled, the information isn't shown. In
 /// either case, a newline is printed.
 ///
+/// The [SummaryStatus] subclass shows only a static message (without an
+/// indicator), then updates it when the operation ends.
+///
 /// Generally, consider `logger.startProgress` instead of directly creating
 /// a [Status] or one of its subclasses.
-class Status {
-  Status({this.onFinish});
+abstract class Status {
+  Status({ @required this.timeout, this.onFinish }) : assert(timeout != null);
 
-  /// A straight [Status] or an [AnsiSpinner] (depending on whether the
+  /// A [SilentStatus] or an [AnsiSpinner] (depending on whether the
   /// terminal is fancy enough), already started.
-  factory Status.withSpinner({ VoidCallback onFinish }) {
+  factory Status.withSpinner({ @required Duration timeout, VoidCallback onFinish }) {
+    assert(timeout != null);
     if (terminal.supportsColor)
-      return AnsiSpinner(onFinish: onFinish)..start();
-    return Status(onFinish: onFinish)..start();
+      return AnsiSpinner(timeout: timeout, onFinish: onFinish)..start();
+    return SilentStatus(timeout: timeout, onFinish: onFinish)..start();
   }
 
+  final Duration timeout;
   final VoidCallback onFinish;
 
   bool _isStarted = false;
 
+  @protected
+  final Stopwatch stopwatch = Stopwatch();
+
+  @protected
+  bool get seemsSlow => stopwatch.elapsed > timeout;
+
+  @protected
+  String get elapsedTime {
+    if (timeout > fastOperation)
+      return getElapsedAsSeconds(stopwatch.elapsed);
+    return getElapsedAsMilliseconds(stopwatch.elapsed);
+  }
+
   /// Call to start spinning.
   void start() {
     assert(!_isStarted);
+    assert(!stopwatch.isRunning);
+    stopwatch.start();
     _isStarted = true;
   }
 
   /// Call to stop spinning after success.
   void stop() {
-    assert(_isStarted);
-    _isStarted = false;
-    if (onFinish != null)
-      onFinish();
+    finish();
   }
 
   /// Call to cancel the spinner after failure or cancellation.
   void cancel() {
+    finish();
+  }
+
+  @protected
+  void finish() {
     assert(_isStarted);
+    assert(stopwatch.isRunning);
+    stopwatch.stop();
     _isStarted = false;
     if (onFinish != null)
       onFinish();
   }
 }
 
+/// A [SilentStatus] shows nothing.
+class SilentStatus extends Status {
+  SilentStatus({
+    @required Duration timeout,
+    VoidCallback onFinish,
+  }) : super(timeout: timeout, onFinish: onFinish);
+}
+
 /// An [AnsiSpinner] is a simple animation that does nothing but implement a
-/// ASCII/Unicode spinner. When stopped or canceled, the animation erases
-/// itself.
+/// terminal spinner. When stopped or canceled, the animation erases itself.
 class AnsiSpinner extends Status {
-  AnsiSpinner({VoidCallback onFinish}) : super(onFinish: onFinish);
+  AnsiSpinner({
+    @required Duration timeout,
+    VoidCallback onFinish,
+  }) : super(timeout: timeout, onFinish: onFinish);
 
   int ticks = 0;
   Timer timer;
+
+  bool _showingSlowWarning = false;
 
   // Windows console font has a limited set of Unicode characters.
   List<String> get _animation => platform.isWindows
       ? <String>[r'-', r'\', r'|', r'/']
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
-  String get _backspace => '\b' * _animation[0].length;
-  String get _clear => ' ' *  _animation[0].length;
+  static const String _slowWarning = ' (This is taking an unexpectedly long time.)';
 
-  void _callback(Timer timer) {
-    stdout.write('$_backspace${_animation[ticks++ % _animation.length]}');
-  }
+  String get _currentAnimationFrame => _animation[ticks % _animation.length];
+  int get _currentLength => _currentAnimationFrame.length + (_showingSlowWarning ? _slowWarning.length : 0);
+  String get _backspace => '\b' * _currentLength;
+  String get _clear => ' ' *  _currentLength;
 
   @override
   void start() {
     super.start();
     assert(timer == null);
-    stdout.write(' ');
+    stdout.write(_clear); // for _callback to backspace over
     timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer);
   }
 
   @override
-  void stop() {
+  void finish() {
     assert(timer.isActive);
     timer.cancel();
     stdout.write('$_backspace$_clear$_backspace');
-    super.stop();
+    super.finish();
   }
 
-  @override
-  void cancel() {
-    assert(timer.isActive);
-    timer.cancel();
-    stdout.write('$_backspace$_clear$_backspace');
-    super.cancel();
+  void _callback(Timer timer) {
+    stdout.write('$_backspace');
+    ticks += 1;
+    stdout.write('$_currentAnimationFrame');
+    if (seemsSlow) {
+      stdout.write(_slowWarning);
+      _showingSlowWarning = true;
+    }
   }
 }
 
 /// Constructor writes [message] to [stdout] with padding, then starts as an
-/// [AnsiSpinner].  On [cancel] or [stop], will call [onFinish].
-/// On [stop], will additionally print out summary information in
-/// milliseconds if [expectSlowOperation] is false, as seconds otherwise.
+/// [AnsiSpinner]. On [cancel] or [stop], will call [onFinish]. On [stop], will
+/// additionally print out summary information.
 class AnsiStatus extends AnsiSpinner {
   AnsiStatus({
-    String message,
-    bool expectSlowOperation,
-    bool multilineOutput,
-    int padding,
+    this.message = '',
+    @required Duration timeout,
+    this.multilineOutput = false,
+    this.padding = kDefaultStatusPadding,
     VoidCallback onFinish,
-  })  : message = message ?? '',
-        padding = padding ?? 0,
-        expectSlowOperation = expectSlowOperation ?? false,
-        multilineOutput = multilineOutput ?? false,
-        super(onFinish: onFinish);
+  }) : assert(message != null),
+       assert(multilineOutput != null),
+       assert(padding != null),
+       super(timeout: timeout, onFinish: onFinish);
 
   final String message;
-  final bool expectSlowOperation;
   final bool multilineOutput;
   final int padding;
-
-  Stopwatch stopwatch;
 
   static const String _margin = '     ';
 
   @override
   void start() {
-    assert(stopwatch == null || !stopwatch.isRunning);
-    stopwatch = Stopwatch()..start();
     stdout.write('${message.padRight(padding)}$_margin');
     super.start();
   }
@@ -531,48 +589,36 @@ class AnsiStatus extends AnsiSpinner {
 
   /// Print summary information when a task is done.
   ///
-  /// If [multilineOutput] is false, backs up 4 characters and prints a
-  /// (minimum) 5 character padded time. If [expectSlowOperation] is true, the
-  /// time is in seconds; otherwise, milliseconds. Only backs up 4 characters
-  /// because [super.cancel] backs up one.
+  /// If [multilineOutput] is false, replaces the spinner with the summary message.
   ///
   /// If [multilineOutput] is true, then it prints the message again on a new
-  /// line before writing the elapsed time, and doesn't back up at all.
+  /// line before writing the elapsed time.
   void writeSummaryInformation() {
-    final String prefix = multilineOutput
-        ? '\n${'$message Done'.padRight(padding - 4)}$_margin'
-        : '\b\b\b\b';
-    if (expectSlowOperation) {
-      stdout.write('$prefix${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
-    } else {
-      stdout.write('$prefix${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
-    }
+    if (multilineOutput)
+      stdout.write('\n${'$message Done'.padRight(padding - 4)}$_margin');
+    stdout.write(elapsedTime.padLeft(8)); // should fit "99,999ms"
+    if (seemsSlow)
+      stdout.write(' (!)');
   }
 }
 
 /// Constructor writes [message] to [stdout].  On [cancel] or [stop], will call
-/// [onFinish]. On [stop], will additionally print out summary information in
-/// milliseconds if [expectSlowOperation] is false, as seconds otherwise.
+/// [onFinish]. On [stop], will additionally print out summary information.
 class SummaryStatus extends Status {
   SummaryStatus({
-    String message,
-    bool expectSlowOperation,
-    int padding,
+    this.message = '',
+    @required Duration timeout,
+    this.padding = kDefaultStatusPadding,
     VoidCallback onFinish,
-  })  : message = message ?? '',
-        padding = padding ?? 0,
-        expectSlowOperation = expectSlowOperation ?? false,
-        super(onFinish: onFinish);
+  }) : assert(message != null),
+       assert(padding != null),
+       super(timeout: timeout, onFinish: onFinish);
 
   final String message;
-  final bool expectSlowOperation;
   final int padding;
-
-  Stopwatch stopwatch;
 
   @override
   void start() {
-    stopwatch = Stopwatch()..start();
     stdout.write('${message.padRight(padding)}     ');
     super.start();
   }
@@ -590,15 +636,16 @@ class SummaryStatus extends Status {
     stdout.write('\n');
   }
 
-  /// Prints a (minimum) 5 character padded time.  If [expectSlowOperation] is
-  /// true, the time is in seconds; otherwise, milliseconds.
+  /// Prints a (minimum) 8 character padded time.
   ///
-  /// Example: ' 0.5s', '150ms', '1600ms'
+  /// If [timeout] is less than or equal to [fastOperation], the time is in
+  /// seconds; otherwise, milliseconds. If the time is longer than [timeout],
+  /// appends "(!)" to the time.
+  ///
+  /// Examples: `    0.5s`, `   150ms`, ` 1,600ms`, `    3.1s (!)`
   void writeSummaryInformation() {
-    if (expectSlowOperation) {
-      stdout.write(getElapsedAsSeconds(stopwatch.elapsed).padLeft(5));
-    } else {
-      stdout.write(getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5));
-    }
+    stdout.write(elapsedTime.padLeft(8));
+    if (seemsSlow)
+      stdout.write(' (!)');
   }
 }
