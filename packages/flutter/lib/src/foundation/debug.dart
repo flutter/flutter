@@ -107,16 +107,22 @@ void debugLogEvent(String key, DebugLogMessageCallback messageCallback) {
   developer.log(json.encode(message), name: key);
 }
 
+final Set<String> _debugLogEventKeys = Set<String>();
+
 /// Enable (or disable) logging for all events with the given [key].
 void debugEnableLogging(String key, [bool enable = true]) {
   assert(key != null);
-  //todo(pq): implement
+  if (enable) {
+    _debugLogEventKeys.add(key);
+  } else {
+    _debugLogEventKeys.remove(key);
+  }
 }
 
 /// Returns true if events with the given event [key] should be logged.
 bool debugShouldLogEvent(String key) {
-  //todo(pq): implement
-  return true;
+  assert(key != null);
+  return _debugLogEventKeys.contains(key);
 }
 
 /// Arguments to whitelist [Timeline] events in order to be shown in the
