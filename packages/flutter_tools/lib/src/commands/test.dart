@@ -77,7 +77,7 @@ class TestCommand extends FlutterCommand {
       )
       ..addOption('concurrency',
         abbr: 'j',
-        defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
+        defaultsTo: math.max<int>(1, platform.numberOfProcessors ~/ 2).toString(),
         help: 'The number of concurrent test processes to run.',
         valueHelp: 'jobs');
   }

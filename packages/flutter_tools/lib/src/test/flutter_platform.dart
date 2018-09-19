@@ -252,7 +252,7 @@ class _Compiler {
         firstCompile = true;
         compilers++;
         outputDill = outputDillDirectory.childFile('output_$compilers.dill').path;
-        printTrace('Compiler will use the following file as its incremental dill file: $outputDill');
+        printTrace('Compiler #$compilers will use the following file as its incremental dill file: $outputDill');
       } else if (idleCompilers.isEmpty) {
         // The request was added to the queue, but we can't process it now.
         return;
@@ -281,6 +281,7 @@ class _Compiler {
         if (outputPath == null || compilerOutput.errorCount > 0) {
           request.result.complete(null);
           await _shutdown(compiler);
+          break;
         } else {
           final File outputFile = fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
