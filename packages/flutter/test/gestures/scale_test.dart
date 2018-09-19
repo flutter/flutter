@@ -282,8 +282,8 @@ void main() {
   });
 
   testGesture('Should recognize rotation gestures', (GestureTester tester) {
-    final ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool didStartScale = false;
     Offset updatedFocalPoint;
@@ -308,7 +308,7 @@ void main() {
       didTap = true;
     };
 
-    final TestPointer pointer1 = new TestPointer(1);
+    final TestPointer pointer1 = TestPointer(1);
 
     final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
     scale.addPointer(down);
@@ -334,7 +334,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Two-finger scaling
-    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer2 = TestPointer(2);
     final PointerDownEvent down2 = pointer2.down(const Offset(30.0, 40.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
@@ -369,7 +369,7 @@ void main() {
     expect(didTap, isFalse);
 
     // Three-finger scaling
-    final TestPointer pointer3 = new TestPointer(3);
+    final TestPointer pointer3 = TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);

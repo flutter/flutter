@@ -265,7 +265,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialLine.pointerStartId == _pointerQueue[0] &&
       _initialLine.pointerEndId == _pointerQueue[1]) {
       /// Rotation updated, set the [_currentLine]
-      _currentLine = new _LineBetweenPointers(
+      _currentLine = _LineBetweenPointers(
         pointerStartId: _pointerQueue[0],
         pointerStartLocation: _pointerLocations[_pointerQueue[0]],
         pointerEndId: _pointerQueue[1],
@@ -273,7 +273,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       );
     } else {
       /// A new rotation process is on the way, set the [_initialLine]
-      _initialLine = new _LineBetweenPointers(
+      _initialLine = _LineBetweenPointers(
         pointerStartId: _pointerQueue[0],
         pointerStartLocation: _pointerLocations[_pointerQueue[0]],
         pointerEndId: _pointerQueue[1],
