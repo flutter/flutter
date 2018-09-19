@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show window;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
@@ -46,8 +45,8 @@ class BottomSheetScrollController extends ScrollController {
         assert(isPersistent != null),
         _initialTop = top,
         super(
-        debugLabel: debugLabel,
-        initialScrollOffset: initialScrollOffset,
+          debugLabel: debugLabel,
+          initialScrollOffset: initialScrollOffset,
       ) {
     // If the BottomSheet's child doesn't have a Scrollable widget in it that
     // inherits our PrimaryScrollController, it will never become visible.
@@ -145,7 +144,8 @@ class BottomSheetScrollController extends ScrollController {
   /// listener on two separate objects which are both forwarding all
   /// registrations to a common upstream object.
   void removeTopListener(VoidCallback callback) {
-    _topListeners.remove(callback);
+    // if we're disposed, this might already be null.
+    _topListeners?.remove(callback);
   }
 
   /// Call all the registered listeners to [top] changes.
@@ -238,6 +238,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
         assert(notifier != null),
         assert(minTop != null),
         assert(maxTop != null),
+        assert(minTop > 0 || maxTop > 0),
         assert(context != null),
         assert(animateIn != null),
         super(
@@ -350,7 +351,7 @@ class BottomSheetScrollPosition extends ScrollPositionWithSingleContext {
     // scroll extent, but we still may want to move it up or down.
     return super.maxScrollExtent != null
       ? super.maxScrollExtent + .01
-      : window.physicalSize.height / window.devicePixelRatio;
+      : MediaQuery.of(context.storageContext).size.height;
   }
 
   @override

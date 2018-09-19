@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +14,7 @@ import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
+import 'colors.dart';
 import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
@@ -27,8 +27,6 @@ import 'theme.dart';
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
-/// The minimum allowable height for a [BottomSheet].
-const double kBottomSheetMinHeight = 56.0;
 // When the top of the BottomSheet crosses this threshold, it will start to
 // shrink the FAB and show a scrim.
 const double _kBottomSheetDominatesPercentage = 0.3;
@@ -285,7 +283,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonLocation,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-    // for bottom sheet
     this.bottomSheetTop,
   }) : assert(previousFloatingActionButtonLocation != null),
        assert(currentFloatingActionButtonLocation != null);
@@ -1272,12 +1269,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       minTop: clampTop ? initialTop : 0.0,
       maxTop: maxTop,
       isPersistent: !isLocalHistoryEntry,
+      context: context,
     )..addTopListener(() => setState(() {
-      final double screenHeight = window.physicalSize.height / window.devicePixelRatio;
+      final double screenHeight = MediaQuery.of(context).size.height;
         floatingActionButtonVisibilityValue =
             _bottomSheetScrollController.top /
                 (screenHeight * _kBottomSheetDominatesPercentage);
-        _bodyScrimColor = const Color(0xFF000000).withOpacity(
+        _bodyScrimColor = Colors.black.withOpacity(
           math.max(
             _kMinBottomSheetScrimOpacity,
             _kMaxBottomSheetScrimOpacity - floatingActionButtonVisibilityValue,

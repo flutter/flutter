@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -50,10 +49,11 @@ class BottomSheet extends StatefulWidget {
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
     Key key,
-    this.scrollController,
+    @required this.scrollController,
     @required this.onClosing,
     @required this.builder
   }) : assert(onClosing != null),
+       assert(scrollController != null),
        assert(builder != null),
        super(key: key);
 
@@ -84,12 +84,16 @@ class BottomSheet extends StatefulWidget {
     double minTop = 0.0,
     double maxTop,
     bool isPersistent = false,
+    @required BuildContext context,
   }) {
     assert(minTop != null);
+    assert(context != null);
+    assert(debugCheckHasMediaQuery(context));
 
-    maxTop ??= window.physicalSize.height / window.devicePixelRatio;
+    maxTop ??= MediaQuery.of(context).size.height;
     top ??= maxTop / 2;
 
+    assert(maxTop != 0);
     assert(maxTop >= minTop, 'Expected $maxTop >= $minTop.');
     assert(minTop <= top && top <= maxTop);
 
@@ -107,12 +111,16 @@ class _BottomSheetState extends State<BottomSheet> {
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addTopListener(() {
-      if (widget.scrollController.top == widget.scrollController.maxTop) {
-        widget.onClosing.call();
-      }
-    });
+    widget.scrollController.addTopListener(_maybeCloseBottomSheet);
   }
+
+  void _maybeCloseBottomSheet() {
+    if (widget.scrollController.top == widget.scrollController.maxTop) {
+      // onClosing is asserted not null
+      widget.onClosing();
+   }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PrimaryScrollController(
@@ -123,6 +131,12 @@ class _BottomSheetState extends State<BottomSheet> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeTopListener(_maybeCloseBottomSheet);
+    super.dispose();
   }
 }
 
@@ -173,7 +187,12 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addTopListener(() => setState(() {}));
+    widget.scrollController.addTopListener(_rebuild);
+  }
+
+  /// Rebuild the sheet when the [BottomSheetScrollController.top] value has changed.
+  void _rebuild() {
+    setState(() { /* state is contained in BottomSheetScrollController.top */ });
   }
 
   @override
@@ -206,6 +225,12 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeTopListener(_rebuild);
+    super.dispose();
   }
 }
 
@@ -249,6 +274,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     _scrollController = BottomSheet.createScrollController(
       top: initialTop,
       minTop: clampTop ? initialTop : 0.0,
+      context: context,
     );
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
@@ -360,6 +386,9 @@ StandardBottomSheetController<T> showBottomSheet<T>({
   assert(clampTop != null);
   assert(!clampTop || initialTop != null,
     'If you wish to clamp the top, you must specify an initial value.');
+  assert(debugCheckHasMediaQuery(context));
+  assert(debugCheckHasScaffold(context));
+
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
     initialTop: initialTop,
