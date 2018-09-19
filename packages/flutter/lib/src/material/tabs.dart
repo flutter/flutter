@@ -15,6 +15,7 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'tab_bar_theme.dart';
 import 'tab_controller.dart';
 import 'tab_indicator.dart';
 import 'theme.dart';
@@ -149,14 +150,22 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final TabBarTheme tabBarTheme= themeData.tabBarTheme;
+
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
     final Animation<double> animation = listenable;
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
-    final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
-    final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Color selectedColor =
+        labelColor
+         ?? tabBarTheme?.labelColor
+         ?? themeData.primaryTextTheme.body2.color;
+    final Color unselectedColor =
+        unselectedLabelColor
+        ?? tabBarTheme?.unselectedLabelColor
+        ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
@@ -876,32 +885,20 @@ class _TabBarState extends State<TabBar> {
     _controller.animateTo(index);
   }
 
-  Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation, ThemeData themeData) {
+  Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
     return _TabStyle(
       animation: animation,
       selected: selected,
-      labelColor: _labelColor(themeData),
-      unselectedLabelColor: _unselectedLabelColor(themeData),
+      labelColor: widget.labelColor,
+      unselectedLabelColor: widget.unselectedLabelColor,
       labelStyle: widget.labelStyle,
       unselectedLabelStyle: widget.unselectedLabelStyle,
       child: child,
     );
   }
 
-  Color _labelColor(ThemeData themeData) {
-    return widget.labelColor ?? themeData.tabBarTheme.labelColor;
-  }
-
-  Color _unselectedLabelColor(ThemeData themeData) {
-    return widget.unselectedLabelColor ?? themeData.tabBarTheme.unselectedLabelColor;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    final Color labelColor = _labelColor(themeData);
-    final Color unselectedLabelColor = _unselectedLabelColor(themeData);
-
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -934,22 +931,22 @@ class _TabBarState extends State<TabBar> {
         // The user tapped on a tab, the tab controller's animation is running.
         assert(_currentIndex != previousIndex);
         final Animation<double> animation = _ChangeAnimation(_controller);
-        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation, themeData);
-        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, themeData);
+        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation);
+        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
         final int tabIndex = _currentIndex;
         final Animation<double> centerAnimation = _DragAnimation(_controller, tabIndex);
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, themeData);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
         if (_currentIndex > 0) {
           final int tabIndex = _currentIndex - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation, themeData);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
         }
         if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
           final Animation<double> nextAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation, themeData);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
         }
       }
     }
@@ -983,8 +980,8 @@ class _TabBarState extends State<TabBar> {
       child: _TabStyle(
         animation: kAlwaysDismissedAnimation,
         selected: false,
-        labelColor: labelColor,
-        unselectedLabelColor: unselectedLabelColor,
+        labelColor: widget.labelColor,
+        unselectedLabelColor: widget.unselectedLabelColor,
         labelStyle: widget.labelStyle,
         unselectedLabelStyle: widget.unselectedLabelStyle,
         child: _TabLabelBar(

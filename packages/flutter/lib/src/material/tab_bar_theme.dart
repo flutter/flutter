@@ -1,21 +1,37 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+
 import 'tabs.dart';
 
-/// Custom theme for [TabBar].
+/// Applies a theme to descendant [TabBar] widgets.
 ///
-/// Used to customize the colors of the label, and the size/shape of the
-/// indicator.
+/// A tab bar theme describes the colors of the label, and the size/shape of the
+/// [TabBar.indicator].
+///
+/// Descendant widgets obtain the current theme's [TabBarTheme] object using
+/// [ThemeData.tabBarTheme] on the [ThemeData] given by calling [Theme.of].
+/// [ThemeData.tabBarTheme] can be customized by copying it (using
+/// [TabBarTheme.copyWith]).
+///
+/// See also:
+///
+///  * [TabBar], A material design widget that displays a horizontal row of tabs.
+///  * [ThemeData], which describes the overall theme information for the
+///    application.
 class TabBarTheme extends Diagnosticable {
   /// Creates a tab bar theme that overrides the defaults for the following
   /// values for any [TabBar] in the context.
   const TabBarTheme({
-      this.indicator,
-      this.indicatorSize,
-      this.labelColor,
-      this.unselectedLabelColor,
+    this.indicator,
+    this.indicatorSize,
+    this.labelColor,
+    this.unselectedLabelColor,
   });
 
   /// Default value for [TabBar.indicator] in this Theme.
