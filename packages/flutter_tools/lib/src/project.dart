@@ -158,12 +158,12 @@ class IosProject {
   final FlutterProject parent;
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
-  Directory get _materializedDirectory => parent.directory.childDirectory('ios');
+  Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
   /// This parent folder of `Runner.xcodeproj`.
   Directory get hostAppRoot {
-    if (!isModule || _materializedDirectory.existsSync())
-      return _materializedDirectory;
+    if (!isModule || _editableDirectory.existsSync())
+      return _editableDirectory;
     return _ephemeralDirectory;
   }
 
@@ -172,8 +172,8 @@ class IosProject {
   /// during build.
   ///
   /// This is the same as [hostAppRoot] except when the project is
-  /// a Flutter module with a materialized host app.
-  Directory get _flutterLibRoot => isModule ? _ephemeralDirectory : _materializedDirectory;
+  /// a Flutter module with an editable host app.
+  Directory get _flutterLibRoot => isModule ? _ephemeralDirectory : _editableDirectory;
 
   /// The bundle name of the host app, `Runner.app`.
   String get hostAppBundleName => '$_hostAppBundleName.app';
@@ -272,8 +272,8 @@ class IosProject {
       return;
     _deleteIfExistsSync(_ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
-    // Add ephemeral host app, if a materialized host app does not already exist.
-    if (!_materializedDirectory.existsSync()) {
+    // Add ephemeral host app, if a editable host app does not already exist.
+    if (!_editableDirectory.existsSync()) {
       _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _ephemeralDirectory);
       if (hasPlugins(parent)) {
         _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _ephemeralDirectory);
@@ -283,13 +283,13 @@ class IosProject {
 
   Future<void> makeHostAppEditable() async {
     assert(isModule);
-    if (_materializedDirectory.existsSync())
-      throwToolExit('iOS host app already materialized. To redo materialization, delete the ios/ folder.');
+    if (_editableDirectory.existsSync())
+      throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
     _deleteIfExistsSync(_ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_materialized_cocoapods'), _materializedDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
   }
