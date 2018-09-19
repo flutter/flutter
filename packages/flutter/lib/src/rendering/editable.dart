@@ -32,6 +32,10 @@ enum SelectionChangedCause {
   /// of the cursor) to change.
   tap,
 
+  /// The user tapped twice in quick succession on the text and that caused
+  /// the selection (or the location of the cursor) to change.
+  doubleTap,
+
   /// The user long-pressed the text and that caused the selection (or the
   /// location of the cursor) to change.
   longPress,
@@ -168,6 +172,8 @@ class RenderEditable extends RenderBox {
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap;
+    _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)
+      ..onDoubleTap = _handleDoubleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
@@ -185,7 +191,7 @@ class RenderEditable extends RenderBox {
 
   /// If true [handleEvent] does nothing and it's assumed that this
   /// renderer will be notified of input gestures via [handleTapDown],
-  /// [handleTap], and [handleLongPress].
+  /// [handleTap], [handleDoubleTap], and [handleLongPress].
   ///
   /// The default value of this property is false.
   bool ignorePointer;
@@ -1022,6 +1028,7 @@ class RenderEditable extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   TapGestureRecognizer _tap;
+  DoubleTapGestureRecognizer _doubleTap;
   LongPressGestureRecognizer _longPress;
 
   @override
@@ -1031,6 +1038,7 @@ class RenderEditable extends RenderBox {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
+      _doubleTap.addPointer(event);
       _longPress.addPointer(event);
     }
   }
@@ -1068,6 +1076,25 @@ class RenderEditable extends RenderBox {
   void _handleTap() {
     assert(!ignorePointer);
     handleTap();
+  }
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [DoubleTapGestureRecognizer.onDoubleTap]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to long
+  /// press events by calling this method.
+  void handleDoubleTap() {
+    _layoutText(constraints.maxWidth);
+    assert(_lastTapDownPosition != null);
+    if (onSelectionChanged != null) {
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
+      onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.doubleTap);
+    }
+  }
+  void _handleDoubleTap() {
+    assert(!ignorePointer);
+    handleDoubleTap();
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by

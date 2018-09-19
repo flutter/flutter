@@ -164,7 +164,7 @@ void main() {
       delegate: delegate,
     ));
     await tester.tap(find.byTooltip('Search'));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     // Showing suggestions
     expect(find.text('Suggestions'), findsOneWidget);
@@ -173,14 +173,14 @@ void main() {
     // Typing query Wow
     delegate.querysForSuggestions.clear();
     await tester.enterText(find.byType(TextField), 'Wow');
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     expect(delegate.query, 'Wow');
     expect(delegate.querysForSuggestions, <String>['Wow']);
     expect(delegate.querysForResults, hasLength(0));
 
     await tester.tap(find.text('Suggestions'));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     // Showing Results
     expect(find.text('Suggestions'), findsNothing);
@@ -195,7 +195,7 @@ void main() {
 
     // Taping search field to go back to suggestions
     await tester.tap(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     textField = tester.widget(find.byType(TextField));
     expect(textField.focusNode.hasFocus, isTrue);
@@ -206,7 +206,7 @@ void main() {
     expect(delegate.querysForResults, <String>['Wow']);
 
     await tester.enterText(find.byType(TextField), 'Foo');
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     expect(delegate.query, 'Foo');
     expect(delegate.querysForSuggestions, <String>['Wow', 'Wow', 'Foo']);
@@ -214,7 +214,7 @@ void main() {
 
     // Go to results again
     await tester.tap(find.text('Suggestions'));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(milliseconds: 300));
 
     expect(find.text('Suggestions'), findsNothing);
     expect(find.text('Results'), findsOneWidget);
