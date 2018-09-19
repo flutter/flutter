@@ -19,14 +19,14 @@ void main() {
   MockAndroidSdk mockAndroidSdk;
 
   setUp(() {
-    mockAndroidStudio = new MockAndroidStudio();
-    mockAndroidSdk = new MockAndroidSdk();
+    mockAndroidStudio = MockAndroidStudio();
+    mockAndroidSdk = MockAndroidSdk();
   });
 
   group('config', () {
     testUsingContext('machine flag', () async {
       final BufferLogger logger = context[Logger];
-      final ConfigCommand command = new ConfigCommand();
+      final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
 
       expect(logger.statusText, isNotEmpty);

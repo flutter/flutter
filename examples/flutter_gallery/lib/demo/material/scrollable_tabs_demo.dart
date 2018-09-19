@@ -37,7 +37,7 @@ class ScrollableTabsDemo extends StatefulWidget {
   static const String routeName = '/material/scrollable-tabs';
 
   @override
-  ScrollableTabsDemoState createState() => new ScrollableTabsDemoState();
+  ScrollableTabsDemoState createState() => ScrollableTabsDemoState();
 }
 
 class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
@@ -48,7 +48,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   @override
   void initState() {
     super.initState();
-    _controller = new TabController(vsync: this, length: _allPages.length);
+    _controller = TabController(vsync: this, length: _allPages.length);
   }
 
   @override
@@ -69,7 +69,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
 
     switch(_demoStyle) {
       case TabsDemoStyle.iconsAndText:
-        return new ShapeDecoration(
+        return ShapeDecoration(
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
             side: BorderSide(
@@ -86,7 +86,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
         );
 
       case TabsDemoStyle.iconsOnly:
-        return new ShapeDecoration(
+        return ShapeDecoration(
           shape: const CircleBorder(
             side: BorderSide(
               color: Colors.white24,
@@ -101,7 +101,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
         );
 
       case TabsDemoStyle.textOnly:
-        return new ShapeDecoration(
+        return ShapeDecoration(
           shape: const StadiumBorder(
             side: BorderSide(
               color: Colors.white24,
@@ -121,11 +121,11 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Scrollable tabs'),
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() {
@@ -133,7 +133,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
               });
             },
           ),
-          new PopupMenuButton<TabsDemoStyle>(
+          PopupMenuButton<TabsDemoStyle>(
             onSelected: changeDemoStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               const PopupMenuItem<TabsDemoStyle>(
@@ -151,7 +151,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             ],
           ),
         ],
-        bottom: new TabBar(
+        bottom: TabBar(
           controller: _controller,
           isScrollable: true,
           indicator: getIndicator(),
@@ -159,28 +159,28 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             assert(_demoStyle != null);
             switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:
-                return new Tab(text: page.text, icon: new Icon(page.icon));
+                return Tab(text: page.text, icon: Icon(page.icon));
               case TabsDemoStyle.iconsOnly:
-                return new Tab(icon: new Icon(page.icon));
+                return Tab(icon: Icon(page.icon));
               case TabsDemoStyle.textOnly:
-                return new Tab(text: page.text);
+                return Tab(text: page.text);
             }
             return null;
           }).toList(),
         ),
       ),
-      body: new TabBarView(
+      body: TabBarView(
         controller: _controller,
         children: _allPages.map((_Page page) {
-          return new SafeArea(
+          return SafeArea(
             top: false,
             bottom: false,
-            child: new Container(
-              key: new ObjectKey(page.icon),
+            child: Container(
+              key: ObjectKey(page.icon),
               padding: const EdgeInsets.all(12.0),
-              child: new Card(
-                child: new Center(
-                  child: new Icon(
+              child: Card(
+                child: Center(
+                  child: Icon(
                     page.icon,
                     color: iconColor,
                     size: 128.0,

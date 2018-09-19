@@ -80,7 +80,7 @@ class Order {
   final bool inCart;
 
   Order copyWith({ Product product, int quantity, bool inCart }) {
-    return new Order(
+    return Order(
       product: product ?? this.product,
       quantity: quantity ?? this.quantity,
       inCart: inCart ?? this.inCart

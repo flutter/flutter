@@ -11,7 +11,7 @@ class PestoDemo extends StatelessWidget {
   static const String routeName = '/pesto';
 
   @override
-  Widget build(BuildContext context) => new PestoHome();
+  Widget build(BuildContext context) => PestoHome();
 }
 
 
@@ -21,9 +21,9 @@ const double _kAppBarHeight = 128.0;
 const double _kFabHalfSize = 28.0; // TODO(mpcomplete): needs to adapt to screen size
 const double _kRecipePageMaxWidth = 500.0;
 
-final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
+final Set<Recipe> _favoriteRecipes = Set<Recipe>();
 
-final ThemeData _kTheme = new ThemeData(
+final ThemeData _kTheme = ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
   accentColor: Colors.redAccent,
@@ -39,7 +39,7 @@ class PestoHome extends StatelessWidget {
 class PestoFavorites extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new RecipeGridPage(recipes: _favoriteRecipes.toList());
+    return RecipeGridPage(recipes: _favoriteRecipes.toList());
   }
 }
 
@@ -69,20 +69,20 @@ class RecipeGridPage extends StatefulWidget {
   final List<Recipe> recipes;
 
   @override
-  _RecipeGridPageState createState() => new _RecipeGridPageState();
+  _RecipeGridPageState createState() => _RecipeGridPageState();
 }
 
 class _RecipeGridPageState extends State<RecipeGridPage> {
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    return new Theme(
+    return Theme(
       data: _kTheme.copyWith(platform: Theme.of(context).platform),
-      child: new Scaffold(
+      child: Scaffold(
         key: scaffoldKey,
-        floatingActionButton: new FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.edit),
           onPressed: () {
             scaffoldKey.currentState.showSnackBar(const SnackBar(
@@ -90,7 +90,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
             ));
           },
         ),
-        body: new CustomScrollView(
+        body: CustomScrollView(
           slivers: <Widget>[
             _buildAppBar(context, statusBarHeight),
             _buildBody(context, statusBarHeight),
@@ -101,11 +101,11 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   Widget _buildAppBar(BuildContext context, double statusBarHeight) {
-    return new SliverAppBar(
+    return SliverAppBar(
       pinned: true,
       expandedHeight: _kAppBarHeight,
       actions: <Widget>[
-        new IconButton(
+        IconButton(
           icon: const Icon(Icons.search),
           tooltip: 'Search',
           onPressed: () {
@@ -115,20 +115,20 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           },
         ),
       ],
-      flexibleSpace: new LayoutBuilder(
+      flexibleSpace: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final Size size = constraints.biggest;
           final double appBarHeight = size.height - statusBarHeight;
           final double t = (appBarHeight - kToolbarHeight) / (_kAppBarHeight - kToolbarHeight);
-          final double extraPadding = new Tween<double>(begin: 10.0, end: 24.0).lerp(t);
+          final double extraPadding = Tween<double>(begin: 10.0, end: 24.0).lerp(t);
           final double logoHeight = appBarHeight - 1.5 * extraPadding;
-          return new Padding(
-            padding: new EdgeInsets.only(
+          return Padding(
+            padding: EdgeInsets.only(
               top: statusBarHeight + 0.5 * extraPadding,
               bottom: extraPadding,
             ),
-            child: new Center(
-              child: new PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))
+            child: Center(
+              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0))
             ),
           );
         },
@@ -138,24 +138,24 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 
   Widget _buildBody(BuildContext context, double statusBarHeight) {
     final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
-    final EdgeInsets padding = new EdgeInsets.only(
+    final EdgeInsets padding = EdgeInsets.only(
       top: 8.0,
       left: 8.0 + mediaPadding.left,
       right: 8.0 + mediaPadding.right,
       bottom: 8.0
     );
-    return new SliverPadding(
+    return SliverPadding(
       padding: padding,
-      sliver: new SliverGrid(
+      sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),
-        delegate: new SliverChildBuilderDelegate(
+        delegate: SliverChildBuilderDelegate(
           (BuildContext context, int index) {
             final Recipe recipe = widget.recipes[index];
-            return new RecipeCard(
+            return RecipeCard(
               recipe: recipe,
               onTap: () { showRecipePage(context, recipe); },
             );
@@ -167,19 +167,19 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   void showFavoritesPage(BuildContext context) {
-    Navigator.push(context, new MaterialPageRoute<void>(
+    Navigator.push(context, MaterialPageRoute<void>(
       settings: const RouteSettings(name: '/pesto/favorites'),
-      builder: (BuildContext context) => new PestoFavorites(),
+      builder: (BuildContext context) => PestoFavorites(),
     ));
   }
 
   void showRecipePage(BuildContext context, Recipe recipe) {
-    Navigator.push(context, new MaterialPageRoute<void>(
+    Navigator.push(context, MaterialPageRoute<void>(
       settings: const RouteSettings(name: '/pesto/recipe'),
       builder: (BuildContext context) {
-        return new Theme(
+        return Theme(
           data: _kTheme.copyWith(platform: Theme.of(context).platform),
-          child: new RecipePage(recipe: recipe),
+          child: RecipePage(recipe: recipe),
         );
       },
     ));
@@ -193,7 +193,7 @@ class PestoLogo extends StatefulWidget {
   final double t;
 
   @override
-  _PestoLogoState createState() => new _PestoLogoState();
+  _PestoLogoState createState() => _PestoLogoState();
 }
 
 class _PestoLogoState extends State<PestoLogo> {
@@ -203,41 +203,41 @@ class _PestoLogoState extends State<PestoLogo> {
   static const double kImageHeight = 108.0;
   static const double kTextHeight = 48.0;
   final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
-  final RectTween _textRectTween = new RectTween(
-    begin: new Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
-    end: new Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
+  final RectTween _textRectTween = RectTween(
+    begin: Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
+    end: Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight)
   );
   final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
-  final RectTween _imageRectTween = new RectTween(
-    begin: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
-    end: new Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
+  final RectTween _imageRectTween = RectTween(
+    begin: Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
+    end: Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
   );
 
   @override
   Widget build(BuildContext context) {
-    return new Semantics(
+    return Semantics(
       namesRoute: true,
-      child: new Transform(
-        transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
+      child: Transform(
+        transform: Matrix4.identity()..scale(widget.height / kLogoHeight),
         alignment: Alignment.topCenter,
-        child: new SizedBox(
+        child: SizedBox(
           width: kLogoWidth,
-          child: new Stack(
+          child: Stack(
             overflow: Overflow.visible,
             children: <Widget>[
-              new Positioned.fromRect(
+              Positioned.fromRect(
                 rect: _imageRectTween.lerp(widget.t),
-                child: new Image.asset(
+                child: Image.asset(
                   _kSmallLogoImage,
                   package: _kGalleryAssetsPackage,
                   fit: BoxFit.contain,
                 ),
               ),
-              new Positioned.fromRect(
+              Positioned.fromRect(
                 rect: _textRectTween.lerp(widget.t),
-                child: new Opacity(
+                child: Opacity(
                   opacity: _textOpacity.transform(widget.t),
-                  child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
+                  child: Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
                 ),
               ),
             ],
@@ -260,13 +260,13 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
+    return GestureDetector(
       onTap: onTap,
-      child: new Card(
-        child: new Column(
+      child: Card(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            new Hero(
+            Hero(
               tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
               child: AspectRatio(
                 aspectRatio: 4.0 / 3.0,
@@ -278,25 +278,25 @@ class RecipeCard extends StatelessWidget {
                 ),
               ),
             ),
-            new Expanded(
-              child: new Row(
+            Expanded(
+              child: Row(
                 children: <Widget>[
-                  new Padding(
+                  Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: new Image.asset(
+                    child: Image.asset(
                       recipe.ingredientsImagePath,
                       package: recipe.ingredientsImagePackage,
                       width: 48.0,
                       height: 48.0,
                     ),
                   ),
-                  new Expanded(
-                    child: new Column(
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
-                        new Text(recipe.author, style: authorStyle),
+                        Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
+                        Text(recipe.author, style: authorStyle),
                       ],
                     ),
                   ),
@@ -317,11 +317,11 @@ class RecipePage extends StatefulWidget {
   final Recipe recipe;
 
   @override
-  _RecipePageState createState() => new _RecipePageState();
+  _RecipePageState createState() => _RecipePageState();
 }
 
 class _RecipePageState extends State<RecipePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextStyle menuItemStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
@@ -335,31 +335,31 @@ class _RecipePageState extends State<RecipePage> {
     final Size screenSize = MediaQuery.of(context).size;
     final bool fullWidth = screenSize.width < _kRecipePageMaxWidth;
     final bool isFavorite = _favoriteRecipes.contains(widget.recipe);
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      body: new Stack(
+      body: Stack(
         children: <Widget>[
-          new Positioned(
+          Positioned(
             top: 0.0,
             left: 0.0,
             right: 0.0,
             height: appBarHeight + _kFabHalfSize,
-            child: new Hero(
+            child: Hero(
               tag: 'packages/$_kGalleryAssetsPackage/${widget.recipe.imagePath}',
-              child: new Image.asset(
+              child: Image.asset(
                 widget.recipe.imagePath,
                 package: widget.recipe.imagePackage,
                 fit: fullWidth ? BoxFit.fitWidth : BoxFit.cover,
               ),
             ),
           ),
-          new CustomScrollView(
+          CustomScrollView(
             slivers: <Widget>[
-              new SliverAppBar(
+              SliverAppBar(
                 expandedHeight: appBarHeight - _kFabHalfSize,
                 backgroundColor: Colors.transparent,
                 actions: <Widget>[
-                  new PopupMenuButton<String>(
+                  PopupMenuButton<String>(
                     onSelected: (String item) {},
                     itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                       _buildMenuItem(Icons.share, 'Tweet recipe'),
@@ -381,18 +381,18 @@ class _RecipePageState extends State<RecipePage> {
                   ),
                 ),
               ),
-              new SliverToBoxAdapter(
-                child: new Stack(
+              SliverToBoxAdapter(
+                child: Stack(
                   children: <Widget>[
-                    new Container(
+                    Container(
                       padding: const EdgeInsets.only(top: _kFabHalfSize),
                       width: fullWidth ? null : _kRecipePageMaxWidth,
-                      child: new RecipeSheet(recipe: widget.recipe),
+                      child: RecipeSheet(recipe: widget.recipe),
                     ),
-                    new Positioned(
+                    Positioned(
                       right: 16.0,
-                      child: new FloatingActionButton(
-                        child: new Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                      child: FloatingActionButton(
+                        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
                         onPressed: _toggleFavorite,
                       ),
                     ),
@@ -407,14 +407,14 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   PopupMenuItem<String> _buildMenuItem(IconData icon, String label) {
-    return new PopupMenuItem<String>(
-      child: new Row(
+    return PopupMenuItem<String>(
+      child: Row(
         children: <Widget>[
-          new Padding(
+          Padding(
             padding: const EdgeInsets.only(right: 24.0),
-            child: new Icon(icon, color: Colors.black54)
+            child: Icon(icon, color: Colors.black54)
           ),
-          new Text(label, style: menuItemStyle),
+          Text(label, style: menuItemStyle),
         ],
       ),
     );
@@ -435,7 +435,7 @@ class RecipeSheet extends StatelessWidget {
   final TextStyle titleStyle = const PestoStyle(fontSize: 34.0);
   final TextStyle descriptionStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
   final TextStyle itemStyle = const PestoStyle(fontSize: 15.0, height: 24.0/15.0);
-  final TextStyle itemAmountStyle = new PestoStyle(fontSize: 15.0, color: _kTheme.primaryColor, height: 24.0/15.0);
+  final TextStyle itemAmountStyle = PestoStyle(fontSize: 15.0, color: _kTheme.primaryColor, height: 24.0/15.0);
   final TextStyle headingStyle = const PestoStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
 
   RecipeSheet({ Key key, this.recipe }) : super(key: key);
@@ -444,22 +444,22 @@ class RecipeSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
-      child: new SafeArea(
+    return Material(
+      child: SafeArea(
         top: false,
         bottom: false,
-        child: new Padding(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
-          child: new Table(
+          child: Table(
             columnWidths: const <int, TableColumnWidth>{
               0: FixedColumnWidth(64.0)
             },
             children: <TableRow>[
-              new TableRow(
+              TableRow(
                 children: <Widget>[
-                  new TableCell(
+                  TableCell(
                     verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: new Image.asset(
+                    child: Image.asset(
                       recipe.ingredientsImagePath,
                       package: recipe.ingredientsImagePackage,
                       width: 32.0,
@@ -468,27 +468,27 @@ class RecipeSheet extends StatelessWidget {
                       fit: BoxFit.scaleDown
                     )
                   ),
-                  new TableCell(
+                  TableCell(
                     verticalAlignment: TableCellVerticalAlignment.middle,
-                    child: new Text(recipe.name, style: titleStyle)
+                    child: Text(recipe.name, style: titleStyle)
                   ),
                 ]
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
                   const SizedBox(),
-                  new Padding(
+                  Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                    child: new Text(recipe.description, style: descriptionStyle)
+                    child: Text(recipe.description, style: descriptionStyle)
                   ),
                 ]
               ),
-              new TableRow(
+              TableRow(
                 children: <Widget>[
                   const SizedBox(),
-                  new Padding(
+                  Padding(
                     padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                    child: new Text('Ingredients', style: headingStyle)
+                    child: Text('Ingredients', style: headingStyle)
                   ),
                 ]
               ),
@@ -497,12 +497,12 @@ class RecipeSheet extends StatelessWidget {
                 return _buildItemRow(ingredient.amount, ingredient.description);
               }
             ))..add(
-              new TableRow(
+              TableRow(
                 children: <Widget>[
                   const SizedBox(),
-                  new Padding(
+                  Padding(
                     padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                    child: new Text('Steps', style: headingStyle)
+                    child: Text('Steps', style: headingStyle)
                   ),
                 ]
               )
@@ -518,15 +518,15 @@ class RecipeSheet extends StatelessWidget {
   }
 
   TableRow _buildItemRow(String left, String right) {
-    return new TableRow(
+    return TableRow(
       children: <Widget>[
-        new Padding(
+        Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: new Text(left, style: itemAmountStyle),
+          child: Text(left, style: itemAmountStyle),
         ),
-        new Padding(
+        Padding(
           padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: new Text(right, style: itemStyle),
+          child: Text(right, style: itemStyle),
         ),
       ],
     );

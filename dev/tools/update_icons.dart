@@ -71,7 +71,7 @@ const Map<String, String> kIdentifierRewrites = <String, String>{
 
 };
 
-final Set<String> kMirroredIcons = new Set<String>.from(<String>[
+final Set<String> kMirroredIcons = Set<String>.from(<String>[
   // This list is obtained from:
   // http://google.github.io/material-design-icons/#icons-in-rtl
   'arrow_back',
@@ -152,18 +152,18 @@ void main(List<String> args) {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  final ArgParser argParser = new ArgParser();
+  final ArgParser argParser = ArgParser();
   argParser.addOption(kOptionCodepointsPath, defaultsTo: kDefaultCodepointsPath);
   argParser.addOption(kOptionIconsPath, defaultsTo: kDefaultIconsPath);
   argParser.addFlag(kOptionDryRun, defaultsTo: false);
   final ArgResults argResults = argParser.parse(args);
 
-  final File iconFile = new File(path.absolute(argResults[kOptionIconsPath]));
+  final File iconFile = File(path.absolute(argResults[kOptionIconsPath]));
   if (!iconFile.existsSync()) {
     stderr.writeln('Icons file not found: ${iconFile.path}');
     exit(1);
   }
-  final File codepointsFile = new File(path.absolute(argResults[kOptionCodepointsPath]));
+  final File codepointsFile = File(path.absolute(argResults[kOptionCodepointsPath]));
   if (!codepointsFile.existsSync()) {
     stderr.writeln('Codepoints file not found: ${codepointsFile.path}');
     exit(1);
@@ -180,7 +180,7 @@ void main(List<String> args) {
 }
 
 String regenerateIconsFile(String iconData, String codepointData) {
-  final StringBuffer buf = new StringBuffer();
+  final StringBuffer buf = StringBuffer();
   bool generating = false;
   for (String line in LineSplitter.split(iconData)) {
     if (!generating)
@@ -208,7 +208,7 @@ String generateIconDeclarations(String codepointData) {
 String getIconDeclaration(String line) {
   final List<String> tokens = line.split(' ');
   if (tokens.length != 2)
-    throw new FormatException('Unexpected codepoint data: $line');
+    throw FormatException('Unexpected codepoint data: $line');
   final String name = tokens[0];
   final String codepoint = tokens[1];
   final String identifier = kIdentifierRewrites[name] ?? name;

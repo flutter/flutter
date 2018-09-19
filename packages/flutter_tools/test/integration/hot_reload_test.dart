@@ -13,15 +13,15 @@ import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
 void main() {
-  group('hot reload', () {
+  group('hot', () {
     Directory tempDir;
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
     FlutterTestDriver _flutter;
 
     setUp(() async {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_hot_reload_test_app.');
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -29,27 +29,26 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    test('works without error', () async {
+    test('reload works without error', () async {
       await _flutter.run();
       await _flutter.hotReload();
-      // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
-      // https://github.com/flutter/flutter/issues/17833.
+    });
+
+    test('restart works without error', () async {
+      await _flutter.run();
+      await _flutter.hotRestart();
+      // TODO(dantup): Unskip after flutter-tester restart issue is fixed on Windows:
+      // https://github.com/flutter/flutter/issues/21348.
     }, skip: platform.isWindows);
 
-    test('hits breakpoints with file:// prefixes after reload', () async {
+    test('reload hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
 
       // Hit breakpoint using a file:// URI.
       final VMIsolate isolate = await _flutter.breakAt(
-          new Uri.file(_project.breakpointFile).toString(),
+          Uri.file(_project.breakpointFile).toString(),
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
-      // TODO(dantup): Unskip for Mac when [1] is fixed, unskip on Windows when
-      // both [1] and [2] are fixed.
-      // [1] hot reload/breakpoints fail when uris prefixed with file://
-      //     https://github.com/flutter/flutter/issues/18441
-      // [2] flutter-tester doesn't work on Windows
-      //     https://github.com/flutter/flutter/issues/17833
-    }, skip: !platform.isLinux);
+    });
   }, timeout: const Timeout.factor(6));
 }

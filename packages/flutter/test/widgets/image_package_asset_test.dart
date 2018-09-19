@@ -24,7 +24,7 @@ void main() {
   });
 
   test('Image.asset from package', () {
-    final Image imageWidget = new Image.asset(
+    final Image imageWidget = Image.asset(
       'assets/image.png',
       package: 'test_package',
     );
@@ -34,7 +34,7 @@ void main() {
   });
 
   test('Image.asset from package', () {
-    final Image imageWidget = new Image.asset(
+    final Image imageWidget = Image.asset(
       'assets/image.png',
       scale: 1.5,
       package: 'test_package',

@@ -14,7 +14,7 @@ void main() {
   setUp(() {
     tempDir = fs.systemTempDirectory.createTempSync('flutter_config_test.');
     final File file = fs.file(fs.path.join(tempDir.path, '.settings'));
-    config = new Config(file);
+    config = Config(file);
   });
 
   tearDown(() {

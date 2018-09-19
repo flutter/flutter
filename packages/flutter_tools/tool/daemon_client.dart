@@ -81,7 +81,8 @@ Future<Null> main() async {
     stdout.write('> ');
   });
 
-  daemon.exitCode.then<Null>((int code) {
+  // Print in the callback can't fail.
+  daemon.exitCode.then<Null>((int code) { // ignore: unawaited_futures
     print('daemon exiting ($code)');
     exit(code);
   });

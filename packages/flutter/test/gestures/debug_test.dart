@@ -14,7 +14,7 @@ void main() {
     final List<String> log = <String>[];
     debugPrint = (String s, { int wrapWidth }) { log.add(s); };
 
-    final TapGestureRecognizer tap = new TapGestureRecognizer()
+    final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
       ..onTapUp = (TapUpDetails details) { }
       ..onTap = () { }
@@ -60,7 +60,7 @@ void main() {
     final List<String> log = <String>[];
     debugPrint = (String s, { int wrapWidth }) { log.add(s); };
 
-    final TapGestureRecognizer tap = new TapGestureRecognizer()
+    final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
       ..onTapUp = (TapUpDetails details) { }
       ..onTap = () { }
@@ -103,7 +103,7 @@ void main() {
     final List<String> log = <String>[];
     debugPrint = (String s, { int wrapWidth }) { log.add(s); };
 
-    final TapGestureRecognizer tap = new TapGestureRecognizer()
+    final TapGestureRecognizer tap = TapGestureRecognizer()
       ..onTapDown = (TapDownDetails details) { }
       ..onTapUp = (TapUpDetails details) { }
       ..onTap = () { }
@@ -147,7 +147,7 @@ void main() {
   });
 
   test('TapGestureRecognizer _sentTapDown toString', () {
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
     const PointerEvent event = PointerDownEvent(pointer: 1, position: Offset(10.0, 10.0));
     tap.addPointer(event);

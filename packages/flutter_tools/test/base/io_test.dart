@@ -15,9 +15,9 @@ void main() {
   group('ProcessSignal', () {
 
     testUsingContext('signals are properly delegated', () async {
-      final MockIoProcessSignal mockSignal = new MockIoProcessSignal();
-      final ProcessSignal signalUnderTest = new ProcessSignal(mockSignal);
-      final StreamController<io.ProcessSignal> controller = new StreamController<io.ProcessSignal>();
+      final MockIoProcessSignal mockSignal = MockIoProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(mockSignal);
+      final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
 
       when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
       controller.add(mockSignal);

@@ -65,10 +65,10 @@ class CocoaPods {
     if (versionText == null)
       return CocoaPodsStatus.notInstalled;
     try {
-      final Version installedVersion = new Version.parse(versionText);
-      if (installedVersion < new Version.parse(cocoaPodsMinimumVersion))
+      final Version installedVersion = Version.parse(versionText);
+      if (installedVersion < Version.parse(cocoaPodsMinimumVersion))
         return CocoaPodsStatus.belowMinimumVersion;
-      else if (installedVersion < new Version.parse(cocoaPodsRecommendedVersion))
+      else if (installedVersion < Version.parse(cocoaPodsRecommendedVersion))
         return CocoaPodsStatus.belowRecommendedVersion;
       else
         return CocoaPodsStatus.recommended;

@@ -35,7 +35,7 @@ Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
   return result;
 }
 
-final RegExp materialIconAssetNameColorExtractor = new RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
+final RegExp materialIconAssetNameColorExtractor = RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
 
 void checkIconColor(WidgetTester tester, String label, Color color) {
   final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile);
@@ -61,8 +61,8 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    final Offset left = new Offset(0.0, (ui.window.physicalSize / ui.window.devicePixelRatio).height / 2.0);
-    final Offset right = new Offset((ui.window.physicalSize / ui.window.devicePixelRatio).width, left.dy);
+    final Offset left = Offset(0.0, (ui.window.physicalSize / ui.window.devicePixelRatio).height / 2.0);
+    final Offset right = Offset((ui.window.physicalSize / ui.window.devicePixelRatio).width, left.dy);
     final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);
@@ -74,7 +74,7 @@ void main() {
 
     // check the colour of the icon - light mode
     checkIconColor(tester, 'Stock List', Colors.purple); // theme primary color
-    checkIconColor(tester, 'Account Balance', Colors.black26); // disabled
+    checkIconColor(tester, 'Account Balance', Colors.black38); // disabled
     checkIconColor(tester, 'About', Colors.black45); // enabled
 
     // switch to dark mode

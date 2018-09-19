@@ -19,7 +19,7 @@ TaskFunction combine(List<TaskFunction> tasks) {
         return result;
       }
     }
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   };
 }
 
@@ -46,9 +46,9 @@ class PluginTest {
       } finally {
         await project.delete();
       }
-      return new TaskResult.success(null);
+      return TaskResult.success(null);
     } catch (e) {
-      return new TaskResult.failure(e.toString());
+      return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
     }
@@ -68,13 +68,13 @@ class FlutterProject {
         options: <String>['--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest')
       );
     });
-    return new FlutterProject(directory, 'plugintest');
+    return FlutterProject(directory, 'plugintest');
   }
 
   String get rootPath => path.join(parent.path, name);
 
   Future<Null> addPlugin(String plugin) async {
-    final File pubspec = new File(path.join(rootPath, 'pubspec.yaml'));
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
     content = content.replaceFirst(
       '\ndependencies:\n',
@@ -84,7 +84,7 @@ class FlutterProject {
   }
 
   Future<Null> build(String target) async {
-    await inDirectory(new Directory(rootPath), () async {
+    await inDirectory(Directory(rootPath), () async {
       await flutter('build', options: <String>[target]);
     });
   }
@@ -99,7 +99,7 @@ class FlutterProject {
         canFail: true,
       );
       // TODO(ianh): Investigating if flakiness is timing dependent.
-      await new Future<Null>.delayed(const Duration(seconds: 10));
+      await Future<Null>.delayed(const Duration(seconds: 10));
     }
     rmTree(parent);
   }
