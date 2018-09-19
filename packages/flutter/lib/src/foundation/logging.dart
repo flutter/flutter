@@ -16,20 +16,18 @@ typedef DebugLogMessageCallback = Object Function();
 /// as JSON strings using `json.encode()`. In the event that logging is not
 /// enabled for the given [channel], [messageCallback] will not be evaluated.
 /// The cost of logging calls can be further mitigated at call sites by invoking
-/// them in a function that is only evaluated in profile or debug modes. For
-/// example,
+/// them in a function that is only evaluated in debug mode. For example, to
+/// ignore logging in release mode you could wrap calls in an assert:
 ///
 /// ```dart
-/// profile(() {
+/// assert(() {
 ///   debugLogEvent(logGestures, () => <String, int> {
 ///    'x' : x,
 ///    'y' : y,
 ///    'z' : z,
 ///   });
-/// });
+/// }());
 ///```
-///
-/// ignores logging entirely in release mode and no performance penalty is paid.
 ///
 /// Logging for a given event channel can be enabled programmatically via
 /// [debugEnableLogging] or using a VM service call.
