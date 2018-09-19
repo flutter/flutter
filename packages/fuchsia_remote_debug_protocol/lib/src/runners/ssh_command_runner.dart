@@ -64,7 +64,7 @@ class SshCommandRunner {
     validateAddress(address);
   }
 
-  final Logger _log = new Logger('SshCommandRunner');
+  final Logger _log = Logger('SshCommandRunner');
 
   final ProcessManager _processManager;
 
@@ -98,7 +98,7 @@ class SshCommandRunner {
     _log.fine('Running command through SSH: ${args.join(' ')}');
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {
-      throw new SshCommandError(
+      throw SshCommandError(
           'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
     _log.fine('SSH command stdout in brackets:[${result.stdout}]');

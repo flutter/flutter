@@ -111,7 +111,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
           // We ran out of children before reaching the scroll offset.
           // We must inform our parent that this sliver cannot fulfill
           // its contract and that we need a scroll offset correction.
-          geometry = new SliverGeometry(
+          geometry = SliverGeometry(
             scrollOffsetCorrection: -scrollOffset,
           );
           return;
@@ -134,7 +134,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
           correction += paintExtentOf(firstChild);
           earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
         }
-        geometry = new SliverGeometry(
+        geometry = SliverGeometry(
           scrollOffsetCorrection: correction - earliestScrollOffset,
         );
         final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
@@ -219,7 +219,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         collectGarbage(leadingGarbage - 1, 0);
         assert(firstChild == lastChild);
         final double extent = childScrollOffset(lastChild) + paintExtentOf(lastChild);
-        geometry = new SliverGeometry(
+        geometry = SliverGeometry(
           scrollExtent: extent,
           paintExtent: 0.0,
           maxPaintExtent: extent,
@@ -275,7 +275,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       to: endScrollOffset,
     );
     final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: estimatedMaxScrollOffset,
       paintExtent: paintExtent,
       cacheExtent: cacheExtent,

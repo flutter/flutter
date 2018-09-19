@@ -45,7 +45,7 @@ class FlutterProject {
     final FlutterManifest exampleManifest = await _readManifest(
       _exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
     );
-    return new FlutterProject(directory, manifest, exampleManifest);
+    return FlutterProject(directory, manifest, exampleManifest);
   }
 
   /// Returns a future that completes with a [FlutterProject] view of the current directory.
@@ -76,7 +76,7 @@ class FlutterProject {
       example.android.applicationId,
       example.ios.productBundleIdentifier,
     ];
-    return new Set<String>.from(candidates
+    return Set<String>.from(candidates
         .map(_organizationNameFromPackageName)
         .where((String name) => name != null));
   }
@@ -89,10 +89,10 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => new IosProject._(this);
+  IosProject get ios => IosProject._(this);
 
   /// The Android sub project of this project.
-  AndroidProject get android => new AndroidProject._(this);
+  AndroidProject get android => AndroidProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -104,7 +104,7 @@ class FlutterProject {
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
   /// The example sub-project of this project.
-  FlutterProject get example => new FlutterProject(
+  FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(),
@@ -148,7 +148,7 @@ class FlutterProject {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter modules.
 class IosProject {
-  static final RegExp _productBundleIdPattern = new RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
+  static final RegExp _productBundleIdPattern = RegExp(r'^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(.*);\s*$');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
@@ -185,6 +185,15 @@ class IosProject {
 
   /// The '.pbxproj' file of the host app.
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  /// Xcode workspace directory of the host app.
+  Directory get xcodeWorkspace => directory.childDirectory('$_hostAppBundleName.xcworkspace');
+
+  /// Xcode workspace shared data directory for the host app.
+  Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
+
+  /// Xcode workspace shared workspace settings file for the host app.
+  File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
@@ -230,7 +239,6 @@ class IosProject {
         project: parent,
         buildInfo: BuildInfo.debug,
         targetOverride: bundle.defaultMainPath,
-        previewDart2: true,
       );
     }
   }
@@ -250,8 +258,8 @@ class IosProject {
     }
   }
 
-  Future<void> materialize() async {
-    throwToolExit('flutter materialize has not yet been implemented for iOS');
+  Future<void> makeHostAppEditable() async {
+    throwToolExit('making host app editable has not yet been implemented for iOS');
   }
 
   File get generatedXcodePropertiesFile => directory.childDirectory('Flutter').childFile('Generated.xcconfig');
@@ -263,7 +271,7 @@ class IosProject {
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = new Template.fromName(path);
+    final Template template = Template.fromName(path);
     template.render(
       target,
       <String, dynamic>{
@@ -281,8 +289,8 @@ class IosProject {
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter modules.
 class AndroidProject {
-  static final RegExp _applicationIdPattern = new RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
-  static final RegExp _groupPattern = new RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   AndroidProject._(this.parent);
 
@@ -293,18 +301,18 @@ class AndroidProject {
   /// containing the `app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
-    if (!isModule || _materializedDirectory.existsSync())
-      return _materializedDirectory;
+    if (!isModule || _editableHostAppDirectory.existsSync())
+      return _editableHostAppDirectory;
     return _ephemeralDirectory;
   }
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
-  /// a Flutter module with a materialized host app.
-  Directory get _flutterLibGradleRoot => isModule ? _ephemeralDirectory : _materializedDirectory;
+  /// a Flutter module with an editable host app.
+  Directory get _flutterLibGradleRoot => isModule ? _ephemeralDirectory : _editableHostAppDirectory;
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.android');
-  Directory get _materializedDirectory => parent.directory.childDirectory('android');
+  Directory get _editableHostAppDirectory => parent.directory.childDirectory('android');
 
   /// True, if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
@@ -338,8 +346,8 @@ class AndroidProject {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       _regenerateLibrary();
-      // Add ephemeral host app, if a materialized host app does not already exist.
-      if (!_materializedDirectory.existsSync()) {
+      // Add ephemeral host app, if an editable host app does not already exist.
+      if (!_editableHostAppDirectory.existsSync()) {
         _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
         _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
       }
@@ -355,16 +363,16 @@ class AndroidProject {
         || Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
   }
 
-  Future<void> materialize() async {
+  Future<void> makeHostAppEditable() async {
     assert(isModule);
-    if (_materializedDirectory.existsSync())
-      throwToolExit('Android host app already materialized. To redo materialization, delete the android/ folder.');
+    if (_editableHostAppDirectory.existsSync())
+      throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     _regenerateLibrary();
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_materialized'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _materializedDirectory);
-    gradle.injectGradleWrapper(_materializedDirectory);
-    gradle.writeLocalProperties(_materializedDirectory.childFile('local.properties'));
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+    gradle.injectGradleWrapper(_editableHostAppDirectory);
+    gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
 
@@ -380,7 +388,7 @@ class AndroidProject {
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
-    final Template template = new Template.fromName(path);
+    final Template template = Template.fromName(path);
     template.render(
       target,
       <String, dynamic>{

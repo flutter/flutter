@@ -20,7 +20,7 @@ void main() {
       expect(task.requiredAgentCapabilities, <String>['linux/android']);
 
       for (ManifestTask task in manifest.tasks) {
-        final File taskFile = new File('bin/tasks/${task.name}.dart');
+        final File taskFile = File('bin/tasks/${task.name}.dart');
         expect(taskFile.existsSync(), true,
           reason: 'File ${taskFile.path} corresponding to manifest task "${task.name}" not found');
       }

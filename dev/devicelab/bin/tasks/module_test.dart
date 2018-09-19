@@ -18,7 +18,7 @@ Future<Null> main() async {
 
     final String javaHome = await findJavaHome();
     if (javaHome == null)
-      return new TaskResult.failure('Could not find Java');
+      return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
@@ -34,14 +34,14 @@ Future<Null> main() async {
 
       section('Add plugins');
 
-      final File pubspec = new File(path.join(tempDir.path, 'hello', 'pubspec.yaml'));
+      final File pubspec = File(path.join(tempDir.path, 'hello', 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  battery:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
-      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'packages',
           options: <String>['get'],
@@ -50,7 +50,7 @@ Future<Null> main() async {
 
       section('Build Flutter module library archive');
 
-      await inDirectory(new Directory(path.join(tempDir.path, 'hello', '.android')), () async {
+      await inDirectory(Directory(path.join(tempDir.path, 'hello', '.android')), () async {
         await exec(
           './gradlew',
           <String>['flutter:assembleDebug'],
@@ -58,7 +58,7 @@ Future<Null> main() async {
         );
       });
 
-      final bool aarBuilt = exists(new File(path.join(
+      final bool aarBuilt = exists(File(path.join(
         tempDir.path,
         'hello',
         '.android',
@@ -70,19 +70,19 @@ Future<Null> main() async {
       )));
 
       if (!aarBuilt) {
-        return new TaskResult.failure('Failed to build .aar');
+        return TaskResult.failure('Failed to build .aar');
       }
 
       section('Build ephemeral host app');
 
-      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'build',
           options: <String>['apk'],
         );
       });
 
-      final bool ephemeralHostApkBuilt = exists(new File(path.join(
+      final bool ephemeralHostApkBuilt = exists(File(path.join(
         tempDir.path,
         'hello',
         'build',
@@ -94,18 +94,18 @@ Future<Null> main() async {
       )));
 
       if (!ephemeralHostApkBuilt) {
-        return new TaskResult.failure('Failed to build ephemeral host .apk');
+        return TaskResult.failure('Failed to build ephemeral host .apk');
       }
 
       section('Clean build');
 
-      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter('clean');
       });
 
       section('Materialize host app');
 
-      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'materialize',
           options: <String>['android'],
@@ -114,14 +114,14 @@ Future<Null> main() async {
 
       section('Build materialized host app');
 
-      await inDirectory(new Directory(path.join(tempDir.path, 'hello')), () async {
+      await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
           'build',
           options: <String>['apk'],
         );
       });
 
-      final bool materializedHostApkBuilt = exists(new File(path.join(
+      final bool materializedHostApkBuilt = exists(File(path.join(
         tempDir.path,
         'hello',
         'build',
@@ -133,24 +133,24 @@ Future<Null> main() async {
       )));
 
       if (!materializedHostApkBuilt) {
-        return new TaskResult.failure('Failed to build materialized host .apk');
+        return TaskResult.failure('Failed to build materialized host .apk');
       }
 
       section('Add to Android app');
 
-      final Directory hostApp = new Directory(path.join(tempDir.path, 'hello_host_app'));
+      final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
-        new Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
         hostApp,
       );
       copy(
-        new File(path.join(tempDir.path, 'hello', '.android', 'gradlew')),
+        File(path.join(tempDir.path, 'hello', '.android', 'gradlew')),
         hostApp,
       );
       copy(
-        new File(path.join(tempDir.path, 'hello', '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
-        new Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
+        File(path.join(tempDir.path, 'hello', '.android', 'gradle', 'wrapper', 'gradle-wrapper.jar')),
+        Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
       await inDirectory(hostApp, () async {
@@ -161,7 +161,7 @@ Future<Null> main() async {
         );
       });
 
-      final bool existingAppBuilt = exists(new File(path.join(
+      final bool existingAppBuilt = exists(File(path.join(
         hostApp.path,
         'app',
         'build',
@@ -172,11 +172,11 @@ Future<Null> main() async {
       )));
 
       if (!existingAppBuilt) {
-        return new TaskResult.failure('Failed to build existing app .apk');
+        return TaskResult.failure('Failed to build existing app .apk');
       }
-      return new TaskResult.success(null);
+      return TaskResult.success(null);
     } catch (e) {
-      return new TaskResult.failure(e.toString());
+      return TaskResult.failure(e.toString());
     } finally {
       rmTree(tempDir);
     }

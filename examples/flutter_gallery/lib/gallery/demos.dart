@@ -85,23 +85,23 @@ class GalleryDemo {
 List<GalleryDemo> _buildGalleryDemos() {
   final List<GalleryDemo> galleryDemos = <GalleryDemo>[
     // Demos
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Shrine',
       subtitle: 'Basic shopping app',
       icon: GalleryIcons.shrine,
       category: _kDemos,
       routeName: ShrineDemo.routeName,
-      buildRoute: (BuildContext context) => new ShrineDemo(),
+      buildRoute: (BuildContext context) => ShrineDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Contact profile',
       subtitle: 'Address book entry with a flexible appbar',
       icon: GalleryIcons.account_box,
       category: _kDemos,
       routeName: ContactsDemo.routeName,
-      buildRoute: (BuildContext context) => new ContactsDemo(),
+      buildRoute: (BuildContext context) => ContactsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Animation',
       subtitle: 'Section organizer',
       icon: GalleryIcons.animation,
@@ -111,138 +111,138 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
 
     // Style
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Colors',
       subtitle: 'All of the predefined colors',
       icon: GalleryIcons.colors,
       category: _kStyle,
       routeName: ColorsDemo.routeName,
-      buildRoute: (BuildContext context) => new ColorsDemo(),
+      buildRoute: (BuildContext context) => ColorsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Typography',
       subtitle: 'All of the predefined text styles',
       icon: GalleryIcons.custom_typography,
       category: _kStyle,
       routeName: TypographyDemo.routeName,
-      buildRoute: (BuildContext context) => new TypographyDemo(),
+      buildRoute: (BuildContext context) => TypographyDemo(),
     ),
 
     // Material Components
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Backdrop',
       subtitle: 'Select a front layer from back layer',
       icon: GalleryIcons.backdrop,
       category: _kMaterialComponents,
       routeName: BackdropDemo.routeName,
-      buildRoute: (BuildContext context) => new BackdropDemo(),
+      buildRoute: (BuildContext context) => BackdropDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Bottom app bar',
       subtitle: 'Optional floating action button notch',
       icon: GalleryIcons.bottom_app_bar,
       category: _kMaterialComponents,
       routeName: BottomAppBarDemo.routeName,
-      buildRoute: (BuildContext context) => new BottomAppBarDemo(),
+      buildRoute: (BuildContext context) => BottomAppBarDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Bottom navigation',
       subtitle: 'Bottom navigation with cross-fading views',
       icon: GalleryIcons.bottom_navigation,
       category: _kMaterialComponents,
       routeName: BottomNavigationDemo.routeName,
-      buildRoute: (BuildContext context) => new BottomNavigationDemo(),
+      buildRoute: (BuildContext context) => BottomNavigationDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Bottom sheet: Modal',
       subtitle: 'A dismissable bottom sheet',
       icon: GalleryIcons.bottom_sheets,
       category: _kMaterialComponents,
       routeName: ModalBottomSheetDemo.routeName,
-      buildRoute: (BuildContext context) => new ModalBottomSheetDemo(),
+      buildRoute: (BuildContext context) => ModalBottomSheetDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Bottom sheet: Persistent',
       subtitle: 'A bottom sheet that sticks around',
       icon: GalleryIcons.bottom_sheet_persistent,
       category: _kMaterialComponents,
       routeName: PersistentBottomSheetDemo.routeName,
-      buildRoute: (BuildContext context) => new PersistentBottomSheetDemo(),
+      buildRoute: (BuildContext context) => PersistentBottomSheetDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Buttons',
       subtitle: 'Flat, raised, dropdown, and more',
       icon: GalleryIcons.generic_buttons,
       category: _kMaterialComponents,
       routeName: ButtonsDemo.routeName,
-      buildRoute: (BuildContext context) => new ButtonsDemo(),
+      buildRoute: (BuildContext context) => ButtonsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Buttons: Floating Action Button',
       subtitle: 'FAB with transitions',
       icon: GalleryIcons.buttons,
       category: _kMaterialComponents,
       routeName: TabsFabDemo.routeName,
-      buildRoute: (BuildContext context) => new TabsFabDemo(),
+      buildRoute: (BuildContext context) => TabsFabDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Cards',
       subtitle: 'Baseline cards with rounded corners',
       icon: GalleryIcons.cards,
       category: _kMaterialComponents,
       routeName: CardsDemo.routeName,
-      buildRoute: (BuildContext context) => new CardsDemo(),
+      buildRoute: (BuildContext context) => CardsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Chips',
       subtitle: 'Labeled with delete buttons and avatars',
       icon: GalleryIcons.chips,
       category: _kMaterialComponents,
       routeName: ChipDemo.routeName,
-      buildRoute: (BuildContext context) => new ChipDemo(),
+      buildRoute: (BuildContext context) => ChipDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Data tables',
       subtitle: 'Rows and columns',
       icon: GalleryIcons.data_table,
       category: _kMaterialComponents,
       routeName: DataTableDemo.routeName,
-      buildRoute: (BuildContext context) => new DataTableDemo(),
+      buildRoute: (BuildContext context) => DataTableDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Dialogs',
       subtitle: 'Simple, alert, and fullscreen',
       icon: GalleryIcons.dialogs,
       category: _kMaterialComponents,
       routeName: DialogDemo.routeName,
-      buildRoute: (BuildContext context) => new DialogDemo(),
+      buildRoute: (BuildContext context) => DialogDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Elevations',
       subtitle: 'Shadow values on cards',
       // TODO(larche): Change to custom icon for elevations when one exists.
       icon: GalleryIcons.cupertino_progress,
       category: _kMaterialComponents,
       routeName: ElevationDemo.routeName,
-      buildRoute: (BuildContext context) => new ElevationDemo(),
+      buildRoute: (BuildContext context) => ElevationDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Expand/collapse list control',
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
       category: _kMaterialComponents,
       routeName: TwoLevelListDemo.routeName,
-      buildRoute: (BuildContext context) => new TwoLevelListDemo(),
+      buildRoute: (BuildContext context) => TwoLevelListDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Expansion panels',
       subtitle: 'List of expanding panels',
       icon: GalleryIcons.expand_all,
       category: _kMaterialComponents,
       routeName: ExpansionPanelsDemo.routeName,
-      buildRoute: (BuildContext context) => new ExpansionPanelsDemo(),
+      buildRoute: (BuildContext context) => ExpansionPanelsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Grid',
       subtitle: 'Row and column layout',
       icon: GalleryIcons.grid_on,
@@ -250,15 +250,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: GridListDemo.routeName,
       buildRoute: (BuildContext context) => const GridListDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Icons',
       subtitle: 'Enabled and disabled icons with opacity',
       icon: GalleryIcons.sentiment_very_satisfied,
       category: _kMaterialComponents,
       routeName: IconsDemo.routeName,
-      buildRoute: (BuildContext context) => new IconsDemo(),
+      buildRoute: (BuildContext context) => IconsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Lists',
       subtitle: 'Scrolling list layouts',
       icon: GalleryIcons.list_alt,
@@ -266,7 +266,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: ListDemo.routeName,
       buildRoute: (BuildContext context) => const ListDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Lists: leave-behind list items',
       subtitle: 'List items with hidden actions',
       icon: GalleryIcons.lists_leave_behind,
@@ -274,7 +274,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: LeaveBehindDemo.routeName,
       buildRoute: (BuildContext context) => const LeaveBehindDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Lists: reorderable',
       subtitle: 'Reorderable lists',
       icon: GalleryIcons.list_alt,
@@ -282,7 +282,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: ReorderableListDemo.routeName,
       buildRoute: (BuildContext context) => const ReorderableListDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Menus',
       subtitle: 'Menu buttons and simple menus',
       icon: GalleryIcons.more_vert,
@@ -290,39 +290,39 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: MenuDemo.routeName,
       buildRoute: (BuildContext context) => const MenuDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Navigation drawer',
       subtitle: 'Navigation drawer with standard header',
       icon: GalleryIcons.menu,
       category: _kMaterialComponents,
       routeName: DrawerDemo.routeName,
-      buildRoute: (BuildContext context) => new DrawerDemo(),
+      buildRoute: (BuildContext context) => DrawerDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Pagination',
       subtitle: 'PageView with indicator',
       icon: GalleryIcons.page_control,
       category: _kMaterialComponents,
       routeName: PageSelectorDemo.routeName,
-      buildRoute: (BuildContext context) => new PageSelectorDemo(),
+      buildRoute: (BuildContext context) => PageSelectorDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Pickers',
       subtitle: 'Date and time selection widgets',
       icon: GalleryIcons.event,
       category: _kMaterialComponents,
       routeName: DateAndTimePickerDemo.routeName,
-      buildRoute: (BuildContext context) => new DateAndTimePickerDemo(),
+      buildRoute: (BuildContext context) => DateAndTimePickerDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Progress indicators',
       subtitle: 'Linear, circular, indeterminate',
       icon: GalleryIcons.progress_activity,
       category: _kMaterialComponents,
       routeName: ProgressIndicatorDemo.routeName,
-      buildRoute: (BuildContext context) => new ProgressIndicatorDemo(),
+      buildRoute: (BuildContext context) => ProgressIndicatorDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Pull to refresh',
       subtitle: 'Refresh indicators',
       icon: GalleryIcons.refresh,
@@ -330,31 +330,31 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: OverscrollDemo.routeName,
       buildRoute: (BuildContext context) => const OverscrollDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Search',
       subtitle: 'Expandable search',
       icon: Icons.search,
       category: _kMaterialComponents,
       routeName: SearchDemo.routeName,
-      buildRoute: (BuildContext context) => new SearchDemo(),
+      buildRoute: (BuildContext context) => SearchDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Selection controls',
       subtitle: 'Checkboxes, radio buttons, and switches',
       icon: GalleryIcons.check_box,
       category: _kMaterialComponents,
       routeName: SelectionControlsDemo.routeName,
-      buildRoute: (BuildContext context) => new SelectionControlsDemo(),
+      buildRoute: (BuildContext context) => SelectionControlsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Sliders',
       subtitle: 'Widgets for selecting a value by swiping',
       icon: GalleryIcons.sliders,
       category: _kMaterialComponents,
       routeName: SliderDemo.routeName,
-      buildRoute: (BuildContext context) => new SliderDemo(),
+      buildRoute: (BuildContext context) => SliderDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Snackbar',
       subtitle: 'Temporary messaging',
       icon: GalleryIcons.snackbar,
@@ -362,23 +362,23 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: SnackBarDemo.routeName,
       buildRoute: (BuildContext context) => const SnackBarDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Tabs',
       subtitle: 'Tabs with independently scrollable views',
       icon: GalleryIcons.tabs,
       category: _kMaterialComponents,
       routeName: TabsDemo.routeName,
-      buildRoute: (BuildContext context) => new TabsDemo(),
+      buildRoute: (BuildContext context) => TabsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Tabs: Scrolling',
       subtitle: 'Tab bar that scrolls',
       category: _kMaterialComponents,
       icon: GalleryIcons.tabs,
       routeName: ScrollableTabsDemo.routeName,
-      buildRoute: (BuildContext context) => new ScrollableTabsDemo(),
+      buildRoute: (BuildContext context) => ScrollableTabsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Text fields',
       subtitle: 'Single line of editable text and numbers',
       icon: GalleryIcons.text_fields_alt,
@@ -386,90 +386,90 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: TextFormFieldDemo.routeName,
       buildRoute: (BuildContext context) => const TextFormFieldDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Tooltips',
       subtitle: 'Short message displayed on long-press',
       icon: GalleryIcons.tooltip,
       category: _kMaterialComponents,
       routeName: TooltipDemo.routeName,
-      buildRoute: (BuildContext context) => new TooltipDemo(),
+      buildRoute: (BuildContext context) => TooltipDemo(),
     ),
 
     // Cupertino Components
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Activity Indicator',
       icon: GalleryIcons.cupertino_progress,
       category: _kCupertinoComponents,
       routeName: CupertinoProgressIndicatorDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoProgressIndicatorDemo(),
+      buildRoute: (BuildContext context) => CupertinoProgressIndicatorDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Alerts',
       icon: GalleryIcons.dialogs,
       category: _kCupertinoComponents,
       routeName: CupertinoAlertDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoAlertDemo(),
+      buildRoute: (BuildContext context) => CupertinoAlertDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Buttons',
       icon: GalleryIcons.generic_buttons,
       category: _kCupertinoComponents,
       routeName: CupertinoButtonsDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoButtonsDemo(),
+      buildRoute: (BuildContext context) => CupertinoButtonsDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Navigation',
       icon: GalleryIcons.bottom_navigation,
       category: _kCupertinoComponents,
       routeName: CupertinoNavigationDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoNavigationDemo(),
+      buildRoute: (BuildContext context) => CupertinoNavigationDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Pickers',
       icon: GalleryIcons.event,
       category: _kCupertinoComponents,
       routeName: CupertinoPickerDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoPickerDemo(),
+      buildRoute: (BuildContext context) => CupertinoPickerDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Pull to refresh',
       icon: GalleryIcons.cupertino_pull_to_refresh,
       category: _kCupertinoComponents,
       routeName: CupertinoRefreshControlDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
+      buildRoute: (BuildContext context) => CupertinoRefreshControlDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Segmented Control',
       icon: GalleryIcons.tabs,
       category: _kCupertinoComponents,
       routeName: CupertinoSegmentedControlDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoSegmentedControlDemo(),
+      buildRoute: (BuildContext context) => CupertinoSegmentedControlDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Sliders',
       icon: GalleryIcons.sliders,
       category: _kCupertinoComponents,
       routeName: CupertinoSliderDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoSliderDemo(),
+      buildRoute: (BuildContext context) => CupertinoSliderDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Switches',
       icon: GalleryIcons.cupertino_switch,
       category: _kCupertinoComponents,
       routeName: CupertinoSwitchDemo.routeName,
-      buildRoute: (BuildContext context) => new CupertinoSwitchDemo(),
+      buildRoute: (BuildContext context) => CupertinoSwitchDemo(),
     ),
 
     // Media
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Animated images',
       subtitle: 'GIF and WebP animations',
       icon: GalleryIcons.animation,
       category: _kMedia,
       routeName: ImagesDemo.routeName,
-      buildRoute: (BuildContext context) => new ImagesDemo(),
+      buildRoute: (BuildContext context) => ImagesDemo(),
     ),
-    new GalleryDemo(
+    GalleryDemo(
       title: 'Video',
       subtitle: 'Video playback',
       icon: GalleryIcons.drive_video,
@@ -483,7 +483,7 @@ List<GalleryDemo> _buildGalleryDemos() {
   // in (release builds) the performance tests.
   assert(() {
     galleryDemos.insert(0,
-      new GalleryDemo(
+      GalleryDemo(
         title: 'Pesto',
         subtitle: 'Simple recipe browser',
         icon: Icons.adjust,
@@ -504,7 +504,7 @@ final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
   kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
-  new Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
+  Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
     kAllGalleryDemoCategories,
     value: (dynamic category) {
       return kAllGalleryDemos.where((GalleryDemo demo) => demo.category == category).toList();

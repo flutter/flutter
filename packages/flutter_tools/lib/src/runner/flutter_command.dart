@@ -73,7 +73,7 @@ abstract class FlutterCommand extends Command<Null> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
 
   @override
   FlutterCommandRunner get runner => super.runner;
@@ -192,7 +192,7 @@ abstract class FlutterCommand extends Command<Null> {
   BuildMode getBuildMode() {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
-      throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+      throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
@@ -215,10 +215,6 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildInfo getBuildInfo() {
-    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
-        ? argResults['preview-dart-2']
-        : true;
-
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&
         argResults['target-platform'] != 'default') {
@@ -228,10 +224,6 @@ abstract class FlutterCommand extends Command<Null> {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
         ? argResults['track-widget-creation']
         : false;
-    if (trackWidgetCreation == true && previewDart2 == false) {
-      throw new UsageException(
-          '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
-    }
 
     int buildNumber;
     try {
@@ -239,15 +231,14 @@ abstract class FlutterCommand extends Command<Null> {
           ? int.parse(argResults['build-number'])
           : null;
     } catch (e) {
-      throw new UsageException(
+      throw UsageException(
           '--build-number (${argResults['build-number']}) must be an int.', null);
     }
 
-    return new BuildInfo(getBuildMode(),
+    return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
-      previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       compilationTraceFilePath: argParser.options.containsKey('precompile')
           ? argResults['precompile']
@@ -274,7 +265,7 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   void setupApplicationPackages() {
-    applicationPackages ??= new ApplicationPackageStore();
+    applicationPackages ??= ApplicationPackageStore();
   }
 
   /// The path to send to Google Analytics. Return null here to disable
@@ -461,7 +452,7 @@ abstract class FlutterCommand extends Command<Null> {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
-        throw new ToolExit(
+        throw ToolExit(
           'Error: No pubspec.yaml file found.\n'
           'This command should be run from the root of your Flutter project.\n'
           'Do not run this command from the root of your git clone of Flutter.'
@@ -469,7 +460,7 @@ abstract class FlutterCommand extends Command<Null> {
       }
 
       if (fs.isFileSync('flutter.yaml')) {
-        throw new ToolExit(
+        throw ToolExit(
           'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
           'We have changed from having separate flutter.yaml and pubspec.yaml\n'
           'files to having just one pubspec.yaml file. Transitioning is simple:\n'
@@ -488,16 +479,16 @@ abstract class FlutterCommand extends Command<Null> {
 
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'packages' && !(_usesPubOption && argResults['pub'])) {
-        final String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
+        final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
         if (error != null)
-          throw new ToolExit(error);
+          throw ToolExit(error);
       }
     }
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
-        throw new ToolExit('Target file "$targetPath" not found.');
+        throw ToolExit('Target file "$targetPath" not found.');
     }
 
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
@@ -505,9 +496,9 @@ abstract class FlutterCommand extends Command<Null> {
     final String compilationTraceFilePath = argParser.options.containsKey('precompile')
         ? argResults['precompile'] : null;
     if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
-      throw new ToolExit('Error: --precompile is not allowed when --debug is specified.');
+      throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
     if (compilationTraceFilePath != null && !dynamicFlag)
-      throw new ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
+      throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
   }
 
   ApplicationPackageStore applicationPackages;

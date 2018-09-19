@@ -46,6 +46,7 @@ export 'src/widgets/icon_theme_data.dart';
 export 'src/widgets/image.dart';
 export 'src/widgets/image_icon.dart';
 export 'src/widgets/implicit_animations.dart';
+export 'src/widgets/inherited_model.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';

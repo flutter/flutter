@@ -22,14 +22,14 @@ class VideoCard extends StatelessWidget {
       : super(key: key);
 
   Widget _buildInlineVideo() {
-    return new Padding(
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
-      child: new Center(
-        child: new AspectRatio(
+      child: Center(
+        child: AspectRatio(
           aspectRatio: 3 / 2,
-          child: new Hero(
+          child: Hero(
             tag: controller,
-            child: new VideoPlayerLoading(controller),
+            child: VideoPlayerLoading(controller),
           ),
         ),
       ),
@@ -37,16 +37,16 @@ class VideoCard extends StatelessWidget {
   }
 
   Widget _buildFullScreenVideo() {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
       ),
-      body: new Center(
-        child: new AspectRatio(
+      body: Center(
+        child: AspectRatio(
           aspectRatio: 3 / 2,
-          child: new Hero(
+          child: Hero(
             tag: controller,
-            child: new VideoPlayPause(controller),
+            child: VideoPlayPause(controller),
           ),
         ),
       ),
@@ -61,8 +61,8 @@ class VideoCard extends StatelessWidget {
     }
 
     void pushFullScreenWidget() {
-      final TransitionRoute<void> route = new PageRouteBuilder<void>(
-        settings: new RouteSettings(name: title, isInitialRoute: false),
+      final TransitionRoute<void> route = PageRouteBuilder<void>(
+        settings: RouteSettings(name: title, isInitialRoute: false),
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
@@ -74,14 +74,14 @@ class VideoCard extends StatelessWidget {
       Navigator.of(context).push(route);
     }
 
-    return new SafeArea(
+    return SafeArea(
       top: false,
       bottom: false,
-      child: new Card(
-        child: new Column(
+      child: Card(
+        child: Column(
           children: <Widget>[
-            new ListTile(title: new Text(title), subtitle: new Text(subtitle)),
-            new GestureDetector(
+            ListTile(title: Text(title), subtitle: Text(subtitle)),
+            GestureDetector(
               onTap: pushFullScreenWidget,
               child: _buildInlineVideo(),
             ),
@@ -98,7 +98,7 @@ class VideoPlayerLoading extends StatefulWidget {
   const VideoPlayerLoading(this.controller);
 
   @override
-  _VideoPlayerLoadingState createState() => new _VideoPlayerLoadingState();
+  _VideoPlayerLoadingState createState() => _VideoPlayerLoadingState();
 }
 
 class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
@@ -124,11 +124,11 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
   @override
   Widget build(BuildContext context) {
     if (_initialized) {
-      return new VideoPlayer(widget.controller);
+      return VideoPlayer(widget.controller);
     }
-    return new Stack(
+    return Stack(
       children: <Widget>[
-        new VideoPlayer(widget.controller),
+        VideoPlayer(widget.controller),
         const Center(child: CircularProgressIndicator()),
       ],
       fit: StackFit.expand,
@@ -142,7 +142,7 @@ class VideoPlayPause extends StatefulWidget {
   const VideoPlayPause(this.controller);
 
   @override
-  State createState() => new _VideoPlayPauseState();
+  State createState() => _VideoPlayPauseState();
 }
 
 class _VideoPlayPauseState extends State<VideoPlayPause> {
@@ -172,12 +172,12 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
   @override
   Widget build(BuildContext context) {
-    return new Stack(
+    return Stack(
       alignment: Alignment.bottomCenter,
       fit: StackFit.expand,
       children: <Widget>[
-        new GestureDetector(
-          child: new VideoPlayerLoading(controller),
+        GestureDetector(
+          child: VideoPlayerLoading(controller),
           onTap: () {
             if (!controller.value.initialized) {
               return;
@@ -195,7 +195,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
             }
           },
         ),
-        new Center(child: imageFadeAnimation),
+        Center(child: imageFadeAnimation),
       ],
     );
   }
@@ -211,7 +211,7 @@ class FadeAnimation extends StatefulWidget {
   });
 
   @override
-  _FadeAnimationState createState() => new _FadeAnimationState();
+  _FadeAnimationState createState() => _FadeAnimationState();
 }
 
 class _FadeAnimationState extends State<FadeAnimation>
@@ -221,7 +221,7 @@ class _FadeAnimationState extends State<FadeAnimation>
   @override
   void initState() {
     super.initState();
-    animationController = new AnimationController(
+    animationController = AnimationController(
       duration: widget.duration,
       vsync: this,
     );
@@ -256,11 +256,11 @@ class _FadeAnimationState extends State<FadeAnimation>
   @override
   Widget build(BuildContext context) {
     return animationController.isAnimating
-        ? new Opacity(
+        ? Opacity(
             opacity: 1.0 - animationController.value,
             child: widget.child,
           )
-        : new Container();
+        : Container();
   }
 }
 
@@ -276,7 +276,7 @@ class ConnectivityOverlay extends StatefulWidget {
   });
 
   @override
-  _ConnectivityOverlayState createState() => new _ConnectivityOverlayState();
+  _ConnectivityOverlayState createState() => _ConnectivityOverlayState();
 }
 
 class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
@@ -294,7 +294,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   );
 
   Stream<ConnectivityResult> connectivityStream() async* {
-    final Connectivity connectivity = new Connectivity();
+    final Connectivity connectivity = Connectivity();
     ConnectivityResult previousResult = await connectivity.checkConnectivity();
     yield previousResult;
     await for (ConnectivityResult result
@@ -341,10 +341,10 @@ class VideoDemo extends StatefulWidget {
   static const String routeName = '/video';
 
   @override
-  _VideoDemoState createState() => new _VideoDemoState();
+  _VideoDemoState createState() => _VideoDemoState();
 }
 
-final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
 Future<bool> isIOSSimulator() async {
   return Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
@@ -353,16 +353,16 @@ Future<bool> isIOSSimulator() async {
 class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
   final VideoPlayerController butterflyController =
-      new VideoPlayerController.asset(
+      VideoPlayerController.asset(
         'videos/butterfly.mp4',
         package: 'flutter_gallery_assets',
       );
-  final VideoPlayerController beeController = new VideoPlayerController.network(
+  final VideoPlayerController beeController = VideoPlayerController.network(
     beeUri,
   );
 
-  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-  final Completer<Null> connectedCompleter = new Completer<Null>();
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final Completer<Null> connectedCompleter = Completer<Null>();
   bool isSupported = true;
 
   @override
@@ -395,21 +395,21 @@ class _VideoDemoState extends State<VideoDemo>
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: scaffoldKey,
-      appBar: new AppBar(
+      appBar: AppBar(
         title: const Text('Videos'),
       ),
       body: isSupported
-          ? new ConnectivityOverlay(
-              child: new ListView(
+          ? ConnectivityOverlay(
+              child: ListView(
                 children: <Widget>[
-                  new VideoCard(
+                  VideoCard(
                     title: 'Butterfly',
                     subtitle: '… flutters by',
                     controller: butterflyController,
                   ),
-                  new VideoCard(
+                  VideoCard(
                     title: 'Bee',
                     subtitle: '… gently buzzing',
                     controller: beeController,

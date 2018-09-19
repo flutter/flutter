@@ -76,5 +76,5 @@ Offset positionDependentBox({
       x = normalizedTargetX - childSize.width / 2.0;
     }
   }
-  return new Offset(x, y);
+  return Offset(x, y);
 }

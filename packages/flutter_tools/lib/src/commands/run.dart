@@ -120,11 +120,6 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
       )
-      ..addFlag('preview-dart-2',
-        defaultsTo: true,
-        hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.',
-      )
       ..addOption('precompile',
         hide: !verboseHelp,
         help: 'Precompile functions specified in input file. This flag is only\n'
@@ -249,9 +244,9 @@ class RunCommand extends RunCommandBase {
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isRelease) {
-      return new DebuggingOptions.disabled(buildInfo);
+      return DebuggingOptions.disabled(buildInfo);
     } else {
-      return new DebuggingOptions.enabled(
+      return DebuggingOptions.enabled(
         buildInfo,
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
@@ -274,8 +269,8 @@ class RunCommand extends RunCommandBase {
     if (argResults['machine']) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
-      final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: new NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
         final String applicationBinaryPath = argResults['use-application-binary'];
@@ -298,7 +293,7 @@ class RunCommand extends RunCommandBase {
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
-      return new FlutterCommandResult(
+      return FlutterCommandResult(
         ExitStatus.success,
         timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
@@ -342,9 +337,8 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(
+      return FlutterDevice(
         device,
-        previewDart2: argResults['preview-dart-2'],
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
@@ -355,7 +349,7 @@ class RunCommand extends RunCommandBase {
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
     if (hotMode) {
-      runner = new HotRunner(
+      runner = HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
@@ -370,7 +364,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6,
       );
     } else {
-      runner = new ColdRunner(
+      runner = ColdRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
@@ -388,7 +382,7 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics.
     //
     // Do not add more operations to the future.
-    final Completer<void> appStartedTimeRecorder = new Completer<void>.sync();
+    final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     appStartedTimeRecorder.future.then( // ignore: unawaited_futures
       (_) { appStartedTime = clock.now(); }
@@ -401,7 +395,7 @@ class RunCommand extends RunCommandBase {
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);
-    return new FlutterCommandResult(
+    return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[
         hotMode ? 'hot' : 'cold',

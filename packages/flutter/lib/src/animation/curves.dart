@@ -34,7 +34,7 @@ abstract class Curve {
   /// See also:
   ///
   ///  * [FlippedCurve], the class that is used to implement this getter.
-  Curve get flipped => new FlippedCurve(this);
+  Curve get flipped => FlippedCurve(this);
 
   @override
   String toString() {

@@ -21,7 +21,7 @@ void main() {
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
-      final Completer<Null> ready = new Completer<Null>();
+      final Completer<Null> ready = Completer<Null>();
       bool ok;
       print('run: starting...');
       final Process run = await startProcess(
@@ -54,7 +54,7 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = new VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
+      final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.first;
       final Stream<VMExtensionEvent> frameEvents = isolate.onExtensionEvent.where(
@@ -82,7 +82,7 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
     });
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }
 

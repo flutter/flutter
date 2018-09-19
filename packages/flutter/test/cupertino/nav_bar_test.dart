@@ -16,7 +16,7 @@ int count = 0;
 void main() {
   testWidgets('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           leading: CupertinoButton(child: Text('Something'), onPressed: null,),
           middle: Text('Title'),
@@ -30,14 +30,14 @@ void main() {
 
   testWidgets('Middle still in center with back button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Title'),
         ),
       ),
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
           middle: Text('Page 2'),
@@ -54,7 +54,7 @@ void main() {
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Title'),
           backgroundColor: Color(0xFFE5E5E5),
@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Title'),
         ),
@@ -76,16 +76,16 @@ void main() {
   });
 
   testWidgets('Can specify custom padding', (WidgetTester tester) async {
-    final Key middleBox = new GlobalKey();
+    final Key middleBox = GlobalKey();
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new Align(
+      CupertinoApp(
+        home: Align(
           alignment: Alignment.topCenter,
-          child: new CupertinoNavigationBar(
+          child: CupertinoNavigationBar(
             leading: const CupertinoButton(child: Text('Cheetah'), onPressed: null),
             // Let the box take all the vertical space to test vertical padding but let
             // the nav bar position it horizontally.
-            middle: new Align(
+            middle: Align(
               key: middleBox,
               alignment: Alignment.center,
               widthFactor: 1.0,
@@ -120,7 +120,7 @@ void main() {
 
   testWidgets('Padding works in RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Directionality(
           textDirection: TextDirection.rtl,
           child: Align(
@@ -151,7 +151,7 @@ void main() {
   testWidgets('Verify styles of each slot', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           leading: _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
           middle: _ExpectStyles(color: Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
@@ -165,7 +165,7 @@ void main() {
 
   testWidgets('No slivers with no large titles', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
             middle: Text('Title'),
@@ -179,14 +179,14 @@ void main() {
   });
 
   testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
-    final ScrollController scrollController = new ScrollController();
-    final Key leadingKey = new GlobalKey();
-    final Key middleKey = new GlobalKey();
-    final Key trailingKey = new GlobalKey();
-    final Key titleKey = new GlobalKey();
+    final ScrollController scrollController = ScrollController();
+    final Key leadingKey = GlobalKey();
+    final Key middleKey = GlobalKey();
+    final Key trailingKey = GlobalKey();
+    final Key titleKey = GlobalKey();
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new MediaQuery(
+      CupertinoApp(
+        home: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.only(
               top: 10.0,
@@ -195,18 +195,18 @@ void main() {
               right: 40.0,
             ),
           ),
-          child: new CupertinoPageScaffold(
-            child: new CustomScrollView(
+          child: CupertinoPageScaffold(
+            child: CustomScrollView(
               controller: scrollController,
               slivers: <Widget>[
-                new CupertinoSliverNavigationBar(
-                  leading: new Placeholder(key: leadingKey),
-                  middle: new Placeholder(key: middleKey),
-                  largeTitle: new Text('Large Title', key: titleKey),
-                  trailing: new Placeholder(key: trailingKey),
+                CupertinoSliverNavigationBar(
+                  leading: Placeholder(key: leadingKey),
+                  middle: Placeholder(key: middleKey),
+                  largeTitle: Text('Large Title', key: titleKey),
+                  trailing: Placeholder(key: trailingKey),
                 ),
-                new SliverToBoxAdapter(
-                  child: new Container(
+                SliverToBoxAdapter(
+                  child: Container(
                     height: 1200.0,
                   ),
                 ),
@@ -227,18 +227,18 @@ void main() {
   });
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
-    final ScrollController scrollController = new ScrollController();
+    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoPageScaffold(
-          child: new CustomScrollView(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
             controller: scrollController,
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
                 largeTitle: Text('Title'),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 1200.0,
                 ),
               ),
@@ -307,18 +307,18 @@ void main() {
   });
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
-    final ScrollController scrollController = new ScrollController();
-    final Key segmentedControlsKey = new UniqueKey();
+    final ScrollController scrollController = ScrollController();
+    final Key segmentedControlsKey = UniqueKey();
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoPageScaffold(
-          child: new CustomScrollView(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
             controller: scrollController,
             slivers: <Widget>[
-              new CupertinoSliverNavigationBar(
-                middle: new ConstrainedBox(
+              CupertinoSliverNavigationBar(
+                middle: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 200.0),
-                  child: new CupertinoSegmentedControl<int>(
+                  child: CupertinoSegmentedControl<int>(
                     key: segmentedControlsKey,
                     children: const <int, Widget>{
                       0: Text('Option A'),
@@ -330,8 +330,8 @@ void main() {
                 ),
                 largeTitle: const Text('Title'),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 1200.0,
                 ),
               ),
@@ -366,19 +366,19 @@ void main() {
   });
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
-    final ScrollController scrollController = new ScrollController();
+    final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoPageScaffold(
-          child: new CustomScrollView(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
             controller: scrollController,
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
                 middle: Text('Different title'),
                 largeTitle: Text('Title'),
               ),
-              new SliverToBoxAdapter(
-                child: new Container(
+              SliverToBoxAdapter(
+                child: Container(
                   height: 1200.0,
                 ),
               ),
@@ -431,7 +431,7 @@ void main() {
 
   testWidgets('Auto back/close button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Home page'),
         ),
@@ -440,7 +440,7 @@ void main() {
 
     expect(find.byType(CupertinoButton), findsNothing);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
           middle: Text('Page 2'),
@@ -452,9 +452,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(CupertinoButton), findsOneWidget);
-    expect(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
+    expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
       fullscreenDialog: true,
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
@@ -476,7 +476,7 @@ void main() {
 
     expect(find.text('Page 2'), findsOneWidget);
 
-    await tester.tap(find.text(new String.fromCharCode(CupertinoIcons.back.codePoint)));
+    await tester.tap(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)));
 
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
@@ -486,13 +486,13 @@ void main() {
 
   testWidgets('Long back label turns into "back"', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const Placeholder(),
       ),
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
@@ -510,7 +510,7 @@ void main() {
     expect(find.widgetWithText(CupertinoButton, '012345678901'), findsOneWidget);
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(
-      new CupertinoPageRoute<void>(
+      CupertinoPageRoute<void>(
         builder: (BuildContext context) {
           return const CupertinoPageScaffold(
             navigationBar: CupertinoNavigationBar(
@@ -529,7 +529,7 @@ void main() {
 
   testWidgets('Border should be displayed by default', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Title'),
         ),
@@ -551,7 +551,7 @@ void main() {
 
   testWidgets('Overrides border color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Title'),
           border: Border(
@@ -580,7 +580,7 @@ void main() {
 
   testWidgets('Border should not be displayed when null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
+      CupertinoApp(
         home: const CupertinoNavigationBar(
           middle: Text('Title'),
           border: null,
@@ -602,9 +602,9 @@ void main() {
       'Border is displayed by default in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoPageScaffold(
-          child: new CustomScrollView(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
             slivers: const <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
@@ -632,9 +632,9 @@ void main() {
       'Border is not displayed when null in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoPageScaffold(
-          child: new CustomScrollView(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
             slivers: const <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
@@ -657,11 +657,11 @@ void main() {
   });
 
   testWidgets('CupertinoSliverNavigationBar has semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(new CupertinoApp(
-      home: new CupertinoPageScaffold(
-        child: new CustomScrollView(
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
+        child: CustomScrollView(
           slivers: const <Widget>[
             CupertinoSliverNavigationBar(
               largeTitle: Text('Large Title'),
@@ -682,14 +682,14 @@ void main() {
   });
 
   testWidgets('CupertinoNavigationBar has semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-    await tester.pumpWidget(new CupertinoApp(
-      home: new CupertinoPageScaffold(
+    await tester.pumpWidget(CupertinoApp(
+      home: CupertinoPageScaffold(
         navigationBar: const CupertinoNavigationBar(
           middle: Text('Fixed Title'),
         ),
-        child: new Container(),
+        child: Container(),
       ),
     ));
 
@@ -706,9 +706,9 @@ void main() {
       'Border can be overridden in sliver nav bar',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoPageScaffold(
-          child: new CustomScrollView(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
             slivers: const <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: Text('Large Title'),
@@ -746,7 +746,7 @@ void main() {
     'Standard title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        new CupertinoApp(
+        CupertinoApp(
           home: const RepaintBoundary(
             child: CupertinoPageScaffold(
               navigationBar: CupertinoNavigationBar(
@@ -772,16 +772,16 @@ void main() {
     'Large title golden',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        new CupertinoApp(
-          home: new RepaintBoundary(
-            child: new CupertinoPageScaffold(
-              child: new CustomScrollView(
+        CupertinoApp(
+          home: RepaintBoundary(
+            child: CupertinoPageScaffold(
+              child: CustomScrollView(
                 slivers: <Widget>[
                   const CupertinoSliverNavigationBar(
                     largeTitle: Text('Bling bling'),
                   ),
-                  new SliverToBoxAdapter(
-                    child: new Container(
+                  SliverToBoxAdapter(
+                    child: Container(
                       height: 1200.0,
                     ),
                   ),
@@ -805,10 +805,10 @@ void main() {
 
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
+      WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
+          return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -825,10 +825,10 @@ void main() {
 
   testWidgets('NavBar draws a dark system bar for a light background', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
+      WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
+          return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -858,6 +858,6 @@ class _ExpectStyles extends StatelessWidget {
     expect(style.fontSize, 17.0);
     expect(style.letterSpacing, letterSpacing ?? -0.24);
     count += index;
-    return new Container();
+    return Container();
   }
 }

@@ -13,15 +13,15 @@ void main() {
     RenderBox child;
     bool painted = false;
     // incoming constraints are tight 800x600
-    final RenderBox root = new RenderPositionedBox(
-      child: new RenderConstrainedBox(
+    final RenderBox root = RenderPositionedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
-        child: new RenderOffstage(
-          child: new RenderCustomPaint(
-            painter: new TestCallbackPainter(
+        child: RenderOffstage(
+          child: RenderCustomPaint(
+            painter: TestCallbackPainter(
               onPaint: () { painted = true; },
             ),
-            child: child = new RenderConstrainedBox(
+            child: child = RenderConstrainedBox(
               additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
             ),
           ),

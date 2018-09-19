@@ -30,6 +30,6 @@ Future<Null> main() async {
       });
     });
 
-    return new TaskResult.success(null);
+    return TaskResult.success(null);
   });
 }

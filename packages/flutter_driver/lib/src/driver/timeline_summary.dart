@@ -33,6 +33,13 @@ class TimelineSummary {
     return _averageInMillis(_extractFrameDurations());
   }
 
+  /// The [p]-th percentile frame rasterization time in milliseconds.
+  ///
+  /// Returns null if no frames were recorded.
+  double computePercentileFrameBuildTimeMillis(double p) {
+    return _percentileInMillis(_extractFrameDurations(), p);
+  }
+
   /// The longest frame build time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
@@ -80,6 +87,8 @@ class TimelineSummary {
   Map<String, dynamic> get summaryJson {
     return <String, dynamic> {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
+      '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
+      '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),
       'worst_frame_build_time_millis': computeWorstFrameBuildTimeMillis(),
       'missed_frame_build_budget_count': computeMissedFrameBuildBudgetCount(),
       'average_frame_rasterizer_time_millis': computeAverageFrameRasterizerTimeMillis(),
@@ -150,7 +159,7 @@ class TimelineSummary {
       final TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
         final TimelineEvent endEvent = events.current;
-        result.add(new TimedEvent(
+        result.add(TimedEvent(
           beginEvent.timestampMicros,
           endEvent.timestampMicros,
         ));
@@ -162,14 +171,14 @@ class TimelineSummary {
 
   double _averageInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      throw new ArgumentError('durations is empty!');
+      throw ArgumentError('durations is empty!');
     final double total = durations.fold<double>(0.0, (double t, Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
     return total / durations.length;
   }
 
   double _percentileInMillis(Iterable<Duration> durations, double percentile) {
     if (durations.isEmpty)
-      throw new ArgumentError('durations is empty!');
+      throw ArgumentError('durations is empty!');
     assert(percentile >= 0.0 && percentile <= 100.0);
     final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
     doubles.sort();
@@ -179,7 +188,7 @@ class TimelineSummary {
 
   double _maxInMillis(Iterable<Duration> durations) {
     if (durations.isEmpty)
-      throw new ArgumentError('durations is empty!');
+      throw ArgumentError('durations is empty!');
     return durations
         .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);
@@ -198,7 +207,7 @@ class TimelineSummary {
 class TimedEvent {
   /// Creates a timed event given begin and end timestamps in microseconds.
   TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
+    : this.duration = Duration(microseconds: endTimeMicros - beginTimeMicros);
 
   /// The duration of the event.
   final Duration duration;

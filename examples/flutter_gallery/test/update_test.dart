@@ -7,7 +7,7 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 Future<String> mockUpdateUrlFetcher() {
   // A real implementation would connect to the network to retrieve this value
-  return new Future<String>.value('http://www.example.com/');
+  return Future<String>.value('http://www.example.com/');
 }
 
 void main() {

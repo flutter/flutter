@@ -318,11 +318,10 @@ class ReverseAnimation extends Animation<double>
 /// linear animation produced by an [AnimationController]:
 ///
 /// ``` dart
-///     final AnimationController controller =
-///         new AnimationController(duration: const Duration(milliseconds: 500));
-///     final CurvedAnimation animation =
-///         new CurvedAnimation(parent: controller, curve: Curves.ease);
+/// final AnimationController controller = AnimationController(duration: const Duration(milliseconds: 500));
+/// final CurvedAnimation animation = CurvedAnimation(parent: controller, curve: Curves.ease);
 ///```
+///
 /// Depending on the given curve, the output of the [CurvedAnimation] could have
 /// a wider range than its input. For example, elastic curves such as
 /// [Curves.elasticIn] will significantly overshoot or undershoot the default
@@ -403,7 +402,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
         final double transformedValue = activeCurve.transform(t);
         final double roundedTransformedValue = transformedValue.round().toDouble();
         if (roundedTransformedValue != t) {
-          throw new FlutterError(
+          throw FlutterError(
             'Invalid curve endpoint at $t.\n'
             'Curves must map 0.0 to near zero and 1.0 to near one but '
             '${activeCurve.runtimeType} mapped $t to $transformedValue, which '

@@ -89,22 +89,22 @@ void main() {
       });
     });
 
-    group('materialize Android', () {
+    group('editable Android host app', () {
       testInMemory('fails on non-module', () async {
         final FlutterProject project = await someProject();
         await expectLater(
-          project.android.materialize(),
+          project.android.makeHostAppEditable(),
           throwsA(isInstanceOf<AssertionError>()),
         );
       });
-      testInMemory('exits on already materialized module', () async {
+      testInMemory('exits on already editable module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
-        return expectToolExitLater(project.android.materialize(), contains('already materialized'));
+        await project.android.makeHostAppEditable();
+        return expectToolExitLater(project.android.makeHostAppEditable(), contains('already editable'));
       });
       testInMemory('creates android/app folder in place of .android/app', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
         expect(
           project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
@@ -119,7 +119,7 @@ void main() {
       });
       testInMemory('retains .android/Flutter folder and references it', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
@@ -128,16 +128,16 @@ void main() {
       });
       testInMemory('can be redone after deletion', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         project.directory.childDirectory('android').deleteSync(recursive: true);
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('android').childDirectory('app'));
       });
     });
 
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
-        final FlutterProject project = new FlutterProject(
+        final FlutterProject project = FlutterProject(
           fs.directory('not_created'),
           FlutterManifest.empty(),
           FlutterManifest.empty(),
@@ -229,9 +229,9 @@ void main() {
       MockIOSWorkflow mockIOSWorkflow;
       MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
       setUp(() {
-        fs = new MemoryFileSystem();
-        mockIOSWorkflow = new MockIOSWorkflow();
-        mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
+        fs = MemoryFileSystem();
+        mockIOSWorkflow = MockIOSWorkflow();
+        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
       });
 
       void testWithMocks(String description, Future<Null> testMethod()) {
@@ -367,12 +367,12 @@ flutter:
 /// is in memory.
 void testInMemory(String description, Future<Null> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
-  final FileSystem testFileSystem = new MemoryFileSystem(
+  final FileSystem testFileSystem = MemoryFileSystem(
     style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
   );
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
-  transfer(new Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
+  transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
   transfer(fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
@@ -386,7 +386,7 @@ void testInMemory(String description, Future<Null> testMethod()) {
     testMethod,
     overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      Cache: () => new Cache(),
+      Cache: () => Cache(),
     },
   );
 }

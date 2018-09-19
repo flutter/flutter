@@ -461,4 +461,7 @@ class CupertinoIcons {
   ///  * [settings], which is similar, but not filled in.
   ///  * [gear_solid], which is another cogwheel with a different design.
   static const IconData settings_solid = IconData(0xf412, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A symbol representing a single musical note.
+  static const IconData music_note = IconData(0xf46b, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

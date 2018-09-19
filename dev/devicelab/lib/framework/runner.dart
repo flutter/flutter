@@ -41,7 +41,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     runnerFinished = true;
   });
 
-  final Completer<int> port = new Completer<int>();
+  final Completer<int> port = Completer<int>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform(const Utf8Decoder())
@@ -90,14 +90,14 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
 
 Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
   final String url = 'ws://localhost:$vmServicePort/ws';
-  final DateTime started = new DateTime.now();
+  final DateTime started = DateTime.now();
 
   // TODO(yjbanov): due to lack of imagination at the moment the handshake with
   //                the task process is very rudimentary and requires this small
   //                delay to let the task process open up the VM service port.
   //                Otherwise we almost always hit the non-ready case first and
   //                wait a whole 1 second, which is annoying.
-  await new Future<Null>.delayed(const Duration(milliseconds: 100));
+  await Future<Null>.delayed(const Duration(milliseconds: 100));
 
   while (true) {
     try {
@@ -105,7 +105,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       await (await WebSocket.connect(url)).close();
 
       // Look up the isolate.
-      final VMServiceClient client = new VMServiceClient.connect(url);
+      final VMServiceClient client = VMServiceClient.connect(url);
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
       final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
@@ -114,8 +114,8 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       return isolate;
     } catch (error) {
       const Duration connectionTimeout = Duration(seconds: 10);
-      if (new DateTime.now().difference(started) > connectionTimeout) {
-        throw new TimeoutException(
+      if (DateTime.now().difference(started) > connectionTimeout) {
+        throw TimeoutException(
           'Failed to connect to the task runner process',
           connectionTimeout,
         );
@@ -123,7 +123,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       print('VM service not ready yet: $error');
       const Duration pauseBetweenRetries = Duration(milliseconds: 200);
       print('Will retry in $pauseBetweenRetries.');
-      await new Future<Null>.delayed(pauseBetweenRetries);
+      await Future<Null>.delayed(pauseBetweenRetries);
     }
   }
 }
@@ -142,8 +142,8 @@ Future<void> cleanupSystem() async {
     print('\nTelling Gradle to shut down (JAVA_HOME=$javaHome)');
     final String gradlewBinaryName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_shutdown_gradle.');
-    recursiveCopy(new Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
-    copy(new File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'create', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), new Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
+    recursiveCopy(Directory(path.join(flutterDirectory.path, 'bin', 'cache', 'artifacts', 'gradle_wrapper')), tempDir);
+    copy(File(path.join(path.join(flutterDirectory.path, 'packages', 'flutter_tools'), 'templates', 'create', 'android.tmpl', 'gradle', 'wrapper', 'gradle-wrapper.properties')), Directory(path.join(tempDir.path, 'gradle', 'wrapper')));
     if (!Platform.isWindows) {
       await exec(
         'chmod',

@@ -18,21 +18,21 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
 
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
-    await tester.pumpWidget(new RawKeyboardListener(focusNode: focusNode, onKey: null, child: new Container()));
-    await tester.pumpWidget(new RawKeyboardListener(focusNode: focusNode, onKey: null, child: new Container()));
-    await tester.pumpWidget(new Container());
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));
+    await tester.pumpWidget(RawKeyboardListener(focusNode: focusNode, onKey: null, child: Container()));
+    await tester.pumpWidget(Container());
   });
 
   testWidgets('Fuchsia key event', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(new RawKeyboardListener(
+    await tester.pumpWidget(RawKeyboardListener(
       focusNode: focusNode,
       onKey: events.add,
-      child: new Container(),
+      child: Container(),
     ));
 
     tester.binding.focusManager.rootScope.requestFocus(focusNode);
@@ -55,7 +55,7 @@ void main() {
     expect(typedData.codePoint, 0x64);
     expect(typedData.modifiers, 0x08);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 
@@ -63,12 +63,12 @@ void main() {
       (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(new RawKeyboardListener(
+    await tester.pumpWidget(RawKeyboardListener(
       focusNode: focusNode,
       onKey: events.add,
-      child: new Container(),
+      child: Container(),
     ));
 
     tester.binding.focusManager.rootScope.requestFocus(focusNode);
@@ -86,7 +86,7 @@ void main() {
     expect(events.length, 1);
     events.clear();
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     sendFakeKeyEvent(<String, dynamic>{
       'type': 'keydown',
@@ -100,7 +100,7 @@ void main() {
 
     expect(events.length, 0);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 }

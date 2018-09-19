@@ -74,8 +74,8 @@ void main() {
 
     group('operator[]', () {
       test('still finds values if async code runs after body has finished', () async {
-        final Completer<void> outer = new Completer<void>();
-        final Completer<void> inner = new Completer<void>();
+        final Completer<void> outer = Completer<void>();
+        final Completer<void> inner = Completer<void>();
         String value;
         await context.run<void>(
           body: () {
@@ -99,7 +99,7 @@ void main() {
         String value;
         await context.run<void>(
           body: () async {
-            final StringBuffer buf = new StringBuffer(context[String]);
+            final StringBuffer buf = StringBuffer(context[String]);
             buf.write(context[String]);
             await context.run<void>(body: () {
               buf.write(context[String]);
@@ -122,7 +122,7 @@ void main() {
         String value;
         await context.run(
           body: () async {
-            final StringBuffer buf = new StringBuffer(context[String]);
+            final StringBuffer buf = StringBuffer(context[String]);
             buf.write(context[String]);
             await context.run<void>(body: () {
               buf.write(context[String]);
