@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -66,7 +67,7 @@ class ScaleUpdateDetails {
   /// greater than or equal to zero.
   final double scale;
 
-  /// The Angle implied by the first two pointers to enter in contact with
+  /// The angle implied by the first two pointers to enter in contact with
   /// the screen. Expressed in radians.
   final double rotation;
 
@@ -125,11 +126,11 @@ class _LineBetweenPointers{
        assert(pointerStartId != null && pointerEndId != null),
        assert(pointerStartId != pointerEndId);
 
-  /// The location and the id of the pointer that marks the start of the line,
+  // The location and the id of the pointer that marks the start of the line.
   final Offset pointerStartLocation;
   final int pointerStartId;
 
-  /// The location and the id of the pointer that marks the end of the line,
+  // The location and the id of the pointer that marks the end of the line.
   final Offset pointerEndLocation;
   final int pointerEndId;
 
