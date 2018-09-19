@@ -47,7 +47,7 @@ import Flutter
                        eventSink: @escaping FlutterEventSink) -> FlutterError? {
     self.eventSink = eventSink
     UIDevice.current.isBatteryMonitoringEnabled = true
-    self.sendBatteryStateEvent()
+    sendBatteryStateEvent()
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(onBatteryStateDidChange),
@@ -57,7 +57,7 @@ import Flutter
   }
 
   @objc private func onBatteryStateDidChange(notification: NSNotification) {
-    self.sendBatteryStateEvent()
+    sendBatteryStateEvent()
   }
 
   private func sendBatteryStateEvent() {
