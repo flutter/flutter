@@ -144,6 +144,16 @@ abstract class BindingBase {
           };
         }
       );
+      registerServiceExtension(
+          name: 'logging',
+          callback: (Map<String, Object> parameters) async {
+            final String eventKey = parameters['eventKey'];
+            if (eventKey != null) {
+              debugEnableLogging(eventKey, parameters['enable'] == 'true');
+            }
+            return <String, dynamic>{};
+          }
+      );
       return true;
     }());
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
