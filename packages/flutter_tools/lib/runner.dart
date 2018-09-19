@@ -75,22 +75,15 @@ Future<int> _handleToolError(
     String getFlutterVersion(),
     ) async {
   if (error is UsageException) {
-    stderr.writeln(error.message);
-    stderr.writeln();
-    stderr.writeln(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available "
-            'flutter commands and options.'
-    );
+    printError('${error.message}\n');
+    printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
-      stderr.writeln(error.message);
-    if (verbose) {
-      stderr.writeln();
-      stderr.writeln(stackTrace.toString());
-      stderr.writeln();
-    }
+      printError(error.message);
+    if (verbose)
+      printError('\n$stackTrace\n');
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
