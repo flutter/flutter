@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:io' show Platform;
 
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
@@ -72,6 +73,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_tab.png'),
+      skip: !Platform.isLinux,
     ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
   });
 
@@ -83,6 +85,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_label.png'),
+      skip: !Platform.isLinux,
     ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
   });
 
@@ -99,6 +102,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.custom_tab_indicator.png'),
+      skip: !Platform.isLinux,
     ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
   });
 }
