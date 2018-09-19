@@ -284,8 +284,8 @@ class TextSelectionOverlay {
   void showHandles() {
     assert(_handles == null);
     _handles = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
-      OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
+      OverlayEntry(builder: (_) => _buildHandle(context, _TextSelectionHandlePosition.start)),
+      OverlayEntry(builder: (_) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
     _handleController.forward(from: 0.0);
@@ -370,6 +370,7 @@ class TextSelectionOverlay {
     return FadeTransition(
       opacity: _handleOpacity,
       child: _TextSelectionHandleOverlay(
+        context: context,
         onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         layerLink: layerLink,
@@ -440,6 +441,7 @@ class TextSelectionOverlay {
 class _TextSelectionHandleOverlay extends StatefulWidget {
   const _TextSelectionHandleOverlay({
     Key key,
+    @required this.context,
     @required this.selection,
     @required this.position,
     @required this.layerLink,
@@ -449,6 +451,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.selectionControls
   }) : super(key: key);
 
+  final BuildContext context;
   final TextSelection selection;
   final _TextSelectionHandlePosition position;
   final LayerLink layerLink;
@@ -536,7 +539,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
               left: point.dx,
               top: point.dy,
               child: widget.selectionControls.buildHandle(
-                context,
+                widget.context,
                 type,
                 widget.renderObject.preferredLineHeight,
               ),
