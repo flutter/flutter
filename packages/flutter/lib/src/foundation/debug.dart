@@ -69,13 +69,13 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 /// be encodable as JSON using `json.encode()`.
 typedef DebugLogMessageCallback = Object Function();
 
-/// Logs a message conditionally if the given identifying event [key] is
+/// Logs a message conditionally if the given identifying event [channel] is
 /// enabled (if `debugShouldLogEvent(key)` is true).
 ///
 /// Messages are obtained by evaluating [messageCallback] and must be encodable
 /// as JSON strings using `json.encode()`. In the event that logging is not
-/// enabled for the given [key], [messageCallback] will not be evaluated. The
-/// cost of logging calls can be further mitigated at call sites by invoking
+/// enabled for the given [channel], [messageCallback] will not be evaluated.
+/// The cost of logging calls can be further mitigated at call sites by invoking
 /// them in a function that is only evaluated in profile or debug modes. For
 /// example,
 ///
@@ -91,12 +91,12 @@ typedef DebugLogMessageCallback = Object Function();
 ///
 /// ignores logging entirely in release mode and no performance penalty is paid.
 ///
-/// Logging for a given event key can be enabled programmatically via
-/// [debugEnableLogging] using a VM service call.
+/// Logging for a given event channel can be enabled programmatically via
+/// [debugEnableLogging] or using a VM service call.
 ///
-void debugLogEvent(String key, DebugLogMessageCallback messageCallback) {
-  assert(key != null);
-  if (!debugShouldLogEvent(key)) {
+void debugLogEvent(String channel, DebugLogMessageCallback messageCallback) {
+  assert(channel != null);
+  if (!debugShouldLogEvent(channel)) {
     return;
   }
 
@@ -104,25 +104,25 @@ void debugLogEvent(String key, DebugLogMessageCallback messageCallback) {
   final Object message = messageCallback();
   assert(message != null);
 
-  developer.log(json.encode(message), name: key);
+  developer.log(json.encode(message), name: channel);
 }
 
-final Set<String> _debugLogEventKeys = Set<String>();
+final Set<String> _debugLogEventChannels = Set<String>();
 
-/// Enable (or disable) logging for all events with the given [key].
-void debugEnableLogging(String key, [bool enable = true]) {
-  assert(key != null);
+/// Enable (or disable) logging for all events on the given [channel].
+void debugEnableLogging(String channel, [bool enable = true]) {
+  assert(channel != null);
   if (enable) {
-    _debugLogEventKeys.add(key);
+    _debugLogEventChannels.add(channel);
   } else {
-    _debugLogEventKeys.remove(key);
+    _debugLogEventChannels.remove(channel);
   }
 }
 
-/// Returns true if events with the given event [key] should be logged.
-bool debugShouldLogEvent(String key) {
-  assert(key != null);
-  return _debugLogEventKeys.contains(key);
+/// Returns true if events on the given event [channel] should be logged.
+bool debugShouldLogEvent(String channel) {
+  assert(channel != null);
+  return _debugLogEventChannels.contains(channel);
 }
 
 /// Arguments to whitelist [Timeline] events in order to be shown in the
