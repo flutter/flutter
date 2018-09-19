@@ -34,8 +34,7 @@ typedef DebugLogMessageCallback = Object Function();
 /// Logging for a given event channel can be enabled programmatically via
 /// [debugEnableLogging] or using a VM service call.
 ///
-void debugLogEvent(
-    LoggingChannel channel, DebugLogMessageCallback messageCallback) {
+void debugLogEvent(LoggingChannel channel, DebugLogMessageCallback messageCallback) {
   assert(channel != null);
   if (!debugShouldLogEvent(channel)) {
     return;
@@ -51,23 +50,13 @@ void debugLogEvent(
 final Set<LoggingChannel> _enabledEventChannels = Set<LoggingChannel>();
 
 /// All logging event channels.
-List<LoggingChannel> get debugLogEventChannels =>
-    LoggingChannel._channels.values.toList(growable: false);
+Iterable<LoggingChannel> get debugLogEventChannels => LoggingChannel._channels.values;
 
 /// The set of all enabled logging event channels.
 Set<LoggingChannel> get enabledDebugLogEventChannels => _enabledEventChannels;
 
 /// Identifies a logging channel.
 class LoggingChannel {
-  static final Map<String, LoggingChannel> _channels =
-      <String, LoggingChannel>{};
-
-  /// A uniquely identifying stream name.
-  final String name;
-
-  /// An optional description, suitable for presentation by tools.
-  final String description;
-
   /// Singleton constructor. Calling `LoggingChannel(name)` returns the same
   /// actual instance whenever it is called with the same string name.
   factory LoggingChannel(String name, {String description}) =>
@@ -75,11 +64,19 @@ class LoggingChannel {
 
   const LoggingChannel._(this.name, this.description);
 
+  /// A uniquely identifying stream name.
+  final String name;
+
+  /// An optional description, suitable for presentation by tools.
+  final String description;
+
   static LoggingChannel _getOrRegisterChannel(String name, String description) {
     assert(name != null);
     return _channels.putIfAbsent(
         name, () => LoggingChannel._(name, description));
   }
+
+  static final Map<String, LoggingChannel> _channels = <String, LoggingChannel>{};
 }
 
 /// Get the logging channel registered to this name, or null if none exists.
