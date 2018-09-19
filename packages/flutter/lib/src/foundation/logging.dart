@@ -10,7 +10,7 @@ import 'dart:developer' as developer;
 typedef DebugLogMessageCallback = Object Function();
 
 /// Logs a message conditionally if the given identifying event [channel] is
-/// enabled (if `debugShouldLogEvent(key)` is true).
+/// enabled (if `debugShouldLogEvent(channel)` is true).
 ///
 /// Messages are obtained by evaluating [messageCallback] and must be encodable
 /// as JSON strings using `json.encode()`. In the event that logging is not
