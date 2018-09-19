@@ -507,8 +507,9 @@ class _TextFinder extends MatchFinder {
         if (parent.widget is Text) {
           parentIsText = true;
           return false;
-        } else if (parent.widget is ExcludeSemantics || parent.widget is Semantics)
+        } else if (parent.widget is ExcludeSemantics || parent.widget is Semantics) {
           return true;
+        }
         return false;
       });
       final RichText richText = candidate.widget;
