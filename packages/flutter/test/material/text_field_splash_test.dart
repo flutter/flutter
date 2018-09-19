@@ -121,32 +121,32 @@ void main() {
     cancelCount = 0;
 
     await tester.tap(find.byKey(textField1));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(Duration(milliseconds: 300));
     expect(confirmCount, 1);
     expect(cancelCount, 0);
 
     // textField1 already has the focus, no new splash
     await tester.tap(find.byKey(textField1));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(Duration(milliseconds: 300));
     expect(confirmCount, 1);
     expect(cancelCount, 0);
 
     // textField2 gets the focus and a splash
     await tester.tap(find.byKey(textField2));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(Duration(milliseconds: 300));
     expect(confirmCount, 2);
     expect(cancelCount, 0);
 
     // Tap outside of textField1's editable. It still gets focus and splash.
     await tester.tapAt(tester.getTopLeft(find.byKey(textField1)));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(Duration(milliseconds: 300));
     expect(confirmCount, 3);
     expect(cancelCount, 0);
 
     // Tap in the center of textField2's editable. It still gets the focus
     // and the splash. There is no splash cancel.
     await tester.tap(find.byKey(textField2));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(Duration(milliseconds: 300));
     expect(confirmCount, 4);
     expect(cancelCount, 0);
   });

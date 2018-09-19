@@ -320,32 +320,39 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildHelper() {
     assert(widget.helperText != null);
-    return Opacity(
-      opacity: 1.0 - _controller.value,
-      child: Text(
-        widget.helperText,
-        style: widget.helperStyle,
-        textAlign: widget.textAlign,
-        overflow: TextOverflow.ellipsis,
+    return Semantics(
+      container: true,
+      child: Opacity(
+        opacity: 1.0 - _controller.value,
+        child: Text(
+          widget.helperText,
+          style: widget.helperStyle,
+          textAlign: widget.textAlign,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }
 
   Widget _buildError() {
     assert(widget.errorText != null);
-    return Opacity(
-      opacity: _controller.value,
-      child: FractionalTranslation(
-        translation: Tween<Offset>(
-          begin: const Offset(0.0, -0.25),
-          end: const Offset(0.0, 0.0),
-        ).evaluate(_controller.view),
-        child: Text(
-          widget.errorText,
-          style: widget.errorStyle,
-          textAlign: widget.textAlign,
-          overflow: TextOverflow.ellipsis,
-          maxLines: widget.errorMaxLines,
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      child: Opacity(
+        opacity: _controller.value,
+        child: FractionalTranslation(
+          translation: Tween<Offset>(
+            begin: const Offset(0.0, -0.25),
+            end: const Offset(0.0, 0.0),
+          ).evaluate(_controller.view),
+          child: Text(
+            widget.errorText,
+            style: widget.errorStyle,
+            textAlign: widget.textAlign,
+            overflow: TextOverflow.ellipsis,
+            maxLines: widget.errorMaxLines,
+          ),
         ),
       ),
     );
@@ -1815,6 +1822,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget counter = decoration.counterText == null ? null :
       Semantics(
         container: true,
+        liveRegion: isFocused,
         child: Text(
           decoration.counterText,
           style: _getHelperStyle(themeData).merge(decoration.counterStyle),

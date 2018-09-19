@@ -179,6 +179,7 @@ void main() {
     );
 
     await tester.tap(find.widgetWithText(TextField, 'TextField 2'));
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
@@ -189,6 +190,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.widgetWithText(TextField, 'TextField 1'));
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(
       focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),

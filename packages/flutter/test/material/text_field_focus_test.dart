@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  const Duration doubleTapTimeout = Duration(milliseconds: 300);
+
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -71,7 +73,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.tap(find.byType(TextField));
-    await tester.idle();
+    await tester.pump(doubleTapTimeout);
 
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -80,7 +82,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.tap(find.byType(TextField));
-    await tester.idle();
+    await tester.pump(doubleTapTimeout);
 
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -113,17 +115,17 @@ void main() {
       builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
     );
 
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(tester.testTextInput.isVisible, isFalse);
 
     Navigator.of(tester.element(find.text('Dialog'))).pop();
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.tap(find.byType(TextField));
-    await tester.idle();
+    await tester.pump(doubleTapTimeout);
 
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -224,7 +226,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isFalse);
     await tester.tap(find.byType(TextField));
-    await tester.idle();
+    await tester.pump(doubleTapTimeout);
     expect(tester.testTextInput.isVisible, isTrue);
   });
 }
