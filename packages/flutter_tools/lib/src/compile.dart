@@ -13,11 +13,12 @@ import 'base/context.dart';
 import 'base/fingerprint.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
+import 'base/terminal.dart';
 import 'globals.dart';
 
 KernelCompiler get kernelCompiler => context[KernelCompiler];
 
-typedef CompilerMessageConsumer = void Function(String message);
+typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
 class CompilerOutput {
   final String outputFilename;
