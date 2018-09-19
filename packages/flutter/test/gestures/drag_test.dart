@@ -165,6 +165,90 @@ void main() {
     drag.dispose();
   });
 
+  testGesture('Should report most recent point to onStart by default', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
+
+    Offset positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      positionAtOnStart = details.globalPosition;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    tester.route(pointer.move(const Offset(30.0, 0.0)));
+    drag.dispose();
+    competingDrag.dispose();
+
+    expect(positionAtOnStart, const Offset(30.0, 00.0));
+  });
+
+  testGesture('Should report most recent point to onStart with a start configuration', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+        HorizontalDragGestureRecognizer(dragStartBehavior: DragStartBehavior.start);
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
+
+    Offset positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      positionAtOnStart = details.globalPosition;
+    };
+    Offset updateOffset;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updateOffset = details.globalPosition;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    tester.route(pointer.move(const Offset(30.0, 0.0)));
+    drag.dispose();
+    competingDrag.dispose();
+
+    expect(positionAtOnStart, const Offset(30.0, 0.0));
+    expect(updateOffset, null);
+  });
+
+  testGesture('Should report initial down point to onStart with a down configuration', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag =
+        HorizontalDragGestureRecognizer(dragStartBehavior: DragStartBehavior.down);
+    final VerticalDragGestureRecognizer competingDrag = VerticalDragGestureRecognizer();
+
+    Offset positionAtOnStart;
+    drag.onStart = (DragStartDetails details) {
+      positionAtOnStart = details.globalPosition;
+    };
+    Offset updateOffset;
+    Offset updateDelta;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updateOffset = details.globalPosition;
+      updateDelta = details.delta;
+    };
+
+    final TestPointer pointer = TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    competingDrag.addPointer(down);
+    tester.closeArena(5);
+    tester.route(down);
+
+    tester.route(pointer.move(const Offset(30.0, 0.0)));
+    drag.dispose();
+    competingDrag.dispose();
+
+    expect(positionAtOnStart, const Offset(10.0, 10.0));
+    expect(updateOffset, const Offset(30.0, 0.0));
+    expect(updateDelta, const Offset(20.0, 0.0));
+  });
+
   testGesture('Drag with multiple pointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = HorizontalDragGestureRecognizer();
     final VerticalDragGestureRecognizer drag2 = VerticalDragGestureRecognizer();
