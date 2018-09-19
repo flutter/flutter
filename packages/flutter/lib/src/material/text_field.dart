@@ -496,6 +496,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _cancelCurrentSplash();
   }
 
+  void _handleDoubleTap() {
+    _renderEditable.handleDoubleTap();
+    _confirmCurrentSplash();
+  }
+
   void _handleLongPress() {
     _renderEditable.handleLongPress();
     _confirmCurrentSplash();
@@ -614,6 +619,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           onTapDown: _handleTapDown,
           onTap: _handleTap,
           onTapCancel: _handleTapCancel,
+          onDoubleTap: _handleDoubleTap,
           onLongPress: _handleLongPress,
           excludeFromSemantics: true,
           child: child,

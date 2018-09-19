@@ -20,6 +20,7 @@ void main() {
   final FocusScopeNode focusScopeNode = FocusScopeNode();
   const TextStyle textStyle = TextStyle();
   const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const Duration doubleTapTimeout = Duration(milliseconds: 300);
 
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -53,6 +54,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -119,6 +121,7 @@ void main() {
       ),
     );
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -282,6 +285,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -311,6 +315,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -341,6 +346,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -373,6 +379,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -403,6 +410,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -433,6 +441,7 @@ void main() {
     );
 
     await tester.tap(find.byType(EditableText));
+    await tester.pump(doubleTapTimeout);
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
@@ -608,7 +617,7 @@ void main() {
     // Select EditableText to give it focus.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.tap(textFinder);
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     assert(focusNode.hasFocus);
 
@@ -645,7 +654,7 @@ void main() {
     // Select EditableText to give it focus.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.tap(textFinder);
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     assert(focusNode.hasFocus);
 
@@ -689,7 +698,7 @@ void main() {
     // Select EditableText to give it focus.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.tap(textFinder);
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     assert(focusNode.hasFocus);
 
@@ -733,7 +742,7 @@ void main() {
     // Select EditableText to give it focus.
     final Finder textFinder = find.byKey(editableTextKey);
     await tester.tap(textFinder);
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     assert(focusNode.hasFocus);
 
@@ -838,7 +847,7 @@ void main() {
 
     await tester.tap(find.byType(EditableText));
     await tester.idle();
-    await tester.pump();
+    await tester.pump(doubleTapTimeout);
 
     expect(
         semantics,
@@ -1479,7 +1488,7 @@ void main() {
 
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
-      await tester.pump();
+      await tester.pump(doubleTapTimeout);
 
       expect(
           semantics,
@@ -1565,7 +1574,7 @@ void main() {
       when(controls.canPaste(any)).thenReturn(true);
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
-      await tester.pump();
+      await tester.pump(doubleTapTimeout);
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
       const int expectedNodeId = 4;
