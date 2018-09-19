@@ -81,6 +81,7 @@ void testUsingContext(String description, dynamic testMethod(), {
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),
           XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
+          FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -300,3 +301,11 @@ class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockClock extends Mock implements Clock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
+
+class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
+  @override
+  set currentDirectory(dynamic value) {
+    throw 'fs.currentDirectory should not be set during tests '
+          'as this can cause race conditions with concurrent tests.';
+  }
+}
