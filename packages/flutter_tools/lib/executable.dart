@@ -23,7 +23,7 @@ import 'src/commands/ide_config.dart';
 import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
-import 'src/commands/materialize.dart';
+import 'src/commands/make_host_app_editable.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
@@ -68,7 +68,7 @@ Future<Null> main(List<String> args) async {
     InjectPluginsCommand(hidden: !verboseHelp),
     InstallCommand(),
     LogsCommand(),
-    MaterializeCommand(),
+    MakeHostAppEditableCommand(),
     PackagesCommand(),
     PrecacheCommand(),
     RunCommand(verboseHelp: verboseHelp),
