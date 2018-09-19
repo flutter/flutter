@@ -11,23 +11,23 @@ namespace internal {
 
 #if OS_WIN
 
-namespace win {
+namespace os_win {
 
 void UniqueFDTraits::Free(HANDLE fd) {
   CloseHandle(fd);
 }
 
-}  // namespace win
+}  // namespace os_win
 
 #else  // OS_WIN
 
-namespace unix {
+namespace os_unix {
 
 void UniqueFDTraits::Free(int fd) {
   close(fd);
 }
 
-}  // namespace unix
+}  // namespace os_unix
 
 #endif  // OS_WIN
 
