@@ -172,12 +172,11 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         )));
       }
       if (delta != Offset.zero && onUpdate != null) {
-        final Offset deltaForDetails = _getDeltaForDetails(delta);
         invokeCallback<void>('onUpdate', () => onUpdate(DragUpdateDetails(
           sourceTimeStamp: timestamp,
-          delta: deltaForDetails,
+          delta: _getDeltaForDetails(delta),
           primaryDelta: _getPrimaryValueFromOffset(delta),
-          globalPosition: _initialPosition + deltaForDetails,
+          globalPosition: _initialPosition + delta,
         )));
       }
     }
