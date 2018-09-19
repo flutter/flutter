@@ -8,17 +8,17 @@ import '../base/common.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
-class MaterializeCommand extends FlutterCommand {
-  MaterializeCommand() {
-    addSubcommand(MaterializeAndroidCommand());
-    addSubcommand(MaterializeIosCommand());
+class MakeHostAppEditableCommand extends FlutterCommand {
+  MakeHostAppEditableCommand() {
+    addSubcommand(MakeHostAppEditableAndroidCommand());
+    addSubcommand(MakeHostAppEditableIosCommand());
   }
 
   @override
-  final String name = 'materialize';
+  final String name = 'make-host-app-editable';
 
   @override
-  final String description = 'Commands for materializing host apps for a Flutter Module';
+  final String description = 'Commands for making host apps editable within a Flutter project';
 
   @override
   bool get hidden => true;
@@ -27,8 +27,8 @@ class MaterializeCommand extends FlutterCommand {
   Future<Null> runCommand() async { }
 }
 
-abstract class MaterializeSubCommand extends FlutterCommand {
-  MaterializeSubCommand() {
+abstract class MakeHostAppEditableSubCommand extends FlutterCommand {
+  MakeHostAppEditableSubCommand() {
     requiresPubspecYaml();
   }
 
@@ -45,34 +45,34 @@ abstract class MaterializeSubCommand extends FlutterCommand {
     await super.validateCommand();
     _project = await FlutterProject.current();
     if (!_project.isModule)
-      throw ToolExit("Only projects created using 'flutter create -t module' can be materialized.");
+      throw ToolExit("Only projects created using 'flutter create -t module' can have their host apps made editable.");
   }
 }
 
-class MaterializeAndroidCommand extends MaterializeSubCommand {
+class MakeHostAppEditableAndroidCommand extends MakeHostAppEditableSubCommand {
   @override
   String get name => 'android';
 
   @override
-  String get description => 'Materialize an Android host app';
+  String get description => 'Make an Android host app editable within a Flutter project';
 
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-    await _project.android.materialize();
+    await _project.android.makeHostAppEditable();
   }
 }
 
-class MaterializeIosCommand extends MaterializeSubCommand {
+class MakeHostAppEditableIosCommand extends MakeHostAppEditableSubCommand {
   @override
   String get name => 'ios';
 
   @override
-  String get description => 'Materialize an iOS host app';
+  String get description => 'Make an iOS host app editable within a Flutter project';
 
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-    await _project.ios.materialize();
+    await _project.ios.makeHostAppEditable();
   }
 }

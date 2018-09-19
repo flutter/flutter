@@ -258,8 +258,8 @@ class IosProject {
     }
   }
 
-  Future<void> materialize() async {
-    throwToolExit('flutter materialize has not yet been implemented for iOS');
+  Future<void> makeHostAppEditable() async {
+    throwToolExit('making host app editable has not yet been implemented for iOS');
   }
 
   File get generatedXcodePropertiesFile => directory.childDirectory('Flutter').childFile('Generated.xcconfig');
@@ -301,18 +301,18 @@ class AndroidProject {
   /// containing the `app/` subdirectory and the `settings.gradle` file that
   /// includes it in the overall Gradle project.
   Directory get hostAppGradleRoot {
-    if (!isModule || _materializedDirectory.existsSync())
-      return _materializedDirectory;
+    if (!isModule || _editableHostAppDirectory.existsSync())
+      return _editableHostAppDirectory;
     return _ephemeralDirectory;
   }
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
-  /// a Flutter module with a materialized host app.
-  Directory get _flutterLibGradleRoot => isModule ? _ephemeralDirectory : _materializedDirectory;
+  /// a Flutter module with an editable host app.
+  Directory get _flutterLibGradleRoot => isModule ? _ephemeralDirectory : _editableHostAppDirectory;
 
   Directory get _ephemeralDirectory => parent.directory.childDirectory('.android');
-  Directory get _materializedDirectory => parent.directory.childDirectory('android');
+  Directory get _editableHostAppDirectory => parent.directory.childDirectory('android');
 
   /// True, if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
@@ -346,8 +346,8 @@ class AndroidProject {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       _regenerateLibrary();
-      // Add ephemeral host app, if a materialized host app does not already exist.
-      if (!_materializedDirectory.existsSync()) {
+      // Add ephemeral host app, if an editable host app does not already exist.
+      if (!_editableHostAppDirectory.existsSync()) {
         _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
         _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
       }
@@ -363,16 +363,16 @@ class AndroidProject {
         || Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
   }
 
-  Future<void> materialize() async {
+  Future<void> makeHostAppEditable() async {
     assert(isModule);
-    if (_materializedDirectory.existsSync())
-      throwToolExit('Android host app already materialized. To redo materialization, delete the android/ folder.');
+    if (_editableHostAppDirectory.existsSync())
+      throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     _regenerateLibrary();
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_materialized'), _materializedDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _materializedDirectory);
-    gradle.injectGradleWrapper(_materializedDirectory);
-    gradle.writeLocalProperties(_materializedDirectory.childFile('local.properties'));
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+    gradle.injectGradleWrapper(_editableHostAppDirectory);
+    gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
 

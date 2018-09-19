@@ -89,22 +89,22 @@ void main() {
       });
     });
 
-    group('materialize Android', () {
+    group('editable Android host app', () {
       testInMemory('fails on non-module', () async {
         final FlutterProject project = await someProject();
         await expectLater(
-          project.android.materialize(),
+          project.android.makeHostAppEditable(),
           throwsA(isInstanceOf<AssertionError>()),
         );
       });
-      testInMemory('exits on already materialized module', () async {
+      testInMemory('exits on already editable module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
-        return expectToolExitLater(project.android.materialize(), contains('already materialized'));
+        await project.android.makeHostAppEditable();
+        return expectToolExitLater(project.android.makeHostAppEditable(), contains('already editable'));
       });
       testInMemory('creates android/app folder in place of .android/app', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
         expect(
           project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
@@ -119,7 +119,7 @@ void main() {
       });
       testInMemory('retains .android/Flutter folder and references it', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
@@ -128,9 +128,9 @@ void main() {
       });
       testInMemory('can be redone after deletion', () async {
         final FlutterProject project = await aModuleProject();
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         project.directory.childDirectory('android').deleteSync(recursive: true);
-        await project.android.materialize();
+        await project.android.makeHostAppEditable();
         expectExists(project.directory.childDirectory('android').childDirectory('app'));
       });
     });

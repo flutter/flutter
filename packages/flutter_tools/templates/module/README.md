@@ -37,7 +37,7 @@ with a dependency on the `.android/Flutter` library.
 Executing `./gradlew app:assembleDebug` in the target folder produces
 an `.apk` archive.
 
-Used with either `android_host_ephemeral` or `android_host_materialized`.
+Used with either `android_host_ephemeral` or `android_host_editable`.
 
 #### host_app_ephemeral
 
@@ -47,11 +47,11 @@ Combined contents define an *ephemeral* (hidden, auto-generated,
 under Flutter tooling control) Android host app with a dependency on the
 `.android/Flutter` library.
 
-#### host_app_materialized
+#### host_app_editable
 
 Written to `android/` on top of `android_host_common`.
 
-Combined contents define a *materialized* (visible, one-time generated,
+Combined contents define an *editable* (visible, one-time generated,
 under app author control) Android host app with a dependency on the
 `.android/Flutter` library.
 
