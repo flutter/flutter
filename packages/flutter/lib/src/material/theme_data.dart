@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
 import 'chip_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -147,10 +148,12 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+    ColorScheme colorScheme,
   }) {
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
+    colorScheme ??= isDark ? const ColorScheme.dark() : const ColorScheme.light();
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -172,8 +175,11 @@ class ThemeData extends Diagnosticable {
     selectedRowColor ??= Colors.grey[100];
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black38;
+    // TBD: if buttonColor isn't usually read, we could avoid defaulting it here.
+    // ButtonThemeData is initialized before buttonColor, because we're only
+    // interested in the value if it was specified and non-null.
+    buttonTheme ??= ButtonThemeData(colorScheme: colorScheme, buttonColor: buttonColor);
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
-    buttonTheme ??= const ButtonThemeData();
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
@@ -187,6 +193,10 @@ class ThemeData extends Diagnosticable {
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
+<<<<<<< HEAD
+=======
+    tabBarTheme ??= const TabBarTheme();
+>>>>>>> [WIP] ColorScheme
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
@@ -235,9 +245,9 @@ class ThemeData extends Diagnosticable {
       selectedRowColor: selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
+      buttonTheme: buttonTheme,
       buttonColor: buttonColor,
       toggleableActiveColor: toggleableActiveColor,
-      buttonTheme: buttonTheme,
       secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
       cursorColor: cursorColor,
@@ -260,6 +270,7 @@ class ThemeData extends Diagnosticable {
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
+      colorScheme: colorScheme,
     );
   }
 
@@ -278,9 +289,9 @@ class ThemeData extends Diagnosticable {
     @required this.primaryColorBrightness,
     @required this.primaryColorLight,
     @required this.primaryColorDark,
+    @required this.canvasColor,
     @required this.accentColor,
     @required this.accentColorBrightness,
-    @required this.canvasColor,
     @required this.scaffoldBackgroundColor,
     @required this.bottomAppBarColor,
     @required this.cardColor,
@@ -291,8 +302,8 @@ class ThemeData extends Diagnosticable {
     @required this.selectedRowColor,
     @required this.unselectedWidgetColor,
     @required this.disabledColor,
-    @required this.buttonColor,
     @required this.buttonTheme,
+    @required this.buttonColor,
     @required this.secondaryHeaderColor,
     @required this.textSelectionColor,
     @required this.cursorColor,
@@ -316,6 +327,7 @@ class ThemeData extends Diagnosticable {
     @required this.platform,
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
+    @required this.colorScheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -358,6 +370,11 @@ class ThemeData extends Diagnosticable {
        assert(platform != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null);
+       assert(colorScheme != null);
+
+  // Warning: make sure these properties are in the exact same order as in
+  // hashValues() and in the raw constructor and in the order of fields in
+  // the class and in the lerp() method.
 
   /// A default light blue theme.
   ///
@@ -407,6 +424,9 @@ class ThemeData extends Diagnosticable {
   /// A darker version of the [primaryColor].
   final Color primaryColorDark;
 
+  /// The default color of [MaterialType.canvas] [Material].
+  final Color canvasColor;
+
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
   final Color accentColor;
 
@@ -414,9 +434,6 @@ class ThemeData extends Diagnosticable {
   /// and icons placed on top of the accent color (e.g. the icons on a floating
   /// action button).
   final Brightness accentColorBrightness;
-
-  /// The default color of [MaterialType.canvas] [Material].
-  final Color canvasColor;
 
   /// The default color of the [Material] that underlies the [Scaffold]. The
   /// background color for a typical material app or a page within the app.
@@ -467,16 +484,12 @@ class ThemeData extends Diagnosticable {
   /// checked or unchecked).
   final Color disabledColor;
 
-  /// The default fill color of the [Material] used in [RaisedButton]s.
-  final Color buttonColor;
-
-  /// The color used to highlight the active states of toggleable widgets like
-  /// [Switch], [Radio], and [Checkbox].
-  final Color toggleableActiveColor;
-
   /// Defines the default configuration of button widgets, like [RaisedButton]
   /// and [FlatButton].
   final ButtonThemeData buttonTheme;
+
+  /// The default fill color of the [Material] used in [RaisedButton]s.
+  final Color buttonColor;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
   // According to the spec for data tables:
@@ -509,6 +522,10 @@ class ThemeData extends Diagnosticable {
 
   /// The color to use for input validation errors, e.g. in [TextField] fields.
   final Color errorColor;
+
+  /// The color used to highlight the active states of toggleable widgets like
+  /// [Switch], [Radio], and [Checkbox].
+  final Color toggleableActiveColor;
 
   /// Text with a color that contrasts with the card and canvas colors.
   final TextTheme textTheme;
@@ -569,6 +586,8 @@ class ThemeData extends Diagnosticable {
   /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
+  final ColorScheme colorScheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -589,8 +608,8 @@ class ThemeData extends Diagnosticable {
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
-    Color buttonColor,
     ButtonThemeData buttonTheme,
+    Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color cursorColor,
@@ -614,6 +633,7 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+    ColorScheme colorScheme,
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -659,6 +679,7 @@ class ThemeData extends Diagnosticable {
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
+      colorScheme: colorScheme ?? this.colorScheme,
     );
   }
 
@@ -746,6 +767,9 @@ class ThemeData extends Diagnosticable {
     assert(a != null);
     assert(b != null);
     assert(t != null);
+    // Warning: make sure these properties are in the exact same order as in
+    // hashValues() and in the raw constructor and in the order of fields in
+    // the class and in the lerp() method.
     return ThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
@@ -765,9 +789,8 @@ class ThemeData extends Diagnosticable {
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
-      buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
-      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
+      buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t),
       cursorColor: Color.lerp(a.cursorColor, b.cursorColor, t),
@@ -777,6 +800,7 @@ class ThemeData extends Diagnosticable {
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       hintColor: Color.lerp(a.hintColor, b.hintColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
+      toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       primaryTextTheme: TextTheme.lerp(a.primaryTextTheme, b.primaryTextTheme, t),
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
@@ -790,6 +814,7 @@ class ThemeData extends Diagnosticable {
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
+      colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
     );
   }
 
@@ -819,9 +844,8 @@ class ThemeData extends Diagnosticable {
            (otherData.selectedRowColor == selectedRowColor) &&
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
-           (otherData.buttonColor == buttonColor) &&
-           (otherData.toggleableActiveColor == toggleableActiveColor) &&
            (otherData.buttonTheme == buttonTheme) &&
+           (otherData.buttonColor == buttonColor) &&
            (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.cursorColor == cursorColor) &&
@@ -831,6 +855,7 @@ class ThemeData extends Diagnosticable {
            (otherData.indicatorColor == indicatorColor) &&
            (otherData.hintColor == hintColor) &&
            (otherData.errorColor == errorColor) &&
+           (otherData.toggleableActiveColor == toggleableActiveColor) &&
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.accentTextTheme == accentTextTheme) &&
@@ -844,6 +869,7 @@ class ThemeData extends Diagnosticable {
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme);
+           (otherData.colorScheme == colorScheme);
   }
 
   @override
@@ -870,9 +896,11 @@ class ThemeData extends Diagnosticable {
       splashFactory,
       selectedRowColor,
       unselectedWidgetColor,
-      buttonColor,
+      disabledColor,
       buttonTheme,
+      buttonColor,
       hashValues(
+        toggleableActiveColor,
         secondaryHeaderColor,
         textSelectionColor,
         cursorColor,
@@ -882,7 +910,6 @@ class ThemeData extends Diagnosticable {
         indicatorColor,
         hintColor,
         errorColor,
-        toggleableActiveColor,
         textTheme,
         primaryTextTheme,
         accentTextTheme,
@@ -897,6 +924,7 @@ class ThemeData extends Diagnosticable {
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
+          colorScheme,
         ),
       ),
     );
@@ -946,6 +974,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
+    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme));
   }
 }
 

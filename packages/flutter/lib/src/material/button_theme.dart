@@ -5,6 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
+import 'colors.dart';
+import 'constants.dart';
+import 'material_button.dart';
 import 'theme.dart';
 
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base
@@ -79,12 +83,15 @@ class ButtonTheme extends InheritedWidget {
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     bool alignedDropdown = false,
+    Color buttonColor,
+    ColorScheme colorScheme = const ColorScheme.light(),
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
+       assert(colorScheme != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -93,6 +100,8 @@ class ButtonTheme extends InheritedWidget {
          shape: shape,
          alignedDropdown: alignedDropdown,
          layoutBehavior: layoutBehavior,
+         buttonColor: buttonColor,
+         colorScheme: colorScheme,
        ),
        super(key: key, child: child);
 
@@ -130,10 +139,12 @@ class ButtonTheme extends InheritedWidget {
     bool alignedDropdown = false,
     Widget child,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
+    ColorScheme colorScheme = const ColorScheme.light(),
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
+       assert(colorScheme != null),
        data = ButtonThemeData(
          textTheme: textTheme,
          minWidth: minWidth,
@@ -142,6 +153,7 @@ class ButtonTheme extends InheritedWidget {
          shape: shape,
          alignedDropdown: alignedDropdown,
          layoutBehavior: layoutBehavior,
+         colorScheme: colorScheme,
        ),
        super(key: key, child: child);
 
@@ -182,11 +194,14 @@ class ButtonThemeData extends Diagnosticable {
     ShapeBorder shape,
     this.layoutBehavior = ButtonBarLayoutBehavior.padded,
     this.alignedDropdown = false,
+    this.buttonColor,
+    this.colorScheme = const ColorScheme.light(),
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        assert(alignedDropdown != null),
        assert(layoutBehavior != null),
+       assert(colorScheme != null),
        _padding = padding,
        _shape = shape;
 
@@ -242,6 +257,7 @@ class ButtonThemeData extends Diagnosticable {
       case ButtonTextTheme.primary:
         return const EdgeInsets.symmetric(horizontal: 24.0);
     }
+    assert(false);
     return EdgeInsets.zero;
   }
   final EdgeInsetsGeometry _padding;
@@ -284,6 +300,167 @@ class ButtonThemeData extends Diagnosticable {
   /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
 
+  final Color buttonColor;
+
+  final ColorScheme colorScheme;
+
+  Brightness getBrightness(MaterialButton button) {
+    return button.colorBrightness ?? colorScheme.brightness;
+  }
+
+  ButtonTextTheme getTextTheme(MaterialButton button) {
+    return button.textTheme ?? textTheme;
+  }
+
+  bool _isFlatButton(MaterialButton button) {
+    return button.type == 'FlatButton' || button.type == 'FlatButton.icon';
+  }
+
+  bool _isOutlineButton(MaterialButton button) {
+    return button.type == 'OutlineButton' || button.type == 'OutlineButton.icon';
+  }
+
+  bool _isIconButton(MaterialButton button) {
+    return button.type == 'RaisedButton.icon' || button.type == 'FlatButton.icon' || button.type == 'OutlineButton.icon';
+  }
+
+  Color _getDisabledColor(MaterialButton button) {
+    return getBrightness(button) == Brightness.dark
+      ? colorScheme.onSurface.withOpacity(0.30)  // default == Colors.white30
+      : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
+  }
+
+  Color getDisabledTextColor(MaterialButton button) {
+    if (button.disabledTextColor != null)
+      return button.disabledTextColor;
+    return _getDisabledColor(button);
+  }
+
+  Color getDisabledFillColor(MaterialButton button) {
+    if (button.disabledColor != null)
+      return button.disabledColor;
+    return _getDisabledColor(button);
+  }
+
+  Color getFillColor(MaterialButton button) {
+    final Color fillColor = button.enabled ? button.color : button.disabledColor;
+    if (fillColor != null)
+      return fillColor;
+
+    if (_isFlatButton(button) || _isOutlineButton(button))
+      return null;
+
+    switch (getTextTheme(button)) {
+      case ButtonTextTheme.normal:
+      case ButtonTextTheme.accent:
+        return button.enabled ? colorScheme.primary : getDisabledFillColor(button);
+      case ButtonTextTheme.primary:
+        return button.enabled
+          ? buttonColor ?? colorScheme.primary
+          : colorScheme.onSurface.withOpacity(0.12);
+    }
+
+    assert(false);
+    return null;
+  }
+
+  Color getTextColor(MaterialButton button) {
+    if (!button.enabled)
+      return getDisabledTextColor(button);
+
+    if (button.textColor != null)
+      return button.textColor;
+
+    switch (getTextTheme(button)) {
+      case ButtonTextTheme.normal:
+        return getBrightness(button) == Brightness.dark ? Colors.white : Colors.black87;
+
+      case ButtonTextTheme.accent:
+        return colorScheme.secondary;
+
+      case ButtonTextTheme.primary: {
+        final Color fillColor = getFillColor(button);
+        final bool fillIsDark = fillColor != null
+          ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
+          : getBrightness(button) == Brightness.dark;
+        if (fillIsDark)
+          return Colors.white;
+        if (_isFlatButton(button) || _isOutlineButton(button))
+          return colorScheme.primary;
+        return Colors.black;
+      }
+    }
+
+    assert(false);
+    return null;
+  }
+
+  Color getSplashColor(MaterialButton button) {
+    if (button.splashColor != null)
+      return button.splashColor;
+    return getTextColor(button).withOpacity(0.12);
+  }
+
+  Color getHighlightColor(MaterialButton button) {
+    if (button.highlightColor != null)
+      return button.highlightColor;
+
+    switch (getTextTheme(button)) {
+      case ButtonTextTheme.normal:
+      case ButtonTextTheme.accent:
+        return getTextColor(button).withOpacity(0.16);
+      case ButtonTextTheme.primary:
+        return Colors.transparent;
+    }
+
+    assert(false);
+    return Colors.transparent;
+  }
+
+  double getElevation(MaterialButton button) {
+    if (button.elevation != null)
+      return button.elevation;
+    if (_isFlatButton(button))
+      return 0.0;
+    return 2.0;
+  }
+
+  double getHighlightElevation(MaterialButton button) {
+    if (button.highlightElevation != null)
+      return button.highlightElevation;
+    if (_isFlatButton(button))
+      return 0.0;
+    if (_isOutlineButton(button))
+      return 2.0;
+    return 8.0;
+  }
+
+  double getDisabledElevation(MaterialButton button) {
+    if (button.disabledElevation != null)
+      return button.disabledElevation;
+    return 0.0;
+  }
+
+  EdgeInsetsGeometry getPadding(MaterialButton button) {
+    if (button.padding != null)
+      return button.padding;
+    if (_isIconButton(button))
+      return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
+    return padding;
+  }
+
+
+  BoxConstraints getConstraints(MaterialButton button) => constraints;
+
+  ShapeBorder getShape(MaterialButton button) {
+    return button.shape ?? shape;
+  }
+
+  Duration getAnimationDuration(MaterialButton button) {
+    return button.animationDuration ?? kThemeChangeDuration;
+  }
+
+
   /// Creates a copy of this button theme data object with the matching fields
   /// replaced with the non-null parameter values.
   ButtonThemeData copyWith({
@@ -293,6 +470,7 @@ class ButtonThemeData extends Diagnosticable {
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     bool alignedDropdown,
+    ColorScheme colorScheme,
   }) {
     return ButtonThemeData(
       textTheme: textTheme ?? this.textTheme,
@@ -301,6 +479,7 @@ class ButtonThemeData extends Diagnosticable {
       padding: padding ?? this.padding,
       shape: shape ?? this.shape,
       alignedDropdown: alignedDropdown ?? this.alignedDropdown,
+      colorScheme: colorScheme ?? this.colorScheme,
     );
   }
 
@@ -314,7 +493,8 @@ class ButtonThemeData extends Diagnosticable {
         && height == typedOther.height
         && padding == typedOther.padding
         && shape == typedOther.shape
-        && alignedDropdown == typedOther.alignedDropdown;
+        && alignedDropdown == typedOther.alignedDropdown
+        && colorScheme == typedOther.colorScheme;
   }
 
   @override
@@ -326,6 +506,7 @@ class ButtonThemeData extends Diagnosticable {
       padding,
       shape,
       alignedDropdown,
+      colorScheme,
     );
   }
 
@@ -343,5 +524,6 @@ class ButtonThemeData extends Diagnosticable {
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',
     ));
+    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultTheme.colorScheme));
   }
 }
