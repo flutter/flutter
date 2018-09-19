@@ -70,13 +70,15 @@ void main() {
 
     setUp(() {
       mockStdio = MockStdio();
-      ansiSpinner = AnsiSpinner();
+      ansiSpinner = AnsiSpinner(
+        timeout: slowOperation,
+      );
       called = 0;
       ansiStatus = AnsiStatus(
         message: 'Hello world',
-        expectSlowOperation: true,
+        timeout: slowOperation,
         padding: 20,
-        onFinish: () => called++,
+        onFinish: () => called += 1,
       );
     });
 
@@ -119,10 +121,11 @@ void main() {
       });
 
       testUsingContext('Stdout startProgress handle null inputs on colored terminal for $testOs', () async {
-        context[Logger].startProgress(
+        final Logger logger = context[Logger];
+        logger.startProgress(
           null,
           progressId: null,
-          expectSlowOperation: null,
+          timeout: fastOperation, // null isn't accepted for timeout
           progressIndicatorPadding: null,
         );
         final List<String> lines = outputStdout();
@@ -205,7 +208,7 @@ void main() {
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
-        expectSlowOperation: true,
+        timeout: slowOperation,
         padding: 20,
         onFinish: () => called++,
       );
@@ -215,7 +218,8 @@ void main() {
     List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
 
     testUsingContext('Error logs are wrapped', () async {
-      context[Logger].printError('0123456789' * 15);
+      final Logger logger = context[Logger];
+      logger.printError('0123456789' * 15);
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
@@ -230,7 +234,8 @@ void main() {
     });
 
     testUsingContext('Error logs are wrapped and can be indented.', () async {
-      context[Logger].printError('0123456789' * 15, indent: 5);
+      final Logger logger = context[Logger];
+      logger.printError('0123456789' * 15, indent: 5);
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
@@ -248,7 +253,8 @@ void main() {
     });
 
     testUsingContext('Error logs are wrapped and can have hanging indent.', () async {
-      context[Logger].printError('0123456789' * 15, hangingIndent: 5);
+      final Logger logger = context[Logger];
+      logger.printError('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
@@ -266,7 +272,8 @@ void main() {
     });
 
     testUsingContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
-      context[Logger].printError('0123456789' * 15, indent: 4, hangingIndent: 5);
+      final Logger logger = context[Logger];
+      logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
@@ -284,7 +291,8 @@ void main() {
     });
 
     testUsingContext('Stdout logs are wrapped', () async {
-      context[Logger].printStatus('0123456789' * 15);
+      final Logger logger = context[Logger];
+      logger.printStatus('0123456789' * 15);
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -299,7 +307,8 @@ void main() {
     });
 
     testUsingContext('Stdout logs are wrapped and can be indented.', () async {
-      context[Logger].printStatus('0123456789' * 15, indent: 5);
+      final Logger logger = context[Logger];
+      logger.printStatus('0123456789' * 15, indent: 5);
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -317,7 +326,8 @@ void main() {
     });
 
     testUsingContext('Stdout logs are wrapped and can have hanging indent.', () async {
-      context[Logger].printStatus('0123456789' * 15, hangingIndent: 5);
+      final Logger logger = context[Logger];
+      logger.printStatus('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -335,7 +345,8 @@ void main() {
     });
 
     testUsingContext('Stdout logs are wrapped, indented, and can have hanging indent.', () async {
-      context[Logger].printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
+      final Logger logger = context[Logger];
+      logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -353,7 +364,8 @@ void main() {
     });
 
     testUsingContext('Error logs are red', () async {
-      context[Logger].printError('Pants on fire!');
+      final Logger logger = context[Logger];
+      logger.printError('Pants on fire!');
       final List<String> lines = outputStderr();
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
@@ -366,7 +378,8 @@ void main() {
     });
 
     testUsingContext('Stdout logs are not colored', () async {
-      context[Logger].printStatus('All good.');
+      final Logger logger = context[Logger];
+      logger.printStatus('All good.');
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -378,7 +391,14 @@ void main() {
     });
 
     testUsingContext('Stdout printStatus handle null inputs on colored terminal', () async {
-      context[Logger].printStatus(null, emphasis: null, color: null, newline: null, indent: null);
+      final Logger logger = context[Logger];
+      logger.printStatus(
+        null,
+        emphasis: null,
+        color: null,
+        newline: null,
+        indent: null,
+      );
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -390,7 +410,14 @@ void main() {
     });
 
     testUsingContext('Stdout printStatus handle null inputs on regular terminal', () async {
-      context[Logger].printStatus(null, emphasis: null, color: null, newline: null, indent: null);
+      final Logger logger = context[Logger];
+      logger.printStatus(
+        null,
+        emphasis: null,
+        color: null,
+        newline: null,
+        indent: null,
+      );
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
@@ -402,10 +429,11 @@ void main() {
     });
 
     testUsingContext('Stdout startProgress handle null inputs on regular terminal', () async {
-      context[Logger].startProgress(
+      final Logger logger = context[Logger];
+      logger.startProgress(
         null,
         progressId: null,
-        expectSlowOperation: null,
+        timeout: fastOperation, // null isn't accepted for timeout
         progressIndicatorPadding: null,
       );
       final List<String> lines = outputStdout();
@@ -464,11 +492,13 @@ void main() {
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
-      context[Logger].startProgress('AAA')..stop();
-      context[Logger].startProgress('BBB')..stop();
-      expect(outputStdout().length, equals(3));
-      expect(outputStdout()[0], matches(RegExp(r'AAA[ ]{60}[\d ]{3}[\d]ms')));
-      expect(outputStdout()[1], matches(RegExp(r'BBB[ ]{60}[\d ]{3}[\d]ms')));
+      final Logger logger = context[Logger];
+      logger.startProgress('AAA', timeout: fastOperation)..stop();
+      logger.startProgress('BBB', timeout: fastOperation)..stop();
+      final List<String> output = outputStdout();
+      expect(output.length, equals(3));
+      expect(output[0], matches(RegExp(r'AAA[ ]{60}[\d ]{3}[\d]ms')));
+      expect(output[1], matches(RegExp(r'BBB[ ]{60}[\d ]{3}[\d]ms')));
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),
       OutputPreferences: () => OutputPreferences(showColor: false),
@@ -476,13 +506,14 @@ void main() {
     });
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
-      context[Logger].startProgress('AAA')..stop();
-      context[Logger].startProgress('BBB')..stop();
+      final Logger logger = context[Logger];
+      logger.startProgress('AAA', timeout: fastOperation)..stop();
+      logger.startProgress('BBB', timeout: fastOperation)..stop();
       expect(outputStdout(), <Matcher>[
         matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA$'),
-        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA \(completed\)$'),
+        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA \(completed.*\)$'),
         matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] BBB$'),
-        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] BBB \(completed\)$'),
+        matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] BBB \(completed.*\)$'),
         matches(r'^$'),
       ]);
     }, overrides: <Type, Generator>{
@@ -491,9 +522,9 @@ void main() {
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
-      context[Logger].startProgress('AAA')..stop();
-      context[Logger].startProgress('BBB')..stop();
       final BufferLogger logger = context[Logger];
+      logger.startProgress('AAA', timeout: fastOperation)..stop();
+      logger.startProgress('BBB', timeout: fastOperation)..stop();
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
       Logger: () => BufferLogger(),

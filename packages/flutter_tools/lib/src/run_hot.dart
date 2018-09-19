@@ -150,6 +150,7 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
+  // Returns the exit code of the flutter tool process, like [run].
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
@@ -157,8 +158,8 @@ class HotRunner extends ResidentRunner {
     _didAttach = true;
     try {
       await connectToServiceProtocol(reloadSources: _reloadSourcesService, compileExpression: _compileExpressionService);
-    } catch (error) {
-      printError('Error connecting to the service protocol: $error');
+    } on String catch (message) {
+      printError(message);
       return 2;
     }
 
@@ -366,7 +367,6 @@ class HotRunner extends ResidentRunner {
       if (device.devFS != null) {
         // Cleanup the devFS; don't wait indefinitely, and ignore any errors.
         await device.devFS.destroy()
-          .timeout(const Duration(milliseconds: 250))
           .catchError((dynamic error) {
             printTrace('$error');
           });
@@ -506,6 +506,7 @@ class HotRunner extends ResidentRunner {
     if (fullRestart) {
       final Status status = logger.startProgress(
         'Performing hot restart...',
+        timeout: fastOperation,
         progressId: 'hot.restart',
       );
       try {
@@ -524,6 +525,7 @@ class HotRunner extends ResidentRunner {
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
       final Status status = logger.startProgress(
         '$progressPrefix hot reload...',
+        timeout: fastOperation,
         progressId: 'hot.reload'
       );
       OperationResult result;
@@ -693,15 +695,9 @@ class HotRunner extends ResidentRunner {
     await _evictDirtyAssets();
     printTrace('Reassembling application');
     bool reassembleAndScheduleErrors = false;
-    bool reassembleTimedOut = false;
     for (FlutterView view in reassembleViews) {
       try {
         await view.uiIsolate.flutterReassemble();
-      } on TimeoutException {
-        reassembleTimedOut = true;
-        printTrace('Reassembling ${view.uiIsolate.name} took too long.');
-        printStatus('Hot reloading ${view.uiIsolate.name} took too long; the reload may have failed.');
-        continue;
       } catch (error) {
         reassembleAndScheduleErrors = true;
         printError('Reassembling ${view.uiIsolate.name} failed: $error');
@@ -724,11 +720,9 @@ class HotRunner extends ResidentRunner {
     // Record complete time it took for the reload.
     _addBenchmarkData('hotReloadMillisecondsToFrame',
         reloadTimer.elapsed.inMilliseconds);
-    // Only report timings if we reloaded a single view without any
-    // errors or timeouts.
+    // Only report timings if we reloaded a single view without any errors.
     if ((reassembleViews.length == 1) &&
         !reassembleAndScheduleErrors &&
-        !reassembleTimedOut &&
         shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
 

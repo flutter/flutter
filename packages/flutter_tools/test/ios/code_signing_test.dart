@@ -534,7 +534,7 @@ class TestTerminal extends AnsiTerminal {
   String bolden(String message) => '<bold>$message</bold>';
 
   @override
-  Stream<String> get onCharInput {
+  Stream<String> get keystrokes {
     return mockTerminalStdInStream;
   }
 }

@@ -29,7 +29,7 @@ Future<void> main() async {
       final SerializableFinder summary = find.byValueKey('summary');
 
       // Wait for calibration to complete and fab to appear.
-      await driver.waitFor(fab, timeout: const Duration(seconds: 40));
+      await driver.waitFor(fab);
 
       final String calibrationResult = await driver.getText(summary);
       final Match matchCalibration = calibrationRegExp.matchAsPrefix(calibrationResult);
@@ -59,7 +59,7 @@ Future<void> main() async {
       expect(double.parse(matchFast.group(1)), closeTo(flutterFrameRate * 2.0, 5.0));
       expect(double.parse(matchFast.group(2)), closeTo(flutterFrameRate, 10.0));
       expect(int.parse(matchFast.group(3)), 1);
-    }, timeout: const Timeout(Duration(minutes: 1)));
+    });
 
     tearDownAll(() async {
       driver?.close();

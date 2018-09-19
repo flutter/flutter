@@ -42,8 +42,9 @@ void main() {
 
       // Hit breakpoint using a file:// URI.
       final VMIsolate isolate = await _flutter.breakAt(
-          Uri.file(_project.breakpointFile).toString(),
-          _project.breakpointLine);
+        Uri.file(_project.breakpointFile).toString(),
+        _project.breakpointLine,
+      );
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
     });
   }, timeout: const Timeout.factor(6));

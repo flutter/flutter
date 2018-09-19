@@ -62,24 +62,17 @@ enum TimelineStream {
 const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all];
 
 /// Default timeout for short-running RPCs.
-const Duration _kShortTimeout = Duration(seconds: 5);
-
-/// Default timeout for awaiting an Isolate to become runnable.
-const Duration _kIsolateLoadRunnableTimeout = Duration(minutes: 1);
+const Duration _kShortTimeout = Duration(minutes: 1);
 
 /// Time to delay before driving a Fuchsia module.
 const Duration _kFuchsiaDriveDelay = Duration(milliseconds: 500);
 
 /// Default timeout for long-running RPCs.
-final Duration _kLongTimeout = _kShortTimeout * 6;
-
-/// Additional amount of time we give the command to finish or timeout remotely
-/// before timing out locally.
-final Duration _kRpcGraceTime = _kShortTimeout ~/ 2;
+const Duration _kLongTimeout = Duration(minutes: 10); // 10 times _kShortTimeout
 
 /// The amount of time we wait prior to making the next attempt to connect to
 /// the VM service.
-final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
+const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
@@ -102,6 +95,27 @@ String _timelineStreamsToString(List<TimelineStream> streams) {
 }
 
 final Logger _log = Logger('FlutterDriver');
+
+Future<T> _warnIfSlow<T>({
+  @required Future<T> future,
+  @required Duration timeout,
+  @required String message,
+}) {
+  assert(future != null);
+  assert(timeout != null);
+  assert(message != null);
+  return future..timeout(timeout, onTimeout: () { _log.error(message); });
+}
+
+Duration _maxDuration(Duration a, Duration b) {
+  if (a == null)
+    return b;
+  if (b == null)
+    return a;
+  if (a > b)
+    return a;
+  return b;
+}
 
 /// A convenient accessor to frequently used finders.
 ///
@@ -170,7 +184,6 @@ class FlutterDriver {
     bool printCommunication = false,
     bool logCommunicationToFile = true,
     int isolateNumber,
-    Duration isolateReadyTimeout = _kIsolateLoadRunnableTimeout,
     Pattern fuchsiaModuleTarget,
   }) async {
     // If running on a Fuchsia device, connect to the first Isolate whose name
@@ -222,12 +235,7 @@ class FlutterDriver {
                    (VMIsolateRef isolate) => isolate.number == isolateNumber);
     _log.trace('Isolate found with number: ${isolateRef.number}');
 
-    VMIsolate isolate = await isolateRef
-        .loadRunnable()
-        .timeout(isolateReadyTimeout, onTimeout: () {
-      throw TimeoutException(
-          'Timeout while waiting for the isolate to become runnable');
-    });
+    VMIsolate isolate = await isolateRef.loadRunnable();
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
@@ -242,7 +250,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await Future<void>.delayed(_kShortTimeout ~/ 10);
+      await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
       isolate = await isolateRef.loadRunnable();
     }
 
@@ -302,23 +310,21 @@ class FlutterDriver {
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
       await enableIsolateStreams();
-      final Future<dynamic> whenServiceExtensionReady = waitForServiceExtension();
+      final Future<String> whenServiceExtensionReady = waitForServiceExtension();
       final Future<dynamic> whenResumed = resumeLeniently();
       await whenResumed;
 
-      try {
-        _log.trace('Waiting for service extension');
-        // We will never receive the extension event if the user does not
-        // register it. If that happens time out.
-        await whenServiceExtensionReady.timeout(_kLongTimeout * 2);
-      } on TimeoutException catch (_) {
-        throw DriverError(
-          'Timed out waiting for Flutter Driver extension to become available. '
-          'Ensure your test app (often: lib/main.dart) imports '
-          '"package:flutter_driver/driver_extension.dart" and '
-          'calls enableFlutterDriverExtension() as the first call in main().'
-        );
-      }
+      _log.trace('Waiting for service extension');
+      // We will never receive the extension event if the user does not
+      // register it. If that happens, show a message but continue waiting.
+      await _warnIfSlow(
+        future: whenServiceExtensionReady,
+        timeout: _kLongTimeout,
+        message: 'Flutter Driver extension is taking a long time to become available. '
+                 'Ensure your test app (often "lib/main.dart") imports '
+                 '"package:flutter_driver/driver_extension.dart" and '
+                 'calls enableFlutterDriverExtension() as the first call in main().'
+      );
     } else if (isolate.pauseEvent is VMPauseExitEvent ||
                isolate.pauseEvent is VMPauseBreakpointEvent ||
                isolate.pauseEvent is VMPauseExceptionEvent ||
@@ -351,7 +357,7 @@ class FlutterDriver {
           'registered.'
         );
         await enableIsolateStreams();
-        await waitForServiceExtension().timeout(_kLongTimeout * 2);
+        await waitForServiceExtension();
         return driver.checkHealth();
       }
     }
@@ -384,16 +390,12 @@ class FlutterDriver {
     try {
       final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
-      response = await _appIsolate
-          .invokeExtension(_flutterExtensionMethodName, serialized)
-          .timeout(command.timeout + _kRpcGraceTime);
-      _logCommunication('<<< $response');
-    } on TimeoutException catch (error, stackTrace) {
-      throw DriverError(
-        'Failed to fulfill ${command.runtimeType}: Flutter application not responding',
-        error,
-        stackTrace,
+      response = await _warnIfSlow(
+        future: _appIsolate.invokeExtension(_flutterExtensionMethodName, serialized),
+        timeout: _maxDuration(command.timeout, _kShortTimeout),
+        message: '${command.kind} message is taking a long time to complete...',
       );
+      _logCommunication('<<< $response');
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to fulfill ${command.runtimeType} due to remote error',

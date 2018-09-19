@@ -33,7 +33,7 @@ Future<List<int>> _attempt(Uri url) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context[HttpClientFactory] != null) {
-    httpClient = context[HttpClientFactory]();
+    httpClient = (context[HttpClientFactory] as HttpClientFactory)(); // ignore: avoid_as
   } else {
     httpClient = HttpClient();
   }

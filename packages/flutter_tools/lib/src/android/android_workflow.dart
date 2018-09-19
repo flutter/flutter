@@ -223,9 +223,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     LicensesAccepted status;
 
     void _onLine(String line) {
-      if (status == null && licenseAccepted.hasMatch(line)) {
-        status = LicensesAccepted.all;
-      } else if (licenseCounts.hasMatch(line)) {
+      if (licenseCounts.hasMatch(line)) {
         final Match match = licenseCounts.firstMatch(line);
         if (match.group(1) != match.group(2)) {
           status = LicensesAccepted.some;
@@ -233,9 +231,12 @@ class AndroidLicenseValidator extends DoctorValidator {
           status = LicensesAccepted.none;
         }
       } else if (licenseNotAccepted.hasMatch(line)) {
-        // In case the format changes, a more general match will keep doctor
-        // mostly working.
+        // The licenseNotAccepted pattern is trying to match the same line as
+        // licenseCounts, but is more general. In case the format changes, a
+        // more general match may keep doctor mostly working.
         status = LicensesAccepted.none;
+      } else if (licenseAccepted.hasMatch(line)) {
+        status ??= LicensesAccepted.all;
       }
     }
 
@@ -256,12 +257,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);
-    try {
-      await Future.wait<void>(<Future<void>>[output, errors]).timeout(const Duration(seconds: 30));
-    } catch (TimeoutException) {
-      printTrace('Intentionally killing ${androidSdk.sdkManagerPath}');
-      processManager.killPid(process.pid);
-    }
+    await Future.wait<void>(<Future<void>>[output, errors]);
     return status ?? LicensesAccepted.unknown;
   }
 
