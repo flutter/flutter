@@ -158,6 +158,19 @@ abstract class BindingBase {
             return <String, dynamic>{};
           }
       );
+      registerServiceExtension(
+          name: 'loggingChannels',
+          callback: (Map<String, dynamic> parameters) async {
+            final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+            for (LoggingChannel channel in debugLogEventChannels) {
+              map[channel.name] = <String, String>{
+                'enabled': debugShouldLogEvent(channel).toString(),
+                'description': channel.description,
+              };
+            }
+            return <String, Map<String,Map<String, String>>>{'value': map };
+          }
+      );
     }());
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
   }
