@@ -163,10 +163,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
-/// If [platform] is non-null then this transition is preferred when
-/// it matches the current platform, [ThemeData.platform].
-///
-/// Apps can configure the list of builders for [ThemeData.platformTheme]
+/// Apps can configure the map of builders for [ThemeData.platformTheme]
 /// to customize the default [MaterialPageRoute] page transition animation
 /// for different platforms.
 ///
@@ -180,19 +177,15 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 abstract class PageTransitionsBuilder {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const PageTransitionsBuilder({ this.platform });
-
-  /// The [TargetPlatform] this builder is to be used for or null if the
-  /// builder is not platform-specific.
-  final TargetPlatform platform;
+  const PageTransitionsBuilder();
 
   /// Wraps the child with one or more transition widgets which define how [route]
   /// arrives on and leaves the screen.
   ///
   /// The [MaterialPageRoute.buildTransitions] method looks up the current
   /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
-  /// and delegates to this method with a [PageTransitionsBuilder] that has
-  /// a matching [PageTransitionsBuilder.platform].
+  /// and delegates to this method with a [PageTransitionsBuilder] based
+  /// on the theme's [ThemeData.platform].
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -200,11 +193,6 @@ abstract class PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   );
-
-  @override
-  String toString() {
-    return '[$runtimeType${platform == null ? "" : " for $platform"}]';
-  }
 }
 
 /// Used by [PageTransitionsTheme] to define a default [MaterialPageRoute] page
@@ -224,7 +212,7 @@ abstract class PageTransitionsBuilder {
 ///    transition that matches native iOS page transitions.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Construct a FadeUpwardsPageTransitionsBuilder with a null [platform].
-  const FadeUpwardsPageTransitionsBuilder() : super(platform: null);
+  const FadeUpwardsPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(
@@ -242,16 +230,13 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// transition animation that looks like the default page transition
 /// used on Android P.
 ///
-/// The [platform] for this builder [TargetPlatform.android].
-///
 /// See also:
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a OpenUpwardsPageTransitionsBuilder with a
-  /// [TargetPlatform.android] [platform].
-  const OpenUpwardsPageTransitionsBuilder() : super(platform: TargetPlatform.android);
+  /// Construct a OpenUpwardsPageTransitionsBuilder.
+  const OpenUpwardsPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(
@@ -272,17 +257,14 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// Used by [PageTransitionsTheme] to define a horizontal [MaterialPageRoute]
 /// page transition animation that matches native iOS page transitions.
 ///
-/// The [platform] for this builder [TargetPlatform.iOS].
-///
 /// See also:
 ///
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a CupertinoPageTransitionsBuilder with a
-  /// [TargetPlatform.iOS] [platform].
-  const CupertinoPageTransitionsBuilder() : super(platform: TargetPlatform.iOS);
+  /// Construct a CupertinoPageTransitionsBuilder.
+  const CupertinoPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(
@@ -303,8 +285,8 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 /// current [PageTransitionsTheme] with `Theme.of(context).pageTransitionsTheme`
 /// and delegates to [buildTransitions].
 ///
-/// If a builder with a matching platform is not found, the first builder
-/// with a null [PageTransitionsBuilder.platform] is used.
+/// If a builder with a matching platform is not found, then the
+/// [FadeUpwardsPageTransitionsBuilder] is used.
 ///
 /// See also:
 ///
@@ -319,29 +301,24 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 class PageTransitionsTheme extends Diagnosticable {
   /// Construct a PageTransitionsTheme.
   ///
-  /// The [builders] parameter must not be null.
-  ///
   /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder],
-  /// [CupertinoPageTransitionsBuilder].
-  const PageTransitionsTheme({
-    this.builders = const <PageTransitionsBuilder>[
-      FadeUpwardsPageTransitionsBuilder(),
-      CupertinoPageTransitionsBuilder(),
-    ],
-  }) : assert(builders != null);
+  /// [CupertinoPageTransitionsBuilder] for [TargetPlatform.android]
+  /// and [TargetPlatform.iOS] respectively.
+  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders }) : _builders = builders;
+
+  static final Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
+    TargetPlatform.android: const FadeUpwardsPageTransitionsBuilder(),
+    TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+  };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
-  final Iterable<PageTransitionsBuilder> builders;
+  Map<TargetPlatform, PageTransitionsBuilder> get builders => _builders ?? _defaultBuilders;
+  final Map<TargetPlatform, PageTransitionsBuilder> _builders;
 
-  /// Delegates to the first builder in [builders] whose
-  /// [PageTransitionsBuilder.platform] matches the current target
-  /// platform: `Theme.of(context).platform`.
+  /// Delegates to the builder for the current [ThemeData.platform]
+  /// or [FadeUpwardsPageTransitionsBuilder].
   ///
-  /// If a builder with a matching platform is not found, the first
-  /// builder whose platform is null is used. By default that's the
-  /// [FadeUpwardsPageTransitionsBuilder].
-  ///
-  /// [MaterialPageRoute.builderTransitions] delegates to this method.
+  /// [MaterialPageRoute.buildTransitions] delegates to this method.
   Widget buildTransitions<T>(
     PageRoute<T> route,
     BuildContext context,
@@ -354,17 +331,13 @@ class PageTransitionsTheme extends Diagnosticable {
     if (CupertinoPageRoute.isPopGestureInProgress(route))
       platform = TargetPlatform.iOS;
 
-    PageTransitionsBuilder matchingBuilder;
-    for (PageTransitionsBuilder builder in builders) {
-      if (builder.platform == platform) {
-        matchingBuilder = builder;
-        break;
-      }
-      if (builder.platform == null)
-        matchingBuilder ??= builder;
-    }
-    assert(matchingBuilder != null);
+    final PageTransitionsBuilder matchingBuilder =
+      builders[platform] ?? const FadeUpwardsPageTransitionsBuilder();
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
+  }
+
+  List<PageTransitionsBuilder> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
+    return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
 
   @override
@@ -376,16 +349,16 @@ class PageTransitionsTheme extends Diagnosticable {
     final PageTransitionsTheme typedOther = other;
     if (identical(builders, other.builders))
       return true;
-    return listEquals<PageTransitionsBuilder>(builders, typedOther.builders);
+    return listEquals<PageTransitionsBuilder>(_all(builders), _all(typedOther.builders));
   }
 
   @override
-  int get hashCode => hashList(builders);
+  int get hashCode => hashList(_all(builders));
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const PageTransitionsTheme defaultTheme = PageTransitionsTheme();
-    properties.add(DiagnosticsProperty<Iterable<PageTransitionsBuilder>>('builders', builders, defaultValue: defaultTheme.builders));
+    properties.add(DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>('builders', builders, defaultValue: defaultTheme.builders));
   }
 }

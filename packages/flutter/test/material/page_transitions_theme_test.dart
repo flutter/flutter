@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Default PageTranstionsTheme includes a builder with a null platform', (WidgetTester tester) async {
+  testWidgets('Default PageTranstionsTheme platform', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: const Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
-    expect(theme.builders.map((PageTransitionsBuilder builder) => builder.platform), contains(null));
+    expect(theme.builders[TargetPlatform.android], isNotNull);
+    expect(theme.builders[TargetPlatform.iOS], isNotNull);
   });
 
   testWidgets('Default PageTranstionsTheme builds a CupertionPageTransition for iOS', (WidgetTester tester) async {
@@ -91,10 +92,9 @@ void main() {
         theme: ThemeData(
           platform: TargetPlatform.android,
           pageTransitionsTheme: const PageTransitionsTheme(
-            builders: <PageTransitionsBuilder>[
-              FadeUpwardsPageTransitionsBuilder(),
-              OpenUpwardsPageTransitionsBuilder(), // creates a _MoutainViewPageTransition
-            ],
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition
+            },
           ),
         ),
         routes: routes,
