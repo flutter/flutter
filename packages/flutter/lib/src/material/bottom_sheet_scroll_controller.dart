@@ -9,7 +9,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart' show Scaffold, ScaffoldState, debugCheckHasScaffold;
+
+import 'debug.dart';
+import 'scaffold.dart';
 
 const double _kBottomSheetMinHeight = 56.0;
 
