@@ -116,18 +116,14 @@ class AOTSnapshotter {
     final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
     final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
-    final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
-    final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
-    final List<String> inputPaths = <String>[uiPath, vmServicePath, vmEntryPoints, ioEntryPoints, mainPath];
+    final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
     final Set<String> outputPaths = Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--url_mapping=dart:ui,$uiPath',
       '--url_mapping=dart:vmservice_io,$vmServicePath',
-      '--embedder_entry_points_manifest=$vmEntryPoints',
-      '--embedder_entry_points_manifest=$ioEntryPoints',
     ];
     genSnapshotArgs.addAll(<String>[
       '--reify-generic-functions',
@@ -303,10 +299,6 @@ class AOTSnapshotter {
     outputDir.createSync(recursive: true);
 
     printTrace('Compiling Dart to kernel: $mainPath');
-    final List<String> entryPointsJsonFiles = <String>[
-      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
-      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
-    ];
 
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
@@ -320,7 +312,6 @@ class AOTSnapshotter {
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,
-      entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
       targetProductVm: buildMode == BuildMode.release,
     );

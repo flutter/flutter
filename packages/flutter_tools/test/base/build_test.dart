@@ -85,11 +85,7 @@ void main() {
   });
 
   group('Snapshotter - iOS AOT', () {
-    const String kVmEntrypoints = 'dart_vm_entry_points.txt';
-    const String kIoEntries = 'dart_io_entries.txt';
     const String kSnapshotDart = 'snapshot.dart';
-    const String kEntrypointsJson = 'entry_points.json';
-    const String kEntrypointsExtraJson = 'entry_points_extra.json';
     String skyEnginePath;
 
     _FakeGenSnapshot genSnapshot;
@@ -101,11 +97,7 @@ void main() {
 
     setUp(() async {
       fs = MemoryFileSystem();
-      fs.file(kVmEntrypoints).createSync();
-      fs.file(kIoEntries).createSync();
       fs.file(kSnapshotDart).createSync();
-      fs.file(kEntrypointsJson).createSync();
-      fs.file(kEntrypointsExtraJson).createSync();
       fs.file('.packages').writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
 
       skyEnginePath = fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
@@ -121,11 +113,7 @@ void main() {
       mockArtifacts = MockArtifacts();
       mockXcode = MockXcode();
       for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, any, mode)).thenReturn(kVmEntrypoints);
-        when(mockArtifacts.getArtifactPath(Artifact.dartIoEntriesTxt, any, mode)).thenReturn(kIoEntries);
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart, any, mode)).thenReturn(kSnapshotDart);
-        when(mockArtifacts.getArtifactPath(Artifact.entryPointsJson, any, mode)).thenReturn(kEntrypointsJson);
-        when(mockArtifacts.getArtifactPath(Artifact.entryPointsExtraJson, any, mode)).thenReturn(kEntrypointsExtraJson);
       }
     });
 
@@ -206,8 +194,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -252,8 +238,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -298,8 +282,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -349,8 +331,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -396,8 +376,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -442,8 +420,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -506,8 +482,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',
@@ -557,8 +531,6 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
         '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
-        '--embedder_entry_points_manifest=$kVmEntrypoints',
-        '--embedder_entry_points_manifest=$kIoEntries',
         '--reify-generic-functions',
         '--strong',
         '--sync-async',

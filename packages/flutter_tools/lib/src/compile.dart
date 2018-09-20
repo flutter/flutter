@@ -78,7 +78,6 @@ class KernelCompiler {
     String depFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    List<String> entryPointsJsonFiles,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
@@ -139,11 +138,6 @@ class KernelCompiler {
     }
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
-    }
-    if (entryPointsJsonFiles != null) {
-      for (String entryPointsJson in entryPointsJsonFiles) {
-        command.addAll(<String>['--entry-points', entryPointsJson]);
-      }
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
