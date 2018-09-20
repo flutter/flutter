@@ -5,7 +5,6 @@
 import("$flutter_root/lib/ui/dart_ui.gni")
 import("//build/compiled_action.gni")
 import("//third_party/dart/utils/compile_platform.gni")
-import("//third_party/dart/utils/generate_entry_points_json.gni")
 
 if (is_fuchsia) {
   import("//build/dart/dart_library.gni")
@@ -212,96 +211,4 @@ if (is_fuchsia || is_fuchsia_host) {
       ":strong_platform",
     ]
   }
-}
-
-# Template to generate entry points JSON file using gen_snapshot tool.
-# List of entry points is generated as a by-product while doing precompilation.
-#
-# This template expects the following arguments:
-#  - input: Name of the input dart script for precompilation.
-#  - output: Name of the output entry points JSON file.
-#  - extra_args: Extra arguments to pass to dart_bootstrap (optional).
-#  - extra_inputs: Extra input dependencies (optional).
-#
-template("generate_entry_points_json_with_gen_snapshot") {
-  assert(defined(invoker.input), "Must define input dart script")
-  assert(defined(invoker.output), "Must define output json file")
-  extra_args = []
-  if (defined(invoker.extra_args)) {
-    extra_args += invoker.extra_args
-  }
-  extra_inputs = []
-  if (defined(invoker.extra_inputs)) {
-    extra_inputs += invoker.extra_inputs
-  }
-  compiled_action(target_name) {
-    # Printing precompiler entry points is folded into precompilation, so gen_snapshot is invoked
-    # with correct arguments to generate app-aot snapshot.
-
-    input = invoker.input
-    output = invoker.output
-
-    tool = "//third_party/dart/runtime/bin:gen_snapshot"
-    inputs = [ input ] + extra_inputs
-    outputs = [
-      output,
-
-      # Though they are not consumed, GN needs to know to create the output directory.
-      "$target_gen_dir/dummy.vm_data.snapshot",
-      "$target_gen_dir/dummy.vm_instr.snapshot",
-      "$target_gen_dir/dummy.isolate_data.snapshot",
-      "$target_gen_dir/dummy.isolate_instr.snapshot",
-    ]
-    args = [
-             "--no-strong",
-             "--no-sync-async",
-             "--no-reify-generic-functions",
-             "--print-precompiler-entry-points=" + rebase_path(output),
-             "--snapshot-kind=app-aot-blobs",
-             "--vm_snapshot_data=" +
-                 rebase_path("$target_gen_dir/dummy.vm_data.snapshot"),
-             "--vm_snapshot_instructions=" +
-                 rebase_path("$target_gen_dir/dummy.vm_instr.snapshot"),
-             "--isolate_snapshot_data=" +
-                 rebase_path("$target_gen_dir/dummy.isolate_data.snapshot"),
-             "--isolate_snapshot_instructions=" +
-                 rebase_path("$target_gen_dir/dummy.isolate_instr.snapshot"),
-           ] + extra_args + [ rebase_path(input) ]
-  }
-}
-
-generate_entry_points_json_with_gen_snapshot("entry_points_json") {
-  input = "$flutter_root/lib/snapshot/snapshot.dart"
-  output = "$root_out_dir/dart_entry_points/entry_points.json"
-  dart_ui = "$flutter_root/lib/ui/ui.dart"
-  vmservice_io = "//third_party/dart/runtime/bin/vmservice/vmservice_io.dart"
-  dart_vm_entry_points_txt = "$flutter_root/runtime/dart_vm_entry_points.txt"
-  dart_io_entries_txt = "//third_party/dart/runtime/bin/dart_io_entries.txt"
-
-  extra_inputs = [
-    dart_ui,
-    vmservice_io,
-    dart_vm_entry_points_txt,
-    dart_io_entries_txt,
-  ]
-
-  extra_args = [
-    "--await_is_keyword",
-    "--url_mapping=dart:ui," + rebase_path(dart_ui),
-    "--url_mapping=dart:vmservice_io," + rebase_path(vmservice_io),
-    "--causal_async_stacks",
-    "--embedder_entry_points_manifest=" + rebase_path(dart_vm_entry_points_txt),
-    "--embedder_entry_points_manifest=" + rebase_path(dart_io_entries_txt),
-  ]
-}
-
-copy_entry_points_extra_json("entry_points_extra_json") {
-  output = "$root_out_dir/dart_entry_points/entry_points_extra.json"
-}
-
-group("entry_points_json_files") {
-  public_deps = [
-    ":entry_points_extra_json",
-    ":entry_points_json",
-  ]
 }
