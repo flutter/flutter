@@ -63,7 +63,7 @@ void main() {
       if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))
         throw 'flutter run --release had unexpected first line: ${stdout.first}';
       stdout.removeAt(0);
-      if (!stdout.first.startsWith('Running \'gradlew assembleRelease\'...'))
+      if (!stdout.first.startsWith('Gradle task \'assembleRelease\'...'))
         throw 'flutter run --release had unexpected second line: ${stdout.first}';
       stdout.removeAt(0);
       if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).')))
