@@ -281,11 +281,9 @@ void main() {
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
       context[Logger].startProgress('AAA')..stop();
       context[Logger].startProgress('BBB')..stop();
-      expect(outputStdout(), <String>[
-        'AAA                                                               0ms',
-        'BBB                                                               0ms',
-        '',
-      ]);
+      expect(outputStdout().length, equals(3));
+      expect(outputStdout()[0], matches(RegExp(r'AAA[ ]{60}[\d ]{3}[\d]ms')));
+      expect(outputStdout()[1], matches(RegExp(r'BBB[ ]{60}[\d ]{3}[\d]ms')));
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Logger: () => StdoutLogger()..supportsColor = false,
