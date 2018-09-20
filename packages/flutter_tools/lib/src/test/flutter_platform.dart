@@ -217,7 +217,7 @@ class _Compiler {
       if (suppressOutput)
         return;
 
-      if (message.startsWith('compiler message: Error: Could not resolve the package \'test\'')) {
+      if (message.startsWith('Error: Could not resolve the package \'test\'')) {
         printTrace(message);
         printError(
           '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',

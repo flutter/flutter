@@ -299,7 +299,11 @@ Future<Null> buildGradleProject({
 
 Future<Null> _buildGradleProjectV1(FlutterProject project, String gradle) async {
   // Run 'gradlew build'.
-  final Status status = logger.startProgress('Running \'gradlew build\'...', expectSlowOperation: true);
+  final Status status = logger.startProgress(
+    "Running 'gradlew build'...",
+    expectSlowOperation: true,
+    multilineOutput: true,
+  );
   final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
@@ -337,7 +341,11 @@ Future<Null> _buildGradleProjectV2(
       throwToolExit('Gradle build aborted.');
     }
   }
-  final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
+  final Status status = logger.startProgress(
+    "Gradle task '$assembleTask'...",
+    expectSlowOperation: true,
+    multilineOutput: true,
+  );
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
   if (logger.isVerbose) {
@@ -382,7 +390,7 @@ Future<Null> _buildGradleProjectV2(
   status.stop();
 
   if (exitCode != 0)
-    throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
+    throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
 
   final File apkFile = _findApkFile(project, buildInfo);
   if (apkFile == null)
