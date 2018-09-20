@@ -31,7 +31,6 @@ typedef DebugLogMessageCallback = Object Function();
 ///
 /// Logging for a given event channel can be enabled programmatically via
 /// [debugEnableLogging] or using a VM service call.
-///
 void debugLogEvent(LoggingChannel channel, DebugLogMessageCallback messageCallback) {
   assert(channel != null);
   if (!debugShouldLogEvent(channel)) {

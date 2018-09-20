@@ -146,30 +146,30 @@ abstract class BindingBase {
         }
       );
       registerServiceExtension(
-          name: 'logging',
-          callback: (Map<String, Object> parameters) async {
-            final String channel = parameters['channel'];
-            if (channel != null) {
-              final LoggingChannel registeredChannel = LoggingService.instance.getRegisteredChannel(channel);
-              if (registeredChannel != null) {
-                debugEnableLogging(registeredChannel, parameters['enable'] == 'true');
-              }
+        name: 'logging',
+        callback: (Map<String, Object> parameters) async {
+          final String channel = parameters['channel'];
+          if (channel != null) {
+            final LoggingChannel registeredChannel = LoggingService.instance.getRegisteredChannel(channel);
+            if (registeredChannel != null) {
+              debugEnableLogging(registeredChannel, parameters['enable'] == 'true');
             }
-            return <String, dynamic>{};
           }
+          return <String, dynamic>{};
+        }
       );
       registerServiceExtension(
-          name: 'loggingChannels',
-          callback: (Map<String, dynamic> parameters) async {
-            final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
-            for (LoggingChannel channel in LoggingService.instance.debugLogEventChannels) {
-              map[channel.name] = <String, String>{
-                'enabled': debugShouldLogEvent(channel).toString(),
-                'description': channel.description,
-              };
-            }
-            return <String, Map<String,Map<String, String>>>{'value': map };
+        name: 'loggingChannels',
+        callback: (Map<String, dynamic> parameters) async {
+          final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+          for (LoggingChannel channel in LoggingService.instance.debugLogEventChannels) {
+            map[channel.name] = <String, String>{
+              'enabled': debugShouldLogEvent(channel).toString(),
+              'description': channel.description,
+            };
           }
+          return <String, Map<String,Map<String, String>>>{'value': map };
+        }
       );
     }());
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
