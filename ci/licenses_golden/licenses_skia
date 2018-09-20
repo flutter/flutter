@@ -1,4 +1,4 @@
-Signature: 1ebd7407ef0addb0cb8504d8873285cc
+Signature: 9be6317c5de5ac1d9e0e68bd0ff50a11
 
 UNUSED LICENSES:
 
@@ -3675,7 +3675,6 @@ FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.h
 FILE: ../../../third_party/skia/src/effects/SkTableColorFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageSource.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAutoLocaleSetter.h
-FILE: ../../../third_party/skia/src/gpu/GrBlend.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlurUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlurUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrCaps.cpp
