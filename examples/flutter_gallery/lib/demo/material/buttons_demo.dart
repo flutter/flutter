@@ -274,7 +274,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   dropdown1Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -295,7 +295,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   dropdown2Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four'].map((String value) {
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -319,7 +319,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
                   'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'
                  ]
-                .map((String value) {
+                .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -359,7 +359,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: null,
           )
         ]
-        .map((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
+        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
         .toList(),
       ),
     );

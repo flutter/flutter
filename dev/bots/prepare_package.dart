@@ -587,7 +587,7 @@ Future<Null> main(List<String> argList) async {
   argParser.addOption(
     'branch',
     defaultsTo: null,
-    allowed: Branch.values.map((Branch branch) => getBranchName(branch)),
+    allowed: Branch.values.map<String>((Branch branch) => getBranchName(branch)),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(

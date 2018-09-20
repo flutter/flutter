@@ -153,16 +153,16 @@ class FlutterTesterDevice extends Device {
         },
       );
       // Setting a bool can't fail in the callback.
-      _process.exitCode.then((_) => _isRunning = false); // ignore: unawaited_futures
+      _process.exitCode.then<void>((_) => _isRunning = false); // ignore: unawaited_futures
       _process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         _logReader.addLine(line);
       });
       _process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
         _logReader.addLine(line);
       });

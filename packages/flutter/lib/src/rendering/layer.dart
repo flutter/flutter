@@ -1129,7 +1129,7 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    return super.find(regionOffset - offset);
+    return super.find<S>(regionOffset - offset);
   }
 
   @override

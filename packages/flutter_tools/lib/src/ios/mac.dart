@@ -662,7 +662,7 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
 
 void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
   printTrace("Creating service definitions manifest at '${manifest.path}'");
-  final List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => <String, String>{
+  final List<Map<String, String>> jsonServices = services.map<Map<String, String>>((Map<String, String> service) => <String, String>{
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.

@@ -78,7 +78,7 @@ final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
-  final String contents = streams.map((TimelineStream stream) {
+  final String contents = streams.map<String>((TimelineStream stream) {
     switch (stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
@@ -428,7 +428,7 @@ class FlutterDriver {
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
   Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency = 60, Duration timeout }) async {
-    return await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then<Null>((Map<String, dynamic> _) => null);
   }
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
@@ -439,7 +439,7 @@ class FlutterDriver {
   /// then this method may fail because [finder] doesn't actually exist.
   /// The [scrollUntilVisible] method can be used in this case.
   Future<Null> scrollIntoView(SerializableFinder finder, { double alignment = 0.0, Duration timeout }) async {
-    return await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
+    return await _sendCommand(ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then<Null>((Map<String, dynamic> _) => null);
   }
 
   /// Repeatedly [scroll] the widget located by [scrollable] by [dxScroll] and
@@ -483,7 +483,7 @@ class FlutterDriver {
     // the chance to complete if the item is already onscreen; if not, scroll
     // repeatedly until we either find the item or time out.
     bool isVisible = false;
-    waitFor(item, timeout: timeout).then((Null value) { isVisible = true; });
+    waitFor(item, timeout: timeout).then<void>((Null value) { isVisible = true; });
     await Future<Null>.delayed(const Duration(milliseconds: 500));
     while (!isVisible) {
       await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));

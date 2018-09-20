@@ -224,7 +224,7 @@ class Font {
   Map<String, dynamic> get descriptor {
     return <String, dynamic>{
       'family': familyName,
-      'fonts': fontAssets.map((FontAsset a) => a.descriptor).toList(),
+      'fonts': fontAssets.map<Map<String, dynamic>>((FontAsset a) => a.descriptor).toList(),
     };
   }
 

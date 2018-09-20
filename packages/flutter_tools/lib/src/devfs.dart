@@ -47,7 +47,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform(gzip.encoder);
+    return contentsAsStream().transform<List<int>>(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -445,7 +445,7 @@ class DevFS {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =
             _operations.deleteFile(fsName, deviceUri)
-            .then((dynamic v) => v?.cast<String,dynamic>());
+            .then<Map<String, dynamic>>((dynamic v) => v?.cast<String,dynamic>());
         if (operation != null)
           _pendingOperations.add(operation);
         toRemove.add(deviceUri);
@@ -458,7 +458,7 @@ class DevFS {
     if (toRemove.isNotEmpty) {
       printTrace('Removing deleted files');
       toRemove.forEach(_entries.remove);
-      await Future.wait(_pendingOperations);
+      await Future.wait<Map<String, dynamic>>(_pendingOperations);
       _pendingOperations.clear();
     }
 
@@ -542,11 +542,11 @@ class DevFS {
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           final Future<Map<String, dynamic>> operation =
               _operations.writeFile(fsName, deviceUri, content)
-                  .then((dynamic v) => v?.cast<String, dynamic>());
+                  .then<Map<String, dynamic>>((dynamic v) => v?.cast<String, dynamic>());
           if (operation != null)
             _pendingOperations.add(operation);
         });
-        await Future.wait(_pendingOperations, eagerError: true);
+        await Future.wait<Map<String, dynamic>>(_pendingOperations, eagerError: true);
         _pendingOperations.clear();
       }
     }

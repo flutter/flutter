@@ -1262,7 +1262,7 @@ class WidgetInspectorService {
     else
       throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return path.map((_DiagnosticsPathNode node) => _pathNodeToJson(
+    return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
       _SerializeConfig(groupName: groupName),
     )).toList();

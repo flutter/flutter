@@ -85,7 +85,7 @@ void testUsingContext(String description, dynamic testMethod(), {
         body: () {
           final String flutterRoot = getFlutterRoot();
 
-          return runZoned(() {
+          return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -198,7 +198,7 @@ class MockDoctor extends Doctor {
   /// the Doctor.
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
-    return superValidators.map((DoctorValidator v) {
+    return superValidators.map<DoctorValidator>((DoctorValidator v) {
       if (v is AndroidValidator) {
         return MockAndroidWorkflowValidator();
       }

@@ -24,7 +24,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String value;
-      future.then((void _) {
+      future.then<void>((void _) {
         value = '123';
       });
       test_package.expect(value, isNull);
@@ -39,7 +39,7 @@ void main() {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip');
       bool completed = false;
-      future.then((void _) {
+      future.then<void>((void _) {
         completed = true;
       });
       test_package.expect(completed, isFalse);
@@ -498,7 +498,7 @@ void main() {
 
     testWidgets('maintains existing zone values', (WidgetTester tester) async {
       final Object key = Object();
-      await runZoned(() {
+      await runZoned<Future<void>>(() {
         expect(Zone.current[key], 'abczed');
         return tester.runAsync<void>(() async {
           expect(Zone.current[key], 'abczed');
