@@ -257,7 +257,7 @@ class FormField<T> extends StatefulWidget {
   /// autovalidates, this value will be ignored.
   final bool autovalidate;
 
-  /// If true, indicates that the widget is enabled
+  /// If true, indicates that the widget is enabled.
   final bool enabled;
 
   @override
