@@ -1,4 +1,4 @@
-Signature: dfbc023ceeca15d70ea76e125a481c0f
+Signature: 2bc2dadbb340855517114ebd927ca790
 
 UNUSED LICENSES:
 
@@ -5455,6 +5455,7 @@ FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.cc
 FILE: ../../../third_party/dart/runtime/bin/typed_data_utils.h
 FILE: ../../../third_party/dart/runtime/include/dart_embedder_api.h
 FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz.dart
+FILE: ../../../third_party/dart/runtime/tools/dartfuzz/dartfuzz_test.dart
 FILE: ../../../third_party/dart/runtime/vm/base64.cc
 FILE: ../../../third_party/dart/runtime/vm/base64.h
 FILE: ../../../third_party/dart/runtime/vm/base64_test.cc
