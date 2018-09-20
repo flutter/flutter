@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,9 +34,9 @@ void main() {
       ),
     );
 
-    final Image image = tester.widget(find.byType(Image));
-    expect(image, isNotNull);
-    expect(image.color.alpha, equals(128));
+    final Opacity opacity = tester.widget(find.byType(Opacity));
+    expect(opacity, isNotNull);
+    expect(opacity.opacity, equals(0.5));
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {
@@ -116,6 +117,77 @@ void main() {
       textDirection: TextDirection.ltr,
     ));
     handle.dispose();
+  });
+
+  testWidgets('ImageIcon should not recolor when color is provided',
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: ImageIcon(
+          _kImage,
+          color: Colors.blue,
+        ),
+      ),
+    );
+
+    final Image image = tester.widget(find.byType(Image));
+    expect(image, isNotNull);
+    expect(image.color, equals(Colors.blue));
+  });
+
+  testWidgets('ImageIcon should inherit IconTheme color',
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: IconTheme(
+          data: IconThemeData(color: Colors.blue),
+          child: ImageIcon(
+            _kImage,
+          ),
+        ),
+      ),
+    );
+
+    final Image image = tester.widget(find.byType(Image));
+    expect(image, isNotNull);
+    expect(image.color, equals(Colors.blue));
+  });
+
+  testWidgets('ImageIcon should not recolor when shouldRecolor is false',
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: ImageIcon(
+          _kImage,
+          color: Colors.blue,
+          shouldRecolor: false,
+        ),
+      ),
+    );
+
+    final Image image = tester.widget(find.byType(Image));
+    expect(image, isNotNull);
+    expect(image.color, isNull);
+  });
+
+  testWidgets(
+    'ImageIcon should ignore IconTheme color when shouldRecolor is false',
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: IconTheme(
+          data: IconThemeData(color: Colors.blue),
+          child: ImageIcon(
+            _kImage,
+            shouldRecolor: false,
+          ),
+        ),
+      ),
+    );
+
+    final Image image = tester.widget(find.byType(Image));
+    expect(image, isNotNull);
+    expect(image.color, isNull);
   });
 
 }

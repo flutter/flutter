@@ -27,6 +27,7 @@ class ImageIcon extends StatelessWidget {
     Key key,
     this.size,
     this.color,
+    this.shouldRecolor = true,
     this.semanticLabel,
   }) : super(key: key);
 
@@ -48,11 +49,17 @@ class ImageIcon extends StatelessWidget {
   /// The color to use when drawing the icon.
   ///
   /// Defaults to the current [IconTheme] color, if any. If there is
-  /// no [IconTheme], then it defaults to not recolorizing the image.
+  /// no [IconTheme], then it defaults to [IconThemeData.fallback].
   ///
   /// The image will additionally be adjusted by the opacity of the current
   /// [IconTheme], if any.
   final Color color;
+
+  /// Flag to decide if ImageIcon should recolor the image or not.
+  ///
+  /// Defaults to true, if set to false ImageIcon will ignore any color
+  /// attribute including [IconTheme] color too.
+  final bool shouldRecolor;
 
   /// Semantic label for the icon.
   ///
@@ -76,22 +83,29 @@ class ImageIcon extends StatelessWidget {
         child: SizedBox(width: iconSize, height: iconSize)
       );
 
-    final double iconOpacity = iconTheme.opacity;
-    Color iconColor = color ?? iconTheme.color;
+    double iconOpacity = iconTheme.opacity;
+    Color iconColor;
 
-    if (iconOpacity != null && iconOpacity != 1.0)
-      iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
+    if (shouldRecolor) {
+      iconColor = color ?? iconTheme.color;
+      if (iconOpacity != null && iconOpacity != 1.0) {
+        iconOpacity = iconColor.opacity * iconOpacity;
+      }
+    }
 
     return Semantics(
       label: semanticLabel,
-      child: Image(
-        image: image,
-        width: iconSize,
-        height: iconSize,
-        color: iconColor,
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.center,
-        excludeFromSemantics: true,
+      child: Opacity(
+        opacity: iconOpacity,
+        child: Image(
+          image: image,
+          width: iconSize,
+          height: iconSize,
+          color: iconColor,
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.center,
+          excludeFromSemantics: true,
+        ),
       ),
     );
   }
