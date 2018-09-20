@@ -111,6 +111,7 @@ Future<void> build({
     throwToolExit('Error building assets', exitCode: 1);
 
   await assemble(
+    buildMode: buildMode,
     assetBundle: assets,
     kernelContent: kernelContent,
     privateKeyPath: privateKeyPath,
@@ -145,6 +146,7 @@ Future<AssetBundle> buildAssets({
 }
 
 Future<void> assemble({
+  BuildMode buildMode,
   AssetBundle assetBundle,
   DevFSContent kernelContent,
   File dylibFile,
@@ -168,8 +170,8 @@ Future<void> assemble({
       assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {
       final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
+      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
       assetEntries[_kKernelKey] = kernelContent;
       assetEntries[_kPlatformKernelKey] = DevFSFileContent(fs.file(platformKernelDill));
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
