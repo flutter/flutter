@@ -22,11 +22,11 @@ void main() {
       final Paragraph paragraph = builder.build();
       paragraph.layout(ParagraphConstraints(width: 400.0));
 
-      expect(paragraph.height, fontSize);
-      expect(paragraph.width, 400.0);
-      expect(paragraph.minIntrinsicWidth, fontSize * 4.0);
-      expect(paragraph.maxIntrinsicWidth, fontSize * 4.0);
-      expect(paragraph.alphabeticBaseline, fontSize * .8);
+      expect(paragraph.height, closeTo(fontSize, 0.001));
+      expect(paragraph.width, closeTo(400.0, 0.001));
+      expect(paragraph.minIntrinsicWidth, closeTo(fontSize * 4.0, 0.001));
+      expect(paragraph.maxIntrinsicWidth, closeTo(fontSize * 4.0, 0.001));
+      expect(paragraph.alphabeticBaseline, closeTo(fontSize * .8, 0.001));
       expect(
         paragraph.ideographicBaseline,
         closeTo(paragraph.alphabeticBaseline * kAhemBaselineRatio, 0.001),
@@ -46,13 +46,13 @@ void main() {
       final Paragraph paragraph = builder.build();
       paragraph.layout(ParagraphConstraints(width: fontSize * 5.0));
 
-      expect(paragraph.height, fontSize * 2.0); // because it wraps
-      expect(paragraph.width, fontSize * 5.0);
-      expect(paragraph.minIntrinsicWidth, fontSize * 4.0);
+      expect(paragraph.height, closeTo(fontSize * 2.0, 0.001)); // because it wraps
+      expect(paragraph.width, closeTo(fontSize * 5.0, 0.001));
+      expect(paragraph.minIntrinsicWidth, closeTo(fontSize * 4.0, 0.001));
 
       // TODO(yjbanov): see https://github.com/flutter/flutter/issues/21965
-      expect(paragraph.maxIntrinsicWidth, fontSize * 8.0);
-      expect(paragraph.alphabeticBaseline, fontSize * .8);
+      expect(paragraph.maxIntrinsicWidth, closeTo(fontSize * 8.0, 0.001));
+      expect(paragraph.alphabeticBaseline, closeTo(fontSize * .8, 0.001));
       expect(
         paragraph.ideographicBaseline,
         closeTo(paragraph.alphabeticBaseline * kAhemBaselineRatio, 0.001),
