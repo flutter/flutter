@@ -43,11 +43,7 @@ export 'src/foundation/diagnostics.dart';
 export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';
-export 'src/foundation/logging.dart' show
-  LoggingChannel,
-  debugEnableLogging,
-  debugLogEvent,
-  debugShouldLogEvent;
+export 'src/foundation/logging.dart';
 export 'src/foundation/node.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';

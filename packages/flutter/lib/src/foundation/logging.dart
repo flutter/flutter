@@ -45,20 +45,12 @@ void debugLogEvent(LoggingChannel channel, DebugLogMessageCallback messageCallba
   developer.log(json.encode(message), name: channel.name);
 }
 
-final Set<LoggingChannel> _enabledEventChannels = Set<LoggingChannel>();
-
-/// All logging event channels.
-Iterable<LoggingChannel> get debugLogEventChannels => LoggingChannel._channels.values;
-
-/// The set of all enabled logging event channels.
-Set<LoggingChannel> get enabledDebugLogEventChannels => _enabledEventChannels;
-
 /// Identifies a logging channel.
 class LoggingChannel {
   /// Singleton constructor. Calling `LoggingChannel(name)` returns the same
   /// actual instance whenever it is called with the same string name.
   factory LoggingChannel(String name, {String description}) =>
-      _getOrRegisterChannel(name, description ?? '');
+      LoggingService.instance.getOrRegisterChannel(name, description ?? '');
 
   const LoggingChannel._(this.name, this.description);
 
@@ -67,32 +59,53 @@ class LoggingChannel {
 
   /// An optional description, suitable for presentation by tools.
   final String description;
-
-  static LoggingChannel _getOrRegisterChannel(String name, String description) {
-    assert(name != null);
-    return _channels.putIfAbsent(
-        name, () => LoggingChannel._(name, description));
-  }
-
-  static final Map<String, LoggingChannel> _channels = <String, LoggingChannel>{};
 }
-
-/// Get the logging channel registered to this name, or null if none exists.
-LoggingChannel getRegisteredChannel(String name) =>
-    LoggingChannel._channels[name];
 
 /// Enable (or disable) logging for all events on the given [channel].
 void debugEnableLogging(LoggingChannel channel, [bool enable = true]) {
   assert(channel != null);
   if (enable) {
-    _enabledEventChannels.add(channel);
+    LoggingService.instance.enabledEventChannels.add(channel);
   } else {
-    _enabledEventChannels.remove(channel);
+    LoggingService.instance.enabledEventChannels.remove(channel);
   }
 }
 
 /// Returns true if events on the given event [channel] should be logged.
 bool debugShouldLogEvent(LoggingChannel channel) {
   assert(channel != null);
-  return _enabledEventChannels.contains(channel);
+  return LoggingService.instance.enabledEventChannels.contains(channel);
+}
+
+/// Manages logging services.
+///
+/// The [LoggingService] is intended for internal use only.
+///
+/// * To create logging channels, see [LoggingChannel].
+/// * To enable or disable a logging channel, use [debugEnableLogging].
+/// * To query channel enablement, use [debugShouldLogEvent].
+class LoggingService {
+  LoggingService._();
+
+  /// The shared service instance.
+  static final LoggingService instance = LoggingService._();
+
+  /// The set of all enabled logging event channels.
+  Set<LoggingChannel> get enabledEventChannels => _enabledEventChannels;
+  final Set<LoggingChannel> _enabledEventChannels = Set<LoggingChannel>();
+
+  /// All registered logging event channels.
+  Iterable<LoggingChannel> get debugLogEventChannels => _channels.values;
+
+  final Map<String, LoggingChannel> _channels = <String, LoggingChannel>{};
+
+  /// Get the logging channel registered to this [name], or null if none exists.
+  LoggingChannel getRegisteredChannel(String name) => _channels[name];
+
+  /// Get the channel currently registered to [name], or register and return a
+  /// new one.
+  LoggingChannel getOrRegisterChannel(String name, String description) {
+    assert(name != null);
+    return _channels.putIfAbsent(name, () => LoggingChannel._(name, description));
+  }
 }

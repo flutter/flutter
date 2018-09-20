@@ -150,7 +150,7 @@ abstract class BindingBase {
           callback: (Map<String, Object> parameters) async {
             final String channel = parameters['channel'];
             if (channel != null) {
-              final LoggingChannel registeredChannel = getRegisteredChannel(channel);
+              final LoggingChannel registeredChannel = LoggingService.instance.getRegisteredChannel(channel);
               if (registeredChannel != null) {
                 debugEnableLogging(registeredChannel, parameters['enable'] == 'true');
               }
@@ -162,7 +162,7 @@ abstract class BindingBase {
           name: 'loggingChannels',
           callback: (Map<String, dynamic> parameters) async {
             final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
-            for (LoggingChannel channel in debugLogEventChannels) {
+            for (LoggingChannel channel in LoggingService.instance.debugLogEventChannels) {
               map[channel.name] = <String, String>{
                 'enabled': debugShouldLogEvent(channel).toString(),
                 'description': channel.description,
