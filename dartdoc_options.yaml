@@ -1,0 +1,5 @@
+dartdoc:
+  tools:
+    snippet:
+      command: ["dev/snippets/lib/main.dart"]
+      description: "Creates custom snippet output from snippet code."
