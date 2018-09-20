@@ -282,6 +282,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   bool get hasError => _errorText != null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
+  /// If the [FormField]'s enabled is false, the method does nothing.
   void save() {
     if (widget.onSaved != null && widget.enabled)
       widget.onSaved(value);
