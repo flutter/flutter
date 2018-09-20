@@ -632,7 +632,7 @@ class AccessibilityBridge
         if (rootObject != null) {
             final float[] identity = new float[16];
             Matrix.setIdentityM(identity, 0);
-            // in android devices above AP 23, the system nav bar can be placed on the left side
+            // in android devices API 23 and above, the system nav bar can be placed on the left side
             // of the screen in landscape mode. We must handle the translation ourselves for the
             // a11y nodes.
             if (Build.VERSION.SDK_INT >= 23) {
