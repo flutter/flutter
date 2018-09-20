@@ -4,8 +4,6 @@
 
 #include "flutter/flow/layers/backdrop_filter_layer.h"
 
-#include "third_party/skia/include/core/SkImageFilter.h"
-
 namespace flow {
 
 BackdropFilterLayer::BackdropFilterLayer() = default;
