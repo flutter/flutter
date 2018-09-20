@@ -26,7 +26,6 @@ export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';
 export 'src/widgets/bottom_navigation_bar_item.dart';
-export 'src/widgets/bottom_sheet_scroll_controller.dart';
 export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissible.dart';

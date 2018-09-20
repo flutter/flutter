@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'bottom_sheet_scroll_controller.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'material.dart';
@@ -80,29 +81,23 @@ class BottomSheet extends StatefulWidget {
   /// Creates a [BottomSheetScrollController] suitable for animating the
   /// [BottomSheet].
   static BottomSheetScrollController createScrollController({
-    double top,
+    double initialHeightPercentage = 0.5,
     double minTop = 0.0,
-    double maxTop,
     bool isPersistent = false,
     @required BuildContext context,
+    bool forFullScreen = false,
   }) {
     assert(minTop != null);
     assert(context != null);
     assert(debugCheckHasMediaQuery(context));
 
-    maxTop ??= MediaQuery.of(context).size.height;
-    top ??= maxTop / 2;
-
-    assert(maxTop != 0);
-    assert(maxTop >= minTop, 'Expected $maxTop >= $minTop.');
-    assert(minTop <= top && top <= maxTop);
-
     return BottomSheetScrollController(
       debugLabel: 'BottomSheetScrollController',
-      top: top,
+      initialHeightPercentage: initialHeightPercentage,
       minTop: minTop,
-      maxTop: maxTop,
       isPersistent: isPersistent,
+      context: context,
+      forFullScreen: forFullScreen,
     );
   }
 }
@@ -115,7 +110,8 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   void _maybeCloseBottomSheet() {
-    if (widget.scrollController.top == widget.scrollController.maxTop) {
+    if (!widget.scrollController.isPersistent &&
+        widget.scrollController.top >= widget.scrollController.maxTop) {
       // onClosing is asserted not null
       widget.onClosing();
    }
@@ -239,14 +235,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
-    this.initialTop,
+    this.initialHeightPercentage,
     this.clampTop = false,
     RouteSettings settings,
   }) : super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
-  final double initialTop;
+  final double initialHeightPercentage;
   final bool clampTop;
 
   BottomSheetScrollController _scrollController;
@@ -272,9 +268,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     _scrollController = BottomSheet.createScrollController(
-      top: initialTop,
-      minTop: clampTop ? initialTop : 0.0,
+      initialHeightPercentage: initialHeightPercentage,
+      minTop: clampTop ? initialHeightPercentage : 0.0,
       context: context,
+      forFullScreen: true,
     );
     // By definition, the bottom sheet is aligned to the bottom of the page
     // and isn't exposed to the top padding of the MediaQuery.
@@ -320,20 +317,24 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
-  double initialTop,
+  double initialHeightPercentage = 0.5,
   bool clampTop = false,
 }) {
   assert(clampTop != null);
   assert(context != null);
   assert(builder != null);
-  assert(!clampTop || initialTop != null,
+  assert(!clampTop || initialHeightPercentage != null,
     'If you wish to clamp the top, you must specify an initial value.');
+  assert(initialHeightPercentage != null);
+  assert(initialHeightPercentage >= 0.0 && initialHeightPercentage <= 1.0);
+  assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
+
   return Navigator.push(context, _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    initialTop: initialTop,
+    initialHeightPercentage: initialHeightPercentage,
     clampTop: clampTop,
   ));
 }
@@ -378,20 +379,17 @@ Future<T> showModalBottomSheet<T>({
 StandardBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
-  double initialTop,
+  double initialHeightPercentage = 0.5,
   bool clampTop = false,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(clampTop != null);
-  assert(!clampTop || initialTop != null,
-    'If you wish to clamp the top, you must specify an initial value.');
-  assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasScaffold(context));
 
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
-    initialTop: initialTop,
+    initialHeightPercentage: initialHeightPercentage,
     clampTop: clampTop,
   );
 }

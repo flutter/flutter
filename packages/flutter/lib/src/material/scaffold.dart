@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
+import 'bottom_sheet_scroll_controller.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'colors.dart';
@@ -1227,8 +1228,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         (BuildContext context) => widget.bottomSheet,
         false,
         // TODO(dnfield): don't hard code this
-        initialTop: 400.0,
-        maxTop: 400.0,
         clampTop: true,
       );
     }
@@ -1249,8 +1248,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   StandardBottomSheetController<T> _buildBottomSheet<T>(
       WidgetBuilder builder,
       bool isLocalHistoryEntry, {
-      double initialTop,
-      double maxTop,
+      double initialHeight = 0.5,
       bool clampTop = false,
     }) {
     assert(() {
@@ -1265,9 +1263,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }());
 
     _bottomSheetScrollController = BottomSheet.createScrollController(
-      top: initialTop,
-      minTop: clampTop ? initialTop : 0.0,
-      maxTop: maxTop,
+      initialHeightPercentage: initialHeight,
+      minTop: clampTop ? initialHeight : 0.0,
       isPersistent: !isLocalHistoryEntry,
       context: context,
     )..addTopListener(() => setState(() {
@@ -1388,7 +1385,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
   StandardBottomSheetController<T> showBottomSheet<T>(
       WidgetBuilder builder, {
-      double initialTop,
+      double initialHeightPercentage = 0.5,
       bool clampTop = false,
   }) {
     assert(() {
@@ -1401,9 +1398,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       }
       return true;
     }());
+    assert(debugCheckHasMediaQuery(context));
+
     _closeCurrentBottomSheet();
     setState(() {
-      _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialTop: initialTop, clampTop: clampTop);
+      _currentBottomSheet = _buildBottomSheet<T>(builder, true, initialHeight: initialHeightPercentage, clampTop: clampTop);
     });
     return _currentBottomSheet;
   }
@@ -1500,8 +1499,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       duration: kFloatingActionButtonSegue,
       vsync: this,
     );
-
-    _maybeBuildPersistentBottomSheet();
   }
 
   @override
@@ -1545,6 +1542,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       hideCurrentSnackBar(reason: SnackBarClosedReason.timeout);
     }
     _accessibleNavigation = mediaQuery.accessibleNavigation;
+    _maybeBuildPersistentBottomSheet();
     super.didChangeDependencies();
   }
 

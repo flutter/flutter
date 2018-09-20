@@ -23,6 +23,7 @@ export 'src/material/back_button.dart';
 export 'src/material/bottom_app_bar.dart';
 export 'src/material/bottom_navigation_bar.dart';
 export 'src/material/bottom_sheet.dart';
+export 'src/material/bottom_sheet_scroll_controller.dart';
 export 'src/material/button.dart';
 export 'src/material/button_bar.dart';
 export 'src/material/button_theme.dart';

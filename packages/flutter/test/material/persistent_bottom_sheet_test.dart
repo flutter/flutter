@@ -153,7 +153,6 @@ void main() {
             primary: true,
             child: Container(
               alignment: Alignment.center,
-              height: 200.0,
               child: Builder(
                 builder: (BuildContext context) {
                   return RaisedButton(
@@ -177,8 +176,8 @@ void main() {
     );
 
     expect(find.text('showModalBottomSheet'), findsOneWidget);
-    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 200.0));
-    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 400.0));
+    expect(tester.getSize(find.byKey(bottomSheetKey)), const Size(800.0, 300.0));
+    expect(tester.getTopLeft(find.byKey(bottomSheetKey)), const Offset(0.0, 300.0));
 
     // Show the modal bottomSheet
     await tester.tap(find.text('showModalBottomSheet'));
