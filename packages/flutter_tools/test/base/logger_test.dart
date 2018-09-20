@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 
 import '../src/common.dart';
@@ -60,6 +61,7 @@ void main() {
     AnsiStatus ansiStatus;
     SummaryStatus summaryStatus;
     int called;
+    const List<String> testPlatforms = <String>['linux', 'macos', 'windows', 'fuchsia'];
     final RegExp secondDigits = RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
@@ -91,22 +93,105 @@ void main() {
       });
     }
 
-    testUsingContext('AnsiSpinner works', () async {
-      ansiSpinner.start();
-      await doWhileAsync(() => ansiSpinner.ticks < 10);
-      List<String> lines = outputStdout();
-      expect(lines[0], startsWith(' \b-\b\\\b|\b/\b-\b\\\b|\b/'));
-      expect(lines[0].endsWith('\n'), isFalse);
-      expect(lines.length, equals(1));
-      ansiSpinner.stop();
-      lines = outputStdout();
-      expect(lines[0], endsWith('\b \b'));
-      expect(lines.length, equals(1));
+    for (String testOs in testPlatforms) {
+      testUsingContext('AnsiSpinner works for $testOs', () async {
+        ansiSpinner.start();
+        await doWhileAsync(() => ansiSpinner.ticks < 10);
+        List<String> lines = outputStdout();
+        expect(lines[0], startsWith(platform.isWindows
+            ? ' \b-\b\\\b|\b/\b-\b\\\b|\b/'
+            : ' \b\b🌕\b\b🌖\b\b🌗\b\b🌘\b\b🌑\b\b🌒\b\b🌓\b\b🌔\b\b🌕\b\b🌖'));
+        expect(lines[0].endsWith('\n'), isFalse);
+        expect(lines.length, equals(1));
+        ansiSpinner.stop();
+        lines = outputStdout();
+        expect(lines[0], endsWith(platform.isWindows ? '\b \b' : '\b\b  \b\b'));
+        expect(lines.length, equals(1));
 
-      // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiSpinner.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-      expect(() { ansiSpinner.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
+        // Verify that stopping or canceling multiple times throws.
+        expect(() {
+          ansiSpinner.stop();
+        }, throwsA(isInstanceOf<AssertionError>()));
+        expect(() {
+          ansiSpinner.cancel();
+        }, throwsA(isInstanceOf<AssertionError>()));
+      }, overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Platform: () => FakePlatform(operatingSystem: testOs),
+      });
+
+      testUsingContext('Stdout startProgress handle null inputs on colored terminal for $testOs', () async {
+        context[Logger].startProgress(null, progressId: null,
+          expectSlowOperation: null,
+          progressIndicatorPadding: null,
+        );
+        final List<String> lines = outputStdout();
+        expect(outputStderr().length, equals(1));
+        expect(outputStderr().first, isEmpty);
+        expect(lines[0], matches(platform.isWindows ? r'[ ]{64} [\b]-' : r'[ ]{64} [\b][\b]🌕'));
+      }, overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Platform: () => FakePlatform(operatingSystem: testOs),
+        Logger: () => StdoutLogger()..supportsColor = true,
+      });
+
+      testUsingContext('AnsiStatus works when cancelled for $testOs', () async {
+        ansiStatus.start();
+        await doWhileAsync(() => ansiStatus.ticks < 10);
+        List<String> lines = outputStdout();
+        expect(lines[0], startsWith(platform.isWindows
+            ? 'Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/'
+            : 'Hello world               \b\b🌕\b\b🌖\b\b🌗\b\b🌘\b\b🌑\b\b🌒\b\b🌓\b\b🌔\b\b🌕\b\b🌖'));
+        expect(lines.length, equals(1));
+        expect(lines[0].endsWith('\n'), isFalse);
+
+        // Verify a cancel does _not_ print the time and prints a newline.
+        ansiStatus.cancel();
+        lines = outputStdout();
+        final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
+        expect(matches, isEmpty);
+        expect(lines[0], endsWith(platform.isWindows ? '\b \b' : '\b\b  \b\b'));
+        expect(called, equals(1));
+        expect(lines.length, equals(2));
+        expect(lines[1], equals(''));
+
+        // Verify that stopping or canceling multiple times throws.
+        expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+        expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+      }, overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Platform: () => FakePlatform(operatingSystem: testOs),
+      });
+
+      testUsingContext('AnsiStatus works when stopped for $testOs', () async {
+        ansiStatus.start();
+        await doWhileAsync(() => ansiStatus.ticks < 10);
+        List<String> lines = outputStdout();
+        expect(lines[0], startsWith(platform.isWindows
+            ? 'Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/'
+            : 'Hello world               \b\b🌕\b\b🌖\b\b🌗\b\b🌘\b\b🌑\b\b🌒\b\b🌓\b\b🌔\b\b🌕\b\b🌖'));
+        expect(lines.length, equals(1));
+
+        // Verify a stop prints the time.
+        ansiStatus.stop();
+        lines = outputStdout();
+        final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
+        expect(matches, isNotNull);
+        expect(matches, hasLength(1));
+        final Match match = matches.first;
+        expect(lines[0], endsWith(match.group(0)));
+        expect(called, equals(1));
+        expect(lines.length, equals(2));
+        expect(lines[1], equals(''));
+
+        // Verify that stopping or canceling multiple times throws.
+        expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
+        expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
+      }, overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Platform: () => FakePlatform(operatingSystem: testOs),
+      });
+    }
 
     testUsingContext('Error logs are red', () async {
       context[Logger].printError('Pants on fire!');
@@ -144,20 +229,6 @@ void main() {
       Logger: () => StdoutLogger()..supportsColor = true,
     });
 
-    testUsingContext('Stdout startProgress handle null inputs on colored terminal', () async {
-      context[Logger].startProgress(null, progressId: null,
-        expectSlowOperation: null,
-        progressIndicatorPadding: null,
-      );
-      final List<String> lines = outputStdout();
-      expect(outputStderr().length, equals(1));
-      expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals('                                                                 \b-'));
-    }, overrides: <Type, Generator>{
-      Stdio: () => mockStdio,
-      Logger: () => StdoutLogger()..supportsColor = true,
-    });
-
     testUsingContext('Stdout printStatus handle null inputs on regular terminal', () async {
       context[Logger].printStatus(null, emphasis: null,
           color: null,
@@ -180,58 +251,11 @@ void main() {
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals('                                                                '));
+      expect(lines[0], matches('[ ]{64}'));
     }, overrides: <Type, Generator>{
       Stdio: () => mockStdio,
       Logger: () => StdoutLogger()..supportsColor = false,
     });
-
-    testUsingContext('AnsiStatus works when cancelled', () async {
-      ansiStatus.start();
-      await doWhileAsync(() => ansiStatus.ticks < 10);
-      List<String> lines = outputStdout();
-      expect(lines[0], startsWith('Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/\b-'));
-      expect(lines.length, equals(1));
-      expect(lines[0].endsWith('\n'), isFalse);
-
-      // Verify a cancel does _not_ print the time and prints a newline.
-      ansiStatus.cancel();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isEmpty);
-      expect(lines[0], endsWith('\b \b'));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
-
-      // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
-
-    testUsingContext('AnsiStatus works when stopped', () async {
-      ansiStatus.start();
-      await doWhileAsync(() => ansiStatus.ticks < 10);
-      List<String> lines = outputStdout();
-      expect(lines[0], startsWith('Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/\b-'));
-      expect(lines.length, equals(1));
-
-      // Verify a stop prints the time.
-      ansiStatus.stop();
-      lines = outputStdout();
-      final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
-      expect(matches, isNotNull);
-      expect(matches, hasLength(1));
-      final Match match = matches.first;
-      expect(lines[0], endsWith(match.group(0)));
-      expect(called, equals(1));
-      expect(lines.length, equals(2));
-      expect(lines[1], equals(''));
-
-      // Verify that stopping or canceling multiple times throws.
-      expect(() { ansiStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-      expect(() { ansiStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('SummaryStatus works when cancelled', () async {
       summaryStatus.start();
