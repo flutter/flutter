@@ -119,10 +119,10 @@ void main() {
     int _validateCalled = 0;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextFormField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
               enabled: false,
               autovalidate: true,
               validator: (String value) { _validateCalled++; return null; },
