@@ -125,7 +125,10 @@ class DartVm {
         await invokeRpc('getVM', timeout: _kRpcTimeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
-      result.add(IsolateRef._fromJson(jsonIsolate, this));
+      final String name = jsonIsolate['name'];
+      if (name.contains(pattern)) {
+        result.add(IsolateRef._fromJson(jsonIsolate, this));
+      }
     }
     return result;
   }
