@@ -14,10 +14,6 @@ import 'dart/sdk.dart';
 import 'globals.dart';
 
 enum Artifact {
-  dartIoEntriesTxt,
-  dartVmEntryPointsTxt,
-  entryPointsJson,
-  entryPointsExtraJson,
   genSnapshot,
   flutterTester,
   snapshotDart,
@@ -34,14 +30,6 @@ enum Artifact {
 
 String _artifactToFileName(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
   switch (artifact) {
-    case Artifact.dartIoEntriesTxt:
-      return 'dart_io_entries.txt';
-    case Artifact.dartVmEntryPointsTxt:
-      return 'dart_vm_entry_points.txt';
-    case Artifact.entryPointsJson:
-      return 'entry_points.json';
-    case Artifact.entryPointsExtraJson:
-      return 'entry_points_extra.json';
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
@@ -145,10 +133,6 @@ class CachedArtifacts extends Artifacts {
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
-      case Artifact.dartIoEntriesTxt:
-      case Artifact.dartVmEntryPointsTxt:
-      case Artifact.entryPointsJson:
-      case Artifact.entryPointsExtraJson:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         return fs.path.join(engineDir, _artifactToFileName(artifact));
@@ -165,10 +149,6 @@ class CachedArtifacts extends Artifacts {
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
-      case Artifact.dartIoEntriesTxt:
-      case Artifact.dartVmEntryPointsTxt:
-      case Artifact.entryPointsJson:
-      case Artifact.entryPointsExtraJson:
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
@@ -260,13 +240,6 @@ class LocalEngineArtifacts extends Artifacts {
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
     switch (artifact) {
-      case Artifact.dartIoEntriesTxt:
-        return fs.path.join(_engineSrcPath, 'third_party', 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
-      case Artifact.dartVmEntryPointsTxt:
-        return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
-      case Artifact.entryPointsJson:
-      case Artifact.entryPointsExtraJson:
-        return fs.path.join(engineOutPath, 'dart_entry_points', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.genSnapshot:
