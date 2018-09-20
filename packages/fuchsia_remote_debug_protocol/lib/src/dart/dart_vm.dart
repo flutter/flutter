@@ -118,7 +118,7 @@ class DartVm {
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
   ///
-  /// This is not limited to isolates running Flutter, but to any Isolate on the
+  /// This is not limited to Isolates running Flutter, but to any Isolate on the
   /// VM.
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
