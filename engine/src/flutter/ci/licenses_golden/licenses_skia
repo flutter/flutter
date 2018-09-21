@@ -1,4 +1,4 @@
-Signature: 042774c98cd26293c1a8d048bd389252
+Signature: f6009d806ed0260302e3edf4b214036d
 
 UNUSED LICENSES:
 
@@ -2779,7 +2779,6 @@ FILE: ../../../third_party/skia/samplecode/SampleComplexClip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleConcavePaths.cpp
 FILE: ../../../third_party/skia/samplecode/SampleDash.cpp
 FILE: ../../../third_party/skia/samplecode/SampleDegenerateTwoPtRadials.cpp
-FILE: ../../../third_party/skia/samplecode/SampleDither.cpp
 FILE: ../../../third_party/skia/samplecode/SampleEffects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleEmboss.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFillType.cpp
@@ -2836,7 +2835,6 @@ FILE: ../../../third_party/skia/src/core/SkColorMatrixFilterRowMajor255.cpp
 FILE: ../../../third_party/skia/src/core/SkConvertPixels.h
 FILE: ../../../third_party/skia/src/core/SkData.cpp
 FILE: ../../../third_party/skia/src/core/SkDevice.cpp
-FILE: ../../../third_party/skia/src/core/SkDither.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawProcs.h
 FILE: ../../../third_party/skia/src/core/SkEdgeBuilder.cpp
 FILE: ../../../third_party/skia/src/core/SkEdgeBuilder.h
@@ -5015,7 +5013,6 @@ FILE: ../../../third_party/skia/include/effects/SkBlurDrawLooper.h
 FILE: ../../../third_party/skia/include/private/SkFloatBits.h
 FILE: ../../../third_party/skia/src/core/SkBitmap.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvas.cpp
-FILE: ../../../third_party/skia/src/core/SkDither.h
 FILE: ../../../third_party/skia/src/core/SkMath.cpp
 FILE: ../../../third_party/skia/src/core/SkPathMeasure.cpp
 FILE: ../../../third_party/skia/src/core/SkPoint.cpp
