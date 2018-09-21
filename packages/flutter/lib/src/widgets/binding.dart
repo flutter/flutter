@@ -297,14 +297,18 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       }
     );
 
-    registerBoolServiceExtension(
-      name: 'debugProfileBuilds',
-      getter: () => new Future<bool>.value(debugProfileBuildsEnabled),
-      setter: (bool value) async {
-        if (debugProfileBuildsEnabled != value)
-          debugProfileBuildsEnabled = value;
-      }
-    );
+    assert(() {
+      // Expose the ability to send Widget rebuilds to the as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileWidgetBuilds',
+        getter: () => new Future<bool>.value(debugProfileBuildsEnabled),
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabled != value)
+            debugProfileBuildsEnabled = value;
+        }
+      );
+      return true;
+    }());
 
     // This service extension is deprecated and will be removed by 7/1/2018.
     // Use ext.flutter.inspector.show instead.
