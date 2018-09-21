@@ -307,6 +307,8 @@ using namespace shell;
     [self writeSize:typedData.elementCount];
     [self writeAlignment:typedData.elementSize];
     [self writeData:typedData.data];
+  } else if ([value isKindOfClass:[NSData class]]) {
+    [self writeValue:[FlutterStandardTypedData typedDataWithBytes:value]];
   } else if ([value isKindOfClass:[NSArray class]]) {
     NSArray* array = value;
     [self writeByte:FlutterStandardFieldList];
