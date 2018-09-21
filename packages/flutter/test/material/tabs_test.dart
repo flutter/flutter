@@ -86,7 +86,7 @@ Widget buildFrame({
   );
 }
 
-typedef Widget TabControllerFrameBuilder(BuildContext context, TabController controller);
+typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
   const TabControllerFrame({ this.length, this.initialIndex = 0, this.builder });

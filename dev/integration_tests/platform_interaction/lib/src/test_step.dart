@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 enum TestStatus { ok, pending, failed, complete }
 
-typedef Future<TestStepResult> TestStep();
+typedef TestStep = Future<TestStepResult> Function();
 
 const String nothing = '-';
 

@@ -20,7 +20,7 @@ const double _kDismissThreshold = 0.4;
 /// the given `direction`.
 ///
 /// Used by [Dismissible.onDismissed].
-typedef void DismissDirectionCallback(DismissDirection direction);
+typedef DismissDirectionCallback = void Function(DismissDirection direction);
 
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {

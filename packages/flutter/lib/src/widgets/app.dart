@@ -31,7 +31,7 @@ export 'dart:ui' show Locale;
 /// The `locale` is the device's locale when the app started, or the device
 /// locale the user selected after the app was started. The `supportedLocales`
 /// parameter is just the value of [WidgetsApp.supportedLocales].
-typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
@@ -41,7 +41,7 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// localized title.
 ///
 /// This function must not return null.
-typedef String GenerateAppTitle(BuildContext context);
+typedef GenerateAppTitle = String Function(BuildContext context);
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
@@ -235,9 +235,9 @@ class WidgetsApp extends StatefulWidget {
   /// A one-line description used by the device to identify the app for the user.
   ///
   /// On Android the titles appear above the task manager's app snapshots which are
-  /// displayed when the user presses the "recent apps" button. Similarly, on
-  /// iOS the titles appear in the App Switcher when the user double presses the
-  /// home button.
+  /// displayed when the user presses the "recent apps" button. On iOS this
+  /// value cannot be used. `CFBundleDisplayName` from the app's `Info.plist` is
+  /// referred to instead whenever present, `CFBundleName` otherwise.
   ///
   /// To provide a localized title instead, use [onGenerateTitle].
   /// {@endtemplate}

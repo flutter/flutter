@@ -36,7 +36,7 @@ import 'material_localizations.dart';
 ///   backingList.insert(newIndex, element);
 /// }
 /// ```
-typedef void OnReorderCallback(int oldIndex, int newIndex);
+typedef OnReorderCallback = void Function(int oldIndex, int newIndex);
 
 /// A list whose items the user can interactively reorder by dragging.
 ///

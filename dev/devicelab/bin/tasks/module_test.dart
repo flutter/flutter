@@ -103,11 +103,11 @@ Future<Null> main() async {
         await flutter('clean');
       });
 
-      section('Materialize host app');
+      section('Running `flutter make-host-app-editable` to Materialize host app');
 
       await inDirectory(Directory(path.join(tempDir.path, 'hello')), () async {
         await flutter(
-          'materialize',
+          'make-host-app-editable',
           options: <String>['android'],
         );
       });

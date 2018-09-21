@@ -20,19 +20,50 @@ AnsiTerminal get terminal {
       : context[AnsiTerminal];
 }
 
-class AnsiTerminal {
-  static const String _bold  = '\u001B[1m';
-  static const String _reset = '\u001B[0m';
-  static const String _clear = '\u001B[2J\u001B[H';
+enum TerminalColor {
+  red,
+  green,
+  blue,
+  cyan,
+  yellow,
+  magenta,
+  grey,
+}
 
-  bool supportsColor = platform.stdoutSupportsAnsi;
+class AnsiTerminal {
+  static const String bold = '\u001B[1m';
+  static const String reset = '\u001B[0m';
+  static const String clear = '\u001B[2J\u001B[H';
+
+  static const String red = '\u001b[31m';
+  static const String green = '\u001b[32m';
+  static const String blue = '\u001b[34m';
+  static const String cyan = '\u001b[36m';
+  static const String magenta = '\u001b[35m';
+  static const String yellow = '\u001b[33m';
+  static const String grey = '\u001b[1;30m';
+
+  static const Map<TerminalColor, String> _colorMap = <TerminalColor, String>{
+    TerminalColor.red: red,
+    TerminalColor.green: green,
+    TerminalColor.blue: blue,
+    TerminalColor.cyan: cyan,
+    TerminalColor.magenta: magenta,
+    TerminalColor.yellow: yellow,
+    TerminalColor.grey: grey,
+  };
+
+  static String colorCode(TerminalColor color) => _colorMap[color];
+
+  bool supportsColor = platform.stdoutSupportsAnsi ?? false;
 
   String bolden(String message) {
-    if (!supportsColor)
+    assert(message != null);
+    if (!supportsColor || message.isEmpty)
       return message;
     final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n'))
-      buffer.writeln('$_bold$line$_reset');
+      buffer.writeln('$bold$line$reset');
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
     return (!message.endsWith('\n') && result.endsWith('\n'))
@@ -40,7 +71,21 @@ class AnsiTerminal {
         : result;
   }
 
-  String clearScreen() => supportsColor ? _clear : '\n\n';
+  String color(String message, TerminalColor color) {
+    assert(message != null);
+    if (!supportsColor || color == null || message.isEmpty)
+      return message;
+    final StringBuffer buffer = StringBuffer();
+    for (String line in message.split('\n'))
+      buffer.writeln('${_colorMap[color]}$line$reset');
+    final String result = buffer.toString();
+    // avoid introducing a new newline to the colored text
+    return (!message.endsWith('\n') && result.endsWith('\n'))
+        ? result.substring(0, result.length - 1)
+        : result;
+  }
+
+  String clearScreen() => supportsColor ? clear : '\n\n';
 
   set singleCharMode(bool value) {
     final Stream<List<int>> stdin = io.stdin;
@@ -113,4 +158,3 @@ class AnsiTerminal {
     return choice;
   }
 }
-

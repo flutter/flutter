@@ -39,7 +39,7 @@ class PlatformViewsRegistry {
 /// Callback signature for when a platform view was created.
 ///
 /// `id` is the platform view's unique identifier.
-typedef void PlatformViewCreatedCallback(int id);
+typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
 ///

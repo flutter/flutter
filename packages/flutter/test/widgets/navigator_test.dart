@@ -42,7 +42,7 @@ class SecondWidgetState extends State<SecondWidget> {
   }
 }
 
-typedef void ExceptionCallback(dynamic exception);
+typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
   const ThirdWidget({ this.targetKey, this.onException });
@@ -89,7 +89,7 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-typedef void OnObservation(Route<dynamic> route, Route<dynamic> previousRoute);
+typedef OnObservation = void Function(Route<dynamic> route, Route<dynamic> previousRoute);
 
 class TestObserver extends NavigatorObserver {
   OnObservation onPushed;

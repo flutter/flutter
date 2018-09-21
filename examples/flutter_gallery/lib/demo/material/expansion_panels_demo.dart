@@ -10,8 +10,8 @@ enum _Location {
   Bermuda
 }
 
-typedef Widget DemoItemBodyBuilder<T>(DemoItem<T> item);
-typedef String ValueToString<T>(T value);
+typedef DemoItemBodyBuilder<T> = Widget Function(DemoItem<T> item);
+typedef ValueToString<T> = String Function(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
   const DualHeaderWithHint({
