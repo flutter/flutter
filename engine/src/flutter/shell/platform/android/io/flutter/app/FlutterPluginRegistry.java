@@ -72,11 +72,11 @@ public class FlutterPluginRegistry
     public void attach(FlutterView flutterView, Activity activity) {
         mFlutterView = flutterView;
         mActivity = activity;
-        mPlatformViewsController.attachFlutterView(flutterView);
+        mPlatformViewsController.attach(activity, flutterView, flutterView);
     }
 
     public void detach() {
-        mPlatformViewsController.detachFlutterView();
+        mPlatformViewsController.detach();
         mPlatformViewsController.onFlutterViewDestroyed();
         mFlutterView = null;
         mActivity = null;
