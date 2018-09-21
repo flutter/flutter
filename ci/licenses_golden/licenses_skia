@@ -1,4 +1,4 @@
-Signature: 6dfa4a1fcdd9bda2c0809b3355520e4d
+Signature: fdd070809577c4d1926fd0176c8dee74
 
 UNUSED LICENSES:
 
@@ -1994,6 +1994,10 @@ FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
 FILE: ../../../third_party/skia/docs/undocumented.bmh
 FILE: ../../../third_party/skia/docs/usingBookmaker.bmh
+FILE: ../../../third_party/skia/experimental/canvaskit/canvas-kit/example.html
+FILE: ../../../third_party/skia/experimental/canvaskit/externs.js
+FILE: ../../../third_party/skia/experimental/canvaskit/helper.js
+FILE: ../../../third_party/skia/experimental/canvaskit/interface.js
 FILE: ../../../third_party/skia/experimental/docs/animationCommon.js
 FILE: ../../../third_party/skia/experimental/docs/backend.js
 FILE: ../../../third_party/skia/experimental/docs/canvasBackend.js
@@ -4617,11 +4621,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/experimental/canvaskit/canvaskit_bindings.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
+FILE: ../../../third_party/skia/experimental/canvaskit/canvaskit_bindings.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
+FILE: ../../../third_party/skia/include/private/GrSkSLFPFactoryCache.h
+FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2016 Mozilla Foundation
+Copyright 2018 Google LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -4652,14 +4660,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/fuzz/FuzzEncoders.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
-FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
-FILE: ../../../third_party/skia/include/private/GrSkSLFPFactoryCache.h
-FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 Google LLC
+Copyright 2016 Mozilla Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
