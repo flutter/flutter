@@ -40,7 +40,7 @@ Map<String, List<String>> parseSection(String section) {
 
 Future<Null> main() async {
   final HttpClient client = new HttpClient();
-  final String body = (await (await (await client.getUrl(Uri.parse(registry))).close()).transform(UTF8.decoder).toList()).join('');
+  final String body = (await (await (await client.getUrl(Uri.parse(registry))).close()).transform(utf8.decoder).toList()).join('');
   final List<Map<String, List<String>>> sections = body.split('%%').map<Map<String, List<String>>>(parseSection).toList();
   final Map<String, List<String>> outputs = <String, List<String>>{'language': <String>[], 'region': <String>[]};
   String fileDate;
