@@ -308,7 +308,7 @@ void main() {
     expect(result, <String, String>{ 'enabled': 'false' });
     expect(debugProfileBuildsEnabled, false);
 
-    result = await binding.testExtension('debugProfileBuilds', <String, String>{ 'enabled': 'true' });
+    result = await binding.testExtension('profileWidgetBuilds', <String, String>{ 'enabled': 'true' });
     expect(result, <String, String>{ 'enabled': 'true' });
     expect(debugProfileBuildsEnabled, true);
 
@@ -541,7 +541,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 38);
+    expect(binding.extensions.length, 39);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
