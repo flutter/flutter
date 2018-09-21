@@ -217,7 +217,8 @@ FLUTTER_EXPORT
 
 /**
  Invokes the specified Flutter method with the specified arguments, expecting
- no results.
+ no results.  See
+ [MethodChannel.setMethodCallHandler](https://docs.flutter.io/flutter/services/MethodChannel/setMethodCallHandler.html).
 
  - Parameters:
    - method: The name of the method to invoke.
