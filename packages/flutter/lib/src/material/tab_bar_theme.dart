@@ -73,4 +73,22 @@ class TabBarTheme extends Diagnosticable {
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t)
     );
   }
+
+  @override
+  int get hashCode {
+    return hashValues(indicator, indicatorSize, labelColor, unselectedLabelColor);
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final TabBarTheme typedOther = other;
+    return typedOther.indicator == indicator
+        && typedOther.indicatorSize == indicatorSize
+        && typedOther.labelColor == labelColor
+        && typedOther.unselectedLabelColor == unselectedLabelColor;
+  }
 }
