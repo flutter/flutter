@@ -11,7 +11,7 @@ import 'tabs.dart';
 
 /// Applies a theme to descendant [TabBar] widgets.
 ///
-/// A tab bar theme describes the colors of the label, and the size/shape of the
+/// A tab bar theme describes the colors of the label and the size/shape of the
 /// [TabBar.indicator].
 ///
 /// Descendant widgets obtain the current theme's [TabBarTheme] object using
@@ -21,7 +21,7 @@ import 'tabs.dart';
 ///
 /// See also:
 ///
-///  * [TabBar], A material design widget that displays a horizontal row of tabs.
+///  * [TabBar], Material Design widget that displays a horizontal row of tabs.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 class TabBarTheme extends Diagnosticable {
