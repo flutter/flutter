@@ -390,19 +390,41 @@
 
 - (UIView*)splashScreenView {
   if (_splashScreenView == nullptr) {
-    NSString* launchStoryboardName =
+    NSString* launchscreenName =
         [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
-    if (launchStoryboardName == nil) {
+    if (launchscreenName == nil) {
       return nil;
     }
-    UIStoryboard* storyboard = [UIStoryboard storyboardWithName:launchStoryboardName bundle:nil];
-    if (storyboard == nil) {
-      return nil;
+    UIView* splashView = [self splashScreenFromStoryboard:launchscreenName];
+    if (!splashView) {
+      splashView = [self splashScreenFromXib:launchscreenName];
     }
-    UIViewController* splashScreenViewController = [storyboard instantiateInitialViewController];
-    self.splashScreenView = splashScreenViewController.view;
+    self.splashScreenView = splashView;
   }
   return _splashScreenView.get();
+}
+
+- (UIView*)splashScreenFromStoryboard:(NSString*)name {
+  UIStoryboard* storyboard = nil;
+  @try {
+    storyboard = [UIStoryboard storyboardWithName:name bundle:nil];
+  } @catch (NSException* exception) {
+    return nil;
+  }
+  if (storyboard) {
+    UIViewController* splashScreenViewController = [storyboard instantiateInitialViewController];
+    return splashScreenViewController.view;
+  }
+  return nil;
+}
+
+- (UIView*)splashScreenFromXib:(NSString*)name {
+  NSArray* objects = [[NSBundle mainBundle] loadNibNamed:name owner:self options:nil];
+  if ([objects count] != 0) {
+    UIView* view = [objects objectAtIndex:0];
+    return view;
+  }
+  return nil;
 }
 
 - (void)setSplashScreenView:(UIView*)view {
