@@ -217,9 +217,9 @@ class ThemeData extends Diagnosticable {
       accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
     }
 
-    // ButtonThemeData is initialized before buttonColor, because we're only
-    // interested in the value if it was specified and non-null. Likewise for
-    // disabledColor, materialTapTargetTap, highlightColor, splashColor.
+    // Used as the default color (fill color) for RaisedButtons. Computing the
+    // default for ButtonThemeData for the sake of backwards compatibility.
+    buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
       buttonColor: buttonColor,
@@ -229,7 +229,6 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize,
     );
     disabledColor ??= isDark ? Colors.white30 : Colors.black38;
-    buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 

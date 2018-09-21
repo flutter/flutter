@@ -18,8 +18,8 @@ import 'theme_data.dart' show MaterialTapTargetSize;
 ///
 /// See also:
 ///
-///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
-///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
+///  * [RaisedButton], [FlatButton], [OutlineButton], which are configured
+///    based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
   normal,
@@ -56,8 +56,8 @@ enum ButtonBarLayoutBehavior {
 ///
 /// See also:
 ///
-///  * [FlatButton] and [RaisedButton], which are styled based on the
-///    ambient button theme.
+///  * [FlatButton] [RaisedButton], and [OutlineButton], which are styled
+///    based on the ambient button theme.
 ///  * [ThemeData.textTheme], `button` is the default text style for button labels.
 ///  * [ThemeData.buttonColor], the fill color for [RaisedButton]s unless the
 ///    button theme's text theme is [ButtonTextTheme.primary].
@@ -74,7 +74,8 @@ enum ButtonBarLayoutBehavior {
 class ButtonTheme extends InheritedWidget {
   /// Creates a button theme.
   ///
-  /// The [textTheme], [minWidth], and [height] arguments must not be null.
+  /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
+  /// must not be null.
   ButtonTheme({
     Key key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
