@@ -154,6 +154,7 @@ class FlatButton extends MaterialButton {
     return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
+      clipBehavior: clipBehavior,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
       highlightColor: buttonTheme.getHighlightColor(this),
@@ -161,12 +162,11 @@ class FlatButton extends MaterialButton {
       elevation: buttonTheme.getElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
-      materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
       padding: buttonTheme.getPadding(this),
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
-      clipBehavior: clipBehavior,
       animationDuration: buttonTheme.getAnimationDuration(this),
+      materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       child: child,
     );
   }

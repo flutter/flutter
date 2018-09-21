@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'material_button.dart';
 import 'theme.dart';
+import 'theme_data.dart' show MaterialTapTargetSize;
 
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base
 /// colors, and the defaults for the button's minimum size, internal padding,
@@ -84,7 +85,11 @@ class ButtonTheme extends InheritedWidget {
     ShapeBorder shape,
     bool alignedDropdown = false,
     Color buttonColor,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
     ColorScheme colorScheme = const ColorScheme.light(),
+    MaterialTapTargetSize materialTapTargetSize,
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -101,7 +106,11 @@ class ButtonTheme extends InheritedWidget {
          alignedDropdown: alignedDropdown,
          layoutBehavior: layoutBehavior,
          buttonColor: buttonColor,
+         disabledColor: disabledColor,
+         highlightColor: highlightColor,
+         splashColor: splashColor,
          colorScheme: colorScheme,
+         materialTapTargetSize: materialTapTargetSize,
        ),
        super(key: key, child: child);
 
@@ -195,7 +204,11 @@ class ButtonThemeData extends Diagnosticable {
     this.layoutBehavior = ButtonBarLayoutBehavior.padded,
     this.alignedDropdown = false,
     this.buttonColor,
+    this.disabledColor,
+    this.highlightColor,
+    this.splashColor,
     this.colorScheme = const ColorScheme.light(),
+    this.materialTapTargetSize,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
@@ -301,8 +314,11 @@ class ButtonThemeData extends Diagnosticable {
   final bool alignedDropdown;
 
   final Color buttonColor;
-
+  final Color disabledColor;
+  final Color highlightColor;
+  final Color splashColor;
   final ColorScheme colorScheme;
+  final MaterialTapTargetSize materialTapTargetSize;
 
   Brightness getBrightness(MaterialButton button) {
     return button.colorBrightness ?? colorScheme.brightness;
@@ -314,6 +330,10 @@ class ButtonThemeData extends Diagnosticable {
 
   bool _isFlatButton(MaterialButton button) {
     return button.type == 'FlatButton' || button.type == 'FlatButton.icon';
+  }
+
+  bool _isRaisedButton(MaterialButton button) {
+    return button.type == 'RaisedButton' || button.type == 'RaisedButton.icon';
   }
 
   bool _isOutlineButton(MaterialButton button) {
@@ -346,6 +366,13 @@ class ButtonThemeData extends Diagnosticable {
     final Color fillColor = button.enabled ? button.color : button.disabledColor;
     if (fillColor != null)
       return fillColor;
+
+    if (_isRaisedButton(button)) {
+      if (button.enabled && buttonColor != null)
+        return buttonColor;
+      if (!button.enabled && disabledColor != null)
+        return disabledColor;
+    }
 
     if (_isFlatButton(button) || _isOutlineButton(button))
       return null;
@@ -398,6 +425,20 @@ class ButtonThemeData extends Diagnosticable {
   Color getSplashColor(MaterialButton button) {
     if (button.splashColor != null)
       return button.splashColor;
+
+    if (splashColor != null && (_isRaisedButton(button) || _isOutlineButton(button)))
+      return splashColor;
+
+    if (splashColor != null && _isFlatButton(button)) {
+      switch (getTextTheme(button)) {
+        case ButtonTextTheme.normal:
+        case ButtonTextTheme.accent:
+          return splashColor;
+        case ButtonTextTheme.primary:
+          break;
+      }
+    }
+
     return getTextColor(button).withOpacity(0.12);
   }
 
@@ -408,7 +449,7 @@ class ButtonThemeData extends Diagnosticable {
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
-        return getTextColor(button).withOpacity(0.16);
+        return highlightColor ?? getTextColor(button).withOpacity(0.16);
       case ButtonTextTheme.primary:
         return Colors.transparent;
     }
@@ -449,7 +490,6 @@ class ButtonThemeData extends Diagnosticable {
     return padding;
   }
 
-
   BoxConstraints getConstraints(MaterialButton button) => constraints;
 
   ShapeBorder getShape(MaterialButton button) {
@@ -460,6 +500,9 @@ class ButtonThemeData extends Diagnosticable {
     return button.animationDuration ?? kThemeChangeDuration;
   }
 
+  MaterialTapTargetSize getMaterialTapTargetSize(MaterialButton button) {
+    return button.materialTapTargetSize ?? materialTapTargetSize ?? MaterialTapTargetSize.padded;
+  }
 
   /// Creates a copy of this button theme data object with the matching fields
   /// replaced with the non-null parameter values.
@@ -470,7 +513,12 @@ class ButtonThemeData extends Diagnosticable {
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     bool alignedDropdown,
+    Color buttonColor,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
     ColorScheme colorScheme,
+    MaterialTapTargetSize materialTapTargetSize,
   }) {
     return ButtonThemeData(
       textTheme: textTheme ?? this.textTheme,
@@ -479,7 +527,12 @@ class ButtonThemeData extends Diagnosticable {
       padding: padding ?? this.padding,
       shape: shape ?? this.shape,
       alignedDropdown: alignedDropdown ?? this.alignedDropdown,
+      buttonColor: buttonColor ?? this.buttonColor,
+      disabledColor: disabledColor ?? this.disabledColor,
+      highlightColor: highlightColor ?? this.highlightColor,
+      splashColor: splashColor ?? this.splashColor,
       colorScheme: colorScheme ?? this.colorScheme,
+      materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
     );
   }
 
@@ -494,7 +547,12 @@ class ButtonThemeData extends Diagnosticable {
         && padding == typedOther.padding
         && shape == typedOther.shape
         && alignedDropdown == typedOther.alignedDropdown
-        && colorScheme == typedOther.colorScheme;
+        && buttonColor == typedOther.buttonColor
+        && disabledColor == typedOther.disabledColor
+        && highlightColor == typedOther.highlightColor
+        && splashColor == typedOther.splashColor
+        && colorScheme == typedOther.colorScheme
+        && materialTapTargetSize == typedOther.materialTapTargetSize;
   }
 
   @override
@@ -506,7 +564,12 @@ class ButtonThemeData extends Diagnosticable {
       padding,
       shape,
       alignedDropdown,
+      buttonColor,
+      disabledColor,
+      highlightColor,
+      splashColor,
       colorScheme,
+      materialTapTargetSize,
     );
   }
 
@@ -524,6 +587,11 @@ class ButtonThemeData extends Diagnosticable {
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',
     ));
+    properties.add(DiagnosticsProperty<Color>('buttonColor', buttonColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultTheme.colorScheme));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }

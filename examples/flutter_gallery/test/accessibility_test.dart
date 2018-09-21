@@ -605,15 +605,12 @@ void main() {
       handle.dispose();
     });
 
-    // TBD: https://github.com/flutter/flutter/issues/22044
-    /*
     testWidgets('modal_bottom_sheet_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: ModalBottomSheetDemo()));
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
-    */
 
     testWidgets('overscroll_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -629,15 +626,12 @@ void main() {
       handle.dispose();
     });
 
-    // TBD: https://github.com/flutter/flutter/issues/22044
-    /*
     testWidgets('persistent_bottom_sheet_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: PersistentBottomSheetDemo()));
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
-    */
 
     testWidgets('progress_indicator_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -682,15 +676,12 @@ void main() {
       handle.dispose();
     });
 
-    // TBD: https://github.com/flutter/flutter/issues/22044
-    /*
     testWidgets('snack_bar_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(home: const SnackBarDemo()));
       await expectLater(tester, meetsGuideline(textContrastGuideline));
       handle.dispose();
     });
-    */
 
     testWidgets('tabs_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show Brightness;
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'theme_data.dart';
 
 @immutable
 class ColorScheme extends Diagnosticable {
@@ -99,6 +100,44 @@ class ColorScheme extends Diagnosticable {
        assert(onBackground != null),
        assert(onError != null),
        assert(brightness != null);
+
+  factory ColorScheme.fromSwatch({
+    MaterialColor primarySwatch = Colors.blue,
+    Color primaryColorLight,
+    Color primaryColorDark,
+    Color accentColor,
+    Color cardColor,
+    Color backgroundColor,
+    Color errorColor,
+    Brightness brightness = Brightness.light,
+  }) {
+    assert(primarySwatch != null);
+    assert(brightness != null);
+
+    final bool isDark = brightness == Brightness.dark;
+    final bool primaryIsDark = _brightnessFor(primarySwatch) == Brightness.dark;
+    final Color secondary = accentColor ?? (isDark ? Colors.tealAccent[200] : primarySwatch);
+    final bool secondaryIsDark = _brightnessFor(secondary) == Brightness.dark;
+
+    return ColorScheme(
+      primary: primarySwatch,
+      primaryVariant: primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]),
+      primaryVariant2: primaryColorLight ?? (isDark ? Colors.grey[500] : primarySwatch[100]),
+      secondary: secondary,
+      secondaryVariant: isDark ? Colors.tealAccent[700] : primarySwatch[700],
+      surface: cardColor ?? (isDark ? Colors.grey[800] : Colors.white),
+      background: backgroundColor ?? (isDark ? Colors.grey[700] : primarySwatch[200]),
+      error: errorColor ?? Colors.red[700],
+      onPrimary: primaryIsDark ? Colors.white : Colors.black,
+      onSecondary: secondaryIsDark ? Colors.white : Colors.black,
+      onSurface: isDark ? Colors.white : Colors.black,
+      onBackground: primaryIsDark ? Colors.white : Colors.black,
+      onError: isDark ? Colors.black : Colors.white,
+      brightness: brightness,
+    );
+  }
+
+  static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
 
   final Color primary;
   final Color primaryVariant;

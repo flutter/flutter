@@ -174,6 +174,7 @@ class OutlineButton extends MaterialButton {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return _OutlineButton(
       onPressed: onPressed,
+      brightness: buttonTheme.getBrightness(this),
       textTheme: textTheme,
       textColor: buttonTheme.getTextColor(this),
       disabledTextColor: buttonTheme.getDisabledTextColor(this),
@@ -183,7 +184,7 @@ class OutlineButton extends MaterialButton {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       borderSide: borderSide,
       disabledBorderColor: disabledBorderColor,
-      highlightedBorderColor: highlightedBorderColor,
+      highlightedBorderColor: highlightedBorderColor ?? buttonTheme.colorScheme.primary,
       padding: buttonTheme.getPadding(this),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
@@ -214,6 +215,7 @@ class _OutlineButton extends StatefulWidget {
   const _OutlineButton({
     Key key,
     @required this.onPressed,
+    this.brightness,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -223,16 +225,18 @@ class _OutlineButton extends StatefulWidget {
     @required this.highlightElevation,
     this.borderSide,
     this.disabledBorderColor,
-    this.highlightedBorderColor,
+    @required this.highlightedBorderColor,
     this.padding,
     this.shape,
     this.clipBehavior = Clip.none,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(highlightedBorderColor != null),
        assert(clipBehavior != null),
        super(key: key);
 
   final VoidCallback onPressed;
+  final Brightness brightness;
   final ButtonTextTheme textTheme;
   final Color textColor;
   final Color disabledTextColor;
@@ -295,8 +299,8 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     super.dispose();
   }
 
-  Color _getFillColor(ThemeData theme) {
-    final bool themeIsDark = theme.brightness == Brightness.dark;
+  Color _getFillColor() {
+    final bool themeIsDark = widget.brightness == Brightness.dark;
     final Color color = widget.color ?? (themeIsDark
       ? const Color(0x00000000)
       : const Color(0x00FFFFFF));
@@ -307,18 +311,18 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
-  BorderSide _getOutline(ThemeData theme, ButtonThemeData buttonTheme) {
-    final bool themeIsDark = theme.brightness == Brightness.dark;
+  BorderSide _getOutline() {
+    final bool isDark = widget.brightness == Brightness.dark;
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
     final Color color = widget.enabled
       ? (_pressed
-         ? widget.highlightedBorderColor ?? theme.primaryColor
+         ? widget.highlightedBorderColor
          : (widget.borderSide?.color ??
-            (themeIsDark ? Colors.grey[600] : Colors.grey[200])))
+            (isDark ? Colors.grey[600] : Colors.grey[200])))
       : (widget.disabledBorderColor ??
-         (themeIsDark ? Colors.grey[800] : Colors.grey[100]));
+         (isDark ? Colors.grey[800] : Colors.grey[100]));
 
     return BorderSide(
       color: color,
@@ -335,16 +339,13 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
         return RaisedButton(
           textColor: widget.textColor,
           disabledTextColor: widget.disabledTextColor,
-          color: _getFillColor(theme),
+          color: _getFillColor(),
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           disabledColor: Colors.transparent,
@@ -364,7 +365,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           padding: widget.padding,
           shape: _OutlineBorder(
             shape: widget.shape,
-            side: _getOutline(theme, buttonTheme),
+            side: _getOutline(),
           ),
           clipBehavior: widget.clipBehavior,
           animationDuration: _kElevationDuration,

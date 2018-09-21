@@ -150,10 +150,8 @@ class ThemeData extends Diagnosticable {
     PageTransitionsTheme pageTransitionsTheme,
     ColorScheme colorScheme,
   }) {
-    materialTapTargetSize ??= MaterialTapTargetSize.padded;
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
-    colorScheme ??= isDark ? const ColorScheme.dark() : const ColorScheme.light();
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -169,17 +167,21 @@ class ThemeData extends Diagnosticable {
     bottomAppBarColor ??= isDark ? Colors.grey[800] : Colors.white;
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
-    highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
-    splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
+
+    colorScheme ??= ColorScheme.fromSwatch(
+      primarySwatch: primarySwatch,
+      primaryColorLight: primaryColorLight,
+      primaryColorDark: primaryColorDark,
+      accentColor: accentColor,
+      cardColor: cardColor,
+      backgroundColor: backgroundColor,
+      errorColor: errorColor,
+      brightness: brightness,
+    );
+
     splashFactory ??= InkSplash.splashFactory;
     selectedRowColor ??= Colors.grey[100];
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
-    disabledColor ??= isDark ? Colors.white30 : Colors.black38;
-    // TBD: if buttonColor isn't usually read, we could avoid defaulting it here.
-    // ButtonThemeData is initialized before buttonColor, because we're only
-    // interested in the value if it was specified and non-null.
-    buttonTheme ??= ButtonThemeData(colorScheme: colorScheme, buttonColor: buttonColor);
-    buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
@@ -208,11 +210,29 @@ class ThemeData extends Diagnosticable {
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
     final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
+    materialTapTargetSize ??= MaterialTapTargetSize.padded;
     if (fontFamily != null) {
       textTheme = textTheme.apply(fontFamily: fontFamily);
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
       accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
     }
+
+    // ButtonThemeData is initialized before buttonColor, because we're only
+    // interested in the value if it was specified and non-null. Likewise for
+    // disabledColor, materialTapTargetTap, highlightColor, splashColor.
+    buttonTheme ??= ButtonThemeData(
+      colorScheme: colorScheme,
+      buttonColor: buttonColor,
+      disabledColor: disabledColor,
+      highlightColor: highlightColor,
+      splashColor: splashColor,
+      materialTapTargetSize: materialTapTargetSize,
+    );
+    disabledColor ??= isDark ? Colors.white30 : Colors.black38;
+    buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
+    highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
+    splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
+
     sliderTheme ??= SliderThemeData.fromPrimaryColors(
       primaryColor: primaryColor,
       primaryColorLight: primaryColorLight,

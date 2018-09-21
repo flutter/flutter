@@ -107,10 +107,12 @@ void main() {
     EdgeInsets padding;
     ShapeBorder shape;
 
+    const Color disabledColor = Color(0xFF00FF00);
     await tester.pumpWidget(
       Theme(
         data: lightTheme.copyWith(
-          disabledColor: const Color(0xFF00FF00), // disabled RaisedButton fill color
+          disabledColor: disabledColor, // disabled RaisedButton fill color
+          buttonTheme: const ButtonThemeData(disabledColor: disabledColor),
           textTheme: lightTheme.textTheme.copyWith(
             button: lightTheme.textTheme.button.copyWith(
               // The button's height will match because there's no
@@ -149,8 +151,7 @@ void main() {
     ));
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
-    // TBD: need to pass Theme disabledColor to ButtonTheme?
-    // expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xFF00FF00));
+    expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
   });
 
@@ -201,8 +202,7 @@ void main() {
     expect(shape, const RoundedRectangleBorder());
 
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
-    // TBD: ...
-    //expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xFF00FF00));
+    expect(tester.widget<Material>(find.byType(Material)).color, const Color(0xFF00FF00));
     expect(tester.getSize(find.byType(Material)), const Size(100.0, 200.0));
   });
 
