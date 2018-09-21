@@ -33,7 +33,7 @@ class IconThemeData extends Diagnosticable {
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   IconThemeData copyWith({Color color, double opacity, double size}) {
-    return new IconThemeData(
+    return IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
       size: size ?? this.size,
@@ -81,7 +81,7 @@ class IconThemeData extends Diagnosticable {
   /// an [AnimationController].
   static IconThemeData lerp(IconThemeData a, IconThemeData b, double t) {
     assert(t != null);
-    return new IconThemeData(
+    return IconThemeData(
       color: Color.lerp(a.color, b.color, t),
       opacity: ui.lerpDouble(a.opacity, b.opacity, t),
       size: ui.lerpDouble(a.size, b.size, t),
@@ -104,8 +104,8 @@ class IconThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DoubleProperty('opacity', opacity, defaultValue: null));
-    properties.add(new DoubleProperty('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
+    properties.add(DoubleProperty('size', size, defaultValue: null));
   }
 }

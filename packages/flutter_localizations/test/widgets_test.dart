@@ -14,12 +14,12 @@ class TestLocalizations {
   final String prefix;
 
   static Future<TestLocalizations> loadSync(Locale locale, String prefix) {
-    return new SynchronousFuture<TestLocalizations>(new TestLocalizations(locale, prefix));
+    return SynchronousFuture<TestLocalizations>(TestLocalizations(locale, prefix));
   }
 
   static Future<TestLocalizations> loadAsync(Locale locale, String prefix) {
-    return new Future<TestLocalizations>.delayed(const Duration(milliseconds: 100))
-      .then((_) => new TestLocalizations(locale, prefix));
+    return Future<TestLocalizations>.delayed(const Duration(milliseconds: 100))
+      .then((_) => TestLocalizations(locale, prefix));
   }
 
   static TestLocalizations of(BuildContext context) {
@@ -79,12 +79,12 @@ class MoreLocalizations {
   final Locale locale;
 
   static Future<MoreLocalizations> loadSync(Locale locale) {
-    return new SynchronousFuture<MoreLocalizations>(new MoreLocalizations(locale));
+    return SynchronousFuture<MoreLocalizations>(MoreLocalizations(locale));
   }
 
   static Future<MoreLocalizations> loadAsync(Locale locale) {
-    return new Future<MoreLocalizations>.delayed(const Duration(milliseconds: 100))
-      .then((_) => new MoreLocalizations(locale));
+    return Future<MoreLocalizations>.delayed(const Duration(milliseconds: 100))
+      .then((_) => MoreLocalizations(locale));
   }
 
   static MoreLocalizations of(BuildContext context) {
@@ -129,7 +129,7 @@ class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<W
 
   @override
   Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(new OnlyRTLDefaultWidgetsLocalizations());
+    return SynchronousFuture<WidgetsLocalizations>(OnlyRTLDefaultWidgetsLocalizations());
   }
 
   @override
@@ -146,14 +146,14 @@ Widget buildFrame({
     Locale('en', 'GB'),
   ],
 }) {
-  return new WidgetsApp(
+  return WidgetsApp(
     color: const Color(0xFFFFFFFF),
     locale: locale,
     localizationsDelegates: delegates,
     localeResolutionCallback: localeResolutionCallback,
     supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
-      return new PageRouteBuilder<void>(
+      return PageRouteBuilder<void>(
         pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
           return buildContent(context);
         }
@@ -166,13 +166,13 @@ class SyncLoadTest extends StatefulWidget {
   const SyncLoadTest();
 
   @override
-  SyncLoadTestState createState() => new SyncLoadTestState();
+  SyncLoadTestState createState() => SyncLoadTestState();
 }
 
 class SyncLoadTestState extends State<SyncLoadTest> {
   @override
   Widget build(BuildContext context) {
-    return new Text(
+    return Text(
       TestLocalizations.of(context).message,
       textDirection: TextDirection.rtl,
     );
@@ -226,12 +226,12 @@ void main() {
 
   testWidgets('Synchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
     final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
-      new SyncTestLocalizationsDelegate(),
+      SyncTestLocalizationsDelegate(),
       DefaultWidgetsLocalizations.delegate,
     ];
 
     Future<Null> pumpTest(Locale locale) async {
-      await tester.pumpWidget(new Localizations(
+      await tester.pumpWidget(Localizations(
         locale: locale,
         delegates: delegates,
         child: const SyncLoadTest(),
@@ -254,10 +254,10 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
-          new AsyncTestLocalizationsDelegate(),
+          AsyncTestLocalizationsDelegate(),
         ],
         buildContent: (BuildContext context) {
-          return new Text(TestLocalizations.of(context).message);
+          return Text(TestLocalizations.of(context).message);
         }
       )
     );
@@ -287,15 +287,15 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
-          new SyncTestLocalizationsDelegate(),
-          new SyncMoreLocalizationsDelegate(),
+          SyncTestLocalizationsDelegate(),
+          SyncMoreLocalizationsDelegate(),
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Text('B: ${MoreLocalizations.of(context).message}'),
             ],
           );
         }
@@ -311,15 +311,15 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
-          new SyncTestLocalizationsDelegate(),
-          new AsyncMoreLocalizationsDelegate(), // No resources until this completes
+          SyncTestLocalizationsDelegate(),
+          AsyncMoreLocalizationsDelegate(), // No resources until this completes
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Text('B: ${MoreLocalizations.of(context).message}'),
             ],
           );
         }
@@ -341,23 +341,23 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
-          new SyncTestLocalizationsDelegate(),
+          SyncTestLocalizationsDelegate(),
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Localizations(
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Localizations(
                 locale: const Locale('en', 'GB'),
                 delegates: <LocalizationsDelegate<dynamic>>[
-                  new SyncTestLocalizationsDelegate(),
+                  SyncTestLocalizationsDelegate(),
                   DefaultWidgetsLocalizations.delegate,
                 ],
                 // Create a new context within the en_GB Localization
-                child: new Builder(
+                child: Builder(
                   builder: (BuildContext context) {
-                    return new Text('B: ${TestLocalizations.of(context).message}');
+                    return Text('B: ${TestLocalizations.of(context).message}');
                   },
                 ),
               ),
@@ -375,19 +375,19 @@ void main() {
   // stays the same BUT one of its delegate.shouldReload() methods returns true,
   // then the dependent widgets should rebuild.
   testWidgets('Localizations sync delegate shouldReload returns true', (WidgetTester tester) async {
-    final SyncTestLocalizationsDelegate originalDelegate = new SyncTestLocalizationsDelegate();
+    final SyncTestLocalizationsDelegate originalDelegate = SyncTestLocalizationsDelegate();
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
           originalDelegate,
-          new SyncMoreLocalizationsDelegate(),
+          SyncMoreLocalizationsDelegate(),
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Text('B: ${MoreLocalizations.of(context).message}'),
             ],
           );
         }
@@ -400,19 +400,19 @@ void main() {
     expect(originalDelegate.shouldReloadValues, <bool>[]);
 
 
-    final SyncTestLocalizationsDelegate modifiedDelegate = new SyncTestLocalizationsDelegate('---');
+    final SyncTestLocalizationsDelegate modifiedDelegate = SyncTestLocalizationsDelegate('---');
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
           modifiedDelegate,
-          new SyncMoreLocalizationsDelegate(),
+          SyncMoreLocalizationsDelegate(),
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Text('B: ${MoreLocalizations.of(context).message}'),
             ],
           );
         }
@@ -430,15 +430,15 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
-          new AsyncTestLocalizationsDelegate(),
-          new AsyncMoreLocalizationsDelegate(),
+          AsyncTestLocalizationsDelegate(),
+          AsyncMoreLocalizationsDelegate(),
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Text('B: ${MoreLocalizations.of(context).message}'),
             ],
           );
         }
@@ -449,19 +449,19 @@ void main() {
     expect(find.text('A: en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
 
-    final AsyncTestLocalizationsDelegate modifiedDelegate = new AsyncTestLocalizationsDelegate('---');
+    final AsyncTestLocalizationsDelegate modifiedDelegate = AsyncTestLocalizationsDelegate('---');
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
           modifiedDelegate,
-          new AsyncMoreLocalizationsDelegate(),
+          AsyncMoreLocalizationsDelegate(),
         ],
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
-          return new Column(
+          return Column(
             children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
+              Text('A: ${TestLocalizations.of(context).message}'),
+              Text('B: ${MoreLocalizations.of(context).message}'),
             ],
           );
         }
@@ -509,7 +509,7 @@ void main() {
           return const Locale('foo', 'BAR');
         },
         buildContent: (BuildContext context) {
-          return new Text(Localizations.localeOf(context).toString());
+          return Text(Localizations.localeOf(context).toString());
         }
       )
     );
@@ -532,7 +532,7 @@ void main() {
           Locale('en', 'CA'),
         ],
         buildContent: (BuildContext context) {
-          return new Text(Localizations.localeOf(context).toString());
+          return Text(Localizations.localeOf(context).toString());
         }
       )
     );
@@ -567,13 +567,13 @@ void main() {
           GlobalWidgetsLocalizations.delegate,
         ],
         buildContent: (BuildContext context) {
-          return new Localizations.override(
+          return Localizations.override(
             context: context,
-            child: new Builder(
+            child: Builder(
               builder: (BuildContext context) {
                 final Locale locale = Localizations.localeOf(context);
                 final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
-                return new Text('$locale $direction');
+                return Text('$locale $direction');
               },
             ),
           );
@@ -604,17 +604,17 @@ void main() {
         // Accept whatever locale we're given
         localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
         buildContent: (BuildContext context) {
-          return new Localizations.override(
+          return Localizations.override(
             context: context,
             delegates: const <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
               // Override: no matter what the locale, textDirection is always RTL.
               OnlyRTLDefaultWidgetsLocalizationsDelegate(),
             ],
-            child: new Builder(
+            child: Builder(
               builder: (BuildContext context) {
                 final Locale locale = Localizations.localeOf(context);
                 final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
-                return new Text('$locale $direction');
+                return Text('$locale $direction');
               },
             ),
           );
@@ -650,7 +650,7 @@ void main() {
         buildContent: (BuildContext context) {
           final Locale locale = Localizations.localeOf(context);
           final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
-          return new Text('$locale $direction');
+          return Text('$locale $direction');
         }
       )
     );

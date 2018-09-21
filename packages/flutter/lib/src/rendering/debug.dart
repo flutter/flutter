@@ -154,11 +154,11 @@ bool debugDisablePhysicalShapeLayers = false;
 bool debugDisableOpacityLayers = false;
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
-  final Path path = new Path()
+  final Path path = Path()
     ..fillType = PathFillType.evenOdd
     ..addRect(outerRect)
     ..addRect(innerRect);
-  final Paint paint = new Paint()
+  final Paint paint = Paint()
     ..color = color;
   canvas.drawPath(path, paint);
 }
@@ -173,7 +173,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
       _debugDrawDoubleRect(canvas, innerRect.inflate(outlineWidth).intersect(outerRect), innerRect, const Color(0xFF0090FF));
     } else {
-      final Paint paint = new Paint()
+      final Paint paint = Paint()
         ..color = const Color(0x90909090);
       canvas.drawRect(outerRect, paint);
     }
@@ -206,7 +206,7 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
         debugProfilePaintsEnabled) {
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     }
     return true;
   }());

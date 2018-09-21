@@ -24,17 +24,17 @@ void main() {
     List<int> mockTimes;
 
     setUp(() {
-      cache = new MockCache();
-      clock = new MockClock();
-      usage = new MockUsage();
+      cache = MockCache();
+      clock = MockClock();
+      usage = MockUsage();
       when(usage.isFirstRun).thenReturn(false);
       when(clock.now()).thenAnswer(
-        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
+        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(shouldUpdateCache: false);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
       verifyZeroInteractions(cache);
     },
@@ -43,7 +43,7 @@ void main() {
     });
 
     testUsingContext('honors shouldUpdateCache true', () async {
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(shouldUpdateCache: true);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
       verify(cache.updateAll()).called(1);
     },
@@ -55,7 +55,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand();
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
       await flutterCommand.run();
       verify(clock.now()).called(2);
 
@@ -76,7 +76,7 @@ void main() {
       mockTimes = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand =
-          new DummyFlutterCommand(noUsagePath: true);
+          DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
       verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(
@@ -92,14 +92,14 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final FlutterCommandResult commandResult = new FlutterCommandResult(
+      final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
         timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
-        endTimeOverride: new DateTime.fromMillisecondsSinceEpoch(1500)
+        endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500)
       );
 
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async => commandResult
       );
       await flutterCommand.run();
@@ -125,7 +125,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
         commandFunction: () async {
           throwToolExit('fail');
           return null; // unreachable

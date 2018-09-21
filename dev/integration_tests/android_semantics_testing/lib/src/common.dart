@@ -37,6 +37,7 @@ class AndroidSemanticsNode  {
   ///         "isLongClickable": bool,
   ///       },
   ///       "text": String,
+  ///       "contentDescription": String,
   ///       "className": String,
   ///       "id": int,
   ///       "rect": {
@@ -50,7 +51,7 @@ class AndroidSemanticsNode  {
   ///       ]
   ///     }
   factory AndroidSemanticsNode.deserialize(String value) {
-    return new AndroidSemanticsNode._(json.decode(value));
+    return AndroidSemanticsNode._(json.decode(value));
   }
 
   final Map<String, Object> _values;
@@ -63,6 +64,16 @@ class AndroidSemanticsNode  {
   /// This is produced by combining the value, label, and hint fields from
   /// the Flutter [SemanticsNode].
   String get text => _values['text'];
+
+  /// The contentDescription of the semantics node.
+  ///
+  /// This field is used for the Switch, Radio, and Checkbox widgets
+  /// instead of [text]. If the text property is used for these, TalkBack
+  /// will not read out the "checked" or "not checked" label by default.
+  ///
+  /// This is produced by combining the value, label, and hint fields from
+  /// the Flutter [SemanticsNode].
+  String get contentDescription => _values['contentDescription'];
 
   /// The className of the semantics node.
   ///
@@ -118,7 +129,7 @@ class AndroidSemanticsNode  {
   Rect getRect() {
     final Map<String, Object> rawRect = _values['rect'];
     final Map<String, int> rect = rawRect.cast<String, int>();
-    return new Rect.fromLTRB(
+    return Rect.fromLTRB(
       rect['left'].toDouble(),
       rect['top'].toDouble(),
       rect['right'].toDouble(),
@@ -129,7 +140,7 @@ class AndroidSemanticsNode  {
   /// Gets a [Size] which defines the size of the semantics node.
   Size getSize() {
     final Rect rect = getRect();
-    return new Size(rect.bottom - rect.top, rect.right - rect.left);
+    return Size(rect.bottom - rect.top, rect.right - rect.left);
   }
 
   /// Gets a list of [AndroidSemanticsActions] which are defined for the node.

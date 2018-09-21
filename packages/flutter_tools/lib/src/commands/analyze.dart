@@ -82,13 +82,13 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() {
     if (argResults['watch']) {
-      return new AnalyzeContinuously(
+      return AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),
       ).analyze();
     } else {
-      return new AnalyzeOnce(
+      return AnalyzeOnce(
         argResults,
         runner.getRepoRoots(),
         runner.getRepoPackages(),

@@ -61,6 +61,11 @@ task:
       container:
         cpu: 4
         memory: 8G
+    - name: codelabs-build-test
+      env:
+        SHARD: codelabs-build-test
+      build_test_script: ./dev/bots/codelabs_build_test.sh
+
 
 task:
   windows_container:

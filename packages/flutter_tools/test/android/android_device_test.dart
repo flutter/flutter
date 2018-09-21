@@ -16,7 +16,7 @@ void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
       const String deviceId = '1234';
-      final AndroidDevice device = new AndroidDevice(deviceId);
+      final AndroidDevice device = AndroidDevice(deviceId);
       expect(device.id, deviceId);
     });
   });
@@ -81,7 +81,7 @@ Use the 'android' tool to install them:
   });
 
   group('isLocalEmulator', () {
-    final ProcessManager mockProcessManager = new MockProcessManager();
+    final ProcessManager mockProcessManager = MockProcessManager();
     String hardware;
     String buildCharacteristics;
 
@@ -91,17 +91,17 @@ Use the 'android' tool to install them:
       when(mockProcessManager.run(argThat(contains('getprop')),
           stderrEncoding: anyNamed('stderrEncoding'),
           stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
-        final StringBuffer buf = new StringBuffer()
+        final StringBuffer buf = StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')
           ..writeln('[ro.build.characteristics]: [$buildCharacteristics]');
-        final ProcessResult result = new ProcessResult(1, 0, buf.toString(), '');
-        return new Future<ProcessResult>.value(result);
+        final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
       });
     });
 
     testUsingContext('knownPhysical', () async {
       hardware = 'samsungexynos7420';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -109,7 +109,7 @@ Use the 'android' tool to install them:
 
     testUsingContext('knownEmulator', () async {
       hardware = 'goldfish';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
       expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
@@ -118,7 +118,7 @@ Use the 'android' tool to install them:
 
     testUsingContext('unknownPhysical', () async {
       buildCharacteristics = 'att';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -126,7 +126,7 @@ Use the 'android' tool to install them:
 
     testUsingContext('unknownEmulator', () async {
       buildCharacteristics = 'att,emulator';
-      final AndroidDevice device = new AndroidDevice('test');
+      final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
       expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{

@@ -32,7 +32,7 @@ class _MockToStringDeep {
   List<String> _lines;
 
   String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
-    final StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = StringBuffer();
     if (_lines.isNotEmpty)
       sb.write('$prefixLineOne${_lines.first}');
 
@@ -52,59 +52,59 @@ void main() {
     expect('Hello\nHello', isNot(hasOneLineDescription));
     expect(' Hello', isNot(hasOneLineDescription));
     expect('Hello ', isNot(hasOneLineDescription));
-    expect(new Object(), isNot(hasOneLineDescription));
+    expect(Object(), isNot(hasOneLineDescription));
   });
 
   test('hasAGoodToStringDeep', () {
-    expect(new _MockToStringDeep('Hello\n World\n'), hasAGoodToStringDeep);
+    expect(_MockToStringDeep('Hello\n World\n'), hasAGoodToStringDeep);
     // Not terminated with a line break.
-    expect(new _MockToStringDeep('Hello\n World'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('Hello\n World'), isNot(hasAGoodToStringDeep));
     // Trailing whitespace on last line.
-    expect(new _MockToStringDeep('Hello\n World \n'),
+    expect(_MockToStringDeep('Hello\n World \n'),
         isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('Hello\n World\t\n'),
+    expect(_MockToStringDeep('Hello\n World\t\n'),
         isNot(hasAGoodToStringDeep));
     // Leading whitespace on line 1.
-    expect(new _MockToStringDeep(' Hello\n World \n'),
+    expect(_MockToStringDeep(' Hello\n World \n'),
         isNot(hasAGoodToStringDeep));
 
     // Single line.
-    expect(new _MockToStringDeep('Hello World'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('Hello World\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('Hello World'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('Hello World\n'), isNot(hasAGoodToStringDeep));
 
-    expect(new _MockToStringDeep('Hello: World\nFoo: bar\n'),
+    expect(_MockToStringDeep('Hello: World\nFoo: bar\n'),
         hasAGoodToStringDeep);
-    expect(new _MockToStringDeep('Hello: World\nFoo: 42\n'),
+    expect(_MockToStringDeep('Hello: World\nFoo: 42\n'),
         hasAGoodToStringDeep);
     // Contains default Object.toString().
-    expect(new _MockToStringDeep('Hello: World\nFoo: ${new Object()}\n'),
+    expect(_MockToStringDeep('Hello: World\nFoo: ${Object()}\n'),
         isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n'), hasAGoodToStringDeep);
-    expect(new _MockToStringDeep('A\n├─B\n╘══════\n'), hasAGoodToStringDeep);
+    expect(_MockToStringDeep('A\n├─B\n'), hasAGoodToStringDeep);
+    expect(_MockToStringDeep('A\n├─B\n╘══════\n'), hasAGoodToStringDeep);
     // Last line is all whitespace or vertical line art.
-    expect(new _MockToStringDeep('A\n├─B\n\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n│\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n│\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n│\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n╎\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n║\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n │\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n ╎\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n ║\n'), isNot(hasAGoodToStringDeep));
-    expect(new _MockToStringDeep('A\n├─B\n ││\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n│\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n│\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n│\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n╎\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n║\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n │\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n ╎\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n ║\n'), isNot(hasAGoodToStringDeep));
+    expect(_MockToStringDeep('A\n├─B\n ││\n'), isNot(hasAGoodToStringDeep));
 
-    expect(new _MockToStringDeep(
+    expect(_MockToStringDeep(
         'A\n'
         '├─B\n'
         '│\n'
         '└─C\n'), hasAGoodToStringDeep);
     // Last line is all whitespace or vertical line art.
-    expect(new _MockToStringDeep(
+    expect(_MockToStringDeep(
         'A\n'
         '├─B\n'
         '│\n'), isNot(hasAGoodToStringDeep));
 
-    expect(new _MockToStringDeep.fromLines(
+    expect(_MockToStringDeep.fromLines(
         <String>['Paragraph#00000\n',
                  ' │ size: (400x200)\n',
                  ' ╘═╦══ text ═══\n',
@@ -114,7 +114,7 @@ void main() {
                  '   ╚═══════════\n']), hasAGoodToStringDeep);
 
     // Text span
-    expect(new _MockToStringDeep.fromLines(
+    expect(_MockToStringDeep.fromLines(
         <String>['Paragraph#00000\n',
                  ' │ size: (400x200)\n',
                  ' ╘═╦══ text ═══\n',
@@ -202,8 +202,8 @@ void main() {
     expect(const Offset(1.0, 0.0), within(distance: 1.0, from: const Offset(0.0, 0.0)));
     expect(const Offset(1.0, 0.0), isNot(within(distance: 1.0, from: const Offset(-1.0, 0.0))));
 
-    expect(new Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
-    expect(new Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), isNot(within<Rect>(distance: 3.9, from: new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0))));
+    expect(Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
+    expect(Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), isNot(within<Rect>(distance: 3.9, from: Rect.fromLTRB(1.0, 3.0, 5.0, 7.0))));
 
     expect(const Size(1.0, 1.0), within<Size>(distance: 1.415, from: const Size(2.0, 2.0)));
     expect(const Size(1.0, 1.0), isNot(within<Size>(distance: 1.414, from: const Size(2.0, 2.0))));
@@ -222,43 +222,43 @@ void main() {
   group('coversSameAreaAs', () {
     test('empty Paths', () {
       expect(
-        new Path(),
+        Path(),
         coversSameAreaAs(
-          new Path(),
-          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          Path(),
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ),
       );
     });
 
     test('mismatch', () {
-      final Path rectPath = new Path()
-        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path rectPath = Path()
+        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       expect(
-        new Path(),
+        Path(),
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         )),
       );
     });
 
     test('mismatch out of examined area', () {
-      final Path rectPath = new Path()
-        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      rectPath.addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path rectPath = Path()
+        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      rectPath.addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       expect(
-        new Path(),
+        Path(),
         coversSameAreaAs(
           rectPath,
-          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
         ),
       );
     });
 
     test('differently constructed rects match', () {
-      final Path rectPath = new Path()
-        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath = new Path()
+      final Path rectPath = Path()
+        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath = Path()
         ..moveTo(5.0, 5.0)
         ..lineTo(5.0, 6.0)
         ..lineTo(6.0, 6.0)
@@ -268,15 +268,15 @@ void main() {
         linePath,
         coversSameAreaAs(
           rectPath,
-          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ),
       );
     });
 
      test('partially overlapping paths', () {
-      final Path rectPath = new Path()
-        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath = new Path()
+      final Path rectPath = Path()
+        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath = Path()
         ..moveTo(5.0, 5.0)
         ..lineTo(5.0, 6.0)
         ..lineTo(6.0, 6.0)
@@ -286,7 +286,7 @@ void main() {
         linePath,
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         )),
       );
     });
@@ -296,14 +296,14 @@ void main() {
     _FakeComparator comparator;
 
     Widget boilerplate(Widget child) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
         child: child,
       );
     }
 
     setUp(() {
-      comparator = new _FakeComparator();
+      comparator = _FakeComparator();
       goldenFileComparator = comparator;
     });
 
@@ -346,7 +346,7 @@ void main() {
       });
 
       testWidgets('if finder finds no widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(new Container()));
+        await tester.pumpWidget(boilerplate(Container()));
         final Finder finder = find.byType(Text);
         try {
           await expectLater(finder, matchesGoldenFile('foo.png'));
@@ -358,7 +358,7 @@ void main() {
       });
 
       testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(new Column(
+        await tester.pumpWidget(boilerplate(Column(
           children: const <Widget>[Text('hello'), Text('world')],
         )));
         final Finder finder = find.byType(Text);
@@ -388,7 +388,7 @@ void main() {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       const Key key = Key('semantics');
-      await tester.pumpWidget(new Semantics(
+      await tester.pumpWidget(Semantics(
         key: key,
         namesRoute: true,
         header: true,
@@ -484,7 +484,7 @@ void main() {
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
         flags |= index;
-      final SemanticsData data = new SemanticsData(
+      final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
         label: 'a',
@@ -575,13 +575,13 @@ class _FakeComparator implements GoldenFileComparator {
     this.golden = golden;
     switch (behavior) {
       case _ComparatorBehavior.returnTrue:
-        return new Future<bool>.value(true);
+        return Future<bool>.value(true);
       case _ComparatorBehavior.returnFalse:
-        return new Future<bool>.value(false);
+        return Future<bool>.value(false);
       case _ComparatorBehavior.throwTestFailure:
-        throw new TestFailure('fake message');
+        throw TestFailure('fake message');
     }
-    return new Future<bool>.value(false);
+    return Future<bool>.value(false);
   }
 
   @override
@@ -589,6 +589,6 @@ class _FakeComparator implements GoldenFileComparator {
     invocation = _ComparatorInvocation.update;
     this.golden = golden;
     this.imageBytes = imageBytes;
-    return new Future<void>.value();
+    return Future<void>.value();
   }
 }

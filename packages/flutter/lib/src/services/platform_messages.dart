@@ -36,12 +36,12 @@ class BinaryMessages {
       <String, _MessageHandler>{};
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
-    final Completer<ByteData> completer = new Completer<ByteData>();
+    final Completer<ByteData> completer = Completer<ByteData>();
     ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
           stack: stack,
           library: 'services library',
@@ -66,7 +66,7 @@ class BinaryMessages {
       if (handler != null)
         response = await handler(data);
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'services library',

@@ -122,7 +122,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
-    final Uri observatoryUri = new Uri(scheme: 'http', host: '127.0.0.1',
+    final Uri observatoryUri = Uri(scheme: 'http', host: '127.0.0.1',
         port: int.parse(argResults[_kObservatoryPort]));
     final VMService vmService = await VMService.connect(observatoryUri);
     return await vmService.vm.invokeRpcRaw(method);

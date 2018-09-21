@@ -89,12 +89,12 @@ void main() {
 
   group('SliverSafeArea', () {
     Widget buildWidget(EdgeInsets mediaPadding, Widget sliver) {
-      return new MediaQuery(
-        data: new MediaQueryData(padding: mediaPadding),
-        child: new Directionality(
+      return MediaQuery(
+        data: MediaQueryData(padding: mediaPadding),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Viewport(
-            offset: new ViewportOffset.fixed(0.0),
+          child: Viewport(
+            offset: ViewportOffset.fixed(0.0),
             axisDirection: AxisDirection.down,
             slivers: <Widget>[
               const SliverToBoxAdapter(child: SizedBox(width: 800.0, height: 100.0, child: Text('before'))),
@@ -111,7 +111,7 @@ void main() {
         (RenderBox target) {
           final Offset topLeft = target.localToGlobal(Offset.zero);
           final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
-          return new Rect.fromPoints(topLeft, bottomRight);
+          return Rect.fromPoints(topLeft, bottomRight);
         }
       ).toList();
       expect(testAnswers, equals(expectedRects));
@@ -128,9 +128,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        new Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
-        new Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
+        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -146,9 +146,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        new Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
-        new Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
+        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -166,9 +166,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        new Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
-        new Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
+        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -188,9 +188,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        new Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
-        new Rect.fromLTWH(0.0, 220.0, 800.0, 100.0),
+        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
+        Rect.fromLTWH(0.0, 220.0, 800.0, 100.0),
       ]);
 
       await tester.pumpWidget(
@@ -205,9 +205,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        new Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
-        new Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
+        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
+        Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
       ]);
     });
   });

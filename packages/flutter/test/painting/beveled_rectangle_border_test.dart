@@ -9,9 +9,9 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   test('BeveledRectangleBorder scale and lerp', () {
-    final BeveledRectangleBorder c10 = new BeveledRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: new BorderRadius.circular(100.0));
-    final BeveledRectangleBorder c15 = new BeveledRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: new BorderRadius.circular(150.0));
-    final BeveledRectangleBorder c20 = new BeveledRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: new BorderRadius.circular(200.0));
+    final BeveledRectangleBorder c10 = BeveledRectangleBorder(side: const BorderSide(width: 10.0), borderRadius: BorderRadius.circular(100.0));
+    final BeveledRectangleBorder c15 = BeveledRectangleBorder(side: const BorderSide(width: 15.0), borderRadius: BorderRadius.circular(150.0));
+    final BeveledRectangleBorder c20 = BeveledRectangleBorder(side: const BorderSide(width: 20.0), borderRadius: BorderRadius.circular(200.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
@@ -21,7 +21,7 @@ void main() {
   });
 
   test('BeveledRectangleBorder BorderRadius.zero', () {
-    final Rect rect1 = new Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    final Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
       includes: const <Offset>[ Offset(10.0, 20.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(9.0, 19.0), Offset(31.0, 41.0) ],
@@ -45,7 +45,7 @@ void main() {
   });
 
   test('BeveledRectangleBorder non-zero BorderRadius', () {
-    final Rect rect = new Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    final Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
       includes: const <Offset>[ Offset(15.0, 25.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],

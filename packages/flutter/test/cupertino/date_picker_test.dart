@@ -9,7 +9,7 @@ void main() {
     testWidgets('onTimerDurationChanged is not null', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoTimerPicker(onTimerDurationChanged: null);
+          CupertinoTimerPicker(onTimerDurationChanged: null);
         },
         throwsAssertionError,
       );
@@ -18,7 +18,7 @@ void main() {
     testWidgets('initialTimerDuration falls within limit', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             initialTimerDuration: const Duration(days: 1),
           );
@@ -28,7 +28,7 @@ void main() {
 
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             initialTimerDuration: const Duration(seconds: -1),
           );
@@ -40,7 +40,7 @@ void main() {
     testWidgets('minuteInterval is positive and is a factor of 60', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             minuteInterval: 0,
           );
@@ -49,7 +49,7 @@ void main() {
       );
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             minuteInterval: -1,
           );
@@ -58,7 +58,7 @@ void main() {
       );
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             minuteInterval: 7,
           );
@@ -70,7 +70,7 @@ void main() {
     testWidgets('secondInterval is positive and is a factor of 60', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             secondInterval: 0,
           );
@@ -79,7 +79,7 @@ void main() {
       );
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             secondInterval: -1,
           );
@@ -88,7 +88,7 @@ void main() {
       );
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             secondInterval: 7,
           );
@@ -100,7 +100,7 @@ void main() {
     testWidgets('secondInterval is positive and is a factor of 60', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             secondInterval: 0,
           );
@@ -109,7 +109,7 @@ void main() {
       );
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             secondInterval: -1,
           );
@@ -118,7 +118,7 @@ void main() {
       );
       expect(
         () {
-          new CupertinoTimerPicker(
+          CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             secondInterval: 7,
           );
@@ -129,9 +129,9 @@ void main() {
 
     testWidgets('columns are ordered correctly when text direction is ltr', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new CupertinoTimerPicker(
+          child: CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
           ),
@@ -157,9 +157,9 @@ void main() {
 
     testWidgets('columns are ordered correctly when text direction is rtl', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.rtl,
-          child: new CupertinoTimerPicker(
+          child: CupertinoTimerPicker(
             onTimerDurationChanged: (_) {},
             initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
           ),
@@ -185,12 +185,12 @@ void main() {
 
     testWidgets('width of picker is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 400.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoTimerPicker(
+            child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
             ),
@@ -203,12 +203,12 @@ void main() {
         tester.getCenter(find.text('sec')).dx - tester.getCenter(find.text('12')).dx;
 
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 800.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoTimerPicker(
+            child: CupertinoTimerPicker(
               onTimerDurationChanged: (_) {},
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
             ),

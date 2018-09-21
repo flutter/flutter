@@ -35,7 +35,7 @@ class BackButtonMemoryTest extends MemoryTest {
       await receivedNextMessage;
 
       // Give Android time to settle (e.g. run GCs) after closing the app.
-      await new Future<Null>.delayed(const Duration(milliseconds: 100));
+      await Future<Null>.delayed(const Duration(milliseconds: 100));
 
       // Relaunch the app, wait for it to launch.
       prepareForNextMessage('READY');
@@ -46,7 +46,7 @@ class BackButtonMemoryTest extends MemoryTest {
       await receivedNextMessage;
 
       // Wait for the Flutter app to settle (e.g. run GCs).
-      await new Future<Null>.delayed(const Duration(milliseconds: 100));
+      await Future<Null>.delayed(const Duration(milliseconds: 100));
     }
     await recordEnd();
   }
@@ -54,5 +54,5 @@ class BackButtonMemoryTest extends MemoryTest {
 
 Future<Null> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
-  await task(new BackButtonMemoryTest().run);
+  await task(BackButtonMemoryTest().run);
 }

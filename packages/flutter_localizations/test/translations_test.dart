@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (String language in kSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
-      final Locale locale = new Locale(language, '');
+      final Locale locale = Locale(language, '');
 
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
 
@@ -120,19 +120,19 @@ void main() {
 
   testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', ''));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Thu, Jul 23');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, Jul 23');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'GB'));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Thu 23 Jul');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu 23 Jul');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es', ''));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'jue., 23 jul.');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue., 23 jul.');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de', ''));
-    expect(localizations.formatMediumDate(new DateTime(2015, 7, 23)), 'Do., 23. Juli');
-    expect(localizations.formatFullDate(new DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Do., 23. Juli');
+    expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
   });
 }

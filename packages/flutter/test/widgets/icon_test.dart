@@ -127,7 +127,7 @@ void main() {
   });
 
   testWidgets('Icon with semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(
@@ -147,7 +147,7 @@ void main() {
   });
 
   testWidgets('Null icon with semantic label', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
       const Directionality(

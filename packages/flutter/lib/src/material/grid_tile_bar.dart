@@ -60,37 +60,37 @@ class GridTileBar extends StatelessWidget {
   Widget build(BuildContext context) {
     BoxDecoration decoration;
     if (backgroundColor != null)
-      decoration = new BoxDecoration(color: backgroundColor);
+      decoration = BoxDecoration(color: backgroundColor);
 
     final List<Widget> children = <Widget>[];
-    final EdgeInsetsDirectional padding = new EdgeInsetsDirectional.only(
+    final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
       start: leading != null ? 8.0 : 16.0,
       end: trailing != null ? 8.0 : 16.0,
     );
 
     if (leading != null)
-      children.add(new Padding(padding: const EdgeInsetsDirectional.only(end: 8.0), child: leading));
+      children.add(Padding(padding: const EdgeInsetsDirectional.only(end: 8.0), child: leading));
 
     final ThemeData theme = Theme.of(context);
-    final ThemeData darkTheme = new ThemeData(
+    final ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
       accentColorBrightness: theme.accentColorBrightness
     );
     if (title != null && subtitle != null) {
       children.add(
-        new Expanded(
-          child: new Column(
+        Expanded(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              new DefaultTextStyle(
+              DefaultTextStyle(
                 style: darkTheme.textTheme.subhead,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
                 child: title
               ),
-              new DefaultTextStyle(
+              DefaultTextStyle(
                 style: darkTheme.textTheme.caption,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -102,8 +102,8 @@ class GridTileBar extends StatelessWidget {
       );
     } else if (title != null || subtitle != null) {
       children.add(
-        new Expanded(
-          child: new DefaultTextStyle(
+        Expanded(
+          child: DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
@@ -114,17 +114,17 @@ class GridTileBar extends StatelessWidget {
     }
 
     if (trailing != null)
-      children.add(new Padding(padding: const EdgeInsetsDirectional.only(start: 8.0), child: trailing));
+      children.add(Padding(padding: const EdgeInsetsDirectional.only(start: 8.0), child: trailing));
 
-    return new Container(
+    return Container(
       padding: padding,
       decoration: decoration,
       height: (title != null && subtitle != null) ? 68.0 : 48.0,
-      child: new Theme(
+      child: Theme(
         data: darkTheme,
         child: IconTheme.merge(
           data: const IconThemeData(color: Colors.white),
-          child: new Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: children
           )

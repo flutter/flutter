@@ -67,5 +67,5 @@ List<IOSEmulator> getEmulators() {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[new IOSEmulator('apple_ios_simulator')];
+  return <IOSEmulator>[IOSEmulator('apple_ios_simulator')];
 }

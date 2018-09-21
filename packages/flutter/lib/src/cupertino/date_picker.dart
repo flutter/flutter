@@ -97,7 +97,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   final ValueChanged<Duration> onTimerDurationChanged;
 
   @override
-  State<StatefulWidget> createState() => new _CupertinoTimerPickerState();
+  State<StatefulWidget> createState() => _CupertinoTimerPickerState();
 }
 
 class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
@@ -129,7 +129,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   // Builds a text label with customized scale factor and font weight.
   Widget _buildLabel(String text) {
-    return new Text(
+    return Text(
       text,
       textScaleFactor: 0.8,
       style: const TextStyle(fontWeight: FontWeight.w600),
@@ -148,8 +148,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourPicker() {
-    return new CupertinoPicker(
-      scrollController: new FixedExtentScrollController(initialItem: selectedHour),
+    return CupertinoPicker(
+      scrollController: FixedExtentScrollController(initialItem: selectedHour),
       offAxisFraction: -0.5 * textDirectionFactor,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
@@ -157,13 +157,13 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         setState(() {
           selectedHour = index;
           widget.onTimerDurationChanged(
-            new Duration(
+            Duration(
               hours: selectedHour,
               minutes: selectedMinute,
               seconds: selectedSecond ?? 0));
         });
       },
-      children: new List<Widget>.generate(24, (int index) {
+      children: List<Widget>.generate(24, (int index) {
         final double hourLabelWidth =
           widget.mode == CupertinoTimerPickerMode.hm ? _kPickerWidth / 4 : _kPickerWidth / 6;
 
@@ -171,19 +171,19 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           ? localizations.timerPickerHour(index) + localizations.timerPickerHourLabel(index)
           : localizations.timerPickerHourLabel(index) + localizations.timerPickerHour(index);
 
-        return new Semantics(
+        return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: new Container(
+          child: Container(
             alignment: alignCenterRight,
             padding: textDirectionFactor == 1
-              ? new EdgeInsets.only(right: hourLabelWidth)
-              : new EdgeInsets.only(left: hourLabelWidth),
-            child: new Container(
+              ? EdgeInsets.only(right: hourLabelWidth)
+              : EdgeInsets.only(left: hourLabelWidth),
+            child: Container(
               alignment: alignCenterRight,
               // Adds some spaces between words.
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: new Text(localizations.timerPickerHour(index)),
+              child: Text(localizations.timerPickerHour(index)),
             ),
           ),
         );
@@ -192,10 +192,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourColumn() {
-    final Widget hourLabel = new IgnorePointer(
-      child: new Container(
+    final Widget hourLabel = IgnorePointer(
+      child: Container(
         alignment: alignCenterRight,
-        child: new Container(
+        child: Container(
           alignment: alignCenterLeft,
           // Adds some spaces between words.
           padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -207,7 +207,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       ),
     );
 
-    return new Stack(
+    return Stack(
       children: <Widget>[
         _buildHourPicker(),
         hourLabel,
@@ -224,8 +224,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     else
       offAxisFraction = -0.5 * textDirectionFactor;
 
-    return new CupertinoPicker(
-      scrollController: new FixedExtentScrollController(
+    return CupertinoPicker(
+      scrollController: FixedExtentScrollController(
         initialItem: selectedMinute ~/ widget.minuteInterval,
       ),
       offAxisFraction: offAxisFraction,
@@ -235,13 +235,13 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         setState(() {
           selectedMinute = index;
           widget.onTimerDurationChanged(
-            new Duration(
+            Duration(
               hours: selectedHour ?? 0,
               minutes: selectedMinute,
               seconds: selectedSecond ?? 0));
         });
       },
-      children: new List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
+      children: List<Widget>.generate(60 ~/ widget.minuteInterval, (int index) {
         final int minute = index * widget.minuteInterval;
 
         final String semanticsLabel = textDirectionFactor == 1
@@ -249,36 +249,36 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           : localizations.timerPickerMinuteLabel(minute) + localizations.timerPickerMinute(minute);
 
         if (widget.mode == CupertinoTimerPickerMode.ms) {
-          return new Semantics(
+          return Semantics(
             label: semanticsLabel,
             excludeSemantics: true,
-            child: new Container(
+            child: Container(
               alignment: alignCenterRight,
               padding: textDirectionFactor == 1
                 ? const EdgeInsets.only(right: _kPickerWidth / 4)
                 : const EdgeInsets.only(left: _kPickerWidth / 4),
-              child: new Container(
+              child: Container(
                 alignment: alignCenterRight,
                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                child: new Text(localizations.timerPickerMinute(minute)),
+                child: Text(localizations.timerPickerMinute(minute)),
               ),
             ),
           );
         }
         else
-          return new Semantics(
+          return Semantics(
             label: semanticsLabel,
             excludeSemantics: true,
-            child: new Container(
+            child: Container(
               alignment: alignCenterLeft,
-              child: new Container(
+              child: Container(
                 alignment: alignCenterRight,
                 width: widget.mode == CupertinoTimerPickerMode.hm
                   ? _kPickerWidth / 10
                   : _kPickerWidth / 6,
                 // Adds some spaces between words.
                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                child: new Text(localizations.timerPickerMinute(minute)),
+                child: Text(localizations.timerPickerMinute(minute)),
               ),
             ),
           );
@@ -290,13 +290,13 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     Widget minuteLabel;
 
     if (widget.mode == CupertinoTimerPickerMode.hm) {
-      minuteLabel = new IgnorePointer(
-        child: new Container(
+      minuteLabel = IgnorePointer(
+        child: Container(
           alignment: alignCenterLeft,
           padding: textDirectionFactor == 1
             ? const EdgeInsets.only(left: _kPickerWidth / 10)
             : const EdgeInsets.only(right: _kPickerWidth / 10),
-          child: new Container(
+          child: Container(
             alignment: alignCenterLeft,
             // Adds some spaces between words.
             padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -306,10 +306,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       );
     }
     else {
-      minuteLabel = new IgnorePointer(
-        child: new Container(
+      minuteLabel = IgnorePointer(
+        child: Container(
           alignment: alignCenterRight,
-          child: new Container(
+          child: Container(
             alignment: alignCenterLeft,
             width: widget.mode == CupertinoTimerPickerMode.ms
               ? _kPickerWidth / 4
@@ -337,8 +337,8 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     final double secondPickerWidth =
       widget.mode == CupertinoTimerPickerMode.ms ? _kPickerWidth / 10 : _kPickerWidth / 6;
 
-    return new CupertinoPicker(
-      scrollController: new FixedExtentScrollController(
+    return CupertinoPicker(
+      scrollController: FixedExtentScrollController(
         initialItem: selectedSecond ~/ widget.secondInterval,
       ),
       offAxisFraction: offAxisFraction,
@@ -348,30 +348,30 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         setState(() {
           selectedSecond = index;
           widget.onTimerDurationChanged(
-            new Duration(
+            Duration(
               hours: selectedHour ?? 0,
               minutes: selectedMinute,
               seconds: selectedSecond));
         });
       },
-      children: new List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
+      children: List<Widget>.generate(60 ~/ widget.secondInterval, (int index) {
         final int second = index * widget.secondInterval;
 
         final String semanticsLabel = textDirectionFactor == 1
           ? localizations.timerPickerSecond(second) + localizations.timerPickerSecondLabel(second)
           : localizations.timerPickerSecondLabel(second) + localizations.timerPickerSecond(second);
 
-        return new Semantics(
+        return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: new Container(
+          child: Container(
             alignment: alignCenterLeft,
-            child: new Container(
+            child: Container(
               alignment: alignCenterRight,
               // Adds some spaces between words.
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               width: secondPickerWidth,
-              child: new Text(localizations.timerPickerSecond(second)),
+              child: Text(localizations.timerPickerSecond(second)),
             ),
           ),
         );
@@ -383,13 +383,13 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     final double secondPickerWidth =
       widget.mode == CupertinoTimerPickerMode.ms ? _kPickerWidth / 10 : _kPickerWidth / 6;
 
-    final Widget secondLabel = new IgnorePointer(
-      child: new Container(
+    final Widget secondLabel = IgnorePointer(
+      child: Container(
         alignment: alignCenterLeft,
         padding: textDirectionFactor == 1
-          ? new EdgeInsets.only(left: secondPickerWidth)
-          : new EdgeInsets.only(right: secondPickerWidth),
-        child: new Container(
+          ? EdgeInsets.only(left: secondPickerWidth)
+          : EdgeInsets.only(right: secondPickerWidth),
+        child: Container(
           alignment: alignCenterLeft,
           // Adds some spaces between words.
           padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -414,35 +414,35 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     Widget picker;
 
     if (widget.mode == CupertinoTimerPickerMode.hm) {
-      picker = new Row(
+      picker = Row(
         children: <Widget>[
-          new Expanded(child: _buildHourColumn()),
-          new Expanded(child: _buildMinuteColumn()),
+          Expanded(child: _buildHourColumn()),
+          Expanded(child: _buildMinuteColumn()),
         ],
       );
     }
     else if (widget.mode == CupertinoTimerPickerMode.ms) {
-      picker = new Row(
+      picker = Row(
         children: <Widget>[
-          new Expanded(child: _buildMinuteColumn()),
-          new Expanded(child: _buildSecondColumn()),
+          Expanded(child: _buildMinuteColumn()),
+          Expanded(child: _buildSecondColumn()),
         ],
       );
     }
     else {
-      picker = new Row(
+      picker = Row(
         children: <Widget>[
-          new Expanded(child: _buildHourColumn()),
-          new Container(
+          Expanded(child: _buildHourColumn()),
+          Container(
             width: _kPickerWidth / 3,
             child: _buildMinuteColumn(),
           ),
-          new Expanded(child: _buildSecondColumn()),
+          Expanded(child: _buildSecondColumn()),
         ],
       );
     }
 
-    return new MediaQuery(
+    return MediaQuery(
       data: const MediaQueryData(
         // The native iOS picker's text scaling is fixed, so we will also fix it
         // as well in our picker.
