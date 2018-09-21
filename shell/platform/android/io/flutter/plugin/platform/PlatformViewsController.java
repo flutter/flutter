@@ -5,14 +5,15 @@
 package io.flutter.plugin.platform;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
-import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
 import java.nio.ByteBuffer;
@@ -40,7 +41,14 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
 
     private final PlatformViewRegistryImpl mRegistry;
 
-    private FlutterView mFlutterView;
+    // The context of the Activity or Fragment hosting the render target for the Flutter engine.
+    private Context mContext;
+
+    // The texture registry maintaining the textures into which the embedded views will be rendered.
+    private TextureRegistry mTextureRegistry;
+
+    // The messenger used to communicate with the framework over the platform views channel.
+    private BinaryMessenger mMessenger;
 
     private final HashMap<Integer, VirtualDisplayController> vdControllers;
 
@@ -49,20 +57,41 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
         vdControllers = new HashMap<>();
     }
 
-    public void attachFlutterView(FlutterView view) {
-        if (mFlutterView != null)
+    /**
+     * Attaches this platform views controller to its input and output channels.
+     *
+     * @param context The base context that will be passed to embedded views created by this controller.
+     *                This should be the context of the Activity hosting the Flutter application.
+     * @param textureRegistry The texture registry which provides the output textures into which the embedded views
+     *                        will be rendered.
+     * @param messenger The Flutter application on the other side of this messenger drives this platform views controller.
+     */
+    public void attach(Context context, TextureRegistry textureRegistry, BinaryMessenger messenger) {
+        if (mContext != null) {
             throw new AssertionError(
-                    "A PlatformViewsController can only be attached to a single FlutterView.\n" +
-                    "attachFlutterView was called while a FlutterView was already attached."
+                    "A PlatformViewsController can only be attached to a single output target.\n" +
+                            "attach was called while the PlatformViewsController was already attached."
             );
-        mFlutterView = view;
-        MethodChannel channel = new MethodChannel(view, CHANNEL_NAME, StandardMethodCodec.INSTANCE);
+        }
+        mContext = context;
+        mTextureRegistry = textureRegistry;
+        mMessenger = messenger;
+        MethodChannel channel = new MethodChannel(messenger, CHANNEL_NAME, StandardMethodCodec.INSTANCE);
         channel.setMethodCallHandler(this);
     }
 
-    public void detachFlutterView() {
-        mFlutterView.setMessageHandler(CHANNEL_NAME, null);
-        mFlutterView = null;
+    /**
+     * Detaches this platform views controller.
+     *
+     * This is typically called when a Flutter applications moves to run in the background, or is destroyed.
+     * After calling this the platform views controller will no longer listen to it's previous messenger, and will
+     * not maintain references to the texture registry, context, and messenger passed to the previous attach call.
+     */
+    public void detach() {
+        mMessenger.setMessageHandler(CHANNEL_NAME, null);
+        mMessenger = null;
+        mContext = null;
+        mTextureRegistry = null;
     }
 
     public PlatformViewRegistry getRegistry() {
@@ -146,9 +175,9 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
             createParams = viewFactory.getCreateArgsCodec().decodeMessage(ByteBuffer.wrap((byte[]) args.get("params")));
         }
 
-        TextureRegistry.SurfaceTextureEntry textureEntry = mFlutterView.createSurfaceTexture();
+        TextureRegistry.SurfaceTextureEntry textureEntry = mTextureRegistry.createSurfaceTexture();
         VirtualDisplayController vdController = VirtualDisplayController.create(
-                mFlutterView.getContext(),
+                mContext,
                 viewFactory,
                 textureEntry.surfaceTexture(),
                 toPhysicalPixels(logicalWidth),
@@ -222,7 +251,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
     private void onTouch(MethodCall call, MethodChannel.Result result) {
         List<Object> args = call.arguments();
 
-        float density = mFlutterView.getContext().getResources().getDisplayMetrics().density;
+        float density = mContext.getResources().getDisplayMetrics().density;
 
         int id = (int) args.get(0);
         Number downTime = (Number) args.get(1);
@@ -353,7 +382,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler 
     }
 
     private int toPhysicalPixels(double logicalPixels) {
-        float density = mFlutterView.getContext().getResources().getDisplayMetrics().density;
+        float density = mContext.getResources().getDisplayMetrics().density;
         return (int) Math.round(logicalPixels * density);
     }
 
