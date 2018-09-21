@@ -688,8 +688,8 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 - (CGFloat)statusBarPadding {
   UIScreen* screen = self.view.window.screen;
   CGRect statusFrame = [UIApplication sharedApplication].statusBarFrame;
-  CGRect viewFrame =
-      [self.view convertRect:self.view.bounds toCoordinateSpace:screen.coordinateSpace];
+  CGRect viewFrame = [self.view convertRect:self.view.bounds
+                          toCoordinateSpace:screen.coordinateSpace];
   CGRect intersection = CGRectIntersection(statusFrame, viewFrame);
   return CGRectIsNull(intersection) ? 0.0 : intersection.size.height;
 }
@@ -740,12 +740,25 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   NSDictionary* info = [notification userInfo];
   CGFloat bottom = CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
   CGFloat scale = [UIScreen mainScreen].scale;
+
+  // The keyboard is treated as an inset since we want to effectively reduce the window size by the
+  // keyboard height. We also eliminate any bottom safe-area padding since they keyboard 'consumes'
+  // the home indicator widget.
   _viewportMetrics.physical_view_inset_bottom = bottom * scale;
+  _viewportMetrics.physical_padding_bottom = 0;
   [self updateViewportMetrics];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
+  CGFloat scale = [UIScreen mainScreen].scale;
   _viewportMetrics.physical_view_inset_bottom = 0;
+
+  // Restore any safe area padding that the keyboard had consumed.
+  if (@available(iOS 11, *)) {
+    _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
+  } else {
+    _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
+  }
   [self updateViewportMetrics];
 }
 
@@ -946,8 +959,9 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   // the "current system locale" or a custom one. On iOS it only applies to the current
   // system locale. Widget implementors must take this into account in order to provide
   // platform-idiomatic behavior in their widgets.
-  NSString* dateFormat =
-      [NSDateFormatter dateFormatFromTemplate:@"j" options:0 locale:[NSLocale currentLocale]];
+  NSString* dateFormat = [NSDateFormatter dateFormatFromTemplate:@"j"
+                                                         options:0
+                                                          locale:[NSLocale currentLocale]];
   return [dateFormat rangeOfString:@"a"].location == NSNotFound;
 }
 
@@ -1075,8 +1089,8 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
   self.pluginPublications[pluginKey] = [NSNull null];
-  return
-      [[FlutterViewControllerRegistrar alloc] initWithPlugin:pluginKey flutterViewController:self];
+  return [[FlutterViewControllerRegistrar alloc] initWithPlugin:pluginKey
+                                          flutterViewController:self];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
