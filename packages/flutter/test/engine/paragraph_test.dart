@@ -51,7 +51,7 @@ void main() {
       expect(paragraph.minIntrinsicWidth, closeTo(fontSize * 4.0, 0.001));
 
       // TODO(yjbanov): see https://github.com/flutter/flutter/issues/21965
-      expect(paragraph.maxIntrinsicWidth, closeTo(fontSize * 8.0, 0.001));
+      expect(paragraph.maxIntrinsicWidth, closeTo(fontSize * 9.0, 0.001));
       expect(paragraph.alphabeticBaseline, closeTo(fontSize * .8, 0.001));
       expect(
         paragraph.ideographicBaseline,
