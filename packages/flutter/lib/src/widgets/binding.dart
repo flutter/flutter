@@ -298,10 +298,10 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     );
 
     assert(() {
-      // Expose the ability to send Widget rebuilds to the as [Timeline] events.
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',
-        getter: () => Future<bool>.value(debugProfileBuildsEnabled),
+        getter: () async => debugProfileBuildsEnabled,
         setter: (bool value) async {
           if (debugProfileBuildsEnabled != value)
             debugProfileBuildsEnabled = value;
