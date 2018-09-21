@@ -102,7 +102,7 @@ Future<Null> main() async {
         await flutter('clean');
       });
 
-      section('Running `flutter make-host-app-editable` to Materialize host app');
+      section('Make Android host app editable');
 
       await inDirectory(projectDir, () async {
         await flutter(
@@ -111,7 +111,7 @@ Future<Null> main() async {
         );
       });
 
-      section('Build materialized host app');
+      section('Build editable host app');
 
       await inDirectory(projectDir, () async {
         await flutter(
@@ -120,7 +120,7 @@ Future<Null> main() async {
         );
       });
 
-      final bool materializedHostApkBuilt = exists(File(path.join(
+      final bool editableHostApkBuilt = exists(File(path.join(
         projectDir.path,
         'build',
         'host',
@@ -130,11 +130,11 @@ Future<Null> main() async {
         'app-release.apk',
       )));
 
-      if (!materializedHostApkBuilt) {
-        return TaskResult.failure('Failed to build materialized host .apk');
+      if (!editableHostApkBuilt) {
+        return TaskResult.failure('Failed to build editable host .apk');
       }
 
-      section('Add to Android app');
+      section('Add to existing Android app');
 
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);

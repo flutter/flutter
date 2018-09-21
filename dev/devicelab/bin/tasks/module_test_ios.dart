@@ -98,16 +98,16 @@ Future<Null> main() async {
         await flutter('clean');
       });
 
-      section('Materialize host app');
+      section('Make iOS host app editable');
 
       await inDirectory(projectDir, () async {
         await flutter(
-          'materialize',
+          'make-host-app-editable',
           options: <String>['ios'],
         );
       });
 
-      section('Build materialized host app');
+      section('Build editable host app');
 
       await inDirectory(projectDir, () async {
         await flutter(
@@ -116,7 +116,7 @@ Future<Null> main() async {
         );
       });
 
-      final bool materializedHostAppBuilt = exists(Directory(path.join(
+      final bool editableHostAppBuilt = exists(Directory(path.join(
         projectDir.path,
         'build',
         'ios',
@@ -124,14 +124,61 @@ Future<Null> main() async {
         'Runner.app',
       )));
 
-      if (!materializedHostAppBuilt) {
-        return TaskResult.failure('Failed to build materialized host .app');
+      if (!editableHostAppBuilt) {
+        return TaskResult.failure('Failed to build editable host .app');
+      }
+
+      section('Add to existing iOS app');
+
+      final Directory hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app'));
+      final Directory buildDir = Directory(path.join(hostAppDir.path, 'build'));
+      mkdir(hostAppDir);
+      recursiveCopy(
+        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
+        hostAppDir,
+      );
+      // TODO mravn: make signing work in this context
+      // await prepareProvisioningCertificates(hostAppDir.path);
+
+      await inDirectory(hostAppDir, () async {
+        await exec('pod', <String>['install']);
+      });
+
+      await inDirectory(hostAppDir, () async {
+        await exec(
+          '/usr/bin/env',
+          <String>[
+            'xcrun',
+            'xcodebuild',
+            '-configuration',
+            'Release',
+            '-allowProvisioningUpdates',
+            '-allowProvisioningDeviceRegistration',
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            'BUILD_DIR=build',
+            '-sdk',
+            'iphoneos',
+          ]
+        );
+      });
+
+      final bool existingAppBuilt = exists(File(path.join(
+        buildDir.path,
+        'iphoneos',
+        'Host.app',
+      )));
+
+      if (!existingAppBuilt) {
+        return TaskResult.failure('Failed to build existing Host.app');
       }
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
     } finally {
-      rmTree(tempDir);
+      //rmTree(tempDir);
     }
   });
 }

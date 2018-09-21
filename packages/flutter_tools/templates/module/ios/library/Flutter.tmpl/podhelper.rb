@@ -33,13 +33,13 @@ def flutter_root(f)
     }
 end
 
-framework_dir = File.join('..', '.ios', 'Flutter')
+framework_dir = File.join(flutter_application_path, '.ios', 'Flutter')
 
 engine_dir = File.join(framework_dir, 'engine')
 if !File.exist?(engine_dir)
     # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
     debug_framework_dir = File.join(flutter_root(flutter_application_path), 'bin', 'cache', 'artifacts', 'engine', 'ios')
-    FileUtils.mkdir(engine_dir)
+    FileUtils.mkdir_p(engine_dir)
     FileUtils.cp_r(File.join(debug_framework_dir, 'Flutter.framework'), engine_dir)
     FileUtils.cp(File.join(debug_framework_dir, 'Flutter.podspec'), engine_dir)
 end
@@ -52,6 +52,7 @@ FileUtils.mkdir_p(symlinks_dir)
 plugin_pods = parse_KV_file(File.join(flutter_application_path, '.flutter-plugins'))
 plugin_pods.map { |r|
     symlink = File.join(symlinks_dir, r[:name])
+    FileUtils.rm_f(symlink)
     File.symlink(r[:path], symlink)
     pod r[:name], :path => File.join(symlink, 'ios')
 }
