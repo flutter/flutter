@@ -1,4 +1,4 @@
-Signature: fdd070809577c4d1926fd0176c8dee74
+Signature: 69298134a1579dc05008e1521a499ac3
 
 UNUSED LICENSES:
 
@@ -723,6 +723,12 @@ FILE: ../../../third_party/skia/bench/StreamBench.cpp
 FILE: ../../../third_party/skia/bench/SwizzleBench.cpp
 FILE: ../../../third_party/skia/bench/TileImageFilterBench.cpp
 FILE: ../../../third_party/skia/bench/VertexColorSpaceBench.cpp
+FILE: ../../../third_party/skia/experimental/pipe/SkPipe.h
+FILE: ../../../third_party/skia/experimental/pipe/SkPipeCanvas.cpp
+FILE: ../../../third_party/skia/experimental/pipe/SkPipeCanvas.h
+FILE: ../../../third_party/skia/experimental/pipe/SkPipeFormat.h
+FILE: ../../../third_party/skia/experimental/pipe/SkPipeReader.cpp
+FILE: ../../../third_party/skia/experimental/pipe/SkRefSet.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkPEG.h
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.cpp
 FILE: ../../../third_party/skia/experimental/svg/model/SkSVGAttribute.h
@@ -1000,7 +1006,6 @@ FILE: ../../../third_party/skia/src/core/SkOverdrawCanvas.cpp
 FILE: ../../../third_party/skia/src/core/SkPM4f.h
 FILE: ../../../third_party/skia/src/core/SkPM4fPriv.h
 FILE: ../../../third_party/skia/src/core/SkPathMeasurePriv.h
-FILE: ../../../third_party/skia/src/core/SkPipe.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipeline.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterPipeline.h
 FILE: ../../../third_party/skia/src/core/SkRasterPipelineBlitter.cpp
@@ -1134,11 +1139,6 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFDocumentPriv.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFMakeCIDGlyphWidthsArray.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFMakeCIDGlyphWidthsArray.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFMakeToUnicodeCmap.h
-FILE: ../../../third_party/skia/src/pipe/SkPipeCanvas.cpp
-FILE: ../../../third_party/skia/src/pipe/SkPipeCanvas.h
-FILE: ../../../third_party/skia/src/pipe/SkPipeFormat.h
-FILE: ../../../third_party/skia/src/pipe/SkPipeReader.cpp
-FILE: ../../../third_party/skia/src/pipe/SkRefSet.h
 FILE: ../../../third_party/skia/src/ports/SkFontConfigInterface.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_empty_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkImageGeneratorCG.cpp
@@ -1608,6 +1608,7 @@ FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
 FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
 FILE: ../../../third_party/skia/src/utils/SkJSON.h
 FILE: ../../../third_party/skia/src/utils/SkTextOnPath.cpp
+FILE: ../../../third_party/skia/src/utils/mac/SkUniqueCFRef.h
 FILE: ../../../third_party/skia/src/utils/win/SkDWriteNTDDI_VERSION.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
 FILE: ../../../third_party/skia/third_party/skcms/skcms.h
