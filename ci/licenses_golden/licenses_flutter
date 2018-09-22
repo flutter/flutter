@@ -200,7 +200,6 @@ FILE: ../../../flutter/lib/ui/window/window.h
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.cc
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONUtil.java
-FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
@@ -271,8 +270,6 @@ FILE: ../../../flutter/shell/common/thread_host.cc
 FILE: ../../../flutter/shell/common/thread_host.h
 FILE: ../../../flutter/shell/platform/darwin/common/command_line.h
 FILE: ../../../flutter/shell/platform/darwin/common/command_line.mm
-FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_application_delegate.h
-FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_application_delegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h
 FILE: ../../../flutter/shell/platform/embedder/embedder.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_engine.cc
@@ -382,7 +379,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm
-FILE: ../../../flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterDartProject.h
@@ -837,12 +833,6 @@ FILE: ../../../flutter/shell/platform/android/library_loader.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h
-FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_window.h
-FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_window.mm
-FILE: ../../../flutter/shell/platform/darwin/desktop/main_mac.mm
-FILE: ../../../flutter/shell/platform/darwin/desktop/platform_view_mac.h
-FILE: ../../../flutter/shell/platform/darwin/desktop/platform_view_mac.mm
-FILE: ../../../flutter/shell/platform/darwin/desktop/vsync_waiter_mac.cc
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.mm
