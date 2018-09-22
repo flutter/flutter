@@ -254,7 +254,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         os.zip(tempDir, zipFile);
         printStatus(
           'Bug report written to ${zipFile.basename}.\n'
-          'Note that this bug report contains local paths, device '
+          'Warning: this bug report contains local paths, device '
           'identifiers, and log snippets.'
         );
       }, ShutdownStage.POST_PROCESS_RECORDING);

@@ -323,13 +323,18 @@ class KeepAliveHandle extends ChangeNotifier {
   }
 }
 
-/// A mixin with convenience methods for clients of [AutomaticKeepAlive].
+/// A mixin with convenience methods for clients of [AutomaticKeepAlive]. Used
+/// with [State] subclasses.
 ///
 /// Subclasses must implement [wantKeepAlive], and their [build] methods must
-/// call `super.build` (which will always return null).
+/// call `super.build` (the return value will always return null, and should be
+/// ignored).
 ///
 /// Then, whenever [wantKeepAlive]'s value changes (or might change), the
 /// subclass should call [updateKeepAlive].
+///
+/// The type argument `T` is the type of the [StatefulWidget] subclass of the
+/// [State] into which this class is being mixed.
 ///
 /// See also:
 ///
