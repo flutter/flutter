@@ -310,7 +310,7 @@ abstract class FlutterCommand extends Command<Null> {
         } finally {
           final DateTime endTime = clock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          // Note that this is checking the result of the call to 'usagePath'
+          // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.
           if (usagePath != null) {
             final List<String> labels = <String>[];

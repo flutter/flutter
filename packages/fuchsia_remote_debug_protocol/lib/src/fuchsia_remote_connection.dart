@@ -96,8 +96,8 @@ class DartVmEvent {
 /// Provides affordances to observe and connect to Flutter views, isolates, and
 /// perform actions on the Fuchsia device's various VM services.
 ///
-/// Note that this class can be connected to several instances of the Fuchsia
-/// device's Dart VM at any given time.
+/// This class can be connected to several instances of the Fuchsia device's
+/// Dart VM at any given time.
 class FuchsiaRemoteConnection {
   FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner)
       : _pollDartVms = false;
@@ -168,10 +168,10 @@ class FuchsiaRemoteConnection {
   /// Throws an [ArgumentError] if the supplied `address` is not valid IPv6 or
   /// IPv4.
   ///
-  /// Note that if `address` is ipv6 link local (usually starts with fe80::),
-  /// then `interface` will probably need to be set in order to connect
-  /// successfully (that being the outgoing interface of your machine, not the
-  /// interface on the target machine).
+  /// If `address` is IPv6 link local (usually starts with `fe80::`), then
+  /// `interface` will probably need to be set in order to connect successfully
+  /// (that being the outgoing interface of your machine, not the interface on
+  /// the target machine).
   ///
   /// Attempts to set `address` via the environment variable
   /// `FUCHSIA_DEVICE_URL` in the event that the argument is not passed.
