@@ -189,6 +189,10 @@ class WidgetsApp extends StatefulWidget {
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
   /// {@endtemplate}
+  ///
+  /// If this property is not set, either the [routes] or [home] properties must
+  /// be set, and the [pageRouteBuilder] must also be set so that the
+  /// default handler will know what routes and [PageRoute]s to build.
   final RouteFactory onGenerateRoute;
 
   /// The [PageRoute] generator callback used when the app is navigated to a
@@ -225,6 +229,10 @@ class WidgetsApp extends StatefulWidget {
   /// In contrast, the widget returned from [builder] is inserted _above_ the
   /// [Navigator] (if any).
   /// {@endTemplate}
+  ///
+  /// If this property is set, the [pageRouteBuilder] property must also be set
+  /// so that the default route handler will know what kind of [PageRoute]s to
+  /// build.
   final Widget home;
 
   /// The application's top-level routing table.
@@ -250,6 +258,10 @@ class WidgetsApp extends StatefulWidget {
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [builder] must not be null.
   /// {@endTemplate}
+  ///
+  /// If this property is set, the [pageRouteBuilder] property must also be set
+  /// so that the default route handler will know what kind of [PageRoute]s to
+  /// build.
   final Map<String, WidgetBuilder> routes;
 
   /// {@template flutter.widgets.widgetsApp.onUnknownRoute}
@@ -587,11 +599,16 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       builder = widget.routes[name];
     }
     if (builder != null) {
-      assert(widget.pageRouteBuilder != null);
-      return widget.pageRouteBuilder<dynamic>(
+      assert(widget.pageRouteBuilder != null,
+        'The default onGenerateRoute handler for WidgetsApp must have a '
+        'pageRouteBuilder set if the home or routes properties are set.');
+      final Route<dynamic> route = widget.pageRouteBuilder<dynamic>(
         settings,
         builder,
       );
+      assert(route != null,
+        'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
+      return route;
     }
     if (widget.onGenerateRoute != null)
       return widget.onGenerateRoute(settings);
