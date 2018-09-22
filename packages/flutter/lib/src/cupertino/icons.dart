@@ -58,8 +58,33 @@ class CupertinoIcons {
   ///  * [share_up], for another (pre-iOS 7) version of this icon.
   static const IconData share_solid = IconData(0xf4cb, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A book silhouette spread open.
+  /// A book silhouette spread open. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [book_solid], which is similar, but filled in.
   static const IconData book = IconData(0xf3e7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [book], which is similar, but not filled in.
+  static const IconData book_solid = IconData(0xf3e8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open containing a bookmark in the upper right. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [bookmark_solid], which is similar, but filled in.
+  static const IconData bookmark = IconData(0xf3e9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open containing a bookmark in the upper right. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [bookmark], which is similar, but not filled in.
+  static const IconData bookmark_solid = IconData(0xf3ea, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A letter 'i' in a circle.
   static const IconData info = IconData(0xf44c, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -497,13 +522,13 @@ class CupertinoIcons {
   ///
   /// See also:
   ///
-  /// * [loop_thick], which is similar, but thicker.
+  ///  * [loop_thick], which is similar, but thicker.
   static const IconData loop = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// The infinity symbol.
   ///
   /// See also:
   ///
-  /// * [loop], which is similar, but thinner.
+  ///  * [loop], which is similar, but thinner.
   static const IconData loop_thick = IconData(0xf44a, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
