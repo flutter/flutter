@@ -33,19 +33,25 @@
 
 #ifndef TRACE_EVENT_HIDE_MACROS
 
+#define __FML__TOKEN_CAT__(x, y) x##y
+#define __FML__TOKEN_CAT__2(x, y) __FML__TOKEN_CAT__(x, y)
+#define __FML__AUTO_TRACE_END(name)                                  \
+  ::fml::tracing::ScopedInstantEnd __FML__TOKEN_CAT__2(__trace_end_, \
+                                                       __LINE__)(name);
+
 #define TRACE_EVENT0(category_group, name)           \
   ::fml::tracing::TraceEvent0(category_group, name); \
-  ::fml::tracing::ScopedInstantEnd __trace_end0_##__LINE__(name);
+  __FML__AUTO_TRACE_END(name)
 
 #define TRACE_EVENT1(category_group, name, arg1_name, arg1_val)           \
   ::fml::tracing::TraceEvent1(category_group, name, arg1_name, arg1_val); \
-  ::fml::tracing::ScopedInstantEnd __trace_end1_##__LINE__(name);
+  __FML__AUTO_TRACE_END(name)
 
 #define TRACE_EVENT2(category_group, name, arg1_name, arg1_val, arg2_name, \
                      arg2_val)                                             \
   ::fml::tracing::TraceEvent2(category_group, name, arg1_name, arg1_val,   \
                               arg2_name, arg2_val);                        \
-  ::fml::tracing::ScopedInstantEnd __trace_end2_##__LINE__(name);
+  __FML__AUTO_TRACE_END(name)
 
 #define TRACE_EVENT_ASYNC_BEGIN0(category_group, name, id) \
   ::fml::tracing::TraceEventAsyncBegin0(category_group, name, id);
