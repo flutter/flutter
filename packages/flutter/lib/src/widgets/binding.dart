@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'widget_inspector.dart';
@@ -268,7 +269,10 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
 
     registerSignalServiceExtension(
       name: 'debugDumpApp',
-      callback: () { debugDumpApp(); return debugPrintDone; }
+      callback: () {
+        debugDumpApp();
+        return debugPrintDone;
+      }
     );
 
     registerBoolServiceExtension(
@@ -292,6 +296,19 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
         return _forceRebuild();
       }
     );
+
+    assert(() {
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabled,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabled != value)
+            debugProfileBuildsEnabled = value;
+        }
+      );
+      return true;
+    }());
 
     // This service extension is deprecated and will be removed by 7/1/2018.
     // Use ext.flutter.inspector.show instead.
