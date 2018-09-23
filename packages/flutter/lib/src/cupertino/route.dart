@@ -19,19 +19,19 @@ const Color _kModalBarrierColor = Color(0x6604040F);
 const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
 // Offset from offscreen to the right to fully on screen.
-final Tween<Offset> _kRightMiddleTween = Tween<Offset>(
+final Animatable<Offset> _kRightMiddleTween = Tween<Offset>(
   begin: const Offset(1.0, 0.0),
   end: Offset.zero,
 );
 
 // Offset from fully on screen to 1/3 offscreen to the left.
-final Tween<Offset> _kMiddleLeftTween = Tween<Offset>(
+final Animatable<Offset> _kMiddleLeftTween = Tween<Offset>(
   begin: Offset.zero,
   end: const Offset(-1.0/3.0, 0.0),
 );
 
 // Offset from offscreen below to fully on screen.
-final Tween<Offset> _kBottomUpTween = Tween<Offset>(
+final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 1.0),
   end: Offset.zero,
 );
@@ -354,28 +354,22 @@ class CupertinoPageTransition extends StatelessWidget {
     @required this.child,
     @required bool linearTransition,
   }) : assert(linearTransition != null),
-       _primaryPositionAnimation = linearTransition
-         ? _kRightMiddleTween.animate(primaryRouteAnimation)
-         : _kRightMiddleTween.animate(
-             CurvedAnimation(
-               parent: primaryRouteAnimation,
-               curve: Curves.easeOut,
-               reverseCurve: Curves.easeIn,
-             )
-           ),
-       _secondaryPositionAnimation = _kMiddleLeftTween.animate(
-         CurvedAnimation(
-           parent: secondaryRouteAnimation,
-           curve: Curves.easeOut,
-           reverseCurve: Curves.easeIn,
-         )
-       ),
-       _primaryShadowAnimation = _kGradientShadowTween.animate(
+       _primaryPositionAnimation = (linearTransition ? primaryRouteAnimation :
          CurvedAnimation(
            parent: primaryRouteAnimation,
            curve: Curves.easeOut,
+           reverseCurve: Curves.easeIn,
          )
-       ),
+       ).drive(_kRightMiddleTween),
+       _secondaryPositionAnimation = CurvedAnimation(
+         parent: secondaryRouteAnimation,
+         curve: Curves.easeOut,
+         reverseCurve: Curves.easeIn,
+       ).drive(_kMiddleLeftTween),
+       _primaryShadowAnimation = CurvedAnimation(
+         parent: primaryRouteAnimation,
+         curve: Curves.easeOut,
+       ).drive(_kGradientShadowTween),
        super(key: key);
 
   // When this page is coming in to cover another page.
@@ -418,12 +412,9 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
     Key key,
     @required Animation<double> animation,
     @required this.child,
-  }) : _positionAnimation = _kBottomUpTween.animate(
-         CurvedAnimation(
-           parent: animation,
-           curve: Curves.easeInOut,
-         )
-       ),
+  }) : _positionAnimation = animation
+         .drive(CurveTween(curve: Curves.easeInOut))
+         .drive(_kBottomUpTween),
        super(key: key);
 
   final Animation<Offset> _positionAnimation;
@@ -859,6 +850,9 @@ Future<T> showCupertinoModalPopup<T>({
   );
 }
 
+final Animatable<double> _dialogTween = Tween<double>(begin: 1.2, end: 1.0)
+  .chain(CurveTween(curve: Curves.fastOutSlowIn));
+
 Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   final CurvedAnimation fadeAnimation = CurvedAnimation(
     parent: animation,
@@ -874,15 +868,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
     opacity: fadeAnimation,
     child: ScaleTransition(
       child: child,
-      scale: Tween<double>(
-        begin: 1.2,
-        end: 1.0,
-      ).animate(
-        CurvedAnimation(
-          parent: animation,
-          curve: Curves.fastOutSlowIn,
-        ),
-      ),
+      scale: animation.drive(_dialogTween),
     ),
   );
 }

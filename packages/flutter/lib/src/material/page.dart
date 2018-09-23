@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
-final Tween<Offset> _kBottomUpTween = Tween<Offset>(
+final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 0.25),
   end: Offset.zero,
 );
@@ -18,17 +18,16 @@ class _MountainViewPageTransition extends StatelessWidget {
   _MountainViewPageTransition({
     Key key,
     @required bool fade,
-    @required Animation<double> routeAnimation,
+    @required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     @required this.child,
-  }) : _positionAnimation = _kBottomUpTween.animate(CurvedAnimation(
-         parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
-         curve: Curves.fastOutSlowIn,
-       )),
-       _opacityAnimation = fade ? CurvedAnimation(
-         parent: routeAnimation,
-         curve: Curves.easeIn, // Eyeballed from other Material apps.
-       ) : const AlwaysStoppedAnimation<double>(1.0),
+  }) : _positionAnimation = routeAnimation.drive(_kBottomUpTween.chain(_fastOutSlowInTween)),
+       _opacityAnimation = fade
+         ? routeAnimation.drive(_easeInTween) // Eyeballed from other Material apps.
+         : const AlwaysStoppedAnimation<double>(1.0),
        super(key: key);
+
+  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
+  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
 
   final Animation<Offset> _positionAnimation;
   final Animation<double> _opacityAnimation;

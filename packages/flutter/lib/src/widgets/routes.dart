@@ -16,6 +16,9 @@ import 'overlay.dart';
 import 'page_storage.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// dynamic routeObserver;
+
 const Color _kTransparent = Color(0x00000000);
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
@@ -1171,19 +1174,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = GlobalKey();
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
+  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
+
   // one of the builders
   OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
     if (barrierColor != null && !offstage) { // changedInternalState is called if these update
       assert(barrierColor != _kTransparent);
-      final Animation<Color> color = ColorTween(
-        begin: _kTransparent,
-        end: barrierColor, // changedInternalState is called if this updates
-      ).animate(CurvedAnimation(
-        parent: animation,
-        curve: Curves.ease,
-      ));
+      final Animation<Color> color = animation.drive(
+        ColorTween(
+          begin: _kTransparent,
+          end: barrierColor, // changedInternalState is called if this updates
+        ).chain(_easeCurveTween),
+      );
       barrier = AnimatedModalBarrier(
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if this updates

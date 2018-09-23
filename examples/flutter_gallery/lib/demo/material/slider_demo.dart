@@ -35,7 +35,7 @@ class _CustomThumbShape extends SliderComponentShape {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
 
-  static final Tween<double> sizeTween = Tween<double>(
+  static final Animatable<double> sizeTween = Tween<double>(
     begin: _disabledThumbSize,
     end: _thumbSize,
   );
@@ -74,7 +74,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     return Size.fromRadius(isEnabled ? _indicatorSize : _disabledIndicatorSize);
   }
 
-  static final Tween<double> sizeTween = Tween<double>(
+  static final Animatable<double> sizeTween = Tween<double>(
     begin: _disabledIndicatorSize,
     end: _indicatorSize,
   );
