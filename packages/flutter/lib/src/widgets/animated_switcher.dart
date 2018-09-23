@@ -5,6 +5,7 @@
 import 'dart:collection';
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -37,6 +38,9 @@ class _ChildEntry {
   // The widget's child at the time this entry was created or updated.
   // Used to rebuild the transition if necessary.
   Widget widgetChild;
+
+  @override
+  String toString() => 'Entry#${shortHash(this)}($widgetChild)';
 }
 
 /// Signature for builders used to generate custom transitions for
