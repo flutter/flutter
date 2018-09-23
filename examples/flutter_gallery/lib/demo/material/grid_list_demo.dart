@@ -117,10 +117,10 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size).shortestSide;
-    _flingAnimation = Tween<Offset>(
+    _flingAnimation = _controller.drive(Tween<Offset>(
       begin: _offset,
       end: _clampOffset(_offset + direction * distance)
-    ).animate(_controller);
+    ));
     _controller
       ..value = 0.0
       ..fling(velocity: magnitude / 1000.0);
