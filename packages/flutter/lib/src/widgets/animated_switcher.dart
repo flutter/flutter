@@ -318,15 +318,15 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _updateTransitionForEntry(_currentEntry); // uses entry.widgetChild
       _markChildWidgetCacheAsDirty();
     }
-  }          
+  }
 
   void _addEntryForNewChild({@required bool animate}) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
       assert(!_outgoingEntries.contains(_currentEntry));
-      _currentEntry.controller.reverse();
       _outgoingEntries.add(_currentEntry);
+      _currentEntry.controller.reverse();
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
@@ -392,7 +392,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     );
   }
 
-  void _rebuildChildWidgetCacheIfNeeded() {
+  void _rebuildOutgoingWidgetsIfNeeded() {
     _outgoingWidgets ??= List<Widget>.unmodifiable(
       _outgoingEntries.map<Widget>((_ChildEntry entry) => entry.transition),
     );
@@ -411,7 +411,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   @override
   Widget build(BuildContext context) {
-    _rebuildChildWidgetCacheIfNeeded();
+    _rebuildOutgoingWidgetsIfNeeded();
     return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets);
   }
 }
