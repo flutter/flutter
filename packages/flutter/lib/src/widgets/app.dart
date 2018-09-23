@@ -757,8 +757,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         initialRoute: ui.window.defaultRouteName != Navigator.defaultRouteName
             ? ui.window.defaultRouteName
             : widget.initialRoute ?? ui.window.defaultRouteName,
-        onGenerateRoute: widget.onGenerateRoute ?? _onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute ?? _onUnknownRoute,
+        onGenerateRoute: _onGenerateRoute,
+        onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
       );
     }
