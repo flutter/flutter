@@ -57,7 +57,7 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
-       tags = tags?.toSet() ?? new Set<SemanticsTag>();
+       tags = tags?.toSet() ?? Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -84,7 +84,7 @@ class TestSemantics {
        assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
-       tags = tags?.toSet() ?? new Set<SemanticsTag>();
+       tags = tags?.toSet() ?? Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -119,7 +119,7 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
-       tags = tags?.toSet() ?? new Set<SemanticsTag>();
+       tags = tags?.toSet() ?? Set<SemanticsTag>();
 
   /// The unique identifier for this node.
   ///
@@ -187,11 +187,11 @@ class TestSemantics {
   ///
   /// See also [new TestSemantics.root], which uses this value to describe the
   /// root node.
-  static final Rect rootRect = new Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
+  static final Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
 
   /// The test screen's size in logical pixels, useful for the [rect] of
   /// full-screen widgets other than the root node.
-  static final Rect fullScreen = new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
+  static final Rect fullScreen = Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
@@ -203,7 +203,7 @@ class TestSemantics {
   final TextSelection textSelection;
 
   static Matrix4 _applyRootChildScale(Matrix4 transform) {
-    final Matrix4 result = new Matrix4.diagonal3Values(3.0, 3.0, 1.0);
+    final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null)
       result.multiply(transform);
     return result;
@@ -225,8 +225,6 @@ class TestSemantics {
       DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
     }
   ) {
-    final SemanticsData nodeData = node.getSemanticsData();
-
     bool fail(String message) {
       matchState[TestSemantics] = '$message';
       return false;
@@ -236,6 +234,8 @@ class TestSemantics {
       return fail('could not find node with id $id.');
     if (!ignoreId && id != node.id)
       return fail('expected node id $id but found id ${node.id}.');
+
+    final SemanticsData nodeData = node.getSemanticsData();
 
     final int flagsBitmask = flags is int
       ? flags
@@ -300,8 +300,8 @@ class TestSemantics {
   @override
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
-    final StringBuffer buf = new StringBuffer();
-    buf.writeln('${indent}new $runtimeType(');
+    final StringBuffer buf = StringBuffer();
+    buf.writeln('$indent$runtimeType(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
     if (flags is int && flags != 0 || flags is List<SemanticsFlag> && flags.isNotEmpty)
@@ -372,7 +372,7 @@ class SemanticsTester {
   }
 
   @override
-  String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode}';
+  String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode}';
 
   /// Returns all semantics nodes in the current semantics tree whose properties
   /// match the non-null arguments.
@@ -451,8 +451,8 @@ class SemanticsTester {
   ///
   /// ```dart
   /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
-  ///   var semantics = new SemanticsTester(tester);
-  ///   await tester.pumpWidget(new MyWidget());
+  ///   var semantics = SemanticsTester(tester);
+  ///   await tester.pumpWidget(MyWidget());
   ///   print(semantics.generateTestSemanticsExpressionForCurrentSemanticsTree());
   ///   semantics.dispose();
   /// });
@@ -462,11 +462,11 @@ class SemanticsTester {
   ///
   /// ```dart
   /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
-  ///   var semantics = new SemanticsTester(tester);
-  ///   await tester.pumpWidget(new MyWidget());
+  ///   var semantics = SemanticsTester(tester);
+  ///   await tester.pumpWidget(MyWidget());
   ///   expect(semantics, hasSemantics(
   ///     // Generated code:
-  ///     new TestSemantics(
+  ///     TestSemantics(
   ///       ... properties and child nodes ...
   ///     ),
   ///     ignoreRect: true,
@@ -487,7 +487,7 @@ class SemanticsTester {
   /// over-test. Prefer breaking your widgets into smaller widgets and test them
   /// individually.
   String generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-    final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode;
     return _generateSemanticsTestForNode(node, 0, childOrder);
   }
 
@@ -520,11 +520,13 @@ class SemanticsTester {
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
   static String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount, DebugSemanticsDumpOrder childOrder) {
+    if (node == null)
+      return 'null';
     final String indent = '  ' * indentAmount;
-    final StringBuffer buf = new StringBuffer();
+    final StringBuffer buf = StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
     final bool isRoot = node.id == 0;
-    buf.writeln('new TestSemantics${isRoot ? '.root': ''}(');
+    buf.writeln('TestSemantics${isRoot ? '.root': ''}(');
     if (!isRoot)
       buf.writeln('  id: ${node.id},');
     if (nodeData.tags != null)
@@ -590,7 +592,7 @@ class _HasSemantics extends Matcher {
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     final bool doesMatch = _semantics._matches(
-      item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode,
+      item.tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode,
       matchState,
       ignoreTransform: ignoreTransform,
       ignoreRect: ignoreRect,
@@ -600,6 +602,9 @@ class _HasSemantics extends Matcher {
     if (!doesMatch) {
       matchState['would-match'] = item.generateTestSemanticsExpressionForCurrentSemanticsTree(childOrder);
     }
+    if (item.tester.binding.pipelineOwner.semanticsOwner == null) {
+      matchState['additional-notes'] = '(Check that the SemanticsTester has not been disposed early.)';
+    }
     return doesMatch;
   }
 
@@ -608,14 +613,25 @@ class _HasSemantics extends Matcher {
     return description.add('semantics node matching:\n$_semantics');
   }
 
+  String _indent(String text) {
+    return text.toString().trimRight().split('\n').map((String line) => '  $line').join('\n');
+  }
+
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription
-        .add('${matchState[TestSemantics]}\n')
-        .add('Current SemanticsNode tree:\n')
-        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder))
-        .add('The semantics tree would have matched the following configuration:\n')
-        .add(matchState['would-match']);
+    Description result = mismatchDescription
+      .add('${matchState[TestSemantics]}\n')
+      .add('Current SemanticsNode tree:\n')
+      .add(_indent(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder)))
+      .add('\n')
+      .add('The semantics tree would have matched the following configuration:\n')
+      .add(_indent(matchState['would-match']));
+    if (matchState.containsKey('additional-notes')) {
+      result = result
+        .add('\n')
+        .add(matchState['additional-notes']);
+    }
+    return result;
   }
 }
 
@@ -626,7 +642,7 @@ Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreId = false,
   DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
-  return new _HasSemantics(
+  return _HasSemantics(
     semantics,
     ignoreRect: ignoreRect,
     ignoreTransform: ignoreTransform,
@@ -722,7 +738,7 @@ Matcher includesNodeWith({
   double scrollExtentMax,
   double scrollExtentMin,
 }) {
-  return new _IncludesNodeWith(
+  return _IncludesNodeWith(
     label: label,
     value: value,
     hint: hint,

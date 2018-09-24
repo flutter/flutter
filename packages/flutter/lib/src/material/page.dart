@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
-final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
+final Animatable<Offset> _kBottomUpTween = Tween<Offset>(
   begin: const Offset(0.0, 0.25),
   end: Offset.zero,
 );
@@ -18,17 +18,16 @@ class _MountainViewPageTransition extends StatelessWidget {
   _MountainViewPageTransition({
     Key key,
     @required bool fade,
-    @required Animation<double> routeAnimation,
+    @required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     @required this.child,
-  }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
-         parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
-         curve: Curves.fastOutSlowIn,
-       )),
-       _opacityAnimation = fade ? new CurvedAnimation(
-         parent: routeAnimation,
-         curve: Curves.easeIn, // Eyeballed from other Material apps.
-       ) : const AlwaysStoppedAnimation<double>(1.0),
+  }) : _positionAnimation = routeAnimation.drive(_kBottomUpTween.chain(_fastOutSlowInTween)),
+       _opacityAnimation = fade
+         ? routeAnimation.drive(_easeInTween) // Eyeballed from other Material apps.
+         : const AlwaysStoppedAnimation<double>(1.0),
        super(key: key);
+
+  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
+  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
 
   final Animation<Offset> _positionAnimation;
   final Animation<double> _opacityAnimation;
@@ -37,9 +36,9 @@ class _MountainViewPageTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
-    return new SlideTransition(
+    return SlideTransition(
       position: _positionAnimation,
-      child: new FadeTransition(
+      child: FadeTransition(
         opacity: _opacityAnimation,
         child: child,
       ),
@@ -87,14 +86,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     assert(opaque);
   }
 
-  /// Turns on the fading of routes during page transitions.
-  ///
-  /// This is currently disabled by default because of performance issues on
-  /// low-end phones. Eventually these issues will be resolved and this flag
-  /// will be removed.
-  @Deprecated('This flag will eventually be removed once the performance issues are resolved. See: https://github.com/flutter/flutter/issues/13736')
-  static bool debugEnableFadingRoutes = false;
-
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
@@ -105,7 +96,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// It's lazily created on first use.
   CupertinoPageRoute<T> get _cupertinoPageRoute {
     assert(_useCupertinoTransitions);
-    _internalCupertinoPageRoute ??= new CupertinoPageRoute<T>(
+    _internalCupertinoPageRoute ??= CupertinoPageRoute<T>(
       builder: builder, // Not used.
       fullscreenDialog: fullscreenDialog,
       hostRoute: this,
@@ -150,14 +141,14 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = new Semantics(
+    final Widget result = Semantics(
       scopesRoute: true,
       explicitChildNodes: true,
       child: builder(context),
     );
     assert(() {
       if (result == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'The builder for route "${settings.name}" returned null.\n'
           'Route builders must never return null.'
         );
@@ -172,10 +163,10 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     if (_useCupertinoTransitions) {
       return _cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
     } else {
-      return new _MountainViewPageTransition(
+      return _MountainViewPageTransition(
         routeAnimation: animation,
         child: child,
-        fade: debugEnableFadingRoutes, // ignore: deprecated_member_use
+        fade: true,
       );
     }
   }

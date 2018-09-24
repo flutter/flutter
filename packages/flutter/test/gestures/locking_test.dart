@@ -7,9 +7,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
-typedef void HandleEventCallback(PointerEvent event);
+import '../flutter_test_alternative.dart';
+
+typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   HandleEventCallback callback;
@@ -37,10 +38,10 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   }
 }
 
-TestGestureFlutterBinding _binding = new TestGestureFlutterBinding();
+TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
 
 void ensureTestGestureBinding() {
-  _binding ??= new TestGestureFlutterBinding();
+  _binding ??= TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 

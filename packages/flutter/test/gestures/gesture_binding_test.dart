@@ -6,9 +6,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
-typedef void HandleEventCallback(PointerEvent event);
+import '../flutter_test_alternative.dart';
+
+typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   HandleEventCallback callback;
@@ -21,10 +22,10 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   }
 }
 
-TestGestureFlutterBinding _binding = new TestGestureFlutterBinding();
+TestGestureFlutterBinding _binding = TestGestureFlutterBinding();
 
 void ensureTestGestureBinding() {
-  _binding ??= new TestGestureFlutterBinding();
+  _binding ??= TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 
@@ -68,14 +69,14 @@ void main() {
   });
 
   test('Synthetic move events', () {
-    final ui.PointerDataPacket packet = new ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        new ui.PointerData(
+        ui.PointerData(
           change: ui.PointerChange.down,
           physicalX: 1.0 * ui.window.devicePixelRatio,
           physicalY: 3.0 * ui.window.devicePixelRatio,
         ),
-        new ui.PointerData(
+        ui.PointerData(
           change: ui.PointerChange.up,
           physicalX: 10.0 * ui.window.devicePixelRatio,
           physicalY: 15.0 * ui.window.devicePixelRatio,
@@ -154,10 +155,10 @@ void main() {
   });
 
   test('Synthetic hover and cancel for misplaced down and remove', () {
-    final ui.PointerDataPacket packet = new ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
-        new ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0 * ui.window.devicePixelRatio, physicalY: 10.0 * ui.window.devicePixelRatio),
-        new ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0 * ui.window.devicePixelRatio, physicalY: 17.0 * ui.window.devicePixelRatio),
+        ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0 * ui.window.devicePixelRatio, physicalY: 10.0 * ui.window.devicePixelRatio),
+        ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0 * ui.window.devicePixelRatio, physicalY: 17.0 * ui.window.devicePixelRatio),
         const ui.PointerData(change: ui.PointerChange.remove, device: 25),
       ]
     );

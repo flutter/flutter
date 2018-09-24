@@ -18,7 +18,7 @@ class VsCodeValidator extends DoctorValidator {
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode
         .allInstalled()
-        .map((VsCode vsCode) => new VsCodeValidator(vsCode));
+        .map((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
   @override
@@ -28,19 +28,19 @@ class VsCodeValidator extends DoctorValidator {
     final String vsCodeVersionText = _vsCode.version == Version.unknown
         ? null
         : 'version ${_vsCode.version}';
-    messages.add(new ValidationMessage('VS Code at ${_vsCode.directory}'));
+    messages.add(ValidationMessage('VS Code at ${_vsCode.directory}'));
     if (_vsCode.isValid) {
       type = ValidationType.installed;
       messages.addAll(_vsCode.validationMessages
-          .map((String m) => new ValidationMessage(m)));
+          .map((String m) => ValidationMessage(m)));
     } else {
       type = ValidationType.partial;
       messages.addAll(_vsCode.validationMessages
-          .map((String m) => new ValidationMessage.error(m)));
-      messages.add(new ValidationMessage(
+          .map((String m) => ValidationMessage.error(m)));
+      messages.add(ValidationMessage(
           'Flutter extension not installed; install from\n$extensionMarketplaceUrl'));
     }
 
-    return new ValidationResult(type, messages, statusInfo: vsCodeVersionText);
+    return ValidationResult(type, messages, statusInfo: vsCodeVersionText);
   }
 }

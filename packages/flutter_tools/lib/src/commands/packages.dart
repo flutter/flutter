@@ -12,10 +12,10 @@ import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
-    addSubcommand(new PackagesGetCommand('get', false));
-    addSubcommand(new PackagesGetCommand('upgrade', true));
-    addSubcommand(new PackagesTestCommand());
-    addSubcommand(new PackagesPassthroughCommand());
+    addSubcommand(PackagesGetCommand('get', false));
+    addSubcommand(PackagesGetCommand('upgrade', true));
+    addSubcommand(PackagesTestCommand());
+    addSubcommand(PackagesPassthroughCommand());
   }
 
   @override

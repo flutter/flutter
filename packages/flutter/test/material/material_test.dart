@@ -12,18 +12,18 @@ import '../rendering/mock_canvas.dart';
 class NotifyMaterial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    new LayoutChangedNotification().dispatch(context);
-    return new Container();
+    LayoutChangedNotification().dispatch(context);
+    return Container();
   }
 }
 
 Widget buildMaterial(
     {double elevation = 0.0, Color shadowColor = const Color(0xFF00FF00)}) {
-  return new Center(
-    child: new SizedBox(
+  return Center(
+    child: SizedBox(
       height: 100.0,
       width: 100.0,
-      child: new Material(
+      child: Material(
         shadowColor: shadowColor,
         elevation: elevation,
         shape: const CircleBorder(),
@@ -44,7 +44,7 @@ class PaintRecorder extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     log.add(size);
-    final Paint paint = new Paint()..color = const Color(0xFF0000FF);
+    final Paint paint = Paint()..color = const Color(0xFF0000FF);
     canvas.drawRect(Offset.zero & size, paint);
   }
 
@@ -55,8 +55,8 @@ class PaintRecorder extends CustomPainter {
 void main() {
   testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new NotifyMaterial(),
+      Material(
+        child: NotifyMaterial(),
       ),
     );
   });
@@ -65,36 +65,36 @@ void main() {
     final List<Size> log = <Size>[];
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Column(
+        child: Column(
           children: <Widget>[
-            new SizedBox(
+            SizedBox(
               width: 150.0,
               height: 150.0,
-              child: new CustomPaint(
-                painter: new PaintRecorder(log),
+              child: CustomPaint(
+                painter: PaintRecorder(log),
               ),
             ),
-            new Expanded(
-              child: new Material(
-                child: new Column(
+            Expanded(
+              child: Material(
+                child: Column(
                   children: <Widget>[
-                    new Expanded(
-                      child: new ListView(
+                    Expanded(
+                      child: ListView(
                         children: <Widget>[
-                          new Container(
+                          Container(
                             height: 2000.0,
                             color: const Color(0xFF00FF00),
                           ),
                         ],
                       ),
                     ),
-                    new SizedBox(
+                    SizedBox(
                       width: 100.0,
                       height: 100.0,
-                      child: new CustomPaint(
-                        painter: new PaintRecorder(log),
+                      child: CustomPaint(
+                        painter: PaintRecorder(log),
                       ),
                     ),
                   ],
@@ -171,27 +171,42 @@ void main() {
   });
 
   group('Transparency clipping', () {
-    testWidgets('clips to bounding rect by default', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+    testWidgets('No clip by default', (WidgetTester tester) async {
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+          Material(
+            key: materialKey,
+            type: MaterialType.transparency,
+            child: const SizedBox(width: 100.0, height: 100.0),
+          )
+      );
+
+      expect(find.byKey(materialKey), hasNoImmediateClip);
+    });
+
+    testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
+      final GlobalKey materialKey = GlobalKey();
+      await tester.pumpWidget(
+        Material(
           key: materialKey,
           type: MaterialType.transparency,
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         )
       );
 
       expect(find.byKey(materialKey), clipsWithBoundingRect);
     });
 
-    testWidgets('clips to rounded rect when borderRadius provided', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+    testWidgets('clips to rounded rect when borderRadius provided given Clip.antiAlias', (WidgetTester tester) async {
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.transparency,
           borderRadius: const BorderRadius.all(Radius.circular(10.0)),
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         )
       );
 
@@ -203,14 +218,15 @@ void main() {
       );
     });
 
-    testWidgets('clips to shape when provided', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+    testWidgets('clips to shape when provided given Clip.antiAlias', (WidgetTester tester) async {
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.transparency,
           shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
         )
       );
 
@@ -225,9 +241,9 @@ void main() {
 
   group('PhysicalModels', () {
     testWidgets('canvas', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.canvas,
           child: const SizedBox(width: 100.0, height: 100.0)
@@ -242,9 +258,9 @@ void main() {
     });
 
     testWidgets('canvas with borderRadius and elevation', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
@@ -261,9 +277,9 @@ void main() {
     });
 
     testWidgets('canvas with shape and elevation', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.canvas,
           shape: const StadiumBorder(),
@@ -279,9 +295,9 @@ void main() {
     });
 
     testWidgets('card', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.card,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -296,9 +312,9 @@ void main() {
     });
 
     testWidgets('card with borderRadius and elevation', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.card,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
@@ -315,9 +331,9 @@ void main() {
     });
 
     testWidgets('card with shape and elevation', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.card,
           shape: const StadiumBorder(),
@@ -333,9 +349,9 @@ void main() {
     });
 
     testWidgets('circle', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.circle,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -350,9 +366,9 @@ void main() {
     });
 
     testWidgets('button', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -368,9 +384,9 @@ void main() {
     });
 
     testWidgets('button with elevation and borderRadius', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -388,9 +404,9 @@ void main() {
     });
 
     testWidgets('button with elevation and shape', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -409,9 +425,9 @@ void main() {
 
   group('Border painting', () {
     testWidgets('border is painted on physical layers', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -430,9 +446,9 @@ void main() {
     });
 
     testWidgets('border is painted for transparent material', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -450,9 +466,9 @@ void main() {
     });
 
     testWidgets('border is not painted for when border side is none', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
+      final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
-        new Material(
+        Material(
           key: materialKey,
           type: MaterialType.transparency,
           child: const SizedBox(width: 100.0, height: 100.0),

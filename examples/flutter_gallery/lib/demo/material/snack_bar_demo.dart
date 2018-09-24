@@ -22,33 +22,33 @@ class SnackBarDemo extends StatefulWidget {
   static const String routeName = '/material/snack-bar';
 
   @override
-  _SnackBarDemoState createState() => new _SnackBarDemoState();
+  _SnackBarDemoState createState() => _SnackBarDemoState();
 }
 
 class _SnackBarDemoState extends State<SnackBarDemo> {
   int _snackBarIndex = 1;
 
   Widget buildBody(BuildContext context) {
-    return new SafeArea(
+    return SafeArea(
       top: false,
       bottom: false,
-      child: new ListView(
+      child: ListView(
         padding: const EdgeInsets.all(24.0),
         children: <Widget>[
           const Text(_text1),
           const Text(_text2),
-          new Center(
-            child: new RaisedButton(
+          Center(
+            child: RaisedButton(
               child: const Text('SHOW A SNACKBAR'),
               onPressed: () {
                 final int thisSnackBarIndex = _snackBarIndex++;
-                Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('This is snackbar #$thisSnackBarIndex.'),
-                  action: new SnackBarAction(
+                Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text('This is snackbar #$thisSnackBarIndex.'),
+                  action: SnackBarAction(
                     label: 'ACTION',
                     onPressed: () {
-                      Scaffold.of(context).showSnackBar(new SnackBar(
-                        content: new Text('You pressed snackbar $thisSnackBarIndex\'s action.')
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                        content: Text('You pressed snackbar $thisSnackBarIndex\'s action.')
                       ));
                     }
                   ),
@@ -59,7 +59,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           const Text(_text3),
         ]
         .map((Widget child) {
-          return new Container(
+          return Container(
             margin: const EdgeInsets.symmetric(vertical: 12.0),
             child: child
           );
@@ -71,11 +71,11 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Snackbar')
       ),
-      body: new Builder(
+      body: Builder(
         // Create an inner BuildContext so that the snackBar onPressed methods
         // can refer to the Scaffold with Scaffold.of().
         builder: buildBody

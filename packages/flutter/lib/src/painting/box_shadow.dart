@@ -67,9 +67,9 @@ class BoxShadow {
   /// in every direction and then translated by [offset] before being filled using
   /// this [Paint].
   Paint toPaint() {
-    final Paint result = new Paint()
+    final Paint result = Paint()
       ..color = color
-      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, blurSigma);
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
     assert(() {
       if (debugDisableShadows)
         result.maskFilter = null;
@@ -80,7 +80,7 @@ class BoxShadow {
 
   /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
   BoxShadow scale(double factor) {
-    return new BoxShadow(
+    return BoxShadow(
       color: color,
       offset: offset * factor,
       blurRadius: blurRadius * factor,
@@ -113,7 +113,7 @@ class BoxShadow {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    return new BoxShadow(
+    return BoxShadow(
       color: Color.lerp(a.color, b.color, t),
       offset: Offset.lerp(a.offset, b.offset, t),
       blurRadius: ui.lerpDouble(a.blurRadius, b.blurRadius, t),

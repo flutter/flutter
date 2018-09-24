@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('SynchronousFuture control test', () async {
-    final Future<int> future = new SynchronousFuture<int>(42);
+    final Future<int> future = SynchronousFuture<int>(42);
 
     int result;
     future.then<Null>((int value) { result = value; });
@@ -31,7 +31,7 @@ void main() {
     bool ranAction = false;
     final Future<int> completeResult = future.whenComplete(() {
       ranAction = true;
-      return new Future<int>.value(31);
+      return Future<int>.value(31);
     });
 
     expect(ranAction, isTrue);

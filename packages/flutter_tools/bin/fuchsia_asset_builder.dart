@@ -22,15 +22,17 @@ const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionAssetManifestOut = 'asset-manifest-out';
+const String _kOptionComponentName = 'component-name';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
   _kOptionAssetManifestOut,
+  _kOptionComponentName,
 ];
 
 Future<Null> main(List<String> args) {
   return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => new DisabledUsage(),
+    Usage: () => DisabledUsage(),
   });
 }
 
@@ -42,12 +44,13 @@ Future<Null> writeFile(libfs.File outputFile, DevFSContent content) async {
 }
 
 Future<Null> run(List<String> args) async {
-  final ArgParser parser = new ArgParser()
+  final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionAsset,
         help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
-    ..addOption(_kOptionAssetManifestOut);
+    ..addOption(_kOptionAssetManifestOut)
+    ..addOption(_kOptionComponentName);
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
       .any((String option) => !argResults.options.contains(option))) {
@@ -77,17 +80,17 @@ Future<Null> run(List<String> args) async {
   await Future.wait(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
 }
 
-Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest) async {
+Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
 
   final libfs.File destFile = libfs.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();
 
   for (String path in assets.entries.keys) {
-    outFile.write('data/$path=$outputBase/$path\n');
+    outFile.write('data/$componentName/$path=$outputBase/$path\n');
   }
   await outFile.flush();
   await outFile.close();

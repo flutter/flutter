@@ -13,7 +13,7 @@ const bool skipExpectsWithKnownBugs = false;
 
 void main() {
   test('TextPainter - basic words', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -37,7 +37,7 @@ void main() {
   });
 
   test('TextPainter - bidi overrides in LTR', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -130,7 +130,7 @@ void main() {
 
     final List<List<TextBox>> list = <List<TextBox>>[];
     for (int index = 0; index < painter.text.text.length; index += 1)
-      list.add(painter.getBoxesForSelection(new TextSelection(baseOffset: index, extentOffset: index + 1)));
+      list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
     expect(list, const <List<TextBox>>[
       <TextBox>[], // U+202E, non-printing Unicode bidi formatting character
       <TextBox>[TextBox.fromLTRBD(230.0, 0.0, 240.0, 10.0, TextDirection.rtl)],
@@ -166,7 +166,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - bidi overrides in RTL', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
@@ -256,7 +256,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - forced line-wrapping with bidi', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -324,7 +324,7 @@ void main() {
   skip: Platform.isWindows || Platform.isMacOS);
 
   test('TextPainter - line wrap mid-word', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -357,7 +357,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - line wrap mid-word, bidi - LTR base', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -390,7 +390,7 @@ void main() {
 
     final List<List<TextBox>> list = <List<TextBox>>[];
     for (int index = 0; index < 5+4+5; index += 1)
-      list.add(painter.getBoxesForSelection(new TextSelection(baseOffset: index, extentOffset: index + 1)));
+      list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
     print(list);
     expect(list, const <List<TextBox>>[
       <TextBox>[TextBox.fromLTRBD(0.0, 8.0, 10.0, 18.0, TextDirection.ltr)],
@@ -411,7 +411,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - line wrap mid-word, bidi - RTL base', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
@@ -446,18 +446,18 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - multiple levels', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.rtl;
 
     final String pyramid = rlo(lro(rlo(lro(rlo('')))));
-    painter.text = new TextSpan(
+    painter.text = TextSpan(
       text: pyramid,
       style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
     painter.layout();
 
     expect(
-      painter.getBoxesForSelection(new TextSelection(baseOffset: 0, extentOffset: pyramid.length)),
+      painter.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: pyramid.length)),
       const <TextBox>[
         TextBox.fromLTRBD(90.0, 0.0, 100.0, 10.0, TextDirection.rtl), // outer R, start (right)
         TextBox.fromLTRBD(10.0, 0.0,  20.0, 10.0, TextDirection.ltr), // level 1 L, start (left)
@@ -477,7 +477,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - getPositionForOffset - RTL in LTR', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -559,7 +559,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - getPositionForOffset - LTR in RTL', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.rtl;
 
     painter.text = const TextSpan(
@@ -604,7 +604,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - Spaces', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     painter.text = const TextSpan(
@@ -665,7 +665,7 @@ void main() {
   }, skip: skipTestsWithKnownBugs);
 
   test('TextPainter - empty text baseline', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
     painter.text = const TextSpan(
       text: '',

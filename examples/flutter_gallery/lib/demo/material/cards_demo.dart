@@ -61,37 +61,37 @@ class TravelDestinationItem extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    return new SafeArea(
+    return SafeArea(
       top: false,
       bottom: false,
-      child: new Container(
+      child: Container(
         padding: const EdgeInsets.all(8.0),
         height: height,
-        child: new Card(
+        child: Card(
           shape: shape,
-          child: new Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               // photo and title
-              new SizedBox(
+              SizedBox(
                 height: 184.0,
-                child: new Stack(
+                child: Stack(
                   children: <Widget>[
-                    new Positioned.fill(
-                      child: new Image.asset(
+                    Positioned.fill(
+                      child: Image.asset(
                         destination.assetName,
                         package: destination.assetPackage,
                         fit: BoxFit.cover,
                       ),
                     ),
-                    new Positioned(
+                    Positioned(
                       bottom: 16.0,
                       left: 16.0,
                       right: 16.0,
-                      child: new FittedBox(
+                      child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerLeft,
-                        child: new Text(destination.title,
+                        child: Text(destination.title,
                           style: titleStyle,
                         ),
                       ),
@@ -100,42 +100,42 @@ class TravelDestinationItem extends StatelessWidget {
                 ),
               ),
               // description and share/explore buttons
-              new Expanded(
-                child: new Padding(
+              Expanded(
+                child: Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-                  child: new DefaultTextStyle(
+                  child: DefaultTextStyle(
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,
                     style: descriptionStyle,
-                    child: new Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         // three line description
-                        new Padding(
+                        Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
-                          child: new Text(
+                          child: Text(
                             destination.description[0],
                             style: descriptionStyle.copyWith(color: Colors.black54),
                           ),
                         ),
-                        new Text(destination.description[1]),
-                        new Text(destination.description[2]),
+                        Text(destination.description[1]),
+                        Text(destination.description[2]),
                       ],
                     ),
                   ),
                 ),
               ),
               // share, explore buttons
-              new ButtonTheme.bar(
-                child: new ButtonBar(
+              ButtonTheme.bar(
+                child: ButtonBar(
                   alignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('SHARE'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
                     ),
-                    new FlatButton(
+                    FlatButton(
                       child: const Text('EXPLORE'),
                       textColor: Colors.amber.shade500,
                       onPressed: () { /* do nothing */ },
@@ -156,7 +156,7 @@ class CardsDemo extends StatefulWidget {
   static const String routeName = '/material/cards';
 
   @override
-  _CardsDemoState createState() => new _CardsDemoState();
+  _CardsDemoState createState() => _CardsDemoState();
 }
 
 class _CardsDemoState extends State<CardsDemo> {
@@ -164,11 +164,11 @@ class _CardsDemoState extends State<CardsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Travel stream'),
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() {
@@ -185,13 +185,13 @@ class _CardsDemoState extends State<CardsDemo> {
           ),
         ],
       ),
-      body: new ListView(
+      body: ListView(
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {
-          return new Container(
+          return Container(
             margin: const EdgeInsets.only(bottom: 8.0),
-            child: new TravelDestinationItem(
+            child: TravelDestinationItem(
               destination: destination,
               shape: _shape,
             ),

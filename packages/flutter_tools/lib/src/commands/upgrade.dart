@@ -88,12 +88,12 @@ class UpgradeCommand extends FlutterCommand {
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
-  static final RegExp _gitDiffRegex = new RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
+  static final RegExp _gitDiffRegex = RegExp(r' (\S+)\s+\|\s+\d+ [+-]+');
 
   //  rename {packages/flutter/doc => dev/docs}/styles.html (92%)
   //  delete mode 100644 doc/index.html
   //  create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart
-  static final RegExp _gitChangedRegex = new RegExp(r' (rename|delete mode|create mode) .+');
+  static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
 
   @visibleForTesting
   static bool matchesGitLine(String line) {

@@ -25,7 +25,7 @@ class Usage {
   Usage({ String settingsName = 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version,
+    _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
         // Analyzer doesn't recognize that [Directory] objects match up due to a
         // conditional import.
         // ignore: argument_type_not_assignable

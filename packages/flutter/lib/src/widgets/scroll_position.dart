@@ -203,7 +203,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       assert(() {
         final double delta = newPixels - pixels;
         if (overscroll.abs() > delta.abs()) {
-          throw new FlutterError(
+          throw FlutterError(
             '$runtimeType.applyBoundaryConditions returned invalid overscroll value.\n'
             'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
             'That is a delta of $delta units.\n'
@@ -374,7 +374,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(() {
       final double delta = value - pixels;
       if (result.abs() > delta.abs()) {
-        throw new FlutterError(
+        throw FlutterError(
           '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
           'The method was called to consider a change from $pixels to $value, which is a '
           'delta of ${delta.toStringAsFixed(1)} units. However, it returned an overscroll of '
@@ -432,7 +432,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         break;
     }
 
-    final Set<SemanticsAction> actions = new Set<SemanticsAction>();
+    final Set<SemanticsAction> actions = Set<SemanticsAction>();
     if (pixels > minScrollExtent)
       actions.add(backward);
     if (pixels < maxScrollExtent)
@@ -500,11 +500,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final double target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
 
     if (target == pixels)
-      return new Future<Null>.value();
+      return Future<Null>.value();
 
     if (duration == Duration.zero) {
       jumpTo(target);
-      return new Future<Null>.value();
+      return Future<Null>.value();
     }
 
     return animateTo(target, duration: duration, curve: curve);
@@ -515,7 +515,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Listeners added by stateful widgets should be removed in the widget's
   /// [State.dispose] method.
-  final ValueNotifier<bool> isScrollingNotifier = new ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isScrollingNotifier = ValueNotifier<bool>(false);
 
   /// Animates the position from its current value to the given value.
   ///
@@ -653,7 +653,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
-    new UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
+    UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
   }
 
   @override

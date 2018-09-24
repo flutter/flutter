@@ -28,14 +28,14 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
   version="$(<version)"
   if [[ "$OS" == "linux" ]]; then
     echo "Building Flutter Gallery $version for Android..."
-    export ANDROID_HOME="$PWD/android-sdk"
+    # ANDROID_HOME must be set in the env.
     (
       cd examples/flutter_gallery
       flutter build apk --release -t lib/main_publish.dart
     )
     echo "Android Flutter Gallery built"
     if [[ -z "$CIRRUS_PULL_REQUEST" && "$CIRRUS_BRANCH" == "dev" && "$version" != *"pre"* ]]; then
-      echo "Deploying Flutter Gellery $version to Play Store..."
+      echo "Deploying Flutter Gallery $version to Play Store..."
       (
         cd examples/flutter_gallery/android
         bundle install
