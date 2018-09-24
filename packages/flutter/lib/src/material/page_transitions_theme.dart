@@ -86,33 +86,20 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size size = constraints.biggest;
 
+        final CurvedAnimation primaryAnimation = CurvedAnimation(
+          parent: animation,
+          curve: _transitionCurve,
+          reverseCurve: _transitionCurve.flipped,
+        );
+
         // Gradually expose the new page from bottom to top.
         final Animation<double> clipAnimation = Tween<double>(
           begin: 0.0,
           end: size.height,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: _transitionCurve,
-            reverseCurve: _transitionCurve.flipped,
-          ),
-        );
+        ).animate(primaryAnimation);
 
-        final Animation<double> opacityAnimation = _scrimOpacityTween.animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: _transitionCurve,
-            reverseCurve: _transitionCurve.flipped,
-          ),
-        );
-
-        final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: _transitionCurve,
-            reverseCurve: _transitionCurve.flipped,
-          ),
-        );
+        final Animation<double> opacityAnimation = _scrimOpacityTween.animate(primaryAnimation);
+        final Animation<Offset> primaryTranslationAnimation = _primaryTranslationTween.animate(primaryAnimation);
 
         final Animation<Offset> secondaryTranslationAnimation = _secondaryTranslationTween.animate(
           CurvedAnimation(
