@@ -1,4 +1,4 @@
-Signature: 51a4de19bf92915c043617632aa89fa3
+Signature: afef3a1fd7b459a56bfe1c51254c9149
 
 UNUSED LICENSES:
 
@@ -1318,7 +1318,6 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
 FILE: ../../../third_party/skia/gm/3dgm.cpp
-FILE: ../../../third_party/skia/gm/analytic_gradients.cpp
 FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
 FILE: ../../../third_party/skia/gm/clockwise.cpp
 FILE: ../../../third_party/skia/gm/crbug_847759.cpp
@@ -1356,6 +1355,7 @@ FILE: ../../../third_party/skia/include/private/SkTo.h
 FILE: ../../../third_party/skia/include/utils/Sk3D.h
 FILE: ../../../third_party/skia/include/utils/SkTextOnPath.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
+FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
@@ -1364,6 +1364,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieLayerEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottiePrecompLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieProperty.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieShapeLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTextLayer.cpp
@@ -1554,9 +1555,6 @@ FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.h
