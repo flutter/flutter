@@ -567,4 +567,18 @@ class CupertinoIcons {
   ///  * [volume_mute], which is similar, but has no sound waves.
   ///  * [volume_off], which is the crossed out version of this icon.
   static const IconData volume_up = IconData(0xf3ba, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// All four corners of a square facing inwards.
+  ///
+  /// See also:
+  ///
+  ///  * [fullscreen_exit], which is similar, but has the corners facing outwards.
+  static const IconData fullscreen = IconData(0xf386, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// All four corners of a square facing outwards.
+  ///
+  /// See also:
+  ///
+  ///  * [fullscreen], which is similar, but has the corners facing inwards.
+  static const IconData fullscreen_exit = IconData(0xf37d, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
