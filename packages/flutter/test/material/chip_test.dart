@@ -1145,6 +1145,7 @@ void main() {
       primarySwatch: Colors.red,
     );
     final ChipThemeData chipTheme = theme.chipTheme;
+    const double elevation = 8.0;
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
@@ -1153,13 +1154,17 @@ void main() {
           data: theme,
           child: const InputChip(
             label: const Text('Label'),
-            pressElevation: ,
+            pressElevation: elevation,
+            onPressed: () {
+              
+            },
           ),
         ),
       );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
+    await tester.press(find.byType(InputChip));
 
     final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
       find.descendant(
