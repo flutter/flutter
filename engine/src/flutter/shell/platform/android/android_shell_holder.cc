@@ -162,7 +162,8 @@ void AndroidShellHolder::Launch(RunConfiguration config) {
                          config = std::move(config)     //
   ]() mutable {
         FML_LOG(INFO) << "Attempting to launch engine configuration...";
-        if (!engine || engine->Run(std::move(config)) == shell::Engine::RunStatus::Failure) {
+        if (!engine || engine->Run(std::move(config)) ==
+                           shell::Engine::RunStatus::Failure) {
           FML_LOG(ERROR) << "Could not launch engine in configuration.";
         } else {
           FML_LOG(INFO) << "Isolate for engine configuration successfully "
