@@ -30,6 +30,8 @@ const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionIcudtl = 'icudtl';
 const String _kOptionTests = 'tests';
+const String _kOptionCoverageDirectory = 'coverage-directory';
+const String _kOptionParentDirectory = 'use-parent';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -55,6 +57,11 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
+    ..addOption(_kOptionCoverageDirectory, help: 'The directory that will have coverage collected')
+    ..addFlag(_kOptionParentDirectory,
+      defaultsTo: true,
+      negatable: false,
+      help: 'Whether to move to the parent directory to find the coverage directory')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -85,6 +92,8 @@ Future<Null> run(List<String> args) async {
     if (!fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
+    final bool useParentDirectory = argResults[_kOptionParentDirectory] ?? true;
+    final String coverageDirectory = argResults[_kOptionCoveragePath] ?? 'lib';
 
     // Put the tester shell where runTests expects it.
     // TODO(tvolkert,garymm): Switch to a Fuchsia-specific Artifacts impl.
@@ -132,8 +141,10 @@ Future<Null> run(List<String> args) async {
     if (collector != null) {
       // collector expects currentDirectory to be the root of the dart
       // package (i.e. contains lib/ and test/ sub-dirs).
-      fs.currentDirectory = testDirectory.parent;
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath]))
+      if (useParentDirectory) {
+        fs.currentDirectory = testDirectory.parent;
+      }
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
         throwToolExit('Failed to collect coverage data');
     }
   } finally {
