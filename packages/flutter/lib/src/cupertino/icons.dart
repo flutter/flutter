@@ -531,4 +531,40 @@ class CupertinoIcons {
   ///
   ///  * [loop], which is similar, but thinner.
   static const IconData loop_thick = IconData(0xf44a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a single small sound wave.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_mute], which is similar, but has no sound waves.
+  ///  * [volume_off], which is similar, but with an additional larger sound wave and a diagonal line crossing the whole icon.
+  ///  * [volume_up], which has an additional larger sound wave next to the small one.
+  static const IconData volume_down = IconData(0xf3b7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but adds a small sound wave.
+  ///  * [volume_off], which is similar, but adds a small and a large sound wave and a diagonal line crossing the whole icon.
+  ///  * [volume_up], which is similar, but has a small and a large sound wave.
+  static const IconData volume_mute = IconData(0xf3b8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a small and a large sound wave and a diagonal line crossing the whole icon.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but not crossed out and only has the small wave.
+  ///  * [volume_mute], which is similar, but not crossed out.
+  ///  * [volume_up], which is the version of this icon that is not crossed out.
+  static const IconData volume_off = IconData(0xf3b9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a small and a large sound wave.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but only has the small sound wave.
+  ///  * [volume_mute], which is similar, but has no sound waves.
+  ///  * [volume_off], which is the crossed out version of this icon.
+  static const IconData volume_up = IconData(0xf3ba, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
