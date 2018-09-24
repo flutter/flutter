@@ -32,8 +32,9 @@ class Engine final : public blink::RuntimeDelegate {
   // Used by Engine::Run
   enum class RunStatus {
     Success,                // Successful call to Run()
-    FailureAlreadyRunning,  // Isolate was already running; may not be considered a failure by callers
-    Failure,                // Isolate could not be started or other unspecified failure
+    FailureAlreadyRunning,  // Isolate was already running; may not be
+                            // considered a failure by callers
+    Failure,  // Isolate could not be started or other unspecified failure
   };
 
   class Delegate {
