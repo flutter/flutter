@@ -129,14 +129,11 @@ class CreateCommand extends FlutterCommand {
     final bool generatePackage = template == 'package';
 
     final Directory projectDir = fs.directory(argResults.rest.first);
-    String dirPath = fs.path.normalize(projectDir.absolute.path);
-    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
-    if (fs.path.basename(dirPath) == '.')
-      dirPath = fs.path.dirname(dirPath);
+    final String dirPath = fs.path.normalize(projectDir.absolute.path);
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
       final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
-      final Set<String> existingOrganizations = await project.organizationNames();
+      final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
       } else if (1 < existingOrganizations.length) {
@@ -286,8 +283,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
       );
     }
     final FlutterProject project = await FlutterProject.fromDirectory(directory);
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
     final String organization = templateContext['organization'];
@@ -320,8 +316,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
       await project.ensureReadyForPlatformSpecificTooling();
     }
 
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(project: project);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     return generatedCount;
   }
@@ -365,7 +360,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
   }
 
   int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context) {
-    final Template template = new Template.fromName(templateName);
+    final Template template = Template.fromName(templateName);
     return template.render(directory, context, overwriteExisting: false);
   }
 
@@ -373,7 +368,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     int filesCreated = 0;
     copyDirectorySync(
       cache.getArtifactDirectory('gradle_wrapper'),
-      project.android.directory,
+      project.android.hostAppGradleRoot,
       (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
@@ -397,13 +392,13 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  final RegExp disallowed = new RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
+  final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return '$organization.$name';
 }
 
-final Set<String> _packageDependencies = new Set<String>.from(<String>[
+final Set<String> _packageDependencies = Set<String>.from(<String>[
   'analyzer',
   'args',
   'async',
@@ -436,7 +431,7 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
   if (!linter_utils.isValidPackageName(projectName)) {
-    final String packageNameDetails = new package_names.PubPackageNames().details;
+    final String packageNameDetails = package_names.PubPackageNames().details;
     return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
   }
   if (_packageDependencies.contains(projectName)) {

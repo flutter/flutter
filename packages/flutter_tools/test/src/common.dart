@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' as test_package show TypeMatcher;
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,6 +15,23 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+
+export 'package:test/test.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+
+/// A matcher that compares the type of the actual value to the type argument T.
+// TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
+Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
+
+void tryToDelete(Directory directory) {
+  // This should not be necessary, but it turns out that
+  // on Windows it's common for deletions to fail due to
+  // bogus (we think) "access denied" errors.
+  try {
+    directory.deleteSync(recursive: true);
+  } on FileSystemException catch (error) {
+    print('Failed to delete ${directory.path}: $error');
+  }
+}
 
 /// Gets the path to the root of the Flutter repository.
 ///
@@ -24,7 +42,7 @@ String getFlutterRoot() {
   if (platform.environment.containsKey('FLUTTER_ROOT'))
     return platform.environment['FLUTTER_ROOT'];
 
-  Error invalidScript() => new StateError('Invalid script: ${platform.script}');
+  Error invalidScript() => StateError('Invalid script: ${platform.script}');
 
   Uri scriptUri;
   switch (platform.script.scheme) {
@@ -32,7 +50,7 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = new RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
       final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null)
         throw invalidScript();
@@ -51,7 +69,7 @@ String getFlutterRoot() {
 }
 
 CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
-  final FlutterCommandRunner runner = new FlutterCommandRunner();
+  final FlutterCommandRunner runner = FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
   return runner;
@@ -61,7 +79,7 @@ CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
 void updateFileModificationTime(String path,
                                 DateTime baseTime,
                                 int seconds) {
-  final DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
+  final DateTime modificationTime = baseTime.add(Duration(seconds: seconds));
   fs.file(path).setLastModifiedSync(modificationTime);
 }
 
@@ -76,7 +94,7 @@ Matcher throwsToolExit({int exitCode, String message}) {
 }
 
 /// Matcher for [ToolExit]s.
-const Matcher isToolExit = isInstanceOf<ToolExit>();
+final Matcher isToolExit = isInstanceOf<ToolExit>();
 
 /// Matcher for functions that throw [ProcessExit].
 Matcher throwsProcessExit([dynamic exitCode]) {
@@ -86,7 +104,7 @@ Matcher throwsProcessExit([dynamic exitCode]) {
 }
 
 /// Matcher for [ProcessExit]s.
-const Matcher isProcessExit = isInstanceOf<ProcessExit>();
+final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 
 /// Creates a flutter project in the [temp] directory using the
 /// [arguments] list if specified, or `--no-pub` if not.
@@ -94,7 +112,7 @@ const Matcher isProcessExit = isInstanceOf<ProcessExit>();
 Future<String> createProject(Directory temp, {List<String> arguments}) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
-  final CreateCommand command = new CreateCommand();
+  final CreateCommand command = CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
   await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
   return projectPath;

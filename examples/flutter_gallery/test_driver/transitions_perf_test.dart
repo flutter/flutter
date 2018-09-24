@@ -9,7 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 const FileSystem _fs = LocalFileSystem();
 
@@ -86,7 +86,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   });
 
   if (unexpectedValueCounts.isNotEmpty) {
-    final StringBuffer error = new StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
     unexpectedValueCounts.forEach((String routeName, int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
@@ -156,7 +156,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
       await driver.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
-        await driver.runUnsynchronized<Future<Null>>(() async {
+        await driver.runUnsynchronized<void>(() async {
           await driver.tap(find.byTooltip('Back'));
         });
       } else {
@@ -183,7 +183,7 @@ void main([List<String> args = const <String>[]]) {
       }
 
       // See _handleMessages() in transitions_perf.dart.
-      _allDemos = new List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
+      _allDemos = List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
       if (_allDemos.isEmpty)
         throw 'no demo names found';
     });
@@ -209,15 +209,15 @@ void main([List<String> args = const <String>[]]) {
       // Save the duration (in microseconds) of the first timeline Frame event
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
-      final TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
-          new List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
+          List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
           histogramPath);
 
       // Execute the remaining tests.
-      final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+      final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
 
     }, timeout: const Timeout(Duration(minutes: 5)));

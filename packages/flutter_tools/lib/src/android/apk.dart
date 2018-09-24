@@ -19,7 +19,7 @@ Future<Null> buildApk({
   @required String target,
   BuildInfo buildInfo = BuildInfo.debug
 }) async {
-  if (!project.android.isUsingGradle()) {
+  if (!project.android.isUsingGradle) {
     throwToolExit(
         'The build process for Android has changed, and the current project configuration\n'
             'is no longer valid. Please consult\n\n'

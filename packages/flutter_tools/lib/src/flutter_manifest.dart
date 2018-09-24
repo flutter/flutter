@@ -14,7 +14,7 @@ import 'base/utils.dart';
 import 'cache.dart';
 import 'globals.dart';
 
-final RegExp _versionPattern = new RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
+final RegExp _versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?(\+(\d+))?$');
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
@@ -22,17 +22,9 @@ class FlutterManifest {
 
   /// Returns an empty manifest.
   static FlutterManifest empty() {
-    final FlutterManifest manifest = new FlutterManifest._();
+    final FlutterManifest manifest = FlutterManifest._();
     manifest._descriptor = const <String, dynamic>{};
     manifest._flutterDescriptor = const <String, dynamic>{};
-    return manifest;
-  }
-
-  /// Returns a mock manifest with the given contents.
-  static FlutterManifest mock(Map<String, dynamic> contents) {
-    final FlutterManifest manifest = new FlutterManifest._();
-    manifest._descriptor = contents ?? const <String, dynamic>{};
-    manifest._flutterDescriptor = manifest._descriptor['flutter'] ?? const <String, dynamic>{};
     return manifest;
   }
 
@@ -51,7 +43,7 @@ class FlutterManifest {
   }
 
   static Future<FlutterManifest> _createFromYaml(dynamic yamlDocument) async {
-    final FlutterManifest pubspec = new FlutterManifest._();
+    final FlutterManifest pubspec = FlutterManifest._();
     if (yamlDocument != null && !await _validate(yamlDocument))
       return null;
 
@@ -78,8 +70,10 @@ class FlutterManifest {
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
   Map<String, dynamic> _flutterDescriptor;
 
+  /// True if the `pubspec.yaml` file does not exist.
   bool get isEmpty => _descriptor.isEmpty;
 
+  /// The string value of the top-level `name` property in the `pubspec.yaml` file.
   String get appName => _descriptor['name'] ?? '';
 
   /// The version String from the `pubspec.yaml` file.
@@ -146,6 +140,14 @@ class FlutterManifest {
     return null;
   }
 
+  /// Returns the iOS bundle identifier declared by this manifest in its
+  /// module descriptor. Returns null, if there is no such declaration.
+  String get iosBundleIdentifier {
+    if (isModule)
+      return _flutterDescriptor['module']['iosBundleIdentifier'];
+    return null;
+  }
+
   List<Map<String, dynamic>> get fontsDescriptor {
     final List<dynamic> fontList = _flutterDescriptor['fonts'];
     return fontList == null
@@ -197,14 +199,14 @@ class FlutterManifest {
           continue;
         }
 
-        fontAssets.add(new FontAsset(
+        fontAssets.add(FontAsset(
           Uri.parse(asset),
           weight: fontFile['weight'],
           style: fontFile['style'],
         ));
       }
       if (fontAssets.isNotEmpty)
-        fonts.add(new Font(fontFamily['family'], fontAssets));
+        fonts.add(Font(fontFamily['family'], fontAssets));
     }
     return fonts;
   }
@@ -275,7 +277,7 @@ Future<bool> _validate(dynamic manifest) async {
   final String schemaData = fs.file(schemaPath).readAsStringSync();
   final Schema schema = await Schema.createSchema(
       convert.json.decode(schemaData));
-  final Validator validator = new Validator(schema);
+  final Validator validator = Validator(schema);
   if (validator.validate(manifest)) {
     return true;
   } else {

@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('RelativeRect.==', () {
     const RelativeRect r = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
-    expect(r, new RelativeRect.fromSize(new Rect.fromLTWH(10.0, 20.0, 0.0, 0.0), const Size(40.0, 60.0)));
+    expect(r, RelativeRect.fromSize(Rect.fromLTWH(10.0, 20.0, 0.0, 0.0), const Size(40.0, 60.0)));
   });
   test('RelativeRect.shift', () {
     const RelativeRect r1 = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
@@ -35,8 +35,8 @@ void main() {
   });
   test('RelativeRect.toRect', () {
     const RelativeRect r1 = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
-    final Rect r2 = r1.toRect(new Rect.fromLTRB(10.0, 20.0, 90.0, 180.0));
-    expect(r2, new Rect.fromLTRB(10.0, 20.0, 50.0, 120.0));
+    final Rect r2 = r1.toRect(Rect.fromLTRB(10.0, 20.0, 90.0, 180.0));
+    expect(r2, Rect.fromLTRB(10.0, 20.0, 50.0, 120.0));
   });
   test('RelativeRect.toSize', () {
     const RelativeRect r1 = RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);

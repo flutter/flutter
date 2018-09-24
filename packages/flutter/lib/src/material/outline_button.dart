@@ -51,7 +51,7 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 class OutlineButton extends StatefulWidget {
   /// Create a filled button.
   ///
-  /// The [highlightElevation], and [borderWidth]
+  /// The [highlightElevation], [borderWidth], and [clipBehavior]
   /// arguments must not be null.
   const OutlineButton({
     Key key,
@@ -68,8 +68,10 @@ class OutlineButton extends StatefulWidget {
     this.highlightedBorderColor,
     this.padding,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Create an outline button from a pair of widgets that serve as the button's
@@ -78,7 +80,8 @@ class OutlineButton extends StatefulWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [highlightElevation], [icon], and [label] must not be null.
+  /// The [highlightElevation], [icon], [label], and [clipBehavior] must not be
+  /// null.
   OutlineButton.icon({
     Key key,
     @required this.onPressed,
@@ -93,13 +96,15 @@ class OutlineButton extends StatefulWidget {
     this.disabledBorderColor,
     this.highlightedBorderColor,
     this.shape,
+    this.clipBehavior = Clip.none,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(icon != null),
        assert(label != null),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
-       child = new Row(
+       child = Row(
          mainAxisSize: MainAxisSize.min,
          children: <Widget>[
            icon,
@@ -223,6 +228,9 @@ class OutlineButton extends StatefulWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// The button's label.
   ///
   /// Often a [Text] widget in all caps.
@@ -235,25 +243,25 @@ class OutlineButton extends StatefulWidget {
   bool get enabled => onPressed != null;
 
   @override
-  _OutlineButtonState createState() => new _OutlineButtonState();
+  _OutlineButtonState createState() => _OutlineButtonState();
 
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: 2.0));
-    properties.add(new DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: 2.0));
+    properties.add(DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
 
@@ -274,17 +282,17 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     // button's fill is translucent, because the shadow fills the interior
     // of the button.
 
-    _controller = new AnimationController(
+    _controller = AnimationController(
       duration: _kPressDuration,
       vsync: this
     );
-    _fillAnimation = new CurvedAnimation(
+    _fillAnimation = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.0, 0.5,
         curve: Curves.fastOutSlowIn,
       ),
     );
-    _elevationAnimation = new CurvedAnimation(
+    _elevationAnimation = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.5, 0.5),
       reverseCurve: const Interval(1.0, 1.0),
@@ -330,7 +338,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     final Color color = widget.color ?? (themeIsDark
       ? const Color(0x00000000)
       : const Color(0x00FFFFFF));
-    final Tween<Color> colorTween = new ColorTween(
+    final Tween<Color> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),
     );
@@ -367,14 +375,14 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       : (widget.disabledBorderColor ??
          (themeIsDark ? Colors.grey[800] : Colors.grey[100]));
 
-    return new BorderSide(
+    return BorderSide(
       color: color,
       width: widget.borderSide?.width ?? 2.0,
     );
   }
 
   double _getHighlightElevation() {
-    return new Tween<double>(
+    return Tween<double>(
       begin: 0.0,
       end: widget.highlightElevation ?? 2.0,
     ).evaluate(_elevationAnimation);
@@ -387,10 +395,10 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     final Color textColor = _getTextColor(theme, buttonTheme);
     final Color splashColor = _getSplashColor(theme, buttonTheme);
 
-    return new AnimatedBuilder(
+    return AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
-        return new RaisedButton(
+        return RaisedButton(
           textColor: textColor,
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(theme),
@@ -411,10 +419,11 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
             });
           },
           padding: widget.padding,
-          shape: new _OutlineBorder(
+          shape: _OutlineBorder(
             shape: widget.shape ?? buttonTheme.shape,
             side: _getOutline(theme, buttonTheme),
           ),
+          clipBehavior: widget.clipBehavior,
           animationDuration: _kElevationDuration,
           child: widget.child,
         );
@@ -437,12 +446,12 @@ class _OutlineBorder extends ShapeBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.all(side.width);
+    return EdgeInsets.all(side.width);
   }
 
   @override
   ShapeBorder scale(double t) {
-    return new _OutlineBorder(
+    return _OutlineBorder(
       shape: shape.scale(t),
       side: side.scale(t),
     );
@@ -452,7 +461,7 @@ class _OutlineBorder extends ShapeBorder {
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
     if (a is _OutlineBorder) {
-      return new _OutlineBorder(
+      return _OutlineBorder(
         side: BorderSide.lerp(a.side, side, t),
         shape: ShapeBorder.lerp(a.shape, shape, t),
       );
@@ -464,7 +473,7 @@ class _OutlineBorder extends ShapeBorder {
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
     if (b is _OutlineBorder) {
-      return new _OutlineBorder(
+      return _OutlineBorder(
         side: BorderSide.lerp(side, b.side, t),
         shape: ShapeBorder.lerp(shape, b.shape, t),
       );
@@ -488,7 +497,7 @@ class _OutlineBorder extends ShapeBorder {
       case BorderStyle.none:
         break;
       case BorderStyle.solid:
-        canvas.drawPath(shape.getOuterPath(rect), side.toPaint());
+        canvas.drawPath(shape.getOuterPath(rect, textDirection: textDirection), side.toPaint());
     }
   }
 

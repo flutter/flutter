@@ -30,20 +30,20 @@ void main() {
     final List<String> log = <String>[];
     log.add('0');
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => new RepaintBoundary(
-            child: new Container(
-              child: new RepaintBoundary(
-                child: new FlipWidget(
-                  left: new CustomPaint(
-                    painter: new TestCustomPainter(
+          '/': (BuildContext context) => RepaintBoundary(
+            child: Container(
+              child: RepaintBoundary(
+                child: FlipWidget(
+                  left: CustomPaint(
+                    painter: TestCustomPainter(
                       log: log,
                       name: 'left'
                     ),
                   ),
-                  right: new CustomPaint(
-                    painter: new TestCustomPainter(
+                  right: CustomPaint(
+                    painter: TestCustomPainter(
                       log: log,
                       name: 'right'
                     ),
@@ -52,7 +52,7 @@ void main() {
               ),
             ),
           ),
-          '/second': (BuildContext context) => new Container(),
+          '/second': (BuildContext context) => Container(),
         },
       ),
     );

@@ -53,7 +53,7 @@ class PointerEventConverter {
   static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
     return _pointers.putIfAbsent(
       datum.device,
-      () => new _PointerState(position, datum.kind)
+      () => _PointerState(position, datum.kind)
     );
   }
 
@@ -65,7 +65,7 @@ class PointerEventConverter {
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
-      final Offset position = new Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
+      final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
       final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
       final double radiusMin = _toLogicalPixels(datum.radiusMin, devicePixelRatio);
@@ -83,7 +83,7 @@ class PointerEventConverter {
           // to worry about native ordering of hover and scroll events.
           final Offset offset = position - state.lastPosition;
           state.lastPosition = position;
-          yield new PointerHoverEvent(
+          yield PointerHoverEvent(
             timeStamp: timeStamp,
             kind: state.kind,
             device: datum.device,
@@ -106,7 +106,7 @@ class PointerEventConverter {
           state.lastPosition = position;
         }
         final Offset scrollDelta =
-            new Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
+            Offset(datum.scrollDeltaX, datum.scrollDeltaY) / devicePixelRatio;
         // A gesture state of hover indicates that the gesture is immediate
         // (e.g., a scroll wheel tick) rather than an actual gesture, so don't
         // set a gestureChange.
@@ -131,7 +131,7 @@ class PointerEventConverter {
             assert(!_pointers.containsKey(datum.device));
             final _PointerState state = _ensureStateForPointer(datum, position);
             assert(state.lastPosition == position);
-            yield new PointerAddedEvent(
+            yield PointerAddedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -153,7 +153,7 @@ class PointerEventConverter {
             assert(!state.down);
             if (!alreadyAdded) {
               assert(state.lastPosition == position);
-              yield new PointerAddedEvent(
+              yield PointerAddedEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -171,7 +171,7 @@ class PointerEventConverter {
             }
             final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
-            yield new PointerHoverEvent(
+            yield PointerHoverEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
@@ -198,7 +198,7 @@ class PointerEventConverter {
             assert(!state.down);
             if (!alreadyAdded) {
               assert(state.lastPosition == position);
-              yield new PointerAddedEvent(
+              yield PointerAddedEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -220,7 +220,7 @@ class PointerEventConverter {
               // down event. We restore the invariant here for our clients.
               final Offset offset = position - state.lastPosition;
               state.lastPosition = position;
-              yield new PointerHoverEvent(
+              yield PointerHoverEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
@@ -244,7 +244,7 @@ class PointerEventConverter {
             }
             state.startNewPointer();
             state.setDown();
-            yield new PointerDownEvent(
+            yield PointerDownEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
@@ -273,7 +273,7 @@ class PointerEventConverter {
             assert(state.down);
             final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
-            yield new PointerMoveEvent(
+            yield PointerMoveEvent(
               timeStamp: timeStamp,
               pointer: state.pointer,
               kind: kind,
@@ -307,7 +307,7 @@ class PointerEventConverter {
               // invariant. We restore the invariant here for our clients.
               final Offset offset = position - state.lastPosition;
               state.lastPosition = position;
-              yield new PointerMoveEvent(
+              yield PointerMoveEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -333,7 +333,7 @@ class PointerEventConverter {
             assert(position == state.lastPosition);
             state.setUp();
             if (datum.change == ui.PointerChange.up) {
-              yield new PointerUpEvent(
+              yield PointerUpEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -354,7 +354,7 @@ class PointerEventConverter {
                 tilt: datum.tilt,
               );
             } else {
-              yield new PointerCancelEvent(
+              yield PointerCancelEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -379,7 +379,7 @@ class PointerEventConverter {
             assert(_pointers.containsKey(datum.device));
             final _PointerState state = _pointers[datum.device];
             if (state.down) {
-              yield new PointerCancelEvent(
+              yield PointerCancelEvent(
                 timeStamp: timeStamp,
                 pointer: state.pointer,
                 kind: kind,
@@ -400,7 +400,7 @@ class PointerEventConverter {
               );
             }
             _pointers.remove(datum.device);
-            yield new PointerRemovedEvent(
+            yield PointerRemovedEvent(
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,

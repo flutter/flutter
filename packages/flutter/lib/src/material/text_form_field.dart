@@ -54,9 +54,9 @@ class TextFormField extends FormField<String> {
     String initialValue,
     FocusNode focusNode,
     InputDecoration decoration = const InputDecoration(),
-    TextInputType keyboardType = TextInputType.text,
+    TextInputType keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
-    TextInputAction textInputAction = TextInputAction.done,
+    TextInputAction textInputAction,
     TextStyle style,
     TextAlign textAlign = TextAlign.start,
     bool autofocus = false,
@@ -75,8 +75,6 @@ class TextFormField extends FormField<String> {
     Brightness keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(initialValue == null || controller == null),
-       assert(keyboardType != null),
-       assert(textInputAction != null),
        assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
@@ -96,7 +94,7 @@ class TextFormField extends FormField<String> {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-      return new TextField(
+      return TextField(
         controller: state._effectiveController,
         focusNode: focusNode,
         decoration: effectiveDecoration.copyWith(errorText: field.errorText),
@@ -129,7 +127,7 @@ class TextFormField extends FormField<String> {
   final TextEditingController controller;
 
   @override
-  _TextFormFieldState createState() => new _TextFormFieldState();
+  _TextFormFieldState createState() => _TextFormFieldState();
 }
 
 class _TextFormFieldState extends FormFieldState<String> {
@@ -144,7 +142,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   void initState() {
     super.initState();
     if (widget.controller == null) {
-      _controller = new TextEditingController(text: widget.initialValue);
+      _controller = TextEditingController(text: widget.initialValue);
     } else {
       widget.controller.addListener(_handleControllerChanged);
     }
@@ -158,7 +156,7 @@ class _TextFormFieldState extends FormFieldState<String> {
       widget.controller?.addListener(_handleControllerChanged);
 
       if (oldWidget.controller != null && widget.controller == null)
-        _controller = new TextEditingController.fromValue(oldWidget.controller.value);
+        _controller = TextEditingController.fromValue(oldWidget.controller.value);
       if (widget.controller != null) {
         setValue(widget.controller.text);
         if (oldWidget.controller == null)

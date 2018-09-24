@@ -25,7 +25,7 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
   assert(() {
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null)
-      throw new FlutterError(reason);
+      throw FlutterError(reason);
     return true;
   }());
   return true;
@@ -53,7 +53,7 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   bool instrument = false;
   assert(() { instrument = debugInstrumentationEnabled; return true; }());
   if (instrument) {
-    final Stopwatch stopwatch = new Stopwatch()..start();
+    final Stopwatch stopwatch = Stopwatch()..start();
     return action().whenComplete(() {
       stopwatch.stop();
       debugPrint('Action "$description" took ${stopwatch.elapsed}');

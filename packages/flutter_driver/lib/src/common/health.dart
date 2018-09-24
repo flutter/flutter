@@ -27,7 +27,7 @@ enum HealthStatus {
 }
 
 final EnumIndex<HealthStatus> _healthStatusIndex =
-    new EnumIndex<HealthStatus>(HealthStatus.values);
+    EnumIndex<HealthStatus>(HealthStatus.values);
 
 /// A description of the application state, as provided in response to a
 /// [FlutterDriver.checkHealth] test.
@@ -43,7 +43,7 @@ class Health extends Result {
 
   /// Deserializes the result from JSON.
   static Health fromJson(Map<String, dynamic> json) {
-    return new Health(_healthStatusIndex.lookupBySimpleName(json['status']));
+    return Health(_healthStatusIndex.lookupBySimpleName(json['status']));
   }
 
   @override

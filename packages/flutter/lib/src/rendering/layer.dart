@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
-import 'dart:ui' show Clip, Offset, defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -51,6 +50,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   Layer _previousSibling;
 
   /// Removes this layer from its parent layer's child list.
+  ///
+  /// This has no effect if the layer's parent is already null.
   @mustCallSuper
   void remove() {
     parent?._removeChild(this);
@@ -120,8 +121,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
-    properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
+    properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
@@ -177,7 +178,7 @@ class PictureLayer extends Layer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
+    properties.add(DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
   }
 
   @override
@@ -212,7 +213,8 @@ class PictureLayer extends Layer {
 ///   for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
-  /// identified by [textureId].
+  /// identified by [textureId], if [freeze] is true new texture frames will not be
+  /// populated to the texture.
   TextureLayer({
     @required this.rect,
     @required this.textureId,
@@ -225,6 +227,13 @@ class TextureLayer extends Layer {
   /// The identity of the backend texture.
   final int textureId;
 
+  /// When true the texture that will not be updated with new frames.
+  ///
+  /// This is used when resizing an embedded  Android views: When resizing
+  /// there is a short period during which the framework cannot tell
+  /// if the newest texture frame has the previous or new size, to workaround this
+  /// the framework "freezes" the texture just before resizing the Android view and unfreezes
+  /// it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
   @override
@@ -558,7 +567,7 @@ class OffsetLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Offset>('offset', offset));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
   }
 
   /// Capture an image of the current state of this layer and its children.
@@ -580,8 +589,12 @@ class OffsetLayer extends ContainerLayer {
   Future<ui.Image> toImage(Rect bounds, {double pixelRatio = 1.0}) async {
     assert(bounds != null);
     assert(pixelRatio != null);
-    final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.translationValues(bounds.left - offset.dx, bounds.top - offset.dy, 0.0);
+    final ui.SceneBuilder builder = ui.SceneBuilder();
+    final Matrix4 transform = Matrix4.translationValues(
+      (-bounds.left  - offset.dx) * pixelRatio,
+      (-bounds.top - offset.dy) * pixelRatio,
+      0.0,
+    );
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     addToScene(builder, Offset.zero);
@@ -609,7 +622,7 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.antiAlias }) :
+  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.hardEdge }) :
         _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.
@@ -618,7 +631,11 @@ class ClipRectLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Rect clipRect;
 
-  /// {@macro flutter.clipper.clipBehavior}
+  /// {@template flutter.clipper.clipBehavior}
+  /// Controls how to clip (default to [Clip.antiAlias]).
+  ///
+  /// [Clip.none] is not allowed here.
+  /// {@endtemplate}
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
@@ -651,7 +668,7 @@ class ClipRectLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Rect>('clipRect', clipRect));
+    properties.add(DiagnosticsProperty<Rect>('clipRect', clipRect));
   }
 }
 
@@ -707,7 +724,7 @@ class ClipRRectLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
+    properties.add(DiagnosticsProperty<RRect>('clipRRect', clipRRect));
   }
 }
 
@@ -802,7 +819,7 @@ class TransformLayer extends OffsetLayer {
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
-      _lastEffectiveTransform = new Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
+      _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
     builder.pushTransform(_lastEffectiveTransform.storage);
@@ -818,9 +835,9 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(new Offset(result[0], result[1]));
+    return super.find<S>(Offset(result[0], result[1]));
   }
 
   @override
@@ -833,7 +850,7 @@ class TransformLayer extends OffsetLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new TransformProperty('transform', transform));
+    properties.add(TransformProperty('transform', transform));
   }
 }
 
@@ -875,7 +892,7 @@ class OpacityLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new IntProperty('alpha', alpha));
+    properties.add(IntProperty('alpha', alpha));
   }
 }
 
@@ -915,9 +932,9 @@ class ShaderMaskLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Shader>('shader', shader));
-    properties.add(new DiagnosticsProperty<Rect>('maskRect', maskRect));
-    properties.add(new DiagnosticsProperty<BlendMode>('blendMode', blendMode));
+    properties.add(DiagnosticsProperty<Shader>('shader', shader));
+    properties.add(DiagnosticsProperty<Rect>('maskRect', maskRect));
+    properties.add(DiagnosticsProperty<BlendMode>('blendMode', blendMode));
   }
 }
 
@@ -959,7 +976,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipPath,
-    this.clipBehavior = defaultClipBehavior, // ignore: deprecated_member_use
+    this.clipBehavior = Clip.none,
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
@@ -1030,8 +1047,8 @@ class PhysicalModelLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('elevation', elevation));
-    properties.add(new DiagnosticsProperty<Color>('color', color));
+    properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DiagnosticsProperty<Color>('color', color));
   }
 }
 
@@ -1120,7 +1137,7 @@ class LeaderLayer extends ContainerLayer {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
-      builder.pushTransform(new Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
+      builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
     addChildrenToScene(builder, Offset.zero);
     if (_lastOffset != Offset.zero)
       builder.pop();
@@ -1143,8 +1160,8 @@ class LeaderLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<Offset>('offset', offset));
-    properties.add(new DiagnosticsProperty<LayerLink>('link', link));
+    properties.add(DiagnosticsProperty<Offset>('offset', offset));
+    properties.add(DiagnosticsProperty<LayerLink>('link', link));
   }
 }
 
@@ -1237,9 +1254,9 @@ class FollowerLayer extends ContainerLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = new Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(new Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
+    return super.find<S>(Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
   }
 
   /// The transform that was used during the last composition phase.
@@ -1251,7 +1268,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 getLastTransform() {
     if (_lastTransform == null)
       return null;
-    final Matrix4 result = new Matrix4.translationValues(-_lastOffset.dx, -_lastOffset.dy, 0.0);
+    final Matrix4 result = Matrix4.translationValues(-_lastOffset.dx, -_lastOffset.dy, 0.0);
     result.multiply(_lastTransform);
     return result;
   }
@@ -1264,7 +1281,7 @@ class FollowerLayer extends ContainerLayer {
   /// null.
   Matrix4 _collectTransformForLayerChain(List<ContainerLayer> layers) {
     // Initialize our result matrix.
-    final Matrix4 result = new Matrix4.identity();
+    final Matrix4 result = Matrix4.identity();
     // Apply each layer to the matrix in turn, starting from the last layer,
     // and providing the previous layer as the child.
     for (int index = layers.length - 1; index > 0; index -= 1)
@@ -1283,7 +1300,7 @@ class FollowerLayer extends ContainerLayer {
     assert(link.leader.owner == owner, 'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.');
     assert(link.leader._lastOffset != null, 'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.');
     // Collect all our ancestors into a Set so we can recognize them.
-    final Set<Layer> ancestors = new HashSet<Layer>();
+    final Set<Layer> ancestors = HashSet<Layer>();
     Layer ancestor = parent;
     while (ancestor != null) {
       ancestors.add(ancestor);
@@ -1353,8 +1370,8 @@ class FollowerLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<LayerLink>('link', link));
-    properties.add(new TransformProperty('transform', getLastTransform(), defaultValue: null));
+    properties.add(DiagnosticsProperty<LayerLink>('link', link));
+    properties.add(TransformProperty('transform', getLastTransform(), defaultValue: null));
   }
 }
 
@@ -1396,7 +1413,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<T>('value', value));
-    properties.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
+    properties.add(DiagnosticsProperty<T>('value', value));
+    properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }

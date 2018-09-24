@@ -15,13 +15,13 @@ const String _kText = 'I polished up that handle so carefullee\nThat now I am th
 
 void main() {
   test('getOffsetForCaret control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
 
-    final Rect caret = new Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+    final Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
 
     final Offset offset5 = paragraph.getOffsetForCaret(const TextPosition(offset: 5), caret);
     expect(offset5.dx, greaterThan(0.0));
@@ -34,7 +34,7 @@ void main() {
   });
 
   test('getPositionForOffset control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
     );
@@ -51,7 +51,7 @@ void main() {
   });
 
   test('getBoxesForSelection control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
@@ -74,7 +74,7 @@ void main() {
   skip: Platform.isWindows || Platform.isMacOS);
 
   test('getWordBoundary control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
     );
@@ -91,7 +91,7 @@ void main() {
   });
 
   test('overflow test', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
@@ -167,7 +167,7 @@ void main() {
   });
 
   test('maxLines', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'How do you write like you\'re running out of time? Write day and night like you\'re running out of time?',
             // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
@@ -196,7 +196,7 @@ void main() {
   }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
 
   test('changing color does not do layout', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         text: 'Hello',
         style: TextStyle(color: Color(0xFF000000)),
@@ -247,7 +247,7 @@ void main() {
         ),
       ],
     );
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
         testSpan,
         textDirection: TextDirection.ltr,
         textScaleFactor: 1.3
@@ -255,8 +255,7 @@ void main() {
     paragraph.layout(const BoxConstraints());
     // anyOf is needed here because Linux and Mac have different text
     // rendering widths in tests.
-    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
-    // text rendering is replaced.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(paragraph.size.width, anyOf(79.0, 78.0));
     expect(paragraph.size.height, 26.0);
 
@@ -265,15 +264,14 @@ void main() {
     final String text = testSpan.toStringDeep();
     for (int i = 0; i < text.length; ++i) {
       boxes.addAll(paragraph.getBoxesForSelection(
-          new TextSelection(baseOffset: i, extentOffset: i + 1)
+          TextSelection(baseOffset: i, extentOffset: i + 1)
       ));
     }
     expect(boxes.length, equals(4));
 
     // anyOf is needed here and below because Linux and Mac have different text
     // rendering widths in tests.
-    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
-    // text rendering is replaced.
+    // TODO(gspencergoog): Figure out why this is, and fix it. https://github.com/flutter/flutter/issues/12357
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[0].toRect().height, closeTo(13.0, 0.0001));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
@@ -285,7 +283,7 @@ void main() {
   });
 
   test('toStringDeep', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
@@ -316,7 +314,7 @@ void main() {
   test('locale setter', () {
     // Regression test for https://github.com/flutter/flutter/issues/18175
 
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(text: _kText),
       locale: const Locale('zh', 'HK'),
       textDirection: TextDirection.ltr,

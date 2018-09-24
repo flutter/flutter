@@ -46,6 +46,7 @@ library flutter_test;
 
 export 'dart:async' show Future;
 
+export 'src/accessibility.dart';
 export 'src/all_elements.dart';
 export 'src/binding.dart';
 export 'src/controller.dart';

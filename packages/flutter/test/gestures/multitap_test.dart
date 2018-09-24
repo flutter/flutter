@@ -14,7 +14,7 @@ void main() {
   setUp(ensureGestureBinding);
 
   testGesture('Should recognize pan', (GestureTester tester) {
-    final MultiTapGestureRecognizer tap = new MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);
+    final MultiTapGestureRecognizer tap = MultiTapGestureRecognizer(longTapDelay: kLongPressTimeout);
 
     final List<String> log = <String>[];
 
@@ -25,7 +25,7 @@ void main() {
     tap.onTapCancel = (int pointer) { log.add('tap-cancel $pointer'); };
 
 
-    final TestPointer pointer5 = new TestPointer(5);
+    final TestPointer pointer5 = TestPointer(5);
     final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
     tap.addPointer(down5);
     tester.closeArena(5);
@@ -34,7 +34,7 @@ void main() {
     tester.route(down5);
     expect(log, isEmpty);
 
-    final TestPointer pointer6 = new TestPointer(6);
+    final TestPointer pointer6 = TestPointer(6);
     final PointerDownEvent down6 = pointer6.down(const Offset(15.0, 15.0));
     tap.addPointer(down6);
     tester.closeArena(6);

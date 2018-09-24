@@ -87,33 +87,23 @@ abstract class ScrollActivity {
   void resetActivity() {}
 
   /// Dispatch a [ScrollStartNotification] with the given metrics.
-  void dispatchScrollStartNotification(
-      ScrollMetrics metrics, BuildContext context) {
-    new ScrollStartNotification(metrics: metrics, context: context)
-        .dispatch(context);
+  void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
+    ScrollStartNotification(metrics: metrics, context: context).dispatch(context);
   }
 
   /// Dispatch a [ScrollUpdateNotification] with the given metrics and scroll delta.
-  void dispatchScrollUpdateNotification(
-      ScrollMetrics metrics, BuildContext context, double scrollDelta) {
-    new ScrollUpdateNotification(
-            metrics: metrics, context: context, scrollDelta: scrollDelta)
-        .dispatch(context);
+  void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
+    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta).dispatch(context);
   }
 
   /// Dispatch an [OverscrollNotification] with the given metrics and overscroll.
-  void dispatchOverscrollNotification(
-      ScrollMetrics metrics, BuildContext context, double overscroll) {
-    new OverscrollNotification(
-            metrics: metrics, context: context, overscroll: overscroll)
-        .dispatch(context);
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll).dispatch(context);
   }
 
   /// Dispatch a [ScrollEndNotification] with the given metrics and overscroll.
-  void dispatchScrollEndNotification(
-      ScrollMetrics metrics, BuildContext context) {
-    new ScrollEndNotification(metrics: metrics, context: context)
-        .dispatch(context);
+  void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
+    ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
   }
 
   /// Called when the scroll view that is performing this activity changes its metrics.
@@ -549,9 +539,7 @@ class DragScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is DragStartDetails);
-    new ScrollStartNotification(
-            metrics: metrics, context: context, dragDetails: lastDetails)
-        .dispatch(context);
+    ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails).dispatch(context);
   }
 
   @override
@@ -559,12 +547,7 @@ class DragScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context, double scrollDelta) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    new ScrollUpdateNotification(
-            metrics: metrics,
-            context: context,
-            scrollDelta: scrollDelta,
-            dragDetails: lastDetails)
-        .dispatch(context);
+    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails).dispatch(context);
   }
 
   @override
@@ -572,12 +555,7 @@ class DragScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context, double overscroll) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    new OverscrollNotification(
-            metrics: metrics,
-            context: context,
-            overscroll: overscroll,
-            dragDetails: lastDetails)
-        .dispatch(context);
+    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails).dispatch(context);
   }
 
   @override
@@ -585,11 +563,11 @@ class DragScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context) {
     // We might not have DragEndDetails yet if we're being called from beginActivity.
     final dynamic lastDetails = _controller.lastDetails;
-    new ScrollEndNotification(
-            metrics: metrics,
-            context: context,
-            dragDetails: lastDetails is DragEndDetails ? lastDetails : null)
-        .dispatch(context);
+    ScrollEndNotification(
+      metrics: metrics,
+      context: context,
+      dragDetails: lastDetails is DragEndDetails ? lastDetails : null
+    ).dispatch(context);
   }
 
   @override
@@ -636,11 +614,11 @@ class PointerScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is PointerScrollStartDetails);
-    new ScrollStartNotification(
-            metrics: metrics,
-            context: context,
-            pointerScrollDetails: lastDetails)
-        .dispatch(context);
+    ScrollStartNotification(
+      metrics: metrics,
+      context: context,
+      pointerScrollDetails: lastDetails)
+    .dispatch(context);
   }
 
   @override
@@ -648,12 +626,12 @@ class PointerScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context, double scrollDelta) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is PointerScrollUpdateDetails);
-    new ScrollUpdateNotification(
-            metrics: metrics,
-            context: context,
-            scrollDelta: scrollDelta,
-            pointerScrollDetails: lastDetails)
-        .dispatch(context);
+    ScrollUpdateNotification(
+      metrics: metrics,
+      context: context,
+      scrollDelta: scrollDelta,
+      pointerScrollDetails: lastDetails)
+    .dispatch(context);
   }
 
   @override
@@ -661,12 +639,12 @@ class PointerScrollActivity extends ScrollActivity {
       ScrollMetrics metrics, BuildContext context, double overscroll) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is PointerScrollUpdateDetails);
-    new OverscrollNotification(
-            metrics: metrics,
-            context: context,
-            overscroll: overscroll,
-            pointerScrollDetails: lastDetails)
-        .dispatch(context);
+    OverscrollNotification(
+      metrics: metrics,
+      context: context,
+      overscroll: overscroll,
+      pointerScrollDetails: lastDetails)
+    .dispatch(context);
   }
 
   @override
@@ -674,11 +652,11 @@ class PointerScrollActivity extends ScrollActivity {
     // There may not be PointerScrollEndDetails yet if this is being called from
     // beginActivity.
     final dynamic lastDetails = _controller.lastDetails;
-    new ScrollEndNotification(
-          metrics: metrics,
-          context: context,
-          pointerScrollDetails: lastDetails is PointerScrollEndDetails ? lastDetails : null)
-        .dispatch(context);
+    ScrollEndNotification(
+      metrics: metrics,
+      context: context,
+      pointerScrollDetails: lastDetails is PointerScrollEndDetails ? lastDetails : null)
+    .dispatch(context);
   }
 
   @override
@@ -724,7 +702,7 @@ class BallisticScrollActivity extends ScrollActivity {
     Simulation simulation,
     TickerProvider vsync,
   ) : super(delegate) {
-    _controller = new AnimationController.unbounded(
+    _controller = AnimationController.unbounded(
       debugLabel: '$runtimeType',
       vsync: vsync,
     )
@@ -769,14 +747,8 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   @override
-  void dispatchOverscrollNotification(
-      ScrollMetrics metrics, BuildContext context, double overscroll) {
-    new OverscrollNotification(
-            metrics: metrics,
-            context: context,
-            overscroll: overscroll,
-            velocity: velocity)
-        .dispatch(context);
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
   }
 
   @override
@@ -818,14 +790,14 @@ class DrivenScrollActivity extends ScrollActivity {
     @required Duration duration,
     @required Curve curve,
     @required TickerProvider vsync,
-  })  : assert(from != null),
-        assert(to != null),
-        assert(duration != null),
-        assert(duration > Duration.zero),
-        assert(curve != null),
-        super(delegate) {
-    _completer = new Completer<Null>();
-    _controller = new AnimationController.unbounded(
+  }) : assert(from != null),
+       assert(to != null),
+       assert(duration != null),
+       assert(duration > Duration.zero),
+       assert(curve != null),
+       super(delegate) {
+    _completer = Completer<Null>();
+    _controller = AnimationController.unbounded(
       value: from,
       debugLabel: '$runtimeType',
       vsync: vsync,
@@ -857,14 +829,8 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   @override
-  void dispatchOverscrollNotification(
-      ScrollMetrics metrics, BuildContext context, double overscroll) {
-    new OverscrollNotification(
-            metrics: metrics,
-            context: context,
-            overscroll: overscroll,
-            velocity: velocity)
-        .dispatch(context);
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
   }
 
   @override

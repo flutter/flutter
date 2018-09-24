@@ -79,9 +79,9 @@ const String fixWithDevelopmentTeamInstruction = '''
 
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    new RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
-final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'.*\(([a-zA-Z0-9]+)\)');
-final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=([a-zA-Z0-9]+)');
+    RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
+final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
+final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
 /// Given a [BuildableIOSApp], this will try to find valid development code
 /// signing identities in the user's keychain prompting a choice if multiple
@@ -96,20 +96,21 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   BuildableIOSApp iosApp,
   bool usesTerminalUi = true
 }) async{
-  if (iosApp.buildSettings == null)
+  final Map<String, String> buildSettings = iosApp.project.buildSettings;
+  if (buildSettings == null)
     return null;
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (isNotEmpty(iosApp.buildSettings['DEVELOPMENT_TEAM'])) {
+  if (isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
     printStatus(
       'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}'
+      'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}'
     );
     return null;
   }
 
-  if (isNotEmpty(iosApp.buildSettings['PROVISIONING_PROFILE']))
+  if (isNotEmpty(buildSettings['PROVISIONING_PROFILE']))
     return null;
 
   // If the user's environment is missing the tools needed to find and read
@@ -152,9 +153,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   );
 
   final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
-  opensslProcess.stdin
-      ..write(signingCertificate)
-      ..close();
+  await (opensslProcess.stdin..write(signingCertificate)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
@@ -218,7 +217,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
     printStatus('  a) Abort', emphasis: true);
 
     final String choice = await terminal.promptForCharInput(
-      new List<String>.generate(count, (int number) => '${number + 1}')
+      List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,

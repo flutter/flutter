@@ -262,7 +262,7 @@ abstract class PointerEvent {
   /// Returns a complete textual description of this event.
   String toStringFull() {
     String extraDescription = addedFieldDescriptions();
-    if (extraDescription.isNotEmpty()) {
+    if (extraDescription.isNotEmpty) {
       extraDescription = ', $extraDescription';
     }
     return '$runtimeType('
