@@ -118,14 +118,15 @@ class DartVm {
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
   ///
-  /// Also checks to make sure it was launched from the `main()` function.
+  /// This is not limited to Isolates running Flutter, but to any Isolate on the
+  /// VM.
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: _kRpcTimeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      if (name.contains(pattern) && name.contains(RegExp(r':main\(\)'))) {
+      if (name.contains(pattern)) {
         result.add(IsolateRef._fromJson(jsonIsolate, this));
       }
     }
