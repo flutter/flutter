@@ -339,7 +339,6 @@ class _MaterialAppState extends State<MaterialApp> {
     _updateNavigator();
   }
 
-  bool _haveNavigator;
   List<NavigatorObserver> _navigatorObservers;
 
   void _updateNavigator() {

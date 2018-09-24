@@ -81,7 +81,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   }
 
   void _setupMock() {
-    // Note that not all possible types of invocations are covered here, just the ones
+    // Not all possible types of invocations are covered here, just the ones
     // expected to be called.
     // TODO(gspencer): make this more general so that any call will be captured.
     when(start(

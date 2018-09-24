@@ -530,7 +530,14 @@ class ThemeData extends Diagnosticable {
 
   /// The platform the material widgets should adapt to target.
   ///
-  /// Defaults to the current platform.
+  /// Defaults to the current platform. This should be used in order to style UI
+  /// elements according to platform conventions.
+  ///
+  /// [Platform.defaultTargetPlatform] should be used directly instead only in
+  /// rare cases where it's necessary to determine behavior based on the
+  /// platform. [dart.io.Platform.environment] should be used when it's critical
+  /// to actually know the current platform, without any overrides possible (for
+  /// example, when a system API is about to be called).
   final TargetPlatform platform;
 
   /// Configures the hit test size of certain Material widgets.

@@ -316,7 +316,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // animation is complete.
   Color _backgroundColor;
 
-  static final Tween<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
+  static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
     for (AnimationController controller in _controllers)
@@ -655,7 +655,7 @@ class _RadialPainter extends CustomPainter {
       );
       canvas.drawCircle(
         center,
-        radiusTween.lerp(circle.animation.value),
+        radiusTween.transform(circle.animation.value),
         paint,
       );
     }
