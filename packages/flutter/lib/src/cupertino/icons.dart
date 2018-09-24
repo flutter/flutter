@@ -58,8 +58,33 @@ class CupertinoIcons {
   ///  * [share_up], for another (pre-iOS 7) version of this icon.
   static const IconData share_solid = IconData(0xf4cb, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A book silhouette spread open.
+  /// A book silhouette spread open. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [book_solid], which is similar, but filled in.
   static const IconData book = IconData(0xf3e7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [book], which is similar, but not filled in.
+  static const IconData book_solid = IconData(0xf3e8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open containing a bookmark in the upper right. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [bookmark_solid], which is similar, but filled in.
+  static const IconData bookmark = IconData(0xf3e9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A book silhouette spread open containing a bookmark in the upper right. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [bookmark], which is similar, but not filled in.
+  static const IconData bookmark_solid = IconData(0xf3ea, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A letter 'i' in a circle.
   static const IconData info = IconData(0xf44c, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -464,4 +489,96 @@ class CupertinoIcons {
 
   /// A symbol representing a single musical note.
   static const IconData music_note = IconData(0xf46b, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A triangle facing to the right. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [play_arrow_solid], which is similar, but filled in.
+  static const IconData play_arrow = IconData(0xf487, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A triangle facing to the right. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [play_arrow], which is similar, but not filled in.
+  static const IconData play_arrow_solid = IconData(0xf488, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two verticale rectangles. This icon is not filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [pause_solid], which is similar, but filled in.
+  static const IconData pause = IconData(0xf477, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two verticale rectangles. This icon is filled in.
+  ///
+  /// See also:
+  ///
+  ///  * [pause], which is similar, but not filled in.
+  static const IconData pause_solid = IconData(0xf478, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The infinity symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [loop_thick], which is similar, but thicker.
+  static const IconData loop = IconData(0xf449, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The infinity symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [loop], which is similar, but thinner.
+  static const IconData loop_thick = IconData(0xf44a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a single small sound wave.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_mute], which is similar, but has no sound waves.
+  ///  * [volume_off], which is similar, but with an additional larger sound wave and a diagonal line crossing the whole icon.
+  ///  * [volume_up], which has an additional larger sound wave next to the small one.
+  static const IconData volume_down = IconData(0xf3b7, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker symbol.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but adds a small sound wave.
+  ///  * [volume_off], which is similar, but adds a small and a large sound wave and a diagonal line crossing the whole icon.
+  ///  * [volume_up], which is similar, but has a small and a large sound wave.
+  static const IconData volume_mute = IconData(0xf3b8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a small and a large sound wave and a diagonal line crossing the whole icon.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but not crossed out and only has the small wave.
+  ///  * [volume_mute], which is similar, but not crossed out.
+  ///  * [volume_up], which is the version of this icon that is not crossed out.
+  static const IconData volume_off = IconData(0xf3b9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A speaker with a small and a large sound wave.
+  ///
+  /// See also:
+  ///
+  ///  * [volume_down], which is similar, but only has the small sound wave.
+  ///  * [volume_mute], which is similar, but has no sound waves.
+  ///  * [volume_off], which is the crossed out version of this icon.
+  static const IconData volume_up = IconData(0xf3ba, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// All four corners of a square facing inwards.
+  ///
+  /// See also:
+  ///
+  ///  * [fullscreen_exit], which is similar, but has the corners facing outwards.
+  static const IconData fullscreen = IconData(0xf386, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// All four corners of a square facing outwards.
+  ///
+  /// See also:
+  ///
+  ///  * [fullscreen], which is similar, but has the corners facing inwards.
+  static const IconData fullscreen_exit = IconData(0xf37d, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
