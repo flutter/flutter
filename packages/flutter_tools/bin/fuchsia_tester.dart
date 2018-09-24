@@ -140,9 +140,12 @@ Future<Null> run(List<String> args) async {
 
     if (collector != null) {
       // collector expects currentDirectory to be the root of the dart
-      // package (i.e. contains lib/ and test/ sub-dirs).
+      // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
+      // test files may appear to be in the root directory.
       if (useParentDirectory) {
         fs.currentDirectory = testDirectory.parent;
+      } else {
+        fs.currentDirectory = testDirectory;
       }
       if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
         throwToolExit('Failed to collect coverage data');
