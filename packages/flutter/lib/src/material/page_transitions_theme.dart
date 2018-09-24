@@ -61,10 +61,10 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
     end: Offset.zero,
   );
 
-  // The old page slides downwards a little as the new page appears.
+  // The old page slides upwards a little as the new page appears.
   static final Tween<Offset> _secondaryTranslationTween = Tween<Offset>(
     begin: Offset.zero,
-    end: const Offset(0.0, 0.025),
+    end: const Offset(0.0, -0.025),
   );
 
   // The scrim obscures the old page by becoming increasingly opaque.
