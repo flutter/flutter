@@ -51,8 +51,7 @@ enum ButtonBarLayoutBehavior {
 /// can be overridden with [ButtonTheme].
 ///
 /// The actual appearance of buttons depends on the button theme, the
-/// button's enabled state, its elevation (if any) and the overall Material
-/// theme.
+/// button's enabled state, its elevation (if any), and the overall [Theme].
 ///
 /// See also:
 ///
@@ -147,9 +146,13 @@ class ButtonTheme extends InheritedWidget {
     EdgeInsetsGeometry padding = const EdgeInsets.symmetric(horizontal: 8.0),
     ShapeBorder shape,
     bool alignedDropdown = false,
+    Color buttonColor,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
+    ColorScheme colorScheme = const ColorScheme.light(),
     Widget child,
     ButtonBarLayoutBehavior layoutBehavior = ButtonBarLayoutBehavior.padded,
-    ColorScheme colorScheme = const ColorScheme.light(),
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
@@ -163,6 +166,10 @@ class ButtonTheme extends InheritedWidget {
          shape: shape,
          alignedDropdown: alignedDropdown,
          layoutBehavior: layoutBehavior,
+         buttonColor: buttonColor,
+         disabledColor: disabledColor,
+         highlightColor: highlightColor,
+         splashColor: splashColor,
          colorScheme: colorScheme,
        ),
        super(key: key, child: child);
@@ -321,10 +328,19 @@ class ButtonThemeData extends Diagnosticable {
   final ColorScheme colorScheme;
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// The button's overall brightness.
+  ///
+  /// Returns the buttons [MaterialButton.colorBrightness] it it is non-null,
+  /// otherwise the color scheme's [ColorScheme.brightness] is returned.
   Brightness getBrightness(MaterialButton button) {
     return button.colorBrightness ?? colorScheme.brightness;
   }
 
+  /// Defines a button's base colors, and the defaults for the button's
+  /// minimum size, internal padding, and shape.
+  ///
+  /// Sadly, this property is not the [TextTheme] whose [TextTheme.button]
+  /// is used to as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) {
     return button.textTheme ?? textTheme;
   }
@@ -351,32 +367,64 @@ class ButtonThemeData extends Diagnosticable {
       : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
   }
 
+  /// The foreground color of the button's text and icon when
+  /// [MaterialButton.onPressed] is null (when MaterialButton.enabled is false).
+  ///
+  /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
+  /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
+  /// with its opacity set to 0.3 if [getBrightness] is dark, 0.38 otherwise.
   Color getDisabledTextColor(MaterialButton button) {
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
     return _getDisabledColor(button);
   }
 
+  /// The button's background color when [MaterialButton.onPressed] is null
+  /// (when MaterialButton.enabled is false).
+  ///
+  /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
+  /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
+  /// with its opacity set to 0.3 if [getBrightness] is dark, 0.38 otherwise.
   Color getDisabledFillColor(MaterialButton button) {
     if (button.disabledColor != null)
       return button.disabledColor;
     return _getDisabledColor(button);
   }
 
+
+  /// The button's background fill color or null for buttons that don't have
+  /// a background color.
+  ///
+  /// Returns [MaterialButton.color] if it is non-null and the button
+  /// is enabled.
+  ///
+  /// Returns [MaterialButton.disabledColor] if it is non-null and the
+  /// button is disabled.
+  ///
+  /// If button is a [FlatButton] or an [OutlineButton] then null is returned.
+  ///
+  /// If button is a [RaisedButton], returns [buttonColor] if
+  /// it is non-null and the button is enabled.
+  ///
+  /// Otherwise the fill color depends on the value of [getTextTheme].
+  ///
+  ///  * [ButtonTextTheme.normal] or [ButtonTextTheme.accent], the
+  ///    color scheme's [ColorScheme.primary] color if the [button] is enabled
+  ///    the value of [getDisabledFillColor] otherwise.
+  ///  * [ButtonTextTheme.primary], if the [button] is enabled then [buttonColor]
+  ///    if [buttonColor] is non-null, otherwise the color scheme's
+  ///    ColorScheme.primary color. If the button is not enabled then the
+  ///    colorScheme's [ColorScheme.onSurface] color with opacity 0.12.
   Color getFillColor(MaterialButton button) {
     final Color fillColor = button.enabled ? button.color : button.disabledColor;
     if (fillColor != null)
       return fillColor;
 
-    if (_isRaisedButton(button)) {
-      if (button.enabled && buttonColor != null)
-        return buttonColor;
-      if (!button.enabled && disabledColor != null)
-        return disabledColor;
-    }
-
     if (_isFlatButton(button) || _isOutlineButton(button))
       return null;
+
+    if (button.enabled && _isRaisedButton(button) && buttonColor != null)
+      return buttonColor;
 
     switch (getTextTheme(button)) {
       case ButtonTextTheme.normal:
@@ -392,6 +440,21 @@ class ButtonThemeData extends Diagnosticable {
     return null;
   }
 
+  /// The foreground color of the button's text and icon.
+  ///
+  /// If [button] is not [MaterialButton.enabled], the value of
+  /// [getDisabledTextColor] is returned. If the button is enabled and
+  /// [buttonTextColor] is non-null, then [buttonTextColor] is returned.
+  ///
+  /// Otherwise the text color depends on the value of [getTextTheme]
+  /// and [getBrightness].
+  ///
+  ///  * [ButtonTextTheme.normal], [Colors.white] if [getBrightness] is dark,
+  ///    otherwise [Colors.black87].
+  ///  * ButtonTextTheme.accent], [colorScheme.secondary].
+  ///  * [ButtonTextTheme.primary], if [getFillColor] is dark then [Colors.white],
+  ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
+  ///    [colorScheme.primary], otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
     if (!button.enabled)
       return getDisabledTextColor(button);
@@ -423,6 +486,18 @@ class ButtonThemeData extends Diagnosticable {
     return null;
   }
 
+  /// The color of the ink "splash" overlay that appears when the (enabled)
+  /// [button] is tapped.
+  ///
+  /// Returns the button's [MaterialButton.splashColor] if it is non-null.
+  ///
+  /// Returns [splashColor] if [button] is a [RaisedButton] or an [OutlineButton]
+  /// and [splashColor] is non-null.
+  ///
+  /// Returns [splashColor] if [button] is a [FlatButton], [getTextTheme]
+  /// is not [ButtonTextTheme.primary], and [splashColor] is non-null.
+  ///
+  /// Otherwise returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {
     if (button.splashColor != null)
       return button.splashColor;
@@ -443,6 +518,10 @@ class ButtonThemeData extends Diagnosticable {
     return getTextColor(button).withOpacity(0.12);
   }
 
+  /// The color of the overlay that appears when the (enabled) button is
+  /// pressed.
+  ///
+  /// Returns the button's [MaterialButton.splashColor] if it is non-null.
   Color getHighlightColor(MaterialButton button) {
     if (button.highlightColor != null)
       return button.highlightColor;

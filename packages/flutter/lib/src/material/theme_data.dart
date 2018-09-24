@@ -168,6 +168,8 @@ class ThemeData extends Diagnosticable {
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
 
+    // Create a ColorScheme that is backwards compatible as possible
+    // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
       primarySwatch: primarySwatch,
       primaryColorLight: primaryColorLight,
@@ -605,6 +607,14 @@ class ThemeData extends Diagnosticable {
   /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
+  /// A set of thirteen colors that can be used to configure the
+  /// color properties of most components.
+  ///
+  /// This property was added much later than the theme's set of highly
+  /// specific colors, like [cardColor], [buttonColor], [canvasColor] etc.
+  /// New components can be defined exclusively in terms of [colorScheme].
+  /// Existing components will gradually migrate to it, to the extent
+  /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
@@ -993,7 +1003,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
-    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme));
+    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
   }
 }
 
