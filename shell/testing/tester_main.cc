@@ -171,7 +171,7 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
         fml::MessageLoop::GetCurrent().AddTaskObserver(
             reinterpret_cast<intptr_t>(&completion_observer),
             [&completion_observer]() { completion_observer.DidProcessTask(); });
-        if (engine->Run(std::move(config))) {
+        if (engine->Run(std::move(config)) != shell::Engine::RunStatus::Failure) {
           engine_did_run = true;
 
           blink::ViewportMetrics metrics;

@@ -101,7 +101,7 @@ static std::string CreateShellLabel() {
       fml::MakeCopyable([engine = _shell->GetEngine(), config = std::move(config)]() mutable {
         BOOL success = NO;
         FML_LOG(INFO) << "Attempting to launch background engine configuration...";
-        if (!engine || !engine->Run(std::move(config))) {
+        if (!engine || engine->Run(std::move(config)) == shell::Engine::RunStatus::Failure) {
           FML_LOG(ERROR) << "Could not launch engine with configuration.";
         } else {
           FML_LOG(INFO) << "Background Isolate successfully started and run.";

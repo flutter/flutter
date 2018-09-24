@@ -29,6 +29,13 @@ namespace shell {
 
 class Engine final : public blink::RuntimeDelegate {
  public:
+  // Used by Engine::Run
+  enum class RunStatus {
+    Success,                // Successful call to Run()
+    FailureAlreadyRunning,  // Isolate was already running; may not be considered a failure by callers
+    Failure,                // Isolate could not be started or other unspecified failure
+  };
+
   class Delegate {
    public:
     virtual void OnEngineUpdateSemantics(
@@ -56,7 +63,7 @@ class Engine final : public blink::RuntimeDelegate {
   fml::WeakPtr<Engine> GetWeakPtr() const;
 
   FML_WARN_UNUSED_RESULT
-  bool Run(RunConfiguration configuration);
+  RunStatus Run(RunConfiguration configuration);
 
   // Used to "cold reload" a running application where the shell (along with the
   // platform view and its rasterizer bindings) remains the same but the root
@@ -149,7 +156,7 @@ class Engine final : public blink::RuntimeDelegate {
 
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
-  bool PrepareAndLaunchIsolate(RunConfiguration configuration);
+  RunStatus PrepareAndLaunchIsolate(RunConfiguration configuration);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
