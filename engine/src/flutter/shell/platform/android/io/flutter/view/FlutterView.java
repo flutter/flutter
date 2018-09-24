@@ -575,6 +575,29 @@ public class FlutterView extends SurfaceView
         return ZeroSides.NONE;
     }
 
+    // TODO(garyq): Use clean ways to detect keyboard instead of heuristics if possible
+    // TODO(garyq): The keyboard detection may interact strangely with
+    //   https://github.com/flutter/flutter/issues/22061
+
+    // Uses inset heights and screen heights as a heuristic to determine if the insets should
+    // be padded. When the on-screen keyboard is detected, we want to include the full inset
+    // but when the inset is just the hidden nav bar, we want to provide a zero inset so the space
+    // can be used.
+    int calculateBottomKeyboardInset(WindowInsets insets) {
+        int screenHeight = getRootView().getHeight();
+        // Magic number due to this being a heuristic. This should be replaced, but we have not
+        // found a clean way to do it yet (Sept. 2018)
+        final double keyboardHeightRatioHeuristic = 0.18;
+        if (insets.getSystemWindowInsetBottom() < screenHeight * keyboardHeightRatioHeuristic) {
+            // Is not a keyboard, so return zero as inset.
+            return 0;
+        }
+        else {
+            // Is a keyboard, so return the full inset.
+            return insets.getSystemWindowInsetBottom();
+        }
+    }
+
     // This callback is not present in API < 20, which means lower API devices will see
     // the wider than expected padding when the status and navigation bars are hidden.
     @Override
@@ -602,8 +625,10 @@ public class FlutterView extends SurfaceView
         // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
         mMetrics.physicalViewInsetTop = 0;
         mMetrics.physicalViewInsetRight = 0;
-        // TODO(garyq): Detect and distinguish between bottom nav padding and keyboard padding.
-        mMetrics.physicalViewInsetBottom = insets.getSystemWindowInsetBottom();
+        // We perform hidden navbar and keyboard handling if the navbar is set to hidden. Otherwise,
+        // the navbar padding should always be provided.
+        mMetrics.physicalViewInsetBottom =
+            navigationBarHidden ? calculateBottomKeyboardInset(insets) : insets.getSystemWindowInsetBottom();
         mMetrics.physicalViewInsetLeft = 0;
         updateViewportMetrics();
         return super.onApplyWindowInsets(insets);
