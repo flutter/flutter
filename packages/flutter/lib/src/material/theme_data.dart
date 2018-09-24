@@ -730,6 +730,7 @@ class ThemeData extends Diagnosticable {
 
   /// Linearly interpolate between two themes.
   ///
+  /// {@template flutter.material.themeData.lerp}
   /// The arguments must not be null.
   ///
   /// The `t` argument represents position on the timeline, with 0.0 meaning
@@ -743,6 +744,7 @@ class ThemeData extends Diagnosticable {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
+  /// {@endtemplate}
   static ThemeData lerp(ThemeData a, ThemeData b, double t) {
     assert(a != null);
     assert(b != null);

@@ -11,10 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
 const String _tab3Text = 'tab 3';
-const String _tab4Text = 'tab 4';
-const String _tab5Text = 'tab 5';
-const String _tab6Text = 'tab 6';
-const String _tab7Text = 'tab 7';
 
 final Key _painterKey = UniqueKey();
 
@@ -22,14 +18,10 @@ const List<Tab> _tabs = <Tab>[
   Tab(text: _tab1Text, icon: Icon(Icons.looks_one)),
   Tab(text: _tab2Text, icon: Icon(Icons.looks_two)),
   Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
-  Tab(text: _tab4Text, icon: Icon(Icons.looks_4)),
-  Tab(text: _tab5Text, icon: Icon(Icons.looks_5)),
-  Tab(text: _tab6Text, icon: Icon(Icons.looks_6)),
-  Tab(text: _tab7Text, icon: Icon(Icons.looks)),
 ];
 
 Widget _buildTabBar({ List<Tab> tabs = _tabs }) {
-  final TabController _tabController = TabController(length: 7, vsync: const TestVSync());
+  final TabController _tabController = TabController(length: 3, vsync: const TestVSync());
 
   return RepaintBoundary(
     key: _painterKey,
@@ -44,25 +36,39 @@ Widget _withTheme(TabBarTheme theme) {
   );
 }
 
+RenderParagraph _iconRenderObject(WidgetTester tester, IconData icon) {
+  return tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)));
+}
+
 void main() {
   testWidgets('Tab bar theme overrides label color (selected)', (WidgetTester tester) async {
-    const Color dummyColor = Colors.black;
-    const TabBarTheme tabBarTheme = TabBarTheme(labelColor: dummyColor);
+    const Color labelColor = Colors.black;
+    const TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
 
     await tester.pumpWidget(_withTheme(tabBarTheme));
 
-    final RenderParagraph renderObject = find.text(_tab1Text).evaluate().single.renderObject;
-    expect(renderObject.text.style.color, equals(dummyColor));
+    final RenderParagraph textRenderObject =
+      tester.renderObject<RenderParagraph>(find.text(_tab1Text));
+    expect(textRenderObject.text.style.color, equals(labelColor));
+    final RenderParagraph iconRenderObject =
+      _iconRenderObject(tester, Icons.looks_one);
+    expect(iconRenderObject.text.style.color, equals(labelColor));
+
   });
 
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
-    const Color dummyColor = Colors.black;
-    const TabBarTheme tabBarTheme = TabBarTheme(unselectedLabelColor: dummyColor);
+    const Color unselectedLabelColor = Colors.black;
+    const TabBarTheme tabBarTheme = TabBarTheme(unselectedLabelColor: unselectedLabelColor);
 
     await tester.pumpWidget(_withTheme(tabBarTheme));
 
-    final RenderParagraph renderObject = find.text(_tab2Text).evaluate().single.renderObject;
-    expect(renderObject.text.style.color, equals(dummyColor));
+    final RenderParagraph textRenderObject =
+      tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    expect(textRenderObject.text.style.color, equals(unselectedLabelColor));
+    final RenderParagraph iconRenderObject =
+      _iconRenderObject(tester, Icons.looks_two);
+    expect(iconRenderObject.text.style.color, equals(unselectedLabelColor));
   });
 
   testWidgets('Tab bar theme overrides tab indicator size (tab)', (WidgetTester tester) async {
@@ -74,7 +80,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_tab.png'),
       skip: !Platform.isLinux,
-    ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
+    );
   });
 
   testWidgets('Tab bar theme overrides tab indicator size (label)', (WidgetTester tester) async {
@@ -86,7 +92,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_label.png'),
       skip: !Platform.isLinux,
-    ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
+    );
   });
 
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
@@ -103,7 +109,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.custom_tab_indicator.png'),
       skip: !Platform.isLinux,
-    ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
+    );
   });
 
   testWidgets('Tab bar theme - beveled rect indicator', (WidgetTester tester) async {
@@ -120,6 +126,6 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.beveled_rect_indicator.png'),
       skip: !Platform.isLinux,
-    ); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
+    );
   });
 }

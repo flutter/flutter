@@ -150,7 +150,7 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TabBarTheme tabBarTheme= themeData.tabBarTheme;
+    final TabBarTheme tabBarTheme = themeData.tabBarTheme;
 
     final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
@@ -160,11 +160,11 @@ class _TabStyle extends AnimatedWidget {
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
     final Color selectedColor =
         labelColor
-         ?? tabBarTheme?.labelColor
+         ?? tabBarTheme.labelColor
          ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor =
         unselectedLabelColor
-        ?? tabBarTheme?.unselectedLabelColor
+        ?? tabBarTheme.unselectedLabelColor
         ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
@@ -513,7 +513,7 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Uses values from [ThemeData.tabBarTheme] if its set in the current context.
+/// Uses values from [ThemeData.tabBarTheme] if it is set in the current context.
 ///
 /// See also:
 ///
@@ -699,7 +699,7 @@ class _TabBarState extends State<TabBar> {
     if (widget.indicator != null)
       return widget.indicator;
     final ThemeData themeData = Theme.of(context);
-    if (themeData.tabBarTheme?.indicator != null)
+    if (themeData.tabBarTheme.indicator != null)
       return themeData.tabBarTheme.indicator;
 
     Color color = widget.indicatorColor ?? themeData.indicatorColor;
