@@ -1138,4 +1138,36 @@ void main() {
     expect(materialBox, paints..path(color: customTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
+
+  testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
+    final ThemeData theme = new ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+    final ChipThemeData chipTheme = theme.chipTheme;
+
+    Widget buildChip(ChipThemeData data) {
+      return _wrapForChip(
+        textDirection: TextDirection.ltr,
+        child: new Theme(
+          data: theme,
+          child: const InputChip(
+            label: const Text('Label'),
+            pressElevation: ,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildChip(chipTheme));
+
+    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
+      find.descendant(
+        of: find.byType(RawChip),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+
+    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+  });
 }
