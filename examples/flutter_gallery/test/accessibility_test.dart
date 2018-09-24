@@ -485,6 +485,7 @@ void main() {
         handle.dispose();
       });
     }
+<<<<<<< HEAD
 =======
     testWidgets('backdrop_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
