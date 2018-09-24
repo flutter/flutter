@@ -200,9 +200,6 @@ abstract class PageTransitionsBuilder {
 /// The default animation fades the new page in while translating it upwards,
 /// starting from about 25% below the top of the screen.
 ///
-/// The [platform] for this builder is null which indicates that it's not
-/// platform-specific.
-///
 /// See also:
 ///
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
@@ -210,7 +207,7 @@ abstract class PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a FadeUpwardsPageTransitionsBuilder with a null [platform].
+  /// Construct a [FadeUpwardsPageTransitionsBuilder].
   const FadeUpwardsPageTransitionsBuilder();
 
   @override
@@ -234,7 +231,7 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a OpenUpwardsPageTransitionsBuilder.
+  /// Construct a [OpenUpwardsPageTransitionsBuilder].
   const OpenUpwardsPageTransitionsBuilder();
 
   @override
@@ -262,7 +259,7 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android P.
 class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
-  /// Construct a CupertinoPageTransitionsBuilder.
+  /// Construct a [CupertinoPageTransitionsBuilder].
   const CupertinoPageTransitionsBuilder();
 
   @override
@@ -305,9 +302,9 @@ class PageTransitionsTheme extends Diagnosticable {
   /// and [TargetPlatform.iOS] respectively.
   const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders }) : _builders = builders;
 
-  static final Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
-    TargetPlatform.android: const FadeUpwardsPageTransitionsBuilder(),
-    TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+  static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
+    TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
   };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
@@ -335,6 +332,8 @@ class PageTransitionsTheme extends Diagnosticable {
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
+  // Just used to the buidlers Map to a list with one PageTransitionsBuilder per platform
+  // for the operator == overload.
   List<PageTransitionsBuilder> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
     return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
   }
@@ -357,7 +356,12 @@ class PageTransitionsTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const PageTransitionsTheme defaultTheme = PageTransitionsTheme();
-    properties.add(DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>('builders', builders, defaultValue: defaultTheme.builders));
+    properties.add(
+      DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>(
+        'builders',
+        builders,
+        defaultValue: PageTransitionsTheme._defaultBuilders
+      ),
+    );
   }
 }
