@@ -127,53 +127,6 @@ Future<Null> main() async {
       if (!editableHostAppBuilt) {
         return TaskResult.failure('Failed to build editable host .app');
       }
-
-      section('Add to existing iOS app');
-
-      final Directory hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app'));
-      final Directory buildDir = Directory(path.join(hostAppDir.path, 'build'));
-      mkdir(hostAppDir);
-      recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app')),
-        hostAppDir,
-      );
-      // TODO mravn: make signing work in this context
-      // await prepareProvisioningCertificates(hostAppDir.path);
-
-      await inDirectory(hostAppDir, () async {
-        await exec('pod', <String>['install']);
-      });
-
-      await inDirectory(hostAppDir, () async {
-        await exec(
-          '/usr/bin/env',
-          <String>[
-            'xcrun',
-            'xcodebuild',
-            '-configuration',
-            'Release',
-            '-allowProvisioningUpdates',
-            '-allowProvisioningDeviceRegistration',
-            '-workspace',
-            'Host.xcworkspace',
-            '-scheme',
-            'Host',
-            'BUILD_DIR=build',
-            '-sdk',
-            'iphoneos',
-          ]
-        );
-      });
-
-      final bool existingAppBuilt = exists(File(path.join(
-        buildDir.path,
-        'iphoneos',
-        'Host.app',
-      )));
-
-      if (!existingAppBuilt) {
-        return TaskResult.failure('Failed to build existing Host.app');
-      }
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
