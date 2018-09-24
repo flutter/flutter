@@ -115,7 +115,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void initState() {
     super.initState();
-    _heroController = CupertinoApp.createCupterinoTransitionController();
+    _heroController = CupertinoApp.createCupertinoHeroController();
     _updateObservers();
   }
 

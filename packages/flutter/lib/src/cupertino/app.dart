@@ -192,7 +192,7 @@ class CupertinoApp extends StatefulWidget {
   /// The [HeroController] used for Cupertino page transitions.
   ///
   /// Used by [CupertinoTabView] and [CupertinoApp].
-  static HeroController createCupterinoTransitionController() =>
+  static HeroController createCupertinoHeroController() =>
       HeroController(); // Linear tweening.
 }
 
@@ -215,26 +215,35 @@ class _CupertinoAppState extends State<CupertinoApp> {
   @override
   void initState() {
     super.initState();
-    _heroController = CupertinoApp.createCupterinoTransitionController();
+    _heroController = CupertinoApp.createCupertinoHeroController();
     _updateNavigator();
   }
 
   @override
   void didUpdateWidget(CupertinoApp oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey) {
+      // If the Navigator changes, we have to create a new observer, because the
+      // old Navigator won't be disposed (and thus won't unregister with its
+      // observers) until after the new one has been created (because the
+      // Navigator has a GlobalKey).
+      _heroController = CupertinoApp.createCupertinoHeroController();
+    }
     _updateNavigator();
   }
 
-  bool _haveNavigator;
   List<NavigatorObserver> _navigatorObservers;
 
   void _updateNavigator() {
-    _haveNavigator = widget.home != null ||
-                     widget.routes.isNotEmpty ||
-                     widget.onGenerateRoute != null ||
-                     widget.onUnknownRoute != null;
-    _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
-      ..add(_heroController);
+    if (widget.home != null ||
+        widget.routes.isNotEmpty ||
+        widget.onGenerateRoute != null ||
+        widget.onUnknownRoute != null) {
+      _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
+        ..add(_heroController);
+    } else {
+      _navigatorObservers = null;
+    }
   }
 
   @override
@@ -244,7 +253,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       child: WidgetsApp(
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
-        navigatorObservers: _haveNavigator ? _navigatorObservers : null,
+        navigatorObservers: _navigatorObservers,
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
           CupertinoPageRoute<T>(settings: settings, builder: builder),
         home: widget.home,

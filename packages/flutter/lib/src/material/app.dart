@@ -343,12 +343,15 @@ class _MaterialAppState extends State<MaterialApp> {
   List<NavigatorObserver> _navigatorObservers;
 
   void _updateNavigator() {
-    _haveNavigator = widget.home != null ||
-                     widget.routes.isNotEmpty ||
-                     widget.onGenerateRoute != null ||
-                     widget.onUnknownRoute != null;
-    _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
-      ..add(_heroController);
+    if (widget.home != null ||
+        widget.routes.isNotEmpty ||
+        widget.onGenerateRoute != null ||
+        widget.onUnknownRoute != null) {
+      _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
+        ..add(_heroController);
+    } else {
+      _navigatorObservers = null;
+    }
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
@@ -375,7 +378,7 @@ class _MaterialAppState extends State<MaterialApp> {
       child: WidgetsApp(
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
-        navigatorObservers: _haveNavigator ? _navigatorObservers : null,
+        navigatorObservers: _navigatorObservers,
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
           MaterialPageRoute<T>(settings: settings, builder: builder),
         home: widget.home,

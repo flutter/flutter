@@ -65,7 +65,7 @@ class WidgetsApp extends StatefulWidget {
   /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
   /// If the [builder] is null, the [onGenerateRoute] and [pageRouteBuilder]
-  /// arguments are required. The [onGenerateRoute] parameters corresponds to
+  /// arguments are required. The [onGenerateRoute] parameter corresponds to
   /// [Navigator.onGenerateRoute], and [pageRouteBuilder] will create a [PageRoute]
   /// that wraps newly built routes. If the [builder] is non-null
   /// and the [onGenerateRoute] argument is null, then the [builder] will not be
@@ -141,7 +141,10 @@ class WidgetsApp extends StatefulWidget {
          'must have their initial values '
          '(null, null, and the empty list, respectively).'
        ),
-       assert(onGenerateRoute != null || pageRouteBuilder != null),
+       assert(onGenerateRoute != null || pageRouteBuilder != null,
+         'If onGenerateRoute is not provided, the pageRouteBuilder must be specified '
+         'so that the default handler will know what kind of PageRoute transition '
+         'bo build.'),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
@@ -227,7 +230,7 @@ class WidgetsApp extends StatefulWidget {
   /// dialog boxes will work automatically, the [routes] table will be used, and
   /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
   /// In contrast, the widget returned from [builder] is inserted _above_ the
-  /// [Navigator] (if any).
+  /// app's [Navigator] (if any).
   /// {@endTemplate}
   ///
   /// If this property is set, the [pageRouteBuilder] property must also be set
