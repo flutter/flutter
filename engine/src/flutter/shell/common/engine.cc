@@ -103,18 +103,23 @@ bool Engine::Restart(RunConfiguration configuration) {
   delegate_.OnPreEngineRestart();
   runtime_controller_ = runtime_controller_->Clone();
   UpdateAssetManager(nullptr);
-  return Run(std::move(configuration));
+  return Run(std::move(configuration)) == Engine::RunStatus::Success;
 }
 
-bool Engine::Run(RunConfiguration configuration) {
+Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   if (!configuration.IsValid()) {
     FML_LOG(ERROR) << "Engine run configuration was invalid.";
-    return false;
+    return RunStatus::Failure;
   }
 
-  if (!PrepareAndLaunchIsolate(std::move(configuration))) {
+  auto isolate_launch_status =
+      PrepareAndLaunchIsolate(std::move(configuration));
+  if (isolate_launch_status == Engine::RunStatus::Failure) {
     FML_LOG(ERROR) << "Engine not prepare and launch isolate.";
-    return false;
+    return isolate_launch_status;
+  } else if (isolate_launch_status ==
+             Engine::RunStatus::FailureAlreadyRunning) {
+    return isolate_launch_status;
   }
 
   std::shared_ptr<blink::DartIsolate> isolate =
@@ -136,10 +141,12 @@ bool Engine::Run(RunConfiguration configuration) {
     }
   }
 
-  return isolate_running;
+  return isolate_running ? Engine::RunStatus::Success
+                         : Engine::RunStatus::Failure;
 }
 
-bool Engine::PrepareAndLaunchIsolate(RunConfiguration configuration) {
+shell::Engine::RunStatus Engine::PrepareAndLaunchIsolate(
+    RunConfiguration configuration) {
   TRACE_EVENT0("flutter", "Engine::PrepareAndLaunchIsolate");
 
   UpdateAssetManager(configuration.GetAssetManager());
@@ -150,28 +157,35 @@ bool Engine::PrepareAndLaunchIsolate(RunConfiguration configuration) {
       runtime_controller_->GetRootIsolate().lock();
 
   if (!isolate) {
-    return false;
+    return RunStatus::Failure;
+  }
+
+  // This can happen on iOS after a plugin shows a native window and returns to
+  // the Flutter ViewController.
+  if (isolate->GetPhase() == blink::DartIsolate::Phase::Running) {
+    FML_DLOG(WARNING) << "Isolate was already running!";
+    return RunStatus::FailureAlreadyRunning;
   }
 
   if (!isolate_configuration->PrepareIsolate(*isolate)) {
     FML_LOG(ERROR) << "Could not prepare to run the isolate.";
-    return false;
+    return RunStatus::Failure;
   }
 
   if (configuration.GetEntrypointLibrary().empty()) {
     if (!isolate->Run(configuration.GetEntrypoint())) {
       FML_LOG(ERROR) << "Could not run the isolate.";
-      return false;
+      return RunStatus::Failure;
     }
   } else {
     if (!isolate->RunFromLibrary(configuration.GetEntrypointLibrary(),
                                  configuration.GetEntrypoint())) {
       FML_LOG(ERROR) << "Could not run the isolate.";
-      return false;
+      return RunStatus::Failure;
     }
   }
 
-  return true;
+  return RunStatus::Success;
 }
 
 void Engine::BeginFrame(fml::TimePoint frame_time) {
