@@ -88,6 +88,7 @@ export 'src/material/snack_bar.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/switch_list_tile.dart';
+export 'src/material/tab_bar_theme.dart';
 export 'src/material/tab_controller.dart';
 export 'src/material/tab_indicator.dart';
 export 'src/material/tabs.dart';

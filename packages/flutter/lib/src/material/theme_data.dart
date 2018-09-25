@@ -16,6 +16,7 @@ import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
+import 'tab_bar_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -141,6 +142,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
+    TabBarTheme tabBarTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
@@ -185,6 +187,7 @@ class ThemeData extends Diagnosticable {
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
+  tabBarTheme ??= const TabBarTheme();
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
@@ -207,6 +210,7 @@ class ThemeData extends Diagnosticable {
       primaryColorDark: primaryColorDark,
       valueIndicatorTextStyle: accentTextTheme.body2,
     );
+    tabBarTheme ??= const TabBarTheme();
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
       brightness: brightness,
@@ -252,6 +256,7 @@ class ThemeData extends Diagnosticable {
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
       sliderTheme: sliderTheme,
+      tabBarTheme: tabBarTheme,
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
@@ -307,6 +312,7 @@ class ThemeData extends Diagnosticable {
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
     @required this.sliderTheme,
+    @required this.tabBarTheme,
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
@@ -348,6 +354,7 @@ class ThemeData extends Diagnosticable {
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
+       assert(tabBarTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
        assert(materialTapTargetSize != null),
@@ -533,6 +540,9 @@ class ThemeData extends Diagnosticable {
   /// This is the value returned from [SliderTheme.of].
   final SliderThemeData sliderTheme;
 
+  /// A theme for customizing the size, shape, and color of the tab bar indicator.
+  final TabBarTheme tabBarTheme;
+
   /// The colors and styles used to render [Chip], [
   ///
   /// This is the value returned from [ChipTheme.of].
@@ -600,6 +610,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
+    TabBarTheme tabBarTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
@@ -644,6 +655,7 @@ class ThemeData extends Diagnosticable {
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
+      tabBarTheme: tabBarTheme ?? this.tabBarTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
@@ -718,6 +730,7 @@ class ThemeData extends Diagnosticable {
 
   /// Linearly interpolate between two themes.
   ///
+  /// {@template flutter.material.themeData.lerp}
   /// The arguments must not be null.
   ///
   /// The `t` argument represents position on the timeline, with 0.0 meaning
@@ -731,6 +744,7 @@ class ThemeData extends Diagnosticable {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
+  /// {@endtemplate}
   static ThemeData lerp(ThemeData a, ThemeData b, double t) {
     assert(a != null);
     assert(b != null);
@@ -774,6 +788,7 @@ class ThemeData extends Diagnosticable {
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
+      tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
@@ -827,6 +842,7 @@ class ThemeData extends Diagnosticable {
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
+           (otherData.tabBarTheme == tabBarTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
@@ -883,6 +899,7 @@ class ThemeData extends Diagnosticable {
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
+          tabBarTheme,
         ),
       ),
     );
@@ -928,6 +945,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
+    properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
