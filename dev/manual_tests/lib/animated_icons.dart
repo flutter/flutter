@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 class AnimatedIconsTestApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Animated Icons Test',
-      home: const Scaffold(
+      home: Scaffold(
         body: IconsList(),
       ),
     );
