@@ -533,8 +533,8 @@ void main() {
   group('getSemanticsData', () {
     testWidgets('throws when there are no semantics', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: const Scaffold(
+        const MaterialApp(
+          home: Scaffold(
             body: Text('hello'),
           ),
         ),
