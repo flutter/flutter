@@ -610,8 +610,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
+      MaterialApp(
+        home: const Center(
           child: Tooltip(
             message: 'Foo',
             child: Text('Bar'),
@@ -645,8 +645,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
+      MaterialApp(
+        home: const Center(
           child: Tooltip(
             message: 'Foo',
             child: Text('Bar'),

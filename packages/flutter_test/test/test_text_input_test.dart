@@ -10,8 +10,8 @@ void main() {
   testWidgets('receiveAction() forwards exception when exception occurs during action processing',
           (WidgetTester tester) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
-    const Widget widget = MaterialApp(
-      home: Material(
+    final Widget widget = MaterialApp(
+      home: const Material(
         child: TextField(),
       ),
     );

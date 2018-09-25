@@ -15,7 +15,7 @@ void main() {
     await WidgetsBinding.instance.reassembleApplication();
     return log;
   });
-  runApp(const MaterialApp(home: Test()));
+  runApp(MaterialApp(home: const Test()));
 }
 
 class Test extends SingleChildRenderObjectWidget {
