@@ -79,7 +79,7 @@ class MaterialApp extends StatefulWidget {
   /// This class creates an instance of [WidgetsApp].
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
-  MaterialApp({ // can't be const because the asserts use methods on Map :-(
+  const MaterialApp({
     Key key,
     this.navigatorKey,
     this.home,
@@ -105,44 +105,6 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
-       assert(
-         home == null ||
-         !routes.containsKey(Navigator.defaultRouteName),
-         'If the home property is specified, the routes table '
-         'cannot include an entry for "/", since it would be redundant.'
-       ),
-       assert(
-         builder != null ||
-         home != null ||
-         routes.containsKey(Navigator.defaultRouteName) ||
-         onGenerateRoute != null ||
-         onUnknownRoute != null,
-         'Either the home property must be specified, '
-         'or the routes table must include an entry for "/", '
-         'or there must be on onGenerateRoute callback specified, '
-         'or there must be an onUnknownRoute callback specified, '
-         'or the builder property must be specified, '
-         'because otherwise there is nothing to fall back on if the '
-         'app is started with an intent that specifies an unknown route.'
-       ),
-       assert(
-         (home != null ||
-          routes.isNotEmpty ||
-          onGenerateRoute != null ||
-          onUnknownRoute != null)
-         ||
-         (builder != null &&
-          navigatorKey == null &&
-          initialRoute == null &&
-          navigatorObservers.isEmpty),
-         'If no route is provided using '
-         'home, routes, onGenerateRoute, or onUnknownRoute, '
-         'a non-null callback for the builder property must be provided, '
-         'and the other navigator-related properties, '
-         'navigatorKey, initialRoute, and navigatorObservers, '
-         'must have their initial values '
-         '(null, null, and the empty list, respectively).'
-       ),
        assert(title != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
@@ -152,48 +114,10 @@ class MaterialApp extends StatefulWidget {
        assert(debugShowCheckedModeBanner != null),
        super(key: key);
 
-  /// A key to use when building the [Navigator].
-  ///
-  /// If a [navigatorKey] is specified, the [Navigator] can be directly
-  /// manipulated without first obtaining it from a [BuildContext] via
-  /// [Navigator.of]: from the [navigatorKey], use the [GlobalKey.currentState]
-  /// getter.
-  ///
-  /// If this is changed, a new [Navigator] will be created, losing all the
-  /// application state in the process; in that case, the [navigatorObservers]
-  /// must also be changed, since the previous observers will be attached to the
-  /// previous navigator.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [navigatorKey] must be null and [builder] must not be null.
+  /// {@macro flutter.widgets.widgetsApp.navigatorKey}
   final GlobalKey<NavigatorState> navigatorKey;
 
-  /// The widget for the default route of the app ([Navigator.defaultRouteName],
-  /// which is `/`).
-  ///
-  /// This is the route that is displayed first when the application is started
-  /// normally, unless [initialRoute] is specified. It's also the route that's
-  /// displayed if the [initialRoute] can't be displayed.
-  ///
-  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
-  /// that sets the [home] argument in the constructor, you can use a [Builder]
-  /// widget to get a [BuildContext].
-  ///
-  /// If [home] is specified, then [routes] must not include an entry for `/`,
-  /// as [home] takes its place.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
-  ///
-  /// The difference between using [home] and using [builder] is that the [home]
-  /// subtree is inserted into the application below a [Navigator] (and thus
-  /// below an [Overlay], which [Navigator] uses). With [home], therefore,
-  /// dialog boxes will work automatically, [Tooltip]s will work, the [routes]
-  /// table will be used, and APIs such as [Navigator.push] and [Navigator.pop]
-  /// will work as expected. In contrast, the widget returned from [builder] is
-  /// inserted _above_ the [MaterialApp]'s [Navigator] (if any).
+  /// {@macro flutter.widgets.widgetsApp.home}
   final Widget home;
 
   /// The application's top-level routing table.
@@ -203,82 +127,25 @@ class MaterialApp extends StatefulWidget {
   /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that performs
   /// an appropriate transition, including [Hero] animations, to the new route.
   ///
-  /// If the app only has one page, then you can specify it using [home] instead.
-  ///
-  /// If [home] is specified, then it implies an entry in this table for the
-  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
-  /// redundantly provide such a route in the [routes] table.
-  ///
-  /// If a route is requested that is not specified in this table (or by
-  /// [home]), then the [onGenerateRoute] callback is called to build the page
-  /// instead.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
+  /// {@macro flutter.widgets.widgetsApp.routes}
   final Map<String, WidgetBuilder> routes;
 
   /// {@macro flutter.widgets.widgetsApp.initialRoute}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [initialRoute] must be null and [builder] must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [Navigator.initialRoute], which is used to implement this property.
-  ///  * [Navigator.push], for pushing additional routes.
-  ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
   /// {@macro flutter.widgets.widgetsApp.onGenerateRoute}
-  ///
-  /// This is used if [routes] does not contain the requested route.
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   final RouteFactory onGenerateRoute;
 
-  /// Called when [onGenerateRoute] fails to generate a route, except for the
-  /// [initialRoute].
-  ///
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [builder] must not be null.
   final RouteFactory onUnknownRoute;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
-  ///
-  /// The [Navigator] is only built if routes are provided (either via [home],
-  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
-  /// [navigatorObservers] must be the empty list and [builder] must not be null.
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@macro flutter.widgets.widgetsApp.builder}
   ///
-  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
-  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
-  /// of the [builder] to provide the application's routing machinery.
-  ///
-  /// If routes _are_ provided using one or more of those properties, then
-  /// `child` is not null, and the returned value should include the `child` in
-  /// the widget subtree; if it does not, then the application will have no
-  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
-  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
-  /// have no effect.
-  ///
-  /// If [builder] is null, it is as if a builder was specified that returned
-  /// the `child` directly. If it is null, routes must be provided using one of
-  /// the other properties listed above.
-  ///
-  /// Unless a [Navigator] is provided, either implicitly from [builder] being
-  /// null, or by a [builder] including its `child` argument, or by a [builder]
-  /// explicitly providing a [Navigator] of its own, features such as
-  /// [showDialog] and [showMenu], widgets such as [Tooltip], [PopupMenuButton],
-  /// or [Hero], and APIs such as [Navigator.push] and [Navigator.pop], will not
+  /// Material specific features such as [showDialog] and [showMenu], and widgets
+  /// such as [Tooltip], [PopupMenuButton], also require a [Navigator] to properly
   /// function.
   final TransitionBuilder builder;
 
@@ -472,71 +339,22 @@ class _MaterialAppState extends State<MaterialApp> {
     _updateNavigator();
   }
 
-  bool _haveNavigator;
   List<NavigatorObserver> _navigatorObservers;
 
   void _updateNavigator() {
-    _haveNavigator = widget.home != null ||
-                     widget.routes.isNotEmpty ||
-                     widget.onGenerateRoute != null ||
-                     widget.onUnknownRoute != null;
-    _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
-      ..add(_heroController);
+    if (widget.home != null ||
+        widget.routes.isNotEmpty ||
+        widget.onGenerateRoute != null ||
+        widget.onUnknownRoute != null) {
+      _navigatorObservers = List<NavigatorObserver>.from(widget.navigatorObservers)
+        ..add(_heroController);
+    } else {
+      _navigatorObservers = null;
+    }
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
     return MaterialRectArcTween(begin: begin, end: end);
-  }
-
-  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
-    final String name = settings.name;
-    WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null) {
-      builder = (BuildContext context) => widget.home;
-    } else {
-      builder = widget.routes[name];
-    }
-    if (builder != null) {
-      return MaterialPageRoute<dynamic>(
-        builder: builder,
-        settings: settings,
-      );
-    }
-    if (widget.onGenerateRoute != null)
-      return widget.onGenerateRoute(settings);
-    return null;
-  }
-
-  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
-    assert(() {
-      if (widget.onUnknownRoute == null) {
-        throw FlutterError(
-          'Could not find a generator for route $settings in the $runtimeType.\n'
-          'Generators for routes are searched for in the following order:\n'
-          ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
-          ' 2. Otherwise, the "routes" table is used, if it has an entry for '
-          'the route.\n'
-          ' 3. Otherwise, onGenerateRoute is called. It should return a '
-          'non-null value for any valid route not handled by "home" and "routes".\n'
-          ' 4. Finally if all else fails onUnknownRoute is called.\n'
-          'Unfortunately, onUnknownRoute was not set.'
-        );
-      }
-      return true;
-    }());
-    final Route<dynamic> result = widget.onUnknownRoute(settings);
-    assert(() {
-      if (result == null) {
-        throw FlutterError(
-          'The onUnknownRoute callback returned null.\n'
-          'When the $runtimeType requested the route $settings from its '
-          'onUnknownRoute callback, the callback returned null. Such callbacks '
-          'must never return null.'
-        );
-      }
-      return true;
-    }());
-    return result;
   }
 
   // Combine the Localizations for Material with the ones contributed
@@ -559,10 +377,14 @@ class _MaterialAppState extends State<MaterialApp> {
       child: WidgetsApp(
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
-        navigatorObservers: _haveNavigator ? _navigatorObservers : null,
+        navigatorObservers: _navigatorObservers,
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+          MaterialPageRoute<T>(settings: settings, builder: builder),
+        home: widget.home,
+        routes: widget.routes,
         initialRoute: widget.initialRoute,
-        onGenerateRoute: _haveNavigator ? _onGenerateRoute : null,
-        onUnknownRoute: _haveNavigator ? _onUnknownRoute : null,
+        onGenerateRoute: widget.onGenerateRoute,
+        onUnknownRoute: widget.onUnknownRoute,
         builder: widget.builder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
