@@ -254,8 +254,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
         key: GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
         navigatorObservers: _navigatorObservers,
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-          CupertinoPageRoute<T>(settings: settings, builder: builder),
+        // TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
+        // this can use type arguments again
+        pageRouteBuilder: (RouteSettings settings, WidgetBuilder builder) =>
+          CupertinoPageRoute<dynamic>(settings: settings, builder: builder),
         home: widget.home,
         routes: widget.routes,
         initialRoute: widget.initialRoute,
