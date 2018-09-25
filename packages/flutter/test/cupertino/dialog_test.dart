@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    await tester.pumpWidget(const MaterialApp(home: Material(
+    await tester.pumpWidget(MaterialApp(home: const Material(
       child: CupertinoAlertDialog(
         title: Text('The Title'),
         content: Text('Content'),

@@ -474,7 +474,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 }
 
 void main() {
-  runApp(const MaterialApp(
-    home: AnimationDemo(),
+  runApp(MaterialApp(
+    home: const AnimationDemo(),
   ));
 }

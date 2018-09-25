@@ -91,7 +91,7 @@ void main() {
 
     testWidgets('grid_list_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: GridListDemo()));
+      await tester.pumpWidget(MaterialApp(home: const GridListDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -105,21 +105,21 @@ void main() {
 
     testWidgets('leave_behind_demo', (WidgetTester tester) async {
      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: LeaveBehindDemo()));
+      await tester.pumpWidget(MaterialApp(home: const LeaveBehindDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
     testWidgets('list_demo', (WidgetTester tester) async {
      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: ListDemo()));
+      await tester.pumpWidget(MaterialApp(home: const ListDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
     testWidgets('menu_demo', (WidgetTester tester) async {
      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: MenuDemo()));
+      await tester.pumpWidget(MaterialApp(home: const MenuDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -133,7 +133,7 @@ void main() {
 
     testWidgets('overscroll_demo', (WidgetTester tester) async {
      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: OverscrollDemo()));
+      await tester.pumpWidget(MaterialApp(home: const OverscrollDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -161,7 +161,7 @@ void main() {
 
     testWidgets('reorderable_list_demo', (WidgetTester tester) async {
      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: ReorderableListDemo()));
+      await tester.pumpWidget(MaterialApp(home: const ReorderableListDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -196,7 +196,7 @@ void main() {
 
     testWidgets('snack_bar_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: SnackBarDemo()));
+      await tester.pumpWidget(MaterialApp(home: const SnackBarDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -217,7 +217,7 @@ void main() {
 
     testWidgets('text_form_field_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
+      await tester.pumpWidget(MaterialApp(home: const TextFormFieldDemo()));
       expect(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
@@ -380,12 +380,12 @@ void main() {
         handle.dispose();
       });
 
-    testWidgets('overscroll_demo', (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      await tester.pumpWidget(const MaterialApp(home: OverscrollDemo()));
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-      handle.dispose();
-    });
+      testWidgets('overscroll_demo $themeName', (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(MaterialApp(theme: theme, home: const OverscrollDemo()));
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        handle.dispose();
+      });
 
       testWidgets('page_selector_demo $themeName', (WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();

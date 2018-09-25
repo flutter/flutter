@@ -1181,8 +1181,8 @@ void main() {
     testWidgets('label only', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
 
-      await tester.pumpWidget(const MaterialApp(
-        home: Material(
+      await tester.pumpWidget(MaterialApp(
+        home: const Material(
           child: RawChip(
             label: Text('test'),
           ),

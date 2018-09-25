@@ -36,8 +36,8 @@ void main() {
 
   testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
@@ -54,8 +54,8 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
@@ -75,8 +75,8 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
@@ -94,8 +94,8 @@ void main() {
 
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
@@ -150,8 +150,8 @@ void main() {
 
   testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           floatingActionButton: FloatingActionButton(onPressed: null),
         ),
       ),
