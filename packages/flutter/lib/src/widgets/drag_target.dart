@@ -36,7 +36,7 @@ typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> can
 /// Used by [Draggable.onDraggableCanceled].
 typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
 
-/// Signature for when the draggable is dropped without being accepted by a [DragTarget].
+/// Signature for when the draggable is dropped and accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDragCompleted]
 typedef DragCompletedCallback = void Function(Velocity velocity, Offset offset);
