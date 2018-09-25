@@ -902,7 +902,8 @@ void main() {
   testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool onDragCompletedCalled = false;
-
+    Velocity onDragCompletedVelocity;
+    Offset onDragCompletedOffset;
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -910,8 +911,10 @@ void main() {
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging'),
-            onDragCompleted: () {
+            onDragCompleted: (Velocity velocity, Offset offset) {
               onDragCompletedCalled = true;
+              onDragCompletedVelocity = velocity;
+              onDragCompletedOffset = offset;
             },
           ),
           DragTarget<int>(
@@ -961,12 +964,15 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
     expect(onDragCompletedCalled, isFalse);
+    expect(onDragCompletedVelocity, isNull);
+    expect(onDragCompletedOffset, isNull);
   });
 
   testWidgets('Drag and drop - onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool onDragCompletedCalled = false;
-
+    Velocity onDragCompletedVelocity;
+    Offset onDragCompletedOffset;
     await tester.pumpWidget(MaterialApp(
       home: Column(
         children: <Widget>[
@@ -974,8 +980,10 @@ void main() {
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging'),
-            onDragCompleted: () {
+            onDragCompleted: (Velocity velocity, Offset offset) {
               onDragCompletedCalled = true;
+              onDragCompletedVelocity = velocity;
+              onDragCompletedOffset = offset;
             },
           ),
           DragTarget<int>(
@@ -1017,11 +1025,16 @@ void main() {
     await gesture.up();
     await tester.pump();
 
+    final Offset droppedLocation = tester.getTopLeft(find.text('Target'));
     expect(accepted, equals(<int>[1]));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
     expect(onDragCompletedCalled, isTrue);
+    expect(onDragCompletedVelocity, equals(Velocity.zero));
+    expect(onDragCompletedOffset,
+        equals(
+            Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy)));
   });
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data test', (WidgetTester tester) async {
@@ -1536,6 +1549,8 @@ void main() {
   testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     bool onDragCompletedCalled = false;
+    Velocity onDragCompletedVelocity;
+    Offset onDragCompletedOffset;
 
     await tester.pumpWidget(MaterialApp(
       home: Column(
@@ -1544,8 +1559,10 @@ void main() {
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging'),
-            onDragCompleted: () {
+            onDragCompleted: (Velocity velocity, Offset offset) {
               onDragCompletedCalled = true;
+              onDragCompletedVelocity = velocity;
+              onDragCompletedOffset = offset;
             },
           ),
           DragTarget<int>(
@@ -1596,11 +1613,16 @@ void main() {
     await gesture.up();
     await tester.pump();
 
+    final Offset droppedLocation = tester.getTopLeft(find.text('Target'));
     expect(accepted, equals(<int>[1]));
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
     expect(onDragCompletedCalled, isTrue);
+    expect(onDragCompletedVelocity, equals(Velocity.zero));
+    expect(onDragCompletedOffset,
+        equals(
+            Offset(droppedLocation.dx, secondLocation.dy - firstLocation.dy)));
   });
 
   testWidgets('long-press draggable calls onDragStartedCalled after long press', (WidgetTester tester) async {

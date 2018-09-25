@@ -36,6 +36,11 @@ typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> can
 /// Used by [Draggable.onDraggableCanceled].
 typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
 
+/// Signature for when the draggable is dropped without being accepted by a [DragTarget].
+///
+/// Used by [Draggable.onDragCompleted]
+typedef DragCompletedCallback = void Function(Velocity velocity, Offset offset);
+
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
@@ -227,7 +232,7 @@ class Draggable<T> extends StatefulWidget {
   /// still be called. For this reason, implementations of this callback might
   /// need to check [State.mounted] to check whether the state receiving the
   /// callback is still in the tree.
-  final VoidCallback onDragCompleted;
+  final DragCompletedCallback onDragCompleted;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -266,7 +271,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
-    VoidCallback onDragCompleted,
+    DragCompletedCallback onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
   }) : super(
@@ -373,7 +378,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _disposeRecognizerIfInactive();
         }
         if (wasAccepted && widget.onDragCompleted != null)
-          widget.onDragCompleted();
+          widget.onDragCompleted(velocity, offset);
         if (!wasAccepted && widget.onDraggableCanceled != null)
           widget.onDraggableCanceled(velocity, offset);
       }
