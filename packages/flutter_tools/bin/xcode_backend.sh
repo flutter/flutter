@@ -80,6 +80,9 @@ BuildApp() {
   AssertExists "${project_path}"
 
   local derived_dir="${SOURCE_ROOT}/Flutter"
+  if [[ -e "${project_path}/.ios" ]]; then
+    derived_dir="${SOURCE_ROOT}/../.ios/Flutter"
+  fi
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
