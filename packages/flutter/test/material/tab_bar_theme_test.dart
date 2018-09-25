@@ -48,13 +48,10 @@ void main() {
 
     await tester.pumpWidget(_withTheme(tabBarTheme));
 
-    final RenderParagraph textRenderObject =
-      tester.renderObject<RenderParagraph>(find.text(_tab1Text));
+    final RenderParagraph textRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab1Text));
     expect(textRenderObject.text.style.color, equals(labelColor));
-    final RenderParagraph iconRenderObject =
-      _iconRenderObject(tester, Icons.looks_one);
+    final RenderParagraph iconRenderObject = _iconRenderObject(tester, Icons.looks_one);
     expect(iconRenderObject.text.style.color, equals(labelColor));
-
   });
 
   testWidgets('Tab bar theme overrides label color (unselected)', (WidgetTester tester) async {
@@ -63,11 +60,9 @@ void main() {
 
     await tester.pumpWidget(_withTheme(tabBarTheme));
 
-    final RenderParagraph textRenderObject =
-      tester.renderObject<RenderParagraph>(find.text(_tab2Text));
+    final RenderParagraph textRenderObject = tester.renderObject<RenderParagraph>(find.text(_tab2Text));
     expect(textRenderObject.text.style.color, equals(unselectedLabelColor));
-    final RenderParagraph iconRenderObject =
-      _iconRenderObject(tester, Icons.looks_two);
+    final RenderParagraph iconRenderObject = _iconRenderObject(tester, Icons.looks_two);
     expect(iconRenderObject.text.style.color, equals(unselectedLabelColor));
   });
 
