@@ -11,7 +11,6 @@ import 'globals.dart';
 /// Information about a build to be performed or used.
 class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
-    this.previewDart2 = false,
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
     this.extraFrontEndOptions,
@@ -33,9 +32,6 @@ class BuildInfo {
   /// `assemblePaidRelease`), and the Xcode build configuration will be
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
-
-  /// Whether build should be done using Dart2 Frontend parser.
-  final bool previewDart2;
 
   final List<String> fileSystemRoots;
   final String fileSystemScheme;
@@ -98,8 +94,7 @@ class BuildInfo {
   String get modeName => getModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      new BuildInfo(mode, flavor,
-          previewDart2: previewDart2,
+      BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
           extraFrontEndOptions: extraFrontEndOptions,
@@ -264,7 +259,7 @@ String getBuildDirectory() {
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
-    throw new Exception(
+    throw Exception(
         'build-dir config setting in ${config.configPath} must be relative');
   }
   return buildDir;

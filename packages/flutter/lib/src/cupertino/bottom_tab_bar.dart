@@ -99,8 +99,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
-    Widget result = new DecoratedBox(
-      decoration: new BoxDecoration(
+    Widget result = DecoratedBox(
+      decoration: BoxDecoration(
         border: const Border(
           top: BorderSide(
             color: _kDefaultTabBarBorderColor,
@@ -111,24 +111,24 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: backgroundColor,
       ),
       // TODO(xster): allow icons-only versions of the tab bar too.
-      child: new SizedBox(
+      child: SizedBox(
         height: _kTabBarHeight + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
-          data: new IconThemeData(
+          data: IconThemeData(
             color: inactiveColor,
             size: iconSize,
           ),
-          child: new DefaultTextStyle( // Default with the inactive state.
-            style: new TextStyle(
+          child: DefaultTextStyle( // Default with the inactive state.
+            style: TextStyle(
               fontFamily: '.SF UI Text',
               fontSize: 10.0,
               letterSpacing: 0.1,
               fontWeight: FontWeight.w400,
               color: inactiveColor,
             ),
-            child: new Padding(
-              padding: new EdgeInsets.only(bottom: bottomPadding),
-              child: new Row(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              child: Row(
                 // Align bottom since we want the labels to be aligned.
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: _buildTabItems(),
@@ -141,9 +141,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
     if (!opaque) {
       // For non-opaque backgrounds, apply a blur effect.
-      result = new ClipRect(
-        child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      result = ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: result,
         ),
       );
@@ -159,20 +159,20 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       final bool active = index == currentIndex;
       result.add(
         _wrapActiveItem(
-          new Expanded(
-            child: new Semantics(
+          Expanded(
+            child: Semantics(
               selected: active,
               // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
               hint: 'tab, ${index + 1} of ${items.length}',
-              child: new GestureDetector(
+              child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: onTap == null ? null : () { onTap(index); },
-                child: new Padding(
+                child: Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
-                  child: new Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget> [
-                      new Expanded(child: new Center(child: items[index].icon)),
+                      Expanded(child: Center(child: items[index].icon)),
                       items[index].title,
                     ],
                   ),
@@ -194,9 +194,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       return item;
 
     return IconTheme.merge(
-      data: new IconThemeData(color: activeColor),
+      data: IconThemeData(color: activeColor),
       child: DefaultTextStyle.merge(
-        style: new TextStyle(color: activeColor),
+        style: TextStyle(color: activeColor),
         child: item,
       ),
     );
@@ -214,7 +214,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     int currentIndex,
     ValueChanged<int> onTap,
   }) {
-    return new CupertinoTabBar(
+    return CupertinoTabBar(
        key: key ?? this.key,
        items: items ?? this.items,
        backgroundColor: backgroundColor ?? this.backgroundColor,

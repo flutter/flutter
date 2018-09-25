@@ -17,7 +17,7 @@ void main() {
     setUp(() {
       FakeDevice.resetLog();
       device = null;
-      device = new FakeDevice();
+      device = FakeDevice();
     });
 
     tearDown(() {
@@ -115,14 +115,14 @@ CommandArgs cmd({
   List<String> arguments,
   Map<String, String> environment,
 }) {
-  return new CommandArgs(
+  return CommandArgs(
     command: command,
     arguments: arguments,
     environment: environment,
   );
 }
 
-typedef dynamic ExitErrorFactory();
+typedef ExitErrorFactory = dynamic Function();
 
 class CommandArgs {
   CommandArgs({ this.command, this.arguments, this.environment });
@@ -183,7 +183,7 @@ class FakeDevice extends AndroidDevice {
 
   @override
   Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) async {
-    commandLog.add(new CommandArgs(
+    commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
       environment: environment,
@@ -193,7 +193,7 @@ class FakeDevice extends AndroidDevice {
 
   @override
   Future<Null> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
-    commandLog.add(new CommandArgs(
+    commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
       environment: environment,

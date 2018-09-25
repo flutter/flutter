@@ -11,7 +11,7 @@ class Leaf extends StatefulWidget {
   const Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
-  _LeafState createState() => new _LeafState();
+  _LeafState createState() => _LeafState();
 }
 
 class _LeafState extends State<Leaf> {
@@ -23,7 +23,7 @@ class _LeafState extends State<Leaf> {
 
   @override
   Widget build(BuildContext context) {
-    return new KeepAlive(
+    return KeepAlive(
       keepAlive: _keepAlive,
       child: widget.child,
     );
@@ -31,10 +31,10 @@ class _LeafState extends State<Leaf> {
 }
 
 List<Widget> generateList(Widget child) {
-  return new List<Widget>.generate(
+  return List<Widget>.generate(
     100,
-    (int index) => new Leaf(
-      key: new GlobalObjectKey<_LeafState>(index),
+    (int index) => Leaf(
+      key: GlobalObjectKey<_LeafState>(index),
       child: child,
     ),
     growable: false,
@@ -44,9 +44,9 @@ List<Widget> generateList(Widget child) {
 void main() {
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
@@ -91,13 +91,13 @@ void main() {
 
   testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
-          children: generateList(new Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
+          children: generateList(Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
         ),
       ),
     );
@@ -137,15 +137,15 @@ void main() {
 
   testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new GridView.count(
+        child: GridView.count(
           cacheExtent: 0.0,
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
           crossAxisCount: 2,
           childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
-          children: generateList(new Container(child: const Placeholder())),
+          children: generateList(Container(child: const Placeholder())),
         ),
       ),
     );
@@ -185,9 +185,9 @@ void main() {
 
   testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: false,
           itemExtent: 400.0, // 2 visible children

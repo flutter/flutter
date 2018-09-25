@@ -5,7 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-typedef void TestCallback(BuildContext context);
+typedef TestCallback = void Function(BuildContext context);
 
 class TestWidget extends StatefulWidget {
   const TestWidget(this.callback);
@@ -13,7 +13,7 @@ class TestWidget extends StatefulWidget {
   final TestCallback callback;
 
   @override
-  TestWidgetState createState() => new TestWidgetState();
+  TestWidgetState createState() => TestWidgetState();
 }
 
 class TestWidgetState extends State<TestWidget> {
@@ -31,12 +31,12 @@ void main() {
   testWidgets('inheritFromWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
         context.inheritFromWidgetOfExactType(Container);
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -44,12 +44,12 @@ void main() {
   testWidgets('ancestorInheritedElementForWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
         context.ancestorInheritedElementForWidgetOfExactType(Container);
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -57,12 +57,12 @@ void main() {
   testWidgets('ancestorWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
         context.ancestorWidgetOfExactType(Container);
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -70,12 +70,12 @@ void main() {
   testWidgets('ancestorStateOfType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
         context.ancestorStateOfType(const TypeMatcher<Container>());
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -83,12 +83,12 @@ void main() {
   testWidgets('ancestorRenderObjectOfType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
         context.ancestorRenderObjectOfType(const TypeMatcher<Container>());
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -96,12 +96,12 @@ void main() {
   testWidgets('visitAncestorElements() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.visitAncestorElements((Element element) { });
+        context.visitAncestorElements((Element element) => true);
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
     expect(tester.takeException(), isFlutterError);
   });
@@ -109,11 +109,11 @@ void main() {
   testWidgets('dispose() method does not unconditionally throw an error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
-      new TestWidget((BuildContext context) {
+      TestWidget((BuildContext context) {
         disposeCalled = true;
       }),
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(disposeCalled, isTrue);
   });
 

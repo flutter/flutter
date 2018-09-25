@@ -12,12 +12,12 @@ import 'package:flutter_driver/driver_extension.dart';
 void main() {
   enableFlutterDriverExtension();
 
-  runApp(new Toggler());
+  runApp(Toggler());
 }
 
 class Toggler extends StatefulWidget {
   @override
-  State<Toggler> createState() => new TogglerState();
+  State<Toggler> createState() => TogglerState();
 }
 
 class TogglerState extends State<Toggler> {
@@ -25,15 +25,15 @@ class TogglerState extends State<Toggler> {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('FlutterDriver test'),
         ),
-        body: new Material(
-          child: new Column(
+        body: Material(
+          child: Column(
             children: <Widget>[
-              new FlatButton(
+              FlatButton(
                 key: const ValueKey<String>('toggle'),
                 child: const Text('Toggle visibility'),
                 onPressed: () {
@@ -42,8 +42,8 @@ class TogglerState extends State<Toggler> {
                   });
                 },
               ),
-              new Expanded(
-                child: new ListView(
+              Expanded(
+                child: ListView(
                   children: _buildRows(_visible ? 10 : 0),
                 ),
               ),
@@ -56,8 +56,8 @@ class TogglerState extends State<Toggler> {
 }
 
 List<Widget> _buildRows(int count) {
-  return new List<Widget>.generate(count, (int i) {
-    return new Row(
+  return List<Widget>.generate(count, (int i) {
+    return Row(
       children: _buildCells(i / count),
     );
   });
@@ -66,12 +66,12 @@ List<Widget> _buildRows(int count) {
 /// Builds cells that are known to take time to render causing a delay on the
 /// GPU thread.
 List<Widget> _buildCells(double epsilon) {
-  return new List<Widget>.generate(15, (int i) {
-    return new Expanded(
-      child: new Material(
+  return List<Widget>.generate(15, (int i) {
+    return Expanded(
+      child: Material(
         // A magic color that the test will be looking for on the screenshot.
         color: const Color(0xffff0102),
-        borderRadius: new BorderRadius.all(new Radius.circular(i.toDouble() + epsilon)),
+        borderRadius: BorderRadius.all(Radius.circular(i.toDouble() + epsilon)),
         elevation: 5.0,
         child: const SizedBox(height: 10.0, width: 10.0),
       ),

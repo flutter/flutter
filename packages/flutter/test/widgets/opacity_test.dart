@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Opacity', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     // Opacity 1.0: Semantics and painting
     await tester.pumpWidget(
@@ -20,9 +20,9 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
@@ -41,7 +41,7 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(),
+      TestSemantics.root(),
     ));
     expect(find.byType(Opacity), paintsNothing);
 
@@ -54,9 +54,9 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
@@ -76,7 +76,7 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(),
+      TestSemantics.root(),
     ));
     expect(find.byType(Opacity), paintsNothing);
 
@@ -88,9 +88,9 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
@@ -110,9 +110,9 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
@@ -132,9 +132,9 @@ void main() {
       ),
     );
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          TestSemantics.rootChild(
             id: 1,
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',

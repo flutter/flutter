@@ -30,7 +30,7 @@ class RelativeRect {
   /// and the RelativeRect (the output) are in the coordinate space of the
   /// rectangle described by the Size, with 0,0 being at the top left.
   factory RelativeRect.fromSize(Rect rect, Size container) {
-    return new RelativeRect.fromLTRB(rect.left, rect.top, container.width - rect.right, container.height - rect.bottom);
+    return RelativeRect.fromLTRB(rect.left, rect.top, container.width - rect.right, container.height - rect.bottom);
   }
 
   /// Creates a RelativeRect from two Rects. The second Rect provides the
@@ -46,7 +46,7 @@ class RelativeRect {
   /// use [RelativeRect.fromSize] and pass the container's size as the second
   /// argument instead.
   factory RelativeRect.fromRect(Rect rect, Rect container) {
-    return new RelativeRect.fromLTRB(
+    return RelativeRect.fromLTRB(
       rect.left - container.left,
       rect.top - container.top,
       container.right - rect.right,
@@ -85,12 +85,12 @@ class RelativeRect {
 
   /// Returns a new rectangle object translated by the given offset.
   RelativeRect shift(Offset offset) {
-    return new RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right - offset.dx, bottom - offset.dy);
+    return RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right - offset.dx, bottom - offset.dy);
   }
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
   RelativeRect inflate(double delta) {
-    return new RelativeRect.fromLTRB(left - delta, top - delta, right - delta, bottom - delta);
+    return RelativeRect.fromLTRB(left - delta, top - delta, right - delta, bottom - delta);
   }
 
   /// Returns a new rectangle with edges moved inwards by the given delta.
@@ -100,7 +100,7 @@ class RelativeRect {
 
   /// Returns a new rectangle that is the intersection of the given rectangle and this rectangle.
   RelativeRect intersect(RelativeRect other) {
-    return new RelativeRect.fromLTRB(
+    return RelativeRect.fromLTRB(
       math.max(left, other.left),
       math.max(top, other.top),
       math.max(right, other.right),
@@ -115,7 +115,7 @@ class RelativeRect {
   ///  * [toSize], which returns the size part of the rect, based on the size of
   ///    the container.
   Rect toRect(Rect container) {
-    return new Rect.fromLTRB(left, top, container.width - right, container.height - bottom);
+    return Rect.fromLTRB(left, top, container.width - right, container.height - bottom);
   }
 
   /// Convert this [RelativeRect] to a [Size], assuming a container with the given size.
@@ -124,7 +124,7 @@ class RelativeRect {
   ///
   ///  * [toRect], which also computes the position relative to the container.
   Size toSize(Size container) {
-    return new Size(container.width - left - right, container.height - top - bottom);
+    return Size(container.width - left - right, container.height - top - bottom);
   }
 
   /// Linearly interpolate between two RelativeRects.
@@ -147,12 +147,12 @@ class RelativeRect {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new RelativeRect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+      return RelativeRect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
     if (b == null) {
       final double k = 1.0 - t;
-      return new RelativeRect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
+      return RelativeRect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
     }
-    return new RelativeRect.fromLTRB(
+    return RelativeRect.fromLTRB(
       lerpDouble(a.left, b.left, t),
       lerpDouble(a.top, b.top, t),
       lerpDouble(a.right, b.right, t),
@@ -205,7 +205,7 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   double height;
 
   /// Get or set the current values in terms of a RelativeRect object.
-  RelativeRect get rect => new RelativeRect.fromLTRB(left, top, right, bottom);
+  RelativeRect get rect => RelativeRect.fromLTRB(left, top, right, bottom);
   set rect(RelativeRect value) {
     top = value.top;
     right = value.right;
@@ -359,7 +359,7 @@ class RenderStack extends RenderBox
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
-      child.parentData = new StackParentData();
+      child.parentData = StackParentData();
   }
 
   Alignment _resolvedAlignment;
@@ -502,7 +502,7 @@ class RenderStack extends RenderBox
         nonPositionedConstraints = constraints.loosen();
         break;
       case StackFit.expand:
-        nonPositionedConstraints = new BoxConstraints.tight(constraints.biggest);
+        nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
         break;
       case StackFit.passthrough:
         nonPositionedConstraints = constraints;
@@ -528,7 +528,7 @@ class RenderStack extends RenderBox
     }
 
     if (hasNonPositionedChildren) {
-      size = new Size(width, height);
+      size = Size(width, height);
       assert(size.width == constraints.constrainWidth(width));
       assert(size.height == constraints.constrainHeight(height));
     } else {
@@ -582,7 +582,7 @@ class RenderStack extends RenderBox
         if (y < 0.0 || y + child.size.height > size.height)
           _hasVisualOverflow = true;
 
-        childParentData.offset = new Offset(x, y);
+        childParentData.offset = Offset(x, y);
       }
 
       assert(child.parentData == childParentData);
@@ -619,10 +619,10 @@ class RenderStack extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
-    properties.add(new EnumProperty<StackFit>('fit', fit));
-    properties.add(new EnumProperty<Overflow>('overflow', overflow));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    properties.add(EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(EnumProperty<StackFit>('fit', fit));
+    properties.add(EnumProperty<Overflow>('overflow', overflow));
   }
 }
 
@@ -698,6 +698,6 @@ class RenderIndexedStack extends RenderStack {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new IntProperty('index', index));
+    properties.add(IntProperty('index', index));
   }
 }

@@ -51,6 +51,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
     @required RenderBox referenceBox,
     @required Offset position,
     @required Color color,
+    @required TextDirection textDirection,
     bool containedInkWell = false,
     RectCallback rectCallback,
     BorderRadius borderRadius,
@@ -58,7 +59,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
     double radius,
     VoidCallback onRemoved,
   }) {
-    return new InkSplash(
+    return InkSplash(
       controller: controller,
       referenceBox: referenceBox,
       position: position,
@@ -69,6 +70,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
       customBorder: customBorder,
       radius: radius,
       onRemoved: onRemoved,
+      textDirection: textDirection,
     );
   }
 }
@@ -116,6 +118,7 @@ class InkSplash extends InteractiveInkFeature {
   InkSplash({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
+    @required TextDirection textDirection,
     Offset position,
     Color color,
     bool containedInkWell = false,
@@ -124,28 +127,30 @@ class InkSplash extends InteractiveInkFeature {
     ShapeBorder customBorder,
     double radius,
     VoidCallback onRemoved,
-  }) : _position = position,
+  }) : assert(textDirection != null),
+       _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _customBorder = customBorder,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
+       _textDirection = textDirection,
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
-    _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
+    _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-    _radius = new Tween<double>(
+    _radius = _radiusController.drive(Tween<double>(
       begin: _kSplashInitialSize,
-      end: _targetRadius
-    ).animate(_radiusController);
-    _alphaController = new AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
+      end: _targetRadius,
+    ));
+    _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
-    _alpha = new IntTween(
+    _alpha = _alphaController.drive(IntTween(
       begin: color.alpha,
-      end: 0
-    ).animate(_alphaController);
+      end: 0,
+    ));
 
     controller.addInkFeature(this);
   }
@@ -156,6 +161,7 @@ class InkSplash extends InteractiveInkFeature {
   final double _targetRadius;
   final RectCallback _clipCallback;
   final bool _repositionToReferenceBox;
+  final TextDirection _textDirection;
 
   Animation<double> _radius;
   AnimationController _radiusController;
@@ -167,7 +173,7 @@ class InkSplash extends InteractiveInkFeature {
   void confirm() {
     final int duration = (_targetRadius / _kSplashConfirmedVelocity).floor();
     _radiusController
-      ..duration = new Duration(milliseconds: duration)
+      ..duration = Duration(milliseconds: duration)
       ..forward();
     _alphaController.forward();
   }
@@ -192,7 +198,7 @@ class InkSplash extends InteractiveInkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
+    final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset center = _position;
     if (_repositionToReferenceBox)
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
@@ -206,9 +212,9 @@ class InkSplash extends InteractiveInkFeature {
     if (_clipCallback != null) {
       final Rect rect = _clipCallback();
       if (_customBorder != null) {
-        canvas.clipPath(_customBorder.getOuterPath(rect));
+        canvas.clipPath(_customBorder.getOuterPath(rect, textDirection: _textDirection));
       } else if (_borderRadius != BorderRadius.zero) {
-        canvas.clipRRect(new RRect.fromRectAndCorners(
+        canvas.clipRRect(RRect.fromRectAndCorners(
           rect,
           topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
           bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,

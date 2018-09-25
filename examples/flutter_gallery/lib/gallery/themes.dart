@@ -11,8 +11,8 @@ class GalleryTheme {
   final ThemeData data;
 }
 
-final GalleryTheme kDarkGalleryTheme = new GalleryTheme._('Dark', _buildDarkTheme());
-final GalleryTheme kLightGalleryTheme = new GalleryTheme._('Light', _buildLightTheme());
+final GalleryTheme kDarkGalleryTheme = GalleryTheme._('Dark', _buildDarkTheme());
+final GalleryTheme kLightGalleryTheme = GalleryTheme._('Light', _buildLightTheme());
 
 TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(
@@ -24,7 +24,7 @@ TextTheme _buildTextTheme(TextTheme base) {
 
 ThemeData _buildDarkTheme() {
   const Color primaryColor = Color(0xFF0175c2);
-  final ThemeData base = new ThemeData.dark();
+  final ThemeData base = ThemeData.dark();
   return base.copyWith(
     primaryColor: primaryColor,
     buttonColor: primaryColor,
@@ -45,7 +45,7 @@ ThemeData _buildDarkTheme() {
 
 ThemeData _buildLightTheme() {
   const Color primaryColor = Color(0xFF0175c2);
-  final ThemeData base = new ThemeData.light();
+  final ThemeData base = ThemeData.light();
   return base.copyWith(
     primaryColor: primaryColor,
     buttonColor: primaryColor,

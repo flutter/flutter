@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -16,13 +17,13 @@ import 'test_driver.dart';
 void main() {
   group('expression evaluation', () {
     Directory tempDir;
-    final BasicProject _project = new BasicProject();
+    final BasicProject _project = BasicProject();
     FlutterTestDriver _flutter;
 
     setUp(() async {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
@@ -57,11 +58,11 @@ void main() {
 
     Future<void> evaluateComplexExpressions() async {
       final VMInstanceRef res = await _flutter.evaluateExpression('new DateTime.now().year');
-      expect(res is VMIntInstanceRef && res.value == new DateTime.now().year, isTrue);
+      expect(res is VMIntInstanceRef && res.value == DateTime.now().year, isTrue);
     }
 
     Future<void> evaluateComplexReturningExpressions() async {
-      final DateTime now = new DateTime.now();
+      final DateTime now = DateTime.now();
       final VMInstanceRef resp = await _flutter.evaluateExpression('new DateTime.now()');
       expect(resp.klass.name, equals('DateTime'));
       // Ensure we got a reasonable approximation. The more accurate we try to
@@ -107,8 +108,8 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-    // https://github.com/flutter/flutter/issues/17833
-    // The test appears to be flaky and time out some times, skipping while
-    // investigation is ongoing: https://github.com/flutter/flutter/issues/19542
-  }, timeout: const Timeout.factor(6), skip: true);
+    // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
+    // https://github.com/flutter/flutter/issues/17833.
+    // https://github.com/flutter/flutter/issues/21348.
+  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
 }

@@ -13,11 +13,12 @@ import 'base/context.dart';
 import 'base/fingerprint.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
+import 'base/terminal.dart';
 import 'globals.dart';
 
 KernelCompiler get kernelCompiler => context[KernelCompiler];
 
-typedef void CompilerMessageConsumer(String message);
+typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
 class CompilerOutput {
   final String outputFilename;
@@ -31,30 +32,35 @@ class _StdoutHandler {
     reset();
   }
 
+  bool compilerMessageReceived = false;
   final CompilerMessageConsumer consumer;
   String boundaryKey;
   Completer<CompilerOutput> compilerOutput;
 
   bool _suppressCompilerMessages;
 
-  void handler(String string) {
+  void handler(String message) {
     const String kResultPrefix = 'result ';
     if (boundaryKey == null) {
-      if (string.startsWith(kResultPrefix))
-        boundaryKey = string.substring(kResultPrefix.length);
-    } else if (string.startsWith(boundaryKey)) {
-      if (string.length <= boundaryKey.length) {
+      if (message.startsWith(kResultPrefix))
+        boundaryKey = message.substring(kResultPrefix.length);
+    } else if (message.startsWith(boundaryKey)) {
+      if (message.length <= boundaryKey.length) {
         compilerOutput.complete(null);
         return;
       }
-      final int spaceDelimiter = string.lastIndexOf(' ');
+      final int spaceDelimiter = message.lastIndexOf(' ');
       compilerOutput.complete(
-        new CompilerOutput(
-          string.substring(boundaryKey.length + 1, spaceDelimiter),
-          int.parse(string.substring(spaceDelimiter + 1).trim())));
+        CompilerOutput(
+          message.substring(boundaryKey.length + 1, spaceDelimiter),
+          int.parse(message.substring(spaceDelimiter + 1).trim())));
     }
     else if (!_suppressCompilerMessages) {
-      consumer('compiler message: $string');
+      if (compilerMessageReceived == false) {
+        consumer('\nCompiler message:');
+        compilerMessageReceived = true;
+      }
+      consumer(message);
     }
   }
 
@@ -62,7 +68,8 @@ class _StdoutHandler {
   // with its own boundary key and new completer.
   void reset({bool suppressCompilerMessages = false}) {
     boundaryKey = null;
-    compilerOutput = new Completer<CompilerOutput>();
+    compilerMessageReceived = false;
+    compilerOutput = Completer<CompilerOutput>();
     _suppressCompilerMessages = suppressCompilerMessages;
   }
 }
@@ -77,7 +84,6 @@ class KernelCompiler {
     String depFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
-    List<String> entryPointsJsonFiles,
     bool trackWidgetCreation = false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
@@ -95,7 +101,7 @@ class KernelCompiler {
     // depfile. None of these are available on the local host.
     Fingerprinter fingerprinter;
     if (depFilePath != null) {
-      fingerprinter = new Fingerprinter(
+      fingerprinter = Fingerprinter(
         fingerprintPath: '$depFilePath.fingerprint',
         paths: <String>[mainPath],
         properties: <String, String>{
@@ -109,7 +115,7 @@ class KernelCompiler {
 
       if (await fingerprinter.doesFingerprintMatch()) {
         printTrace('Skipping kernel compilation. Fingerprint match.');
-        return new CompilerOutput(outputFilePath, 0);
+        return CompilerOutput(outputFilePath, 0);
       }
     }
 
@@ -138,11 +144,6 @@ class KernelCompiler {
     }
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
-    }
-    if (entryPointsJsonFiles != null) {
-      for (String entryPointsJson in entryPointsJsonFiles) {
-        command.addAll(<String>['--entry-points', entryPointsJson]);
-      }
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
@@ -175,11 +176,11 @@ class KernelCompiler {
       printError('Failed to start frontend server $error, $stack');
     });
 
-    final _StdoutHandler _stdoutHandler = new _StdoutHandler();
+    final _StdoutHandler _stdoutHandler = _StdoutHandler();
 
     server.stderr
       .transform(utf8.decoder)
-      .listen((String s) { printError('compiler message: $s'); });
+      .listen((String message) { printError(message); });
     server.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -247,15 +248,17 @@ class _CompileExpressionRequest extends _CompilationRequest {
 /// restarts the Flutter app.
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation = false,
-      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
-      CompilerMessageConsumer compilerMessageConsumer = printError})
+      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme,
+      CompilerMessageConsumer compilerMessageConsumer = printError,
+      String initializeFromDill})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
       _fileSystemScheme = fileSystemScheme,
-      _stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer),
-      _controller = new StreamController<_CompilationRequest>() {
+      _stdoutHandler = _StdoutHandler(consumer: compilerMessageConsumer),
+      _controller = StreamController<_CompilationRequest>(),
+      _initializeFromDill = initializeFromDill {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -268,6 +271,7 @@ class ResidentCompiler {
   String _sdkRoot;
   Process _server;
   final _StdoutHandler _stdoutHandler;
+  String _initializeFromDill;
 
   final StreamController<_CompilationRequest> _controller;
 
@@ -284,9 +288,9 @@ class ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-        new _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
+        _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
     );
     return completer.future;
   }
@@ -301,7 +305,7 @@ class ResidentCompiler {
           request.outputPath, _mapFilename(request.packagesFilePath));
     }
 
-    final String inputKey = new Uuid().generateV4();
+    final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('recompile ${request.mainPath != null ? _mapFilename(request.mainPath) + " ": ""}$inputKey');
     for (String fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri));
@@ -311,19 +315,19 @@ class ResidentCompiler {
     return _stdoutHandler.compilerOutput.future;
   }
 
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  final List<_CompilationRequest> _compilationQueue = <_CompilationRequest>[];
 
-  void _handleCompilationRequest(_CompilationRequest request) async {
-    final bool isEmpty = compilationQueue.isEmpty;
-    compilationQueue.add(request);
+  Future<void> _handleCompilationRequest(_CompilationRequest request) async {
+    final bool isEmpty = _compilationQueue.isEmpty;
+    _compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests
     // are currently being processed. This effectively enforces "one
     // compilation request at a time".
     if (isEmpty) {
-      while (compilationQueue.isNotEmpty) {
-        final _CompilationRequest request = compilationQueue.first;
+      while (_compilationQueue.isNotEmpty) {
+        final _CompilationRequest request = _compilationQueue.first;
         await request.run(this);
-        compilationQueue.removeAt(0);
+        _compilationQueue.removeAt(0);
       }
     }
   }
@@ -341,7 +345,6 @@ class ResidentCompiler {
       '--incremental',
       '--strong',
       '--target=flutter',
-      '--initialize-from-dill=foo' // TODO(aam): remove once dartbug.com/33087 fixed
     ];
     if (outputPath != null) {
       command.addAll(<String>['--output-dill', outputPath]);
@@ -363,6 +366,9 @@ class ResidentCompiler {
     if (_fileSystemScheme != null) {
       command.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
     }
+    if (_initializeFromDill != null) {
+      command.addAll(<String>['--initialize-from-dill', _initializeFromDill]);
+    }
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
@@ -381,7 +387,7 @@ class ResidentCompiler {
     _server.stderr
       .transform(utf8.decoder)
       .transform(const LineSplitter())
-      .listen((String s) { printError('compiler message: $s'); });
+      .listen((String message) { printError(message); });
 
     _server.stdin.writeln('compile $scriptFilename');
 
@@ -394,9 +400,9 @@ class ResidentCompiler {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
-    final Completer<CompilerOutput> completer = new Completer<CompilerOutput>();
+    final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
     _controller.add(
-        new _CompileExpressionRequest(
+        _CompileExpressionRequest(
             completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
     );
     return completer.future;
@@ -411,7 +417,7 @@ class ResidentCompiler {
     if (_server == null)
       return null;
 
-    final String inputKey = new Uuid().generateV4();
+    final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
     _server.stdin.writeln(request.expression);
     request.definitions?.forEach(_server.stdin.writeln);
@@ -450,7 +456,7 @@ class ResidentCompiler {
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
-          return new Uri(
+          return Uri(
               scheme: _fileSystemScheme, path: filename.substring(root.length))
               .toString();
         }
@@ -464,7 +470,7 @@ class ResidentCompiler {
       final String filename = Uri.parse(fileUri).toFilePath();
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
-          return new Uri(
+          return Uri(
               scheme: _fileSystemScheme, path: filename.substring(root.length))
               .toString();
         }

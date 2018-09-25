@@ -13,7 +13,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding { }
 
 void ensureGestureBinding() {
   if (GestureBinding.instance == null)
-    new TestGestureFlutterBinding();
+    TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 
@@ -32,13 +32,13 @@ class GestureTester {
   }
 }
 
-typedef void GestureTest(GestureTester tester);
+typedef GestureTest = void Function(GestureTester tester);
 
 @isTest
 void testGesture(String description, GestureTest callback) {
   test(description, () {
-    new FakeAsync().run((FakeAsync async) {
-      callback(new GestureTester._(async));
+    FakeAsync().run((FakeAsync async) {
+      callback(GestureTester._(async));
     });
   });
 }

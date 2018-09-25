@@ -56,7 +56,7 @@ Future<Null> main(List<String> args) async {
     // Scrolls down 300px.
     await driver.scroll(find.byType('Scaffold'), 0.0, -300.0,
         const Duration(milliseconds: 300));
-    await new Future<Null>.delayed(const Duration(milliseconds: 500));
+    await Future<Null>.delayed(const Duration(milliseconds: 500));
     // Scrolls up 300px.
     await driver.scroll(find.byType('Scaffold'), 300.0, 300.0,
         const Duration(milliseconds: 300));

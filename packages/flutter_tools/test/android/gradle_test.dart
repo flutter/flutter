@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -19,6 +18,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/pubspec_schema.dart';
 
 void main() {
   Cache.flutterRoot = getFlutterRoot();
@@ -63,7 +63,7 @@ void main() {
   });
 
   group('gradle project', () {
-    GradleProject projectFrom(String properties) => new GradleProject.fromAppProperties(properties);
+    GradleProject projectFrom(String properties) => GradleProject.fromAppProperties(properties);
 
     test('should extract build directory from app properties', () {
       final GradleProject project = projectFrom('''
@@ -115,27 +115,27 @@ someOtherProperty: someOtherValue
       expect(project.productFlavors, <String>['free', 'paid']);
     });
     test('should provide apk file name for default build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
       expect(project.apkFileFor(BuildInfo.debug), 'app-debug.apk');
       expect(project.apkFileFor(BuildInfo.profile), 'app-profile.apk');
       expect(project.apkFileFor(BuildInfo.release), 'app-release.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide apk file name for flavored build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
       expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app-free-debug.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app-paid-release.apk');
       expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide assemble task name for default build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'));
       expect(project.assembleTaskFor(BuildInfo.debug), 'assembleDebug');
       expect(project.assembleTaskFor(BuildInfo.profile), 'assembleProfile');
       expect(project.assembleTaskFor(BuildInfo.release), 'assembleRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
     });
     test('should provide assemble task name for flavored build types', () {
-      final GradleProject project = new GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'));
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'free')), 'assembleFreeDebug');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'assemblePaidRelease');
       expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
@@ -149,9 +149,9 @@ someOtherProperty: someOtherValue
     FileSystem fs;
 
     setUp(() {
-      fs = new MemoryFileSystem();
-      mockArtifacts = new MockLocalEngineArtifacts();
-      mockProcessManager = new MockProcessManager();
+      fs = MemoryFileSystem();
+      mockArtifacts = MockLocalEngineArtifacts();
+      mockProcessManager = MockProcessManager();
       android = fakePlatform('android');
     });
 
@@ -186,8 +186,7 @@ someOtherProperty: someOtherValue
       manifestFile.writeAsStringSync(manifest);
 
       // write schemaData otherwise pubspec.yaml file can't be loaded
-      const String schemaData = '{}';
-      writeSchemaFile(fs, schemaData);
+      writeEmptySchemaFile(fs);
 
       try {
         updateLocalProperties(
@@ -331,18 +330,8 @@ flutter:
   });
 }
 
-void writeSchemaFile(FileSystem filesystem, String schemaData) {
-  final String schemaPath = buildSchemaPath(filesystem);
-  final File schemaFile = filesystem.file(schemaPath);
-
-  final String schemaDir = buildSchemaDir(filesystem);
-
-  filesystem.directory(schemaDir).createSync(recursive: true);
-  filesystem.file(schemaFile).writeAsStringSync(schemaData);
-}
-
 Platform fakePlatform(String name) {
-  return new FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
+  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

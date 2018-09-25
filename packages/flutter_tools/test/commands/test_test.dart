@@ -116,7 +116,11 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   int outputLineNumber = 0;
   bool haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
-    expect(output, hasLength(greaterThan(outputLineNumber)));
+    expect(
+      output,
+      hasLength(greaterThan(outputLineNumber)),
+      reason: 'Failure in $testName to compare to $fullTestExpectation',
+    );
     final String expectationLine = expectations[expectationLineNumber];
     final String outputLine = output[outputLineNumber];
     if (expectationLine == '<<skip until matching line>>') {
@@ -125,7 +129,7 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
       continue;
     }
     if (allowSkip) {
-      if (!new RegExp(expectationLine).hasMatch(outputLine)) {
+      if (!RegExp(expectationLine).hasMatch(outputLine)) {
         outputLineNumber += 1;
         continue;
       }
@@ -167,7 +171,7 @@ Future<ProcessResult> _runFlutterTest(
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  final Completer<Null> testExclusionCompleter = new Completer<Null>();
+  final Completer<Null> testExclusionCompleter = Completer<Null>();
   _testExclusionLock = testExclusionCompleter.future;
   try {
     return await Process.run(

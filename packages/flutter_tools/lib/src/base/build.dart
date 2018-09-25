@@ -67,69 +67,6 @@ class GenSnapshot {
   }
 }
 
-/// Dart snapshot builder.
-///
-/// Builds Dart snapshots in one of three modes:
-///   * Script snapshot: architecture-independent snapshot of a Dart script
-///     and core libraries.
-///   * AOT snapshot: architecture-specific ahead-of-time compiled snapshot
-///     suitable for loading with `mmap`.
-///   * Assembly AOT snapshot: architecture-specific ahead-of-time compile to
-///     assembly suitable for compilation as a static or dynamic library.
-class ScriptSnapshotter {
-  /// Builds an architecture-independent snapshot of the specified script.
-  Future<int> build({
-    @required String mainPath,
-    @required String snapshotPath,
-    @required String depfilePath,
-    @required String packagesPath
-  }) async {
-    final SnapshotType snapshotType = new SnapshotType(null, BuildMode.debug);
-    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
-    final List<String> args = <String>[
-      '--snapshot_kind=script',
-      '--script_snapshot=$snapshotPath',
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
-      '--enable-mirrors=false',
-      mainPath,
-    ];
-
-    final Fingerprinter fingerprinter = new Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[
-        mainPath,
-        snapshotPath,
-        vmSnapshotData,
-        isolateSnapshotData,
-      ],
-      properties: <String, String>{
-        'buildMode': snapshotType.mode.toString(),
-        'targetPlatform': snapshotType.platform?.toString() ?? '',
-        'entryPoint': mainPath,
-      },
-      depfilePaths: <String>[depfilePath],
-    );
-    if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping script snapshot build. Fingerprints match.');
-      return 0;
-    }
-
-    // Build the snapshot.
-    final int exitCode = await genSnapshot.run(
-      snapshotType: snapshotType,
-      packagesPath: packagesPath,
-      additionalArgs: args,
-    );
-
-    if (exitCode != 0)
-      return exitCode;
-    await fingerprinter.writeFingerprint();
-    return exitCode;
-  }
-}
-
 class AOTSnapshotter {
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
@@ -138,7 +75,6 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool previewDart2,
     @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
@@ -167,7 +103,7 @@ class AOTSnapshotter {
       return 1;
     }
 
-    final PackageMap packageMap = new PackageMap(packagesPath);
+    final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
     if (packageMapError != null) {
       printError(packageMapError);
@@ -180,26 +116,20 @@ class AOTSnapshotter {
     final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
     final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
     final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
-    final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
-    final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
-    final List<String> inputPaths = <String>[uiPath, vmServicePath, vmEntryPoints, ioEntryPoints, mainPath];
-    final Set<String> outputPaths = new Set<String>();
+    final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
+    final Set<String> outputPaths = Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--url_mapping=dart:ui,$uiPath',
       '--url_mapping=dart:vmservice_io,$vmServicePath',
-      '--embedder_entry_points_manifest=$vmEntryPoints',
-      '--embedder_entry_points_manifest=$ioEntryPoints',
     ];
-    if (previewDart2) {
-      genSnapshotArgs.addAll(<String>[
-        '--reify-generic-functions',
-        '--strong',
-        '--sync-async',
-      ]);
-    }
+    genSnapshotArgs.addAll(<String>[
+      '--reify-generic-functions',
+      '--strong',
+      '--sync-async',
+    ]);
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
@@ -229,7 +159,7 @@ class AOTSnapshotter {
 
     if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
       // Use softfp for Android armv7 devices.
-      // Note that this is the default for armv7 iOS builds, but harmless to set.
+      // This is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
       genSnapshotArgs.add('--no-sim-use-hardfp');
 
@@ -247,14 +177,13 @@ class AOTSnapshotter {
     }
 
     // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = new Fingerprinter(
+    final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
       paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
       properties: <String, String>{
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'dart2': previewDart2.toString(),
         'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
@@ -265,7 +194,7 @@ class AOTSnapshotter {
       return 0;
     }
 
-    final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+    final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packageMap.packagesPath,
@@ -370,10 +299,6 @@ class AOTSnapshotter {
     outputDir.createSync(recursive: true);
 
     printTrace('Compiling Dart to kernel: $mainPath');
-    final List<String> entryPointsJsonFiles = <String>[
-      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
-      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
-    ];
 
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
@@ -387,7 +312,6 @@ class AOTSnapshotter {
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,
-      entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
       targetProductVm: buildMode == BuildMode.release,
     );
@@ -436,7 +360,7 @@ class CoreJITSnapshotter {
     outputDir.createSync(recursive: true);
 
     final List<String> inputPaths = <String>[mainPath, compilationTraceFilePath];
-    final Set<String> outputPaths = new Set<String>();
+    final Set<String> outputPaths = Set<String>();
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -486,7 +410,7 @@ class CoreJITSnapshotter {
     }
 
     // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = new Fingerprinter(
+    final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
       paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
       properties: <String, String>{
@@ -502,7 +426,7 @@ class CoreJITSnapshotter {
       return 0;
     }
 
-    final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+    final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
       packagesPath: packagesPath,
