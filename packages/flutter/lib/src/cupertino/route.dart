@@ -273,8 +273,10 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return backController;
   }
 
-  /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full screen dialog,
-  /// otherwise a [CupertinoPageTransition] is returned.
+  /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
+  /// screen dialog, otherwise a [CupertinoPageTransition] is returned.
+  ///
+  /// Used by [CupertinoPageRoute.buildTransitions].
   ///
   /// This method can be applied to any [PageRoute], not just
   /// [CupertinoPageRoute]. It's typically used to provide a Cupertino style
