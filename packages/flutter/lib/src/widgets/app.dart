@@ -262,7 +262,7 @@ class WidgetsApp extends StatefulWidget {
   /// [builder] must not be null.
   /// {@endTemplate}
   ///
-  /// If this property is set, the [pageRouteBuilder] property must also be set
+  /// If the routes map is not empty, the [pageRouteBuilder] property must be set
   /// so that the default route handler will know what kind of [PageRoute]s to
   /// build.
   final Map<String, WidgetBuilder> routes;
