@@ -538,6 +538,11 @@ class ButtonThemeData extends Diagnosticable {
     return Colors.transparent;
   }
 
+  /// The [button]'s elevation when it is enabled and has not been pressed.
+  ///
+  /// Returns the button's [MaterialButton.elevation] if it is non-null.
+  ///
+  /// If button is a [FlatButton] then elevation is 0.0, otherwise 2.0.
   double getElevation(MaterialButton button) {
     if (button.elevation != null)
       return button.elevation;
@@ -546,6 +551,13 @@ class ButtonThemeData extends Diagnosticable {
     return 2.0;
   }
 
+  /// The [button]'s elevation when it is enabled and has been pressed.
+  ///
+  /// Returns the button's [MaterialButton.highlightElevation] if it is non-null.
+  ///
+  /// If button is a [FlatButton] then the highlight elevation is 0.0, if it's
+  /// a [OutlineButton] then the highlight elevation is 2.0, otherise the
+  /// highlight elevation is 8.0.
   double getHighlightElevation(MaterialButton button) {
     if (button.highlightElevation != null)
       return button.highlightElevation;
@@ -556,18 +568,33 @@ class ButtonThemeData extends Diagnosticable {
     return 8.0;
   }
 
+  /// The [button]'s elevation when [MaterialButton.onPressed] is null (when
+  /// MaterialButton.enabled is false).
+  ///
+  /// Returns the button's [MaterialButton.elevation] if it is non-null.
+  ///
+  /// Otheriwse the disabled elevation is 0.0.
   double getDisabledElevation(MaterialButton button) {
     if (button.disabledElevation != null)
       return button.disabledElevation;
     return 0.0;
   }
 
+  /// The [button]'s internal padding.
+  ///
+  /// Returns the button's [MaterialButton.padding] if it is non-null.
+  ///
+  /// If this is a button constructed with [RaisedButton.icon] or
+  /// [FlatButton.icon] or [OutlineButton.icon] then the padding is:
+  /// `EdgeInsetsDirectional.only(start: 12.0, end: 16.0)`.
+  ///
+  /// Returns [padding] if it is non-null, otherwise `EdgeInsets.zero`.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
     if (button.padding != null)
       return button.padding;
     if (_isIconButton(button))
       return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
-    return padding;
+    return padding ?? EdgeInsets.zero;
   }
 
   BoxConstraints getConstraints(MaterialButton button) => constraints;
