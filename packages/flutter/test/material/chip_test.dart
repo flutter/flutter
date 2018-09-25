@@ -1139,40 +1139,40 @@ void main() {
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 
-  testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+  testWidgets('Chip elevation works correctly', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
     final ChipThemeData chipTheme = theme.chipTheme;
-    const double elevation = 8.0;
+
+    InputChip inputChip =
+      const InputChip(
+        label: const Text('Label'),
+        pressElevation: 8.0,
+      );
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
         textDirection: TextDirection.ltr,
-        child: new Theme(
+        child: Theme(
           data: theme,
-          child: const InputChip(
-            label: const Text('Label'),
-            pressElevation: elevation,
-            onPressed: () {
-              
-            },
-          ),
+          child: inputChip,
         ),
       );
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
-    await tester.press(find.byType(InputChip));
+    expect(inputChip.pressElevation, 8.0);
 
-    final RenderBox materialBox = tester.firstRenderObject<RenderBox>(
-      find.descendant(
-        of: find.byType(RawChip),
-        matching: find.byType(CustomPaint),
-      ),
-    );
+    inputChip =
+      const InputChip(
+        label: const Text('Label'),
+        pressElevation: 12.0,
+      );
 
-    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+    await tester.pumpWidget(buildChip(chipTheme));
+    await tester.pumpAndSettle();
+    expect(inputChip.pressElevation, 12.0);
   });
 }
