@@ -141,7 +141,26 @@ BuildApp() {
     fi
     StreamOutput "done"
 
-    RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
+    local app_framework="${build_dir}/aot/App.framework"
+
+    RunCommand cp -r -- "${app_framework}" "${derived_dir}"
+
+    StreamOutput " ├─Generating dSYM file..."
+    RunCommand xcrun dsymutil -o "${build_dir}/aot/App.dSYM" "${app_framework}/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
+    StreamOutput " ├─Stripping debug symbols..."
+    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to strip ${derived_dir}/App.framework/App."
+      exit -1
+    fi
+    StreamOutput "done"
+
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
 
