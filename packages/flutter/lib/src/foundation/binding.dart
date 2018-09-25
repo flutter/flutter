@@ -7,6 +7,7 @@ import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 
+import 'package:flutter/src/foundation/logging.dart';
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
@@ -144,7 +145,32 @@ abstract class BindingBase {
           };
         }
       );
-      return true;
+      registerServiceExtension(
+        name: 'logging',
+        callback: (Map<String, Object> parameters) async {
+          final String channel = parameters['channel'];
+          if (channel != null) {
+            final LoggingChannel registeredChannel = LoggingService.instance.getRegisteredChannel(channel);
+            if (registeredChannel != null) {
+              debugEnableLogging(registeredChannel, parameters['enable'] == 'true');
+            }
+          }
+          return <String, dynamic>{};
+        }
+      );
+      registerServiceExtension(
+        name: 'loggingChannels',
+        callback: (Map<String, dynamic> parameters) async {
+          final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+          for (LoggingChannel channel in LoggingService.instance.debugLogEventChannels) {
+            map[channel.name] = <String, String>{
+              'enabled': debugShouldLogEvent(channel).toString(),
+              'description': channel.description,
+            };
+          }
+          return <String, Map<String,Map<String, String>>>{'value': map };
+        }
+      );
     }());
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
   }
