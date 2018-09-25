@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'app.dart' show CupertinoApp;
 import 'route.dart';
 
 /// A single tab view with its own [Navigator] state and history.
@@ -115,7 +114,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void initState() {
     super.initState();
-    _heroController = CupertinoApp.createCupertinoHeroController();
+    _heroController = HeroController(); // Linear tweening.
     _updateObservers();
   }
 

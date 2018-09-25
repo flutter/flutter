@@ -67,9 +67,9 @@ void main() {
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         title: 'flutter_tester',
-        home: Material(child: AboutListTile()),
+        home: const Material(child: AboutListTile()),
       ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
@@ -89,8 +89,8 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
+      MaterialApp(
+        home: const Center(
           child: LicensePage(),
         ),
       ),

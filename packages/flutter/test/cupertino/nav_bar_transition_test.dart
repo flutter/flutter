@@ -14,8 +14,8 @@ Future<void> startTransitionBetween(
   String toTitle,
 }) async {
   await tester.pumpWidget(
-    const CupertinoApp(
-      home: Placeholder(),
+    CupertinoApp(
+      home: const Placeholder(),
     ),
   );
 
@@ -195,8 +195,8 @@ void main() {
   testWidgets('Fullscreen dialogs do not create heroes',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Placeholder(),
+      CupertinoApp(
+        home: const Placeholder(),
       ),
     );
 

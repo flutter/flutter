@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 void main() {
   testWidgets('no overlap with floating action button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           floatingActionButton: FloatingActionButton(
             onPressed: null,
           ),
@@ -95,8 +95,8 @@ void main() {
   // _BottomAppBarClipper will try an illegal downcast.
   testWidgets('toggle shape to null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar: BottomAppBar(
             shape: RectangularNotch(),
           ),
@@ -105,8 +105,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar: BottomAppBar(
             shape: null,
           ),
@@ -115,8 +115,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar: BottomAppBar(
             shape: RectangularNotch(),
           ),
@@ -127,8 +127,8 @@ void main() {
 
   testWidgets('no notch when notch param is null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar: ShapeListener(BottomAppBar(
             shape: null,
           )),
@@ -159,8 +159,8 @@ void main() {
 
   testWidgets('notch no margin', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
               child: SizedBox(height: 100.0),
@@ -211,8 +211,8 @@ void main() {
 
   testWidgets('notch with margin', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar: ShapeListener(
             BottomAppBar(
               child: SizedBox(height: 100.0),
@@ -263,8 +263,8 @@ void main() {
 
   testWidgets('observes safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: MediaQuery(
+      MaterialApp(
+        home: const MediaQuery(
           data: MediaQueryData(
             padding: EdgeInsets.all(50.0),
           ),
@@ -287,8 +287,8 @@ void main() {
 
   testWidgets('clipBehavior is propagated', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar:
               BottomAppBar(
                 child: SizedBox(height: 100.0),
@@ -303,8 +303,8 @@ void main() {
     expect(physicalShape.clipBehavior, Clip.none);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomNavigationBar:
           BottomAppBar(
             child: SizedBox(height: 100.0),

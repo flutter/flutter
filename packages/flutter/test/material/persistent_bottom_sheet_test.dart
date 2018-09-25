@@ -180,8 +180,8 @@ void main() {
 
     // Remove the persistent bottomSheet
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
+      MaterialApp(
+        home: const Scaffold(
           bottomSheet: null,
           body: Placeholder(),
         ),

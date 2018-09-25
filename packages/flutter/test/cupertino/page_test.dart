@@ -146,8 +146,8 @@ void main() {
 
   testWidgets('test iOS fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: Center(child: Text('Page 1')),
+      CupertinoApp(
+        home: const Center(child: Text('Page 1')),
       ),
     );
 

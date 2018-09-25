@@ -106,8 +106,8 @@ void main() {
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: RaisedButton(
               onPressed: null,
@@ -149,8 +149,8 @@ void main() {
 
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: RaisedButton(
               onPressed: null,
@@ -212,8 +212,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     const String buttonText = 'A button covered by dialog overlay';
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: RaisedButton(
               onPressed: null,

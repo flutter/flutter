@@ -37,8 +37,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: TextField(
               autofocus: true,
@@ -59,8 +59,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: TextField(),
           ),
@@ -93,8 +93,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: TextField(
               autofocus: true,
@@ -211,8 +211,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        home: const Material(
           child: Center(
             child: TextField(
               decoration: null
