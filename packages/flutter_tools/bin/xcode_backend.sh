@@ -145,7 +145,7 @@ BuildApp() {
     StreamOutput " ├─Generating dSYM file..."
     RunCommand xcrun dsymutil -o "${build_dir}/aot/App.dSYM" "${app_framework}/App"
     if [[ $? -ne 0 ]]; then
-      EchoError "Failed to generate dSYM file for ${app_framework}/App."
+      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
       exit -1
     fi
     StreamOutput "done"
