@@ -10,29 +10,29 @@ import 'package:flutter/material.dart';
 
 bool refreshCalled = false;
 
-Future<Null> refresh() {
+Future<void> refresh() {
   refreshCalled = true;
-  return new Future<Null>.value();
+  return Future<void>.value();
 }
 
-Future<Null> holdRefresh() {
+Future<void> holdRefresh() {
   refreshCalled = true;
-  return new Completer<Null>().future;
+  return Completer<void>().future;
 }
 
 void main() {
   testWidgets('RefreshIndicator', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
+              return SizedBox(
                 height: 200.0,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),
@@ -51,20 +51,20 @@ void main() {
   testWidgets('Refresh Indicator - nested', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
           onRefresh: refresh,
-          child: new SingleChildScrollView(
+          child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: new Container(
+            child: Container(
               width: 600.0,
-              child: new ListView(
+              child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-                  return new SizedBox(
+                  return SizedBox(
                     height: 200.0,
-                    child: new Text(item),
+                    child: Text(item),
                   );
                 }).toList(),
               ),
@@ -93,16 +93,16 @@ void main() {
   testWidgets('RefreshIndicator - bottom', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -121,15 +121,15 @@ void main() {
   testWidgets('RefreshIndicator - top - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: holdRefresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -147,16 +147,16 @@ void main() {
   testWidgets('RefreshIndicator - bottom - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: holdRefresh,
-          child: new ListView(
+          child: ListView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -174,15 +174,15 @@ void main() {
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -202,15 +202,15 @@ void main() {
   testWidgets('RefreshIndicator - not enough', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -229,15 +229,15 @@ void main() {
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: holdRefresh, // this one never returns
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -248,7 +248,7 @@ void main() {
     bool completed = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -260,7 +260,7 @@ void main() {
     refreshCalled = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -272,15 +272,15 @@ void main() {
   testWidgets('RefreshIndicator - show - fast', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -291,7 +291,7 @@ void main() {
     bool completed = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -303,7 +303,7 @@ void main() {
     refreshCalled = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed = true; });
+      .then<void>((void value) { completed = true; });
     await tester.pump();
     expect(completed, false);
     await tester.pump(const Duration(seconds: 1));
@@ -316,15 +316,15 @@ void main() {
   testWidgets('RefreshIndicator - show - fast - twice', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
-              const SizedBox(
+              SizedBox(
                 height: 200.0,
-                child: const Text('X'),
+                child: Text('X'),
               ),
             ],
           ),
@@ -335,11 +335,11 @@ void main() {
     bool completed1 = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed1 = true; });
+      .then<void>((void value) { completed1 = true; });
     bool completed2 = false;
     tester.state<RefreshIndicatorState>(find.byType(RefreshIndicator))
       .show()
-      .then<Null>((Null value) { completed2 = true; });
+      .then<void>((void value) { completed2 = true; });
     await tester.pump();
     expect(completed1, false);
     expect(completed2, false);
@@ -354,18 +354,18 @@ void main() {
   testWidgets('RefreshIndicator - onRefresh asserts', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: () {
             refreshCalled = true;
-            // Missing a returned Future value here.
+            return null; // Missing a returned Future value here, should cause framework to throw.
           },
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
+              return SizedBox(
                 height: 200.0,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),
@@ -384,19 +384,19 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     refreshCalled = false;
     double lastScrollOffset;
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             controller: controller,
             physics: const AlwaysScrollableScrollPhysics(),
             children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
+              return SizedBox(
                 height: 200.0,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),

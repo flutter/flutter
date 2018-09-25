@@ -40,5 +40,16 @@
   "popupMenuLabel": "Menú emergente",
   "dialogLabel": "Cuadro de diálogo",
   "alertDialogLabel": "Alerta",
-  "searchFieldLabel": "Buscar"
+  "searchFieldLabel": "Buscar",
+  "reorderItemToStart": "Mover al principio",
+  "reorderItemToEnd": "Mover al final",
+  "reorderItemUp": "Mover hacia arriba",
+  "reorderItemDown": "Mover hacia abajo",
+  "reorderItemLeft": "Mover hacia la izquierda",
+  "reorderItemRight": "Mover hacia la derecha",
+  "expandedIconTapHint": "Ocultar",
+  "collapsedIconTapHint": "Mostrar",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Queda 1 carácter.",
+  "remainingTextFieldCharacterCountOther": "Quedan $remainingCount caracteres"
 }

@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -25,7 +24,7 @@ const String frameworkChannel = 'omega';
 
 void main() {
   group('create', () {
-    Directory temp;
+    Directory tempDir;
     Directory projectDir;
     FlutterVersion mockFlutterVersion;
     LoggingProcessManager loggingProcessManager;
@@ -35,19 +34,14 @@ void main() {
     });
 
     setUp(() {
-      loggingProcessManager = new LoggingProcessManager();
-      temp = fs.systemTempDirectory.createTempSync('flutter_tools');
-      projectDir = temp.childDirectory('flutter_project');
-      mockFlutterVersion = new MockFlutterVersion();
+      loggingProcessManager = LoggingProcessManager();
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+      projectDir = tempDir.childDirectory('flutter_project');
+      mockFlutterVersion = MockFlutterVersion();
     });
 
     tearDown(() {
-      try {
-        temp.deleteSync(recursive: true);
-      } on FileSystemException catch (e) {
-        // ignore errors deleting the temporary directory
-        print('Ignored exception during tearDown: $e');
-      }
+      tryToDelete(tempDir);
     });
 
     // Verify that we create a project that is well-formed.
@@ -245,7 +239,7 @@ void main() {
       when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
       when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
@@ -309,7 +303,7 @@ void main() {
     testUsingContext('can re-gen over existing project', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
@@ -344,8 +338,9 @@ void main() {
       );
       projectDir.childDirectory('ios').deleteSync(recursive: true);
       await _createProject(projectDir, <String>['--no-pub'], <String>[]);
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await new FlutterProject(projectDir).ios.productBundleIdentifier(),
+        project.ios.productBundleIdentifier,
         'com.bar.foo.flutterProject',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -370,8 +365,9 @@ void main() {
           'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
         ],
       );
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
       expect(
-        await new FlutterProject(projectDir).example.ios.productBundleIdentifier(),
+        project.example.ios.productBundleIdentifier,
         'com.bar.foo.flutterProjectExample',
       );
     }, timeout: allowForCreateFlutterProject);
@@ -398,7 +394,7 @@ void main() {
     testUsingContext('produces sensible error message', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       expect(
@@ -410,7 +406,7 @@ void main() {
     // Verify that we fail with an error code when the file exists.
     testUsingContext('fails when file exists', () async {
       Cache.flutterRoot = '../..';
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       final File existingFile = fs.file('${projectDir.path.toString()}/bad');
       if (!existingFile.existsSync())
@@ -423,7 +419,7 @@ void main() {
 
     testUsingContext('fails when invalid package name', () async {
       Cache.flutterRoot = '../..';
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       expect(
         runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
@@ -434,7 +430,7 @@ void main() {
     testUsingContext('invokes pub offline when requested', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
@@ -450,7 +446,7 @@ void main() {
     testUsingContext('invokes pub online when offline not requested', () async {
       Cache.flutterRoot = '../..';
 
-      final CreateCommand command = new CreateCommand();
+      final CreateCommand command = CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
@@ -469,7 +465,7 @@ Future<Null> _createProject(
     Directory dir, List<String> createArgs, List<String> expectedPaths,
     { List<String> unexpectedPaths = const <String>[], bool plugin = false}) async {
   Cache.flutterRoot = '../..';
-  final CreateCommand command = new CreateCommand();
+  final CreateCommand command = CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
   final List<String> args = <String>['create'];
   args.addAll(createArgs);
@@ -563,7 +559,7 @@ class LoggingProcessManager extends LocalProcessManager {
       Map<String, String> environment,
       bool includeParentEnvironment = true,
       bool runInShell = false,
-      ProcessStartMode mode = ProcessStartMode.NORMAL, // ignore: deprecated_member_use
+      ProcessStartMode mode = ProcessStartMode.normal,
     }) {
     commands.add(command);
     return super.start(

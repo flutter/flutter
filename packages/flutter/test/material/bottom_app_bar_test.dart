@@ -9,14 +9,14 @@ import 'package:flutter/rendering.dart';
 void main() {
   testWidgets('no overlap with floating action button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
           ),
-          bottomNavigationBar: const ShapeListener(
-            const BottomAppBar(
-              child: const SizedBox(height: 100.0),
+          bottomNavigationBar: ShapeListener(
+            BottomAppBar(
+              child: SizedBox(height: 100.0),
             )
           ),
         ),
@@ -25,7 +25,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = new Path()
+    final Path expectedPath = Path()
       ..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
@@ -40,16 +40,16 @@ void main() {
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
+      MaterialApp(
+        home: Builder(
           builder: (BuildContext context) {
-            return new Theme(
+            return Theme(
               data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
-                floatingActionButton: const FloatingActionButton(
+                floatingActionButton: FloatingActionButton(
                   onPressed: null,
                 ),
-                bottomNavigationBar: const BottomAppBar(),
+                bottomNavigationBar: BottomAppBar(),
               ),
             );
           }
@@ -65,17 +65,17 @@ void main() {
 
   testWidgets('color overrides theme color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
+      MaterialApp(
+        home: Builder(
           builder: (BuildContext context) {
-            return new Theme(
+            return Theme(
               data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
-                floatingActionButton: const FloatingActionButton(
+                floatingActionButton: FloatingActionButton(
                   onPressed: null,
                 ),
-                bottomNavigationBar: const BottomAppBar(
-                  color: const Color(0xff0000ff)
+                bottomNavigationBar: BottomAppBar(
+                  color: Color(0xff0000ff)
                 ),
               ),
             );
@@ -95,19 +95,19 @@ void main() {
   // _BottomAppBarClipper will try an illegal downcast.
   testWidgets('toggle shape to null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const BottomAppBar(
-            shape: const RectangularNotch(),
+          bottomNavigationBar: BottomAppBar(
+            shape: RectangularNotch(),
           ),
         ),
       ),
     );
 
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const BottomAppBar(
+          bottomNavigationBar: BottomAppBar(
             shape: null,
           ),
         ),
@@ -115,10 +115,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const BottomAppBar(
-            shape: const RectangularNotch(),
+          bottomNavigationBar: BottomAppBar(
+            shape: RectangularNotch(),
           ),
         ),
       ),
@@ -127,14 +127,14 @@ void main() {
 
   testWidgets('no notch when notch param is null', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const ShapeListener(const BottomAppBar(
+          bottomNavigationBar: ShapeListener(BottomAppBar(
             shape: null,
           )),
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
-            child: const Icon(Icons.add),
+            child: Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
@@ -143,7 +143,7 @@ void main() {
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
     final RenderBox renderBox = tester.renderObject(find.byType(BottomAppBar));
-    final Path expectedPath = new Path()
+    final Path expectedPath = Path()
       ..addRect(Offset.zero & renderBox.size);
 
     final Path actualPath = shapeListenerState.cache.value;
@@ -159,18 +159,18 @@ void main() {
 
   testWidgets('notch no margin', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const ShapeListener(
-            const BottomAppBar(
-              child: const SizedBox(height: 100.0),
-              shape: const RectangularNotch(),
+          bottomNavigationBar: ShapeListener(
+            BottomAppBar(
+              child: SizedBox(height: 100.0),
+              shape: RectangularNotch(),
               notchMargin: 0.0,
             )
           ),
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
-            child: const Icon(Icons.add),
+            child: Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
@@ -187,7 +187,7 @@ void main() {
     final double fabRight = fabLeft + fabSize.width;
     final double fabBottom = fabSize.height / 2.0;
 
-    final Path expectedPath = new Path()
+    final Path expectedPath = Path()
       ..moveTo(0.0, 0.0)
       ..lineTo(fabLeft, 0.0)
       ..lineTo(fabLeft, fabBottom)
@@ -211,18 +211,18 @@ void main() {
 
   testWidgets('notch with margin', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const Scaffold(
-          bottomNavigationBar: const ShapeListener(
-            const BottomAppBar(
-              child: const SizedBox(height: 100.0),
-              shape: const RectangularNotch(),
+          bottomNavigationBar: ShapeListener(
+            BottomAppBar(
+              child: SizedBox(height: 100.0),
+              shape: RectangularNotch(),
               notchMargin: 6.0,
             )
           ),
-          floatingActionButton: const FloatingActionButton(
+          floatingActionButton: FloatingActionButton(
             onPressed: null,
-            child: const Icon(Icons.add),
+            child: Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         ),
@@ -239,7 +239,7 @@ void main() {
     final double fabRight = fabLeft + fabSize.width + 6.0;
     final double fabBottom = 6.0 + fabSize.height / 2.0;
 
-    final Path expectedPath = new Path()
+    final Path expectedPath = Path()
       ..moveTo(0.0, 0.0)
       ..lineTo(fabLeft, 0.0)
       ..lineTo(fabLeft, fabBottom)
@@ -263,15 +263,15 @@ void main() {
 
   testWidgets('observes safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: const MediaQuery(
-          data: const MediaQueryData(
-            padding: const EdgeInsets.all(50.0),
+          data: MediaQueryData(
+            padding: EdgeInsets.all(50.0),
           ),
-          child: const Scaffold(
-            bottomNavigationBar: const BottomAppBar(
-              child: const Center(
-                child: const Text('safe'),
+          child: Scaffold(
+            bottomNavigationBar: BottomAppBar(
+              child: Center(
+                child: Text('safe'),
               ),
             ),
           ),
@@ -283,6 +283,41 @@ void main() {
       tester.getBottomLeft(find.widgetWithText(Center, 'safe')),
       const Offset(50.0, 550.0),
     );
+  });
+
+  testWidgets('clipBehavior is propagated', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar:
+              BottomAppBar(
+                child: SizedBox(height: 100.0),
+                shape: RectangularNotch(),
+                notchMargin: 0.0,
+              ),
+        ),
+      ),
+    );
+
+    PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape));
+    expect(physicalShape.clipBehavior, Clip.none);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar:
+          BottomAppBar(
+            child: SizedBox(height: 100.0),
+            shape: RectangularNotch(),
+            notchMargin: 0.0,
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+          ),
+        ),
+      ),
+    );
+
+    physicalShape = tester.widget(find.byType(PhysicalShape));
+    expect(physicalShape.clipBehavior, Clip.antiAliasWithSaveLayer);
   });
 }
 
@@ -328,14 +363,14 @@ class ShapeListener extends StatefulWidget {
   final Widget child;
 
   @override
-  State createState() => new ShapeListenerState();
+  State createState() => ShapeListenerState();
 
 }
 
 class ShapeListenerState extends State<ShapeListener> {
   @override
   Widget build(BuildContext context) {
-    return new CustomPaint(
+    return CustomPaint(
       child: widget.child,
       painter: cache
     );
@@ -346,7 +381,7 @@ class ShapeListenerState extends State<ShapeListener> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    cache = new ClipCachePainter(context);
+    cache = ClipCachePainter(context);
   }
 
 }
@@ -356,7 +391,7 @@ class RectangularNotch implements NotchedShape {
 
   @override
   Path getOuterPath(Rect host, Rect guest) {
-    return new Path()
+    return Path()
       ..moveTo(host.left, host.top)
       ..lineTo(guest.left, host.top)
       ..lineTo(guest.left, guest.bottom)

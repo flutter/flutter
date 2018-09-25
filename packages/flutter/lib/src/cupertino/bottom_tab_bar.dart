@@ -11,8 +11,8 @@ import 'colors.dart';
 // Standard iOS 10 tab bar height.
 const double _kTabBarHeight = 50.0;
 
-const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
-const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
+const Color _kDefaultTabBarBackgroundColor = Color(0xCCF8F8F8);
+const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -99,10 +99,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
-    Widget result = new DecoratedBox(
-      decoration: new BoxDecoration(
+    Widget result = DecoratedBox(
+      decoration: BoxDecoration(
         border: const Border(
-          top: const BorderSide(
+          top: BorderSide(
             color: _kDefaultTabBarBorderColor,
             width: 0.0, // One physical pixel.
             style: BorderStyle.solid,
@@ -111,24 +111,24 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: backgroundColor,
       ),
       // TODO(xster): allow icons-only versions of the tab bar too.
-      child: new SizedBox(
+      child: SizedBox(
         height: _kTabBarHeight + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
-          data: new IconThemeData(
+          data: IconThemeData(
             color: inactiveColor,
             size: iconSize,
           ),
-          child: new DefaultTextStyle( // Default with the inactive state.
-            style: new TextStyle(
+          child: DefaultTextStyle( // Default with the inactive state.
+            style: TextStyle(
               fontFamily: '.SF UI Text',
               fontSize: 10.0,
               letterSpacing: 0.1,
               fontWeight: FontWeight.w400,
               color: inactiveColor,
             ),
-            child: new Padding(
-              padding: new EdgeInsets.only(bottom: bottomPadding),
-              child: new Row(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: bottomPadding),
+              child: Row(
                 // Align bottom since we want the labels to be aligned.
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: _buildTabItems(),
@@ -141,9 +141,9 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
     if (!opaque) {
       // For non-opaque backgrounds, apply a blur effect.
-      result = new ClipRect(
-        child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      result = ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: result,
         ),
       );
@@ -156,25 +156,31 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final List<Widget> result = <Widget>[];
 
     for (int index = 0; index < items.length; index += 1) {
+      final bool active = index == currentIndex;
       result.add(
         _wrapActiveItem(
-          new Expanded(
-            child: new GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap == null ? null : () { onTap(index); },
-              child: new Padding(
-                padding: const EdgeInsets.only(bottom: 4.0),
-                child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget> [
-                    new Expanded(child: new Center(child: items[index].icon)),
-                    items[index].title,
-                  ],
+          Expanded(
+            child: Semantics(
+              selected: active,
+              // TODO(xster): This needs localization support. https://github.com/flutter/flutter/issues/13452
+              hint: 'tab, ${index + 1} of ${items.length}',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onTap == null ? null : () { onTap(index); },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget> [
+                      Expanded(child: Center(child: items[index].icon)),
+                      items[index].title,
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          active: index == currentIndex,
+          active: active,
         ),
       );
     }
@@ -183,14 +189,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(Widget item, { bool active }) {
+  Widget _wrapActiveItem(Widget item, { @required bool active }) {
     if (!active)
       return item;
 
     return IconTheme.merge(
-      data: new IconThemeData(color: activeColor),
+      data: IconThemeData(color: activeColor),
       child: DefaultTextStyle.merge(
-        style: new TextStyle(color: activeColor),
+        style: TextStyle(color: activeColor),
         child: item,
       ),
     );
@@ -208,7 +214,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     int currentIndex,
     ValueChanged<int> onTap,
   }) {
-    return new CupertinoTabBar(
+    return CupertinoTabBar(
        key: key ?? this.key,
        items: items ?? this.items,
        backgroundColor: backgroundColor ?? this.backgroundColor,

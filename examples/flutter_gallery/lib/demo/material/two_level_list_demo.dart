@@ -9,23 +9,23 @@ class TwoLevelListDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Expand/collapse list control')),
-      body: new ListView(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Expand/collapse list control')),
+      body: ListView(
         children: <Widget>[
-          const ListTile(title: const Text('Top')),
-          new ExpansionTile(
+          const ListTile(title: Text('Top')),
+          ExpansionTile(
              title: const Text('Sublist'),
              backgroundColor: Theme.of(context).accentColor.withOpacity(0.025),
              children: const <Widget>[
-               const ListTile(title: const Text('One')),
-               const ListTile(title: const Text('Two')),
+               ListTile(title: Text('One')),
+               ListTile(title: Text('Two')),
                // https://en.wikipedia.org/wiki/Free_Four
-               const ListTile(title: const Text('Free')),
-               const ListTile(title: const Text('Four'))
+               ListTile(title: Text('Free')),
+               ListTile(title: Text('Four'))
              ]
           ),
-           const ListTile(title: const Text('Bottom'))
+           const ListTile(title: Text('Bottom'))
         ]
       )
     );

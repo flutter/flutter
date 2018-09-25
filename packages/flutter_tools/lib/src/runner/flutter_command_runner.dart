@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:completion/completion.dart';
 import 'package:file/file.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -145,7 +146,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
 
   @override
   String get usageFooter {
@@ -178,6 +179,29 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
+  ArgResults parse(Iterable<String> args) {
+    try {
+      // This is where the CommandRunner would call argParser.parse(args). We
+      // override this function so we can call tryArgsCompletion instead, so the
+      // completion package can interrogate the argParser, and as part of that,
+      // it calls argParser.parse(args) itself and returns the result.
+      return tryArgsCompletion(args, argParser);
+    } on ArgParserException catch (error) {
+      if (error.commands.isEmpty) {
+        usageException(error.message);
+      }
+
+      Command<Null> command = commands[error.commands.first];
+      for (String commandName in error.commands.skip(1)) {
+        command = command.subcommands[commandName];
+      }
+
+      command.usageException(error.message);
+      return null;
+    }
+  }
+
+  @override
   Future<Null> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
     // TODO(ianh): Move this to the Build command itself somehow.
@@ -190,13 +214,13 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   @override
   Future<Null> runCommand(ArgResults topLevelResults) async {
     final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
-      Flags: new Flags(topLevelResults),
+      Flags: Flags(topLevelResults),
     };
 
     // Check for verbose.
     if (topLevelResults['verbose']) {
       // Override the logger.
-      contextOverrides[Logger] = new VerboseLogger(logger);
+      contextOverrides[Logger] = VerboseLogger(logger);
     }
 
     if (topLevelResults['show-test-device'] ||
@@ -209,14 +233,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (topLevelResults['bug-report']) {
       // --bug-report implies --record-to=<tmp_path>
-      final Directory tmp = await const LocalFileSystem()
+      final Directory tempDir = const LocalFileSystem()
           .systemTempDirectory
-          .createTemp('flutter_tools_');
-      recordTo = tmp.path;
+          .createTempSync('flutter_tools_bug_report.');
+      recordTo = tempDir.path;
 
       // Record the arguments that were used to invoke this runner.
-      final File manifest = tmp.childFile('MANIFEST.txt');
-      final StringBuffer buffer = new StringBuffer()
+      final File manifest = tempDir.childFile('MANIFEST.txt');
+      final StringBuffer buffer = StringBuffer()
         ..writeln('# arguments')
         ..writeln(topLevelResults.arguments)
         ..writeln()
@@ -227,13 +251,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       // ZIP the recording up once the recording has been serialized.
       addShutdownHook(() async {
         final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
-        os.zip(tmp, zipFile);
+        os.zip(tempDir, zipFile);
         printStatus(
-            'Bug report written to ${zipFile.basename}.\n'
-            'Note that this bug report contains local paths, device '
-            'identifiers, and log snippets.');
+          'Bug report written to ${zipFile.basename}.\n'
+          'Warning: this bug report contains local paths, device '
+          'identifiers, and log snippets.'
+        );
       }, ShutdownStage.POST_PROCESS_RECORDING);
-      addShutdownHook(() => tmp.delete(recursive: true), ShutdownStage.CLEANUP);
+      addShutdownHook(() => tempDir.delete(recursive: true), ShutdownStage.CLEANUP);
     }
 
     assert(recordTo == null || replayFrom == null);
@@ -277,7 +302,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     await context.run<Null>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
-        return new MapEntry<Type, Generator>(type, () => value);
+        return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
         logger.quiet = topLevelResults['quiet'];
@@ -335,7 +360,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        final Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        final Uri engineUri = PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         if (engineUri != null) {
           engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
           final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
@@ -389,7 +414,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
 
-    return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
+    return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
   static void initFlutterRoot() {
@@ -460,7 +485,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
-      final PackageMap packageMap = new PackageMap(kPackagesFileName);
+      final PackageMap packageMap = PackageMap(kPackagesFileName);
       final Uri flutterUri = packageMap.map['flutter'];
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {

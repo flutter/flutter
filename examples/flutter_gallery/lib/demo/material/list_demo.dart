@@ -24,11 +24,11 @@ class ListDemo extends StatefulWidget {
   static const String routeName = '/material/list';
 
   @override
-  _ListDemoState createState() => new _ListDemoState();
+  _ListDemoState createState() => _ListDemoState();
 }
 
 class _ListDemoState extends State<ListDemo> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
   _MaterialListType _itemType = _MaterialListType.threeLine;
@@ -50,52 +50,52 @@ class _ListDemoState extends State<ListDemo> {
 
   void _showConfigurationSheet() {
     final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
-      return new Container(
+      return Container(
         decoration: const BoxDecoration(
-          border: const Border(top: const BorderSide(color: Colors.black26)),
+          border: Border(top: BorderSide(color: Colors.black26)),
         ),
-        child: new ListView(
+        child: ListView(
           shrinkWrap: true,
           primary: false,
           children: <Widget>[
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('One-line'),
-                trailing: new Radio<_MaterialListType>(
+                trailing: Radio<_MaterialListType>(
                   value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 )
               ),
             ),
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('Two-line'),
-                trailing: new Radio<_MaterialListType>(
+                trailing: Radio<_MaterialListType>(
                   value: _MaterialListType.twoLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 )
               ),
             ),
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('Three-line'),
-                trailing: new Radio<_MaterialListType>(
+                trailing: Radio<_MaterialListType>(
                   value: _MaterialListType.threeLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
                 ),
               ),
             ),
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('Show avatar'),
-                trailing: new Checkbox(
+                trailing: Checkbox(
                   value: _showAvatars,
                   onChanged: (bool value) {
                     setState(() {
@@ -106,11 +106,11 @@ class _ListDemoState extends State<ListDemo> {
                 ),
               ),
             ),
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('Show icon'),
-                trailing: new Checkbox(
+                trailing: Checkbox(
                   value: _showIcons,
                   onChanged: (bool value) {
                     setState(() {
@@ -121,11 +121,11 @@ class _ListDemoState extends State<ListDemo> {
                 ),
               ),
             ),
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('Show dividers'),
-                trailing: new Checkbox(
+                trailing: Checkbox(
                   value: _showDividers,
                   onChanged: (bool value) {
                     setState(() {
@@ -136,11 +136,11 @@ class _ListDemoState extends State<ListDemo> {
                 ),
               ),
             ),
-            new MergeSemantics(
-              child: new ListTile(
+            MergeSemantics(
+              child: ListTile(
                 dense: true,
                 title: const Text('Dense layout'),
-                trailing: new Checkbox(
+                trailing: Checkbox(
                   value: _dense,
                   onChanged: (bool value) {
                     setState(() {
@@ -178,14 +178,14 @@ class _ListDemoState extends State<ListDemo> {
         'Even more additional list item information appears on line three.',
       );
     }
-    return new MergeSemantics(
-      child: new ListTile(
+    return MergeSemantics(
+      child: ListTile(
         isThreeLine: _itemType == _MaterialListType.threeLine,
         dense: _dense,
-        leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new Text(item))) : null,
-        title: new Text('This item represents $item.'),
+        leading: _showAvatars ? ExcludeSemantics(child: CircleAvatar(child: Text(item))) : null,
+        title: Text('This item represents $item.'),
         subtitle: secondary,
-        trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+        trailing: _showIcons ? Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
       ),
     );
   }
@@ -211,12 +211,12 @@ class _ListDemoState extends State<ListDemo> {
     if (_showDividers)
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
-    return new Scaffold(
+    return Scaffold(
       key: scaffoldKey,
-      appBar: new AppBar(
-        title: new Text('Scrolling list\n$itemTypeText$layoutText'),
+      appBar: AppBar(
+        title: Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',
             onPressed: () {
@@ -226,16 +226,20 @@ class _ListDemoState extends State<ListDemo> {
               });
             },
           ),
-          new IconButton(
-            icon: const Icon(Icons.more_vert),
+          IconButton(
+            icon: Icon(
+              Theme.of(context).platform == TargetPlatform.iOS
+                  ? Icons.more_horiz
+                  : Icons.more_vert,
+            ),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
           ),
         ],
       ),
-      body: new Scrollbar(
-        child: new ListView(
-          padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
+      body: Scrollbar(
+        child: ListView(
+          padding: EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
           children: listTiles.toList(),
         ),
       ),

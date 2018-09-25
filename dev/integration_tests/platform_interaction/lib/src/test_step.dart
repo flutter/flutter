@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 
 enum TestStatus { ok, pending, failed, complete }
 
-typedef Future<TestStepResult> TestStep();
+typedef TestStep = Future<TestStepResult> Function();
 
 const String nothing = '-';
 
 class TestStepResult {
-  static const TextStyle bold = const TextStyle(fontWeight: FontWeight.bold);
-  static const TestStepResult complete = const TestStepResult(
+  static const TextStyle bold = TextStyle(fontWeight: FontWeight.bold);
+  static const TestStepResult complete = TestStepResult(
     'Test complete',
     nothing,
     TestStatus.complete,
@@ -46,15 +46,15 @@ class TestStepResult {
   final TestStatus status;
 
   Widget asWidget(BuildContext context) {
-    return new Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Text('Step: $name', style: bold),
-        new Text(description),
+        Text('Step: $name', style: bold),
+        Text(description),
         const Text(' '),
-        new Text(
+        Text(
           status.toString().substring('TestStatus.'.length),
-          key: new ValueKey<String>(
+          key: ValueKey<String>(
               status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
         ),

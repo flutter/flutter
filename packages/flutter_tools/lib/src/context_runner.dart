@@ -19,7 +19,6 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -38,7 +37,7 @@ import 'version.dart';
 
 Future<T> runInContext<T>(
   FutureOr<T> runner(), {
-  Map<Type, dynamic> overrides,
+  Map<Type, Generator> overrides,
 }) async {
   return await context.run<T>(
     name: 'global fallbacks',
@@ -47,35 +46,38 @@ Future<T> runInContext<T>(
     fallbacks: <Type, Generator>{
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
-      AndroidWorkflow: () => new AndroidWorkflow(),
-      Artifacts: () => new CachedArtifacts(),
+      AndroidWorkflow: () => AndroidWorkflow(),
+      AndroidValidator: () => AndroidValidator(),
+      Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
-      Cache: () => new Cache(),
+      Cache: () => Cache(),
       Clock: () => const Clock(),
-      CocoaPods: () => new CocoaPods(),
-      Config: () => new Config(),
-      DevFSConfig: () => new DevFSConfig(),
-      DeviceManager: () => new DeviceManager(),
+      CocoaPods: () => CocoaPods(),
+      CocoaPodsValidator: () => const CocoaPodsValidator(),
+      Config: () => Config(),
+      DevFSConfig: () => DevFSConfig(),
+      DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
-      EmulatorManager: () => new EmulatorManager(),
+      EmulatorManager: () => EmulatorManager(),
       Flags: () => const EmptyFlags(),
-      FlutterVersion: () => new FlutterVersion(const Clock()),
+      FlutterVersion: () => FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),
-      HotRunnerConfig: () => new HotRunnerConfig(),
+      HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => const IMobileDevice(),
-      IOSSimulatorUtils: () => new IOSSimulatorUtils(),
+      IOSSimulatorUtils: () => IOSSimulatorUtils(),
       IOSWorkflow: () => const IOSWorkflow(),
+      IOSValidator: () => const IOSValidator(),
       KernelCompiler: () => const KernelCompiler(),
-      Logger: () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger(),
-      OperatingSystemUtils: () => new OperatingSystemUtils(),
-      PortScanner: () => const HostPortScanner(),
-      SimControl: () => new SimControl(),
+      Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
+      OperatingSystemUtils: () => OperatingSystemUtils(),
+      PlistBuddy: () => const PlistBuddy(),
+      SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
-      Usage: () => new Usage(),
-      Xcode: () => new Xcode(),
-      XcodeProjectInterpreter: () => new XcodeProjectInterpreter(),
+      Usage: () => Usage(),
+      Xcode: () => Xcode(),
+      XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },
   );
 }

@@ -18,11 +18,11 @@ class TestFocusable extends StatefulWidget {
   final bool autofocus;
 
   @override
-  TestFocusableState createState() => new TestFocusableState();
+  TestFocusableState createState() => TestFocusableState();
 }
 
 class TestFocusableState extends State<TestFocusable> {
-  final FocusNode focusNode = new FocusNode();
+  final FocusNode focusNode = FocusNode();
   bool _didAutofocus = false;
 
   @override
@@ -42,12 +42,12 @@ class TestFocusableState extends State<TestFocusable> {
 
   @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
+    return GestureDetector(
       onTap: () { FocusScope.of(context).requestFocus(focusNode); },
-      child: new AnimatedBuilder(
+      child: AnimatedBuilder(
         animation: focusNode,
         builder: (BuildContext context, Widget child) {
-          return new Text(focusNode.hasFocus ? widget.yes : widget.no, textDirection: TextDirection.ltr);
+          return Text(focusNode.hasFocus ? widget.yes : widget.no, textDirection: TextDirection.ltr);
         },
       ),
     );
@@ -57,13 +57,13 @@ class TestFocusableState extends State<TestFocusable> {
 void main() {
   testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: const <Widget>[
-          const TestFocusable(
+          TestFocusable(
             no: 'a',
             yes: 'A FOCUSED',
           ),
-          const TestFocusable(
+          TestFocusable(
             no: 'b',
             yes: 'B FOCUSED',
           ),
@@ -137,17 +137,17 @@ void main() {
   });
 
   testWidgets('Can move focus to scope', (WidgetTester tester) async {
-    final FocusScopeNode parentFocusScope = new FocusScopeNode();
-    final FocusScopeNode childFocusScope = new FocusScopeNode();
+    final FocusScopeNode parentFocusScope = FocusScopeNode();
+    final FocusScopeNode childFocusScope = FocusScopeNode();
 
     await tester.pumpWidget(
-      new FocusScope(
+      FocusScope(
         node: parentFocusScope,
         autofocus: true,
-        child: new Row(
+        child: Row(
           textDirection: TextDirection.ltr,
           children: const <Widget>[
-            const TestFocusable(
+            TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,
@@ -191,9 +191,9 @@ void main() {
     await tester.idle();
 
     await tester.pumpWidget(
-      new FocusScope(
+      FocusScope(
         node: parentFocusScope,
-        child: new Row(
+        child: Row(
           textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
@@ -201,9 +201,9 @@ void main() {
               yes: 'A FOCUSED',
               autofocus: false,
             ),
-            new FocusScope(
+            FocusScope(
               node: childFocusScope,
-              child: new Container(
+              child: Container(
                 width: 50.0,
                 height: 50.0,
               ),
@@ -217,12 +217,12 @@ void main() {
     expect(find.text('A FOCUSED'), findsNothing);
 
     await tester.pumpWidget(
-      new FocusScope(
+      FocusScope(
         node: parentFocusScope,
-        child: new Row(
+        child: Row(
           textDirection: TextDirection.ltr,
           children: const <Widget>[
-            const TestFocusable(
+            TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,

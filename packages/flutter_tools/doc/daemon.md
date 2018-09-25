@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A subset of the `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. Which commands/events are available in this mode is documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` and `flutter attach --machine` which allow IDEs and tools to launch and attach to flutter applications and interact to send commands like Hot Reload. The command and events that are available in these modes are documented at the bottom of this document.
 
 ## Protocol
 
@@ -76,24 +76,6 @@ It is up to the client to decide how best to display the message; for some clien
 
 ### app domain
 
-#### app.start
-
-The `start()` command is used to start applications.
-
-- `deviceId`: The device to launch the app on; this is required.
-- `projectDirectory`: The project directory; this is required. It is used to determine the application to start.
-- `startPaused`: Start the VM in a paused mode.
-- `route`: A string; the route to use when restoring the application.
-- `mode`: One of either `debug`, `profile`, or `release`.
-- `target`: Optional; the target file to start.
-- `hot`: Optional; whether to start the application using `--hot` mode
-
-On success, returns a map with the fields:
-- `appId`: this is is used when sending app events, and can be used by clients to stop the app (`app.stop`).
-- `deviceId`
-- `directory`
-- `supportsRestart`
-
 #### app.restart
 
 The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
@@ -110,15 +92,17 @@ The `callServiceExtension()` allows clients to make arbitrary calls to service p
 - `methodName`: the name of the service protocol extension to invoke; this is required.
 - `params`: an optional Map of parameters to pass to the service protocol extension.
 
+#### app.detach
+
+The `detach()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in detaching from an app without stopping it.
+
+- `appId`: the id of a previously started app; this is required.
+
 #### app.stop
 
 The `stop()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in stopping an app.
 
 - `appId`: the id of a previously started app; this is required.
-
-#### app.discover
-
-The `discover()` command takes one parameter, a `deviceId`. It returns a list of applications discovered on the device. Each application is represented by a map with two fields, an `id` - an Android or iOS application id - and an `observatoryDevicePort`. The `observatoryDevicePort` is the device port to connect to to debug the application. The port may first have to be made accessable via `device.forward`.
 
 #### Events
 
@@ -128,11 +112,11 @@ This is sent when an app is starting. The `params` field will be a map with the 
 
 #### app.debugPort
 
-This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field (`port` will be removed in a future version of the protocol). An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
+This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
 
 #### app.started
 
-This is sent once the application launch process is complete and the app is either paused before main() (if `startPaused` is true) or main() has begun running. The `params` field will be a map containing the field `appId`.
+This is sent once the application launch process is complete and the app is either paused before main() (if `startPaused` is true) or main() has begun running. When attaching, this even will be fired once attached. The `params` field will be a map containing the field `appId`.
 
 #### app.log
 
@@ -144,7 +128,7 @@ This is sent when an operation starts and again when it stops. When an operation
 
 #### app.stop
 
-This is sent when an app is stopped. The `params` field will be a map with the field `appId`.
+This is sent when an app is stopped or detached from. The `params` field will be a map with the field `appId`.
 
 ### device domain
 
@@ -188,13 +172,25 @@ Return a list of all available emulators. The `params` field will be a List; eac
 
 #### emulator.launch
 
-The `launch()` command takes allows launching an emulator/simulator by its `id`.
+The `launch()` command allows launching an emulator/simulator by its `id`.
 
 - `emulatorId`: the id of an emulator as returned by `getEmulators`.
 
-## Flutter Run --machine
+#### emulator.create
 
-When running `flutter run --machine` the following subset of the daemon is available:
+The `create()` command creates a new Android emulator with an optional `name`.
+
+- `name`: an optional name for this emulator
+
+The returned `params` will contain:
+
+- `success` - whether the emulator was successfully created
+- `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
+- `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
+
+## 'flutter run --machine' and 'flutter attach --machine'
+
+When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:
 
 ### daemon domain
 
@@ -214,6 +210,7 @@ The following subset of the app domain is available in `flutter run --machine`. 
 - Commands
   - [`restart`](#apprestart)
   - [`callServiceExtension`](#appcallserviceextension)
+  - [`detach`](#appdetach)
   - [`stop`](#appstop)
 - Events
   - [`start`](#appstart)
@@ -229,4 +226,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.4.2: Added `app.detach` command
+- 0.4.1: Added `flutter attach --machine`
+- 0.4.0: Added `emulator.create` command
 - 0.3.0: Added `daemon.connected` event at startup

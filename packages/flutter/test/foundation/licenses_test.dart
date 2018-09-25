@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 void main() {
   test('LicenseEntryWithLineBreaks - most cases', () {
@@ -34,10 +34,10 @@ G
  H
  H]
 \u0020\u0020
-IJ
-K
+I\u000cJ
+\u000cK
 K
-
+\u000c
 L
 L L
 L  L

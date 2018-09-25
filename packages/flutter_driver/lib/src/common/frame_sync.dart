@@ -30,7 +30,7 @@ class SetFrameSync extends Command {
 class SetFrameSyncResult extends Result {
   /// Deserializes this result from JSON.
   static SetFrameSyncResult fromJson(Map<String, dynamic> json) {
-    return new SetFrameSyncResult();
+    return SetFrameSyncResult();
   }
 
   @override

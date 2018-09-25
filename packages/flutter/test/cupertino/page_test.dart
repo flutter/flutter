@@ -8,14 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('test iOS page transition (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
+      CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
+          return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
-              return new Center(child: new Text('Page $pageNumber'));
+              return Center(child: Text('Page $pageNumber'));
             }
           );
         },
@@ -76,17 +75,16 @@ void main() {
 
   testWidgets('test iOS page transition (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
+      CupertinoApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          const RtlOverrideWidgetsDelegate(),
+          RtlOverrideWidgetsDelegate(),
         ],
-        color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
+          return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
-              return new Center(child: new Text('Page $pageNumber'));
+              return Center(child: Text('Page $pageNumber'));
             }
           );
         },
@@ -148,24 +146,16 @@ void main() {
 
   testWidgets('test iOS fullscreen dialog transition', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return const Center(child: const Text('Page 1'));
-            }
-          );
-        },
+      CupertinoApp(
+        home: const Center(child: Text('Page 1')),
       ),
     );
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(
       builder: (BuildContext context) {
-        return const Center(child: const Text('Page 2'));
+        return const Center(child: Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -216,14 +206,13 @@ void main() {
 
   testWidgets('test only edge swipes work (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
+      CupertinoApp(
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
+          return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
-              return new Center(child: new Text('Page $pageNumber'));
+              return Center(child: Text('Page $pageNumber'));
             }
           );
         },
@@ -278,17 +267,16 @@ void main() {
 
   testWidgets('test only edge swipes work (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new WidgetsApp(
+      CupertinoApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-          const RtlOverrideWidgetsDelegate(),
+          RtlOverrideWidgetsDelegate(),
         ],
-        color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<void>(
+          return CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
-              return new Center(child: new Text('Page $pageNumber'));
+              return Center(child: Text('Page $pageNumber'));
             }
           );
         },

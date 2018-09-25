@@ -19,7 +19,7 @@ import 'package:flutter/widgets.dart';
 Iterable<Element> collectAllElementsFrom(Element rootElement, {
   @required bool skipOffstage,
 }) {
-  return new CachingIterable<Element>(new _DepthFirstChildIterator(rootElement, skipOffstage));
+  return CachingIterable<Element>(_DepthFirstChildIterator(rootElement, skipOffstage));
 }
 
 class _DepthFirstChildIterator implements Iterator<Element> {

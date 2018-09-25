@@ -32,7 +32,7 @@ _ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aSt
     for (int i = 0; i < aStops.length; i += 1)
       interpolatedStops.add(ui.lerpDouble(aStops[i], bStops[i], t).clamp(0.0, 1.0));
   }
-  return new _ColorsAndStops(interpolatedColors, interpolatedStops);
+  return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
 
 /// A 2D gradient.
@@ -92,7 +92,7 @@ abstract class Gradient {
       return null;
     assert(colors.length >= 2, 'colors list must have at least two colors');
     final double separation = 1.0 / (colors.length - 1);
-    return new List<double>.generate(
+    return List<double>.generate(
       colors.length,
       (int index) => index * separation,
       growable: false,
@@ -242,11 +242,11 @@ abstract class Gradient {
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
 ///
 /// ```dart
-/// new Container(
-///   decoration: new BoxDecoration(
-///     gradient: new LinearGradient(
+/// Container(
+///   decoration: BoxDecoration(
+///     gradient: LinearGradient(
 ///       begin: Alignment.topLeft,
-///       end: new Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
+///       end: Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
 ///       colors: [const Color(0xFFFFFFEE), const Color(0xFF999999)], // whitish to gray
 ///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///     ),
@@ -320,7 +320,7 @@ class LinearGradient extends Gradient {
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
-    return new ui.Gradient.linear(
+    return ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
@@ -333,7 +333,7 @@ class LinearGradient extends Gradient {
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   LinearGradient scale(double factor) {
-    return new LinearGradient(
+    return LinearGradient(
       begin: begin,
       end: end,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
@@ -384,7 +384,7 @@ class LinearGradient extends Gradient {
     if (b == null)
       return a.scale(1.0 - t);
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
-    return new LinearGradient(
+    return LinearGradient(
       begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
       end: AlignmentGeometry.lerp(a.end, b.end, t),
       colors: interpolated.colors,
@@ -443,10 +443,10 @@ class LinearGradient extends Gradient {
 /// A normal radial gradient has a [center] and a [radius]. The [center] point
 /// corresponds to 0.0, and the ring at [radius] from the center corresponds
 /// to 1.0. These lengths are expressed in fractions, so that the same gradient
-/// can be reused with varying sized boxes without changing the parameters. 
+/// can be reused with varying sized boxes without changing the parameters.
 /// (This contrasts with [new ui.Gradient.radial], whose arguments are expressed
 /// in logical pixels.)
-/// 
+///
 /// It is also possible to create a two-point (or focal pointed) radial gradient
 /// (which is sometimes referred to as a two point conic gradient, but is not the
 /// same as a CSS conic gradient which corresponds to a [SweepGradient]). A [focal]
@@ -454,7 +454,7 @@ class LinearGradient extends Gradient {
 /// which will make the rendered gradient appear to be pointed or directed in the
 /// direction of the [focal] point. This is only important if [focal] and [center]
 /// are not equal or [focalRadius] > 0.0 (as this case is visually identical to a
-/// normal radial gradient).  One important case to avoid is having [focal] and 
+/// normal radial gradient).  One important case to avoid is having [focal] and
 /// [center] both resolve to [Offset.zero] when [focalRadius] > 0.0. In such a case,
 /// a valid shader cannot be created by the framework.
 ///
@@ -476,7 +476,7 @@ class LinearGradient extends Gradient {
 ///
 /// ```dart
 /// void paintSky(Canvas canvas, Rect rect) {
-///   var gradient = new RadialGradient(
+///   var gradient = RadialGradient(
 ///     center: const Alignment(0.7, -0.6), // near the top right
 ///     radius: 0.2,
 ///     colors: [
@@ -486,7 +486,7 @@ class LinearGradient extends Gradient {
 ///     stops: [0.4, 1.0],
 ///   );
 ///   // rect is the area we are painting over
-///   var paint = new Paint()
+///   var paint = Paint()
 ///     ..shader = gradient.createShader(rect);
 ///   canvas.drawRect(rect, paint);
 /// }
@@ -553,17 +553,17 @@ class RadialGradient extends Gradient {
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radial.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radial.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radial.png)
-  /// 
+  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_clamp_radialWithFocal.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_mirror_radialWithFocal.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/tile_mode_repeated_radialWithFocal.png)
   final TileMode tileMode;
 
   /// The focal point of the gradient.  If specified, the gradient will appear
-  /// to be focused along the vector from [center] to focal. 
-  /// 
+  /// to be focused along the vector from [center] to focal.
+  ///
   /// See [center] for a description of how the coordinates are mapped.
-  /// 
+  ///
   /// If this value is specified and [focalRadius] > 0.0, care should be taken
   /// to ensure that either this value or [center] will not both resolve to
   /// [Offset.zero], which would fail to create a valid gradient.
@@ -575,7 +575,7 @@ class RadialGradient extends Gradient {
   /// For example, if a radial gradient is painted on a box that is
   /// 100.0 pixels wide and 200.0 pixels tall, then a radius of 1.0
   /// will place the 1.0 stop at 100.0 pixels from the [focus].
-  /// 
+  ///
   /// If this value is specified and is greater than 0.0, either [focal] or
   /// [center] must not resolve to [Offset.zero], which would fail to create
   /// a valid gradient.
@@ -583,7 +583,7 @@ class RadialGradient extends Gradient {
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
-    return new ui.Gradient.radial(
+    return ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
@@ -599,7 +599,7 @@ class RadialGradient extends Gradient {
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   RadialGradient scale(double factor) {
-    return new RadialGradient(
+    return RadialGradient(
       center: center,
       radius: radius,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
@@ -652,7 +652,7 @@ class RadialGradient extends Gradient {
     if (b == null)
       return a.scale(1.0 - t);
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
-    return new RadialGradient(
+    return RadialGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       radius: math.max(0.0, ui.lerpDouble(a.radius, b.radius, t)),
       colors: interpolated.colors,
@@ -733,18 +733,18 @@ class RadialGradient extends Gradient {
 /// This sample draws a different color in each quadrant.
 ///
 /// ```dart
-/// new Container(
-///   decoration: new BoxDecoration(
-///     gradient: new SweepGradient(
+/// Container(
+///   decoration: BoxDecoration(
+///     gradient: SweepGradient(
 ///       center: FractionalOffset.center,
 ///       startAngle: 0.0,
 ///       endAngle: math.pi * 2,
 ///       colors: const <Color>[
-///         const Color(0xFF4285F4), // blue
-///         const Color(0xFF34A853), // green
-///         const Color(0xFFFBBC05), // yellow
-///         const Color(0xFFEA4335), // red
-///         const Color(0xFF4285F4), // blue again to seamlessly transition to the start
+///         Color(0xFF4285F4), // blue
+///         Color(0xFF34A853), // green
+///         Color(0xFFFBBC05), // yellow
+///         Color(0xFFEA4335), // red
+///         Color(0xFF4285F4), // blue again to seamlessly transition to the start
 ///       ],
 ///       stops: const <double>[0.0, 0.25, 0.5, 0.75, 1.0],
 ///      ),
@@ -816,7 +816,7 @@ class SweepGradient extends Gradient {
 
   @override
   Shader createShader(Rect rect, { TextDirection textDirection }) {
-    return new ui.Gradient.sweep(
+    return ui.Gradient.sweep(
       center.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
       startAngle,
@@ -830,7 +830,7 @@ class SweepGradient extends Gradient {
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
   SweepGradient scale(double factor) {
-    return new SweepGradient(
+    return SweepGradient(
       center: center,
       startAngle: startAngle,
       endAngle: endAngle,
@@ -881,7 +881,7 @@ class SweepGradient extends Gradient {
     if (b == null)
       return a.scale(1.0 - t);
     final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
-    return new SweepGradient(
+    return SweepGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       startAngle: math.max(0.0, ui.lerpDouble(a.startAngle, b.startAngle, t)),
       endAngle: math.max(0.0, ui.lerpDouble(a.endAngle, b.endAngle, t)),

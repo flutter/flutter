@@ -10,7 +10,7 @@ class CupertinoRefreshControlDemo extends StatefulWidget {
   static const String routeName = '/cupertino/refresh';
 
   @override
-  _CupertinoRefreshControlDemoState createState() => new _CupertinoRefreshControlDemoState();
+  _CupertinoRefreshControlDemoState createState() => _CupertinoRefreshControlDemoState();
 }
 
 class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDemo> {
@@ -23,8 +23,8 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
   }
 
   void repopulateList() {
-    final Random random = new Random();
-    randomizedContacts = new List<List<String>>.generate(
+    final Random random = Random();
+    randomizedContacts = List<List<String>>.generate(
       100,
       (int index) {
         return contacts[random.nextInt(contacts.length)]
@@ -36,33 +36,38 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
 
   @override
   Widget build(BuildContext context) {
-    return new DefaultTextStyle(
+    return DefaultTextStyle(
       style: const TextStyle(
         fontFamily: '.SF UI Text',
         inherit: false,
         fontSize: 17.0,
         color: CupertinoColors.black,
       ),
-      child: new CupertinoPageScaffold(
-        child: new DecoratedBox(
-          decoration: const BoxDecoration(color: const Color(0xFFEFEFF4)),
-          child: new CustomScrollView(
+      child: CupertinoPageScaffold(
+        child: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          child: CustomScrollView(
             slivers: <Widget>[
               const CupertinoSliverNavigationBar(
-                largeTitle: const Text('Cupertino Refresh'),
+                largeTitle: Text('Cupertino Refresh'),
+                previousPageTitle: 'Cupertino',
               ),
-              new CupertinoRefreshControl(
+              CupertinoSliverRefreshControl(
                 onRefresh: () {
-                  return new Future<void>.delayed(const Duration(seconds: 2))
-                      ..then((_) => setState(() => repopulateList()));
+                  return Future<void>.delayed(const Duration(seconds: 2))
+                      ..then((_) {
+                        if (mounted) {
+                          setState(() => repopulateList());
+                        }
+                      });
                 },
               ),
-              new SliverSafeArea(
+              SliverSafeArea(
                 top: false, // Top safe area is consumed by the navigation bar.
-                sliver: new SliverList(
-                  delegate: new SliverChildBuilderDelegate(
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
-                      return new _ListItem(
+                      return _ListItem(
                         name: randomizedContacts[index][0],
                         place: randomizedContacts[index][1],
                         date: randomizedContacts[index][2],
@@ -143,18 +148,18 @@ class _ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       color: CupertinoColors.white,
       height: 60.0,
       padding: const EdgeInsets.only(top: 9.0),
-      child: new Row(
+      child: Row(
         children: <Widget>[
-          new Container(
+          Container(
             width: 38.0,
             child: called
                 ? const Align(
                     alignment: Alignment.topCenter,
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.phone_solid,
                       color: CupertinoColors.inactiveGray,
                       size: 18.0,
@@ -162,22 +167,22 @@ class _ListItem extends StatelessWidget {
                   )
                 : null,
           ),
-        new Expanded(
-          child: new Container(
+        Expanded(
+          child: Container(
               decoration: const BoxDecoration(
-                border: const Border(
-                  bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFBCBBC1), width: 0.0),
                 ),
               ),
               padding: const EdgeInsets.only(left: 1.0, bottom: 9.0, right: 10.0),
-              child: new Row(
+              child: Row(
                 children: <Widget>[
-                  new Expanded(
-                    child: new Column(
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        new Text(
+                        Text(
                           name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -186,7 +191,7 @@ class _ListItem extends StatelessWidget {
                             letterSpacing: -0.18,
                           ),
                         ),
-                        new Text(
+                        Text(
                           place,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -199,7 +204,7 @@ class _ListItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                  new Text(
+                  Text(
                     date,
                     style: const TextStyle(
                       color: CupertinoColors.inactiveGray,
@@ -208,8 +213,8 @@ class _ListItem extends StatelessWidget {
                     ),
                   ),
                   const Padding(
-                    padding: const EdgeInsets.only(left: 9.0),
-                    child: const Icon(
+                    padding: EdgeInsets.only(left: 9.0),
+                    child: Icon(
                       CupertinoIcons.info,
                       color: CupertinoColors.activeBlue
                     ),

@@ -42,7 +42,7 @@ class ParentData {
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
 ///
 /// Used by many of the methods of [PaintingContext].
-typedef void PaintingContextCallback(PaintingContext context, Offset offset);
+typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
 
 /// A place to paint.
 ///
@@ -59,8 +59,14 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 ///
 /// New [PaintingContext] objects are created automatically when using
 /// [PaintingContext.repaintCompositedChild] and [pushLayer].
-class PaintingContext {
-  PaintingContext._(this._containerLayer, this.estimatedBounds)
+class PaintingContext extends ClipContext {
+
+  /// Creates a painting context.
+  ///
+  /// Typically only called by [PaintingContext.repaintCompositedChild]
+  /// and [pushLayer].
+  @protected
+  PaintingContext(this._containerLayer, this.estimatedBounds)
     : assert(_containerLayer != null),
       assert(estimatedBounds != null);
 
@@ -86,8 +92,19 @@ class PaintingContext {
   ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
   ///    has a composited layer.
   static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent = false }) {
-    assert(child.isRepaintBoundary);
     assert(child._needsPaint);
+    _repaintCompositedChild(
+      child,
+      debugAlsoPaintedParent: debugAlsoPaintedParent,
+    );
+  }
+
+  static void _repaintCompositedChild(
+    RenderObject child, {
+    bool debugAlsoPaintedParent = false,
+    PaintingContext childContext,
+  }) {
+    assert(child.isRepaintBoundary);
     assert(() {
       // register the call for RepaintBoundary metrics
       child.debugRegisterRepaintBoundaryPaint(
@@ -98,7 +115,7 @@ class PaintingContext {
     }());
     if (child._layer == null) {
       assert(debugAlsoPaintedParent);
-      child._layer = new OffsetLayer();
+      child._layer = OffsetLayer();
     } else {
       assert(debugAlsoPaintedParent || child._layer.attached);
       child._layer.removeAllChildren();
@@ -107,9 +124,32 @@ class PaintingContext {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
-    final PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
+    childContext ??= PaintingContext(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
-    childContext._stopRecordingIfNeeded();
+    childContext.stopRecordingIfNeeded();
+  }
+
+  /// In debug mode, repaint the given render object using a custom painting
+  /// context that can record the results of the painting operation in addition
+  /// to performing the regular paint of the child.
+  ///
+  /// See also:
+  ///
+  ///  * [repaintCompositedChild], for repainting a composited child without
+  ///    instrumentation.
+  static void debugInstrumentRepaintCompositedChild(
+    RenderObject child, {
+    bool debugAlsoPaintedParent = false,
+    @required PaintingContext customContext,
+  }) {
+    assert(() {
+      _repaintCompositedChild(
+        child,
+        debugAlsoPaintedParent: debugAlsoPaintedParent,
+        childContext: customContext,
+      );
+      return true;
+    }());
   }
 
   /// Paint a child [RenderObject].
@@ -125,7 +165,7 @@ class PaintingContext {
     }());
 
     if (child.isRepaintBoundary) {
-      _stopRecordingIfNeeded();
+      stopRecordingIfNeeded();
       _compositeChild(child, offset);
     } else {
       child._paintWithContext(this, offset);
@@ -159,10 +199,20 @@ class PaintingContext {
       }());
     }
     child._layer.offset = offset;
-    _appendLayer(child._layer);
+    appendLayer(child._layer);
   }
 
-  void _appendLayer(Layer layer) {
+  /// Adds a layer to the recording requiring that the recording is already
+  /// stopped.
+  ///
+  /// Do not call this function directly: call [addLayer] or [pushLayer]
+  /// instead. This function is called internally when all layers not
+  /// generated from the [canvas] are added.
+  ///
+  /// Subclasses that need to customize how layers are added should override
+  /// this method.
+  @protected
+  void appendLayer(Layer layer) {
     assert(!_isRecording);
     layer.remove();
     _containerLayer.append(layer);
@@ -195,6 +245,7 @@ class PaintingContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
+  @override
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
@@ -203,25 +254,37 @@ class PaintingContext {
 
   void _startRecording() {
     assert(!_isRecording);
-    _currentLayer = new PictureLayer(estimatedBounds);
-    _recorder = new ui.PictureRecorder();
-    _canvas = new Canvas(_recorder);
+    _currentLayer = PictureLayer(estimatedBounds);
+    _recorder = ui.PictureRecorder();
+    _canvas = Canvas(_recorder);
     _containerLayer.append(_currentLayer);
   }
 
-  void _stopRecordingIfNeeded() {
+  /// Stop recording to a canvas if recording has started.
+  ///
+  /// Do not call this function directly: functions in this class will call
+  /// this method as needed. This function is called internally to ensure that
+  /// recording is stopped before adding layers or finalizing the results of a
+  /// paint.
+  ///
+  /// Subclasses that need to customize how recording to a canvas is performed
+  /// should override this method to save the results of the custom canvas
+  /// recordings.
+  @protected
+  @mustCallSuper
+  void stopRecordingIfNeeded() {
     if (!_isRecording)
       return;
     assert(() {
       if (debugRepaintRainbowEnabled) {
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6.0
           ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(estimatedBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
-        final Paint paint = new Paint()
+        final Paint paint = Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = const Color(0xFFFF9800);
@@ -270,8 +333,8 @@ class PaintingContext {
   ///  * [pushLayer], for adding a layer and using its canvas to paint with that
   ///    layer.
   void addLayer(Layer layer) {
-    _stopRecordingIfNeeded();
-    _appendLayer(layer);
+    stopRecordingIfNeeded();
+    appendLayer(layer);
   }
 
   /// Appends the given layer to the recording, and calls the `painter` callback
@@ -294,15 +357,21 @@ class PaintingContext {
   /// See also:
   ///
   ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+  void pushLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     assert(!childLayer.attached);
     assert(childLayer.parent == null);
     assert(painter != null);
-    _stopRecordingIfNeeded();
-    _appendLayer(childLayer);
-    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? estimatedBounds);
+    stopRecordingIfNeeded();
+    appendLayer(childLayer);
+    final PaintingContext childContext = createChildContext(childLayer, childPaintBounds ?? estimatedBounds);
     painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
+    childContext.stopRecordingIfNeeded();
+  }
+
+  /// Creates a compatible painting context to paint onto [childLayer].
+  @protected
+  PaintingContext createChildContext(ContainerLayer childLayer, Rect bounds) {
+    return PaintingContext(childLayer, bounds);
   }
 
   /// Clip further painting using a rectangle.
@@ -315,17 +384,13 @@ class PaintingContext {
   ///   clip the painting done by [painter].
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
+  /// * `clipBehavior` controls how the rectangle is clipped.
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge}) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipRectLayer(clipRect: offsetClipRect), painter, offset, childPaintBounds: offsetClipRect);
+      pushLayer(ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
     } else {
-      canvas
-        ..save()
-        ..clipRect(offsetClipRect);
-      painter(this, offset);
-      canvas
-        ..restore();
+      clipRectAndPaint(offsetClipRect, clipBehavior, offsetClipRect, () => painter(this, offset));
     }
   }
 
@@ -341,18 +406,16 @@ class PaintingContext {
   ///   to use to clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
+  /// * `clipBehavior` controls how the path is clipped.
+  // ignore: deprecated_member_use
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+    assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect), painter, offset, childPaintBounds: offsetBounds);
+      pushLayer(ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      canvas
-        ..save()
-        ..clipRRect(offsetClipRRect);
-      painter(this, offset);
-      canvas
-        ..restore();
+      clipRRectAndPaint(offsetClipRRect, clipBehavior, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -368,18 +431,16 @@ class PaintingContext {
   ///   clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+  /// * `clipBehavior` controls how the rounded rectangle is clipped.
+  // ignore: deprecated_member_use
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+    assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
+      pushLayer(ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      canvas
-        ..save()
-        ..clipPath(clipPath.shift(offset));
-      painter(this, offset);
-      canvas
-        ..restore();
+      clipPathAndPaint(offsetClipPath, clipBehavior, offsetBounds, () => painter(this, offset));
     }
   }
 
@@ -393,11 +454,11 @@ class PaintingContext {
   /// * `painter` is a callback that will paint with the `transform` applied. This
   ///   function calls the `painter` synchronously.
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
-    final Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0)
+    final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
       pushLayer(
-        new TransformLayer(transform: effectiveTransform),
+        TransformLayer(transform: effectiveTransform),
         painter,
         offset,
         childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
@@ -427,7 +488,7 @@ class PaintingContext {
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
+    pushLayer(OpacityLayer(alpha: alpha), painter, offset);
   }
 
   @override
@@ -525,12 +586,12 @@ abstract class Constraints {
 /// Signature for a function that is called for each [RenderObject].
 ///
 /// Used by [RenderObject.visitChildren] and [RenderObject.visitChildrenForSemantics].
-typedef void RenderObjectVisitor(RenderObject child);
+typedef RenderObjectVisitor = void Function(RenderObject child);
 
 /// Signature for a function that is called during layout.
 ///
 /// Used by [RenderObject.invokeLayoutCallback].
-typedef void LayoutCallback<T extends Constraints>(T constraints);
+typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 
 /// A reference to the semantics tree.
 ///
@@ -570,7 +631,7 @@ class SemanticsHandle {
   void dispose() {
     assert(() {
       if (_owner == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'SemanticsHandle has already been disposed.\n'
           'Each SemanticsHandle should be disposed exactly once.'
         );
@@ -840,11 +901,11 @@ class PipelineOwner {
     _outstandingSemanticsHandles += 1;
     if (_outstandingSemanticsHandles == 1) {
       assert(_semanticsOwner == null);
-      _semanticsOwner = new SemanticsOwner();
+      _semanticsOwner = SemanticsOwner();
       if (onSemanticsOwnerCreated != null)
         onSemanticsOwnerCreated();
     }
-    return new SemanticsHandle._(this, listener);
+    return SemanticsHandle._(this, listener);
   }
 
   void _didDisposeSemanticsHandle() {
@@ -859,7 +920,7 @@ class PipelineOwner {
   }
 
   bool _debugDoingSemantics = false;
-  final Set<RenderObject> _nodesNeedingSemantics = new Set<RenderObject>();
+  final Set<RenderObject> _nodesNeedingSemantics = Set<RenderObject>();
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1062,7 +1123,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void setupParentData(covariant RenderObject child) {
     assert(_debugCanPerformMutations);
     if (child.parentData is! ParentData)
-      child.parentData = new ParentData();
+      child.parentData = ParentData();
   }
 
   /// Called by subclasses when they decide a render object is a child.
@@ -1109,7 +1170,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   dynamic debugCreator;
 
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
-    FlutterError.reportError(new FlutterErrorDetailsForRendering(
+    FlutterError.reportError(FlutterErrorDetailsForRendering(
       exception: exception,
       stack: stack,
       library: 'rendering library',
@@ -1487,7 +1548,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       informationCollector: (StringBuffer information) {
         final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
-        final Pattern layoutFramePattern = new RegExp(r'^#[0-9]+ +RenderObject.layout \(');
+        final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
         for (int i = 0; i < stack.length; i += 1) {
           if (layoutFramePattern.matchAsPrefix(stack[i]) != null) {
             targetFrame = i + 1;
@@ -1500,7 +1561,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
             'function by the following function, which probably computed the '
             'invalid constraints in question:'
           );
-          final Pattern targetFramePattern = new RegExp(r'^#[0-9]+ +(.+)$');
+          final Pattern targetFramePattern = RegExp(r'^#[0-9]+ +(.+)$');
           final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
           if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
             information.writeln('  ${targetFrameMatch.group(1)}');
@@ -1975,7 +2036,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugDoingThisPaint) {
-        throw new FlutterError(
+        throw FlutterError(
           'Tried to paint a RenderObject reentrantly.\n'
           'The following RenderObject was already being painted when it was '
           'painted again:\n'
@@ -1997,7 +2058,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        throw new FlutterError(
+        throw FlutterError(
           'Tried to paint a RenderObject before its compositing bits were '
           'updated.\n'
           'The following RenderObject was marked as having dirty compositing '
@@ -2043,7 +2104,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
-  @protected
   void debugPaint(PaintingContext context, Offset offset) { }
 
   /// Paint this render object into the given context at the given offset.
@@ -2098,7 +2158,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
     }
-    final Matrix4 transform = new Matrix4.identity();
+    final Matrix4 transform = Matrix4.identity();
     for (int index = renderers.length - 1; index > 0; index -= 1)
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
     return transform;
@@ -2206,7 +2266,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void sendSemanticsEvent(SemanticsEvent semanticsEvent) {
     if (owner.semanticsOwner == null)
       return;
-    if (_semantics != null) {
+    if (_semantics != null && !_semantics.isMergedIntoParent) {
       _semantics.sendEvent(semanticsEvent);
     } else if (parent != null) {
       final RenderObject renderParent = parent;
@@ -2219,7 +2279,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   SemanticsConfiguration get _semanticsConfiguration {
     if (_cachedSemanticsConfiguration == null) {
-      _cachedSemanticsConfiguration = new SemanticsConfiguration();
+      _cachedSemanticsConfiguration = SemanticsConfiguration();
       describeSemanticsConfiguration(_cachedSemanticsConfiguration);
     }
     return _cachedSemanticsConfiguration;
@@ -2347,7 +2407,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
-    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
+    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = Set<_InterestingSemanticsFragment>();
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     visitChildrenForSemantics((RenderObject renderChild) {
@@ -2391,16 +2451,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (parent is! RenderObject) {
       assert(!config.hasBeenAnnotated);
       assert(!mergeIntoParent);
-      result = new _RootSemanticsFragment(
+      result = _RootSemanticsFragment(
         owner: this,
         dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
       );
     } else if (producesForkingFragment) {
-      result = new _ContainerSemanticsFragment(
+      result = _ContainerSemanticsFragment(
         dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
       );
     } else {
-      result = new _SwitchableSemanticsFragment(
+      result = _SwitchableSemanticsFragment(
         config: config,
         mergeIntoParent: mergeIntoParent,
         owner: this,
@@ -2557,18 +2617,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
-    properties.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
+    properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    properties.add(DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
-    properties.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
-    properties.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
-    properties.add(new FlagProperty(
+    properties.add(DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
+    properties.add(DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
+    properties.add(FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',
       value: _semanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes,
       ifTrue: 'blocks semantics of earlier render objects below the common boundary',
     ));
-    properties.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
+    properties.add(FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
   @override
@@ -2624,7 +2684,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extend
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw new FlutterError(
+        throw FlutterError(
           'A $runtimeType expected a child of type $ChildType but received a '
           'child of type ${child.runtimeType}.\n'
           'RenderObjects expect specific types of children because they '
@@ -2761,7 +2821,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw new FlutterError(
+        throw FlutterError(
           'A $runtimeType expected a child of type $ChildType but received a '
           'child of type ${child.runtimeType}.\n'
           'RenderObjects expect specific types of children because they '
@@ -3140,7 +3200,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   void addTags(Iterable<SemanticsTag> tags) {
     if (tags == null || tags.isEmpty)
       return;
-    _tagsForChildren ??= new Set<SemanticsTag>();
+    _tagsForChildren ??= Set<SemanticsTag>();
     _tagsForChildren.addAll(tags);
   }
 
@@ -3175,12 +3235,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(parentPaintClipRect == null);
     assert(_ancestorChain.length == 1);
 
-    owner._semantics ??= new SemanticsNode.root(
+    owner._semantics ??= SemanticsNode.root(
       showOnScreen: owner.showOnScreen,
       owner: owner.owner.semanticsOwner,
     );
     final SemanticsNode node = owner._semantics;
-    assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
+    assert(MatrixUtils.matrixEquals(node.transform, Matrix4.identity()));
     assert(node.parentSemanticsClipRect == null);
     assert(node.parentPaintClipRect == null);
 
@@ -3196,7 +3256,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     }
     node.updateWith(config: null, childrenInInversePaintOrder: children);
 
-    assert(!node.isInvisible);
+    // The root node is the only semantics node allowed to be invisible. This
+    // can happen when the canvas the app is drawn on has a size of 0 by 0
+    // pixel. If this happens, the root node must not have any children (because
+    // these would be invisible as well and are therefore excluded from the
+    // tree).
+    assert(!node.isInvisible || children.isEmpty);
     yield node;
   }
 
@@ -3264,13 +3329,13 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     }
 
     final _SemanticsGeometry geometry = _needsGeometryUpdate
-        ? new _SemanticsGeometry(parentSemanticsClipRect: parentSemanticsClipRect, parentPaintClipRect: parentPaintClipRect, ancestors: _ancestorChain)
+        ? _SemanticsGeometry(parentSemanticsClipRect: parentSemanticsClipRect, parentPaintClipRect: parentPaintClipRect, ancestors: _ancestorChain)
         : null;
 
     if (!_mergeIntoParent && (geometry?.dropFromTree == true))
       return;  // Drop the node, it's not going to be visible.
 
-    owner._semantics ??= new SemanticsNode(showOnScreen: owner.showOnScreen);
+    owner._semantics ??= SemanticsNode(showOnScreen: owner.showOnScreen);
     final SemanticsNode node = owner._semantics
       ..isMergedIntoParent = _mergeIntoParent
       ..tags = _tagsForChildren;
@@ -3374,7 +3439,7 @@ class _SemanticsGeometry {
   void _computeValues(Rect parentSemanticsClipRect, Rect parentPaintClipRect, List<RenderObject> ancestors) {
     assert(ancestors.length > 1);
 
-    _transform = new Matrix4.identity();
+    _transform = Matrix4.identity();
     _semanticsClipRect = parentSemanticsClipRect;
     _paintClipRect = parentPaintClipRect;
     for (int index = ancestors.length-1; index > 0; index -= 1) {
@@ -3408,7 +3473,7 @@ class _SemanticsGeometry {
       return null;
     if (rect.isEmpty)
       return Rect.zero;
-    final Matrix4 transform = new Matrix4.identity();
+    final Matrix4 transform = Matrix4.identity();
     parent.applyPaintTransform(child, transform);
     return MatrixUtils.inverseTransformRect(transform, rect);
   }
