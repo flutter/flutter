@@ -1,5 +1,6 @@
 #import "ViewController.h"
 #import "Flutter/Flutter.h"
+#import "FlutterPluginRegistrant/GeneratedPluginRegistrant.h"
 
 @implementation ViewController
 
@@ -17,6 +18,7 @@
 
 - (void)handleButtonAction {
     FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
+    [GeneratedPluginRegistrant registerWithRegistry:flutterViewController];
     [self presentViewController:flutterViewController animated:false completion:nil];
 }
 
