@@ -66,6 +66,7 @@ linter:
     - package_names
     - package_prefixed_library_names
     - prefer_is_not_empty
+    - prefer_mixin
     # - public_member_api_docs
     - slash_for_doc_comments
     # - sort_constructors_first

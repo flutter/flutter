@@ -12,11 +12,7 @@ export 'dart:ui' show AccessibilityFeatures;
 
 /// The glue between the semantics layer and the Flutter engine.
 // TODO(jonahwilliams): move the remaining semantic related bindings here.
-class SemanticsBinding extends BindingBase {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory SemanticsBinding._() => null;
-
+mixin SemanticsBinding on BindingBase {
   /// The current [SemanticsBinding], if one has been created.
   static SemanticsBinding get instance => _instance;
   static SemanticsBinding _instance;

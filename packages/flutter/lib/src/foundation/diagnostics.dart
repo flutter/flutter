@@ -2460,11 +2460,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
 ///
 /// This class is identical to DiagnosticableTree except that it can be used as
 /// a mixin.
-abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory DiagnosticableTreeMixin._() => null;
-
+mixin DiagnosticableTreeMixin implements DiagnosticableTree {
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString(minLevel: minLevel);
