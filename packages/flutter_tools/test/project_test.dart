@@ -148,20 +148,20 @@ void main() {
       testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectNotExists(project.ios.directory.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectNotExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
         expectNotExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
-        expectNotExists(project.ios.directory.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectNotExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.ios.directory.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
       });
       testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.ios.directory.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
       });
       testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
@@ -183,7 +183,7 @@ void main() {
       testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        final Directory flutter = project.ios.directory.childDirectory('Flutter');
+        final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('Generated.xcconfig'));
         final Directory pluginRegistrantClasses = flutter
@@ -201,7 +201,7 @@ void main() {
         expect(project.android.isModule, isTrue);
         expect(project.ios.isModule, isTrue);
         expect(project.android.hostAppGradleRoot.basename, '.android');
-        expect(project.ios.directory.basename, '.ios');
+        expect(project.ios.hostAppRoot.basename, '.ios');
       });
       testInMemory('is known for non-module', () async {
         final FlutterProject project = await someProject();
@@ -209,7 +209,7 @@ void main() {
         expect(project.android.isModule, isFalse);
         expect(project.ios.isModule, isFalse);
         expect(project.android.hostAppGradleRoot.basename, 'android');
-        expect(project.ios.directory.basename, 'ios');
+        expect(project.ios.hostAppRoot.basename, 'ios');
       });
     });
 
