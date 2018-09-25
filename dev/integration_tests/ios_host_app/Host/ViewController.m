@@ -1,8 +1,8 @@
 #import "ViewController.h"
 #import "Flutter/Flutter.h"
-#import "FlutterPluginRegistrant/GeneratedPluginRegistrant.h"
 
 @implementation ViewController
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -17,7 +17,7 @@
 
 - (void)handleButtonAction {
     FlutterViewController* flutterViewController = [[FlutterViewController alloc] init];
-    [GeneratedPluginRegistrant registerWithRegistry:flutterViewController];
     [self presentViewController:flutterViewController animated:false completion:nil];
 }
+
 @end
