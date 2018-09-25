@@ -150,13 +150,13 @@ BuildApp() {
     fi
     StreamOutput "done"
 
-    # StreamOutput " ├─Stripping debug symbols..."
-    # RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-    # if [[ $? -ne 0 ]]; then
-    #   EchoError "Failed to strip ${derived_dir}/App.framework/App."
-    #   exit -1
-    # fi
-    # StreamOutput "done"
+    StreamOutput " ├─Stripping debug symbols..."
+    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+    if [[ $? -ne 0 ]]; then
+      EchoError "Failed to strip ${derived_dir}/App.framework/App."
+      exit -1
+    fi
+    StreamOutput "done"
 
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
