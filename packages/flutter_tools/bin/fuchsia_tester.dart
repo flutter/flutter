@@ -31,7 +31,6 @@ const String _kOptionSdkRoot = 'sdk-root';
 const String _kOptionIcudtl = 'icudtl';
 const String _kOptionTests = 'tests';
 const String _kOptionCoverageDirectory = 'coverage-directory';
-const String _kOptionParentDirectory = 'use-parent';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -57,11 +56,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
-    ..addOption(_kOptionCoverageDirectory, help: 'The directory that will have coverage collected')
-    ..addFlag(_kOptionParentDirectory,
-      defaultsTo: true,
-      negatable: false,
-      help: 'Whether to move to the parent directory to find the coverage directory')
+    ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -92,8 +87,7 @@ Future<Null> run(List<String> args) async {
     if (!fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
-    final bool useParentDirectory = argResults[_kOptionParentDirectory] ?? true;
-    final String coverageDirectory = argResults[_kOptionCoveragePath] ?? 'lib';
+    final String coverageDirectory = argResults[_kOptionCoverageDirectory];
 
     // Put the tester shell where runTests expects it.
     // TODO(tvolkert,garymm): Switch to a Fuchsia-specific Artifacts impl.
@@ -142,7 +136,7 @@ Future<Null> run(List<String> args) async {
       // collector expects currentDirectory to be the root of the dart
       // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
       // test files may appear to be in the root directory.
-      if (useParentDirectory) {
+      if (coverageDirectory == null) {
         fs.currentDirectory = testDirectory.parent;
       } else {
         fs.currentDirectory = testDirectory;
