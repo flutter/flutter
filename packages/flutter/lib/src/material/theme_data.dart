@@ -899,7 +899,7 @@ class ThemeData extends Diagnosticable {
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
-     tabBarTheme,
+          tabBarTheme,
         ),
       ),
     );
