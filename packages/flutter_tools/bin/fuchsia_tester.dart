@@ -87,7 +87,14 @@ Future<Null> run(List<String> args) async {
     if (!fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
     }
-    final String coverageDirectory = argResults[_kOptionCoverageDirectory];
+    Directory coverageDirectory;
+    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory];
+    if (coverageDirectoryPath != null) {
+      if (!fs.isDirectorySync(coverageDirectoryPath)) {
+        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
+      }
+      coverageDirectory = fs.directory(coverageDirectoryPath);
+    }
 
     // Put the tester shell where runTests expects it.
     // TODO(tvolkert,garymm): Switch to a Fuchsia-specific Artifacts impl.
