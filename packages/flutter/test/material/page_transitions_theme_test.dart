@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Default PageTranstionsTheme platform', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: const Text('home')));
+    await tester.pumpWidget(const MaterialApp(home: Text('home')));
     final PageTransitionsTheme theme = Theme.of(tester.element(find.text('home'))).pageTransitionsTheme;
     expect(theme.builders, isNotNull);
     expect(theme.builders[TargetPlatform.android], isNotNull);
