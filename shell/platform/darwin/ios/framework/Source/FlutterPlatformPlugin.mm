@@ -51,6 +51,9 @@ using namespace shell;
   } else if ([method isEqualToString:@"SystemChrome.setEnabledSystemUIOverlays"]) {
     [self setSystemChromeEnabledSystemUIOverlays:args];
     result(nil);
+  } else if ([method isEqualToString:@"SystemChrome.restoreSystemUIOverlays"]) {
+    [self restoreSystemChromeSystemUIOverlays];
+    result(nil);
   } else if ([method isEqualToString:@"SystemChrome.setSystemUIOverlayStyle"]) {
     [self setSystemChromeSystemUIOverlayStyle:args];
     result(nil);
@@ -116,11 +119,10 @@ using namespace shell;
 
   if (!mask)
     return;
-  [[NSNotificationCenter defaultCenter] postNotificationName:@(kOrientationUpdateNotificationName)
-                                                      object:nil
-                                                    userInfo:@{
-                                                      @(kOrientationUpdateNotificationKey) : @(mask)
-                                                    }];
+  [[NSNotificationCenter defaultCenter]
+      postNotificationName:@(kOrientationUpdateNotificationName)
+                    object:nil
+                  userInfo:@{@(kOrientationUpdateNotificationKey) : @(mask)}];
 }
 
 - (void)setSystemChromeApplicationSwitcherDescription:(NSDictionary*)object {
@@ -136,6 +138,10 @@ using namespace shell;
   // UIViewControllerBasedStatusBarAppearance
   [UIApplication sharedApplication].statusBarHidden =
       ![overlays containsObject:@"SystemUiOverlay.top"];
+}
+
+- (void)restoreSystemChromeSystemUIOverlays {
+  // Nothing to do on iOS.
 }
 
 - (void)setSystemChromeSystemUIOverlayStyle:(NSDictionary*)message {
@@ -160,9 +166,7 @@ using namespace shell;
     [[NSNotificationCenter defaultCenter]
         postNotificationName:@(kOverlayStyleUpdateNotificationName)
                       object:nil
-                    userInfo:@{
-                      @(kOverlayStyleUpdateNotificationKey) : @(statusBarStyle)
-                    }];
+                    userInfo:@{@(kOverlayStyleUpdateNotificationKey) : @(statusBarStyle)}];
   } else {
     // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
     // in favor of delegating to the view controller

@@ -58,6 +58,9 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
             } else if (method.equals("SystemChrome.setEnabledSystemUIOverlays")) {
                 setSystemChromeEnabledSystemUIOverlays((JSONArray) arguments);
                 result.success(null);
+            } else if (method.equals("SystemChrome.restoreSystemUIOverlays")) {
+                restoreSystemChromeSystemUIOverlays();
+                result.success(null);
             } else if (method.equals("SystemChrome.setSystemUIOverlayStyle")) {
                 setSystemChromeSystemUIOverlayStyle((JSONObject) arguments);
                 result.success(null);
@@ -222,6 +225,10 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
         if (mCurrentTheme != null) {
             setSystemChromeSystemUIOverlayStyle(mCurrentTheme);
         }
+    }
+
+    private void restoreSystemChromeSystemUIOverlays() {
+        updateSystemUiOverlays();
     }
 
     private void setSystemChromeSystemUIOverlayStyle(JSONObject message) {
