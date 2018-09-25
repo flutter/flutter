@@ -197,10 +197,6 @@ class ThemeData extends Diagnosticable {
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
-<<<<<<< HEAD
-=======
-    tabBarTheme ??= const TabBarTheme();
->>>>>>> [WIP] ColorScheme
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
@@ -390,7 +386,7 @@ class ThemeData extends Diagnosticable {
        assert(chipTheme != null),
        assert(platform != null),
        assert(materialTapTargetSize != null),
-       assert(pageTransitionsTheme != null);
+       assert(pageTransitionsTheme != null),
        assert(colorScheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
@@ -897,7 +893,7 @@ class ThemeData extends Diagnosticable {
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
-           (otherData.pageTransitionsTheme == pageTransitionsTheme);
+           (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.colorScheme == colorScheme);
   }
 
@@ -927,8 +923,8 @@ class ThemeData extends Diagnosticable {
       unselectedWidgetColor,
       disabledColor,
       buttonTheme,
-      buttonColor,
       hashValues(
+        buttonColor,
         toggleableActiveColor,
         secondaryHeaderColor,
         textSelectionColor,

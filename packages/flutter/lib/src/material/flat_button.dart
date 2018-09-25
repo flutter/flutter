@@ -68,8 +68,7 @@ class FlatButton extends MaterialButton {
     Clip clipBehavior = Clip.none,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget child,
-  }) : _type = 'FlatButton',
-       super(
+  }) : super(
          key: key,
          onPressed: onPressed,
          onHighlightChanged: onHighlightChanged,
@@ -95,7 +94,7 @@ class FlatButton extends MaterialButton {
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
   /// The [icon], [label], and [clipBehavior] arguments must not be null.
-  FlatButton.icon({
+  factory FlatButton.icon({
     Key key,
     @required VoidCallback onPressed,
     ValueChanged<bool> onHighlightChanged,
@@ -109,13 +108,80 @@ class FlatButton extends MaterialButton {
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior,
+    MaterialTapTargetSize materialTapTargetSize,
+    @required Widget icon,
+    @required Widget label,
+  }) = FlatButtonWithIcon._;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
+
+    return RawMaterialButton(
+      onPressed: onPressed,
+      onHighlightChanged: onHighlightChanged,
+      clipBehavior: clipBehavior ?? Clip.none,
+      fillColor: buttonTheme.getFillColor(this),
+      textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      highlightColor: buttonTheme.getHighlightColor(this),
+      splashColor: buttonTheme.getSplashColor(this),
+      elevation: buttonTheme.getElevation(this),
+      highlightElevation: buttonTheme.getHighlightElevation(this),
+      disabledElevation: buttonTheme.getDisabledElevation(this),
+      padding: buttonTheme.getPadding(this),
+      constraints: buttonTheme.constraints,
+      shape: buttonTheme.getShape(this),
+      animationDuration: buttonTheme.getAnimationDuration(this),
+      materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
+      child: child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+  }
+}
+
+/// The type of of FlatButtons created with [FlatButton.icon].
+///
+/// This class only exists to give FlatButtons created with [FlatButton.icon]
+/// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
+class FlatButtonWithIcon extends FlatButton {
+  FlatButtonWithIcon._({
+    Key key,
+    @required VoidCallback onPressed,
+    ValueChanged<bool> onHighlightChanged,
+    ButtonTextTheme textTheme,
+    Color textColor,
+    Color disabledTextColor,
+    Color color,
+    Color disabledColor,
+    Color highlightColor,
+    Color splashColor,
+    Brightness colorBrightness,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
+    Clip clipBehavior,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
        assert(label != null),
-       _type = 'FlatButton.icon',
        super(
          key: key,
          onPressed: onPressed,
@@ -142,49 +208,4 @@ class FlatButton extends MaterialButton {
          ),
        );
 
-  @override
-  Object get type => _type;
-  final String _type;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-
-    return RawMaterialButton(
-      onPressed: onPressed,
-      onHighlightChanged: onHighlightChanged,
-      clipBehavior: clipBehavior,
-      fillColor: buttonTheme.getFillColor(this),
-      textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
-      highlightColor: buttonTheme.getHighlightColor(this),
-      splashColor: buttonTheme.getSplashColor(this),
-      elevation: buttonTheme.getElevation(this),
-      highlightElevation: buttonTheme.getHighlightElevation(this),
-      disabledElevation: buttonTheme.getDisabledElevation(this),
-      padding: buttonTheme.getPadding(this),
-      constraints: buttonTheme.getConstraints(this),
-      shape: buttonTheme.getShape(this),
-      animationDuration: buttonTheme.getAnimationDuration(this),
-      materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
-      child: child,
-    );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
-  }
 }

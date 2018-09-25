@@ -72,7 +72,6 @@ class OutlineButton extends MaterialButton {
     Clip clipBehavior = Clip.none,
     Widget child,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
-       _type = 'OutlineButton',
        super(
          key: key,
          onPressed: onPressed,
@@ -97,7 +96,7 @@ class OutlineButton extends MaterialButton {
   ///
   /// The [highlightElevation], [icon], [label], and [clipBehavior] must not be
   /// null.
-  OutlineButton.icon({
+  factory OutlineButton.icon({
     Key key,
     @required VoidCallback onPressed,
     ButtonTextTheme textTheme,
@@ -107,40 +106,15 @@ class OutlineButton extends MaterialButton {
     Color highlightColor,
     Color splashColor,
     double highlightElevation,
-    this.borderSide,
-    this.disabledBorderColor,
-    this.highlightedBorderColor,
+    Color highlightedBorderColor,
+    Color disabledBorderColor,
+    BorderSide borderSide,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
-  }) : assert(highlightElevation == null || highlightElevation >= 0.0),
-       assert(icon != null),
-       assert(label != null),
-       _type = 'OutlineButton.icon',
-       super(
-         key: key,
-         onPressed: onPressed,
-         textTheme: textTheme,
-         textColor: textColor,
-         disabledTextColor: disabledTextColor,
-         color: color,
-         highlightColor: highlightColor,
-         splashColor: splashColor,
-         highlightElevation: highlightElevation,
-         padding: padding,
-         shape: shape,
-         clipBehavior: clipBehavior,
-         child: Row(
-           mainAxisSize: MainAxisSize.min,
-           children: <Widget>[
-             icon,
-             const SizedBox(width: 8.0),
-             label,
-           ],
-         ),
-       );
+  }) = OutlineButtonWithIcon._;
 
   /// The outline border's color when the button is [enabled] and pressed.
   ///
@@ -164,10 +138,6 @@ class OutlineButton extends MaterialButton {
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 2.0, and its color is a light shade of grey.
   final BorderSide borderSide;
-
-  @override
-  Object get type => _type;
-  final String _type;
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +181,59 @@ class OutlineButton extends MaterialButton {
   }
 }
 
+/// The type of of OutlineButtons created with [OutlineButton.icon].
+///
+/// This class only exists to give RaisedButtons created with [RaisedButton.icon]
+/// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
+class OutlineButtonWithIcon extends OutlineButton {
+  OutlineButtonWithIcon._({
+    Key key,
+    @required VoidCallback onPressed,
+    ButtonTextTheme textTheme,
+    Color textColor,
+    Color disabledTextColor,
+    Color color,
+    Color highlightColor,
+    Color splashColor,
+    double highlightElevation,
+    Color highlightedBorderColor,
+    Color disabledBorderColor,
+    BorderSide borderSide,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
+    Clip clipBehavior,
+    @required Widget icon,
+    @required Widget label,
+  }) : assert(highlightElevation == null || highlightElevation >= 0.0),
+       assert(icon != null),
+       assert(label != null),
+       super(
+         key: key,
+         onPressed: onPressed,
+         textTheme: textTheme,
+         textColor: textColor,
+         disabledTextColor: disabledTextColor,
+         color: color,
+         highlightColor: highlightColor,
+         splashColor: splashColor,
+         highlightElevation: highlightElevation,
+         disabledBorderColor: disabledBorderColor,
+         highlightedBorderColor: highlightedBorderColor,
+         borderSide: borderSide,
+         padding: padding,
+         shape: shape,
+         clipBehavior: clipBehavior,
+         child: Row(
+           mainAxisSize: MainAxisSize.min,
+           children: <Widget>[
+             icon,
+             const SizedBox(width: 8.0),
+             label,
+           ],
+         ),
+       );
+}
+
 class _OutlineButton extends StatefulWidget {
   const _OutlineButton({
     Key key,
@@ -228,11 +251,10 @@ class _OutlineButton extends StatefulWidget {
     @required this.highlightedBorderColor,
     this.padding,
     this.shape,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(highlightedBorderColor != null),
-       assert(clipBehavior != null),
        super(key: key);
 
   final VoidCallback onPressed;

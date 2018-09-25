@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const defaultButtonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
-const defaultButtonPadding = EdgeInsets.only(left: 16.0, right: 16.0);
-const defaultButtonConstraints = BoxConstraints(minWidth: 88.0, minHeight: 36.0);
-const defaultButtonDuration = Duration(milliseconds: 200);
+const ShapeBorder defaultButtonShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0)));
+const EdgeInsets defaultButtonPadding = EdgeInsets.only(left: 16.0, right: 16.0);
+const BoxConstraints defaultButtonConstraints = BoxConstraints(minWidth: 88.0, minHeight: 36.0);
+const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
 void main() {
   group('RaisedButton', () {
@@ -19,7 +19,7 @@ void main() {
           home: Center(
             child: RaisedButton(
               onPressed: () { }, // button.enabled == true
-              child: Text('button'),
+              child: const Text('button'),
             )
           ),
         ),
@@ -44,7 +44,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),
-          home: Center(
+          home: const Center(
             child: RaisedButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
@@ -77,7 +77,7 @@ void main() {
           home: Center(
             child: FlatButton(
               onPressed: () { }, // button.enabled == true
-              child: Text('button'),
+              child: const Text('button'),
             )
           ),
         ),
@@ -102,7 +102,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),
-          home: Center(
+          home: const Center(
             child: FlatButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
@@ -122,7 +122,7 @@ void main() {
       expect(raw.constraints, defaultButtonConstraints);
       expect(raw.padding, defaultButtonPadding);
       expect(raw.shape, defaultButtonShape);
-      expect(raw.animationDuration, Duration(milliseconds: 200));
+      expect(raw.animationDuration, const Duration(milliseconds: 200));
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
   });
@@ -135,15 +135,15 @@ void main() {
           home: Center(
             child: OutlineButton(
               onPressed: () { }, // button.enabled == true
-              child: Text('button'),
+              child: const Text('button'),
             )
           ),
         ),
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, Color(0xdd000000));
-      expect(raw.fillColor, Color(0x00ffffff));
+      expect(raw.textStyle.color, const Color(0xdd000000));
+      expect(raw.fillColor, const Color(0x00ffffff));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
       expect(raw.elevation, 0.0);
@@ -159,7 +159,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),
-          home: Center(
+          home: const Center(
             child: OutlineButton(
               onPressed: null, // button.enabled == false
               child: Text('button'),
@@ -169,8 +169,8 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
-      expect(raw.textStyle.color, Color(0x61000000));
-      expect(raw.fillColor, Color(0x00000000));
+      expect(raw.textStyle.color, const Color(0x61000000));
+      expect(raw.fillColor, const Color(0x00000000));
       // highlightColor, disabled button can't be pressed
       // splashColor, disabled button doesn't splash
       expect(raw.elevation, 0.0);

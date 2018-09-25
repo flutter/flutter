@@ -9,6 +9,11 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme_data.dart';
 
+/// A set of thirteen colors based on the [Material spec](https://material.io/design/color/the-color-system.html)
+/// that can be used to configure the color properties of most components.
+///
+/// The [Theme] has a color scheme, [ThemeData.colorScheme], which is constructed
+/// with [ColorScheme.fromSwatch].
 @immutable
 class ColorScheme extends Diagnosticable {
   const ColorScheme({

@@ -66,7 +66,7 @@ class MaterialButton extends StatelessWidget {
     this.minWidth,
     this.height,
     this.child,
-  }) : assert(clipBehavior != null), super(key: key);
+  }) : super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -216,8 +216,6 @@ class MaterialButton extends StatelessWidget {
   /// property to a non-null value.
   bool get enabled => onPressed != null;
 
-  Object get type => null;
-
   /// The internal padding for the button's [child].
   ///
   /// Defaults to the value from the current [ButtonTheme],
@@ -272,9 +270,9 @@ class MaterialButton extends StatelessWidget {
       elevation: buttonTheme.getElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       padding: buttonTheme.getPadding(this),
-      constraints: buttonTheme.getConstraints(this),
+      constraints: buttonTheme.constraints,
       shape: buttonTheme.shape,
-      clipBehavior: clipBehavior,
+      clipBehavior: clipBehavior ?? Clip.none,
       animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,

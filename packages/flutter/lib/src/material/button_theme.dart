@@ -8,7 +8,10 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'flat_button.dart';
 import 'material_button.dart';
+import 'outline_button.dart';
+import 'raised_button.dart';
 import 'theme.dart';
 import 'theme_data.dart' show MaterialTapTargetSize;
 
@@ -57,17 +60,6 @@ enum ButtonBarLayoutBehavior {
 ///
 ///  * [FlatButton] [RaisedButton], and [OutlineButton], which are styled
 ///    based on the ambient button theme.
-///  * [ThemeData.textTheme], `button` is the default text style for button labels.
-///  * [ThemeData.buttonColor], the fill color for [RaisedButton]s unless the
-///    button theme's text theme is [ButtonTextTheme.primary].
-///  * [ThemeData.primaryColor], the fill or text color if a button theme's text
-///    theme is [ButtonTextTheme.primary].
-///  * [ThemeData.accentColor], the text color for buttons when button theme's
-///    text theme is [ButtonTextTheme.accent].
-///  * [ThemeData.disabled], the default text color for disabled buttons.
-///  * [ThemeData.brightness], used to select contrasting text and fill colors.
-///  * [ThemeData.highlightColor], a button [InkWell]'s default highlight color.
-///  * [ThemeData.splashColor], a button [InkWell]'s default splash color.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedWidget {
@@ -203,6 +195,10 @@ class ButtonThemeData extends Diagnosticable {
   /// or [ThemeData].
   ///
   /// The [textTheme], [minWidth], and [height] parameters must not be null.
+  ///
+  /// The ButtonTheme's methods that have a [MaterialButton] parameter and
+  /// have a name with a `get` prefix are used by [RaisedButton],
+  /// [OutlineButton], and [FlatButton] to configure a [RawMaterialButton].
   const ButtonThemeData({
     this.textTheme = ButtonTextTheme.normal,
     this.minWidth = 88.0,
@@ -241,10 +237,13 @@ class ButtonThemeData extends Diagnosticable {
 
   /// Defines a button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
+  ///
+  /// Despite the name, this property is not a [TextTheme], its value is not a
+  /// collection of [TextStyle]s.
   final ButtonTextTheme textTheme;
 
-  /// Defines whether a button bar should size itself with a minimum size
-  /// constraint or padding.
+  /// Defines whether a [ButtonBar] should size itself with a minimum size
+  /// constraint or with padding.
   ///
   /// Defaults to [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
@@ -268,15 +267,20 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Defaults to 24.0 on the left and right if [textTheme] is
   /// [ButtonTextTheme.primary], 16.0 on the left and right otherwise.
+  ///
+  /// See also:
+  ///
+  ///  * [getPadding], which is used by [RaisedButton], [OutlineButton]
+  ///    and [FlatButton].
   EdgeInsetsGeometry get padding {
     if (_padding != null)
       return _padding;
-    switch (textTheme) {
+   switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
         return const EdgeInsets.symmetric(horizontal: 16.0);
       case ButtonTextTheme.primary:
-        return const EdgeInsets.symmetric(horizontal: 24.0);
+       return const EdgeInsets.symmetric(horizontal: 24.0);
     }
     assert(false);
     return EdgeInsets.zero;
@@ -292,6 +296,11 @@ class ButtonThemeData extends Diagnosticable {
   /// Defaults to a rounded rectangle with circular corner radii of 4.0 if
   /// [textTheme] is [ButtonTextTheme.primary], a rounded rectangle with
   /// circular corner radii of 2.0 otherwise.
+  ///
+  /// See also:
+  ///
+  ///  * [getShape], which is used by [RaisedButton], [OutlineButton]
+  ///    and [FlatButton].
   ShapeBorder get shape {
     if (_shape != null)
       return _shape;
@@ -321,44 +330,87 @@ class ButtonThemeData extends Diagnosticable {
   /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
 
+  /// The background fill color for [RaisedButton]s.
+  ///
+  /// This property is null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getFillColor], which is used by [RaisedButton] to compute its
+  ///    background fill color.
   final Color buttonColor;
+
+  /// The background fill color for disabled [RaisedButton]s.
+  ///
+  /// Null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getDisabledFillColor], which is used by [RaisedButton] to compute its
+  ///    background fill color.
   final Color disabledColor;
+
+  /// The color of the overlay that appears when a button is pressed.
+  ///
+  /// Null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getHighlightColor], which is used by [RaisedButton], [OutlineButton]
+  ///    and [FlatButton].
   final Color highlightColor;
+
+  /// The color of the ink "splash" overlay that appears when a button is tapped.
+  ///
+  /// Null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getSplashColor], which is used by [RaisedButton], [OutlineButton]
+  ///    and [FlatButton].
   final Color splashColor;
+
+  /// A set of thirteen colors that can be used to derive the button theme's
+  /// colors.
+  ///
+  /// This property was added much later than the theme's set of highly
+  /// specific colors, like [buttonColor], [highlightColor], [splashColor] etc.
+  /// The colors for new button classes can be defined exclusively in terms
+  /// of [colorScheme]. When it's possible, the existing buttons will
+  /// (continue to) gradually migrate to it.
   final ColorScheme colorScheme;
+
+  /// The minimum size of a button's tap target.
+  ///
+  /// Null by default.
+  ///
+  /// See also:
+  ///
+  ///  * [getMaterialTargetTapSize], which is used by [RaisedButton],
+  /// [OutlineButton] and [FlatButton].
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// The button's overall brightness.
+  /// The [button]'s overall brightness.
   ///
-  /// Returns the buttons [MaterialButton.colorBrightness] it it is non-null,
+  /// Returns the button's [MaterialButton.colorBrightness] it it is non-null,
   /// otherwise the color scheme's [ColorScheme.brightness] is returned.
   Brightness getBrightness(MaterialButton button) {
     return button.colorBrightness ?? colorScheme.brightness;
   }
 
-  /// Defines a button's base colors, and the defaults for the button's
+  /// Defines the [button]'s base colors, and the defaults for the button's
   /// minimum size, internal padding, and shape.
   ///
-  /// Sadly, this property is not the [TextTheme] whose [TextTheme.button]
-  /// is used to as the button text's [TextStyle].
+  /// Despite the name, this property is not the [TextTheme] whose
+  /// [TextTheme.button] is used as the button text's [TextStyle].
   ButtonTextTheme getTextTheme(MaterialButton button) {
     return button.textTheme ?? textTheme;
   }
 
-  bool _isFlatButton(MaterialButton button) {
-    return button.type == 'FlatButton' || button.type == 'FlatButton.icon';
-  }
-
-  bool _isRaisedButton(MaterialButton button) {
-    return button.type == 'RaisedButton' || button.type == 'RaisedButton.icon';
-  }
-
-  bool _isOutlineButton(MaterialButton button) {
-    return button.type == 'OutlineButton' || button.type == 'OutlineButton.icon';
-  }
-
   bool _isIconButton(MaterialButton button) {
-    return button.type == 'RaisedButton.icon' || button.type == 'FlatButton.icon' || button.type == 'OutlineButton.icon';
+    return button is RaisedButtonWithIcon
+        || button is FlatButtonWithIcon
+        || button is OutlineButtonWithIcon;
   }
 
   Color _getDisabledColor(MaterialButton button) {
@@ -367,19 +419,19 @@ class ButtonThemeData extends Diagnosticable {
       : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
   }
 
-  /// The foreground color of the button's text and icon when
+  /// The foreground color of the [button]'s text and icon when
   /// [MaterialButton.onPressed] is null (when MaterialButton.enabled is false).
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.3 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
   Color getDisabledTextColor(MaterialButton button) {
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
     return _getDisabledColor(button);
   }
 
-  /// The button's background color when [MaterialButton.onPressed] is null
+  /// The [button]'s background color when [MaterialButton.onPressed] is null
   /// (when MaterialButton.enabled is false).
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
@@ -388,9 +440,10 @@ class ButtonThemeData extends Diagnosticable {
   Color getDisabledFillColor(MaterialButton button) {
     if (button.disabledColor != null)
       return button.disabledColor;
+    if (disabledColor != null)
+      return disabledColor;
     return _getDisabledColor(button);
   }
-
 
   /// The button's background fill color or null for buttons that don't have
   /// a background color.
@@ -398,12 +451,13 @@ class ButtonThemeData extends Diagnosticable {
   /// Returns [MaterialButton.color] if it is non-null and the button
   /// is enabled.
   ///
-  /// Returns [MaterialButton.disabledColor] if it is non-null and the
-  /// button is disabled.
+  /// Otherwise, returns [MaterialButton.disabledColor] if it is non-null and
+  /// the button is disabled.
   ///
-  /// If button is a [FlatButton] or an [OutlineButton] then null is returned.
+  /// Otherwise, if button is a [FlatButton] or an [OutlineButton] then null is
+  /// returned.
   ///
-  /// If button is a [RaisedButton], returns [buttonColor] if
+  /// Otherwise, if button is a [RaisedButton], returns [buttonColor] if
   /// it is non-null and the button is enabled.
   ///
   /// Otherwise the fill color depends on the value of [getTextTheme].
@@ -420,10 +474,10 @@ class ButtonThemeData extends Diagnosticable {
     if (fillColor != null)
       return fillColor;
 
-    if (_isFlatButton(button) || _isOutlineButton(button))
+    if (button is FlatButton || button is OutlineButton)
       return null;
 
-    if (button.enabled && _isRaisedButton(button) && buttonColor != null)
+    if (button.enabled && button is RaisedButton && buttonColor != null)
       return buttonColor;
 
     switch (getTextTheme(button)) {
@@ -440,7 +494,7 @@ class ButtonThemeData extends Diagnosticable {
     return null;
   }
 
-  /// The foreground color of the button's text and icon.
+  /// The foreground color of the [button]'s text and icon.
   ///
   /// If [button] is not [MaterialButton.enabled], the value of
   /// [getDisabledTextColor] is returned. If the button is enabled and
@@ -476,7 +530,7 @@ class ButtonThemeData extends Diagnosticable {
           : getBrightness(button) == Brightness.dark;
         if (fillIsDark)
           return Colors.white;
-        if (_isFlatButton(button) || _isOutlineButton(button))
+        if (button is FlatButton || button is OutlineButton)
           return colorScheme.primary;
         return Colors.black;
       }
@@ -491,21 +545,22 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.splashColor] if it is non-null.
   ///
-  /// Returns [splashColor] if [button] is a [RaisedButton] or an [OutlineButton]
-  /// and [splashColor] is non-null.
+  /// Otherwise, returns [splashColor] if [button] is a [RaisedButton] or an
+  /// [OutlineButton] and [splashColor] is non-null.
   ///
-  /// Returns [splashColor] if [button] is a [FlatButton], [getTextTheme]
-  /// is not [ButtonTextTheme.primary], and [splashColor] is non-null.
+  /// Otherwise, returns [splashColor] if [button] is a [FlatButton],
+  /// [getTextTheme] is not [ButtonTextTheme.primary], and [splashColor] is
+  /// non-null.
   ///
-  /// Otherwise returns [getTextColor] with an opacity of 0.12.
+  /// Otherwise, returns [getTextColor] with an opacity of 0.12.
   Color getSplashColor(MaterialButton button) {
     if (button.splashColor != null)
       return button.splashColor;
 
-    if (splashColor != null && (_isRaisedButton(button) || _isOutlineButton(button)))
+    if (splashColor != null && (button is RaisedButton || button is OutlineButton))
       return splashColor;
 
-    if (splashColor != null && _isFlatButton(button)) {
+    if (splashColor != null && button is FlatButton) {
       switch (getTextTheme(button)) {
         case ButtonTextTheme.normal:
         case ButtonTextTheme.accent:
@@ -518,10 +573,15 @@ class ButtonThemeData extends Diagnosticable {
     return getTextColor(button).withOpacity(0.12);
   }
 
-  /// The color of the overlay that appears when the (enabled) button is
-  /// pressed.
+  /// The color of the overlay that appears when the [button] is pressed.
   ///
-  /// Returns the button's [MaterialButton.splashColor] if it is non-null.
+  /// Returns the button's [MaterialButton.highlightColor] if it is non-null.
+  /// Otherwise the highlight color depends on [getTextTheme]:
+  ///
+  ///  * [ButtonTextTheme.normal], [ButtonTextTheme.accent]: returns
+  ///    [highlightColor] if it is non-null, otherwise the value
+  ///    of [getTextColor] with opacity 0.16.
+  ///  * [ButtonTextTheme.primary], returns [Colors.transparent].
   Color getHighlightColor(MaterialButton button) {
     if (button.highlightColor != null)
       return button.highlightColor;
@@ -542,11 +602,11 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// Returns the button's [MaterialButton.elevation] if it is non-null.
   ///
-  /// If button is a [FlatButton] then elevation is 0.0, otherwise 2.0.
+  /// If button is a [FlatButton] then elevation is 0.0, otherwise it is 2.0.
   double getElevation(MaterialButton button) {
     if (button.elevation != null)
       return button.elevation;
-    if (_isFlatButton(button))
+    if (button is FlatButton)
       return 0.0;
     return 2.0;
   }
@@ -561,9 +621,9 @@ class ButtonThemeData extends Diagnosticable {
   double getHighlightElevation(MaterialButton button) {
     if (button.highlightElevation != null)
       return button.highlightElevation;
-    if (_isFlatButton(button))
+    if (button is FlatButton)
       return 0.0;
-    if (_isOutlineButton(button))
+    if (button is OutlineButton)
       return 2.0;
     return 8.0;
   }
@@ -580,7 +640,7 @@ class ButtonThemeData extends Diagnosticable {
     return 0.0;
   }
 
-  /// The [button]'s internal padding.
+  /// Padding for the [button]'s child (typically the button's label).
   ///
   /// Returns the button's [MaterialButton.padding] if it is non-null.
   ///
@@ -588,25 +648,53 @@ class ButtonThemeData extends Diagnosticable {
   /// [FlatButton.icon] or [OutlineButton.icon] then the padding is:
   /// `EdgeInsetsDirectional.only(start: 12.0, end: 16.0)`.
   ///
-  /// Returns [padding] if it is non-null, otherwise `EdgeInsets.zero`.
+  /// Otherwise, returns [padding] if it is non-null.
+  ///
+  /// Otherwise, returns horizontal padding of 24.0 on the left and right if
+  /// [getTextTheme] is [ButtonTextTheme.primary], 16.0 on the left and right
+  /// otherwise.
   EdgeInsetsGeometry getPadding(MaterialButton button) {
     if (button.padding != null)
       return button.padding;
+
     if (_isIconButton(button))
       return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
-    return padding ?? EdgeInsets.zero;
+
+    if (_padding != null)
+      return _padding;
+
+    switch (getTextTheme(button)) {
+      case ButtonTextTheme.normal:
+      case ButtonTextTheme.accent:
+        return const EdgeInsets.symmetric(horizontal: 16.0);
+      case ButtonTextTheme.primary:
+        return const EdgeInsets.symmetric(horizontal: 24.0);
+    }
+    assert(false);
+    return EdgeInsets.zero;
   }
 
-  BoxConstraints getConstraints(MaterialButton button) => constraints;
-
+  /// The shape of the [button]'s [Material].
+  ///
+  /// Returns the button's [MaterialButton.shape] if it is non-null, otherwise
+  /// [shape] is returned.
   ShapeBorder getShape(MaterialButton button) {
     return button.shape ?? shape;
   }
 
+  /// The duration of the [button]'s highlight animation.
+  ///
+  /// Returns the button's [MaterialButton.animationDuration] it if is non-null,
+  /// otherwise 200ms.
   Duration getAnimationDuration(MaterialButton button) {
     return button.animationDuration ?? kThemeChangeDuration;
   }
 
+  /// The minimum size of the [button]'s tap target.
+  ///
+  /// Returns the button's [MaterialButton.tapTargetSize] if it is non-null.
+  /// Otherwise [materialTapTargetSize] is returned if that's non-null.
+  /// Otherwise [MaterialTapTargetSize.padded] is returned.
   MaterialTapTargetSize getMaterialTapTargetSize(MaterialButton button) {
     return button.materialTapTargetSize ?? materialTapTargetSize ?? MaterialTapTargetSize.padded;
   }
