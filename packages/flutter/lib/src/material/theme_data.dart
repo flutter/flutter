@@ -943,8 +943,8 @@ class ThemeData extends Diagnosticable {
         primaryIconTheme,
         accentIconTheme,
         sliderTheme,
-        tabBarTheme,
         hashValues(
+          tabBarTheme,
           chipTheme,
           platform,
           materialTapTargetSize,
