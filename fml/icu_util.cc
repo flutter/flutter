@@ -16,12 +16,6 @@
 namespace fml {
 namespace icu {
 
-#if OS_WIN
-static constexpr char kPathSeparator = '\\';
-#else
-static constexpr char kPathSeparator = '/';
-#endif
-
 class ICUContext {
  public:
   ICUContext(const std::string& icu_data_path) : valid_(false) {
@@ -31,25 +25,37 @@ class ICUContext {
   ~ICUContext() = default;
 
   bool SetupMapping(const std::string& icu_data_path) {
-    // Check if the explicit path specified exists.
-    auto path_mapping = std::make_unique<FileMapping>(icu_data_path, false);
-    if (path_mapping->GetSize() != 0) {
-      mapping_ = std::move(path_mapping);
-      return true;
+    // Check if the path exists and it readable directly.
+    auto fd =
+        fml::OpenFile(icu_data_path.c_str(), false, fml::FilePermission::kRead);
+
+    // Check the path relative to the current executable.
+    if (!fd.is_valid()) {
+      auto directory = fml::paths::GetExecutableDirectoryPath();
+
+      if (!directory.first) {
+        return false;
+      }
+
+      std::string path_relative_to_executable =
+          paths::JoinPaths({directory.second, icu_data_path});
+
+      fd = fml::OpenFile(path_relative_to_executable.c_str(), false,
+                         fml::FilePermission::kRead);
     }
 
-    // Check if the mapping can by directly accessed via a file path. In this
-    // case, the data file needs to be next to the executable.
-    auto directory = fml::paths::GetExecutableDirectoryPath();
-
-    if (!directory.first) {
+    if (!fd.is_valid()) {
       return false;
     }
 
-    auto file = std::make_unique<FileMapping>(
-        directory.second + kPathSeparator + icu_data_path, false);
-    if (file->GetSize() != 0) {
-      mapping_ = std::move(file);
+    std::initializer_list<FileMapping::Protection> protection = {
+        fml::FileMapping::Protection::kRead};
+
+    auto file_mapping =
+        std::make_unique<FileMapping>(fd, std::move(protection));
+
+    if (file_mapping->GetSize() != 0) {
+      mapping_ = std::move(file_mapping);
       return true;
     }
 

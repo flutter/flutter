@@ -32,7 +32,8 @@ class FlutterMain {
                    jobject context,
                    jobjectArray jargs,
                    jstring bundlePath,
-                   jstring appRootPath);
+                   jstring appRootPath,
+                   jstring engineCachesPath);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };

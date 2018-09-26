@@ -6,6 +6,10 @@
 
 namespace fml {
 
+uint8_t* FileMapping::GetMutableMapping() {
+  return mutable_mapping_;
+}
+
 DataMapping::DataMapping(std::vector<uint8_t> data) : data_(std::move(data)) {}
 
 DataMapping::~DataMapping() = default;
@@ -17,4 +21,5 @@ size_t DataMapping::GetSize() const {
 const uint8_t* DataMapping::GetMapping() const {
   return data_.data();
 }
+
 }  // namespace fml

@@ -252,8 +252,9 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
       asset_manager->PushBack(
           std::make_unique<blink::ZipAssetStore>(bundlepath));
     } else {
-      asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
-          fml::OpenFile(bundlepath.c_str(), fml::OpenPermission::kRead, true)));
+      asset_manager->PushBack(
+          std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+              bundlepath.c_str(), false, fml::FilePermission::kRead)));
     }
 
     // Use the last path component of the bundle path to determine the
@@ -273,8 +274,9 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
 
   const auto defaultpath = fml::jni::JavaStringToString(env, jdefaultPath);
   if (defaultpath.size() > 0) {
-    asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
-        fml::OpenFile(defaultpath.c_str(), fml::OpenPermission::kRead, true)));
+    asset_manager->PushBack(
+        std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+            defaultpath.c_str(), false, fml::FilePermission::kRead)));
   }
 
   auto isolate_configuration = CreateIsolateConfiguration(*asset_manager);

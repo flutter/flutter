@@ -35,10 +35,8 @@ std::unique_ptr<fml::Mapping> DirectoryAssetBundle::GetAsMapping(
     return nullptr;
   }
 
-  auto mapping = std::make_unique<fml::FileMapping>(
-      fml::OpenFile(descriptor_, asset_name.c_str(), fml::OpenPermission::kRead,
-                    false /* directory */),
-      false /* executable */);
+  auto mapping = std::make_unique<fml::FileMapping>(fml::OpenFile(
+      descriptor_, asset_name.c_str(), false, fml::FilePermission::kRead));
 
   if (mapping->GetMapping() == nullptr) {
     return nullptr;

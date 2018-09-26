@@ -873,7 +873,8 @@ bool Shell::OnServiceProtocolRunInView(
       fml::paths::FromURI(params.at("assetDirectory").ToString());
 
   auto main_script_file_mapping =
-      std::make_unique<fml::FileMapping>(main_script_path, false);
+      std::make_unique<fml::FileMapping>(fml::OpenFile(
+          main_script_path.c_str(), false, fml::FilePermission::kRead));
 
   auto isolate_configuration = IsolateConfiguration::CreateForKernel(
       std::move(main_script_file_mapping));
@@ -881,8 +882,8 @@ bool Shell::OnServiceProtocolRunInView(
   RunConfiguration configuration(std::move(isolate_configuration));
 
   configuration.AddAssetResolver(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenFile(
-          asset_directory_path.c_str(), fml::OpenPermission::kRead, true)));
+      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+          asset_directory_path.c_str(), false, fml::FilePermission::kRead)));
 
   auto& allocator = response.GetAllocator();
   response.SetObject();
@@ -938,8 +939,8 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
   auto asset_manager = fml::MakeRefCounted<blink::AssetManager>();
 
   asset_manager->PushFront(std::make_unique<blink::DirectoryAssetBundle>(
-      fml::OpenFile(params.at("assetDirectory").ToString().c_str(),
-                    fml::OpenPermission::kRead, true)));
+      fml::OpenDirectory(params.at("assetDirectory").ToString().c_str(), false,
+                         fml::FilePermission::kRead)));
 
   if (engine_->UpdateAssetManager(std::move(asset_manager))) {
     response.AddMember("type", "Success", allocator);

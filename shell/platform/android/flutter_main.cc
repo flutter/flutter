@@ -15,6 +15,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/start_up.h"
@@ -46,7 +47,8 @@ void FlutterMain::Init(JNIEnv* env,
                        jobject context,
                        jobjectArray jargs,
                        jstring bundlePath,
-                       jstring appStoragePath) {
+                       jstring appStoragePath,
+                       jstring engineCachesPath) {
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -59,8 +61,14 @@ void FlutterMain::Init(JNIEnv* env,
   settings.assets_path = fml::jni::JavaStringToString(env, bundlePath);
 
   // Restore the callback cache.
+  // TODO(chinmaygarde): Route all cache file access through FML and remove this
+  // setter.
   blink::DartCallbackCache::SetCachePath(
       fml::jni::JavaStringToString(env, appStoragePath));
+
+  fml::paths::InitializeAndroidCachesPath(
+      fml::jni::JavaStringToString(env, engineCachesPath));
+
   blink::DartCallbackCache::LoadCacheFromDisk();
 
   if (!blink::DartVM::IsRunningPrecompiledCode()) {
@@ -99,7 +107,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {

@@ -5,6 +5,8 @@
 source_set("fml") {
   sources = [
     "arraysize.h",
+    "base32.cc",
+    "base32.h",
     "build_config.h",
     "closure.h",
     "command_line.cc",
@@ -12,6 +14,7 @@ source_set("fml") {
     "compiler_specific.h",
     "eintr_wrapper.h",
     "export.h",
+    "file.cc",
     "file.h",
     "icu_util.cc",
     "icu_util.h",
@@ -104,6 +107,7 @@ source_set("fml") {
       "platform/android/message_loop_android.cc",
       "platform/android/message_loop_android.h",
       "platform/android/paths_android.cc",
+      "platform/android/paths_android.h",
       "platform/android/scoped_java_ref.cc",
       "platform/android/scoped_java_ref.h",
     ]
@@ -139,6 +143,8 @@ source_set("fml") {
 
   if (is_win) {
     sources += [
+      "platform/win/errors_win.cc",
+      "platform/win/errors_win.h",
       "platform/win/file_win.cc",
       "platform/win/mapping_win.cc",
       "platform/win/message_loop_win.cc",
@@ -161,7 +167,9 @@ executable("fml_unittests") {
   testonly = true
 
   sources = [
+    "base32_unittest.cc",
     "command_line_unittest.cc",
+    "file_unittest.cc",
     "memory/ref_counted_unittest.cc",
     "memory/weak_ptr_unittest.cc",
     "message_loop_unittests.cc",
