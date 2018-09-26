@@ -83,6 +83,7 @@ class CoverageCollector extends TestWatcher {
   Future<String> finalizeCoverage({
     coverage.Formatter formatter,
     Duration timeout,
+    Directory coverageDirectory,
   }) async {
     printTrace('formating coverage data');
     if (_globalHitmap == null)
@@ -90,7 +91,9 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
-      final List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
+      final List<String> reportOn = coverageDirectory == null
+        ? <String>[fs.path.join(packagePath, 'lib')]
+        : <String>[coverageDirectory.path];
       formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = await formatter.format(_globalHitmap);
@@ -98,10 +101,11 @@ class CoverageCollector extends TestWatcher {
     return result;
   }
 
-  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false }) async {
+  Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await finalizeCoverage(
       timeout: const Duration(seconds: 30),
+      coverageDirectory: coverageDirectory,
     );
     status.stop();
     printTrace('coverage information collection complete');
