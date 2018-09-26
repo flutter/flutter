@@ -672,29 +672,22 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// ```dart
 /// Scaffold(
-///      appBar: AppBar(
-///        title: Text('Sample Code'),
-///      ),
-///      body: Center(
-///        child: Text(
-///          'Scaffold',
-///        ),
-///      ),
-///
-///      bottomNavigationBar: BottomAppBar(
-///        child: Container(
-///          height: 50.0,
-///        ),
-///      ),
-///
-///      floatingActionButton: FloatingActionButton(
-///        onPressed: () {},
-///        tooltip: 'Increment',
-///        child: Icon(Icons.add),
-///      ),
-///
-///      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-///    )
+///   appBar: AppBar(
+///     title: Text('Sample Code'),
+///   ),
+///   body: Center(
+///     child: Text('Scaffold'),
+///   ),
+///   bottomNavigationBar: BottomAppBar(
+///     child: Container(height: 50.0,),
+///   ),
+///   floatingActionButton: FloatingActionButton(
+///     onPressed: () {},
+///     tooltip: 'Increment',
+///     child: Icon(Icons.add),
+///   ),
+///   floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+///   )
 /// ```
 ///
 /// See also:
