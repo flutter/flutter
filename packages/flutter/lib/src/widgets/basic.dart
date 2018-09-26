@@ -143,11 +143,24 @@ class Directionality extends InheritedWidget {
 /// This is more efficient than adding and removing the child widget from the
 /// tree on demand.
 ///
-/// ## Opacity Animation
+/// ## Opacity animation
 ///
 /// Animating an [Opacity] widget directly causes the widget (and possibly its
 /// subtree) to rebuild each frame, which is not very efficient. Consider using
 /// an [AnimatedOpacity] instead.
+///
+/// ## Transparent image
+///
+/// If only a single [Image] needs to be composited with an opacity between 0.0
+/// and 1.0, it's much faster to directly use [Image] as following:
+///
+/// ```dart
+/// Image(
+///   image: image,
+///   color: Color.fromRGBO(255, 255, 255, opacity),
+///   colorBlendMode: BlendMode.modulate
+/// )
+/// ```
 ///
 /// See also:
 ///
@@ -161,6 +174,8 @@ class Directionality extends InheritedWidget {
 ///    animate opacity.
 ///  * [FadeTransition], which uses a provided animation to efficiently animate
 ///    opacity.
+///  * [Image], which can directly provide a partially transparent image with
+///    much less performance hit.
 class Opacity extends SingleChildRenderObjectWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
