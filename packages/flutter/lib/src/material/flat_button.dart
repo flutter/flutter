@@ -131,7 +131,7 @@ class FlatButton extends MaterialButton {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
-      constraints: buttonTheme.constraints,
+      constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
       animationDuration: buttonTheme.getAnimationDuration(this),
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),

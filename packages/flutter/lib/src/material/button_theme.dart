@@ -690,6 +690,13 @@ class ButtonThemeData extends Diagnosticable {
     return button.animationDuration ?? kThemeChangeDuration;
   }
 
+  /// The [BoxConstraints] that the define the [button]'s size.
+  ///
+  /// By default this method just returns [constraints]. Subclasses
+  /// could override this method to return a value that was,
+  /// for example, based on the button's type.
+  BoxConstraints getConstraints(MaterialButton button) => constraints;
+
   /// The minimum size of the [button]'s tap target.
   ///
   /// Returns the button's [MaterialButton.tapTargetSize] if it is non-null.
