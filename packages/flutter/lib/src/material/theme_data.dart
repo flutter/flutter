@@ -187,7 +187,6 @@ class ThemeData extends Diagnosticable {
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
-  tabBarTheme ??= const TabBarTheme();
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
@@ -894,12 +893,12 @@ class ThemeData extends Diagnosticable {
         primaryIconTheme,
         accentIconTheme,
         sliderTheme,
-        chipTheme,
+        tabBarTheme,
         hashValues(
+          chipTheme,
           platform,
           materialTapTargetSize,
           pageTransitionsTheme,
-          tabBarTheme,
         ),
       ),
     );
