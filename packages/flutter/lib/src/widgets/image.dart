@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -249,7 +250,8 @@ class Image extends StatefulWidget {
   /// addition:
   ///
   /// * If the `scale` argument is provided and is not null, then the exact
-  /// asset specified will be used.
+  /// asset specified will be used. To display an image variant with a specific
+  /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   //
@@ -550,9 +552,12 @@ class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   bool _isListeningToStream = false;
+  bool _invertColors;
 
   @override
   void didChangeDependencies() {
+    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
     _resolveImage();
 
     if (TickerMode.of(context))
@@ -645,6 +650,7 @@ class _ImageState extends State<Image> {
       repeat: widget.repeat,
       centerSlice: widget.centerSlice,
       matchTextDirection: widget.matchTextDirection,
+      invertColors: _invertColors,
     );
     if (widget.excludeFromSemantics)
       return image;

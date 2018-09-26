@@ -10,6 +10,7 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'colors.dart';
 import 'constants.dart';
+import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -315,7 +316,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // animation is complete.
   Color _backgroundColor;
 
-  static final Tween<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
+  static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
     for (AnimationController controller in _controllers)
@@ -495,6 +496,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     // Labels apply up to _bottomMargin padding. Remainder is media padding.
     final double additionalBottomPadding = math.max(MediaQuery.of(context).padding.bottom - _kBottomMargin, 0.0);
@@ -653,7 +655,7 @@ class _RadialPainter extends CustomPainter {
       );
       canvas.drawCircle(
         center,
-        radiusTween.lerp(circle.animation.value),
+        radiusTween.transform(circle.animation.value),
         paint,
       );
     }

@@ -212,7 +212,7 @@ bool _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirect
   return null;
 }
 
-typedef double _ChildSizingFunction(RenderBox child, double extent);
+typedef _ChildSizingFunction = double Function(RenderBox child, double extent);
 
 /// Displays its children in a one-dimensional array.
 ///

@@ -13,8 +13,7 @@ enum LoggingLevel {
   /// Logs no logs.
   none,
 
-  /// Logs severe messages at the most (note that severe messages are always
-  /// logged).
+  /// Logs severe messages at the most (severe messages are always logged).
   ///
   /// Severe means that the process has encountered a critical level of failure
   /// in which it cannot recover and will terminate as a result.
@@ -43,7 +42,7 @@ enum LoggingLevel {
 }
 
 /// Signature of a function that logs a [LogMessage].
-typedef void LoggingFunction(LogMessage log);
+typedef LoggingFunction = void Function(LogMessage log);
 
 /// The default logging function.
 ///

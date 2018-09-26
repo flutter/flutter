@@ -79,6 +79,7 @@ class _AccountDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
@@ -308,6 +309,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     return Semantics(
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,

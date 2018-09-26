@@ -34,7 +34,7 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef void ContextInitializer(AppContext testContext);
+typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(String description, dynamic testMethod(), {
@@ -76,7 +76,7 @@ void testUsingContext(String description, dynamic testMethod(), {
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger()..supportsColor = false,
           OperatingSystemUtils: () => MockOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),

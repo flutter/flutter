@@ -1010,10 +1010,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       vsync: this,
     );
     _thetaTween = Tween<double>(begin: _getThetaForTime(widget.selectedTime));
-    _theta = _thetaTween.animate(CurvedAnimation(
-      parent: _thetaController,
-      curve: Curves.fastOutSlowIn
-    ))..addListener(() => setState(() { }));
+    _theta = _thetaController
+      .drive(CurveTween(curve: Curves.fastOutSlowIn))
+      .drive(_thetaTween)
+      ..addListener(() => setState(() { /* _theta.value has changed */ }));
   }
 
   ThemeData themeData;

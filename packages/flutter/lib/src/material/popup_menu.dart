@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'debug.dart';
 import 'divider.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -713,6 +714,7 @@ Future<T> showMenu<T>({
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
+  assert(debugCheckHasMaterialLocalizations(context));
   String label = semanticLabel;
   switch (defaultTargetPlatform) {
     case TargetPlatform.iOS:
@@ -739,19 +741,19 @@ Future<T> showMenu<T>({
 /// dismissed.
 ///
 /// Used by [PopupMenuButton.onSelected].
-typedef void PopupMenuItemSelected<T>(T value);
+typedef PopupMenuItemSelected<T> = void Function(T value);
 
 /// Signature for the callback invoked when a [PopupMenuButton] is dismissed
 /// without selecting an item.
 ///
 /// Used by [PopupMenuButton.onCanceled].
-typedef void PopupMenuCanceled();
+typedef PopupMenuCanceled = void Function();
 
 /// Signature used by [PopupMenuButton] to lazily construct the items shown when
 /// the button is pressed.
 ///
 /// Used by [PopupMenuButton.itemBuilder].
-typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
+typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext context);
 
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
 /// because an item was selected. The value passed to [onSelected] is the value of
@@ -911,6 +913,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMaterialLocalizations(context));
     return widget.child != null
       ? InkWell(
           onTap: showButtonMenu,

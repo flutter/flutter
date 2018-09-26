@@ -67,16 +67,14 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   AnimationController _controller;
   Animation<double> _iconTurns;
 
+  static final Animatable<double> _iconTurnTween = Tween<double>(begin: 0.0, end: 0.5)
+    .chain(CurveTween(curve: Curves.fastOutSlowIn));
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
-    _iconTurns = Tween<double>(begin: 0.0, end: 0.5).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn
-      )
-    );
+    _iconTurns = _controller.drive(_iconTurnTween);
     // If the widget is initially expanded, rotate the icon without animating it.
     if (widget.isExpanded) {
       _controller.value = math.pi;
@@ -109,6 +107,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData theme = Theme.of(context);
     final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;

@@ -1220,7 +1220,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   Animation<double> enableAnimation;
   Animation<double> selectionFade;
 
-  static final Tween<double> pressedShadowTween = Tween<double>(
+  static final Animatable<double> pressedShadowTween = Tween<double>(
     begin: 0.0,
     end: _kPressElevation,
   );
@@ -1429,6 +1429,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
+    assert(debugCheckHasMaterialLocalizations(context));
 
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);

@@ -2,6 +2,7 @@ container:
   image: gcr.io/flutter-cirrus/build-flutter-image:latest
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -68,6 +69,7 @@ task:
 
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   windows_container:
     image: cirrusci/windowsservercore:2016
     os_version: 2016
@@ -102,6 +104,7 @@ task:
         SHARD: tool_tests
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: deploy_gallery-macos
   only_if: $CIRRUS_BRANCH == 'dev'
   pub_cache:
@@ -133,6 +136,7 @@ task:
     - ./dev/bots/deploy_gallery.sh
 
 task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
     image: high-sierra-xcode-9.4.1
   depends_on:

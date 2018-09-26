@@ -622,7 +622,7 @@ class ClipRectLayer extends ContainerLayer {
   ///
   /// The [clipRect] property must be non-null before the compositing phase of
   /// the pipeline.
-  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.antiAlias }) :
+  ClipRectLayer({ this.clipRect, Clip clipBehavior = Clip.hardEdge }) :
         _clipBehavior = clipBehavior, assert(clipBehavior != null), assert(clipBehavior != Clip.none);
 
   /// The rectangle to clip in the parent's coordinate system.

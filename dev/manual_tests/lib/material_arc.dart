@@ -396,7 +396,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   }
 }
 
-typedef Widget _DemoBuilder(_ArcDemo demo);
+typedef _DemoBuilder = Widget Function(_ArcDemo demo);
 
 class _ArcDemo {
   _ArcDemo(this.title, this.builder, TickerProvider vsync)
@@ -474,7 +474,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 }
 
 void main() {
-  runApp(MaterialApp(
-    home: const AnimationDemo(),
+  runApp(const MaterialApp(
+    home: AnimationDemo(),
   ));
 }

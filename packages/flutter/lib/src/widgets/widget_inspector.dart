@@ -13,6 +13,7 @@ import 'dart:ui' as ui
         window,
         ClipOp,
         Image,
+        ImageByteFormat,
         Paragraph,
         Picture,
         PictureRecorder,
@@ -36,9 +37,9 @@ import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
-typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
+typedef InspectorSelectButtonBuilder = Widget Function(BuildContext context, VoidCallback onPressed);
 
-typedef void _RegisterServiceExtensionCallback({
+typedef _RegisterServiceExtensionCallback = void Function({
   @required String name,
   @required ServiceExtensionCallback callback
 });
@@ -655,7 +656,7 @@ List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain
 
 /// Signature for the selection change callback used by
 /// [WidgetInspectorService.selectionChangedCallback].
-typedef void InspectorSelectionChangedCallback();
+typedef InspectorSelectionChangedCallback = void Function();
 
 /// Structure to help reference count Dart objects referenced by a GUI tool
 /// using [WidgetInspectorService].
@@ -1026,6 +1027,36 @@ class WidgetInspectorService {
       name: 'isWidgetCreationTracked',
       callback: isWidgetCreationTracked,
     );
+    assert(() {
+      registerServiceExtension(
+        name: 'screenshot',
+        callback: (Map<String, String> parameters) async {
+          assert(parameters.containsKey('id'));
+          assert(parameters.containsKey('width'));
+          assert(parameters.containsKey('height'));
+
+          final ui.Image image = await screenshot(
+            toObject(parameters['id']),
+            width: double.parse(parameters['width']),
+            height: double.parse(parameters['height']),
+            margin: parameters.containsKey('margin') ?
+                double.parse(parameters['margin']) : 0.0,
+            maxPixelRatio: parameters.containsKey('maxPixelRatio') ?
+                double.parse(parameters['maxPixelRatio']) : 1.0,
+            debugPaint: parameters['debugPaint'] == 'true',
+          );
+          if (image == null) {
+            return <String, Object>{'result': null};
+          }
+          final ByteData byteData = await image.toByteData(format:ui.ImageByteFormat.png);
+
+          return <String, Object>{
+            'result': base64.encoder.convert(Uint8List.view(byteData.buffer)),
+          };
+        },
+      );
+      return true;
+    }());
   }
 
   /// Clear all InspectorService object references.

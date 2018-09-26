@@ -9,27 +9,34 @@ void main() {
   testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(),
-          child: CustomScrollView(
-            controller: controller,
-            slivers: const <Widget>[
-              SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
-              SliverAppBar(primary: false, pinned: true, title: Text('B')),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  <Widget>[
-                    Text('C'),
-                    Text('D'),
-                    SizedBox(height: 500.0),
-                    Text('E'),
-                    SizedBox(height: 500.0),
-                  ],
+      Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              controller: controller,
+              slivers: const <Widget>[
+                SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+                SliverAppBar(primary: false, pinned: true, title: Text('B')),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      Text('C'),
+                      Text('D'),
+                      SizedBox(height: 500.0),
+                      Text('E'),
+                      SizedBox(height: 500.0),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

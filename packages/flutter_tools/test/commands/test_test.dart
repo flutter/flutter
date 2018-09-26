@@ -116,7 +116,11 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   int outputLineNumber = 0;
   bool haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
-    expect(output, hasLength(greaterThan(outputLineNumber)));
+    expect(
+      output,
+      hasLength(greaterThan(outputLineNumber)),
+      reason: 'Failure in $testName to compare to $fullTestExpectation',
+    );
     final String expectationLine = expectations[expectationLineNumber];
     final String outputLine = output[outputLineNumber];
     if (expectationLine == '<<skip until matching line>>') {

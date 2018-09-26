@@ -62,7 +62,7 @@ class MediaQueryData {
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
@@ -315,8 +315,8 @@ class MediaQueryData {
   String toString() {
     return '$runtimeType('
              'size: $size, '
-             'devicePixelRatio: $devicePixelRatio, '
-             'textScaleFactor: $textScaleFactor, '
+             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
+             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '

@@ -115,8 +115,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 ///    - packages/fancy_backgrounds/backgrounds/background1.png
 /// ```
 ///
-/// Note that the `lib/` is implied, so it should not be included in the asset
-/// path.
+/// The `lib/` is implied, so it should not be included in the asset path.
 ///
 /// See also:
 ///

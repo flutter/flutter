@@ -12,6 +12,7 @@ import 'button_theme.dart';
 import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
+import 'debug.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -286,6 +287,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.
+    assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData themeData = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER

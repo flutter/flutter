@@ -20,7 +20,7 @@ final Logger _log = Logger('DartVm');
 
 /// Signature of an asynchronous function for astablishing a JSON RPC-2
 /// connection to a [Uri].
-typedef Future<json_rpc.Peer> RpcPeerConnectionFunction(Uri uri);
+typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(Uri uri);
 
 /// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
 ///
@@ -118,14 +118,15 @@ class DartVm {
 
   /// Returns a [List] of [IsolateRef] objects whose name matches `pattern`.
   ///
-  /// Also checks to make sure it was launched from the `main()` function.
+  /// This is not limited to Isolates running Flutter, but to any Isolate on the
+  /// VM.
   Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: _kRpcTimeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      if (name.contains(pattern) && name.contains(RegExp(r':main\(\)'))) {
+      if (name.contains(pattern)) {
         result.add(IsolateRef._fromJson(jsonIsolate, this));
       }
     }

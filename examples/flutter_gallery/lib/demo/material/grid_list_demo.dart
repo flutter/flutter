@@ -10,7 +10,7 @@ enum GridDemoTileStyle {
   twoLine
 }
 
-typedef void BannerTapCallback(Photo photo);
+typedef BannerTapCallback = void Function(Photo photo);
 
 const double _kMinFlingVelocity = 800.0;
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
@@ -117,10 +117,10 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
     final double distance = (Offset.zero & context.size).shortestSide;
-    _flingAnimation = Tween<Offset>(
+    _flingAnimation = _controller.drive(Tween<Offset>(
       begin: _offset,
       end: _clampOffset(_offset + direction * distance)
-    ).animate(_controller);
+    ));
     _controller
       ..value = 0.0
       ..fling(velocity: magnitude / 1000.0);

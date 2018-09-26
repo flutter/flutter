@@ -16,6 +16,9 @@ import 'overlay.dart';
 import 'page_storage.dart';
 import 'transitions.dart';
 
+// Examples can assume:
+// dynamic routeObserver;
+
 const Color _kTransparent = Color(0x00000000);
 
 /// A route that displays widgets in the [Navigator]'s [Overlay].
@@ -909,7 +912,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// included in the semantics tree.
   ///
   /// If [semanticsDismissible] is false, then modal barrier semantics are
-  /// excluded from the the semantics tree and tapping on the modal barrier
+  /// excluded from the semantics tree and tapping on the modal barrier
   /// has no effect.
   bool get semanticsDismissible => true;
 
@@ -1171,19 +1174,20 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = GlobalKey();
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
+  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
+
   // one of the builders
   OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
     if (barrierColor != null && !offstage) { // changedInternalState is called if these update
       assert(barrierColor != _kTransparent);
-      final Animation<Color> color = ColorTween(
-        begin: _kTransparent,
-        end: barrierColor, // changedInternalState is called if this updates
-      ).animate(CurvedAnimation(
-        parent: animation,
-        curve: Curves.ease,
-      ));
+      final Animation<Color> color = animation.drive(
+        ColorTween(
+          begin: _kTransparent,
+          end: barrierColor, // changedInternalState is called if this updates
+        ).chain(_easeCurveTween),
+      );
       barrier = AnimatedModalBarrier(
         color: color,
         dismissible: barrierDismissible, // changedInternalState is called if this updates
@@ -1529,10 +1533,10 @@ Future<T> showGeneralDialog<T>({
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
+typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
 
 /// Signature for the function that builds a route's transitions.
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
+typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);

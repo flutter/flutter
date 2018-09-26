@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
 
-typedef Future<Null> ShardRunner();
+typedef ShardRunner = Future<Null> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -144,7 +144,6 @@ Future<Null> _runToolTests() async {
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     enableFlutterToolAsserts: true,
-    runConcurrently: false,
   );
 
   print('${bold}DONE: All tests successful.$reset');
@@ -197,13 +196,9 @@ Future<Null> _runCoverage() async {
 Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool runConcurrently = true,
   bool enableFlutterToolAsserts = false
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact'];
-  if (!runConcurrently) {
-    args.add('-j1');
-  }
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
