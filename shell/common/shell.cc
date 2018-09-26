@@ -23,6 +23,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/engine.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/vsync_waiter.h"
@@ -293,6 +294,9 @@ Shell::Shell(blink::TaskRunners task_runners, blink::Settings settings)
 }
 
 Shell::~Shell() {
+  PersistentCache::GetCacheForProcess()->RemoveWorkerTaskRunner(
+      task_runners_.GetIOTaskRunner());
+
   if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
     vm->GetServiceProtocol().RemoveHandler(this);
   }
@@ -369,6 +373,9 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   if (auto vm = blink::DartVM::ForProcessIfInitialized()) {
     vm->GetServiceProtocol().AddHandler(this);
   }
+
+  PersistentCache::GetCacheForProcess()->AddWorkerTaskRunner(
+      task_runners_.GetIOTaskRunner());
 
   return true;
 }
