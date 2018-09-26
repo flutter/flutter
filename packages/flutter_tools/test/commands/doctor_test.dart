@@ -148,13 +148,16 @@ void main() {
               '[✗] Missing Validator\n'
               '    ✗ A useful error message\n'
               '    ! A hint message\n'
+              '[!] Not Available Validator\n'
+              '    ✗ A useful error message\n'
+              '    ! A hint message\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '[!] Partial Validator with Errors\n'
               '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '\n'
-              '! Doctor found issues in 3 categories.\n'
+              '! Doctor found issues in 4 categories.\n'
       ));
     });
 
@@ -170,6 +173,11 @@ void main() {
               '    • A message that is not an error\n'
               '    ! A hint message\n'
               '\n'
+              '[!] Not Available Validator\n'
+              '    ✗ A useful error message\n'
+              '    • A message that is not an error\n'
+              '    ! A hint message\n'
+              '\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '    • But there is no error\n'
@@ -179,7 +187,7 @@ void main() {
               '    ! Maybe a hint will help the user\n'
               '    • An extra message with some verbose details\n'
               '\n'
-              '! Doctor found issues in 3 categories.\n'
+              '! Doctor found issues in 4 categories.\n'
       ));
     });
   });
@@ -301,6 +309,19 @@ class MissingValidator extends DoctorValidator {
   }
 }
 
+class NotAvailableValidator extends DoctorValidator {
+  NotAvailableValidator(): super('Not Available Validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(ValidationMessage.error('A useful error message'));
+    messages.add(ValidationMessage('A message that is not an error'));
+    messages.add(ValidationMessage.hint('A hint message'));
+    return ValidationResult(ValidationType.notAvailable, messages);
+  }
+}
+
 class PartialValidatorWithErrors extends DoctorValidator {
   PartialValidatorWithErrors() : super('Partial Validator with Errors');
 
@@ -336,6 +357,7 @@ class FakeDoctor extends Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(PassingValidator('Passing Validator'));
       _validators.add(MissingValidator());
+      _validators.add(NotAvailableValidator());
       _validators.add(PartialValidatorWithHintsOnly());
       _validators.add(PartialValidatorWithErrors());
     }
