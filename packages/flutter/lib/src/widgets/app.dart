@@ -14,6 +14,7 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
+import 'pages.dart';
 import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
 import 'text.dart';
@@ -43,6 +44,13 @@ typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Local
 /// This function must not return null.
 typedef GenerateAppTitle = String Function(BuildContext context);
 
+/// The signature of [WidgetsApp.pageRouteBuilder].
+///
+/// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
+// TODO(dnfield): when https://github.com/dart-lang/sdk/issues/34572 is resolved
+// this can use type arguments again
+typedef PageRouteFactory = PageRoute<dynamic> Function(RouteSettings settings, WidgetBuilder builder);
+
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -58,8 +66,10 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The boolean arguments, [color], and [navigatorObservers] must not be null.
   ///
-  /// If the [builder] is null, the [onGenerateRoute] argument is required, and
-  /// corresponds to [Navigator.onGenerateRoute]. If the [builder] is non-null
+  /// If the [builder] is null, the [onGenerateRoute] and [pageRouteBuilder]
+  /// arguments are required. The [onGenerateRoute] parameter corresponds to
+  /// [Navigator.onGenerateRoute], and [pageRouteBuilder] will create a [PageRoute]
+  /// that wraps newly built routes. If the [builder] is non-null
   /// and the [onGenerateRoute] argument is null, then the [builder] will not be
   /// provided with a [Navigator]. If [onGenerateRoute] is not provided,
   /// [navigatorKey], [onUnknownRoute], [navigatorObservers], and [initialRoute]
@@ -74,6 +84,9 @@ class WidgetsApp extends StatefulWidget {
     this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
+    this.pageRouteBuilder,
+    this.home,
+    this.routes = const <String, WidgetBuilder>{},
     this.builder,
     this.title = '',
     this.onGenerateTitle,
@@ -91,11 +104,49 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
   }) : assert(navigatorObservers != null),
-       assert(onGenerateRoute != null || navigatorKey == null),
-       assert(onGenerateRoute != null || onUnknownRoute == null),
-       assert(onGenerateRoute != null || navigatorObservers == const <NavigatorObserver>[]),
-       assert(onGenerateRoute != null || initialRoute == null),
-       assert(onGenerateRoute != null || builder != null),
+       assert(routes != null),
+       assert(
+         home == null ||
+         !routes.containsKey(Navigator.defaultRouteName),
+         'If the home property is specified, the routes table '
+         'cannot include an entry for "/", since it would be redundant.'
+       ),
+       assert(
+         builder != null ||
+         home != null ||
+         routes.containsKey(Navigator.defaultRouteName) ||
+         onGenerateRoute != null ||
+         onUnknownRoute != null,
+         'Either the home property must be specified, '
+         'or the routes table must include an entry for "/", '
+         'or there must be on onGenerateRoute callback specified, '
+         'or there must be an onUnknownRoute callback specified, '
+         'or the builder property must be specified, '
+         'because otherwise there is nothing to fall back on if the '
+         'app is started with an intent that specifies an unknown route.'
+       ),
+       assert(
+         (home != null ||
+          routes.isNotEmpty ||
+          onGenerateRoute != null ||
+          onUnknownRoute != null)
+         ||
+         (builder != null &&
+          navigatorKey == null &&
+          initialRoute == null &&
+          navigatorObservers.isEmpty),
+         'If no route is provided using '
+         'home, routes, onGenerateRoute, or onUnknownRoute, '
+         'a non-null callback for the builder property must be provided, '
+         'and the other navigator-related properties, '
+         'navigatorKey, initialRoute, and navigatorObservers, '
+         'must have their initial values '
+         '(null, null, and the empty list, respectively).'
+       ),
+       assert(onGenerateRoute != null || pageRouteBuilder != null,
+         'If onGenerateRoute is not provided, the pageRouteBuilder must be specified '
+         'so that the default handler will know what kind of PageRoute transition '
+         'bo build.'),
        assert(title != null),
        assert(color != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
@@ -107,6 +158,7 @@ class WidgetsApp extends StatefulWidget {
        assert(debugShowWidgetInspector != null),
        super(key: key);
 
+  /// {@template flutter.widgets.widgetsApp.navigatorKey}
   /// A key to use when building the [Navigator].
   ///
   /// If a [navigatorKey] is specified, the [Navigator] can be directly
@@ -121,6 +173,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
   /// null, [navigatorKey] must also be null.
+  /// {@endTemplate}
   final GlobalKey<NavigatorState> navigatorKey;
 
   /// {@template flutter.widgets.widgetsApp.onGenerateRoute}
@@ -134,25 +187,103 @@ class WidgetsApp extends StatefulWidget {
   /// During normal app operation, the [onGenerateRoute] callback will only be
   /// applied to route names pushed by the application, and so should never
   /// return null.
+  ///
+  /// This is used if [routes] does not contain the requested route.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
   /// {@endtemplate}
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null. If
-  /// [onGenerateRoute] is null, the [builder] must be non-null.
+  /// If this property is not set, either the [routes] or [home] properties must
+  /// be set, and the [pageRouteBuilder] must also be set so that the
+  /// default handler will know what routes and [PageRoute]s to build.
   final RouteFactory onGenerateRoute;
 
-  /// Called when [onGenerateRoute] fails to generate a route.
+  /// The [PageRoute] generator callback used when the app is navigated to a
+  /// named route.
   ///
+  /// This callback can be used, for example, to specify that a [MaterialPageRoute]
+  /// or a [CupertinoPageRoute] should be used for building page transitions.
+  final PageRouteFactory pageRouteBuilder;
+
+  /// {@template flutter.widgets.widgetsApp.home}
+  /// The widget for the default route of the app ([Navigator.defaultRouteName],
+  /// which is `/`).
+  ///
+  /// This is the route that is displayed first when the application is started
+  /// normally, unless [initialRoute] is specified. It's also the route that's
+  /// displayed if the [initialRoute] can't be displayed.
+  ///
+  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
+  /// that sets the [home] argument in the constructor, you can use a [Builder]
+  /// widget to get a [BuildContext].
+  ///
+  /// If [home] is specified, then [routes] must not include an entry for `/`,
+  /// as [home] takes its place.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  ///
+  /// The difference between using [home] and using [builder] is that the [home]
+  /// subtree is inserted into the application below a [Navigator] (and thus
+  /// below an [Overlay], which [Navigator] uses). With [home], therefore,
+  /// dialog boxes will work automatically, the [routes] table will be used, and
+  /// APIs such as [Navigator.push] and [Navigator.pop] will work as expected.
+  /// In contrast, the widget returned from [builder] is inserted _above_ the
+  /// app's [Navigator] (if any).
+  /// {@endTemplate}
+  ///
+  /// If this property is set, the [pageRouteBuilder] property must also be set
+  /// so that the default route handler will know what kind of [PageRoute]s to
+  /// build.
+  final Widget home;
+
+  /// The application's top-level routing table.
+  ///
+  /// When a named route is pushed with [Navigator.pushNamed], the route name is
+  /// looked up in this map. If the name is present, the associated
+  /// [WidgetBuilder] is used to construct a [PageRoute] specified by
+  /// [pageRouteBuilder] to perform an appropriate transition, including [Hero]
+  /// animations, to the new route.
+  ///
+  /// {@template flutter.widgets.widgetsApp.routes}
+  /// If the app only has one page, then you can specify it using [home] instead.
+  ///
+  /// If [home] is specified, then it implies an entry in this table for the
+  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
+  /// redundantly provide such a route in the [routes] table.
+  ///
+  /// If a route is requested that is not specified in this table (or by
+  /// [home]), then the [onGenerateRoute] callback is called to build the page
+  /// instead.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  /// {@endTemplate}
+  ///
+  /// If the routes map is not empty, the [pageRouteBuilder] property must be set
+  /// so that the default route handler will know what kind of [PageRoute]s to
+  /// build.
+  final Map<String, WidgetBuilder> routes;
+
   /// {@template flutter.widgets.widgetsApp.onUnknownRoute}
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
+  ///
   /// This callback is typically used for error handling. For example, this
   /// callback might always generate a "not found" page that describes the route
   /// that wasn't found.
   ///
   /// Unknown routes can arise either from errors in the app or from external
   /// requests to push routes, such as from Android intents.
-  /// {@endtemplate}
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
-  /// null, [onUnknownRoute] must also be null.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  /// {@endtemplate}
   final RouteFactory onUnknownRoute;
 
   /// {@template flutter.widgets.widgetsApp.initialRoute}
@@ -170,16 +301,16 @@ class WidgetsApp extends StatefulWidget {
   /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
   /// (`/`). This can happen if the app is started with an intent that specifies
   /// a non-existent route.
-  /// {@endtemplate}
-  ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
-  /// null, [initialRoute] must also be null.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [initialRoute] must be null and [builder] must not be null.
   ///
   /// See also:
   ///
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
+  /// {@endtemplate}
   final String initialRoute;
 
   /// {@template flutter.widgets.widgetsApp.navigatorObservers}
@@ -187,11 +318,11 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// This list must be replaced by a list of newly-created observers if the
   /// [navigatorKey] is changed.
-  /// {@endtemplate}
   ///
-  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
-  /// null, [navigatorObservers] must be left to its default value, the empty
-  /// list.
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [navigatorObservers] must be the empty list and [builder] must not be null.
+  /// {@endtemplate}
   final List<NavigatorObserver> navigatorObservers;
 
   /// {@template flutter.widgets.widgetsApp.builder}
@@ -214,21 +345,27 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The [builder] callback is passed two arguments, the [BuildContext] (as
   /// `context`) and a [Navigator] widget (as `child`).
-  /// {@endtemplate}
   ///
-  /// If [onGenerateRoute] is null, the `child` will be null, and it is the
-  /// responsibility of the [builder] to provide the application's routing
-  /// machinery.
+  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
+  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
+  /// of the [builder] to provide the application's routing machinery.
   ///
-  /// If [onGenerateRoute] is not null, then `child` is not null, and the
-  /// returned value should include the `child` in the widget subtree; if it
-  /// does not, then the application will have no navigator and the
-  /// [navigatorKey], [onGenerateRoute], [onUnknownRoute], [initialRoute], and
-  /// [navigatorObservers] properties will have no effect.
+  /// If routes _are_ provided using one or more of those properties, then
+  /// `child` is not null, and the returned value should include the `child` in
+  /// the widget subtree; if it does not, then the application will have no
+  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
+  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
+  /// have no effect.
   ///
   /// If [builder] is null, it is as if a builder was specified that returned
-  /// the `child` directly. At least one of either [onGenerateRoute] or
-  /// [builder] must be non-null.
+  /// the `child` directly. If it is null, routes must be provided using one of
+  /// the other properties listed above.
+  ///
+  /// Unless a [Navigator] is provided, either implicitly from [builder] being
+  /// null, or by a [builder] including its `child` argument, or by a [builder]
+  /// explicitly providing a [Navigator] of its own, widgets and APIs such as
+  /// [Hero], [Navigator.push] and [Navigator.pop], will not function.
+  /// {@endtemplate}
   final TransitionBuilder builder;
 
   /// {@template flutter.widgets.widgetsApp.title}
@@ -455,11 +592,64 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   GlobalKey<NavigatorState> _navigator;
 
   void _updateNavigator() {
-    if (widget.onGenerateRoute == null) {
-      _navigator = null;
+    _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
+  }
+
+  Route<dynamic> _onGenerateRoute(RouteSettings settings) {
+    final String name = settings.name;
+    WidgetBuilder builder;
+    if (name == Navigator.defaultRouteName && widget.home != null) {
+      builder = (BuildContext context) => widget.home;
     } else {
-      _navigator = widget.navigatorKey ?? GlobalObjectKey<NavigatorState>(this);
+      builder = widget.routes[name];
     }
+    if (builder != null) {
+      assert(widget.pageRouteBuilder != null,
+        'The default onGenerateRoute handler for WidgetsApp must have a '
+        'pageRouteBuilder set if the home or routes properties are set.');
+      final Route<dynamic> route = widget.pageRouteBuilder(
+        settings,
+        builder,
+      );
+      assert(route != null,
+        'The pageRouteBuilder for WidgetsApp must return a valid non-null Route.');
+      return route;
+    }
+    if (widget.onGenerateRoute != null)
+      return widget.onGenerateRoute(settings);
+    return null;
+  }
+
+  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
+    assert(() {
+      if (widget.onUnknownRoute == null) {
+        throw FlutterError(
+          'Could not find a generator for route $settings in the $runtimeType.\n'
+          'Generators for routes are searched for in the following order:\n'
+          ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
+          ' 2. Otherwise, the "routes" table is used, if it has an entry for '
+          'the route.\n'
+          ' 3. Otherwise, onGenerateRoute is called. It should return a '
+          'non-null value for any valid route not handled by "home" and "routes".\n'
+          ' 4. Finally if all else fails onUnknownRoute is called.\n'
+          'Unfortunately, onUnknownRoute was not set.'
+        );
+      }
+      return true;
+    }());
+    final Route<dynamic> result = widget.onUnknownRoute(settings);
+    assert(() {
+      if (result == null) {
+        throw FlutterError(
+          'The onUnknownRoute callback returned null.\n'
+          'When the $runtimeType requested the route $settings from its '
+          'onUnknownRoute callback, the callback returned null. Such callbacks '
+          'must never return null.'
+        );
+      }
+      return true;
+    }());
+    return result;
   }
 
   // On Android: the user has pressed the back button.
@@ -566,9 +756,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     if (_navigator != null) {
       navigator = Navigator(
         key: _navigator,
-        initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
-        onGenerateRoute: widget.onGenerateRoute,
-        onUnknownRoute: widget.onUnknownRoute,
+        // If ui.window.defaultRouteName isn't '/', we should assume it was set
+        // intentionally via `setInitialRoute`, and should override whatever
+        // is in [widget.initialRoute].
+        initialRoute: ui.window.defaultRouteName != Navigator.defaultRouteName
+            ? ui.window.defaultRouteName
+            : widget.initialRoute ?? ui.window.defaultRouteName,
+        onGenerateRoute: _onGenerateRoute,
+        onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
       );
     }

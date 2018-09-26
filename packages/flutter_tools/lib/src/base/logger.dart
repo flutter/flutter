@@ -395,7 +395,7 @@ class AnsiSpinner extends Status {
   // Windows console font has a limited set of Unicode characters.
   List<String> get _animation => platform.isWindows
       ? <String>[r'-', r'\', r'|', r'/']
-      : <String>['🌕', '🌖', '🌗', '🌘', '🌑', '🌒', '🌓', '🌔'];
+      : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
   String get _backspace => '\b' * _animation[0].length;
   String get _clear => ' ' *  _animation[0].length;

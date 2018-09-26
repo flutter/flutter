@@ -46,7 +46,7 @@ void main() {
     mockProcessManager = MockProcessManager();
     mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
     projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
-    projectUnderTest.ios.directory.childDirectory('Runner.xcodeproj').createSync(recursive: true);
+    projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(

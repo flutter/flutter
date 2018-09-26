@@ -124,12 +124,20 @@ class Doctor {
     for (DoctorValidator validator in validators) {
       final ValidationResult result = await validator.validate();
       buffer.write('${result.leadingBox} ${validator.title} is ');
-      if (result.type == ValidationType.missing)
-        buffer.write('not installed.');
-      else if (result.type == ValidationType.partial)
-        buffer.write('partially installed; more components are available.');
-      else
-        buffer.write('fully installed.');
+      switch (result.type) {
+        case ValidationType.missing:
+          buffer.write('not installed.');
+          break;
+        case ValidationType.partial:
+          buffer.write('partially installed; more components are available.');
+          break;
+        case ValidationType.notAvailable:
+          buffer.write('not available.');
+          break;
+        case ValidationType.installed:
+          buffer.write('fully installed.');
+          break;
+      }
 
       if (result.statusInfo != null)
         buffer.write(' (${result.statusInfo})');
@@ -171,11 +179,17 @@ class Doctor {
       }
       status.stop();
 
-      if (result.type == ValidationType.missing) {
-        doctorResult = false;
-      }
-      if (result.type != ValidationType.installed) {
-        issues += 1;
+      switch (result.type) {
+        case ValidationType.missing:
+          doctorResult = false;
+          issues += 1;
+          break;
+        case ValidationType.partial:
+        case ValidationType.notAvailable:
+          issues += 1;
+          break;
+        case ValidationType.installed:
+          break;
       }
 
       if (result.statusInfo != null)
@@ -238,7 +252,8 @@ abstract class Workflow {
 enum ValidationType {
   missing,
   partial,
-  installed
+  notAvailable,
+  installed,
 }
 
 abstract class DoctorValidator {
@@ -286,6 +301,7 @@ class GroupedValidator extends DoctorValidator {
             mergedType = ValidationType.partial;
           }
           break;
+        case ValidationType.notAvailable:
         case ValidationType.partial:
           mergedType = ValidationType.partial;
           break;
@@ -322,6 +338,7 @@ class ValidationResult {
         return '[✗]';
       case ValidationType.installed:
         return '[✓]';
+      case ValidationType.notAvailable:
       case ValidationType.partial:
         return '[!]';
     }
@@ -600,7 +617,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator() : super('Connected devices');
+  DeviceValidator() : super('Connected device');
 
   @override
   Future<ValidationResult> validate() async {
@@ -619,7 +636,7 @@ class DeviceValidator extends DoctorValidator {
     }
 
     if (devices.isEmpty) {
-      return ValidationResult(ValidationType.partial, messages);
+      return ValidationResult(ValidationType.notAvailable, messages);
     } else {
       return ValidationResult(ValidationType.installed, messages, statusInfo: '${devices.length} available');
     }
