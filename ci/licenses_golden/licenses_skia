@@ -1,4 +1,4 @@
-Signature: c1910a197b1124a970d9a5b159ae10e8
+Signature: 8bae9cfacdcc38c4a03697488634dcd2
 
 UNUSED LICENSES:
 
@@ -1402,6 +1402,8 @@ FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
+FILE: ../../../third_party/skia/src/compute/common/vk/cache_vk.c
+FILE: ../../../third_party/skia/src/compute/common/vk/cache_vk.h
 FILE: ../../../third_party/skia/src/compute/common/vk/event_pool.c
 FILE: ../../../third_party/skia/src/compute/common/vk/event_pool.h
 FILE: ../../../third_party/skia/src/compute/common/vk/host_alloc.c
@@ -2474,16 +2476,18 @@ FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_bs_3.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_bs_3.spv.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_bs_4.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_bs_4.spv.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_0.len.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_0.spv.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_1.len.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_1.spv.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_2.len.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_2.spv.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_3.len.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_0_3.spv.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_hm_0.len.xxd
-FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_hm_0.spv.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_0.len.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_0.spv.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_1.len.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_1.spv.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_2.len.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_2.spv.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_3.len.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_3.spv.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_4.len.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_fm_1_4.spv.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_hm_1.len.xxd
+FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_hm_1.spv.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_transpose.len.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/amd/gcn/u64/hs_transpose.spv.xxd
 FILE: ../../../third_party/skia/src/compute/hs/vk/intel/gen8/u32/hs_bc_0.len.xxd
