@@ -152,7 +152,7 @@ class FilledInputBorder extends InputBorder {
   bool get isOutline => false;
 
   @override
-  FilledInputBorder copyWith({BorderRadius borderRadius}) {
+  InputBorder copyWith({BorderSide borderSide, BorderRadius borderRadius}) {
     return FilledInputBorder(
       borderRadius: borderRadius ?? this.borderRadius,
     );
@@ -163,7 +163,7 @@ class FilledInputBorder extends InputBorder {
 
   @override
   FilledInputBorder scale(double t) {
-    return FilledInputBorder(borderSide: borderSide.scale(t));
+    return FilledInputBorder(borderRadius: borderRadius);
   }
 
   @override
