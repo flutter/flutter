@@ -137,7 +137,7 @@ class FilledInputBorder extends InputBorder {
   const FilledInputBorder({
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
   }) : assert(borderRadius != null),
-        super(borderSide: borderSide.none);
+        super(borderSide: BorderSide.none);
 
   /// The radii of the border's rounded rectangle corners.
   ///
