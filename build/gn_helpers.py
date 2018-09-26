@@ -15,7 +15,7 @@ def ToGNString(value, allow_dicts = True):
   allow_dicts indicates if this function will allow converting dictionaries
   to GN scopes. This is only possible at the top level, you can't nest a
   GN scope in a list, so this should be set to False for recursive calls."""
-  if isinstance(value, str):
+  if isinstance(value, str) or isinstance(value, unicode):
     if value.find('\n') >= 0:
       raise GNException("Trying to print a string with a newline in it.")
     return '"' + value.replace('"', '\\"') + '"'
@@ -36,4 +36,4 @@ def ToGNString(value, allow_dicts = True):
   if isinstance(value, int):
     return str(value)
 
-  raise GNException("Unsupported type when printing to GN.")
+  raise GNException("Unsupported type %s (value %s) when printing to GN." % (type(value), value))
