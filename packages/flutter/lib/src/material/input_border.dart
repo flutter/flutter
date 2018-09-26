@@ -153,7 +153,7 @@ class FilledInputBorder extends InputBorder {
 
   @override
   FilledInputBorder copyWith({BorderRadius borderRadius}) {
-    return new FilledInputBorder(
+    return FilledInputBorder(
       borderRadius: borderRadius ?? this.borderRadius,
     );
   }
@@ -163,18 +163,18 @@ class FilledInputBorder extends InputBorder {
 
   @override
   FilledInputBorder scale(double t) {
-    return new FilledInputBorder(borderSide: borderSide.scale(t));
+    return FilledInputBorder(borderSide: borderSide.scale(t));
   }
 
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRect(new Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
+    return Path()
+      ..addRect(Rect.fromLTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+    return Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
