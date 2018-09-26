@@ -17,16 +17,41 @@
 
 namespace fml {
 
+static int ToPosixProtectionFlags(
+    std::initializer_list<FileMapping::Protection> protection_flags) {
+  int flags = 0;
+  for (auto protection : protection_flags) {
+    switch (protection) {
+      case FileMapping::Protection::kRead:
+        flags |= PROT_READ;
+        break;
+      case FileMapping::Protection::kWrite:
+        flags |= PROT_WRITE;
+        break;
+      case FileMapping::Protection::kExecute:
+        flags |= PROT_READ | PROT_EXEC;
+        break;
+    }
+  }
+  return flags;
+}
+
+static bool IsWritable(
+    std::initializer_list<FileMapping::Protection> protection_flags) {
+  for (auto protection : protection_flags) {
+    if (protection == FileMapping::Protection::kWrite) {
+      return true;
+    }
+  }
+  return false;
+}
+
 Mapping::Mapping() = default;
 
 Mapping::~Mapping() = default;
 
-FileMapping::FileMapping(const std::string& path, bool executable)
-    : FileMapping(
-          fml::UniqueFD{FML_HANDLE_EINTR(::open(path.c_str(), O_RDONLY))},
-          executable) {}
-
-FileMapping::FileMapping(const fml::UniqueFD& handle, bool executable)
+FileMapping::FileMapping(const fml::UniqueFD& handle,
+                         std::initializer_list<Protection> protection)
     : size_(0), mapping_(nullptr) {
   if (!handle.is_valid()) {
     return;
@@ -42,13 +67,11 @@ FileMapping::FileMapping(const fml::UniqueFD& handle, bool executable)
     return;
   }
 
-  int flags = PROT_READ;
-  if (executable) {
-    flags |= PROT_EXEC;
-  }
+  const auto is_writable = IsWritable(protection);
 
   auto mapping =
-      ::mmap(nullptr, stat_buffer.st_size, flags, MAP_PRIVATE, handle.get(), 0);
+      ::mmap(nullptr, stat_buffer.st_size, ToPosixProtectionFlags(protection),
+             is_writable ? MAP_SHARED : MAP_PRIVATE, handle.get(), 0);
 
   if (mapping == MAP_FAILED) {
     return;
@@ -56,6 +79,9 @@ FileMapping::FileMapping(const fml::UniqueFD& handle, bool executable)
 
   mapping_ = static_cast<uint8_t*>(mapping);
   size_ = stat_buffer.st_size;
+  if (is_writable) {
+    mutable_mapping_ = mapping_;
+  }
 }
 
 FileMapping::~FileMapping() {

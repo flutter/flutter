@@ -90,5 +90,10 @@ std::string FromURI(const std::string& uri) {
   return SanitizeURIEscapedCharacters(file_path);
 }
 
+fml::UniqueFD GetCachesDirectory() {
+  // Unsupported on this platform.
+  return {};
+}
+
 }  // namespace paths
 }  // namespace fml

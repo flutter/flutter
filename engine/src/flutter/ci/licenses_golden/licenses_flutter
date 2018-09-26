@@ -532,11 +532,61 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../flutter/fml/platform/darwin/scoped_block.h + ../../../LICENSE
+ORIGIN: ../../../flutter/fml/platform/android/paths_android.h + ../../../LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/fml/platform/darwin/scoped_block.h
+FILE: ../../../flutter/fml/base32.cc
+FILE: ../../../flutter/fml/base32.h
+FILE: ../../../flutter/fml/base32_unittest.cc
+FILE: ../../../flutter/fml/file.cc
+FILE: ../../../flutter/fml/file.h
+FILE: ../../../flutter/fml/file_unittest.cc
+FILE: ../../../flutter/fml/macros.h
+FILE: ../../../flutter/fml/mapping.cc
+FILE: ../../../flutter/fml/message.cc
+FILE: ../../../flutter/fml/message.h
+FILE: ../../../flutter/fml/message_unittests.cc
+FILE: ../../../flutter/fml/native_library.h
+FILE: ../../../flutter/fml/paths.cc
+FILE: ../../../flutter/fml/platform/android/paths_android.h
+FILE: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc
+FILE: ../../../flutter/fml/platform/posix/file_posix.cc
+FILE: ../../../flutter/fml/platform/posix/native_library_posix.cc
+FILE: ../../../flutter/fml/platform/posix/paths_posix.cc
+FILE: ../../../flutter/fml/platform/win/errors_win.cc
+FILE: ../../../flutter/fml/platform/win/errors_win.h
+FILE: ../../../flutter/fml/platform/win/file_win.cc
+FILE: ../../../flutter/fml/platform/win/native_library_win.cc
+FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
+FILE: ../../../flutter/fml/unique_fd.cc
+FILE: ../../../flutter/fml/unique_fd.h
+FILE: ../../../flutter/fml/unique_object.h
+FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.cc
+FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.h
+FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.cc
+FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h
+FILE: ../../../flutter/lib/ui/plugins/callback_cache.cc
+FILE: ../../../flutter/lib/ui/plugins/callback_cache.h
+FILE: ../../../flutter/shell/common/isolate_configuration.cc
+FILE: ../../../flutter/shell/common/isolate_configuration.h
+FILE: ../../../flutter/shell/common/persistent_cache.cc
+FILE: ../../../flutter/shell/common/persistent_cache.h
+FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
+FILE: ../../../flutter/shell/platform/android/android_shell_holder.h
+FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
+FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
+FILE: ../../../flutter/shell/version/version.cc
+FILE: ../../../flutter/shell/version/version.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2013 The Chromium Authors. All rights reserved.
+Copyright 2018 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -567,51 +617,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc + ../../../LICENSE
+ORIGIN: ../../../flutter/fml/platform/darwin/scoped_block.h + ../../../LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/fml/file.h
-FILE: ../../../flutter/fml/macros.h
-FILE: ../../../flutter/fml/mapping.cc
-FILE: ../../../flutter/fml/message.cc
-FILE: ../../../flutter/fml/message.h
-FILE: ../../../flutter/fml/message_unittests.cc
-FILE: ../../../flutter/fml/native_library.h
-FILE: ../../../flutter/fml/paths.cc
-FILE: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc
-FILE: ../../../flutter/fml/platform/posix/file_posix.cc
-FILE: ../../../flutter/fml/platform/posix/native_library_posix.cc
-FILE: ../../../flutter/fml/platform/posix/paths_posix.cc
-FILE: ../../../flutter/fml/platform/win/file_win.cc
-FILE: ../../../flutter/fml/platform/win/native_library_win.cc
-FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
-FILE: ../../../flutter/fml/unique_fd.cc
-FILE: ../../../flutter/fml/unique_fd.h
-FILE: ../../../flutter/fml/unique_object.h
-FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.cc
-FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server.h
-FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.cc
-FILE: ../../../flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h
-FILE: ../../../flutter/lib/ui/plugins/callback_cache.cc
-FILE: ../../../flutter/lib/ui/plugins/callback_cache.h
-FILE: ../../../flutter/shell/common/isolate_configuration.cc
-FILE: ../../../flutter/shell/common/isolate_configuration.h
-FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
-FILE: ../../../flutter/shell/platform/android/android_shell_holder.h
-FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
-FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
-FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
-FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
-FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.cc
-FILE: ../../../flutter/shell/platform/embedder/embedder_surface_gl.h
-FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.cc
-FILE: ../../../flutter/shell/platform/embedder/embedder_surface_software.h
-FILE: ../../../flutter/shell/version/version.cc
-FILE: ../../../flutter/shell/version/version.h
+FILE: ../../../flutter/fml/platform/darwin/scoped_block.h
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 The Flutter Authors. All rights reserved.
+Copyright (c) 2013 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are

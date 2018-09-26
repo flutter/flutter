@@ -5,9 +5,12 @@
 #ifndef FLUTTER_RUNTIME_DART_SNAPSHOT_BUFFER_H_
 #define FLUTTER_RUNTIME_DART_SNAPSHOT_BUFFER_H_
 
+#include <initializer_list>
 #include <memory>
 
+#include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
 
 namespace blink {
@@ -19,8 +22,8 @@ class DartSnapshotBuffer {
       const char* symbol_name);
 
   static std::unique_ptr<DartSnapshotBuffer> CreateWithContentsOfFile(
-      const char* file_path,
-      bool executable);
+      const fml::UniqueFD& fd,
+      std::initializer_list<fml::FileMapping::Protection> protection);
 
   static std::unique_ptr<DartSnapshotBuffer> CreateWithUnmanagedAllocation(
       const uint8_t* allocation);

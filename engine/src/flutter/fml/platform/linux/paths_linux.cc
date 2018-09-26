@@ -22,5 +22,10 @@ std::pair<bool, std::string> GetExecutableDirectoryPath() {
                     std::string{path, static_cast<size_t>(read_size)})};
 }
 
+fml::UniqueFD GetCachesDirectory() {
+  // Unsupported on this platform.
+  return {};
+}
+
 }  // namespace paths
 }  // namespace fml

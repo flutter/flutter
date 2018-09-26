@@ -129,8 +129,13 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
     return EXIT_FAILURE;
   }
 
+  std::initializer_list<fml::FileMapping::Protection> protection = {
+      fml::FileMapping::Protection::kRead};
   auto main_dart_file_mapping = std::make_unique<fml::FileMapping>(
-      fml::paths::AbsolutePath(settings.main_dart_file_path), false);
+      fml::OpenFile(
+          fml::paths::AbsolutePath(settings.main_dart_file_path).c_str(), false,
+          fml::FilePermission::kRead),
+      protection);
 
   auto isolate_configuration =
       IsolateConfiguration::CreateForKernel(std::move(main_dart_file_mapping));
@@ -144,8 +149,8 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
   asset_manager->PushBack(std::make_unique<blink::DirectoryAssetBundle>(
       fml::Duplicate(settings.assets_dir)));
   asset_manager->PushBack(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenFile(
-          settings.assets_path.c_str(), fml::OpenPermission::kRead, true)));
+      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+          settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
 
   RunConfiguration run_configuration(std::move(isolate_configuration),
                                      std::move(asset_manager));

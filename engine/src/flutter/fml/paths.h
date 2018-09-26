@@ -8,10 +8,15 @@
 #include <string>
 #include <utility>
 
+#include "flutter/fml/unique_fd.h"
+
 namespace fml {
 namespace paths {
 
 std::pair<bool, std::string> GetExecutableDirectoryPath();
+
+// Get the directory to the application's caches directory.
+fml::UniqueFD GetCachesDirectory();
 
 std::string JoinPaths(std::initializer_list<std::string> components);
 

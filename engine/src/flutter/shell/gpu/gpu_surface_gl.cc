@@ -7,6 +7,7 @@
 #include "flutter/fml/arraysize.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/common/persistent_cache.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
@@ -46,6 +47,9 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   proc_resolver_ = delegate_->GetGLProcResolver();
 
   GrContextOptions options;
+
+  options.fPersistentCache = PersistentCache::GetCacheForProcess();
+
   options.fAvoidStencilBuffers = true;
 
   // To get video playback on the widest range of devices, we limit Skia to

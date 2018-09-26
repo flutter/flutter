@@ -20,8 +20,8 @@ RunConfiguration RunConfiguration::InferFromSettings(
       fml::Duplicate(settings.assets_dir)));
 
   asset_manager->PushBack(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenFile(
-          settings.assets_path.c_str(), fml::OpenPermission::kRead, true)));
+      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenDirectory(
+          settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
 
   return {IsolateConfiguration::InferFromSettings(settings, asset_manager),
           asset_manager};

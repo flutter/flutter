@@ -6,11 +6,27 @@
 
 #include <Foundation/Foundation.h>
 
+#include "flutter/fml/file.h"
+
 namespace fml {
 namespace paths {
 
 std::pair<bool, std::string> GetExecutableDirectoryPath() {
-  return {true, GetDirectoryName([NSBundle mainBundle].executablePath.UTF8String)};
+  @autoreleasepool {
+    return {true, GetDirectoryName([NSBundle mainBundle].executablePath.UTF8String)};
+  }
+}
+
+fml::UniqueFD GetCachesDirectory() {
+  @autoreleasepool {
+    auto items = [[NSFileManager defaultManager] URLsForDirectory:NSCachesDirectory
+                                                        inDomains:NSUserDomainMask];
+    if (items.count == 0) {
+      return {};
+    }
+
+    return OpenDirectory(items[0].fileSystemRepresentation, false, FilePermission::kRead);
+  }
 }
 
 }  // namespace paths

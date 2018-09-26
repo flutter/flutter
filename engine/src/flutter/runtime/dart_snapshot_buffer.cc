@@ -33,8 +33,10 @@ class NativeLibrarySnapshotBuffer final : public DartSnapshotBuffer {
 
 class FileSnapshotBuffer final : public DartSnapshotBuffer {
  public:
-  FileSnapshotBuffer(const char* path, bool executable)
-      : mapping_(path, executable) {
+  FileSnapshotBuffer(
+      const fml::UniqueFD& fd,
+      std::initializer_list<fml::FileMapping::Protection> protection)
+      : mapping_(fd, protection) {
     if (mapping_.GetSize() > 0) {
       symbol_ = mapping_.GetMapping();
     }
@@ -75,9 +77,10 @@ DartSnapshotBuffer::CreateWithSymbolInLibrary(
 }
 
 std::unique_ptr<DartSnapshotBuffer>
-DartSnapshotBuffer::CreateWithContentsOfFile(const char* file_path,
-                                             bool executable) {
-  auto source = std::make_unique<FileSnapshotBuffer>(file_path, executable);
+DartSnapshotBuffer::CreateWithContentsOfFile(
+    const fml::UniqueFD& fd,
+    std::initializer_list<fml::FileMapping::Protection> protection) {
+  auto source = std::make_unique<FileSnapshotBuffer>(fd, protection);
   return source->GetSnapshotPointer() == nullptr ? nullptr : std::move(source);
 }
 
