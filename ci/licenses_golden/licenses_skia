@@ -1,4 +1,4 @@
-Signature: ef30250de4eaa464a08f48dc9bf03faf
+Signature: 0ab755a5dbbfd3eca7ceb6773699ee1f
 
 UNUSED LICENSES:
 
@@ -968,13 +968,10 @@ FILE: ../../../third_party/skia/src/core/SkAutoPixmapStorage.cpp
 FILE: ../../../third_party/skia/src/core/SkAutoPixmapStorage.h
 FILE: ../../../third_party/skia/src/core/SkBlendModePriv.h
 FILE: ../../../third_party/skia/src/core/SkClipOpPriv.h
-FILE: ../../../third_party/skia/src/core/SkColorLookUpTable.cpp
-FILE: ../../../third_party/skia/src/core/SkColorLookUpTable.h
 FILE: ../../../third_party/skia/src/core/SkColorMatrixFilterRowMajor255.h
 FILE: ../../../third_party/skia/src/core/SkColorSpace.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpacePriv.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXform.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformPriv.h
 FILE: ../../../third_party/skia/src/core/SkCpu.cpp
 FILE: ../../../third_party/skia/src/core/SkCpu.h
 FILE: ../../../third_party/skia/src/core/SkDeduper.h
@@ -1435,7 +1432,6 @@ FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXform_skcms.cpp
 FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
 FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicMap.h
@@ -4170,7 +4166,6 @@ FILE: ../../../third_party/skia/gm/dftext_blob_persp.cpp
 FILE: ../../../third_party/skia/gm/drrect_small_inner.cpp
 FILE: ../../../third_party/skia/gm/encode-alpha-jpeg.cpp
 FILE: ../../../third_party/skia/gm/flippity.cpp
-FILE: ../../../third_party/skia/gm/gammaencodedpremul.cpp
 FILE: ../../../third_party/skia/gm/highcontrastfilter.cpp
 FILE: ../../../third_party/skia/gm/hsl.cpp
 FILE: ../../../third_party/skia/gm/imageblurclampmode.cpp
