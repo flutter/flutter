@@ -54,8 +54,8 @@ class _ProxyLayer extends Layer {
   _ProxyLayer(this._layer);
 
   @override
-  void addToScene(ui.SceneBuilder builder) {
-    _layer.addToScene(builder);
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    _layer.addToScene(builder, layerOffset);
   }
 
   @override
@@ -312,8 +312,8 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  void addToScene(ui.SceneBuilder builder) {
-    addChildrenToScene(builder);
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
+    addChildrenToScene(builder, layerOffset);
   }
 }
 
@@ -2235,7 +2235,7 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     if (!selection.active)
       return;
 
@@ -2259,7 +2259,7 @@ class _InspectorOverlayLayer extends Layer {
       _lastState = state;
       _picture = _buildPicture(state);
     }
-    builder.addPicture(Offset.zero, _picture);
+    builder.addPicture(layerOffset, _picture);
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
