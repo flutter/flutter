@@ -3,6 +3,7 @@
 #import "FlutterPluginRegistrant/GeneratedPluginRegistrant.h"
 
 @implementation ViewController
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -20,4 +21,5 @@
     [GeneratedPluginRegistrant registerWithRegistry:flutterViewController];
     [self presentViewController:flutterViewController animated:false completion:nil];
 }
+
 @end

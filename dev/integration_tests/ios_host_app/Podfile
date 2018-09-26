@@ -2,5 +2,5 @@ platform :ios, '9.0'
 
 target 'Host' do
   flutter_application_path = '../hello'
-  eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  eval(File.read("#{flutter_application_path}/.ios/Flutter/podhelper.rb"))
 end
