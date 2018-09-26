@@ -284,13 +284,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     Widget child = builder(context, index);
     if (child == null)
       return null;
+    if (addRepaintBoundaries)
+      child = RepaintBoundary.wrap(child, index);
     if (addSemanticIndexes) {
       final int semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
         child = IndexedChildSemantics(index: semanticIndex + semanticIndexOffset, child: child);
     }
-    if (addRepaintBoundaries)
-      child = RepaintBoundary.wrap(child, index);
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
     return child;
@@ -399,13 +399,13 @@ class SliverChildListDelegate extends SliverChildDelegate {
       return null;
     Widget child = children[index];
     assert(child != null);
+    if (addRepaintBoundaries)
+      child = RepaintBoundary.wrap(child, index);
     if (addSemanticIndexes) {
       final int semanticIndex = semanticIndexCallback(child, index);
       if (semanticIndex != null)
         child = IndexedChildSemantics(index: semanticIndex + semanticIndexOffset, child: child);
     }
-    if (addRepaintBoundaries)
-      child = RepaintBoundary.wrap(child, index);
     if (addAutomaticKeepAlives)
       child = AutomaticKeepAlive(child: child);
     return child;

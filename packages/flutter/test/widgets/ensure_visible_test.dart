@@ -48,6 +48,7 @@ Widget buildListView(Axis scrollDirection, { bool reverse = false, bool shrinkWr
         child: ListView(
           scrollDirection: scrollDirection,
           reverse: reverse,
+          addSemanticIndexes: false,
           shrinkWrap: shrinkWrap,
           children: <Widget>[
             Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),

@@ -1658,6 +1658,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: ListView(
           scrollDirection: Axis.horizontal,
+          addSemanticIndexes: false,
           children: <Widget>[
             DragTarget<int>(
               builder: (BuildContext context, List<int> data, List<dynamic> rejects) {

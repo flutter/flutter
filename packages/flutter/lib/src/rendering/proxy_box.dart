@@ -4358,6 +4358,7 @@ class RenderIndexedChildSemantics extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
     config.indexInParent = index;
   }
 
