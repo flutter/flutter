@@ -46,10 +46,28 @@ FLUTTER_EXPORT
 
 /**
  Sets the first route that the Flutter app shows. The default is "/".
+ This method will guarnatee that the initial route is delivered, even if the
+ Flutter window hasn't been created yet when called. It cannot be used to update
+ the current route being shown in a visible FlutterViewController (see pushRoute
+ and popRoute).
 
  - Parameter route: The name of the first route to show.
  */
 - (void)setInitialRoute:(NSString*)route;
+
+/**
+ Instructs the Flutter Navigator (if any) to go back.
+ */
+- (void)popRoute;
+
+/**
+ Instructs the Flutter Navigator (if any) to push a route on to the navigation
+ stack.  The setInitialRoute method should be prefered if this is called before the
+ FlutterViewController has come into view.
+
+ - Parameter route: The name of the route to push to the navigation stack.
+ */
+- (void)pushRoute:(NSString*)route;
 
 - (id<FlutterPluginRegistry>)pluginRegistry;
 
