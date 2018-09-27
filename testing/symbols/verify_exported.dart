@@ -41,6 +41,9 @@ int _checkIos(String outPath, Iterable<String> builds) {
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'Flutter.framework', 'Flutter');
     final String stdout = Process.runSync('nm', <String>['-gUm', libFlutter]).stdout;
+    print('+++ DEBUG: stdout of nm +++');
+    print(stdout);
+    print('+++ END: stdout of nm +++');
     final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(stdout).where((NmEntry entry) {
       return !((entry.type == '(__DATA,__common)' && entry.name.startsWith('_Flutter'))
           || (entry.type == '(__DATA,__objc_data)'
@@ -64,6 +67,9 @@ int _checkAndroid(String outPath, Iterable<String> builds) {
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'libflutter.so');
     final String stdout = Process.runSync('nm', <String>['-gU', libFlutter]).stdout;
+    print('+++ DEBUG: stdout of nm +++');
+    print(stdout);
+    print('+++ END: stdout of nm +++');
     final Iterable<NmEntry> entries = NmEntry.parse(stdout);
     if (entries.isEmpty) {
       print('ERROR: $libFlutter exports no symbol');
