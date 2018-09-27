@@ -6,17 +6,26 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+/// Defines the axis we want the divider to lay on.
+enum Axis {
+  /// The divider lies on a vertical axis.
+  Vertical,
+
+  /// The divider lies on a horizontal axis.
+  Horizontal
+}
+
 /// A one device pixel thick horizontal line, with padding on either
 /// side.
 ///
 /// In the material design language, this represents a divider.
 ///
 /// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
-/// vertically. To create a one-pixel divider between items in a list, consider
-/// using [ListTile.divideTiles], which is optimized for this case.
+/// vertically or horizontally. To create a one-pixel divider between items in
+/// a list, consider using [ListTile.divideTiles], which is optimized for this case.
 ///
-/// The box's total height is controlled by [height]. The appropriate padding is
-/// automatically computed from the height.
+/// The box's total width or height is controlled by [height]. The appropriate
+/// padding is automatically computed from the width or height.
 ///
 /// See also:
 ///
@@ -31,18 +40,18 @@ class Divider extends StatelessWidget {
     Key key,
     this.height = 16.0,
     this.indent = 0.0,
-    this.isVertical = false,
+    this.axis = Axis.Horizontal,
     this.color
-  }) : assert(height >= 0.0 && isVertical != null),
-       super(key: key);
+  }) : assert(height >= 0.0 && axis != null),
+        super(key: key);
 
-  /// The divider's vertical extent.
+  /// The divider's dimensional extent.
   ///
-  /// The divider itself is always drawn as one device pixel thick horizontal
-  /// line that is centered within the height specified by this value.
+  /// The divider itself is always drawn as one device pixel thick
+  /// line that is centered within the height or width specified by this value.
   ///
-  /// A divider with a height of 0.0 is always drawn as a line with a height of
-  /// exactly one device pixel, without any padding around it.
+  /// A divider with a size of 0.0 is always drawn as a line with a
+  /// height of exactly one device pixel, without any padding around it.
   final double height;
 
   /// The amount of empty space to the left of the divider.
@@ -62,9 +71,9 @@ class Divider extends StatelessWidget {
   /// ```
   final Color color;
 
-  /// Whether the divider should be vertical. When this is true, the height
-  /// argument becomes the width of the divider.
-  final bool isVertical;
+  /// Whether the divider should be vertical or horizontal. When vertical,
+  /// the [height] argument becomes the width of the divider.
+  final Axis axis;
 
   /// Computes the [BorderSide] that represents a divider of the specified
   /// color, or, if there is no specified color, of the default
@@ -90,19 +99,36 @@ class Divider extends StatelessWidget {
   ///   // child: ...
   /// )
   /// ```
-  static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
+  static BorderSide createBorderSide(BuildContext context,
+      { Color color, double width = 0.0 }) {
     assert(width != null);
     return BorderSide(
-      color: color ?? Theme.of(context).dividerColor,
+      color: color ?? Theme
+          .of(context)
+          .dividerColor,
       width: width,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return RotatedBox(
-      quarterTurns: isVertical ? 1 : 0,
-      child: SizedBox(
+    if (axis == Axis.Vertical) {
+      return SizedBox(
+        width: height,
+        child: Center(
+          child: Container(
+            height: 0.0,
+            margin: EdgeInsetsDirectional.only(start: indent),
+            decoration: BoxDecoration(
+              border: Border(
+                left: createBorderSide(context, color: color),
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return SizedBox(
         height: height,
         child: Center(
           child: Container(
@@ -115,7 +141,7 @@ class Divider extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

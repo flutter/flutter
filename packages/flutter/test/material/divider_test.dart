@@ -20,4 +20,18 @@ void main() {
     expect(box.size.height, 16.0);
     expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
   });
+
+  testWidgets('Vertical Divider Test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Divider(axis: Axis.Vertical),
+        ),
+      ),
+    );
+    final RenderBox box = tester.firstRenderObject(find.byType(Divider));
+    expect(box.size.width, 16.0);
+    expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
+  });
 }
