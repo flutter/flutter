@@ -57,7 +57,16 @@ class TypographyDemo extends StatelessWidget {
       TextStyleItem(name: 'Body 2', style: textTheme.body2, text: 'Medium 14sp'),
       TextStyleItem(name: 'Body 1', style: textTheme.body1, text: 'Regular 14sp'),
       TextStyleItem(name: 'Caption', style: textTheme.caption, text: 'Regular 12sp'),
-      TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp')
+      TextStyleItem(name: 'Button', style: textTheme.button, text: 'MEDIUM (ALL CAPS) 14sp'),
+      TextStyleItem(name: 'Headline3', style: textTheme.headline3, text: 'Regular 48sp'),
+      TextStyleItem(name: 'Headline4', style: textTheme.headline4, text: 'Regular 34sp'),
+      TextStyleItem(name: 'Headline5', style: textTheme.headline5, text: 'Regular 24sp'),
+      TextStyleItem(name: 'Headline6', style: textTheme.headline6, text: 'Medium 20sp'),
+      TextStyleItem(name: 'Subtitle1', style: textTheme.subtitle1, text: 'Regular 16sp'),
+      TextStyleItem(name: 'Subtitle2', style: textTheme.subtitle2, text: 'Medium 14sp'),
+      TextStyleItem(name: 'Paragraph1', style: textTheme.paragraph1, text: 'Regular 16sp'),
+      TextStyleItem(name: 'Paragraph2', style: textTheme.paragraph2, text: 'Regular 14sp'),
+      TextStyleItem(name: 'Overline', style: textTheme.overline, text: 'REGULAR(ALL CAPS) 10sp'),
     ];
 
     if (MediaQuery.of(context).size.width > 500.0) {
@@ -66,6 +75,10 @@ class TypographyDemo extends StatelessWidget {
         style: textTheme.display4,
         text: 'Light 112sp'
       ));
+      styleItems.insertAll(11, <TextStyleItem>[
+        TextStyleItem(name: 'Headline1', style: textTheme.headline1, text: 'Light 96sp'),
+        TextStyleItem(name: 'Headline2', style: textTheme.headline2, text: 'Light 60sp'),
+      ]);
     }
 
     return Scaffold(
