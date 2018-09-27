@@ -822,10 +822,9 @@ config("optimize") {
     cflags = [ "-Os" ] + common_optimize_on_cflags  # Favor size over speed.
   } else if (is_android) {
     cflags = [ "-Oz" ] + common_optimize_on_cflags  # Favor size over speed.
-    # TODO(goderbauer): re-enable when  https://github.com/flutter/flutter/issues/21686 is fixed
-    # if (enable_lto) {
-    #   lto_flags += [ "-flto" ]
-    # }
+    if (enable_lto) {
+      lto_flags += [ "-flto" ]
+    }
   } else {
     cflags = [ "-O2" ] + common_optimize_on_cflags
   }
