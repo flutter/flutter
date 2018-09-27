@@ -581,4 +581,92 @@ class CupertinoIcons {
   ///
   ///  * [fullscreen], which is similar, but has the corners facing inwards.
   static const IconData fullscreen_exit = IconData(0xf37d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in microphone with a diagonal line crossing it.
+  ///
+  /// See also:
+  ///
+  ///  * [mic], which is similar, but not filled in and without a diagonal line.
+  ///  * [mic_solid], which is similar, but without a diagonal line.
+  static const IconData mic_off = IconData(0xf45f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A microphone.
+  ///
+  /// See also:
+  ///
+  ///  * [mic_solid], which is similar, but filled in.
+  ///  * [mic_off], which is similar, but filled in and with a diagonal line crossing the icon.
+  static const IconData mic = IconData(0xf460, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in microphone.
+  ///
+  /// See also:
+  ///
+  ///  * [mic], which is similar, but not filled in.
+  ///  * [mic_off], which is similar, but with a diagonal line crossing the icon.
+  static const IconData mic_solid = IconData(0xf461, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A circle with a dotted clock face inside with hands showing 10:30.
+  ///
+  /// See also:
+  ///
+  ///  * [clock_solid], which is similar, but filled in.
+  ///  * [time], which is similar, but without dots on the clock face.
+  ///  * [time_solid], which is similar, but filled in and without dots on the clock face.
+  static const IconData clock = IconData(0xf4be, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in circle with a dotted clock face inside with hands showing 10:30.
+  ///
+  /// See also:
+  ///
+  ///  * [clock], which is similar, but not filled in.
+  ///  * [time], which is similar, but not filled in and without dots on the clock face.
+  ///  * [time_solid], which is similar, but without dots on the clock face.
+  static const IconData clock_solid = IconData(0xf4bf, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  ///
+  /// See also:
+  ///
+  ///  * [time_solid], which is similar, but filled in.
+  ///  * [clock], which is similar, but with dots on the clockface.
+  ///  * [clock_solid], which is similar, but filled in and with dots on the clockface.
+  static const IconData time = IconData(0xf402, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in circle with with a 90 degree angle shape in the center, resembeling a clock with hands showing 09:00.
+  ///
+  /// See also:
+  ///
+  ///  * [time], which is similar, but not filled in.
+  ///  * [clock], which is similar, but not filled in and with dots on the clockface.
+  ///  * [clock_solid], which is similar, but with dots on the clockface.
+  static const IconData time_solid = IconData(0xf403, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An unlocked padlock.
+  ///
+  /// See also:
+  ///
+  ///  * [padlock_solid], which is similar, but filled in.
+  static const IconData padlock = IconData(0xf4c8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An unlocked padlock.
+  ///
+  /// See also:
+  ///
+  ///  * [padlock], which is similar, but not filled in.
+  static const IconData padlock_solid = IconData(0xf4c9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An open eye.
+  ///
+  /// See also:
+  ///
+  ///  * [eye_solid], which is similar, but filled in.
+  static const IconData eye = IconData(0xf424, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An open eye.
+  ///
+  /// See also:
+  ///
+  ///  * [eye], which is similar, but not filled in.
+  static const IconData eye_solid = IconData(0xf425, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
