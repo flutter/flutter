@@ -4,6 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demos.dart';
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
 const double _kPickerSheetHeight = 216.0;
@@ -132,6 +133,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cupertino Picker'),
+        actions: <Widget>[kDemoDocumentationMaterialButton[CupertinoPickerDemo.routeName]],
       ),
       body: DefaultTextStyle(
         style: const TextStyle(

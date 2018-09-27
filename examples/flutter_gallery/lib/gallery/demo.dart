@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'example_code_parser.dart';
 import 'syntax_highlighter.dart';
@@ -12,13 +13,15 @@ class ComponentDemoTabData {
     this.demoWidget,
     this.exampleCodeTag,
     this.description,
-    this.tabName
+    this.tabName,
+    this.documentationUrl,
   });
 
   final Widget demoWidget;
   final String exampleCodeTag;
   final String description;
   final String tabName;
+  final String documentationUrl;
 
   @override
   bool operator==(Object other) {
@@ -52,6 +55,13 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     }
   }
 
+  void _showApiDocumentation(BuildContext context) {
+    final String url = demos[DefaultTabController.of(context).index].documentationUrl;
+    if (url != null) {
+      launch(url, forceWebView: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -64,11 +74,17 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               Builder(
                 builder: (BuildContext context) {
                   return IconButton(
+                    icon: const Icon(Icons.library_books),
+                    onPressed: () => _showApiDocumentation(context),
+                  );
+                },
+              ),
+              Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
                     icon: const Icon(Icons.code),
                     tooltip: 'Show example code',
-                    onPressed: () {
-                      _showExampleCode(context);
-                    },
+                    onPressed: () => _showExampleCode(context),
                   );
                 },
               )

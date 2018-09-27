@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demos.dart';
+
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
@@ -209,6 +211,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       appBar: AppBar(
         title: const Text('Bottom navigation'),
         actions: <Widget>[
+          kDemoDocumentationMaterialButton[BottomNavigationDemo.routeName],
           PopupMenuButton<BottomNavigationBarType>(
             onSelected: (BottomNavigationBarType value) {
               setState(() {

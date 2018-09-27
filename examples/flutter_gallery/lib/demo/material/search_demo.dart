@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demos.dart';
+
 class SearchDemo extends StatefulWidget {
   static const String routeName = '/material/search';
 
@@ -50,6 +52,7 @@ class _SearchDemoState extends State<SearchDemo> {
               }
             },
           ),
+          kDemoDocumentationMaterialButton[SearchDemo.routeName],
           IconButton(
             tooltip: 'More (not implemented)',
             icon: Icon(

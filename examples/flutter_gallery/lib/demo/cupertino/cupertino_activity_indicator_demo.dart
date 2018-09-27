@@ -3,18 +3,21 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+
+import '../../gallery/demos.dart';
 
 class CupertinoProgressIndicatorDemo extends StatelessWidget {
   static const String routeName = '/cupertino/progress_indicator';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cupertino Activity Indicator'),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        previousPageTitle: 'Cupertino',
+        middle: const Text('Cupertino Activity Indicator'),
+        trailing: kDemoDocumentationCupertinoButton[routeName],
       ),
-      body: const Center(
+      child: const Center(
         child: CupertinoActivityIndicator(),
       ),
     );
