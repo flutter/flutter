@@ -517,7 +517,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
   /// size of the output image. It is independent of the
   /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
   /// will give you a 1:1 mapping between logical pixels and the output pixels
-  // / in the image.
+  /// in the image.
   ///
   /// The [debugPaint] argument specifies whether the image should include the
   /// output of [RenderObject.debugPaint] for [renderObject] with
