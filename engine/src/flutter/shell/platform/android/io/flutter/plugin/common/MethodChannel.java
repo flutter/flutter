@@ -117,6 +117,10 @@ public final class MethodChannel {
          * <p>Any uncaught exception thrown by this method will be caught by the channel implementation and
          * logged, and an error result will be sent back to Flutter.</p>
          *
+         * <p>The handler is called on the platform thread (Android main thread). For more details see
+         * <a href="https://github.com/flutter/engine/wiki/Threading-in-the-Flutter-Engine">Threading in the Flutter
+         * Engine</a>.</p>
+         *
          * @param call A {@link MethodCall}.
          * @param result A {@link Result} used for submitting the result of the call.
          */
@@ -128,6 +132,10 @@ public final class MethodChannel {
      * to be invoked by Flutter act as clients of this interface for sending results
      * back to Flutter. Invokers of Flutter methods provide implementations of this
      * interface for handling results received from Flutter.
+     *
+     * <p>All methods of this class must be called on the platform thread (Android main thread). For more details see
+     * <a href="https://github.com/flutter/engine/wiki/Threading-in-the-Flutter-Engine">Threading in the Flutter
+     * Engine</a>.</p>
      */
     public interface Result {
         /**
