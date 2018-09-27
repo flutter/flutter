@@ -5,10 +5,15 @@
 #ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
 
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 
-@interface FlutterPlatformPlugin : NSObject
+#include <UIKit/UIKit.h>
 
+@interface FlutterPlatformPlugin : NSObject
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithViewController:(fml::WeakPtr<UIViewController>)viewController
+    NS_DESIGNATED_INITIALIZER;
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 @end
