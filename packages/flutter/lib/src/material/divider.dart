@@ -99,8 +99,7 @@ class Divider extends StatelessWidget {
   ///   // child: ...
   /// )
   /// ```
-  static BorderSide createBorderSide(BuildContext context,
-      { Color color, double width = 0.0 }) {
+  static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
     assert(width != null);
     return BorderSide(
       color: color ?? Theme.of(context).dividerColor,
