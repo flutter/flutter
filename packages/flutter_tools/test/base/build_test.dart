@@ -573,12 +573,12 @@ void main() {
 
   });
 
-  group('Snapshotter - Core JIT', () {
+  group('Snapshotter - JIT', () {
     const String kTrace = 'trace.txt';
 
     _FakeGenSnapshot genSnapshot;
     MemoryFileSystem fs;
-    CoreJITSnapshotter snapshotter;
+    JITSnapshotter snapshotter;
     MockAndroidSdk mockAndroidSdk;
     MockArtifacts mockArtifacts;
 
@@ -587,7 +587,7 @@ void main() {
       fs.file(kTrace).createSync();
 
       genSnapshot = _FakeGenSnapshot();
-      snapshotter = CoreJITSnapshotter();
+      snapshotter = JITSnapshotter();
       mockAndroidSdk = MockAndroidSdk();
       mockArtifacts = MockArtifacts();
     });

@@ -46,6 +46,7 @@ Future<void> build({
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,
   String compilationTraceFilePath,
+  bool buildHotUpdate = false,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],
   List<String> fileSystemRoots,
@@ -85,7 +86,7 @@ Future<void> build({
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     if (compilationTraceFilePath != null) {
-      final CoreJITSnapshotter snapshotter = CoreJITSnapshotter();
+      final JITSnapshotter snapshotter = JITSnapshotter();
       final int snapshotExitCode = await snapshotter.build(
         platform: platform,
         buildMode: buildMode,
@@ -94,6 +95,7 @@ Future<void> build({
         packagesPath: packagesPath,
         compilationTraceFilePath: compilationTraceFilePath,
         extraGenSnapshotOptions: extraGenSnapshotOptions,
+        buildHotUpdate: buildHotUpdate,
       );
       if (snapshotExitCode != 0) {
         throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
@@ -158,8 +160,8 @@ Future<void> assemble({
   final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = fs.path.join(getBuildDirectory(), _kVMSnapshotData);
-      final String vmSnapshotInstr = fs.path.join(getBuildDirectory(), _kVMSnapshotInstr);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+      final String vmSnapshotInstr = artifacts.getArtifactPath(Artifact.vmSnapshotInstr);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
