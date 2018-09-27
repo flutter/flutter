@@ -17,7 +17,7 @@ import 'theme.dart';
 /// To create a one-pixel divider between items in a list, consider using
 /// [ListTile.divideTiles], which is optimized for this case.
 ///
-/// The box's total width or height is controlled by [height]. The appropriate
+/// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the width or height.
 ///
 /// See also:
@@ -39,7 +39,7 @@ class Divider extends StatelessWidget {
 
   /// The divider's height extent.
   ///
-  /// The divider itself is always drawn as one device pixel thick
+  /// The divider itself is always drawn as one device pixel thick horizontal
   /// line that is centered within the height specified by this value.
   ///
   /// A divider with a [height] of 0.0 is always drawn as a line with a height
