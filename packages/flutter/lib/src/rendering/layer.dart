@@ -566,12 +566,11 @@ class OffsetLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     // Skia has a fast path for concatenating scale/translation only matrices.
-    // Hence this operation should be fast. For retained rendering, we don't
-    // want to push the offset down to each leaf node. Otherwise, changing an
-    // offset layer on the very high level could cascade the change to too many
-    // leaves.
-    final Matrix4 matrix = Matrix4.translationValues(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, 0.0);
-    builder.pushTransform(matrix.storage);
+    // Hence pushing a translation-only transform layer should be fast. For
+    // retained rendering, we don't want to push the offset down to each leaf
+    // node. Otherwise, changing an offset layer on the very high level could
+    // cascade the change to too many leaves.
+    builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy);
     addChildrenToScene(builder);
     builder.pop();
   }
