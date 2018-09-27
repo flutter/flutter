@@ -1,4 +1,4 @@
-Signature: 0ab755a5dbbfd3eca7ceb6773699ee1f
+Signature: 7f91399904c5a8dcc961805aa82cce57
 
 UNUSED LICENSES:
 
@@ -1318,6 +1318,8 @@ FILE: ../../../third_party/skia/gm/3dgm.cpp
 FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
 FILE: ../../../third_party/skia/gm/clockwise.cpp
 FILE: ../../../third_party/skia/gm/crbug_847759.cpp
+FILE: ../../../third_party/skia/gm/crbug_884166.cpp
+FILE: ../../../third_party/skia/gm/crbug_887103.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
