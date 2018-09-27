@@ -157,37 +157,53 @@ class IosProject {
   /// The parent of this project.
   final FlutterProject parent;
 
-  /// The directory of this project.
-  Directory get directory => parent.directory.childDirectory(isModule ? '.ios' : 'ios');
+  Directory get _ephemeralDirectory => parent.directory.childDirectory('.ios');
+  Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
+  /// This parent folder of `Runner.xcodeproj`.
+  Directory get hostAppRoot {
+    if (!isModule || _editableDirectory.existsSync())
+      return _editableDirectory;
+    return _ephemeralDirectory;
+  }
+
+  /// The root directory of the iOS wrapping of Flutter and plugins. This is the
+  /// parent of the `Flutter/` folder into which Flutter artifacts are written
+  /// during build.
+  ///
+  /// This is the same as [hostAppRoot] except when the project is
+  /// a Flutter module with an editable host app.
+  Directory get _flutterLibRoot => isModule ? _ephemeralDirectory : _editableDirectory;
+
+  /// The bundle name of the host app, `Runner.app`.
   String get hostAppBundleName => '$_hostAppBundleName.app';
 
   /// True, if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
   /// The xcode config file for [mode].
-  File xcodeConfigFor(String mode) => directory.childDirectory('Flutter').childFile('$mode.xcconfig');
+  File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
   /// The 'Podfile'.
-  File get podfile => directory.childFile('Podfile');
+  File get podfile => hostAppRoot.childFile('Podfile');
 
   /// The 'Podfile.lock'.
-  File get podfileLock => directory.childFile('Podfile.lock');
+  File get podfileLock => hostAppRoot.childFile('Podfile.lock');
 
   /// The 'Manifest.lock'.
-  File get podManifestLock => directory.childDirectory('Pods').childFile('Manifest.lock');
+  File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
   /// The 'Info.plist' file of the host app.
-  File get hostInfoPlist => directory.childDirectory(_hostAppBundleName).childFile('Info.plist');
+  File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
 
   /// '.xcodeproj' folder of the host app.
-  Directory get xcodeProject => directory.childDirectory('$_hostAppBundleName.xcodeproj');
+  Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
 
   /// The '.pbxproj' file of the host app.
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   /// Xcode workspace directory of the host app.
-  Directory get xcodeWorkspace => directory.childDirectory('$_hostAppBundleName.xcworkspace');
+  Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppBundleName.xcworkspace');
 
   /// Xcode workspace shared data directory for the host app.
   Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
@@ -232,8 +248,12 @@ class IosProject {
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     _regenerateFromTemplateIfNeeded();
-    if (!directory.existsSync())
+    if (!_flutterLibRoot.existsSync())
       return;
+    await _updateGeneratedXcodeConfigIfNeeded();
+  }
+
+  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
     if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
@@ -246,28 +266,40 @@ class IosProject {
   void _regenerateFromTemplateIfNeeded() {
     if (!isModule)
       return;
-    final bool pubspecChanged = isOlderThanReference(entity: directory, referenceFile: parent.pubspecFile);
-    final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(directory);
+    final bool pubspecChanged = isOlderThanReference(entity: _ephemeralDirectory, referenceFile: parent.pubspecFile);
+    final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
     if (!pubspecChanged && !toolingChanged)
       return;
-    _deleteIfExistsSync(directory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), directory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), directory);
-    if (hasPlugins(parent)) {
-      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), directory);
+    _deleteIfExistsSync(_ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
+    // Add ephemeral host app, if a editable host app does not already exist.
+    if (!_editableDirectory.existsSync()) {
+      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _ephemeralDirectory);
+      if (hasPlugins(parent)) {
+        _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _ephemeralDirectory);
+      }
     }
   }
 
   Future<void> makeHostAppEditable() async {
-    throwToolExit('making host app editable has not yet been implemented for iOS');
+    assert(isModule);
+    if (_editableDirectory.existsSync())
+      throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
+    _deleteIfExistsSync(_ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    await _updateGeneratedXcodeConfigIfNeeded();
+    await injectPlugins(parent);
   }
 
-  File get generatedXcodePropertiesFile => directory.childDirectory('Flutter').childFile('Generated.xcconfig');
+  File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
 
   Directory get pluginRegistrantHost {
     return isModule
-        ? directory.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
-        : directory.childDirectory(_hostAppBundleName);
+        ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
+        : hostAppRoot.childDirectory(_hostAppBundleName);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {

@@ -100,12 +100,12 @@ void main() {
         List<String> lines = outputStdout();
         expect(lines[0], startsWith(platform.isWindows
             ? ' \b-\b\\\b|\b/\b-\b\\\b|\b/'
-            : ' \b\b🌕\b\b🌖\b\b🌗\b\b🌘\b\b🌑\b\b🌒\b\b🌓\b\b🌔\b\b🌕\b\b🌖'));
+            : ' \b⣾\b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽'));
         expect(lines[0].endsWith('\n'), isFalse);
         expect(lines.length, equals(1));
         ansiSpinner.stop();
         lines = outputStdout();
-        expect(lines[0], endsWith(platform.isWindows ? '\b \b' : '\b\b  \b\b'));
+        expect(lines[0], endsWith('\b \b'));
         expect(lines.length, equals(1));
 
         // Verify that stopping or canceling multiple times throws.
@@ -128,7 +128,7 @@ void main() {
         final List<String> lines = outputStdout();
         expect(outputStderr().length, equals(1));
         expect(outputStderr().first, isEmpty);
-        expect(lines[0], matches(platform.isWindows ? r'[ ]{64} [\b]-' : r'[ ]{64} [\b][\b]🌕'));
+        expect(lines[0], matches(platform.isWindows ? r'[ ]{64} [\b]-' : r'[ ]{64} [\b]⣾'));
       }, overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Platform: () => FakePlatform(operatingSystem: testOs),
@@ -141,7 +141,7 @@ void main() {
         List<String> lines = outputStdout();
         expect(lines[0], startsWith(platform.isWindows
             ? 'Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/'
-            : 'Hello world               \b\b🌕\b\b🌖\b\b🌗\b\b🌘\b\b🌑\b\b🌒\b\b🌓\b\b🌔\b\b🌕\b\b🌖'));
+            : 'Hello world               \b⣾\b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽'));
         expect(lines.length, equals(1));
         expect(lines[0].endsWith('\n'), isFalse);
 
@@ -150,7 +150,7 @@ void main() {
         lines = outputStdout();
         final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
         expect(matches, isEmpty);
-        expect(lines[0], endsWith(platform.isWindows ? '\b \b' : '\b\b  \b\b'));
+        expect(lines[0], endsWith('\b \b'));
         expect(called, equals(1));
         expect(lines.length, equals(2));
         expect(lines[1], equals(''));
@@ -169,7 +169,7 @@ void main() {
         List<String> lines = outputStdout();
         expect(lines[0], startsWith(platform.isWindows
             ? 'Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/'
-            : 'Hello world               \b\b🌕\b\b🌖\b\b🌗\b\b🌘\b\b🌑\b\b🌒\b\b🌓\b\b🌔\b\b🌕\b\b🌖'));
+            : 'Hello world               \b⣾\b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽'));
         expect(lines.length, equals(1));
 
         // Verify a stop prints the time.

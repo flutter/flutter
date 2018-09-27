@@ -291,7 +291,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     modern: false,
   );
 
-  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.directory.path);
+  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -326,7 +326,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
-  await _addServicesToBundle(app.project.directory);
+  await _addServicesToBundle(app.project.hostAppRoot);
 
   final FlutterProject project = await FlutterProject.current();
   await updateGeneratedXcodeProperties(
@@ -334,8 +334,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-
-  if (hasPlugins(project)) {
+  refreshPluginsList(project);
+  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
     final Fingerprinter fingerprinter = Fingerprinter(
@@ -381,7 +381,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
-  final List<FileSystemEntity> contents = app.project.directory.listSync();
+  final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
   for (FileSystemEntity entity in contents) {
     if (fs.path.extension(entity.path) == '.xcworkspace') {
       buildCommands.addAll(<String>[
@@ -446,7 +446,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
-    workingDirectory: app.project.directory.path,
+    workingDirectory: app.project.hostAppRoot.path,
     allowReentrantFlutter: true
   );
   buildSubStatus?.stop();
@@ -473,7 +473,7 @@ Future<XcodeBuildResult> buildXcodeProject({
             '-allowProvisioningDeviceRegistration',
           ].contains(buildCommand);
         }).toList(),
-    workingDirectory: app.project.directory.path,
+    workingDirectory: app.project.hostAppRoot.path,
   ));
 
   if (buildResult.exitCode != 0) {
@@ -492,7 +492,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       stderr: buildResult.stderr,
       xcodeBuildExecution: XcodeBuildExecution(
         buildCommands: buildCommands,
-        appDirectory: app.project.directory.path,
+        appDirectory: app.project.hostAppRoot.path,
         buildForPhysicalDevice: buildForDevice,
         buildSettings: buildSettings,
       ),
@@ -677,7 +677,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
   assert(await xcodeProjectFile.exists());
   final List<String> lines = await xcodeProjectFile.readAsLines();
 
-  if (lines.any((String line) => line.contains('path = Flutter/flutter_assets')))
+  if (lines.any((String line) => line.contains('flutter_assets in Resources')))
     return true;
 
   const String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
