@@ -243,6 +243,9 @@ abstract class FlutterCommand extends Command<Null> {
       compilationTraceFilePath: argParser.options.containsKey('precompile')
           ? argResults['precompile']
           : null,
+      buildHotUpdate: argParser.options.containsKey('hotupdate')
+          ? argResults['hotupdate']
+          : false,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -495,10 +498,15 @@ abstract class FlutterCommand extends Command<Null> {
         ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('precompile')
         ? argResults['precompile'] : null;
+    final bool buildHotUpdate = argParser.options.containsKey('hotupdate')
+        ? argResults['hotupdate'] : false;
+
     if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
       throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
     if (compilationTraceFilePath != null && !dynamicFlag)
       throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
+    if (buildHotUpdate && compilationTraceFilePath == null)
+      throw ToolExit('Error: --hotupdate is allowed only when --precompile is specified.');
   }
 
   ApplicationPackageStore applicationPackages;
