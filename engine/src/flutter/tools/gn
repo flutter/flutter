@@ -113,6 +113,8 @@ def to_gn_args(args):
     else:
       aot = False
 
+    gn_args['dart_lib_export_symbols'] = False
+
     if runtime_mode == 'debug':
         gn_args['dart_runtime_mode'] = 'develop'
     elif runtime_mode == 'dynamic_profile':
