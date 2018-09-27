@@ -163,11 +163,19 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (await opensslProcess.exitCode != 0)
     return null;
 
-  return <String, String> {
+  final Map<String, String> signingConfigs = <String, String> {
     'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
       ?.group(1),
   };
+
+  if (opensslOutput.contains('iPhone Developer: Google Development')) {
+    signingConfigs['PROVISIONING_PROFILE_SPECIFIER'] = 'Google Development';
+    signingConfigs['CODE_SIGN_STYLE'] = 'Manual';
+    printStatus("Manually selecting Google's mobile provisioning profile (see go/google-flutter-signing).");
+  }
+
+  return signingConfigs;
 }
 
 Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, bool usesTerminalUi) async {
