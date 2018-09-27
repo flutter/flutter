@@ -152,7 +152,11 @@ class Directionality extends InheritedWidget {
 /// ## Transparent image
 ///
 /// If only a single [Image] needs to be composited with an opacity between 0.0
-/// and 1.0, it's much faster to directly use [Image] as following:
+/// and 1.0, it's much faster to directly use [Image].
+///
+/// ### Sample code
+///
+/// This example draws an [Image] with some opacity:
 ///
 /// ```dart
 /// Image(
