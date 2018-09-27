@@ -15,6 +15,7 @@ import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'material_localizations.dart';
 import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
 import 'tab_bar_theme.dart';
@@ -705,6 +706,11 @@ class ThemeData extends Diagnosticable {
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       colorScheme: colorScheme ?? this.colorScheme,
     );
+  }
+
+  ThemeData localizeFor(MaterialLocalizations localizations) {
+    final TextTheme geometryTheme = localizations?.localTextGeometry(version: 0) ?? MaterialTextGeometry.englishLike;
+    return ThemeData.localize(this, geometryTheme);
   }
 
   // The number 5 was chosen without any real science or research behind it. It

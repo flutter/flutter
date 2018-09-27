@@ -511,9 +511,13 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   @protected
   String get scriptCategory;
 
-  /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(scriptCategory);
+  TextTheme localTextGeometry({ int version }) {
+    return MaterialTextGeometry.localizedFor(
+      version: version,
+      scriptCategory: scriptCategory,
+    );
+  }
 
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.

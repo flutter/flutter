@@ -104,7 +104,7 @@ class Theme extends StatelessWidget {
   /// [BuildContext] that is "under" the [Theme]:
   ///
   /// ```dart
-  /// @override
+  /// @overrideun
   /// Widget build(BuildContext context) {
   ///   return MaterialApp(
   ///     theme: ThemeData.light(),
@@ -119,23 +119,24 @@ class Theme extends StatelessWidget {
   ///           ),
   ///         );
   ///       },
-  ///     ),
+  ///     ),'
   ///   );
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
-    final _InheritedTheme inheritedTheme =
-        context.inheritFromWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
       if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
       return inheritedTheme.theme.data;
     }
 
-    final ThemeData colorTheme = (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final TextTheme geometryTheme = localizations?.localTextGeometry ?? MaterialTextGeometry.englishLike;
-    return ThemeData.localize(colorTheme, geometryTheme);
+    if (inheritedTheme == null) {
+      final TextTheme geometryTheme = localizations?.localTextGeometry() ?? MaterialTextGeometry.englishLike;
+      return ThemeData.localize(_kFallbackTheme, geometryTheme);
+    }
+    return inheritedTheme.theme.data.localizeFor(localizations);
   }
 
   @override

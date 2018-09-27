@@ -45,62 +45,79 @@ class TextTheme extends Diagnosticable {
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].
   const TextTheme({
-    this.display4,
-    this.display3,
-    this.display2,
-    this.display1,
-    this.headline,
-    this.title,
-    this.subhead,
-    this.body2,
-    this.body1,
+    TextStyle display4,
+    TextStyle display3,
+    TextStyle display2,
+    TextStyle display1,
+    TextStyle headline,
+    TextStyle title,
+    TextStyle subhead,
+    TextStyle body2,
+    TextStyle body1,
     this.caption,
     this.button,
-    this.headline1,
-    this.headline2,
-    this.headline3,
-    this.headline4,
-    this.headline5,
-    this.headline6,
-    this.subtitle1,
+    TextStyle headline1,
+    TextStyle headline2,
+    TextStyle headline3,
+    TextStyle headline4,
+    TextStyle headline5,
+    TextStyle headline6,
+    TextStyle subtitle1,
     this.subtitle2,
-    this.paragraph1,
-    this.paragraph2,
+    TextStyle paragraph1,
+    TextStyle paragraph2,
     this.overline,
-  });
+  }) : assert(!(display4 != null && headline1 != null)),
+       assert(!(display3 != null && headline2 != null)),
+       assert(!(display2 != null && headline3 != null)),
+       assert(!(display1 != null && headline4 != null)),
+       assert(!(headline != null && headline5 != null)),
+       assert(!(title != null && headline6 != null)),
+       assert(!(subhead != null && subtitle1 != null)),
+       assert(!(body1 != null && paragraph2 != null)),
+       assert(!(body2 != null && paragraph1 != null)),
+       this.headline1 = headline1 ?? display4,
+       this.headline2 = headline2 ?? display3,
+       this.headline3 = headline3 ?? display2,
+       this.headline4 = headline4 ?? display1,
+       this.headline5 = headline5 ?? headline,
+       this.headline6 = headline6 ?? title,
+       this.subtitle1 = subtitle1 ?? subhead,
+       this.paragraph2 = paragraph2 ?? body1,
+       this.paragraph1 = paragraph1 ?? body2;
 
   /// Extremely large text.
   ///
   /// The font size is 112 pixels.
-  final TextStyle display4;
+  TextStyle get display4 => headline1;
 
   /// Very, very large text.
   ///
   /// Used for the date in the dialog shown by [showDatePicker].
-  final TextStyle display3;
+  TextStyle get display3 => headline2;
 
   /// Very large text.
-  final TextStyle display2;
+  TextStyle get display2 => headline3;
 
   /// Large text.
-  final TextStyle display1;
+  TextStyle get display1 => headline4;
 
   /// Used for large text in dialogs (e.g., the month and year in the dialog
   /// shown by [showDatePicker]).
-  final TextStyle headline;
+  TextStyle get headline => headline5;
 
   /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
   /// and [AlertDialog.title]).
-  final TextStyle title;
+  TextStyle get title => headline6;
 
   /// Used for the primary text in lists (e.g., [ListTile.title]).
-  final TextStyle subhead;
+  TextStyle get subhead => subtitle1;
 
   /// Used for emphasizing text that would otherwise be [body1].
-  final TextStyle body2;
+  TextStyle get body2 => paragraph1;
 
   /// Used for the default text style for [Material].
-  final TextStyle body1;
+  TextStyle get body1 => paragraph2;
 
   /// Used for auxiliary text associated with images.
   final TextStyle caption;
@@ -183,28 +200,29 @@ class TextTheme extends Diagnosticable {
     TextStyle paragraph2,
     TextStyle overline,
   }) {
+    assert(!(display4 != null && headline1 != null));
+    assert(!(display3 != null && headline2 != null));
+    assert(!(display2 != null && headline3 != null));
+    assert(!(display1 != null && headline4 != null));
+    assert(!(headline != null && headline5 != null));
+    assert(!(title != null && headline6 != null));
+    assert(!(subhead != null && subtitle1 != null));
+    assert(!(body1 != null && paragraph2 != null));
+    assert(!(body2 != null && paragraph1 != null));
+
     return TextTheme(
-      display4: display4 ?? this.display4,
-      display3: display3 ?? this.display3,
-      display2: display2 ?? this.display2,
-      display1: display1 ?? this.display1,
-      headline: headline ?? this.headline,
-      title: title ?? this.title,
-      subhead: subhead ?? this.subhead,
-      body2: body2 ?? this.body2,
-      body1: body1 ?? this.body1,
       caption: caption ?? this.caption,
       button: button ?? this.button,
-      headline1: headline1 ?? this.headline1,
-      headline2: headline2 ?? this.headline2,
-      headline3: headline3 ?? this.headline3,
-      headline4: headline4 ?? this.headline4,
-      headline5: headline5 ?? this.headline5,
-      headline6: headline6 ?? this.headline6,
-      subtitle1: subtitle1 ?? this.subtitle1,
+      headline1: headline1 ?? display4 ?? this.headline1,
+      headline2: headline2 ?? display3 ?? this.headline2,
+      headline3: headline3 ?? display2 ?? this.headline3,
+      headline4: headline4 ?? display1 ?? this.headline4,
+      headline5: headline5 ?? headline ?? this.headline5,
+      headline6: headline6 ?? title ?? this.headline6,
+      subtitle1: subtitle1 ?? subhead ?? this.subtitle1,
       subtitle2: subtitle2 ?? this.subtitle2,
-      paragraph1: paragraph1 ?? this.paragraph1,
-      paragraph2: paragraph2 ?? this.paragraph2,
+      paragraph1: paragraph1 ?? body2 ?? this.paragraph1,
+      paragraph2: paragraph2 ?? body1 ?? this.paragraph2,
       overline: overline ?? this.overline,
     );
   }
@@ -263,15 +281,6 @@ class TextTheme extends Diagnosticable {
     if (other == null)
       return this;
     return copyWith(
-      display4: display4?.merge(other.display4) ?? other.display4,
-      display3: display3?.merge(other.display3) ?? other.display3,
-      display2: display2?.merge(other.display2) ?? other.display2,
-      display1: display1?.merge(other.display1) ?? other.display1,
-      headline: headline?.merge(other.headline) ?? other.headline,
-      title: title?.merge(other.title) ?? other.title,
-      subhead: subhead?.merge(other.subhead) ?? other.subhead,
-      body2: body2?.merge(other.body2) ?? other.body2,
-      body1: body1?.merge(other.body1) ?? other.body1,
       caption: caption?.merge(other.caption) ?? other.caption,
       button: button?.merge(other.button) ?? other.button,
       headline1: headline1?.merge(other.headline1) ?? other.headline1,
@@ -309,87 +318,6 @@ class TextTheme extends Diagnosticable {
     TextDecorationStyle decorationStyle,
   }) {
     return TextTheme(
-      display4: display4.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      display3: display3.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      display2: display2.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      display1: display1.apply(
-        color: displayColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      headline: headline.apply(
-        color: bodyColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      title: title.apply(
-        color: bodyColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      subhead: subhead.apply(
-        color: bodyColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      body2: body2.apply(
-        color: bodyColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
-      body1: body1.apply(
-        color: bodyColor,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationStyle: decorationStyle,
-        fontFamily: fontFamily,
-        fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta,
-      ),
       caption: caption.apply(
         color: displayColor,
         decoration: decoration,
@@ -520,15 +448,6 @@ class TextTheme extends Diagnosticable {
     assert(b != null);
     assert(t != null);
     return TextTheme(
-      display4: TextStyle.lerp(a.display4, b.display4, t),
-      display3: TextStyle.lerp(a.display3, b.display3, t),
-      display2: TextStyle.lerp(a.display2, b.display2, t),
-      display1: TextStyle.lerp(a.display1, b.display1, t),
-      headline: TextStyle.lerp(a.headline, b.headline, t),
-      title: TextStyle.lerp(a.title, b.title, t),
-      subhead: TextStyle.lerp(a.subhead, b.subhead, t),
-      body2: TextStyle.lerp(a.body2, b.body2, t),
-      body1: TextStyle.lerp(a.body1, b.body1, t),
       caption: TextStyle.lerp(a.caption, b.caption, t),
       button: TextStyle.lerp(a.button, b.button, t),
       headline1: TextStyle.lerp(a.headline1, b.headline1, t),
@@ -552,16 +471,7 @@ class TextTheme extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final TextTheme typedOther = other;
-    return display4 == typedOther.display4
-        && display3 == typedOther.display3
-        && display2 == typedOther.display2
-        && display1 == typedOther.display1
-        && headline == typedOther.headline
-        && title == typedOther.title
-        && subhead == typedOther.subhead
-        && body2 == typedOther.body2
-        && body1 == typedOther.body1
-        && caption == typedOther.caption
+    return caption == typedOther.caption
         && button == typedOther.button
         && headline1 == typedOther.headline1
         && headline2 == typedOther.headline2
@@ -580,15 +490,6 @@ class TextTheme extends Diagnosticable {
   int get hashCode {
     // The hashValues() function supports up to 20 arguments.
     return hashValues(
-      display4,
-      display3,
-      display2,
-      display1,
-      headline,
-      title,
-      subhead,
-      body2,
-      body1,
       caption,
       button,
       headline1,
@@ -599,11 +500,9 @@ class TextTheme extends Diagnosticable {
       headline6,
       subtitle1,
       subtitle2,
-      hashValues(
-        paragraph1,
-        paragraph2,
-        overline,
-      ),
+      paragraph1,
+      paragraph2,
+      overline,
     );
   }
 
@@ -611,27 +510,18 @@ class TextTheme extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final TextTheme defaultTheme = Typography(platform: defaultTargetPlatform).black;
-    properties.add(DiagnosticsProperty<TextStyle>('display4', display4, defaultValue: defaultTheme.display4));
-    properties.add(DiagnosticsProperty<TextStyle>('display3', display3, defaultValue: defaultTheme.display3));
-    properties.add(DiagnosticsProperty<TextStyle>('display2', display2, defaultValue: defaultTheme.display2));
-    properties.add(DiagnosticsProperty<TextStyle>('display1', display1, defaultValue: defaultTheme.display1));
-    properties.add(DiagnosticsProperty<TextStyle>('headline', headline, defaultValue: defaultTheme.headline));
-    properties.add(DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
-    properties.add(DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
-    properties.add(DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
-    properties.add(DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
     properties.add(DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
     properties.add(DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
-    properties.add(DiagnosticsProperty<TextStyle>('headline1', headline1, defaultValue: defaultTheme.headline1));
-    properties.add(DiagnosticsProperty<TextStyle>('headline2', headline2, defaultValue: defaultTheme.headline2));
-    properties.add(DiagnosticsProperty<TextStyle>('headline3', headline3, defaultValue: defaultTheme.headline3));
-    properties.add(DiagnosticsProperty<TextStyle>('headline4', headline4, defaultValue: defaultTheme.headline4));
-    properties.add(DiagnosticsProperty<TextStyle>('headline5', headline5, defaultValue: defaultTheme.headline5));
-    properties.add(DiagnosticsProperty<TextStyle>('headline6', headline6, defaultValue: defaultTheme.headline6));
-    properties.add(DiagnosticsProperty<TextStyle>('subtitle1', subtitle1, defaultValue: defaultTheme.subtitle1));
+    properties.add(DiagnosticsProperty<TextStyle>('headline1 (display4)', headline1, defaultValue: defaultTheme.headline1));
+    properties.add(DiagnosticsProperty<TextStyle>('headline2 (display3)', headline2, defaultValue: defaultTheme.headline2));
+    properties.add(DiagnosticsProperty<TextStyle>('headline3 (display2)', headline3, defaultValue: defaultTheme.headline3));
+    properties.add(DiagnosticsProperty<TextStyle>('headline4 (display1)', headline4, defaultValue: defaultTheme.headline4));
+    properties.add(DiagnosticsProperty<TextStyle>('headline5 (headline)', headline5, defaultValue: defaultTheme.headline5));
+    properties.add(DiagnosticsProperty<TextStyle>('headline6 (title)', headline6, defaultValue: defaultTheme.headline6));
+    properties.add(DiagnosticsProperty<TextStyle>('subtitle1 (subhead)', subtitle1, defaultValue: defaultTheme.subtitle1));
     properties.add(DiagnosticsProperty<TextStyle>('subtitle2', subtitle2, defaultValue: defaultTheme.subtitle2));
-    properties.add(DiagnosticsProperty<TextStyle>('paragraph1', paragraph1, defaultValue: defaultTheme.paragraph1));
-    properties.add(DiagnosticsProperty<TextStyle>('paragraph2', paragraph2, defaultValue: defaultTheme.paragraph2));
+    properties.add(DiagnosticsProperty<TextStyle>('paragraph1 (body2)', paragraph1, defaultValue: defaultTheme.paragraph1));
+    properties.add(DiagnosticsProperty<TextStyle>('paragraph2 (body1)', paragraph2, defaultValue: defaultTheme.paragraph2));
     properties.add(DiagnosticsProperty<TextStyle>('overline', overline, defaultValue: defaultTheme.overline));
   }
 }
@@ -703,16 +593,7 @@ class _MaterialTextColorThemes {
     body1      : TextStyle(debugLabel: 'blackMountainView body1',      fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
     caption    : TextStyle(debugLabel: 'blackMountainView caption',    fontFamily: 'Roboto', inherit: true, color: Colors.black54, decoration: TextDecoration.none),
     button     : TextStyle(debugLabel: 'blackMountainView button',     fontFamily: 'Roboto', inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline1  : TextStyle(debugLabel: 'blackMountainView headline1',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline2  : TextStyle(debugLabel: 'blackMountainView headline2',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline3  : TextStyle(debugLabel: 'blackMountainView headline3',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline4  : TextStyle(debugLabel: 'blackMountainView headline4',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline5  : TextStyle(debugLabel: 'blackMountainView headline5',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline6  : TextStyle(debugLabel: 'blackMountainView headline6',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    subtitle1  : TextStyle(debugLabel: 'blackMountainView subtitle1',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
     subtitle2  : TextStyle(debugLabel: 'blackMountainView subtitle2',  fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    paragraph1 : TextStyle(debugLabel: 'blackMountainView paragraph1', fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    paragraph2 : TextStyle(debugLabel: 'blackMountainView paragraph2', fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
     overline   : TextStyle(debugLabel: 'blackMountainView overline',   fontFamily: 'Roboto', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
   );
 
@@ -728,16 +609,7 @@ class _MaterialTextColorThemes {
     body1      : TextStyle(debugLabel: 'whiteMountainView body1',      fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     caption    : TextStyle(debugLabel: 'whiteMountainView caption',    fontFamily: 'Roboto', inherit: true, color: Colors.white70, decoration: TextDecoration.none),
     button     : TextStyle(debugLabel: 'whiteMountainView button',     fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline1  : TextStyle(debugLabel: 'whiteMountainView headline1',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline2  : TextStyle(debugLabel: 'whiteMountainView headline2',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline3  : TextStyle(debugLabel: 'whiteMountainView headline3',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline4  : TextStyle(debugLabel: 'whiteMountainView headline4',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline5  : TextStyle(debugLabel: 'whiteMountainView headline5',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6  : TextStyle(debugLabel: 'whiteMountainView headline6',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1  : TextStyle(debugLabel: 'whiteMountainView subtitle1',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     subtitle2  : TextStyle(debugLabel: 'whiteMountainView subtitle2',  fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    paragraph1 : TextStyle(debugLabel: 'whiteMountainView paragraph1', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    paragraph2 : TextStyle(debugLabel: 'whiteMountainView paragraph2', fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     overline   : TextStyle(debugLabel: 'whiteMountainView overline',   fontFamily: 'Roboto', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
   );
 
@@ -753,16 +625,7 @@ class _MaterialTextColorThemes {
     body1      : TextStyle(debugLabel: 'blackCupertino body1',      fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
     caption    : TextStyle(debugLabel: 'blackCupertino caption',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black54, decoration: TextDecoration.none),
     button     : TextStyle(debugLabel: 'blackCupertino button',     fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    headline1  : TextStyle(debugLabel: 'blackCupertino headline1',  fontFamily: '.SF UI Display', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline2  : TextStyle(debugLabel: 'blackCupertino headline2',  fontFamily: '.SF UI Display', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline3  : TextStyle(debugLabel: 'blackCupertino headline3',  fontFamily: '.SF UI Display', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline4  : TextStyle(debugLabel: 'blackCupertino headline4',  fontFamily: '.SF UI Display', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline5  : TextStyle(debugLabel: 'blackCupertino headline5',  fontFamily: '.SF UI Display', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    headline6  : TextStyle(debugLabel: 'blackCupertino headline6',  fontFamily: '.SF UI Display', inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    subtitle1  : TextStyle(debugLabel: 'blackCupertino subtitle1',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
     subtitle2  : TextStyle(debugLabel: 'blackCupertino subtitle2',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    paragraph1 : TextStyle(debugLabel: 'blackCupertino paragraph1', fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
-    paragraph2 : TextStyle(debugLabel: 'blackCupertino paragraph2', fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
     overline   : TextStyle(debugLabel: 'blackCupertino overline',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.black,   decoration: TextDecoration.none),
   );
 
@@ -778,16 +641,7 @@ class _MaterialTextColorThemes {
     body1      : TextStyle(debugLabel: 'whiteCupertino body1',      fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     caption    : TextStyle(debugLabel: 'whiteCupertino caption',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.white70, decoration: TextDecoration.none),
     button     : TextStyle(debugLabel: 'whiteCupertino button',     fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline1  : TextStyle(debugLabel: 'whiteCupertino headline1',  fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline2  : TextStyle(debugLabel: 'whiteCupertino headline2',  fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline3  : TextStyle(debugLabel: 'whiteCupertino headline3',  fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline4  : TextStyle(debugLabel: 'whiteCupertino headline4',  fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline5  : TextStyle(debugLabel: 'whiteCupertino headline5',  fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    headline6  : TextStyle(debugLabel: 'whiteCupertino headline6',  fontFamily: '.SF UI Display', inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    subtitle1  : TextStyle(debugLabel: 'whiteCupertino subtitle1',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     subtitle2  : TextStyle(debugLabel: 'whiteCupertino subtitle2',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    paragraph1 : TextStyle(debugLabel: 'whiteCupertino paragraph1', fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
-    paragraph2 : TextStyle(debugLabel: 'whiteCupertino paragraph2', fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
     overline   : TextStyle(debugLabel: 'whiteCupertino overline',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
   );
 }
@@ -795,35 +649,37 @@ class _MaterialTextColorThemes {
 /// Defines text geometries for the three language categories defined in
 /// https://material.io/go/design-typography.
 class MaterialTextGeometry {
-  /// The name of the English-like script category.
-  static const String englishLikeCategory = 'English-like';
+  MaterialTextGeometry._();
 
-  /// The name of the dense script category.
-  static const String denseCategory = 'dense';
-
-  /// The name of the tall script category.
-  static const String tallCategory = 'tall';
-
-  /// The mapping from script category names to text themes.
-  static const Map<String, TextTheme> _categoryToTextTheme = <String, TextTheme>{
-    englishLikeCategory: englishLike,
-    denseCategory: dense,
-    tallCategory: tall,
-  };
-
-  /// Looks up text geometry corresponding to the given [scriptCategoryName].
+  /// Looks up text geometry for the given [version] and [scriptCategory].
+  ///
+  /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
+  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// three language categories defined in https://material.io/go/design-typography.
   ///
   /// Most apps would not call this method directly, but rather call [Theme.of]
   /// and use the [TextTheme] fields of the returned [ThemeData] object.
-  ///
-  /// [scriptCategoryName] must be one of [englishLikeCategory], [denseCategory]
-  /// and [tallCategory].
   ///
   /// See also:
   ///
   ///  * [DefaultMaterialLocalizations.localTextGeometry], which uses this
   ///    method to look-up text geometry for the current locale.
-  static TextTheme forScriptCategory(String scriptCategoryName) => _categoryToTextTheme[scriptCategoryName];
+  static TextTheme localizedFor({ int version = 0, String scriptCategory = 'English-like' }) {
+    assert(version != null && (version == 0 || version == 1));
+    assert(const <String>['English-like', 'tall', 'dense'].contains(scriptCategory));
+
+    switch(scriptCategory) {
+      case 'English-like':
+        return version == 0 ? englishLike : englishLikeVersion1;
+      case 'dense':
+        return version == 0 ? dense : denseVersion1;
+      case 'tall':
+        return version == 0 ? tall : tallVersion1;
+    }
+
+    assert(false);
+    return null;
+  }
 
   /// Defines text geometry for English-like scripts, such as English, French, Russian, etc.
   static const TextTheme englishLike = TextTheme(
@@ -838,17 +694,28 @@ class MaterialTextGeometry {
     body1      : TextStyle(debugLabel: 'englishLike body1',      inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     caption    : TextStyle(debugLabel: 'englishLike caption',    inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     button     : TextStyle(debugLabel: 'englishLike button',     inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    headline1  : TextStyle(debugLabel: 'englishLike headline1',  inherit: false, fontSize:  96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
-    headline2  : TextStyle(debugLabel: 'englishLike headline2',  inherit: false, fontSize:  60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
-    headline3  : TextStyle(debugLabel: 'englishLike headline3',  inherit: false, fontSize:  48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.0),
-    headline4  : TextStyle(debugLabel: 'englishLike headline4',  inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.25),
-    headline5  : TextStyle(debugLabel: 'englishLike headline5',  inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.0),
-    headline6  : TextStyle(debugLabel: 'englishLike headline6',  inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.15),
-    subtitle1  : TextStyle(debugLabel: 'englishLike subtitle1',  inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.15),
     subtitle2  : TextStyle(debugLabel: 'englishLike subtitle2',  inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.1),
-    paragraph1 : TextStyle(debugLabel: 'englishLike paragraph1', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.5),
-    paragraph2 : TextStyle(debugLabel: 'englishLike paragraph2', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  0.25),
     overline   : TextStyle(debugLabel: 'englishLike overline',   inherit: false, fontSize:  10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing:  1.5),
+  );
+
+  /// Defines text geometry for English-like scripts, such as English, French, Russian, etc.
+  ///
+  /// This version matches the latest Material Design spec:
+  /// (https://material.io/go/design-typography#typography-styles).
+  static const TextTheme englishLikeVersion1 = TextTheme(
+    headline1  : TextStyle(debugLabel: 'englishLike version1 headline1', fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
+    headline2  : TextStyle(debugLabel: 'englishLike version1 headline2', fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
+    headline3  : TextStyle(debugLabel: 'englishLike version1 headline3', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
+    headline4  : TextStyle(debugLabel: 'englishLike version1 headline4', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
+    headline5  : TextStyle(debugLabel: 'englishLike version1 headline5', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
+    headline6  : TextStyle(debugLabel: 'englishLike version1 headline6', fontSize: 20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
+    subtitle1  : TextStyle(debugLabel: 'englishLike version1 subtitle1', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
+    subtitle2  : TextStyle(debugLabel: 'englishLike version1 subtitle2', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
+    body1      : TextStyle(debugLabel: 'englishLike version1 body1',     fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.5),
+    body2      : TextStyle(debugLabel: 'englishLike version1 body2',     fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
+    button     : TextStyle(debugLabel: 'englishLike version1 button',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.75),
+    caption    : TextStyle(debugLabel: 'englishLike version1 caption',   fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
+    overline   : TextStyle(debugLabel: 'englishLike version1 overline',  fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
   /// Defines text geometry for dense scripts, such as Chinese, Japanese, Korean, etc.
@@ -864,17 +731,28 @@ class MaterialTextGeometry {
     body1      : TextStyle(debugLabel: 'dense body1',      inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     caption    : TextStyle(debugLabel: 'dense caption',    inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     button     : TextStyle(debugLabel: 'dense button',     inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    headline1  : TextStyle(debugLabel: 'dense headline1',  inherit: false, fontSize:  96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    headline2  : TextStyle(debugLabel: 'dense headline2',  inherit: false, fontSize:  60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
-    headline3  : TextStyle(debugLabel: 'dense headline3',  inherit: false, fontSize:  48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headline4  : TextStyle(debugLabel: 'dense headline4',  inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headline5  : TextStyle(debugLabel: 'dense headline5',  inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    headline6  : TextStyle(debugLabel: 'dense headline6',  inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    subtitle1  : TextStyle(debugLabel: 'dense subtitle1',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     subtitle2  : TextStyle(debugLabel: 'dense subtitle2',  inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    paragraph1 : TextStyle(debugLabel: 'dense paragraph1', inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    paragraph2 : TextStyle(debugLabel: 'dense paragraph2', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     overline   : TextStyle(debugLabel: 'dense overline',   inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+  );
+
+  /// Defines text geometry for dense scripts, such as Chinese, Japanese, Korean, etc.
+  ///
+  /// This version matches the latest Material Design spec:
+  /// (https://material.io/go/design-typography#typography-styles).
+  static const TextTheme denseVersion1 = TextTheme(
+    headline1  : TextStyle(debugLabel: 'dense version1 headline1',  fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    headline2  : TextStyle(debugLabel: 'dense version1 headline2',  fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    headline3  : TextStyle(debugLabel: 'dense version1 headline3',  fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headline4  : TextStyle(debugLabel: 'dense version1 headline4',  fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headline5  : TextStyle(debugLabel: 'dense version1 headline5',  fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headline6  : TextStyle(debugLabel: 'dense version1 headline6',  fontSize: 21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    subtitle1  : TextStyle(debugLabel: 'dense version1 subtitle1',  fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    subtitle2  : TextStyle(debugLabel: 'dense version1 subtitle2',  fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    paragraph1 : TextStyle(debugLabel: 'dense version1 paragraph1', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    paragraph2 : TextStyle(debugLabel: 'dense version1 paragraph2', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    button     : TextStyle(debugLabel: 'dense version1 button',     fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    caption    : TextStyle(debugLabel: 'dense version1 caption',    fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    overline   : TextStyle(debugLabel: 'dense version1 overline',   fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
   /// Defines text geometry for tall scripts, such as Farsi, Hindi, Thai, etc.
@@ -890,16 +768,27 @@ class MaterialTextGeometry {
     body1      : TextStyle(debugLabel: 'tall body1',      inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     caption    : TextStyle(debugLabel: 'tall caption',    inherit: false, fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     button     : TextStyle(debugLabel: 'tall button',     inherit: false, fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
-    headline1  : TextStyle(debugLabel: 'tall headline1',  inherit: false, fontSize:  96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
-    headline2  : TextStyle(debugLabel: 'tall headline2',  inherit: false, fontSize:  60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
-    headline3  : TextStyle(debugLabel: 'tall headline3',  inherit: false, fontSize:  48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline4  : TextStyle(debugLabel: 'tall headline4',  inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline5  : TextStyle(debugLabel: 'tall headline5',  inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline6  : TextStyle(debugLabel: 'tall headline6',  inherit: false, fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    subtitle1  : TextStyle(debugLabel: 'tall subtitle1',  inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     subtitle2  : TextStyle(debugLabel: 'tall subtitle2',  inherit: false, fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
-    paragraph1 : TextStyle(debugLabel: 'tall paragraph1', inherit: false, fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    paragraph2 : TextStyle(debugLabel: 'tall paragraph2', inherit: false, fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     overline   : TextStyle(debugLabel: 'tall overline',   inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+  );
+
+  /// Defines text geometry for tall scripts, such as Farsi, Hindi, Thai, etc.
+  ///
+  /// This version matches the latest Material Design spec:
+  /// (https://material.io/go/design-typography#typography-styles).
+  static const TextTheme tallVersion1 = TextTheme(
+    headline1  : TextStyle(debugLabel: 'tall version1 headline1',  fontSize: 96.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline2  : TextStyle(debugLabel: 'tall version1 headline2',  fontSize: 60.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline3  : TextStyle(debugLabel: 'tall version1 headline3',  fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline4  : TextStyle(debugLabel: 'tall version1 headline4',  fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline5  : TextStyle(debugLabel: 'tall version1 headline5',  fontSize: 24.0, fontWeight: FontWeight.w400,  textBaseline: TextBaseline.alphabetic),
+    headline6  : TextStyle(debugLabel: 'tall version1 headline6',  fontSize: 21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    subtitle1  : TextStyle(debugLabel: 'tall version1 subtitle1',  fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    subtitle2  : TextStyle(debugLabel: 'tall version1 subtitle2',  fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    paragraph1 : TextStyle(debugLabel: 'tall version1 paragraph1', fontSize: 17.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    paragraph2 : TextStyle(debugLabel: 'tall version1 paragraph2', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button     : TextStyle(debugLabel: 'tall version1 button',     fontSize: 15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    caption    : TextStyle(debugLabel: 'tall version1 caption',    fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    overline   : TextStyle(debugLabel: 'tall version1 overline',   fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
   );
 }

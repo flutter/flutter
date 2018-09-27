@@ -183,7 +183,7 @@ abstract class MaterialLocalizations {
   /// contains a complete set of properties needed to style a [Text] widget.
   ///
   /// See also: https://material.io/go/design-typography
-  TextTheme get localTextGeometry;
+  TextTheme localTextGeometry({ int version = 0 });
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
   /// separators as necessary.
@@ -659,9 +659,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       : TimeOfDayFormat.h_colon_mm_space_a;
   }
 
-  /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
+  TextTheme localTextGeometry({ int version = 0 }) {
+    return MaterialTextGeometry.localizedFor(version: version);
+  }
 
   @override
   String get signedInLabel => 'Signed in';
