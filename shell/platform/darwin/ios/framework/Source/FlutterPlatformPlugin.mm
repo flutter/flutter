@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#include "flutter/fml/logging.h"
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <Foundation/Foundation.h>
@@ -31,7 +32,26 @@ const char* const kOverlayStyleUpdateNotificationKey =
 
 using namespace shell;
 
-@implementation FlutterPlatformPlugin
+@implementation FlutterPlatformPlugin {
+  fml::WeakPtr<UIViewController> _viewController;
+}
+
+- (instancetype)init {
+  @throw([NSException exceptionWithName:@"FlutterPlatformPlugin must initWithViewController"
+                                 reason:nil
+                               userInfo:nil]);
+}
+
+- (instancetype)initWithViewController:(fml::WeakPtr<UIViewController>)viewController {
+  FML_DCHECK(viewController) << "viewController must be set";
+  self = [super init];
+
+  if (self) {
+    _viewController = viewController;
+  }
+
+  return self;
+}
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSString* method = call.method;
@@ -178,9 +198,13 @@ using namespace shell;
   // Apple's human user guidelines say not to terminate iOS applications. However, if the
   // root view of the app is a navigation controller, it is instructed to back up a level
   // in the navigation hierarchy.
+  // It's also possible in an Add2App scenario that the FlutterViewController was presented
+  // outside the context of a UINavigationController, and still wants to be popped.
   UIViewController* viewController = [UIApplication sharedApplication].keyWindow.rootViewController;
   if ([viewController isKindOfClass:[UINavigationController class]]) {
     [((UINavigationController*)viewController) popViewControllerAnimated:NO];
+  } else if (viewController != _viewController.get()) {
+    [_viewController.get() dismissViewControllerAnimated:NO completion:nil];
   }
 }
 
