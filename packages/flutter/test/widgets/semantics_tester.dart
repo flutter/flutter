@@ -285,8 +285,8 @@ class TestSemantics {
     if (scrollIndex != null && scrollIndex != nodeData.scrollIndex) {
       return fail('expected node id $id to have scrollIndex $scrollIndex but found scrollIndex ${nodeData.scrollIndex}.');
     }
-    if (scrollChildren != null && scrollChildren != nodeData.scrollChildren) {
-      return fail('expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildren}.');
+    if (scrollChildren != null && scrollChildren != nodeData.scrollChildrenCount) {
+      return fail('expected node id $id to have scrollIndex $scrollChildren but found scrollIndex ${nodeData.scrollChildrenCount}.');
     }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount)

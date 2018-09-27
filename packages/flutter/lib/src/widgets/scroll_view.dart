@@ -60,7 +60,7 @@ abstract class ScrollView extends StatelessWidget {
     ScrollPhysics physics,
     this.shrinkWrap = false,
     this.cacheExtent,
-    this.semanticChildren,
+    this.semanticChildrenCount,
   }) : assert(reverse != null),
        assert(shrinkWrap != null),
        assert(!(controller != null && primary == true),
@@ -173,19 +173,20 @@ abstract class ScrollView extends StatelessWidget {
   /// {@macro flutter.rendering.viewport.cacheExtent}
   final double cacheExtent;
 
-  /// The number of children which will contribute semantic information.
+  /// The number of children that will contribute semantic information.
   ///
   /// Some subtypes of [ScrollView] can infer this value automatically. For
   /// example [ListView] will use the number of widgets in the child list,
   /// while the [new ListView.separated] constructor will use half that amount.
   ///
   /// For [CustomScrollView] and other types which do not receive a builder
-  /// or list of widgets, the child count must be explicitly provided.
+  /// or list of widgets, the child count must be explicitly provided. If the
+  /// number is unknown or unbounded this should be left unset or set to null.
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.scrollChildren], the corresponding semantics property.
-  final int semanticChildren;
+  ///  * [SemanticsConfiguration.scrollChildrenCount], the corresponding semantics property.
+  final int semanticChildrenCount;
 
   /// Returns the [AxisDirection] in which the scroll view scrolls.
   ///
@@ -249,7 +250,7 @@ abstract class ScrollView extends StatelessWidget {
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
-      semanticChildren: semanticChildren,
+      semanticChildrenCount: semanticChildrenCount,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
@@ -369,7 +370,7 @@ class CustomScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
-    semanticChildren: semanticChildren,
+    semanticChildrenCount: semanticChildren,
   );
 
   /// The slivers to place inside the viewport.
@@ -411,7 +412,7 @@ abstract class BoxScrollView extends ScrollView {
     physics: physics,
     shrinkWrap: shrinkWrap,
     cacheExtent: cacheExtent,
-    semanticChildren: semanticChildren,
+    semanticChildrenCount: semanticChildren,
   );
 
   /// The amount of space by which to inset the children.
