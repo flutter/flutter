@@ -100,12 +100,6 @@ class FlutterDevice {
       await service.getVM();
   }
 
-  Future<Null> waitForViews() async {
-    // Refresh the view list, and wait a bit for the list to populate.
-    for (VMService service in vmServices)
-      await service.waitForViews();
-  }
-
   Future<Null> stopApps() async {
     final List<FlutterView> flutterViews = views;
     if (flutterViews == null || flutterViews.isEmpty)
@@ -635,7 +629,7 @@ abstract class ResidentRunner {
       await device._connect(reloadSources: reloadSources,
           compileExpression: compileExpression);
       await device.getVMs();
-      await device.waitForViews();
+      await device.refreshViews();
       if (device.views.isEmpty)
         printStatus('No Flutter views available on ${device.device.name}');
       else
