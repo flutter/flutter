@@ -33,6 +33,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   ~SceneBuilder() override;
 
   void pushTransform(const tonic::Float64List& matrix4);
+  void pushOffset(double dx, double dy);
   void pushClipRect(double left,
                     double right,
                     double top,
