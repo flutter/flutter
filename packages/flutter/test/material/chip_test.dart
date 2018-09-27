@@ -173,7 +173,7 @@ void main() {
 
   testWidgets(
       'Chip does not constrain size of label widget if it does not exceed '
-      'the available space', (WidgetTester tester) async {
+          'the available space', (WidgetTester tester) async {
     const double labelWidth = 50.0;
     const double labelHeight = 30.0;
     final Key labelKey = UniqueKey();
@@ -207,13 +207,14 @@ void main() {
 
   testWidgets(
       'Chip constrains the size of the label widget when it exceeds the '
-      'available space', (WidgetTester tester) async {
+          'available space', (WidgetTester tester) async {
     await _testConstrainedLabel(tester);
   });
 
   testWidgets(
       'Chip constrains the size of the label widget when it exceeds the '
-      'available space and the avatar is present', (WidgetTester tester) async {
+          'available space and the avatar is present', (
+      WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
       avatar: const CircleAvatar(child: Text('A')),
@@ -222,7 +223,8 @@ void main() {
 
   testWidgets(
       'Chip constrains the size of the label widget when it exceeds the '
-      'available space and the delete icon is present', (WidgetTester tester) async {
+          'available space and the delete icon is present', (
+      WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
       onDeleted: () {},
@@ -231,7 +233,8 @@ void main() {
 
   testWidgets(
       'Chip constrains the size of the label widget when it exceeds the '
-      'available space and both avatar and delete icons are present', (WidgetTester tester) async {
+          'available space and both avatar and delete icons are present', (
+      WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
       avatar: const CircleAvatar(child: Text('A')),
@@ -251,7 +254,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(64.0,48.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       _wrapForChip(
         child: Row(
@@ -276,7 +279,8 @@ void main() {
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
   });
 
-  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgets('Chip elements are ordered horizontally for locale', (
+      WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
@@ -301,7 +305,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle(const Duration(milliseconds: 500));
-    expect(tester.getCenter(find.text('ABC')).dx, greaterThan(tester.getCenter(find.byKey(iconKey)).dx));
+    expect(tester
+        .getCenter(find.text('ABC'))
+        .dx, greaterThan(tester
+        .getCenter(find.byKey(iconKey))
+        .dx));
     await tester.pumpWidget(
       _wrapForChip(
         textDirection: TextDirection.ltr,
@@ -309,7 +317,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle(const Duration(milliseconds: 500));
-    expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byKey(iconKey)).dx));
+    expect(tester
+        .getCenter(find.text('ABC'))
+        .dx, lessThan(tester
+        .getCenter(find.byKey(iconKey))
+        .dx));
   });
 
   testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
@@ -340,8 +352,12 @@ void main() {
       tester.getSize(find.text('Chip B')),
       anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
     );
-    expect(tester.getSize(find.byType(Chip).first), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
-    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find
+        .byType(Chip)
+        .first), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find
+        .byType(Chip)
+        .last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
 
     await tester.pumpWidget(
       _wrapForChip(
@@ -363,12 +379,30 @@ void main() {
 
     // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
     // https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last).width, anyOf(318.0, 319.0));
-    expect(tester.getSize(find.byType(Chip).last).height, equals(50.0));
+    expect(tester.getSize(find.text('Chip A')),
+        anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
+    expect(tester.getSize(find.text('Chip B')),
+        anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
+    expect(tester
+        .getSize(find
+        .byType(Chip)
+        .first)
+        .width, anyOf(318.0, 319.0));
+    expect(tester
+        .getSize(find
+        .byType(Chip)
+        .first)
+        .height, equals(50.0));
+    expect(tester
+        .getSize(find
+        .byType(Chip)
+        .last)
+        .width, anyOf(318.0, 319.0));
+    expect(tester
+        .getSize(find
+        .byType(Chip)
+        .last)
+        .height, equals(50.0));
 
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
@@ -390,11 +424,23 @@ void main() {
 
     // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
     // https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find.text('Chip A')),
+        anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
+    expect(tester.getSize(find.text('Chip B')),
+        anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)));
+    expect(tester
+        .getSize(find
+        .byType(Chip)
+        .first)
+        .width, anyOf(318.0, 319.0));
+    expect(tester
+        .getSize(find
+        .byType(Chip)
+        .first)
+        .height, equals(50.0));
+    expect(tester.getSize(find
+        .byType(Chip)
+        .last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
   });
 
   testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
@@ -425,13 +471,18 @@ void main() {
     );
     expect(tester.getSize(find.byKey(keyB)), const Size(10.0, 10.0));
     expect(
-      tester.getSize(find.byType(Chip).first),
+      tester.getSize(find
+          .byType(Chip)
+          .first),
       anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)),
     );
-    expect(tester.getSize(find.byType(Chip).last), const Size(58.0, 48.0));
+    expect(tester.getSize(find
+        .byType(Chip)
+        .last), const Size(58.0, 48.0));
   });
 
-  testWidgets('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
+  testWidgets(
+      'Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
     await tester.pumpWidget(
       _wrapForChip(
@@ -449,7 +500,8 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgets('Delete icons can be non-icon widgets', (WidgetTester tester) async {
+  testWidgets(
+      'Delete icons can be non-icon widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
     await tester.pumpWidget(
       _wrapForChip(
@@ -502,7 +554,8 @@ void main() {
     expect(tester.getTopLeft(find.byKey(keyB)), const Offset(380.0, 280.0));
     expect(tester.getBottomRight(find.byKey(keyB)), const Offset(420.0, 320.0));
     expect(tester.getTopLeft(find.byType(Icon)), const Offset(439.0, 291.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
+    expect(
+        tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
   testWidgets('Chip padding - RTL', (WidgetTester tester) async {
@@ -540,10 +593,12 @@ void main() {
     expect(tester.getTopLeft(find.byKey(keyB)), const Offset(380.0, 280.0));
     expect(tester.getBottomRight(find.byKey(keyB)), const Offset(420.0, 320.0));
     expect(tester.getTopLeft(find.byType(Icon)), const Offset(343.0, 291.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(361.0, 309.0));
+    expect(
+        tester.getBottomRight(find.byType(Icon)), const Offset(361.0, 309.0));
   });
 
-  testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
+  testWidgets('Avatar drawer works as expected on RawChip', (
+      WidgetTester tester) async {
     final GlobalKey labelKey = GlobalKey();
     Future<Null> pushChip({Widget avatar}) async {
       return tester.pumpWidget(
@@ -563,7 +618,8 @@ void main() {
 
     // No avatar
     await pushChip();
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
     final GlobalKey avatarKey = GlobalKey();
 
     // Add an avatar
@@ -576,86 +632,157 @@ void main() {
       ),
     );
     // Avatar drawer should start out closed.
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(-20.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)),
+        equals(const Offset(-20.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
     // Avatar drawer should start expanding.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(81.2, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-18.8, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(13.2, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(81.2, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-18.8, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(13.2, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(86.7, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-13.3, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(18.6, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(86.7, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-13.3, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(18.6, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(94.7, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-5.3, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(26.7, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(94.7, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-5.3, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(26.7, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(99.5, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-0.5, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(31.5, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(99.5, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-0.5, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(31.5, 0.1));
 
     // Wait for being done with animation, and make sure it didn't change
     // height.
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(36.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)),
+        equals(const Offset(4.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(36.0, 17.0)));
 
     // Remove the avatar again
     await pushChip();
     // Avatar drawer should start out open.
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(36.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)),
+        equals(const Offset(4.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(36.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
     // Avatar drawer should start contracting.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(2.9, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(34.9, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(102.9, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(2.9, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(34.9, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(98.0, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-2.0, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(30.0, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(98.0, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-2.0, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(30.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(84.1, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-15.9, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(16.1, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(84.1, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-15.9, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(16.1, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(80.0, 0.1));
-    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(avatarKey)).dx, closeTo(-20.0, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(12.0, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(80.0, 0.1));
+    expect(
+        tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(avatarKey))
+        .dx, closeTo(-20.0, 0.1));
+    expect(tester
+        .getTopLeft(find.byKey(labelKey))
+        .dx, closeTo(12.0, 0.1));
 
     // Wait for being done with animation, make sure it didn't change
     // height, and make sure that the avatar is no longer drawn.
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
     expect(find.byKey(avatarKey), findsNothing);
   });
 
-  testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
+  testWidgets('Delete button drawer works as expected on RawChip', (
+      WidgetTester tester) async {
     final UniqueKey labelKey = UniqueKey();
     final UniqueKey deleteButtonKey = UniqueKey();
     bool wasDeleted = false;
@@ -664,20 +791,22 @@ void main() {
         _wrapForChip(
           child: Wrap(
             children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  onDeleted: deletable
-                      ? () {
-                          setState(() {
-                            wasDeleted = true;
-                          });
-                        }
-                      : null,
-                  deleteIcon: Container(width: 40.0, height: 40.0, key: deleteButtonKey),
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                );
-              }),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      onDeleted: deletable
+                          ? () {
+                        setState(() {
+                          wasDeleted = true;
+                        });
+                      }
+                          : null,
+                      deleteIcon: Container(
+                          width: 40.0, height: 40.0, key: deleteButtonKey),
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                    );
+                  }),
             ],
           ),
         ),
@@ -686,45 +815,75 @@ void main() {
 
     // No delete button
     await pushChip();
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
 
     // Add a delete button
     await pushChip(deletable: true);
     // Delete button drawer should start out closed.
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(52.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)),
+        equals(const Offset(52.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
     // Delete button drawer should start expanding.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(81.2, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(53.2, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(81.2, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(53.2, 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(86.7, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(58.7, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(86.7, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(58.7, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(94.7, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(66.7, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(94.7, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(66.7, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(99.5, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(71.5, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(99.5, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(71.5, 0.1));
 
     // Wait for being done with animation, and make sure it didn't change
     // height.
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(76.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)),
+        equals(const Offset(76.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
 
     // Test the tap work for the delete button, but not the rest of the chip.
     expect(wasDeleted, isFalse);
@@ -736,42 +895,70 @@ void main() {
     // Remove the delete button again
     await pushChip();
     // Delete button drawer should start out open.
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(76.0, 12.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)),
+        equals(const Offset(76.0, 12.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
     // Delete button drawer should start contracting.
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(103.8, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(75.8, 0.1));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(103.8, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(75.8, 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(74.9, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(102.9, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(74.9, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(101.0, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(73.0, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(101.0, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(73.0, 0.1));
 
     await tester.pump(const Duration(milliseconds: 20));
-    expect(tester.getSize(find.byType(RawChip)).width, closeTo(97.5, 0.1));
-    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
-    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(69.5, 0.1));
+    expect(tester
+        .getSize(find.byType(RawChip))
+        .width, closeTo(97.5, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)),
+        equals(const Size(24.0, 24.0)));
+    expect(tester
+        .getTopLeft(find.byKey(deleteButtonKey))
+        .dx, closeTo(69.5, 0.1));
 
     // Wait for being done with animation, make sure it didn't change
     // height, and make sure that the delete button is no longer drawn.
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
-    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)),
+        equals(const Offset(12.0, 17.0)));
     expect(find.byKey(deleteButtonKey), findsNothing);
   });
 
-  testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
+  testWidgets('Selection with avatar works as expected on RawChip', (
+      WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
     Future<Null> pushChip({Widget avatar, bool selectable = false}) async {
@@ -779,24 +966,25 @@ void main() {
         _wrapForChip(
           child: Wrap(
             children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  avatar: avatar,
-                  onSelected: selectable != null
-                      ? (bool value) {
-                          setState(() {
-                            selected = value;
-                          });
-                        }
-                      : null,
-                  selected: selected,
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                  showCheckmark: true,
-                  tapEnabled: true,
-                  isEnabled: true,
-                );
-              }),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      avatar: avatar,
+                      onSelected: selectable != null
+                          ? (bool value) {
+                        setState(() {
+                          selected = value;
+                        });
+                      }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: true,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
             ],
           ),
         ),
@@ -808,7 +996,8 @@ void main() {
     await pushChip(
       avatar: Container(width: 40.0, height: 40.0, key: avatarKey),
     );
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 48.0)));
 
     // Turn on selection.
     await pushChip(
@@ -854,7 +1043,8 @@ void main() {
     expect(getDeleteDrawerProgress(tester), equals(0.0));
   });
 
-  testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
+  testWidgets('Selection without avatar works as expected on RawChip', (
+      WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
     Future<Null> pushChip({bool selectable = false}) async {
@@ -862,23 +1052,24 @@ void main() {
         _wrapForChip(
           child: Wrap(
             children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  onSelected: selectable != null
-                      ? (bool value) {
-                          setState(() {
-                            selected = value;
-                          });
-                        }
-                      : null,
-                  selected: selected,
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                  showCheckmark: true,
-                  tapEnabled: true,
-                  isEnabled: true,
-                );
-              }),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      onSelected: selectable != null
+                          ? (bool value) {
+                        setState(() {
+                          selected = value;
+                        });
+                      }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: true,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
             ],
           ),
         ),
@@ -887,7 +1078,8 @@ void main() {
 
     // Without avatar, but not selectable.
     await pushChip();
-    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
+    expect(
+        tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
 
     // Turn on selection.
     await pushChip(selectable: true);
@@ -930,7 +1122,8 @@ void main() {
     expect(getDeleteDrawerProgress(tester), equals(0.0));
   });
 
-  testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
+  testWidgets(
+      'Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
     Future<Null> pushChip({Widget avatar, bool selectable = false}) async {
@@ -938,24 +1131,25 @@ void main() {
         _wrapForChip(
           child: Wrap(
             children: <Widget>[
-              StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                return RawChip(
-                  avatar: avatar,
-                  onSelected: selectable != null
-                      ? (bool value) {
-                          setState(() {
-                            selected = value;
-                          });
-                        }
-                      : null,
-                  selected: selected,
-                  label: Text('Chip', key: labelKey),
-                  shape: const StadiumBorder(),
-                  showCheckmark: false,
-                  tapEnabled: true,
-                  isEnabled: true,
-                );
-              }),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return RawChip(
+                      avatar: avatar,
+                      onSelected: selectable != null
+                          ? (bool value) {
+                        setState(() {
+                          selected = value;
+                        });
+                      }
+                          : null,
+                      selected: selected,
+                      label: Text('Chip', key: labelKey),
+                      shape: const StadiumBorder(),
+                      showCheckmark: false,
+                      tapEnabled: true,
+                      isEnabled: true,
+                    );
+                  }),
             ],
           ),
         ),
@@ -988,7 +1182,8 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
+  testWidgets(
+      'Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
@@ -1019,7 +1214,8 @@ void main() {
     expect(materialBox, paints..path(color: chipTheme.disabledColor));
   });
 
-  testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (
+      WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
       _wrapForChip(
@@ -1041,7 +1237,8 @@ void main() {
     await tester.pumpWidget(
       _wrapForChip(
         child: Theme(
-          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          data: ThemeData(
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: Center(
             child: RawChip(
               key: key2,
@@ -1055,7 +1252,8 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
   });
 
-  testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgets('Chip uses the right theme colors for the right components', (
+      WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -1077,33 +1275,34 @@ void main() {
           data: themeData,
           child: ChipTheme(
             data: chipTheme,
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-              return RawChip(
-                showCheckmark: showCheckmark,
-                onDeleted: isDeletable ? () {} : null,
-                tapEnabled: true,
-                avatar: avatar,
-                deleteIcon: deleteIcon,
-                isEnabled: isSelectable || isPressable,
-                shape: chipTheme.shape,
-                selected: isSelectable ? value : null,
-                label: Text('$value'),
-                onSelected: isSelectable
-                    ? (bool newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      }
-                    : null,
-                onPressed: isPressable
-                    ? () {
-                        setState(() {
-                          value = true;
-                        });
-                      }
-                    : null,
-              );
-            }),
+            child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return RawChip(
+                    showCheckmark: showCheckmark,
+                    onDeleted: isDeletable ? () {} : null,
+                    tapEnabled: true,
+                    avatar: avatar,
+                    deleteIcon: deleteIcon,
+                    isEnabled: isSelectable || isPressable,
+                    shape: chipTheme.shape,
+                    selected: isSelectable ? value : null,
+                    label: Text('$value'),
+                    onSelected: isSelectable
+                        ? (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    }
+                        : null,
+                    onPressed: isPressable
+                        ? () {
+                      setState(() {
+                        value = true;
+                      });
+                    }
+                        : null,
+                  );
+                }),
           ),
         ),
       );
@@ -1127,7 +1326,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check default theme with disabled widget.
-    await tester.pumpWidget(buildApp(isSelectable: false, isPressable: false, isDeletable: true));
+    await tester.pumpWidget(
+        buildApp(isSelectable: false, isPressable: false, isDeletable: true));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester);
@@ -1186,10 +1386,10 @@ void main() {
     final ChipThemeData chipTheme = theme.chipTheme;
 
     InputChip inputChip =
-      const InputChip(
-        label: Text('Label'),
-        pressElevation: 8.0,
-      );
+    const InputChip(
+      label: Text('Label'),
+      pressElevation: 8.0,
+    );
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
@@ -1205,10 +1405,10 @@ void main() {
     expect(inputChip.pressElevation, 8.0);
 
     inputChip =
-      const InputChip(
-        label: Text('Label'),
-        pressElevation: 12.0,
-      );
+    const InputChip(
+      label: Text('Label'),
+      pressElevation: 12.0,
+    );
 
     await tester.pumpWidget(buildChip(chipTheme));
     await tester.pumpAndSettle();
@@ -1415,7 +1615,8 @@ void main() {
     });
   });
 
-  testWidgets('can be tapped outside of chip delete icon', (WidgetTester tester) async {
+  testWidgets(
+      'can be tapped outside of chip delete icon', (WidgetTester tester) async {
     bool deleted = false;
     await tester.pumpWidget(
       _wrapForChip(
@@ -1423,7 +1624,8 @@ void main() {
           children: <Widget>[
             Chip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(0.0))),
               avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onDeleted: () {
@@ -1436,12 +1638,14 @@ void main() {
       ),
     );
 
-    await tester.tapAt(tester.getTopRight(find.byType(Chip)) - const Offset(2.0, -2.0));
+    await tester.tapAt(
+        tester.getTopRight(find.byType(Chip)) - const Offset(2.0, -2.0));
     await tester.pumpAndSettle();
     expect(deleted, true);
   });
 
-  testWidgets('can be tapped outside of chip body', (WidgetTester tester) async {
+  testWidgets(
+      'can be tapped outside of chip body', (WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       _wrapForChip(
@@ -1449,7 +1653,8 @@ void main() {
           children: <Widget>[
             InputChip(
               materialTapTargetSize: MaterialTapTargetSize.padded,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(0.0))),
               avatar: const CircleAvatar(child: Text('A')),
               label: const Text('Chip A'),
               onPressed: () {
@@ -1461,7 +1666,9 @@ void main() {
       ),
     );
 
-    await tester.tapAt(tester.getRect(find.byType(InputChip)).topCenter);
+    await tester.tapAt(tester
+        .getRect(find.byType(InputChip))
+        .topCenter);
     await tester.pumpAndSettle();
     expect(pressed, true);
   });
@@ -1470,7 +1677,8 @@ void main() {
     await tester.pumpWidget(
       _wrapForChip(
         child: InputChip(
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0.0))),
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(0.0))),
           avatar: const CircleAvatar(child: Text('A')),
           label: const Text('Chip A'),
           onPressed: () {},
@@ -1478,56 +1686,76 @@ void main() {
       ),
     );
 
-    expect(find.byType(InputChip).hitTestable(at: Alignment.center), findsOneWidget);
+    expect(find.byType(InputChip).hitTestable(at: Alignment.center),
+        findsOneWidget);
   });
 
   void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-    final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+    final Iterable<Material> materials = tester.widgetList<Material>(
+        find.byType(Material));
     expect(materials.length, 2);
     expect(materials.last.clipBehavior, clipBehavior);
   }
 
-  testWidgets('Chip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
-     const Text label = Text('label');
-     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
-     checkChipMaterialClipBehavior(tester, Clip.none);
-
-     await tester.pumpWidget(_wrapForChip(child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
-     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
-  });
-
-  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('Chip clipBehavior properly passes through to the Material', (
+      WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: const ChoiceChip(label: label, selected: false)));
+    await tester.pumpWidget(_wrapForChip(child: const Chip(label: label)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: const ChoiceChip(label: label, selected: false, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(_wrapForChip(
+        child: const Chip(label: label, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets(
+      'ChoiceChip clipBehavior properly passes through to the Material', (
+      WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b){},)));
+    await tester.pumpWidget(
+        _wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: FilterChip(label: label, onSelected: (bool b){}, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(_wrapForChip(child: const ChoiceChip(
+        label: label, selected: false, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets(
+      'FilterChip clipBehavior properly passes through to the Material', (
+      WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, onPressed: (){},)));
+    await tester.pumpWidget(_wrapForChip(
+        child: FilterChip(label: label, onSelected: (bool b) {},)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: (){})));
+    await tester.pumpWidget(_wrapForChip(child: FilterChip(
+        label: label, onSelected: (bool b) {}, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('InputChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets(
+      'ActionChip clipBehavior properly passes through to the Material', (
+      WidgetTester tester) async {
+    const Text label = Text('label');
+    await tester.pumpWidget(
+        _wrapForChip(child: ActionChip(label: label, onPressed: () {},)));
+    checkChipMaterialClipBehavior(tester, Clip.none);
+
+    await tester.pumpWidget(_wrapForChip(child: ActionChip(
+        label: label, clipBehavior: Clip.antiAlias, onPressed: () {})));
+    checkChipMaterialClipBehavior(tester, Clip.antiAlias);
+  });
+
+  testWidgets(
+      'InputChip clipBehavior properly passes through to the Material', (
+      WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(_wrapForChip(child: const InputChip(label: label)));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(_wrapForChip(child: const InputChip(label: label, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(_wrapForChip(
+        child: const InputChip(label: label, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
+}
