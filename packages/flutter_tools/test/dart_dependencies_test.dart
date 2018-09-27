@@ -92,7 +92,7 @@ void main() {
         builder.build();
         fail('expect an exception to be thrown.');
       } on DartDependencyException catch (error) {
-        expect(error.toString(), contains('Unable to parse URI'));
+        expect(error.toString(), contains("Couldn't parse URI"));
       }
     });
   });
