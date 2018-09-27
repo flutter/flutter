@@ -1,0 +1,3 @@
+#include "Flutter.xcconfig"
+#include "../Pods/Target Support Files/Pods-Host/Pods-Host.release.xcconfig"
+FLUTTER_BUILD_MODE=release

@@ -65,7 +65,7 @@ class Divider extends StatelessWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// new Divider(
+  /// Divider(
   ///   color: Colors.deepOrange,
   /// )
   /// ```
@@ -89,9 +89,9 @@ class Divider extends StatelessWidget {
   /// scrollable section from the rest of the interface.
   ///
   /// ```dart
-  /// new DecoratedBox(
-  ///   decoration: new BoxDecoration(
-  ///     border: new Border(
+  /// DecoratedBox(
+  ///   decoration: BoxDecoration(
+  ///     border: Border(
   ///       top: Divider.createBorderSide(context),
   ///       bottom: Divider.createBorderSide(context),
   ///     ),
@@ -103,9 +103,7 @@ class Divider extends StatelessWidget {
       { Color color, double width = 0.0 }) {
     assert(width != null);
     return BorderSide(
-      color: color ?? Theme
-          .of(context)
-          .dividerColor,
+      color: color ?? Theme.of(context).dividerColor,
       width: width,
     );
   }

@@ -27,11 +27,12 @@ const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionAsset,
   _kOptionAssetManifestOut,
+  _kOptionComponentName,
 ];
 
 Future<Null> main(List<String> args) {
   return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => new DisabledUsage(),
+    Usage: () => DisabledUsage(),
   });
 }
 
@@ -43,7 +44,7 @@ Future<Null> writeFile(libfs.File outputFile, DevFSContent content) async {
 }
 
 Future<Null> run(List<String> args) async {
-  final ArgParser parser = new ArgParser()
+  final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionAsset,
         help: 'The directory where to put temporary files')
@@ -89,10 +90,7 @@ Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String 
   final libfs.IOSink outFile = destFile.openWrite();
 
   for (String path in assets.entries.keys) {
-    outFile.write('data/$path=$outputBase/$path\n');
-    if (componentName != null && componentName.isNotEmpty) {
-      outFile.write('data/$componentName/$path=$outputBase/$path\n');
-    }
+    outFile.write('data/$componentName/$path=$outputBase/$path\n');
   }
   await outFile.flush();
   await outFile.close();

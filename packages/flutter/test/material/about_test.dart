@@ -11,14 +11,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         title: 'Pirate app',
-        home: new Scaffold(
-          appBar: new AppBar(
+        home: Scaffold(
+          appBar: AppBar(
             title: const Text('Home'),
           ),
-          drawer: new Drawer(
-            child: new ListView(
+          drawer: Drawer(
+            child: ListView(
               children: const <Widget>[
                 AboutListTile(
                   applicationVersion: '0.1.2',
@@ -54,7 +54,7 @@ void main() {
     expect(find.text('About box'), findsOneWidget);
 
     LicenseRegistry.addLicense(() {
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
       ]);
     });
@@ -67,9 +67,9 @@ void main() {
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      const MaterialApp(
         title: 'flutter_tester',
-        home: const Material(child: AboutListTile()),
+        home: Material(child: AboutListTile()),
       ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
@@ -77,20 +77,20 @@ void main() {
 
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
       ]);
     });
 
     LicenseRegistry.addLicense(() {
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
       ]);
     });
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Center(
+      const MaterialApp(
+        home: Center(
           child: LicensePage(),
         ),
       ),

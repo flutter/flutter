@@ -19,7 +19,7 @@ void main() {
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_cached.');
-      artifacts = new CachedArtifacts();
+      artifacts = CachedArtifacts();
     });
 
     tearDown(() {
@@ -32,16 +32,12 @@ void main() {
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
       );
       expect(
-          artifacts.getArtifactPath(Artifact.entryPointsExtraJson, TargetPlatform.android_arm64, BuildMode.release),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'android-arm64-release', 'entry_points_extra.json')
-      );
-      expect(
           artifacts.getArtifactPath(Artifact.flutterTester),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
-      Cache: () => new Cache(rootOverride: tempDir),
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Cache: () => Cache(rootOverride: tempDir),
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
 
     testUsingContext('getEngineType', () {
@@ -58,8 +54,8 @@ void main() {
           'darwin-x64'
       );
     }, overrides: <Type, Generator> {
-      Cache: () => new Cache(rootOverride: tempDir),
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Cache: () => Cache(rootOverride: tempDir),
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
   });
 
@@ -70,7 +66,7 @@ void main() {
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_local.');
-      artifacts = new LocalEngineArtifacts(tempDir.path,
+      artifacts = LocalEngineArtifacts(tempDir.path,
         fs.path.join(tempDir.path, 'out', 'android_debug_unopt'),
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt'),
       );
@@ -81,14 +77,6 @@ void main() {
     });
 
     testUsingContext('getArtifactPath', () {
-      expect(
-          artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, TargetPlatform.android_arm, BuildMode.debug),
-          fs.path.join(tempDir.path, 'third_party', 'dart', 'runtime', 'bin', 'dart_io_entries.txt')
-      );
-      expect(
-          artifacts.getArtifactPath(Artifact.entryPointsJson, TargetPlatform.android_arm, BuildMode.profile),
-          fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'dart_entry_points', 'entry_points.json')
-      );
       expect(
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework')
@@ -102,7 +90,7 @@ void main() {
         fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk')
       );
     }, overrides: <Type, Generator> {
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
 
     testUsingContext('getEngineType', () {
@@ -119,7 +107,7 @@ void main() {
           'android_debug_unopt'
       );
     }, overrides: <Type, Generator> {
-      Platform: () => new FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux')
     });
   });
 }

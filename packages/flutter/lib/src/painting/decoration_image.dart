@@ -132,7 +132,7 @@ class DecorationImage {
   /// because it is animated.
   DecorationImagePainter createPainter(VoidCallback onChanged) {
     assert(onChanged != null);
-    return new DecorationImagePainter._(this, onChanged);
+    return DecorationImagePainter._(this, onChanged);
   }
 
   @override
@@ -220,7 +220,7 @@ class DecorationImagePainter {
         // We check this first so that the assert will fire immediately, not just
         // when the image is ready.
         if (configuration.textDirection == null) {
-          throw new FlutterError(
+          throw FlutterError(
             'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
             'When DecorationImagePainter.paint() was called, there was no text direction provided '
             'in the ImageConfiguration object to match.\n'
@@ -254,6 +254,7 @@ class DecorationImagePainter {
       canvas: canvas,
       rect: rect,
       image: _image.image,
+      scale: _image.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -303,6 +304,8 @@ class DecorationImagePainter {
 ///
 ///  * `image`: The image to paint onto the canvas.
 ///
+///  * `scale`: The number of image pixels for each logical pixel.
+///
 ///  * `colorFilter`: If non-null, the color filter to apply when painting the
 ///    image.
 ///
@@ -339,7 +342,12 @@ class DecorationImagePainter {
 ///    when using this, to not flip images with integral shadows, text, or other
 ///    effects that will look incorrect when flipped.
 ///
-/// The `canvas`, `rect`, `image`, `alignment`, `repeat`, and `flipHorizontally`
+///  * `invertColors`: Inverting the colors of an image applies a new color
+///    filter to the paint. If there is another specified color filter, the
+///    invert will be applied after it. This is primarily used for implementing
+///    smart invert on iOS.
+///
+/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, and `flipHorizontally`
 /// arguments must not be null.
 ///
 /// See also:
@@ -351,12 +359,14 @@ void paintImage({
   @required Canvas canvas,
   @required Rect rect,
   @required ui.Image image,
+  double scale = 1.0,
   ColorFilter colorFilter,
   BoxFit fit,
   Alignment alignment = Alignment.center,
   Rect centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
   bool flipHorizontally = false,
+  bool invertColors = false,
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -366,10 +376,10 @@ void paintImage({
   if (rect.isEmpty)
     return;
   Size outputSize = rect.size;
-  Size inputSize = new Size(image.width.toDouble(), image.height.toDouble());
+  Size inputSize = Size(image.width.toDouble(), image.height.toDouble());
   Offset sliceBorder;
   if (centerSlice != null) {
-    sliceBorder = new Offset(
+    sliceBorder = Offset(
       centerSlice.left + inputSize.width - centerSlice.right,
       centerSlice.top + inputSize.height - centerSlice.bottom
     );
@@ -378,8 +388,8 @@ void paintImage({
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
-  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize, outputSize);
-  final Size sourceSize = fittedSizes.source;
+  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize / scale, outputSize);
+  final Size sourceSize = fittedSizes.source * scale;
   Size destinationSize = fittedSizes.destination;
   if (centerSlice != null) {
     outputSize += sliceBorder;
@@ -393,7 +403,7 @@ void paintImage({
     // output rect with the image.
     repeat = ImageRepeat.noRepeat;
   }
-  final Paint paint = new Paint()..isAntiAlias = false;
+  final Paint paint = Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {
@@ -402,6 +412,7 @@ void paintImage({
     // to nearest-neighbor.
     paint.filterQuality = FilterQuality.low;
   }
+  paint.invertColors = invertColors;
   final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
   final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
   final double dx = halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
@@ -421,7 +432,7 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = alignment.inscribe(
-      fittedSizes.source, Offset.zero & inputSize
+      sourceSize, Offset.zero & inputSize
     );
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageRect(image, sourceRect, tileRect, paint);
@@ -458,6 +469,6 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 
   for (int i = startX; i <= stopX; ++i) {
     for (int j = startY; j <= stopY; ++j)
-      yield fundamentalRect.shift(new Offset(i * strideX, j * strideY));
+      yield fundamentalRect.shift(Offset(i * strideX, j * strideY));
   }
 }

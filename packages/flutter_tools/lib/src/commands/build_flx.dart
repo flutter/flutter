@@ -8,8 +8,6 @@ import '../globals.dart';
 import 'build.dart';
 
 class BuildFlxCommand extends BuildSubCommand {
-
-  BuildFlxCommand({bool verboseHelp = false});
   @override
   final String name = 'flx';
 

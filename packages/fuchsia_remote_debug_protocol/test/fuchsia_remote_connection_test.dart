@@ -19,10 +19,10 @@ void main() {
     List<Uri> uriConnections;
 
     setUp(() {
-      mockRunner = new MockSshCommandRunner();
+      mockRunner = MockSshCommandRunner();
       // Adds some extra junk to make sure the strings will be cleaned up.
       when(mockRunner.run(any)).thenAnswer((_) =>
-          new Future<List<String>>.value(
+          Future<List<String>>.value(
               <String>['123\n\n\n', '456  ', '789']));
       const String address = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';
@@ -33,8 +33,8 @@ void main() {
       Future<PortForwarder> mockPortForwardingFunction(
           String address, int remotePort,
           [String interface = '', String configFile]) {
-        return new Future<PortForwarder>(() {
-          final MockPortForwarder pf = new MockPortForwarder();
+        return Future<PortForwarder>(() {
+          final MockPortForwarder pf = MockPortForwarder();
           forwardedPorts.add(pf);
           when(pf.port).thenReturn(port++);
           when(pf.remotePort).thenReturn(remotePort);
@@ -87,14 +87,14 @@ void main() {
       mockPeerConnections = <MockPeer>[];
       uriConnections = <Uri>[];
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        return new Future<json_rpc.Peer>(() async {
-          final MockPeer mp = new MockPeer();
+        return Future<json_rpc.Peer>(() async {
+          final MockPeer mp = MockPeer();
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
           when(mp.sendRequest(any, any))
               // The local ports match the desired indices for now, so get the
               // canned response from the URI port.
-              .thenAnswer((_) => new Future<Map<String, dynamic>>(
+              .thenAnswer((_) => Future<Map<String, dynamic>>(
                   () => flutterViewCannedResponses[uri.port]));
           return mp;
         });

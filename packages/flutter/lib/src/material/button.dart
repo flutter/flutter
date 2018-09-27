@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui'as ui show defaultClipBehavior; // ignore: deprecated_member_use
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -47,7 +46,7 @@ class RawMaterialButton extends StatefulWidget {
     this.constraints = const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape = const RoundedRectangleBorder(),
     this.animationDuration = kThemeChangeDuration,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
+    this.clipBehavior = Clip.none,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
   }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -155,7 +154,7 @@ class RawMaterialButton extends StatefulWidget {
   final Clip clipBehavior;
 
   @override
-  _RawMaterialButtonState createState() => new _RawMaterialButtonState();
+  _RawMaterialButtonState createState() => _RawMaterialButtonState();
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
@@ -174,9 +173,9 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       ? (_highlight ? widget.highlightElevation : widget.elevation)
       : widget.disabledElevation;
 
-    final Widget result = new ConstrainedBox(
+    final Widget result = ConstrainedBox(
       constraints: widget.constraints,
-      child: new Material(
+      child: Material(
         elevation: elevation,
         textStyle: widget.textStyle,
         shape: widget.shape,
@@ -184,16 +183,17 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
         animationDuration: widget.animationDuration,
         clipBehavior: widget.clipBehavior,
-        child: new InkWell(
+        child: InkWell(
           onHighlightChanged: _handleHighlightChanged,
           splashColor: widget.splashColor,
           highlightColor: widget.highlightColor,
           onTap: widget.onPressed,
+          customBorder: widget.shape,
           child: IconTheme.merge(
-            data: new IconThemeData(color: widget.textStyle?.color),
-            child: new Container(
+            data: IconThemeData(color: widget.textStyle?.color),
+            child: Container(
               padding: widget.padding,
-              child: new Center(
+              child: Center(
                 widthFactor: 1.0,
                 heightFactor: 1.0,
                 child: widget.child,
@@ -213,11 +213,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         break;
     }
 
-    return new Semantics(
+    return Semantics(
       container: true,
       button: true,
       enabled: widget.enabled,
-      child: new _InputPadding(
+      child: _InputPadding(
         minSize: minSize,
         child: result,
       ),
@@ -268,7 +268,7 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.padding,
     this.materialTapTargetSize,
-    this.clipBehavior = ui.defaultClipBehavior, // ignore: deprecated_member_use,
+    this.clipBehavior = Clip.none,
     @required this.onPressed,
     this.child
   }) : assert(clipBehavior != null), super(key: key);
@@ -293,11 +293,11 @@ class MaterialButton extends StatelessWidget {
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
-  ///  new MaterialButton(
-  ///    color: Colors.blue[500],
-  ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
-  ///  ),
+  /// MaterialButton(
+  ///   color: Colors.blue[500],
+  ///   onPressed: _handleTap,
+  ///   child: Text('DEMO'),
+  /// ),
   /// ```
   final Color color;
 
@@ -411,11 +411,11 @@ class MaterialButton extends StatelessWidget {
       case ButtonTextTheme.normal:
         return enabled
           ? (themeIsDark ? Colors.white : Colors.black87)
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.accent:
         return enabled
           ? theme.accentColor
-          : (themeIsDark ? Colors.white30 : Colors.black26);
+          : theme.disabledColor;
       case ButtonTextTheme.primary:
         return enabled
           ? (fillIsDark ? Colors.white : Colors.black)
@@ -430,7 +430,7 @@ class MaterialButton extends StatelessWidget {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color textColor = _getTextColor(theme, buttonTheme, color);
 
-    return new RawMaterialButton(
+    return RawMaterialButton(
       onPressed: onPressed,
       fillColor: color,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
@@ -453,7 +453,7 @@ class MaterialButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -473,7 +473,7 @@ class _InputPadding extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new _RenderInputPadding(minSize);
+    return _RenderInputPadding(minSize);
   }
 
   @override
@@ -497,28 +497,28 @@ class _RenderInputPadding extends RenderShiftedBox {
   @override
   double computeMinIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicWidth(height), minSize.width);
+      return math.max(child.getMinIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMinIntrinsicHeight(width), minSize.height);
+      return math.max(child.getMinIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicWidth(height), minSize.width);
+      return math.max(child.getMaxIntrinsicWidth(height), minSize.width);
     return 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     if (child != null)
-      return math.max(child.computeMaxIntrinsicHeight(width), minSize.height);
+      return math.max(child.getMaxIntrinsicHeight(width), minSize.height);
     return 0.0;
   }
 
@@ -528,7 +528,7 @@ class _RenderInputPadding extends RenderShiftedBox {
       child.layout(constraints, parentUsesSize: true);
       final double height = math.max(child.size.width, minSize.width);
       final double width = math.max(child.size.height, minSize.height);
-      size = constraints.constrain(new Size(height, width));
+      size = constraints.constrain(Size(height, width));
       final BoxParentData childParentData = child.parentData;
       childParentData.offset = Alignment.center.alongOffset(size - child.size);
     } else {

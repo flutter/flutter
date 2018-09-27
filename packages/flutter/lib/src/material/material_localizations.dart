@@ -301,6 +301,15 @@ abstract class MaterialLocalizations {
   /// list one space right in the list.
   String get reorderItemRight;
 
+  /// The semantics hint to describe the tap action on an expanded [ExpandIcon].
+  String get expandedIconTapHint => 'Collapse';
+
+  /// The semantics hint to describe the tap action on a collapsed [ExpandIcon].
+  String get collapsedIconTapHint => 'Expand';
+
+  /// The label for the [TextField]'s character counter.
+  String remainingTextFieldCharacterCount(int remaining);
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -418,7 +427,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       case TimeOfDayFormat.HH_colon_mm:
         return _formatTwoDigitZeroPad(timeOfDay.hour);
       default:
-        throw new AssertionError('$runtimeType does not support $format.');
+        throw AssertionError('$runtimeType does not support $format.');
     }
   }
 
@@ -484,7 +493,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       return number.toString();
 
     final String digits = number.abs().toString();
-    final StringBuffer result = new StringBuffer(number < 0 ? '-' : '');
+    final StringBuffer result = StringBuffer(number < 0 ? '-' : '');
     final int maxDigitIndex = digits.length - 1;
     for (int i = 0; i <= maxDigitIndex; i += 1) {
       result.write(digits[i]);
@@ -504,7 +513,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = StringBuffer();
 
     // Add hour:minute.
     buffer
@@ -681,6 +690,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String get reorderItemToStart => 'Move to the start';
 
+  @override
+  String get expandedIconTapHint => 'Collapse';
+
+  @override
+  String get collapsedIconTapHint => 'Expand';
+
   /// Creates an object that provides US English resource values for the material
   /// library widgets.
   ///
@@ -689,7 +704,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<MaterialLocalizations>(const DefaultMaterialLocalizations());
+    return SynchronousFuture<MaterialLocalizations>(const DefaultMaterialLocalizations());
   }
 
   /// A [LocalizationsDelegate] that uses [DefaultMaterialLocalizations.load]
@@ -697,4 +712,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
   static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
+
+  @override
+  String remainingTextFieldCharacterCount(int remaining) {
+    switch (remaining) {
+      case 0:
+        return 'No characters remaining';
+      case 1:
+        return '1 character remaining';
+      default:
+        return '$remaining characters remaining';
+    }
+  }
 }
