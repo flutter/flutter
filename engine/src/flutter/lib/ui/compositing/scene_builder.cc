@@ -42,6 +42,7 @@ static void SceneBuilder_constructor(Dart_NativeArguments args) {
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
 
 #define FOR_EACH_BINDING(V)                         \
+  V(SceneBuilder, pushOffset)                       \
   V(SceneBuilder, pushTransform)                    \
   V(SceneBuilder, pushClipRect)                     \
   V(SceneBuilder, pushClipRRect)                    \
