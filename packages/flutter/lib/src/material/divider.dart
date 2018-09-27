@@ -3,17 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/src/painting/basic_types.dart';
 
 import 'theme.dart';
-
-/// Defines the axis we want the divider to lay on.
-enum Axis {
-  /// The divider lies on a vertical axis.
-  Vertical,
-
-  /// The divider lies on a horizontal axis.
-  Horizontal
-}
 
 /// A one device pixel thick horizontal line, with padding on either
 /// side.
@@ -40,7 +32,7 @@ class Divider extends StatelessWidget {
     Key key,
     this.height = 16.0,
     this.indent = 0.0,
-    this.axis = Axis.Horizontal,
+    this.axis = Axis.horizontal,
     this.color
   }) : assert(height >= 0.0 && axis != null),
         super(key: key);
@@ -109,7 +101,7 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (axis == Axis.Vertical) {
+    if (axis == Axis.vertical) {
       return SizedBox(
         width: height,
         child: Center(
