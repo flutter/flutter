@@ -198,7 +198,7 @@ class BorderSide {
   ///
   /// The arguments must not be null.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
@@ -404,7 +404,7 @@ abstract class ShapeBorder {
   /// function instead. If both return null, it returns `a` before `t=0.5`
   /// and `b` after `t=0.5`.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static ShapeBorder lerp(ShapeBorder a, ShapeBorder b, double t) {
     assert(t != null);
     ShapeBorder result;

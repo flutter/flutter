@@ -190,7 +190,7 @@ abstract class EdgeInsetsGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [EdgeInsets] using [resolve].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static EdgeInsetsGeometry lerp(EdgeInsetsGeometry a, EdgeInsetsGeometry b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -546,7 +546,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
   ///
   /// If either is null, this function interpolates from [EdgeInsets.zero].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static EdgeInsets lerp(EdgeInsets a, EdgeInsets b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -770,7 +770,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   /// (either [EdgeInsets] or [EdgeInsetsDirectional]), consider the
   /// [EdgeInsetsGeometry.lerp] static method.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static EdgeInsetsDirectional lerp(EdgeInsetsDirectional a, EdgeInsetsDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)

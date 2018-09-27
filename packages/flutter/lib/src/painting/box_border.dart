@@ -98,7 +98,7 @@ abstract class BoxBorder extends ShapeBorder {
   /// For a more flexible approach, consider [ShapeBorder.lerp], which would
   /// instead [add] the two sets of sides and interpolate them simultaneously.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BoxBorder lerp(BoxBorder a, BoxBorder b, double t) {
     assert(t != null);
     if ((a is Border || a == null) && (b is Border || b == null))
@@ -421,7 +421,7 @@ class Border extends BoxBorder {
   /// If a border is null, it is treated as having four [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static Border lerp(Border a, Border b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -711,7 +711,7 @@ class BorderDirectional extends BoxBorder {
   /// If a border is null, it is treated as having four [BorderSide.none]
   /// borders.
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static BorderDirectional lerp(BorderDirectional a, BorderDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)

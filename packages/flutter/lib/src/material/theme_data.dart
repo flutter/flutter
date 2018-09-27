@@ -729,6 +729,8 @@ class ThemeData extends Diagnosticable {
 
   /// Linearly interpolate between two themes.
   ///
+  /// The arguments must not be null.
+  ///
   /// {@template flutter.material.themeData.lerp}
   /// The `t` argument represents position on the timeline, with 0.0 meaning
   /// that the interpolation has not started, returning `a` (or something

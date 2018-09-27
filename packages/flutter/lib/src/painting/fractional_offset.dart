@@ -178,7 +178,7 @@ class FractionalOffset extends Alignment {
   ///
   /// If either is null, this function interpolates from [FractionalOffset.center].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     assert(t != null);
     if (a == null && b == null)

@@ -124,7 +124,7 @@ abstract class Decoration extends Diagnosticable {
   /// respectively to find a solution. If the two values can't directly be
   /// interpolated, then the interpolation is done via null (at `t == 0.5`).
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static Decoration lerp(Decoration a, Decoration b, double t) {
     assert(t != null);
     if (a == null && b == null)

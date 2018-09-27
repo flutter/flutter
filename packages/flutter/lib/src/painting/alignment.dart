@@ -85,7 +85,7 @@ abstract class AlignmentGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [Alignment] using [resolve].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static AlignmentGeometry lerp(AlignmentGeometry a, AlignmentGeometry b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -324,7 +324,7 @@ class Alignment extends AlignmentGeometry {
   ///
   /// If either is null, this function interpolates from [Alignment.center].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static Alignment lerp(Alignment a, Alignment b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -505,7 +505,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   ///
   /// If either is null, this function interpolates from [AlignmentDirectional.center].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   static AlignmentDirectional lerp(AlignmentDirectional a, AlignmentDirectional b, double t) {
     assert(t != null);
     if (a == null && b == null)

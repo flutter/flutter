@@ -127,7 +127,7 @@ class FlutterLogoDecoration extends Decoration {
   /// non-null value. If one of the values is null, then the result is obtained
   /// by scaling the other value's opacity and [margin].
   ///
-  /// {@macro flutter.material.themeData.lerp}
+  /// {@macro flutter.painting.gradient.lerp}
   ///
   /// See also:
   ///
