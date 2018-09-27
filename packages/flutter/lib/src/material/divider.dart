@@ -37,12 +37,12 @@ class Divider extends StatelessWidget {
   }) : assert(height >= 0.0),
         super(key: key);
 
-  /// The divider's dimensional extent.
+  /// The divider's height extent.
   ///
   /// The divider itself is always drawn as one device pixel thick
-  /// line that is centered within the height or width specified by this value.
+  /// line that is centered within the height specified by this value.
   ///
-  /// A divider with a [height] of 0.0 is always drawn as a line with a length
+  /// A divider with a [height] of 0.0 is always drawn as a line with a height
   /// of exactly one device pixel, without any padding around it.
   final double height;
 
