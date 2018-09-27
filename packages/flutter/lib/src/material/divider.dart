@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter/src/painting/basic_types.dart';
+import 'package:flutter/painting.dart';
 
 import 'theme.dart';
 
@@ -35,7 +35,8 @@ class Divider extends StatelessWidget {
     this.indent = 0.0,
     this.color
   }) : assert(height >= 0.0),
-        super(key: key);
+       super(key: key);
+
 
   /// The divider's height extent.
   ///
@@ -141,7 +142,7 @@ class VerticalDivider extends StatelessWidget {
     this.indent = 0.0,
     this.color
   }) : assert(width >= 0.0),
-        super(key: key);
+       super(key: key);
 
   /// The divider's width.
   ///
