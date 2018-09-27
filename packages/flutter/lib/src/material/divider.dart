@@ -13,8 +13,9 @@ import 'theme.dart';
 /// In the material design language, this represents a divider.
 ///
 /// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
-/// vertically or horizontally. To create a one-pixel divider between items in
-/// a list, consider using [ListTile.divideTiles], which is optimized for this case.
+/// vertically or horizontally depending on the value of the [axis] enum.
+/// To create a one-pixel divider between items in a list, consider using
+/// [ListTile.divideTiles], which is optimized for this case.
 ///
 /// The box's total width or height is controlled by [height]. The appropriate
 /// padding is automatically computed from the width or height.
@@ -42,8 +43,8 @@ class Divider extends StatelessWidget {
   /// The divider itself is always drawn as one device pixel thick
   /// line that is centered within the height or width specified by this value.
   ///
-  /// A divider with a [width] of 0.0 is always drawn as a line with a width or
-  /// height of exactly one device pixel, without any padding around it.
+  /// A divider with a [height] of 0.0 is always drawn as a line with a length
+  /// of exactly one device pixel, without any padding around it.
   final double height;
 
   /// The amount of empty space to the left of the divider.
