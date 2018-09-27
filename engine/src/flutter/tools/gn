@@ -82,6 +82,7 @@ def to_gn_args(args):
     gn_args['skia_use_dng_sdk'] = False    # RAW image handling.
     gn_args['skia_use_sfntly'] = False     # PDF handling depedency.
     gn_args['skia_enable_pdf'] = False     # PDF handling.
+    gn_args['skia_use_x11'] = False        # Never add the X11 dependency (only takes effect on Linux).
     gn_args['skia_use_expat'] = args.target_os == 'android'
     gn_args['skia_use_fontconfig'] = False # Use the custom font manager instead.
     gn_args['is_official_build'] = True    # Disable Skia test utilities.
