@@ -28,7 +28,7 @@ enum MyFlutterErrorCode {
     didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     guard let controller = window?.rootViewController as? FlutterViewController else {
-      return false
+      fatalError("rootViewController is not type FlutterViewController")
     }
     let batteryChannel = FlutterMethodChannel(name: ChannelName.battery,
                                               binaryMessenger: controller)
