@@ -1469,7 +1469,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
 
     Widget result = Material(
-      elevation: isTapping ? _kPressElevation : 0.0,
+      elevation: isTapping ? widget.pressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
       shape: shape,
       clipBehavior: widget.clipBehavior,

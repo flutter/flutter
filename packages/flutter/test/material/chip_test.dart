@@ -1187,7 +1187,7 @@ void main() {
 
     InputChip inputChip =
       const InputChip(
-        label: const Text('Label'),
+        label: Text('Label'),
         pressElevation: 8.0,
       );
 
@@ -1206,7 +1206,7 @@ void main() {
 
     inputChip =
       const InputChip(
-        label: const Text('Label'),
+        label: Text('Label'),
         pressElevation: 12.0,
       );
 
