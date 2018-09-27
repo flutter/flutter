@@ -27,12 +27,12 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
-          child: Divider(axis: Axis.vertical),
+          child: VerticalDivider(),
         ),
       ),
     );
-    final RenderBox box = tester.firstRenderObject(find.byType(Divider));
+    final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
-    expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
+    expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
   });
 }
