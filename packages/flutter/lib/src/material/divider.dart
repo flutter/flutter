@@ -42,7 +42,7 @@ class Divider extends StatelessWidget {
   /// The divider itself is always drawn as one device pixel thick
   /// line that is centered within the height or width specified by this value.
   ///
-  /// A divider with a size of 0.0 is always drawn as a line with a
+  /// A divider with a [width] of 0.0 is always drawn as a line with a width or
   /// height of exactly one device pixel, without any padding around it.
   final double height;
 
