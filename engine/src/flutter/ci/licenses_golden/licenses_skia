@@ -1,4 +1,4 @@
-Signature: b15adde73c29df9aacba54cd72a0dc7c
+Signature: a67098cfb6f3fb8126a66694c637c46b
 
 UNUSED LICENSES:
 
@@ -1315,6 +1315,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
 FILE: ../../../third_party/skia/gm/3dgm.cpp
+FILE: ../../../third_party/skia/gm/analytic_gradients.cpp
 FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
 FILE: ../../../third_party/skia/gm/clockwise.cpp
 FILE: ../../../third_party/skia/gm/crbug_847759.cpp
@@ -1555,6 +1556,9 @@ FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.h
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.cpp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.fp
 FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.h
