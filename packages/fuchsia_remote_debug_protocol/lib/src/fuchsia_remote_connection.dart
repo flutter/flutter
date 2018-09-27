@@ -258,8 +258,7 @@ class FuchsiaRemoteConnection {
           final DartVm vmService = await _getDartVm(event.uri.port);
           // If the VM service is null, set the result to the empty list.
           final List<IsolateRef> result = await vmService
-                  ?.getMainIsolatesByPattern(pattern)
-                  .timeout(timeout) ??
+                  ?.getMainIsolatesByPattern(pattern, timeout: timeout) ??
               <IsolateRef>[];
           if (result.isNotEmpty) {
             if (!completer.isCompleted) {
