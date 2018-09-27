@@ -64,6 +64,13 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   }
   void _pushTransform(Float64List matrix4) native 'SceneBuilder_pushTransform';
 
+  /// Pushes an offset operation onto the operation stack.
+  ///
+  /// This is equivalent to [pushTransform] with a matrix with only translation.
+  ///
+  /// See [pop] for details about the operation stack.
+  void pushOffset(double dx, double dy) native 'SceneBuilder_pushOffset';
+
   /// Pushes a rectangular clip operation onto the operation stack.
   ///
   /// Rasterization outside the given rectangle is discarded.
