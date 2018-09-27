@@ -51,8 +51,8 @@ PersistentCache::PersistentCache()
                           },
                           fml::FilePermission::kReadWrite))) {
   if (!IsValid()) {
-    FML_LOG(ERROR) << "Could not acquire the persistent cache directory. "
-                      "Caching of GPU resources on disk is disabled.";
+    FML_LOG(WARNING) << "Could not acquire the persistent cache directory. "
+                        "Caching of GPU resources on disk is disabled.";
   }
 }
 
@@ -90,21 +90,23 @@ static void PersistentCacheStore(fml::RefPtr<fml::TaskRunner> worker,
                                  std::shared_ptr<fml::UniqueFD> cache_directory,
                                  std::string key,
                                  std::unique_ptr<fml::Mapping> value) {
-  auto task = fml::MakeCopyable([cache_directory,             //
-                                 file_name = std::move(key),  //
-                                 mapping = std::move(value)   //
+  auto task =
+      fml::MakeCopyable([cache_directory,             //
+                         file_name = std::move(key),  //
+                         mapping = std::move(value)   //
   ]() mutable {
-    TRACE_EVENT0("flutter", "PersistentCacheStore");
-    if (!fml::WriteAtomically(*cache_directory,   //
-                              file_name.c_str(),  //
-                              *mapping)           //
-    ) {
-      FML_DLOG(ERROR) << "Could not write cache contents to persistent store.";
-    }
-  });
+        TRACE_EVENT0("flutter", "PersistentCacheStore");
+        if (!fml::WriteAtomically(*cache_directory,   //
+                                  file_name.c_str(),  //
+                                  *mapping)           //
+        ) {
+          FML_DLOG(WARNING)
+              << "Could not write cache contents to persistent store.";
+        }
+      });
 
   if (!worker) {
-    FML_LOG(ERROR)
+    FML_LOG(WARNING)
         << "The persistent cache has no available workers. Performing the task "
            "on the current thread. This slow operation is going to occur on a "
            "frame workload.";
