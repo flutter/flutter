@@ -315,6 +315,14 @@
   [_navigationChannel.get() invokeMethod:@"setInitialRoute" arguments:route];
 }
 
+- (void)popRoute {
+  [_navigationChannel.get() invokeMethod:@"popRoute" arguments:nil];
+}
+
+- (void)pushRoute:(NSString*)route {
+  [_navigationChannel.get() invokeMethod:@"pushRoute" arguments:route];
+}
+
 #pragma mark - Loading the view
 
 - (void)loadView {
