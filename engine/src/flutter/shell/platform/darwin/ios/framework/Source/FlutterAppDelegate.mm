@@ -132,9 +132,16 @@
   [_lifeCycleDelegate application:application performFetchWithCompletionHandler:completionHandler];
 }
 
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray*))restorationHandler {
+      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
+                                       restorableObjects))restorationHandler {
+#else
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray* __nullable restorableObjects))restorationHandler {
+#endif
   return [_lifeCycleDelegate application:application
                     continueUserActivity:userActivity
                       restorationHandler:restorationHandler];
