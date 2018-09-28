@@ -17,28 +17,32 @@ import 'colors.dart';
 /// [BuildContext] and read the [ThemeData.textTheme] property.
 ///
 /// The Material Design typography scheme was signficantly changed in the
-/// current (2018) version of the specification.
+/// current (2018) version of the specification
+/// (https://material.io/design/typography).
 ///
 /// The current spec has thirteen text styles:
 /// ```
-/// NAME       SIZE  WEIGHT  SPACING
-/// headline1  96.0  thin    -1.5
-/// headline2  60.0  thin    -0.5
-/// headline3  48.0  normal   0.0
-/// headline4  34.0  normal   0.25
-/// headline5  24.0  normal   0.0
-/// headline6  20.0  medium   0.15
-/// subtitle1  16.0  normal   0.15
-/// subtitle2  14.0  medium   0.1
-/// body1      16.0  normal   0.5
-/// body2      14.0  normal   0.25
-/// button     14.0  medium   0.75
-/// caption    12.0  normal   0.4
-/// overline   10.0  normal   1.5
+/// NAME         SIZE  WEIGHT  SPACING
+/// headline1    96.0  thin    -1.5
+/// headline2    60.0  thin    -0.5
+/// headline3    48.0  normal   0.0
+/// headline4    34.0  normal   0.25
+/// headline5    24.0  normal   0.0
+/// headline6    20.0  medium   0.15
+/// subtitle1    16.0  normal   0.15
+/// subtitle2    14.0  medium   0.1
+/// paragraph1   16.0  normal   0.5
+/// paragraph2   14.0  normal   0.25
+/// button       14.0  medium   0.75
+/// caption      12.0  normal   0.4
+/// overline     10.0  normal   1.5
 ///
 /// ```
 /// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
-/// "medium" is `FontWeight.w500`.
+/// "medium" is `FontWeight.w500`. The spec calls 'paragraph1' and
+/// 'paragraph2', 'body1' and 'body2'. They've been changed here to
+/// make it possible to support both the old text style names and the
+/// new ones.
 ///
 ///
 /// The original (2017) spec had eleven text styles. This class maps the
