@@ -36,6 +36,12 @@ typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> can
 /// Used by [Draggable.onDraggableCanceled].
 typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
 
+/// Signature for when the draggable is dropped, returning its current
+/// [DraggableDetails].
+///
+/// Used by [Draggable.onDragEnd]
+typedef DragEndCallback = void Function(DraggableDetails details);
+
 /// Signature for when the draggable is dropped and accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDragCompleted]
@@ -105,6 +111,7 @@ class Draggable<T> extends StatefulWidget {
     this.maxSimultaneousDrags,
     this.onDragStarted,
     this.onDraggableCanceled,
+    this.onDragEnd,
     this.onDragCompleted,
     this.ignoringFeedbackSemantics = true,
   }) : assert(child != null),
@@ -234,6 +241,17 @@ class Draggable<T> extends StatefulWidget {
   /// callback is still in the tree.
   final DragCompletedCallback onDragCompleted;
 
+  /// Called when the draggable is dropped, returning its current
+  /// [DraggableDetails].
+  ///
+  /// This function might be called after this widget has been removed from the
+  /// tree. For example, if a drag was in progress when this widget was removed
+  /// from the tree and the drag ended up completing, this callback will
+  /// still be called. For this reason, implementations of this callback might
+  /// need to check [State.mounted] to check whether the state receiving the
+  /// callback is still in the tree.
+  final DragEndCallback onDragEnd;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -271,6 +289,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
     DraggableCanceledCallback onDraggableCanceled,
+    DragEndCallback onDragEnd,
     DragCompletedCallback onDragCompleted,
     this.hapticFeedbackOnStart = true,
     bool ignoringFeedbackSemantics = true,
@@ -286,6 +305,7 @@ class LongPressDraggable<T> extends Draggable<T> {
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
     onDraggableCanceled: onDraggableCanceled,
+    onDragEnd: onDragEnd,
     onDragCompleted: onDragCompleted,
     ignoringFeedbackSemantics: ignoringFeedbackSemantics,
   );
@@ -377,6 +397,10 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _activeCount -= 1;
           _disposeRecognizerIfInactive();
         }
+        if(widget.onDragEnd != null)
+          widget.onDragEnd(DraggableDetails._(
+              wasAccepted: wasAccepted, velocity: velocity, offset: offset)
+          );
         if (wasAccepted && widget.onDragCompleted != null)
           widget.onDragCompleted(velocity, offset);
         if (!wasAccepted && widget.onDraggableCanceled != null)
@@ -399,6 +423,24 @@ class _DraggableState<T> extends State<Draggable<T>> {
       child: showChild ? widget.child : widget.childWhenDragging
     );
   }
+}
+
+/// Represents the draggable's current details, such as whether the
+/// [DragTarget] accepted it, its [Velocity], and its [Offset].
+class DraggableDetails {
+  /// Determines whether the [DragTarget] accepted this draggable
+  final bool wasAccepted;
+
+  /// This draggable's current [Velocity]
+  final Velocity velocity;
+
+  /// This draggable's current [Offset]
+  final Offset offset;
+
+  DraggableDetails._({
+    this.wasAccepted,
+    this.velocity,
+    this.offset});
 }
 
 /// A widget that receives data when a [Draggable] widget is dropped.
