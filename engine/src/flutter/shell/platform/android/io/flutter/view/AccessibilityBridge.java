@@ -169,7 +169,9 @@ class AccessibilityBridge
                 // Text fields will always be created as a live region, so that updates to
                 // the label trigger polite announcements. This makes it easy to follow a11y
                 // guidelines for text fields on Android.
-                result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+                }
             }
 
             // Cursor movements
@@ -294,7 +296,7 @@ class AccessibilityBridge
                 result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
         }
-        if (object.hasFlag(Flag.IS_LIVE_REGION)) {
+        if (object.hasFlag(Flag.IS_LIVE_REGION) && Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
             result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         }
 
