@@ -168,7 +168,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in ports) {
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
-      await vmService.waitForViews();
+      await vmService.refreshViews();
       views.addAll(vmService.vm.views);
     }
     return views;
@@ -268,7 +268,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in ports) {
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
-      await vmService.waitForViews();
+      await vmService.refreshViews();
       printStatus(_vmServiceToString(vmService));
     }
   }
@@ -307,8 +307,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
       throwToolExit('Give the GN target with --gn-target(-g).');
     final List<String> targetInfo = _extractPathAndName(gnTarget);
     _projectRoot = targetInfo[0];
+    printTrace('_projectRoot is $_projectRoot');
     _projectName = targetInfo[1];
     _fuchsiaProjectPath = '$_buildDir/../../$_projectRoot';
+    printTrace('_fuchsiaProjectPath is $_fuchsiaProjectPath');
     if (!_directoryExists(_fuchsiaProjectPath))
       throwToolExit('Target does not exist in the Fuchsia tree: $_fuchsiaProjectPath.');
 
@@ -330,6 +332,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     // to locate the .packages file.
     final String packagesFileName = '${_binaryName}_dart_library.packages';
     _dotPackagesPath = '$_buildDir/dartlang/gen/$_projectRoot/$packagesFileName';
+    printTrace('_dotPackagesPath is $_dotPackagesPath');
     if (!_fileExists(_dotPackagesPath))
       throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 
