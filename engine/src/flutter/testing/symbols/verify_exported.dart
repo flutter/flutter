@@ -49,11 +49,19 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'Flutter.framework', 'Flutter');
-    final String stdout = Process.runSync(nmPath, <String>['-gUm', libFlutter]).stdout;
+    final ProcessResult nmResult = Process.runSync(nmPath, <String>['-gUm', libFlutter]);
     print('+++ DEBUG: stdout of nm +++');
-    print(stdout);
+    print(nmResult.stdout);
     print('+++ END: stdout of nm +++');
-    final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(stdout).where((NmEntry entry) {
+    print('+++ DEBUG: stderr of nm +++');
+    print(nmResult.stderr);
+    print('+++ END: stdout of nm +++');
+    if (nmResult.exitCode != 0) {
+      print('ERROR: failed to execute "nm -gUm $libFlutter":\n${nmResult.stderr}');
+      failures++;
+      continue;
+    }
+    final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout).where((NmEntry entry) {
       return !((entry.type == '(__DATA,__common)' && entry.name.startsWith('_Flutter'))
           || (entry.type == '(__DATA,__objc_data)'
               && (entry.name.startsWith('_OBJC_METACLASS_\$_Flutter') || entry.name.startsWith('_OBJC_CLASS_\$_Flutter'))));
@@ -75,11 +83,19 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'libflutter.so');
-    final String stdout = Process.runSync(nmPath, <String>['-gU', libFlutter]).stdout;
+    final ProcessResult nmResult = Process.runSync(nmPath, <String>['-gU', libFlutter]);
     print('+++ DEBUG: stdout of nm +++');
-    print(stdout);
+    print(nmResult.stdout);
     print('+++ END: stdout of nm +++');
-    final Iterable<NmEntry> entries = NmEntry.parse(stdout);
+    print('+++ DEBUG: stderr of nm +++');
+    print(nmResult.stderr);
+    print('+++ END: stdout of nm +++');
+    if (nmResult.exitCode != 0) {
+      print('ERROR: failed to execute "nm -gU $libFlutter":\n${nmResult.stderr}');
+      failures++;
+      continue;
+    }
+    final Iterable<NmEntry> entries = NmEntry.parse(nmResult.stdout);
     if (entries.isEmpty) {
       print('ERROR: $libFlutter exports no symbol');
       print(' Expected exactly one symbol "JNI_OnLoad" of type "T", but got none.');
