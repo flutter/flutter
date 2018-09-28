@@ -54,7 +54,7 @@ class _ProxyLayer extends Layer {
   _ProxyLayer(this._layer);
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     _layer.addToScene(builder, layerOffset);
   }
 
@@ -312,7 +312,7 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     addChildrenToScene(builder, layerOffset);
   }
 }
@@ -588,7 +588,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     // We must build the regular scene before we can build the screenshot
     // scene as building the screenshot scene assumes addToScene has already
     // been called successfully for all layers in the regular scene.
-    repaintBoundary.layer.addToScene(ui.SceneBuilder(), Offset.zero);
+    repaintBoundary.layer.addToScene(ui.SceneBuilder());
 
     return data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
   }
@@ -2235,7 +2235,7 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+  void addToScene(ui.SceneBuilder builder, [Offset layerOffset = Offset.zero]) {
     if (!selection.active)
       return;
 
