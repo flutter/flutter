@@ -1,4 +1,4 @@
-Signature: 2be5fac2b59647d51680f662194ca2d2
+Signature: 4f2f038f62dacc6268c8f98045680305
 
 UNUSED LICENSES:
 
@@ -1336,6 +1336,8 @@ FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/gm/skinning.cpp
 FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
+FILE: ../../../third_party/skia/include/c/sk_colorspace.h
+FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
 FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
 FILE: ../../../third_party/skia/include/core/SkFontParameters.h
@@ -1398,6 +1400,7 @@ FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNimaActor.cpp
 FILE: ../../../third_party/skia/samplecode/SampleNimaActor.h
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
+FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.c
 FILE: ../../../third_party/skia/src/compute/common/cl/find_cl.h
