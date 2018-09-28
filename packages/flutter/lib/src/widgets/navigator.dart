@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import 'dart:collection';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -1295,7 +1295,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final FocusScopeNode focusScopeNode = new FocusScopeNode();
 
   final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
-  List<Route<dynamic>> get history => _history;
+  UnmodifiableListView<Route<dynamic>> get history =>
+      new UnmodifiableListView<Route<dynamic>>(_history);
 
   @override
   void initState() {
