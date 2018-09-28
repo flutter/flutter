@@ -160,7 +160,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // end transition
 
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'The route should still be present if the pop is vetoed.');
+      reason: 'The route should not be present if the pop is permitted.');
 
     expect(willPopCalled, isTrue);
   });
