@@ -8,9 +8,12 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'shadow.dart';
 import 'debug.dart';
 
 /// A shadow cast by a box.
+/// 
+/// Inherits from [Shadow]
 ///
 /// [BoxShadow] can cast non-rectangular shadows if the box is non-rectangular
 /// (e.g., has a border radius or a circular shape).
@@ -20,45 +23,22 @@ import 'debug.dart';
 /// See also:
 ///
 ///  * [Canvas.drawShadow], which is a more efficient way to draw shadows.
+///  * [Shadow], which is the parent class that lacks [spreadRadius].
 @immutable
-class BoxShadow {
+class BoxShadow extends Shadow {
   /// Creates a box shadow.
   ///
   /// By default, the shadow is solid black with zero [offset], [blurRadius],
   /// and [spreadRadius].
   const BoxShadow({
-    this.color = const Color(0xFF000000),
-    this.offset = Offset.zero,
-    this.blurRadius = 0.0,
+    Color color = const Color(0xFF000000),
+    Offset offset = Offset.zero,
+    double blurRadius = 0.0,
     this.spreadRadius = 0.0
-  });
-
-  /// The color of the shadow.
-  final Color color;
-
-  /// The displacement of the shadow from the box.
-  final Offset offset;
-
-  /// The standard deviation of the Gaussian to convolve with the box's shape.
-  final double blurRadius;
+  }) : super(color: color, offset: offset, blurRadius: blurRadius);
 
   /// The amount the box should be inflated prior to applying the blur.
   final double spreadRadius;
-
-  /// Converts a blur radius in pixels to sigmas.
-  ///
-  /// See the sigma argument to [MaskFilter.blur].
-  //
-  // See SkBlurMask::ConvertRadiusToSigma().
-  // <https://github.com/google/skia/blob/bb5b77db51d2e149ee66db284903572a5aac09be/src/effects/SkBlurMask.cpp#L23>
-  static double convertRadiusToSigma(double radius) {
-    return radius * 0.57735 + 0.5;
-  }
-
-  /// The [blurRadius] in sigmas instead of logical pixels.
-  ///
-  /// See the sigma argument to [MaskFilter.blur].
-  double get blurSigma => convertRadiusToSigma(blurRadius);
 
   /// Create the [Paint] object that corresponds to this shadow description.
   ///
@@ -66,19 +46,13 @@ class BoxShadow {
   /// To honor those as well, the shape should be inflated by [spreadRadius] pixels
   /// in every direction and then translated by [offset] before being filled using
   /// this [Paint].
+  @override
   Paint toPaint() {
-    final Paint result = Paint()
-      ..color = color
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
-    assert(() {
-      if (debugDisableShadows)
-        result.maskFilter = null;
-      return true;
-    }());
-    return result;
+    return super.toPaint();
   }
 
   /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
+  @override
   BoxShadow scale(double factor) {
     return BoxShadow(
       color: color,
