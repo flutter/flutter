@@ -427,7 +427,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
       return ScrollSpringSimulation(
         spring,
         position.pixels,
-        position.maxScrollExtent,
+        end,
         math.min(0.0, velocity),
         tolerance: tolerance
       );
