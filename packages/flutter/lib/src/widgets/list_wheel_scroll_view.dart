@@ -722,7 +722,6 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
             && notification.metrics is FixedExtentMetrics) {
           final FixedExtentMetrics metrics = notification.metrics;
           final int currentItemIndex = metrics.itemIndex;
-          print('scrolled index $currentItemIndex');
           if (currentItemIndex != _lastReportedItemIndex) {
             _lastReportedItemIndex = currentItemIndex;
             final int trueIndex = widget.childDelegate.trueIndexOf(currentItemIndex);

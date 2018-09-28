@@ -416,7 +416,7 @@ void main() {
       );
     });
 
-    testWidgets('picker automatically scrolls away from invalid date', (WidgetTester tester) async {
+    testWidgets('picker automatically scrolls away from invalid date on month change', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
         SizedBox(
@@ -427,7 +427,6 @@ void main() {
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (DateTime newDate) {
-                print('received date $newDate');
                 date = newDate;
               },
               initialDateTime: DateTime(2018, 3, 30),
@@ -437,12 +436,76 @@ void main() {
       );
 
       await tester.drag(find.text('March'), const Offset(0.0, 32.0));
-      await tester.pump();
+      // Momentarily, the 2018 and the incorrect 30 of February is aligned.
+      expect(
+        tester.getTopLeft(find.text('2018')).dy,
+        tester.getTopLeft(find.text('30')).dy,
+      );
+      await tester.pump(); // Once to trigger the post frame animate call.
+      await tester.pump(); // Once to start the DrivenScrollActivity.
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(
         date,
         DateTime(2018, 2, 28),
+      );
+      expect(
+        tester.getTopLeft(find.text('2018')).dy,
+        tester.getTopLeft(find.text('28')).dy,
+      );
+    });
+
+    testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
+      DateTime date;
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (DateTime newDate) {
+                date = newDate;
+              },
+              initialDateTime: DateTime(2018, 2, 27), // 2018 has 28 days in Feb.
+            ),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('27'), const Offset(0.0, -32.0));
+      await tester.pump();
+      expect(
+        date,
+        DateTime(2018, 2, 28),
+      );
+
+
+      await tester.drag(find.text('28'), const Offset(0.0, -32.0));
+      await tester.pump(); // Once to trigger the post frame animate call.
+
+      // Callback doesn't transiently go into invalid dates.
+      expect(
+        date,
+        DateTime(2018, 2, 28),
+      );
+      // Momentarily, the invalid 29th of Feb is dragged into the middle.
+      expect(
+        tester.getTopLeft(find.text('2018')).dy,
+        tester.getTopLeft(find.text('29')).dy,
+      );
+
+      await tester.pump(); // Once to start the DrivenScrollActivity.
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        date,
+        DateTime(2018, 2, 28),
+      );
+      expect(
+        tester.getTopLeft(find.text('2018')).dy,
+        tester.getTopLeft(find.text('28')).dy,
       );
     });
 

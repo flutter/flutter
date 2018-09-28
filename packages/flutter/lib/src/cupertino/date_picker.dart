@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -331,7 +332,7 @@ class CupertinoDatePicker extends StatefulWidget {
   }
 }
 
-typedef Widget _ColumnBuilder(double offAxisFraction, TransitionBuilder itemPositioningBuilder);
+typedef _ColumnBuilder = Widget Function(double offAxisFraction, TransitionBuilder itemPositioningBuilder);
 
 class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   int textDirectionFactor;
@@ -710,10 +711,17 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
           widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
       },
-      children: List<Widget>.generate(daysInCurrentMonth, (int index) {
+      children: List<Widget>.generate(31, (int index) {
+        TextStyle disableTextStyle; // Null if not out of range.
+        if (index >= daysInCurrentMonth) {
+          disableTextStyle = const TextStyle(color: CupertinoColors.inactiveGray);
+        }
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerDayOfMonth(index + 1)),
+          Text(
+            localizations.datePickerDayOfMonth(index + 1),
+            style: disableTextStyle,
+          ),
         );
       }),
       looping: true,
@@ -729,7 +737,6 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
       onSelectedItemChanged: (int index) {
-        print('month picker index $index');
         selectedMonth = index + 1;
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
           widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
@@ -770,6 +777,27 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
         );
       },
     );
+  }
+
+  bool _keepInValidRange(ScrollEndNotification notification) {
+    // Whenever scrolling lands on an invalid entry, the picker
+    // automatically scrolls to a valid one.
+    final int desiredDay = DateTime(selectedYear, selectedMonth, selectedDay).day;
+    if (desiredDay != selectedDay) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+        dayController.animateToItem(
+          // The next valid date is also the amount of days overflown.
+          dayController.selectedItem - desiredDay,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+    setState(() {
+      // Rebuild because the number of valid days per month are different
+      // depending on the month and year.
+    });
+    return false;
   }
 
   @override
@@ -813,7 +841,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     final List<Widget> pickers = <Widget>[];
 
     for (int i = 0; i < columnWidths.length; i++) {
-      final double offAxisFraction = (i - 1) * 0.5 * textDirectionFactor;
+      final double offAxisFraction = (i - 1) * 0.3 * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (textDirectionFactor == -1)
@@ -843,19 +871,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     return MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.0),
       child: NotificationListener<ScrollEndNotification>(
-        onNotification: (ScrollEndNotification notification) {
-          // Whenever scrolling lands on an invalid entry, the picker
-          // automatically scrolls to a valid one.
-          final int desiredDay = DateTime(selectedYear, selectedMonth, selectedDay).day;
-          if (desiredDay != selectedDay) {
-            dayController.animateToItem(
-              dayController.selectedItem - desiredDay,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-            );
-          }
-          setState(() {});
-        },
+        onNotification: _keepInValidRange,
         child: CustomMultiChildLayout(
           delegate: _DatePickerLayoutDelegate(
             columnWidths: columnWidths,
