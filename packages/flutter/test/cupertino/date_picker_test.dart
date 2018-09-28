@@ -197,7 +197,7 @@ void main() {
     testWidgets('mode is not null', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoDatePicker(
+          CupertinoDatePicker(
             mode: null,
             onDateTimeChanged: (_) {},
             initialDateTime: DateTime.now(),
@@ -210,7 +210,7 @@ void main() {
     testWidgets('onDateTimeChanged is not null', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoDatePicker(
+          CupertinoDatePicker(
             onDateTimeChanged: null,
             initialDateTime: DateTime.now(),
           );
@@ -222,7 +222,7 @@ void main() {
     testWidgets('initial date time is not null', (WidgetTester tester) async {
       expect(
         () {
-          new CupertinoDatePicker(
+          CupertinoDatePicker(
             onDateTimeChanged: (_) {},
             initialDateTime: null,
           );
@@ -234,7 +234,7 @@ void main() {
     testWidgets('initial date time is not null', (WidgetTester tester) async {
       expect(
             () {
-          new CupertinoDatePicker(
+          CupertinoDatePicker(
             onDateTimeChanged: (_) {},
             initialDateTime: null,
           );
@@ -245,15 +245,15 @@ void main() {
 
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 400.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (_) {},
-              initialDateTime: new DateTime(2018, 1, 1, 10, 30),
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
         ),
@@ -264,15 +264,15 @@ void main() {
           tester.getCenter(find.text('Mon Jan 1')).dx - tester.getCenter(find.text('AM')).dx;
 
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 800.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               onDateTimeChanged: (_) {},
-              initialDateTime: new DateTime(2018, 1, 1, 10, 30),
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
         ),
@@ -287,15 +287,15 @@ void main() {
 
     testWidgets('width of picker in date mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 400.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (_) {},
-              initialDateTime: new DateTime(2018, 1, 1, 10, 30),
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
         ),
@@ -306,15 +306,15 @@ void main() {
           tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx;
 
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 800.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (_) {},
-              initialDateTime: new DateTime(2018, 1, 1, 10, 30),
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
         ),
@@ -329,15 +329,15 @@ void main() {
 
     testWidgets('width of picker in time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 400.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               onDateTimeChanged: (_) {},
-              initialDateTime: new DateTime(2018, 1, 1, 10, 30),
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
         ),
@@ -348,15 +348,15 @@ void main() {
           tester.getCenter(find.text('10')).dx - tester.getCenter(find.text('AM')).dx;
 
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 800.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               onDateTimeChanged: (_) {},
-              initialDateTime: new DateTime(2018, 1, 1, 10, 30),
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
         ),
@@ -373,17 +373,17 @@ void main() {
     testWidgets('picker automatically scrolls away from invalid date', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 400.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (DateTime newDate) {
                 date = newDate;
               },
-              initialDateTime: new DateTime(2018, 3, 30),
+              initialDateTime: DateTime(2018, 3, 30),
             ),
           ),
         ),
@@ -391,27 +391,27 @@ void main() {
 
       await tester.drag(find.text('March'), const Offset(0.0, 32.0));
       await tester.pumpAndSettle();
-      
+
       expect(
         date,
-        new DateTime(2018, 2, 28),
+        DateTime(2018, 2, 28),
       );
     });
 
     testWidgets('picker automatically scrolls the am/pm column when the hour column changes enough', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
-        new SizedBox(
+        SizedBox(
           height: 400.0,
           width: 400.0,
-          child: new Directionality(
+          child: Directionality(
             textDirection: TextDirection.ltr,
-            child: new CupertinoDatePicker(
+            child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               onDateTimeChanged: (DateTime newDate) {
                 date = newDate;
               },
-              initialDateTime: new DateTime(2018, 1, 1, 11, 59),
+              initialDateTime: DateTime(2018, 1, 1, 11, 59),
             ),
           ),
         ),
@@ -420,22 +420,22 @@ void main() {
       await tester.drag(find.text('11'), const Offset(0.0, -32.0));
       await tester.pumpAndSettle();
 
-      expect(date, new DateTime(2018, 1, 1, 12, 59));
+      expect(date, DateTime(2018, 1, 1, 12, 59));
 
       await tester.drag(find.text('12'), const Offset(0.0, 32.0));
       await tester.pumpAndSettle();
 
-      expect(date, new DateTime(2018, 1, 1, 11, 59));
+      expect(date, DateTime(2018, 1, 1, 11, 59));
 
       await tester.drag(find.text('11'), const Offset(0.0, 64.0));
       await tester.pumpAndSettle();
 
-      expect(date, new DateTime(2018, 1, 1, 9, 59));
+      expect(date, DateTime(2018, 1, 1, 9, 59));
 
       await tester.drag(find.text('09'), const Offset(0.0, -192.0));
       await tester.pumpAndSettle();
 
-      expect(date, new DateTime(2018, 1, 1, 15, 59));
+      expect(date, DateTime(2018, 1, 1, 15, 59));
     });
   });
 }
