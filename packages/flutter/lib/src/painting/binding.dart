@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data' show Uint8List;
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
@@ -43,6 +45,11 @@ abstract class PaintingBinding extends BindingBase with ServicesBinding {
   /// This method can be overridden to provide a custom image cache.
   @protected
   ImageCache createImageCache() => ImageCache();
+
+  /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
+  Future<ui.Codec> instantiateImageCodec(Uint8List list) {
+    return ui.instantiateImageCodec(list, decodedCacheRatioCap: _imageCache.decodedCacheRatioCap);
+  }
 
   @override
   void evict(String asset) {

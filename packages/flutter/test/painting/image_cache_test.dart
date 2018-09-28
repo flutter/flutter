@@ -128,5 +128,14 @@ void main() {
       expect(imageCache.currentSizeBytes, 256);
       expect(imageCache.maximumSizeBytes, 256 + 1000);
     });
+
+    test('decodedCacheRatio', () async {
+      // Has default value.
+      expect(imageCache.decodedCacheRatioCap, isNot(null));
+
+      // Can be set.
+      imageCache.decodedCacheRatioCap = 1.0;
+      expect(imageCache.decodedCacheRatioCap, 1.0);
+    });
   });
 }
