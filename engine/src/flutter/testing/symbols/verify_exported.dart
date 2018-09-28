@@ -49,13 +49,11 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'Flutter.framework', 'Flutter');
+    if (!new File(libFlutter).existsSync()) {
+      print('SKIPPING: $libFlutter does not exist.');
+      continue;
+    }
     final ProcessResult nmResult = Process.runSync(nmPath, <String>['-gUm', libFlutter]);
-    print('+++ DEBUG: stdout of nm +++');
-    print(nmResult.stdout);
-    print('+++ END: stdout of nm +++');
-    print('+++ DEBUG: stderr of nm +++');
-    print(nmResult.stderr);
-    print('+++ END: stdout of nm +++');
     if (nmResult.exitCode != 0) {
       print('ERROR: failed to execute "nm -gUm $libFlutter":\n${nmResult.stderr}');
       failures++;
@@ -83,13 +81,11 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'libflutter.so');
+    if (!new File(libFlutter).existsSync()) {
+      print('SKIPPING: $libFlutter does not exist.');
+      continue;
+    }
     final ProcessResult nmResult = Process.runSync(nmPath, <String>['-gU', libFlutter]);
-    print('+++ DEBUG: stdout of nm +++');
-    print(nmResult.stdout);
-    print('+++ END: stdout of nm +++');
-    print('+++ DEBUG: stderr of nm +++');
-    print(nmResult.stderr);
-    print('+++ END: stdout of nm +++');
     if (nmResult.exitCode != 0) {
       print('ERROR: failed to execute "nm -gU $libFlutter":\n${nmResult.stderr}');
       failures++;
