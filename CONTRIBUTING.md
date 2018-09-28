@@ -3,7 +3,7 @@ Contributing to Flutter
 
 [![Build Status](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
 
-_See also: [Flutter's code of conduct](https://flutter.io/design-principles/#code-of-conduct)_
+_See also: [Flutter's code of conduct](https://flutter.io/resources/design-principles#code-of-conduct)_
 
 Welcome
 -------
@@ -12,7 +12,7 @@ We gladly accept contributions via GitHub pull requests.
 
 Please become familiar with our
 [style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo) and
-[design philosophy](https://flutter.io/design-principles/). These guidelines are intended to
+[design philosophy](https://flutter.io/resources/design-principles). These guidelines are intended to
 keep the code consistent and avoid common pitfalls, and being familiar with them will
 make everything much easier for you. If you have questions about our processes or are looking
 for random tips and tricks, you may be interested in the [engine wiki](https://github.com/flutter/engine/wiki) and [framework wiki](https://github.com/flutter/flutter/wiki).
@@ -191,7 +191,7 @@ Please make sure all your checkins have detailed commit messages explaining the 
 
 Once you've gotten an LGTM from a project maintainer and once your PR has received
 the green light from all our automated testing (running on Cirrus, etc), and once
-the tree is green (see the [design principles](https://flutter.io/design-principles/)
+the tree is green (see the [design principles](https://flutter.io/resources/design-principles)
 document for more details), submit your changes to the `master` branch using one of
 the following methods:
 
@@ -272,7 +272,7 @@ API docs for master branch
 --------------------------
 
 To view the API docs for the `master` branch,
-visit https://master-docs-flutter-io.firebaseapp.com/.
+visit https://master-docs-flutter-io.firebaseapp.com.
 
 Those docs should be updated after a successful CI build
 of Flutter's `master` branch.
