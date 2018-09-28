@@ -441,9 +441,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
         onDragStarted: onDragStarted,
         // When the drag ends inside a DragTarget widget, the drag
         // succeeds, and we reorder the widget into position appropriately.
-        onDragCompleted: (Velocity velocity, Offset offset) {
-          onDragEnded();
-        },
+        onDragCompleted: onDragEnded,
         // When the drag does not end inside a DragTarget widget, the
         // drag fails, but we still reorder the widget to the last position it
         // had been dragged to.
