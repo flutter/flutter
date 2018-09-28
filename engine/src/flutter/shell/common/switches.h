@@ -54,7 +54,8 @@ DEF_SWITCH(DartFlags,
            "by the Flutter shell.")
 DEF_SWITCH(DeviceObservatoryPort,
            "observatory-port",
-           "A custom Dart Observatory port. The default is 8181.")
+           "A custom Dart Observatory port. The default is to pick a randomly "
+           "available open port.")
 DEF_SWITCH(DisableObservatory,
            "disable-observatory",
            "Disable the Dart Observatory. The observatory is never available "
