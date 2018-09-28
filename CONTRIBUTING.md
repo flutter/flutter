@@ -117,7 +117,7 @@ Running the tests
 To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and
 run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
- * `cd examples/stocks`
+ * `cd examples/gallery`
  * `flutter test`
 
 Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.dart`
