@@ -75,7 +75,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
     final Widget onePhysicalPixelVerticalDivider =
     SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
-    const DefaultCupertinoLocalizations localizations = DefaultCupertinoLocalizations();
+    final DefaultCupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     if (handleCut != null)
       items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
