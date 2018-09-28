@@ -1,4 +1,4 @@
-Signature: 20ae37bb3cc34f1a71efd24a93f2ef6d
+Signature: b09e2c4b483f2a9dc9d6ca193d010c5e
 
 UNUSED LICENSES:
 
@@ -2300,6 +2300,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-De
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-asmjs-Release-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-wasm-Debug-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/update_go_deps.expected/Housekeeper-Nightly-UpdateGoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_dm_results.expected/alternate_bucket.json
