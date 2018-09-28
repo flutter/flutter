@@ -335,7 +335,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
   );
   refreshPluginsList(project);
-  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
+  if (hasPlugins(project) || (project.isApplication && project.ios.podfile.existsSync())) {
     // If the Xcode project, Podfile, or Generated.xcconfig have changed since
     // last run, pods should be updated.
     final Fingerprinter fingerprinter = Fingerprinter(

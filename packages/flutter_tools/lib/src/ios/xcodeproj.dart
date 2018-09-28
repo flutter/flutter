@@ -57,8 +57,8 @@ Future<void> updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  if (!project.isModule) {
-    // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
+  if (!project.isApplication) {
+    // For application projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');

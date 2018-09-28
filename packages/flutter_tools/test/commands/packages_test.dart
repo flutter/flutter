@@ -114,14 +114,30 @@ void main() {
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
+    const List<String> applicationPluginRegistrants = <String>[
+      '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.h',
+      '.ios/Flutter/FlutterPluginRegistrant/Classes/GeneratedPluginRegistrant.m',
+      '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+    ];
+
     const List<String> pluginWitnesses = <String>[
       '.flutter-plugins',
       'ios/Podfile',
     ];
 
+    const List<String> applicationPluginWitnesses = <String>[
+      '.flutter-plugins',
+      '.ios/Podfile',
+    ];
+
     const Map<String, String> pluginContentWitnesses = <String, String>{
       'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
       'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+    };
+
+    const Map<String, String> applicationPluginContentWitnesses = <String, String>{
+      '.ios/Config/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      '.ios/Config/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     void expectDependenciesResolved(String projectPath) {
@@ -131,13 +147,13 @@ void main() {
     }
 
     void expectZeroPluginsInjected(String projectPath) {
-      for (final String registrant in pluginRegistrants) {
+      for (final String registrant in applicationPluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses) {
         expectNotExists(projectPath, witness);
       }
-      pluginContentWitnesses.forEach((String witness, String content) {
+      applicationPluginContentWitnesses.forEach((String witness, String content) {
         expectNotContains(projectPath, witness, content);
       });
     }
@@ -154,10 +170,22 @@ void main() {
       });
     }
 
+    void expectApplicationPluginInjected(String projectPath) {
+      for (final String registrant in applicationPluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in applicationPluginWitnesses) {
+        expectExists(projectPath, witness);
+      }
+      applicationPluginContentWitnesses.forEach((String witness, String content) {
+        expectContains(projectPath, witness, content);
+      });
+    }
+
     void removeGeneratedFiles(String projectPath) {
       final Iterable<String> allFiles = <List<String>>[
         pubOutput,
-        pluginRegistrants,
+        applicationPluginRegistrants,
         pluginWitnesses,
       ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
@@ -204,14 +232,13 @@ void main() {
       await runCommandIn(projectPath, 'get');
 
       expectDependenciesResolved(projectPath);
-      expectPluginInjected(projectPath);
-      // TODO(mravn): This test fails on the Chrome windows bot only.
-      // Skipping until resolved.
-    }, timeout: allowForRemotePubInvocation, skip: true);
+      expectApplicationPluginInjected(projectPath);
+    }, timeout: allowForRemotePubInvocation);
+
     testUsingContext('get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
         tempDir,
-        arguments: <String>['-t', 'plugin', '--no-pub'],
+        arguments: <String>['--template=plugin', '--no-pub'],
       );
       final String exampleProjectPath = fs.path.join(projectPath, 'example');
       removeGeneratedFiles(projectPath);
