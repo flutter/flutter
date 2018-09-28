@@ -171,7 +171,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    String sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
+    final String sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
 
     // Check for licenses.
     switch (await licensesAccepted) {
@@ -192,7 +192,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   }
 
   bool _checkJavaVersionNoOutput() {
-    String javaBinary = AndroidSdk.findJavaBinary();
+    final String javaBinary = AndroidSdk.findJavaBinary();
     if (!processManager.canRun(javaBinary)) {
       return false;
     }
