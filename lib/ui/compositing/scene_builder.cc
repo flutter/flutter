@@ -217,7 +217,6 @@ void SceneBuilder::addChildScene(double dx,
   if (!current_layer_) {
     return;
   }
-  SkRect sceneRect = SkRect::MakeXYWH(dx, dy, width, height);
   auto layer = std::make_unique<flow::ChildSceneLayer>();
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_size(SkSize::Make(width, height));

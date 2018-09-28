@@ -143,7 +143,9 @@ Dart_Handle GetVMServiceAssetsArchiveCallback() {
     (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE)
   return nullptr;
 #elif OS_FUCHSIA
-  fml::FileMapping mapping("pkg/data/observatory.tar", false /* executable */);
+  fml::UniqueFD fd = fml::OpenFile("pkg/data/observatory.tar", false,
+                                   fml::FilePermission::kRead);
+  fml::FileMapping mapping(fd, {fml::FileMapping::Protection::kRead});
   if (mapping.GetSize() == 0 || mapping.GetMapping() == nullptr) {
     FML_LOG(ERROR) << "Fail to load Observatory archive";
     return nullptr;
