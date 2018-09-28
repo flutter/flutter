@@ -65,7 +65,7 @@ void main() {
         } else if (json != null && json['event'] == 'app.started') {
           appId = json['params']['appId'];
         }
-        if (vmServicePort != null && appId != null) {
+        if (vmServicePort != null && appId != null && !ready.isCompleted) {
           print('run: ready!');
           ready.complete();
           ok ??= true;
