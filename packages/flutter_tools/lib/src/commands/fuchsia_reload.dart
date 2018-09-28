@@ -223,12 +223,12 @@ class FuchsiaReloadCommand extends FlutterCommand {
     int totalOldCap = 0;
     int totalExternal = 0;
     for (Isolate i in vmService.vm.isolates) {
-//      totalNewUsed += i.newSpace.used;
-//      totalNewCap += i.newSpace.capacity;
-//      totalOldUsed += i.oldSpace.used;
-//      totalOldCap += i.oldSpace.capacity;
-//      totalExternal += i.newSpace.external;
-//      totalExternal += i.oldSpace.external;
+      totalNewUsed += i.newSpace.used;
+      totalNewCap += i.newSpace.capacity;
+      totalOldUsed += i.oldSpace.used;
+      totalOldCap += i.oldSpace.capacity;
+      totalExternal += i.newSpace.external;
+      totalExternal += i.oldSpace.external;
     }
     final String newUsed = getSizeAsMB(totalNewUsed);
     final String newCap = getSizeAsMB(totalNewCap);
