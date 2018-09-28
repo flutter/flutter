@@ -120,9 +120,12 @@ class DartVm {
   ///
   /// This is not limited to Isolates running Flutter, but to any Isolate on the
   /// VM.
-  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
+  Future<List<IsolateRef>> getMainIsolatesByPattern(
+    Pattern pattern, {
+    Duration timeout = _kRpcTimeout,
+  }) async {
     final Map<String, dynamic> jsonVmRef =
-        await invokeRpc('getVM', timeout: _kRpcTimeout);
+        await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
@@ -160,10 +163,12 @@ class DartVm {
   /// the flutter view's name), then the flutter view's ID will be added
   /// instead. If none of these things can be found (isolate has no name or the
   /// flutter view has no ID), then the result will not be added to the list.
-  Future<List<FlutterView>> getAllFlutterViews() async {
+  Future<List<FlutterView>> getAllFlutterViews({
+    Duration timeout = _kRpcTimeout,
+  }) async {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
-        await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
+        await invokeRpc('_flutter.listViews', timeout: timeout);
     for (Map<String, dynamic> jsonView in rpcResponse['views']) {
       final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
