@@ -70,35 +70,21 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-static const SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
-
-SceneBuilder::SceneBuilder() {
-  cull_rects_.push(kGiantRect);
-}
-
+SceneBuilder::SceneBuilder() = default;
 SceneBuilder::~SceneBuilder() = default;
 
 void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
-  SkMatrix inverse_sk_matrix;
-  SkRect cullRect;
-  // Perspective projections don't produce rectangles that are useful for
-  // culling for some reason.
-  if (!sk_matrix.hasPerspective() && sk_matrix.invert(&inverse_sk_matrix)) {
-    inverse_sk_matrix.mapRect(&cullRect, cull_rects_.top());
-  } else {
-    cullRect = kGiantRect;
-  }
   auto layer = std::make_unique<flow::TransformLayer>();
   layer->set_transform(sk_matrix);
-  PushLayer(std::move(layer), cullRect);
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushOffset(double dx, double dy) {
   SkMatrix sk_matrix = SkMatrix::MakeTrans(dx, dy);
   auto layer = std::make_unique<flow::TransformLayer>();
   layer->set_transform(sk_matrix);
-  PushLayer(std::move(layer), cull_rects_.top().makeOffset(-dx, -dy));
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushClipRect(double left,
@@ -108,55 +94,43 @@ void SceneBuilder::pushClipRect(double left,
                                 int clipBehavior) {
   SkRect clipRect = SkRect::MakeLTRB(left, top, right, bottom);
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
-  SkRect cullRect;
-  if (!cullRect.intersect(clipRect, cull_rects_.top())) {
-    cullRect = SkRect::MakeEmpty();
-  }
   auto layer = std::make_unique<flow::ClipRectLayer>(clip_behavior);
   layer->set_clip_rect(clipRect);
-  PushLayer(std::move(layer), cullRect);
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushClipRRect(const RRect& rrect, int clipBehavior) {
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
-  SkRect cullRect;
-  if (!cullRect.intersect(rrect.sk_rrect.rect(), cull_rects_.top())) {
-    cullRect = SkRect::MakeEmpty();
-  }
   auto layer = std::make_unique<flow::ClipRRectLayer>(clip_behavior);
   layer->set_clip_rrect(rrect.sk_rrect);
-  PushLayer(std::move(layer), cullRect);
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushClipPath(const CanvasPath* path, int clipBehavior) {
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
   FML_DCHECK(clip_behavior != flow::Clip::none);
-  SkRect cullRect;
-  if (!cullRect.intersect(path->path().getBounds(), cull_rects_.top())) {
-    cullRect = SkRect::MakeEmpty();
-  }
   auto layer = std::make_unique<flow::ClipPathLayer>(clip_behavior);
   layer->set_clip_path(path->path());
-  PushLayer(std::move(layer), cullRect);
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushOpacity(int alpha) {
   auto layer = std::make_unique<flow::OpacityLayer>();
   layer->set_alpha(alpha);
-  PushLayer(std::move(layer), cull_rects_.top());
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushColorFilter(int color, int blendMode) {
   auto layer = std::make_unique<flow::ColorFilterLayer>();
   layer->set_color(static_cast<SkColor>(color));
   layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
-  PushLayer(std::move(layer), cull_rects_.top());
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushBackdropFilter(ImageFilter* filter) {
   auto layer = std::make_unique<flow::BackdropFilterLayer>();
   layer->set_filter(filter->filter());
-  PushLayer(std::move(layer), cull_rects_.top());
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushShaderMask(Shader* shader,
@@ -171,7 +145,7 @@ void SceneBuilder::pushShaderMask(Shader* shader,
   layer->set_shader(shader->shader());
   layer->set_mask_rect(rect);
   layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
-  PushLayer(std::move(layer), cull_rects_.top());
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
@@ -181,10 +155,6 @@ void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
                                      int clipBehavior) {
   const SkPath& sk_path = path->path();
   flow::Clip clip_behavior = static_cast<flow::Clip>(clipBehavior);
-  SkRect cullRect;
-  if (!cullRect.intersect(sk_path.getBounds(), cull_rects_.top())) {
-    cullRect = SkRect::MakeEmpty();
-  }
   auto layer = std::make_unique<flow::PhysicalShapeLayer>(clip_behavior);
   layer->set_path(sk_path);
   layer->set_elevation(elevation);
@@ -192,14 +162,13 @@ void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
   layer->set_shadow_color(static_cast<SkColor>(shadow_color));
   layer->set_device_pixel_ratio(
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
-  PushLayer(std::move(layer), cullRect);
+  PushLayer(std::move(layer));
 }
 
 void SceneBuilder::pop() {
   if (!current_layer_) {
     return;
   }
-  cull_rects_.pop();
   current_layer_ = current_layer_->parent();
 }
 
@@ -213,9 +182,6 @@ void SceneBuilder::addPicture(double dx,
   SkPoint offset = SkPoint::Make(dx, dy);
   SkRect pictureRect = picture->picture()->cullRect();
   pictureRect.offset(offset.x(), offset.y());
-  if (!SkRect::Intersects(pictureRect, cull_rects_.top())) {
-    return;
-  }
   auto layer = std::make_unique<flow::PictureLayer>();
   layer->set_offset(offset);
   layer->set_picture(UIDartState::CreateGPUObject(picture->picture()));
@@ -252,9 +218,6 @@ void SceneBuilder::addChildScene(double dx,
     return;
   }
   SkRect sceneRect = SkRect::MakeXYWH(dx, dy, width, height);
-  if (!SkRect::Intersects(sceneRect, cull_rects_.top())) {
-    return;
-  }
   auto layer = std::make_unique<flow::ChildSceneLayer>();
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_size(SkSize::Make(width, height));
@@ -298,11 +261,8 @@ fml::RefPtr<Scene> SceneBuilder::build() {
   return scene;
 }
 
-void SceneBuilder::PushLayer(std::unique_ptr<flow::ContainerLayer> layer,
-                             const SkRect& cullRect) {
+void SceneBuilder::PushLayer(std::unique_ptr<flow::ContainerLayer> layer) {
   FML_DCHECK(layer);
-
-  cull_rects_.push(cullRect);
 
   if (!root_layer_) {
     root_layer_ = std::move(layer);
