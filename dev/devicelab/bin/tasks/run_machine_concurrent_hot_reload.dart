@@ -64,6 +64,8 @@ void main() {
           print('service protocol connection available at port $vmServicePort');
         } else if (json != null && json['event'] == 'app.started') {
           appId = json['params']['appId'];
+        }
+        if (vmServicePort != null && appId != null) {
           print('run: ready!');
           ready.complete();
           ok ??= true;
