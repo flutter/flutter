@@ -274,9 +274,9 @@ abstract class SelectableChipAttributes {
   /// ```
   ValueChanged<bool> get onSelected;
 
-  /// Elevation to be applied on the chip during the press motion. 
+  /// Elevation to be applied on the chip during the press motion.
   /// This controls the size of the shadow below the chip.
-  /// 
+  ///
   /// Defaults to 8.
   double get pressElevation;
 
@@ -383,9 +383,9 @@ abstract class TappableChipAttributes {
   /// ```
   VoidCallback get onPressed;
 
-  /// Elevation to be applied on the chip during the press motion. 
+  /// Elevation to be applied on the chip during the press motion.
   /// This controls the size of the shadow below the chip.
-  /// 
+  ///
   /// Defaults to 8.
   double get pressElevation;
 
