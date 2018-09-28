@@ -149,7 +149,11 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+<<<<<<< HEAD
     ColorScheme colorScheme,
+=======
+    int typographyVersion,
+>>>>>>> updated
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -201,6 +205,7 @@ class ThemeData extends Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
+    typographyVersion ??= 0;
     final Typography typography = Typography(platform: platform);
     final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     textTheme = defaultTextTheme.merge(textTheme);
@@ -287,7 +292,11 @@ class ThemeData extends Diagnosticable {
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme,
+<<<<<<< HEAD
       colorScheme: colorScheme,
+=======
+      typographyVersion: typographyVersion,
+>>>>>>> updated
     );
   }
 
@@ -344,7 +353,11 @@ class ThemeData extends Diagnosticable {
     @required this.platform,
     @required this.materialTapTargetSize,
     @required this.pageTransitionsTheme,
+<<<<<<< HEAD
     @required this.colorScheme,
+=======
+    @required this.typographyVersion,
+>>>>>>> updated
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -387,11 +400,16 @@ class ThemeData extends Diagnosticable {
        assert(platform != null),
        assert(materialTapTargetSize != null),
        assert(pageTransitionsTheme != null),
+<<<<<<< HEAD
        assert(colorScheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
   // the class and in the lerp() method.
+=======
+       assert(typographyVersion != null);
+
+>>>>>>> updated
 
   /// A default light blue theme.
   ///
@@ -603,6 +621,7 @@ class ThemeData extends Diagnosticable {
   /// builder is not found, a builder whose platform is null is used.
   final PageTransitionsTheme pageTransitionsTheme;
 
+<<<<<<< HEAD
   /// A set of thirteen colors that can be used to configure the
   /// color properties of most components.
   ///
@@ -612,6 +631,14 @@ class ThemeData extends Diagnosticable {
   /// Existing components will gradually migrate to it, to the extent
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
+=======
+  /// Font sizes, weights, and letter spacing will match the original (2017)
+  /// Material Design spec if [typographyVersion] is 1, the current (2018)
+  /// version of the spec if [typographyVersion] is 2.
+  ///
+  /// The current spec is https://material.io/design/typography.
+  final int typographyVersion;
+>>>>>>> updated
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -658,7 +685,11 @@ class ThemeData extends Diagnosticable {
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
     PageTransitionsTheme pageTransitionsTheme,
+<<<<<<< HEAD
     ColorScheme colorScheme,
+=======
+    int typographyVersion,
+>>>>>>> updated
   }) {
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
@@ -705,11 +736,13 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       colorScheme: colorScheme ?? this.colorScheme,
+      typographyVersion: typographyVersion ?? this.typographyVersion,
     );
   }
 
   ThemeData localizeFor(MaterialLocalizations localizations) {
-    final TextTheme geometryTheme = localizations?.localTextGeometry(version: 0) ?? MaterialTextGeometry.englishLike;
+    final TextTheme geometryTheme = localizations?.localTextGeometry(version: typographyVersion)
+      ?? MaterialTextGeometry.englishLike;
     return ThemeData.localize(this, geometryTheme);
   }
 
@@ -835,6 +868,7 @@ class ThemeData extends Diagnosticable {
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
+      typographyVersion: t < 0.5 ? a.typographyVersion : b.typographyVersion,
     );
   }
 
@@ -890,6 +924,7 @@ class ThemeData extends Diagnosticable {
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.colorScheme == colorScheme);
+           (otherData.typographyVersion == typographyVersion);
   }
 
   @override
@@ -945,6 +980,7 @@ class ThemeData extends Diagnosticable {
           materialTapTargetSize,
           pageTransitionsTheme,
           colorScheme,
+          typographyVersion,
         ),
       ),
     );
@@ -995,6 +1031,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
+    properties.add(DiagnosticsProperty<int>('typographyVersion', typographyVersion, defaultValue: defaultData.typographyVersion));
   }
 }
 

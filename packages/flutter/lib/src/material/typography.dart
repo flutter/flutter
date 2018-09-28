@@ -10,11 +10,65 @@ import 'colors.dart';
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in material design
-/// (e.g., headline, caption). Rather than creating a [TextTheme] directly,
+/// (e.g., button, caption). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
+///
+/// The Material Design typography scheme was signficantly changed in the
+/// current (2018) version of the specification.
+///
+/// The current spec has thirteen text styles:
+/// ```
+/// NAME       SIZE  WEIGHT  SPACING
+/// headline1  96.0  thin    -1.5
+/// headline2  60.0  thin    -0.5
+/// headline3  48.0  normal   0.0
+/// headline4  34.0  normal   0.25
+/// headline5  24.0  normal   0.0
+/// headline6  20.0  medium   0.15
+/// subtitle1  16.0  normal   0.15
+/// subtitle2  14.0  medium   0.1
+/// body1      16.0  normal   0.5
+/// body2      14.0  normal   0.25
+/// button     14.0  medium   0.75
+/// caption    12.0  normal   0.4
+/// overline   10.0  normal   1.5
+///
+/// ```
+/// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
+/// "medium" is `FontWeight.w500`.
+///
+///
+/// The original (2017) spec had eleven text styles. This class maps the
+/// old names to the new text styles.
+///
+/// ```
+/// NAME       SIZE   WEIGHT   TARGET
+/// display4   112.0  thin     headline1
+/// display3   56.0   normal   headline2
+/// display2   45.0   normal   headline3
+/// display1   34.0   normal   headline4
+/// headline   24.0   normal   headline5
+/// title      20.0   medium   headline6
+/// subhead    16.0   normal   subtitle
+/// body2      14.0   medium   paragraph1
+/// body1      14.0   normal   paragraph2
+/// caption    12.0   normal   caption
+/// button     14.0   medium   button
+/// ```
+///
+/// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
+/// "medium" is `FontWeight.w500`. Letter spacing for all of the original
+/// text styles was 0.0.
+///
+/// Application developers are encouraged to migrate to the new text
+/// styles. However, to preserve backwards compatibility, the font size
+/// and letter spacing changes specified by the new styles are only
+/// applied if [ThemeData.typographyVersion] is 1. By default
+/// [ThemeData.typographyVersion] is 0, which means that the original font
+/// sizes and 0.0 letter spacing remain unchanged.
 ///
 /// The following image [from the material design
 /// specification](https://material.io/go/design-typography#typography-styles)
@@ -781,7 +835,7 @@ class MaterialTextGeometry {
     headline2  : TextStyle(debugLabel: 'tall version1 headline2',  fontSize: 60.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     headline3  : TextStyle(debugLabel: 'tall version1 headline3',  fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     headline4  : TextStyle(debugLabel: 'tall version1 headline4',  fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    headline5  : TextStyle(debugLabel: 'tall version1 headline5',  fontSize: 24.0, fontWeight: FontWeight.w400,  textBaseline: TextBaseline.alphabetic),
+    headline5  : TextStyle(debugLabel: 'tall version1 headline5',  fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     headline6  : TextStyle(debugLabel: 'tall version1 headline6',  fontSize: 21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
     subtitle1  : TextStyle(debugLabel: 'tall version1 subtitle1',  fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     subtitle2  : TextStyle(debugLabel: 'tall version1 subtitle2',  fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),

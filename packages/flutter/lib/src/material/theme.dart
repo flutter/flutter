@@ -104,7 +104,7 @@ class Theme extends StatelessWidget {
   /// [BuildContext] that is "under" the [Theme]:
   ///
   /// ```dart
-  /// @overrideun
+  /// @override
   /// Widget build(BuildContext context) {
   ///   return MaterialApp(
   ///     theme: ThemeData.light(),
@@ -119,7 +119,7 @@ class Theme extends StatelessWidget {
   ///           ),
   ///         );
   ///       },
-  ///     ),'
+  ///     ),
   ///   );
   /// }
   /// ```
