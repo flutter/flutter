@@ -310,9 +310,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     }
 
     // If sshConfig path not available from the fuchsiaBuildDir, get from command line.
-    if (_sshConfig == null) {
-      _sshConfig = argResults['ssh-config'];
-    }
+    _sshConfig ??= argResults['ssh-config'];
     if (_sshConfig == null)
       throwToolExit('Provide the path to the ssh config file with --ssh-config.');
     if (!_fileExists(_sshConfig))
@@ -335,7 +333,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       return;
     }
 
-    String projectRoot = null;
+    String projectRoot;
     if (gnTarget != null) {
       if (fuchsiaBuildDir == null)
         throwToolExit('Must provide --build-dir when specifying --gn-target.');
