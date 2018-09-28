@@ -152,12 +152,16 @@ class Directionality extends InheritedWidget {
 /// ## Transparent image
 ///
 /// If only a single [Image] needs to be composited with an opacity between 0.0
-/// and 1.0, it's much faster to directly use [Image] as following:
+/// and 1.0, it's much faster to directly use [Image].
+///
+/// ### Sample code
+///
+/// This example draws an [Image] with 0.5 opacity:
 ///
 /// ```dart
-/// Image(
-///   image: image,
-///   color: Color.fromRGBO(255, 255, 255, opacity),
+/// Image.network(
+///   'https://github.com/flutter/flutter_gallery_assets/raw/master/lib/products/backpack.png',
+///   color: Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
