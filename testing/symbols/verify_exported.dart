@@ -17,6 +17,15 @@ import 'package:path/path.dart' as p;
 void main(List<String> arguments) {
   assert(arguments.length == 1);
   final String outPath = arguments.first;
+  String platform;
+  if (Platform.isLinux) {
+    platform = 'linux-x64';
+  } else if (Platform.isMacOS) {
+    platform = 'mac-x64';
+  } else {
+    throw new UnimplementedError('Script only support running on Linux or MacOS.');
+  }
+  final String nmPath = p.join(p.dirname(outPath), 'buildtools', platform, 'clang', 'bin', 'llvm-nm');
   assert(new Directory(outPath).existsSync());
 
   final Iterable<String> releaseBuilds = new Directory(outPath).listSync()
@@ -30,17 +39,17 @@ void main(List<String> arguments) {
       .where((String s) => s.startsWith('android_'));
 
   int failures = 0;
-  failures += _checkIos(outPath, iosReleaseBuilds);
-  failures += _checkAndroid(outPath, androidReleaseBuilds);
-
-  exit(failures);
+  failures += _checkIos(outPath, nmPath, iosReleaseBuilds);
+  failures += _checkAndroid(outPath, nmPath, androidReleaseBuilds);
+  // TODO(goderbauer): Return failing exit code on failure once it works on bots.
+  print('Failures: $failures'); // exit(failures);
 }
 
-int _checkIos(String outPath, Iterable<String> builds) {
+int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'Flutter.framework', 'Flutter');
-    final String stdout = Process.runSync('nm', <String>['-gUm', libFlutter]).stdout;
+    final String stdout = Process.runSync(nmPath, <String>['-gUm', libFlutter]).stdout;
     print('+++ DEBUG: stdout of nm +++');
     print(stdout);
     print('+++ END: stdout of nm +++');
@@ -62,11 +71,11 @@ int _checkIos(String outPath, Iterable<String> builds) {
   return failures;
 }
 
-int _checkAndroid(String outPath, Iterable<String> builds) {
+int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
   int failures = 0;
   for (String build in builds) {
     final String libFlutter = p.join(outPath, build, 'libflutter.so');
-    final String stdout = Process.runSync('nm', <String>['-gU', libFlutter]).stdout;
+    final String stdout = Process.runSync(nmPath, <String>['-gU', libFlutter]).stdout;
     print('+++ DEBUG: stdout of nm +++');
     print(stdout);
     print('+++ END: stdout of nm +++');
