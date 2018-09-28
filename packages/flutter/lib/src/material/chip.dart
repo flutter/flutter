@@ -1250,11 +1250,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   Animation<double> enableAnimation;
   Animation<double> selectionFade;
 
-
-//  static final Animatable<double> pressedShadowTween = Tween<double>(
-//    begin: 0.0,
-//    end: _kPressElevation,
-//  );
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
 

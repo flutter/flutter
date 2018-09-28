@@ -1411,11 +1411,7 @@ void main() {
 
     final ChipThemeData chipTheme = theme.chipTheme;
 
-    InputChip inputChip =
-    const InputChip(
-      label: Text('Label'),
-      pressElevation: 8.0,
-    );
+    InputChip inputChip = const InputChip(label: Text('Label'), pressElevation: 8.0);
 
     Widget buildChip(ChipThemeData data) {
       return _wrapForChip(
@@ -1430,11 +1426,7 @@ void main() {
     await tester.pumpWidget(buildChip(chipTheme));
     expect(inputChip.pressElevation, 8.0);
 
-    inputChip =
-    const InputChip(
-      label: Text('Label'),
-      pressElevation: 12.0,
-    );
+    inputChip = const InputChip(label: Text('Label'), pressElevation: 12.0);
 
     await tester.pumpWidget(buildChip(chipTheme));
     await tester.pumpAndSettle();
