@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -21,13 +22,80 @@ class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
 void main() {
+  group('PropertyList', () {
+    MockProcessManager mockProcessManager;
+    MemoryFileSystem fs;
+    Directory workspaceDirectory;
+    File workspaceSettingsFile;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      fs = MemoryFileSystem();
+      workspaceDirectory = fs.directory('Runner.xcworkspace');
+      workspaceSettingsFile = workspaceDirectory.childDirectory('xcshareddata').childFile('WorkspaceSettings.xcsettings');
+    });
+
+    testUsingContext('does nothing if workspace directory does not exist', () async {
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verifyNever(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('creates dict-based plist if settings file does not exist', () async {
+      workspaceSettingsFile.parent.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Clear dict', workspaceSettingsFile.path]));
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Add BuildSystemType string Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('writes legacy build mode settings if requested and not present', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Add BuildSystemType string Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('updates legacy build mode setting if requested and existing setting is present', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'FancyNewOne', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: false);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Set BuildSystemType Original', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('deletes legacy build mode setting if modern build mode requested', () async {
+      workspaceSettingsFile.createSync(recursive: true);
+      when(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Print BuildSystemType', workspaceSettingsFile.path]))
+        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'Original', '')));
+      await setXcodeWorkspaceBuildSystem(workspaceDirectory: workspaceDirectory, workspaceSettings: workspaceSettingsFile, modern: true);
+      verify(mockProcessManager.run(<String>[PlistBuddy.path, '-c', 'Delete BuildSystemType', workspaceSettingsFile.path]));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
   group('IMobileDevice', () {
-    final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform())
+    final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
     MockProcessManager mockProcessManager;
 
     setUp(() {
-      mockProcessManager = new MockProcessManager();
+      mockProcessManager = MockProcessManager();
     });
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
@@ -40,7 +108,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(1, 1, '', 'Sad today')));
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -48,7 +116,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(1, 0, 'foo', '')));
+          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
       expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -60,8 +128,8 @@ void main() {
       MockFile mockOutputFile;
 
       setUp(() {
-        mockProcessManager = new MockProcessManager();
-        mockOutputFile = new MockFile();
+        mockProcessManager = MockProcessManager();
+        mockOutputFile = MockFile();
       });
 
       testUsingContext('error if idevicescreenshot is not installed', () async {
@@ -71,7 +139,7 @@ void main() {
         when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
             workingDirectory: null
-        )).thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(4, 1, '', '')));
+        )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       }, overrides: <Type, Generator>{
@@ -82,7 +150,7 @@ void main() {
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
         when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
-            (Invocation invocation) => new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
+            (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
@@ -101,9 +169,9 @@ void main() {
     MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
 
     setUp(() {
-      mockProcessManager = new MockProcessManager();
-      mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
-      xcode = new Xcode();
+      mockProcessManager = MockProcessManager();
+      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      xcode = Xcode();
     });
 
     testUsingContext('xcodeSelectPath returns null when xcode-select is not installed', () {
@@ -117,7 +185,7 @@ void main() {
     testUsingContext('xcodeSelectPath returns path when xcode-select is installed', () {
       const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
       when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenReturn(new ProcessResult(1, 0, xcodePath, ''));
+          .thenReturn(ProcessResult(1, 0, xcodePath, ''));
       expect(xcode.xcodeSelectPath, xcodePath);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -176,7 +244,7 @@ void main() {
 
     testUsingContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenReturn(new ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.'));
+          .thenReturn(ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.'));
       expect(xcode.eulaSigned, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -184,7 +252,7 @@ void main() {
 
     testUsingContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenReturn(new ProcessResult(1, 1, '', 'clang: error: no input files'));
+          .thenReturn(ProcessResult(1, 1, '', 'clang: error: no input files'));
       expect(xcode.eulaSigned, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -201,7 +269,7 @@ void main() {
     });
 
     testUsingContext('No provisioning profile shows message', () async {
-      final XcodeBuildResult buildResult = new XcodeBuildResult(
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
 Launching lib/main.dart on iPhone in debug mode...
@@ -258,7 +326,7 @@ Xcode's output:
 Could not build the precompiled application for the device.
 
 Error launching application on iPhone.''',
-        xcodeBuildExecution: new XcodeBuildExecution(
+        xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
           buildForPhysicalDevice: true,
@@ -274,7 +342,7 @@ Error launching application on iPhone.''',
     });
 
     testUsingContext('No development team shows message', () async {
-      final XcodeBuildResult buildResult = new XcodeBuildResult(
+      final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
 Running "flutter packages get" in flutter_gallery...  0.6s
@@ -339,7 +407,7 @@ Xcode's output:
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'
 
 Could not build the precompiled application for the device.''',
-        xcodeBuildExecution: new XcodeBuildExecution(
+        xcodeBuildExecution: XcodeBuildExecution(
           buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
           appDirectory: '/blah/blah',
           buildForPhysicalDevice: true,

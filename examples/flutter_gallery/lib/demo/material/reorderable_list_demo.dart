@@ -23,7 +23,7 @@ class ReorderableListDemo extends StatefulWidget {
   static const String routeName = '/material/reorderable-list';
 
   @override
-  _ListDemoState createState() => new _ListDemoState();
+  _ListDemoState createState() => _ListDemoState();
 }
 
 class _ListItem {
@@ -35,14 +35,14 @@ class _ListItem {
 }
 
 class _ListDemoState extends State<ReorderableListDemo> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
   _ReorderableListType _itemType = _ReorderableListType.threeLine;
   bool _reverseSort = false;
   final List<_ListItem> _items = <String>[
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-  ].map((String item) => new _ListItem(item, false)).toList();
+  ].map((String item) => _ListItem(item, false)).toList();
 
   void changeItemType(_ReorderableListType type) {
     setState(() {
@@ -57,29 +57,29 @@ class _ListDemoState extends State<ReorderableListDemo> {
   void _showConfigurationSheet() {
     setState(() {
       _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
-        return new DecoratedBox(
+        return DecoratedBox(
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: Colors.black26)),
           ),
-          child: new ListView(
+          child: ListView(
             shrinkWrap: true,
             primary: false,
             children: <Widget>[
-              new RadioListTile<_ReorderableListType>(
+              RadioListTile<_ReorderableListType>(
                 dense: true,
                 title: const Text('Horizontal Avatars'),
                 value: _ReorderableListType.horizontalAvatar,
                 groupValue: _itemType,
                 onChanged: changeItemType,
               ),
-              new RadioListTile<_ReorderableListType>(
+              RadioListTile<_ReorderableListType>(
                 dense: true,
                 title: const Text('Vertical Avatars'),
                 value: _ReorderableListType.verticalAvatar,
                 groupValue: _itemType,
                 onChanged: changeItemType,
               ),
-              new RadioListTile<_ReorderableListType>(
+              RadioListTile<_ReorderableListType>(
                 dense: true,
                 title: const Text('Three-line'),
                 value: _ReorderableListType.threeLine,
@@ -109,8 +109,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
     Widget listTile;
     switch (_itemType) {
       case _ReorderableListType.threeLine:
-        listTile = new CheckboxListTile(
-          key: new Key(item.value),
+        listTile = CheckboxListTile(
+          key: Key(item.value),
           isThreeLine: true,
           value: item.checkState ?? false,
           onChanged: (bool newValue) {
@@ -118,18 +118,18 @@ class _ListDemoState extends State<ReorderableListDemo> {
               item.checkState = newValue;
             });
           },
-          title: new Text('This item represents ${item.value}.'),
+          title: Text('This item represents ${item.value}.'),
           subtitle: secondary,
           secondary: const Icon(Icons.drag_handle),
         );
         break;
       case _ReorderableListType.horizontalAvatar:
       case _ReorderableListType.verticalAvatar:
-        listTile = new Container(
-          key: new Key(item.value),
+        listTile = Container(
+          key: Key(item.value),
           height: 100.0,
           width: 100.0,
-          child: new CircleAvatar(child: new Text(item.value),
+          child: CircleAvatar(child: Text(item.value),
             backgroundColor: Colors.green,
           ),
         );
@@ -152,12 +152,12 @@ class _ListDemoState extends State<ReorderableListDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       key: scaffoldKey,
-      appBar: new AppBar(
+      appBar: AppBar(
         title: const Text('Reorderable list'),
         actions: <Widget>[
-          new IconButton(
+          IconButton(
             icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',
             onPressed: () {
@@ -167,8 +167,8 @@ class _ListDemoState extends State<ReorderableListDemo> {
               });
             },
           ),
-          new IconButton(
-            icon: new Icon(
+          IconButton(
+            icon: Icon(
               Theme.of(context).platform == TargetPlatform.iOS
                   ? Icons.more_horiz
                   : Icons.more_vert,
@@ -178,12 +178,12 @@ class _ListDemoState extends State<ReorderableListDemo> {
           ),
         ],
       ),
-      body: new Scrollbar(
-        child: new ReorderableListView(
+      body: Scrollbar(
+        child: ReorderableListView(
           header: _itemType != _ReorderableListType.threeLine
-              ? new Padding(
+              ? Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: new Text('Header of the list', style: Theme.of(context).textTheme.headline))
+                  child: Text('Header of the list', style: Theme.of(context).textTheme.headline))
               : null,
           onReorder: _onReorder,
           scrollDirection: _itemType == _ReorderableListType.horizontalAvatar ? Axis.horizontal : Axis.vertical,

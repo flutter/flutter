@@ -9,40 +9,40 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TextPainter caret test', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     String text = 'A';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
 
     Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
 
     // Check that getOffsetForCaret handles a character that is encoded as a surrogate pair.
     text = 'A\u{1F600}';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
-    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
   });
 
   test('TextPainter error test', () {
-    final TextPainter painter = new TextPainter(textDirection: TextDirection.ltr);
+    final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
     expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
   });
 
   test('TextPainter requires textDirection', () {
-    final TextPainter painter1 = new TextPainter(text: const TextSpan(text: ''));
+    final TextPainter painter1 = TextPainter(text: const TextSpan(text: ''));
     expect(() { painter1.layout(); }, throwsAssertionError);
-    final TextPainter painter2 = new TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
+    final TextPainter painter2 = TextPainter(text: const TextSpan(text: ''), textDirection: TextDirection.rtl);
     expect(() { painter2.layout(); }, isNot(throwsException));
   });
 
   test('TextPainter size test', () {
-    final TextPainter painter = new TextPainter(
+    final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
         style: TextStyle(
@@ -58,7 +58,7 @@ void main() {
   });
 
   test('TextPainter textScaleFactor test', () {
-    final TextPainter painter = new TextPainter(
+    final TextPainter painter = TextPainter(
       text: const TextSpan(
         text: 'X',
         style: TextStyle(
@@ -75,7 +75,7 @@ void main() {
   });
 
   test('TextPainter default text height is 14 pixels', () {
-    final TextPainter painter = new TextPainter(
+    final TextPainter painter = TextPainter(
       text: const TextSpan(text: 'x'),
       textDirection: TextDirection.ltr,
     );
@@ -85,7 +85,7 @@ void main() {
   });
 
   test('TextPainter sets paragraph size from root', () {
-    final TextPainter painter = new TextPainter(
+    final TextPainter painter = TextPainter(
       text: const TextSpan(text: 'x', style: TextStyle(fontSize: 100.0)),
       textDirection: TextDirection.ltr,
     );
@@ -102,7 +102,7 @@ void main() {
     );
     TextPainter painter;
 
-    painter = new TextPainter(
+    painter = TextPainter(
       text: const TextSpan(
         text: 'X X X',
         style: style,
@@ -114,7 +114,7 @@ void main() {
     expect(painter.minIntrinsicWidth, 10.0);
     expect(painter.maxIntrinsicWidth, 50.0);
 
-    painter = new TextPainter(
+    painter = TextPainter(
       text: const TextSpan(
         text: 'X X X',
         style: style,
@@ -127,7 +127,7 @@ void main() {
     expect(painter.minIntrinsicWidth, 50.0);
     expect(painter.maxIntrinsicWidth, 50.0);
 
-    painter = new TextPainter(
+    painter = TextPainter(
       text: const TextSpan(
         text: 'X X XXXX',
         style: style,
@@ -140,7 +140,7 @@ void main() {
     expect(painter.minIntrinsicWidth, 40.0);
     expect(painter.maxIntrinsicWidth, 80.0);
 
-    painter = new TextPainter(
+    painter = TextPainter(
       text: const TextSpan(
         text: 'X X XXXX XX',
         style: style,
@@ -153,7 +153,7 @@ void main() {
     expect(painter.minIntrinsicWidth, 70.0);
     expect(painter.maxIntrinsicWidth, 110.0);
 
-    painter = new TextPainter(
+    painter = TextPainter(
       text: const TextSpan(
         text: 'XXXXXXXX XXXX XX X',
         style: style,
@@ -166,7 +166,7 @@ void main() {
     expect(painter.minIntrinsicWidth, 90.0);
     expect(painter.maxIntrinsicWidth, 180.0);
 
-    painter = new TextPainter(
+    painter = TextPainter(
       text: const TextSpan(
         text: 'X XX XXXX XXXXXXXX',
         style: style,
@@ -181,38 +181,38 @@ void main() {
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
   test('TextPainter handles newlines properly', () {
-    final TextPainter painter = new TextPainter()
+    final TextPainter painter = TextPainter()
       ..textDirection = TextDirection.ltr;
 
     String text = 'aaa';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
 
     Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
-    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
 
     // Check that getOffsetForCaret handles a trailing newline when affinity is downstream.
     text = 'aaa\n';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
-    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(14.0, 0.0001));
 
     // Check that getOffsetForCaret handles a trailing newline when affinity is upstream.
     text = 'aaa\n';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
-    caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length, affinity: TextAffinity.upstream), ui.Rect.zero);
+    caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length, affinity: TextAffinity.upstream), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
 
     // Correctly moves through second line with downstream affinity.
     text = 'aaa\naaa';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
@@ -225,7 +225,7 @@ void main() {
 
     // Correctly handles multiple trailing newlines.
     text = 'aaa\n\n\n';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
@@ -257,7 +257,7 @@ void main() {
 
     // Correctly handles multiple leading newlines
     text = '\n\n\naaa';
-    painter.text = new TextSpan(text: text);
+    painter.text = TextSpan(text: text);
     painter.layout();
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 3), ui.Rect.zero);

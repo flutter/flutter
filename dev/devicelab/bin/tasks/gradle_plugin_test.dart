@@ -36,13 +36,13 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
-void main() async {
+Future<void> main() async {
   await task(() async {
     section('Find Java');
 
     javaHome = await findJavaHome();
     if (javaHome == null)
-      return new TaskResult.failure('Could not find Java');
+      return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
     try {
@@ -51,14 +51,8 @@ void main() async {
         await project.runGradleTask('assembleDebug');
         errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
         if (errorMessage != null) {
-          throw new TaskResult.failure(errorMessage);
+          throw TaskResult.failure(errorMessage);
         }
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleDebug no-preview-dart-2');
-        await project.runGradleTask('assembleDebug',
-            options: <String>['-Ppreview-dart-2=false']);
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -131,15 +125,15 @@ void main() async {
         section('gradlew assembleDebug on plugin example');
         await pluginProject.runGradleTask('assembleDebug');
         if (!pluginProject.hasDebugApk)
-          throw new TaskResult.failure(
+          throw TaskResult.failure(
               'Gradle did not produce an apk file at the expected place');
       });
 
-      return new TaskResult.success(null);
+      return TaskResult.success(null);
     } on TaskResult catch (taskResult) {
       return taskResult;
     } catch (e) {
-      return new TaskResult.failure(e.toString());
+      return TaskResult.failure(e.toString());
     }
   });
 }
@@ -149,7 +143,7 @@ TaskResult _failure(String message, ProcessResult result) {
   print('Exit code: ${result.exitCode}');
   print('Std out  :\n${result.stdout}');
   print('Std err  :\n${result.stderr}');
-  return new TaskResult.failure(message);
+  return TaskResult.failure(message);
 }
 
 bool _hasMultipleOccurrences(String text, Pattern pattern) {
@@ -166,14 +160,14 @@ class FlutterProject {
     await inDirectory(directory, () async {
       await flutter('create', options: <String>[name]);
     });
-    return new FlutterProject(directory, name);
+    return FlutterProject(directory, name);
   }
 
   String get rootPath => path.join(parent.path, name);
   String get androidPath => path.join(rootPath, 'android');
 
   Future<Null> addCustomBuildType(String name, {String initWith}) async {
-    final File buildScript = new File(
+    final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
 
@@ -190,7 +184,7 @@ android {
   }
 
   Future<Null> addProductFlavor(String name) async {
-    final File buildScript = new File(
+    final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
 
@@ -209,7 +203,7 @@ android {
   }
 
   Future<Null> introduceError() async {
-    final File buildScript = new File(
+    final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
@@ -242,7 +236,7 @@ class FlutterPluginProject {
     await inDirectory(directory, () async {
       await flutter('create', options: <String>['-t', 'plugin', name]);
     });
-    return new FlutterPluginProject(directory, name);
+    return FlutterPluginProject(directory, name);
   }
 
   String get rootPath => path.join(parent.path, name);
@@ -254,7 +248,7 @@ class FlutterPluginProject {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
-  bool get hasDebugApk => new File(debugApkPath).existsSync();
+  bool get hasDebugApk => File(debugApkPath).existsSync();
 }
 
 Future<Null> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
@@ -290,12 +284,12 @@ class _Dependencies {
   String target;
   Set<String> dependencies;
   _Dependencies(String depfilePath) {
-    final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
-    final RegExp _escapeExpr = new RegExp(r'\\(.)');
+    final RegExp _separatorExpr = RegExp(r'([^\\]) ');
+    final RegExp _escapeExpr = RegExp(r'\\(.)');
 
     // Depfile format:
     // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
-    final String contents = new File(depfilePath).readAsStringSync();
+    final String contents = File(depfilePath).readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
     target = colonSeparated[0].trim();
     dependencies = colonSeparated[1]
@@ -311,7 +305,7 @@ class _Dependencies {
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  final _Dependencies deps = new _Dependencies(
+  final _Dependencies deps = _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
           'flutter', 'debug', 'snapshot_blob.bin.d'));
   return deps.target == expectedTarget ? null :

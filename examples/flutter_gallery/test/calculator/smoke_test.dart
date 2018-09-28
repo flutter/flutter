@@ -14,7 +14,7 @@ void main() {
   // We press the "1" and the "2" buttons and check that the display
   // reads "12".
   testWidgets('Flutter calculator app smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(home: const CalculatorDemo()));
+    await tester.pumpWidget(const MaterialApp(home: CalculatorDemo()));
 
     final Finder oneButton = find.widgetWithText(InkResponse, '1');
     expect(oneButton, findsOneWidget);

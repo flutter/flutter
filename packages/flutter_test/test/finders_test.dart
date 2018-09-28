@@ -32,16 +32,16 @@ void main() {
   group('hitTestable', () {
     testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
-        _boilerplate(new IndexedStack(
+        _boilerplate(IndexedStack(
           sizing: StackFit.expand,
           children: <Widget>[
-            new GestureDetector(
+            GestureDetector(
               key: const ValueKey<int>(0),
               behavior: HitTestBehavior.opaque,
               onTap: () { },
               child: const SizedBox.expand(),
             ),
-            new GestureDetector(
+            GestureDetector(
               key: const ValueKey<int>(1),
               behavior: HitTestBehavior.opaque,
               onTap: () { },
@@ -58,15 +58,15 @@ void main() {
   });
 
   testWidgets('ChainedFinders chain properly', (WidgetTester tester) async {
-    final GlobalKey key1 = new GlobalKey();
+    final GlobalKey key1 = GlobalKey();
     await tester.pumpWidget(
-      _boilerplate(new Column(
+      _boilerplate(Column(
         children: <Widget>[
-          new Container(
+          Container(
             key: key1,
             child: const Text('1'),
           ),
-          new Container(
+          Container(
             child: const Text('2'),
           )
         ],
@@ -87,7 +87,7 @@ void main() {
 }
 
 Widget _boilerplate(Widget child) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
     child: child,
   );

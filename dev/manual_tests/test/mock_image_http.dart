@@ -7,13 +7,13 @@ import '../../../packages/flutter/test/painting/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
 MockHttpClient createMockImageHttpClient(SecurityContext _) {
-  final MockHttpClient client = new MockHttpClient();
-  final MockHttpClientRequest request = new MockHttpClientRequest();
-  final MockHttpClientResponse response = new MockHttpClientResponse();
-  final MockHttpHeaders headers = new MockHttpHeaders();
-  when(client.getUrl(any)).thenAnswer((_) => new Future<HttpClientRequest>.value(request));
+  final MockHttpClient client = MockHttpClient();
+  final MockHttpClientRequest request = MockHttpClientRequest();
+  final MockHttpClientResponse response = MockHttpClientResponse();
+  final MockHttpHeaders headers = MockHttpHeaders();
+  when(client.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
   when(request.headers).thenReturn(headers);
-  when(request.close()).thenAnswer((_) => new Future<HttpClientResponse>.value(response));
+  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
   when(response.contentLength).thenReturn(kTransparentImage.length);
   when(response.statusCode).thenReturn(HttpStatus.ok);
   when(response.listen(any)).thenAnswer((Invocation invocation) {
@@ -21,7 +21,7 @@ MockHttpClient createMockImageHttpClient(SecurityContext _) {
     final void Function() onDone = invocation.namedArguments[#onDone];
     final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError];
     final bool cancelOnError = invocation.namedArguments[#cancelOnError];
-    return new Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
   });
   return client;
 }

@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
-  await tester.pumpWidget(new MaterialApp(
-    theme: new ThemeData(
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
       platform: platform,
     ),
-    home: new CustomScrollView(
+    home: CustomScrollView(
       slivers: const <Widget>[
         SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
