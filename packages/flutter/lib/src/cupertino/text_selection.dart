@@ -6,9 +6,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'button.dart';
+import 'localizations.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
 // the height of the text font.
@@ -75,7 +75,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
     final Widget onePhysicalPixelVerticalDivider =
     SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
-    final DefaultCupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    const DefaultCupertinoLocalizations localizations = DefaultCupertinoLocalizations();
 
     if (handleCut != null)
       items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
