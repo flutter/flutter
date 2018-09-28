@@ -1759,3 +1759,4 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 }
+added
