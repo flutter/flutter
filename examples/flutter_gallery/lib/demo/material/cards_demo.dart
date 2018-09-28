@@ -5,6 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class TravelDestination {
@@ -168,6 +170,7 @@ class _CardsDemoState extends State<CardsDemo> {
       appBar: AppBar(
         title: const Text('Travel stream'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(CardsDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {

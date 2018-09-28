@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
 import 'full_screen_dialog_demo.dart';
 
 enum DialogDemoAction {
@@ -87,7 +88,8 @@ class DialogDemoState extends State<DialogDemo> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('Dialogs')
+        title: const Text('Dialogs'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DialogDemo.routeName)],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
