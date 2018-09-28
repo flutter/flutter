@@ -156,12 +156,12 @@ class Directionality extends InheritedWidget {
 ///
 /// ### Sample code
 ///
-/// This example draws an [Image] with some opacity:
+/// This example draws an [Image] with 0.5 opacity:
 ///
 /// ```dart
-/// Image(
-///   image: image,
-///   color: Color.fromRGBO(255, 255, 255, opacity),
+/// Image.network(
+///   'https://raw.githubusercontent.com/flutter/website/master/src/_includes/code/layout/lakes/images/lake.jpg',
+///   color: Color.fromRGBO(255, 255, 255, 0.5),
 ///   colorBlendMode: BlendMode.modulate
 /// )
 /// ```
