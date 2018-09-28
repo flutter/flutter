@@ -19,6 +19,7 @@ import 'android_sdk.dart';
 
 AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
 AndroidValidator get androidValidator => context[AndroidValidator];
+AndroidLicenseValidator get androidLicenseValidator => context[AndroidLicenseValidator];
 
 enum LicensesAccepted {
   none,
@@ -105,8 +106,8 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
     messages.add(ValidationMessage(androidSdk.ndk == null
-          ? 'Android NDK location not configured (optional; useful for native profiling support)'
-          : 'Android NDK at ${androidSdk.ndk.directory}'));
+        ? 'Android NDK location not configured (optional; useful for native profiling support)'
+        : 'Android NDK at ${androidSdk.ndk.directory}'));
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
@@ -132,7 +133,7 @@ class AndroidValidator extends DoctorValidator {
       }));
       messages.add(ValidationMessage(
           'Try re-installing or updating your Android SDK,\n'
-          'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
+              'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
@@ -152,6 +153,26 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
+    // Success.
+    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+  }
+
+}
+class AndroidLicenseValidator extends DoctorValidator {
+  AndroidLicenseValidator(): super('Android license subvalidator',);
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+
+    // Match pre-existing early termination behavior
+    if (androidSdk == null || androidSdk.latestVersion == null ||
+        androidSdk.validateSdkWellFormed().isNotEmpty || !_checkJavaVersionNoOutput() ) {
+      return ValidationResult(ValidationType.missing, messages);
+    }
+
+    String sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
+
     // Check for licenses.
     switch (await licensesAccepted) {
       case LicensesAccepted.all:
@@ -167,9 +188,27 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error('Android license status unknown.'));
         return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-
-    // Success.
     return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+  }
+
+  bool _checkJavaVersionNoOutput() {
+    String javaBinary = AndroidSdk.findJavaBinary();
+    if (!processManager.canRun(javaBinary)) {
+      return false;
+    }
+    String javaVersion;
+    try {
+      final ProcessResult result = processManager.runSync(<String>[javaBinary, '-version']);
+      if (result.exitCode == 0) {
+        final List<String> versionLines = result.stderr.split('\n');
+        javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+      }
+    } catch (_) { /* ignore */ }
+    if (javaVersion == null) {
+      // Could not determine the java version.
+      return false;
+    }
+    return true;
   }
 
   Future<LicensesAccepted> get licensesAccepted async {
