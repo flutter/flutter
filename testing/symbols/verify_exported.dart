@@ -41,8 +41,8 @@ void main(List<String> arguments) {
   int failures = 0;
   failures += _checkIos(outPath, nmPath, iosReleaseBuilds);
   failures += _checkAndroid(outPath, nmPath, androidReleaseBuilds);
-  // TODO(goderbauer): Return failing exit code on failure once it works on bots.
-  print('Failures: $failures'); // exit(failures);
+  print('Failing checks: $failures');
+  exit(failures);
 }
 
 int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
