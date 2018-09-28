@@ -65,6 +65,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   Widget _buildBottomPicker(Widget picker) {
     return Container(
       height: _kPickerSheetHeight,
+      padding: const EdgeInsets.only(top: 6.0),
       color: CupertinoColors.white,
       child: DefaultTextStyle(
         style: const TextStyle(
@@ -75,6 +76,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           // Blocks taps from propagating to the modal sheet and popping.
           onTap: () {},
           child: SafeArea(
+            top: false,
             child: picker,
           ),
         ),
@@ -86,41 +88,39 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     final FixedExtentScrollController scrollController =
         FixedExtentScrollController(initialItem: _selectedColorIndex);
 
-    final Widget colorPicker = CupertinoPicker(
-      scrollController: scrollController,
-      itemExtent: _kPickerItemHeight,
-      backgroundColor: CupertinoColors.white,
-      onSelectedItemChanged: (int index) {
-        setState(() {
-          _selectedColorIndex = index;
-        });
-      },
-      children: List<Widget>.generate(coolColorNames.length, (int index) {
-        return Center(child:
-        Text(coolColorNames[index]),
-        );
-      }),
-    );
-
     return GestureDetector(
       onTap: () async {
         await showCupertinoModalPopup<void>(
           context: context,
           builder: (BuildContext context) {
-            return _buildBottomPicker(colorPicker);
+            return _buildBottomPicker(
+              CupertinoPicker(
+                scrollController: scrollController,
+                itemExtent: _kPickerItemHeight,
+                backgroundColor: CupertinoColors.white,
+                onSelectedItemChanged: (int index) {
+                  setState(() => _selectedColorIndex = index);
+                },
+                children: List<Widget>.generate(coolColorNames.length, (int index) {
+                  return Center(child:
+                  Text(coolColorNames[index]),
+                  );
+                }),
+              ),
+            );
           },
         );
       },
       child: _buildMenu(
-          <Widget>[
-            const Text('Favorite Color'),
-            Text(
-              coolColorNames[_selectedColorIndex],
-              style: const TextStyle(
-                  color: CupertinoColors.inactiveGray
-              ),
+        <Widget>[
+          const Text('Favorite Color'),
+          Text(
+            coolColorNames[_selectedColorIndex],
+            style: const TextStyle(
+                color: CupertinoColors.inactiveGray
             ),
-          ]
+          ),
+        ],
       ),
     );
   }
@@ -135,9 +135,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               CupertinoTimerPicker(
                 initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
-                  setState(() {
-                    timer = newTimer;
-                  });
+                  setState(() => timer = newTimer);
                 },
               ),
             );
@@ -149,8 +147,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           const Text('Countdown Timer'),
           Text(
             '${timer.inHours}:'
-              '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
-              '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
+                '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
+                '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
             style: const TextStyle(color: CupertinoColors.inactiveGray),
           ),
         ],
@@ -169,9 +167,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
                 onDateTimeChanged: (DateTime newDateTime) {
-                  setState(() {
-                    date = newDateTime;
-                  });
+                  setState(() => date = newDateTime);
                 },
               ),
             );
@@ -201,9 +197,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
                 onDateTimeChanged: (DateTime newDateTime) {
-                  setState(() {
-                    time = newDateTime;
-                  });
+                  setState(() => time = newDateTime);
                 },
               ),
             );
@@ -211,13 +205,13 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         );
       },
       child: _buildMenu(
-          <Widget>[
-            const Text('Time'),
-            Text(
-              DateFormat.jm().format(time),
-              style: const TextStyle(color: CupertinoColors.inactiveGray),
-            ),
-          ]
+        <Widget>[
+          const Text('Time'),
+          Text(
+            DateFormat.jm().format(time),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
       ),
     );
   }
@@ -233,9 +227,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                 mode: CupertinoDatePickerMode.dateAndTime,
                 initialDateTime: dateTime,
                 onDateTimeChanged: (DateTime newDateTime) {
-                  setState(() {
-                    dateTime = newDateTime;
-                  });
+                  setState(() => dateTime = newDateTime);
                 },
               ),
             );
@@ -243,13 +235,13 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         );
       },
       child: _buildMenu(
-          <Widget>[
-            const Text('Date and Time'),
-            Text(
-              DateFormat.yMMMd().add_jm().format(dateTime),
-              style: const TextStyle(color: CupertinoColors.inactiveGray),
-            ),
-          ]
+        <Widget>[
+          const Text('Date and Time'),
+          Text(
+            DateFormat.yMMMd().add_jm().format(dateTime),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
       ),
     );
   }

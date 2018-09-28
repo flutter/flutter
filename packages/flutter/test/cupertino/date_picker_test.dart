@@ -243,6 +243,53 @@ void main() {
       );
     });
 
+    testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
+      DateTime selectedDateTime;
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
+              initialDateTime: DateTime(2018, 1, 1, 10, 30),
+            ),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('10'), const Offset(0.0, 32.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(selectedDateTime, DateTime(2018, 1, 1, 9, 30));
+
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              onDateTimeChanged: (DateTime dateTime) => selectedDateTime = dateTime,
+              // Change the initial date, but it shouldn't affect the present state.
+              initialDateTime: DateTime(2016, 4, 5, 15, 00),
+            ),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('09'), const Offset(0.0, 32.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Moving up an hour is still based on the original initial date time.
+      expect(selectedDateTime, DateTime(2018, 1, 1, 8, 30));
+    });
+
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
         SizedBox(
@@ -369,7 +416,6 @@ void main() {
       );
     });
 
-    // This test currently fails because of an issue with FixedExtentScrollController.animateToItem().
     testWidgets('picker automatically scrolls away from invalid date', (WidgetTester tester) async {
       DateTime date;
       await tester.pumpWidget(
@@ -381,6 +427,7 @@ void main() {
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
               onDateTimeChanged: (DateTime newDate) {
+                print('received date $newDate');
                 date = newDate;
               },
               initialDateTime: DateTime(2018, 3, 30),
@@ -390,7 +437,8 @@ void main() {
       );
 
       await tester.drag(find.text('March'), const Offset(0.0, 32.0));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(
         date,
@@ -418,22 +466,26 @@ void main() {
       );
 
       await tester.drag(find.text('11'), const Offset(0.0, -32.0));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 12, 59));
 
       await tester.drag(find.text('12'), const Offset(0.0, 32.0));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
       await tester.drag(find.text('11'), const Offset(0.0, 64.0));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
       await tester.drag(find.text('09'), const Offset(0.0, -192.0));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 15, 59));
     });
