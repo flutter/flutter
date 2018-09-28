@@ -48,7 +48,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(_FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(androidValidator);
+        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]);
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
