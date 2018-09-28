@@ -25,7 +25,6 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kVMSnapshotData = 'vm_snapshot_data';
-const String _kVMSnapshotInstr = 'vm_snapshot_instr';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 const String _kDylibKey = 'libapp.so';
@@ -161,11 +160,9 @@ Future<void> assemble({
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
       final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-      final String vmSnapshotInstr = artifacts.getArtifactPath(Artifact.vmSnapshotInstr);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kVMSnapshotInstr] = DevFSFileContent(fs.file(vmSnapshotInstr));
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
       assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {

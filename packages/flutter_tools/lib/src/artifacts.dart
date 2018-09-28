@@ -23,7 +23,6 @@ enum Artifact {
   snapshotDart,
   flutterFramework,
   vmSnapshotData,
-  vmSnapshotInstr,
   isolateSnapshotData,
   platformKernelDill,
   platformLibrariesJson,
@@ -56,8 +55,6 @@ String _artifactToFileName(Artifact artifact, [TargetPlatform platform]) {
       return 'Flutter.framework';
     case Artifact.vmSnapshotData:
       return 'vm_isolate_snapshot.bin';
-    case Artifact.vmSnapshotInstr:
-      return 'vm_snapshot_instructions.bin';
     case Artifact.isolateSnapshotData:
       return 'isolate_snapshot.bin';
     case Artifact.platformKernelDill:
@@ -184,7 +181,6 @@ class CachedArtifacts extends Artifacts {
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.flutterTester:
       case Artifact.vmSnapshotData:
-      case Artifact.vmSnapshotInstr:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
@@ -267,7 +263,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _flutterTesterPath(platform);
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
-      case Artifact.vmSnapshotInstr:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
