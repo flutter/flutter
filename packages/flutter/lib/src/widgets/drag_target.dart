@@ -42,7 +42,7 @@ typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offs
 /// Used by [Draggable.onDragEnd]
 typedef DragEndCallback = void Function(DraggableDetails details);
 
-/// Signature for when the draggable is dropped and accepted by a [DragTarget].
+/// Signature for when the draggable is dropped without being accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDragCompleted]
 typedef DragCompletedCallback = void Function(Velocity velocity, Offset offset);
