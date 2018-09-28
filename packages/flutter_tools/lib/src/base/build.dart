@@ -338,10 +338,9 @@ class AOTSnapshotter {
   }
 }
 
-class CoreJITSnapshotter {
-  /// Builds a "Core JIT" VM snapshot of the specified kernel. This snapshot
-  /// includes data as well as either machine code or DBC, depending on build
-  /// configuration.
+class JITSnapshotter {
+  /// Builds a JIT VM snapshot of the specified kernel. This snapshot includes
+  /// data as well as either machine code or DBC, depending on build configuration.
   Future<int> build({
     @required TargetPlatform platform,
     @required BuildMode buildMode,
@@ -349,18 +348,28 @@ class CoreJITSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required String compilationTraceFilePath,
+    @required bool buildHotUpdate,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
-    if (!_isValidCoreJitPlatform(platform)) {
-      printError('${getNameForTargetPlatform(platform)} does not support Core JIT compilation.');
+    if (!_isValidJitPlatform(platform)) {
+      printError('${getNameForTargetPlatform(platform)} does not support JIT snapshotting.');
       return 1;
     }
 
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final List<String> inputPaths = <String>[mainPath, compilationTraceFilePath];
-    final Set<String> outputPaths = Set<String>();
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+    final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
+    final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
+
+    final List<String> inputPaths = <String>[
+      mainPath, compilationTraceFilePath, engineVmSnapshotData, engineIsolateSnapshotData,
+    ];
+    if (buildHotUpdate) {
+      inputPaths.add(isolateSnapshotInstructions);
+    }
 
     final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
@@ -376,20 +385,25 @@ class CoreJITSnapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    // Blob Core JIT snapshot.
-    final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-    final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-    final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-    final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-    outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
+    final Set<String> outputPaths = Set<String>();
+    outputPaths.addAll(<String>[isolateSnapshotData]);
+    if (!buildHotUpdate) {
+      outputPaths.add(isolateSnapshotInstructions);
+    }
+
     genSnapshotArgs.addAll(<String>[
-      '--snapshot_kind=core-jit',
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
-      '--vm_snapshot_instructions=$vmSnapshotInstructions',
-      '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
+      '--snapshot_kind=app-jit',
       '--load_compilation_trace=$compilationTraceFilePath',
+      '--load_vm_snapshot_data=$engineVmSnapshotData',
+      '--load_isolate_snapshot_data=$engineIsolateSnapshotData',
+      '--isolate_snapshot_data=$isolateSnapshotData',
     ]);
+
+    if (!buildHotUpdate) {
+      genSnapshotArgs.add('--isolate_snapshot_instructions=$isolateSnapshotInstructions');
+    } else {
+      genSnapshotArgs.add('--reused_instructions=$isolateSnapshotInstructions');
+    }
 
     if (platform == TargetPlatform.android_arm) {
       // Use softfp for Android armv7 devices.
@@ -417,12 +431,13 @@ class CoreJITSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
+        'buildHotUpdate': buildHotUpdate.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
       },
       depfilePaths: <String>[],
     );
     if (await fingerprinter.doesFingerprintMatch()) {
-      printTrace('Skipping Core JIT snapshot build. Fingerprint match.');
+      printTrace('Skipping JIT snapshot build. Fingerprint match.');
       return 0;
     }
 
@@ -447,7 +462,7 @@ class CoreJITSnapshotter {
     return 0;
   }
 
-  bool _isValidCoreJitPlatform(TargetPlatform platform) {
+  bool _isValidJitPlatform(TargetPlatform platform) {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
