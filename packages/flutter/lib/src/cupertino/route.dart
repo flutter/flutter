@@ -92,7 +92,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     RouteSettings settings,
     this.maintainState = true,
     bool fullscreenDialog = false,
-    this.hostRoute,
   }) : assert(builder != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
@@ -151,16 +150,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   @override
   final bool maintainState;
 
-  /// The route that owns this one.
-  ///
-  /// The [MaterialPageRoute] creates a [CupertinoPageRoute] to handle iOS-style
-  /// navigation. When this happens, the [MaterialPageRoute] is the [hostRoute]
-  /// of this [CupertinoPageRoute].
-  ///
-  /// The [hostRoute] is responsible for calling [dispose] on the route. When
-  /// there is a [hostRoute], the [CupertinoPageRoute] must not be [install]ed.
-  final PageRoute<T> hostRoute;
-
   @override
   Duration get transitionDuration => const Duration(milliseconds: 350);
 
@@ -182,51 +171,42 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void install(OverlayEntry insertionPoint) {
-    assert(() {
-      if (hostRoute == null)
-        return true;
-      throw FlutterError(
-        'Cannot install a subsidiary route (one with a hostRoute).\n'
-        'This route ($this) cannot be installed, because it has a host route ($hostRoute).'
-      );
-    }());
-    super.install(insertionPoint);
-  }
-
-  @override
   void dispose() {
-    _backGestureController?.dispose();
-    _backGestureController = null;
+    _popGestureInProgress.remove(this);
     super.dispose();
   }
 
-  _CupertinoBackGestureController<T> _backGestureController;
-
-  /// Whether a pop gesture is currently underway.
-  ///
-  /// This starts returning true when pop gesture is started by the user. It
-  /// returns false if that has not yet occurred or if the most recent such
-  /// gesture has completed.
+  /// True if a Cupertino pop gesture is currently underway for [route].
   ///
   /// See also:
   ///
-  ///  * [popGestureEnabled], which returns whether a pop gesture is appropriate
-  ///    in the first place.
-  bool get popGestureInProgress => _backGestureController != null;
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  static bool isPopGestureInProgress(PageRoute<dynamic> route) => _popGestureInProgress.contains(route);
+  static final Set<PageRoute<dynamic>> _popGestureInProgress = Set<PageRoute<dynamic>>();
+
+  /// True if a Cupertino pop gesture is currently underway for this route.
+  ///
+  /// See also:
+  ///
+  ///  * [isPopGestureInProgress], which returns true if a Cupertino pop gesture
+  ///    is currently underway for specific route.
+  ///  * [popGestureEnabled], which returns true if a user-triggered pop gesture
+  ///    would be allowed.
+  bool get popGestureInProgress => isPopGestureInProgress(this);
 
   /// Whether a pop gesture can be started by the user.
   ///
-  /// This returns true if the user can edge-swipe to a previous route,
-  /// otherwise false.
+  /// Returns true if the user can edge-swipe to a previous route.
   ///
-  /// This will return false once [popGestureInProgress] is true, but
-  /// [popGestureInProgress] can only become true if [popGestureEnabled] was
+  /// Returns false once [isPopGestureInProgress] is true, but
+  /// [isPopGestureInProgress] can only become true if [popGestureEnabled] was
   /// true first.
   ///
   /// This should only be used between frames, not during build.
-  bool get popGestureEnabled {
-    final PageRoute<T> route = hostRoute ?? this;
+  bool get popGestureEnabled => _isPopGestureEnabled(this);
+
+  static bool _isPopGestureEnabled<T>(PageRoute<T> route) {
     // If there's nothing to go back to, then obviously we don't support
     // the back gesture.
     if (route.isFirst)
@@ -240,52 +220,17 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     if (route.hasScopedWillPopCallback)
       return false;
     // Fullscreen dialogs aren't dismissable by back swipe.
-    if (fullscreenDialog)
+    if (route.fullscreenDialog)
       return false;
     // If we're in an animation already, we cannot be manually swiped.
     if (route.controller.status != AnimationStatus.completed)
       return false;
     // If we're in a gesture already, we cannot start another.
-    if (popGestureInProgress)
+    if (_popGestureInProgress.contains(route))
       return false;
+
     // Looks like a back gesture would be welcome!
     return true;
-  }
-
-  /// Begin dismissing this route from a horizontal swipe, if appropriate.
-  ///
-  /// Swiping will be disabled if the page is a fullscreen dialog or if
-  /// dismissals can be overridden because a [WillPopCallback] was
-  /// defined for the route.
-  ///
-  /// When this method decides a pop gesture is appropriate, it returns a
-  /// [CupertinoBackGestureController].
-  ///
-  /// See also:
-  ///
-  ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
-  ///    is defined for this route.
-  ///  * [popGestureEnabled], which returns whether a pop gesture is
-  ///    appropriate.
-  ///  * [Route.startPopGesture], which describes the contract that this method
-  ///    must implement.
-  _CupertinoBackGestureController<T> _startPopGesture() {
-    assert(!popGestureInProgress);
-    assert(popGestureEnabled);
-    final PageRoute<T> route = hostRoute ?? this;
-    _backGestureController = _CupertinoBackGestureController<T>(
-      navigator: route.navigator,
-      controller: route.controller,
-      onEnded: _endPopGesture,
-    );
-    return _backGestureController;
-  }
-
-  void _endPopGesture() {
-    // In practice this only gets called if for some reason popping the route
-    // did not cause this route to get disposed.
-    _backGestureController?.dispose();
-    _backGestureController = null;
   }
 
   @override
@@ -307,9 +252,49 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     return result;
   }
 
-  @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (fullscreenDialog) {
+  // Called by _CupertinoBackGestureDetector when a pop ("back") drag start
+  // gesture is detected. The returned controller handles all of the subsquent
+  // drag events.
+  static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
+    assert(!_popGestureInProgress.contains(route));
+    assert(_isPopGestureEnabled(route));
+    _popGestureInProgress.add(route);
+
+    _CupertinoBackGestureController<T> backController;
+    backController = _CupertinoBackGestureController<T>(
+      navigator: route.navigator,
+      controller: route.controller,
+      onEnded: () {
+        backController?.dispose();
+        backController = null;
+        _popGestureInProgress.remove(route);
+      },
+    );
+    return backController;
+  }
+
+  /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
+  /// screen dialog, otherwise a [CupertinoPageTransition] is returned.
+  ///
+  /// Used by [CupertinoPageRoute.buildTransitions].
+  ///
+  /// This method can be applied to any [PageRoute], not just
+  /// [CupertinoPageRoute]. It's typically used to provide a Cupertino style
+  /// horizontal transition for material widgets when the target platform
+  /// is [TargetPlatform.iOS].
+  ///
+  /// See also:
+  ///
+  ///  * [CupertinoPageTransitionsBuilder], which uses this method to define a
+  ///    [PageTransitionsBuilder] for the [PageTransitionsTheme].
+  static Widget buildPageTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (route.fullscreenDialog) {
       return CupertinoFullscreenDialogTransition(
         animation: animation,
         child: child,
@@ -320,14 +305,19 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
         secondaryRouteAnimation: secondaryAnimation,
         // In the middle of a back gesture drag, let the transition be linear to
         // match finger motions.
-        linearTransition: popGestureInProgress,
+        linearTransition: _popGestureInProgress.contains(route),
         child: _CupertinoBackGestureDetector<T>(
-          enabledCallback: () => popGestureEnabled,
-          onStartPopGesture: _startPopGesture,
+          enabledCallback: () => _isPopGestureEnabled<T>(route),
+          onStartPopGesture: () => _startPopGesture<T>(route),
           child: child,
         ),
       );
     }
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
 
   @override
@@ -385,11 +375,10 @@ class CupertinoPageTransition extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    // TODO(ianh): tell the transform to be un-transformed for hit testing
-    // but not while being controlled by a gesture.
     return SlideTransition(
       position: _secondaryPositionAnimation,
       textDirection: textDirection,
+      transformHitTests: false,
       child: SlideTransition(
         position: _primaryPositionAnimation,
         textDirection: textDirection,

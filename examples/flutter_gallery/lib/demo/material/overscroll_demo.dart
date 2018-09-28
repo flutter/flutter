@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum IndicatorType { overscroll, refresh }
 
 class OverscrollDemo extends StatefulWidget {
@@ -47,6 +49,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
       appBar: AppBar(
         title: const Text('Pull to refresh'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(OverscrollDemo.routeName),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',

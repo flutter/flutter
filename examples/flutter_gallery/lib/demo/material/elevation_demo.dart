@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class ElevationDemo extends StatefulWidget {
   static const String routeName = '/material/elevation';
 
@@ -46,6 +48,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
       appBar: AppBar(
         title: const Text('Elevation'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(ElevationDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
