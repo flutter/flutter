@@ -344,17 +344,10 @@ class VMService {
     return await _vm.reload();
   }
 
-  Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+  Future<Null> refreshViews() async {
     if (!vm.isFlutterEngine)
       return;
     await vm.refreshViews();
-    for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
-      // If the VM doesn't yet have a view, wait for one to show up.
-      printTrace('Waiting for Flutter view');
-      await Future<Null>.delayed(Duration(seconds: attemptSeconds));
-      await getVM();
-      await vm.refreshViews();
-    }
   }
 }
 

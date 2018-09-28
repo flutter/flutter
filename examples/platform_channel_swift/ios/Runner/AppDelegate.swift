@@ -5,6 +5,20 @@
 import UIKit
 import Flutter
 
+enum ChannelName {
+  static let battery = "samples.flutter.io/battery"
+  static let charging = "samples.flutter.io/charging"
+}
+
+enum BatteryState {
+  static let charging = "charging"
+  static let discharging = "discharging"
+}
+
+enum MyFlutterErrorCode {
+  static let unavailable = "UNAVAILABLE"
+}
+
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
   private var eventSink: FlutterEventSink?
@@ -13,19 +27,21 @@ import Flutter
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-    let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
-    let batteryChannel = FlutterMethodChannel(name: "samples.flutter.io/battery",
+    guard let controller = window?.rootViewController as? FlutterViewController else {
+      fatalError("rootViewController is not type FlutterViewController")
+    }
+    let batteryChannel = FlutterMethodChannel(name: ChannelName.battery,
                                               binaryMessenger: controller)
     batteryChannel.setMethodCallHandler({
-      (call: FlutterMethodCall, result: FlutterResult) -> Void in
-      if "getBatteryLevel" == call.method {
-        self.receiveBatteryLevel(result: result)
-      } else {
+      [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
+      guard call.method == "getBatteryLevel" else {
         result(FlutterMethodNotImplemented)
+        return
       }
+      self?.receiveBatteryLevel(result: result)
     })
 
-    let chargingChannel = FlutterEventChannel(name: "samples.flutter.io/charging",
+    let chargingChannel = FlutterEventChannel(name: ChannelName.charging,
                                               binaryMessenger: controller)
     chargingChannel.setStreamHandler(self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -34,13 +50,13 @@ import Flutter
   private func receiveBatteryLevel(result: FlutterResult) {
     let device = UIDevice.current
     device.isBatteryMonitoringEnabled = true
-    if device.batteryState == UIDeviceBatteryState.unknown {
-      result(FlutterError(code: "UNAVAILABLE",
+    guard device.batteryState != .unknown  else {
+      result(FlutterError(code: MyFlutterErrorCode.unavailable,
                           message: "Battery info unavailable",
                           details: nil))
-    } else {
-      result(Int(device.batteryLevel * 100))
+      return
     }
+    result(Int(device.batteryLevel * 100))
   }
 
   public func onListen(withArguments arguments: Any?,
@@ -50,7 +66,7 @@ import Flutter
     sendBatteryStateEvent()
     NotificationCenter.default.addObserver(
       self,
-      selector: #selector(onBatteryStateDidChange),
+      selector: #selector(AppDelegate.onBatteryStateDidChange),
       name: NSNotification.Name.UIDeviceBatteryStateDidChange,
       object: nil)
     return nil
@@ -61,22 +77,21 @@ import Flutter
   }
 
   private func sendBatteryStateEvent() {
-    if eventSink == nil {
+    guard let eventSink = eventSink else {
       return
     }
 
-    let state = UIDevice.current.batteryState
-    switch state {
-    case UIDeviceBatteryState.full:
-      eventSink!("charging")
-    case UIDeviceBatteryState.charging:
-      eventSink!("charging")
-    case UIDeviceBatteryState.unplugged:
-      eventSink!("discharging")
+    switch UIDevice.current.batteryState {
+    case .full:
+      eventSink(BatteryState.charging)
+    case .charging:
+      eventSink(BatteryState.charging)
+    case .unplugged:
+      eventSink(BatteryState.discharging)
     default:
-      eventSink!(FlutterError(code: "UNAVAILABLE",
-                              message: "Charging status unavailable",
-                              details: nil))
+      eventSink(FlutterError(code: MyFlutterErrorCode.unavailable,
+                             message: "Charging status unavailable",
+                             details: nil))
     }
   }
 

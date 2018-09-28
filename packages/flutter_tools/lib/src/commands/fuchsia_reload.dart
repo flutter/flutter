@@ -190,7 +190,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in ports) {
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
-      await vmService.waitForViews();
+      await vmService.refreshViews();
       views.addAll(vmService.vm.views);
     }
     return views;
@@ -290,7 +290,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in ports) {
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
-      await vmService.waitForViews();
+      await vmService.refreshViews();
       printStatus(_vmServiceToString(vmService));
     }
   }
@@ -375,7 +375,6 @@ class FuchsiaReloadCommand extends FlutterCommand {
       throwToolExit('Provide the .packages path with --dot-packages.');
     if (!_fileExists(_dotPackagesPath))
       throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
-    printTrace("$_dotPackagesPath");
 
     final String isolateNumber = argResults['isolate-number'];
     if (isolateNumber == null) {
