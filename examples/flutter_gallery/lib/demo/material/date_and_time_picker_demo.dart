@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../gallery/demo.dart';
+
 class _InputDropdown extends StatelessWidget {
   const _InputDropdown({
     Key key,
@@ -129,7 +131,10 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Date and time pickers')),
+      appBar: AppBar(
+        title: const Text('Date and time pickers'),
+        actions: <Widget>[MaterialDemoDocumentationButton(DateAndTimePickerDemo.routeName)],
+      ),
       body: DropdownButtonHideUnderline(
         child: SafeArea(
           top: false,

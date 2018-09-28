@@ -7,6 +7,8 @@ import 'package:collection/collection.dart' show lowerBound;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
+import '../../gallery/demo.dart';
+
 enum LeaveBehindDemoAction {
   reset,
   horizontalSwipe,
@@ -140,6 +142,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       appBar: AppBar(
         title: const Text('Swipe to dismiss'),
         actions: <Widget>[
+          MaterialDemoDocumentationButton(LeaveBehindDemo.routeName),
           PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[

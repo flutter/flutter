@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
 const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
 const Color _kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
@@ -51,6 +53,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
     return Scaffold(
       appBar: AppBar(
         title: const Text('Segmented Control'),
+        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName)],
       ),
       body: Column(
         children: <Widget>[

@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import 'demos.dart';
 import 'example_code_parser.dart';
 import 'syntax_highlighter.dart';
 
@@ -12,24 +15,28 @@ class ComponentDemoTabData {
     this.demoWidget,
     this.exampleCodeTag,
     this.description,
-    this.tabName
+    this.tabName,
+    this.documentationUrl,
   });
 
   final Widget demoWidget;
   final String exampleCodeTag;
   final String description;
   final String tabName;
+  final String documentationUrl;
 
   @override
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     final ComponentDemoTabData typedOther = other;
-    return typedOther.tabName == tabName && typedOther.description == description;
+    return typedOther.tabName == tabName
+        && typedOther.description == description
+        && typedOther.documentationUrl == documentationUrl;
   }
 
   @override
-  int get hashCode => hashValues(tabName.hashCode, description.hashCode);
+  int get hashCode => hashValues(tabName, description, documentationUrl);
 }
 
 class TabbedComponentDemoScaffold extends StatelessWidget {
@@ -52,6 +59,13 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     }
   }
 
+  void _showApiDocumentation(BuildContext context) {
+    final String url = demos[DefaultTabController.of(context).index].documentationUrl;
+    if (url != null) {
+      launch(url, forceWebView: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -64,11 +78,17 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
               Builder(
                 builder: (BuildContext context) {
                   return IconButton(
+                    icon: const Icon(Icons.library_books),
+                    onPressed: () => _showApiDocumentation(context),
+                  );
+                },
+              ),
+              Builder(
+                builder: (BuildContext context) {
+                  return IconButton(
                     icon: const Icon(Icons.code),
                     tooltip: 'Show example code',
-                    onPressed: () {
-                      _showExampleCode(context);
-                    },
+                    onPressed: () => _showExampleCode(context),
                   );
                 },
               )
@@ -167,6 +187,47 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
         title: const Text('Example code')
       ),
       body: body
+    );
+  }
+}
+
+class MaterialDemoDocumentationButton extends StatelessWidget {
+  MaterialDemoDocumentationButton(String routeName, { Key key })
+    : documentationUrl = kDemoDocumentationUrl[routeName],
+      assert(
+        kDemoDocumentationUrl[routeName] != null,
+        'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
+      ),
+      super(key: key);
+
+  final String documentationUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.library_books),
+      onPressed: () => launch(documentationUrl, forceWebView: true)
+    );
+  }
+}
+
+class CupertinoDemoDocumentationButton extends StatelessWidget {
+  CupertinoDemoDocumentationButton(String routeName, { Key key })
+    : documentationUrl = kDemoDocumentationUrl[routeName],
+      assert(
+        kDemoDocumentationUrl[routeName] != null,
+        'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
+      ),
+      super(key: key);
+
+  final String documentationUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      child: const Icon(CupertinoIcons.book),
+      onPressed: () => launch(documentationUrl, forceWebView: true)
     );
   }
 }
