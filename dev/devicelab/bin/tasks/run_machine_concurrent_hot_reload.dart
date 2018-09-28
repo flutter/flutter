@@ -66,7 +66,7 @@ void main() {
           appId = json['params']['appId'];
         }
         if (vmServicePort != null && appId != null && !ready.isCompleted) {
-          print('run: ready!');q
+          print('run: ready!');
           ready.complete();
           ok ??= true;
         }
