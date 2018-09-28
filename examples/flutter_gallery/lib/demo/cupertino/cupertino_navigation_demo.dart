@@ -127,7 +127,7 @@ class ExitButton extends StatelessWidget {
   }
 }
 
-Widget trailingButtons = Row(
+final Widget trailingButtons = Row(
   mainAxisSize: MainAxisSize.min,
   children: <Widget>[
     CupertinoDemoDocumentationButton(CupertinoNavigationDemo.routeName),

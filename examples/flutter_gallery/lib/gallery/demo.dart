@@ -30,11 +30,13 @@ class ComponentDemoTabData {
     if (other.runtimeType != runtimeType)
       return false;
     final ComponentDemoTabData typedOther = other;
-    return typedOther.tabName == tabName && typedOther.description == description;
+    return typedOther.tabName == tabName
+        && typedOther.description == description
+        && typedOther.documentationUrl == documentationUrl;
   }
 
   @override
-  int get hashCode => hashValues(tabName.hashCode, description.hashCode);
+  int get hashCode => hashValues(tabName, description, documentationUrl);
 }
 
 class TabbedComponentDemoScaffold extends StatelessWidget {
@@ -194,7 +196,7 @@ class MaterialDemoDocumentationButton extends StatelessWidget {
     : documentationUrl = kDemoDocumentationUrl[routeName],
       assert(
         kDemoDocumentationUrl[routeName] != null,
-        'A documentation URL was not specified for this demo route in kAllGalleryDemos',
+        'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
       ),
       super(key: key);
 
@@ -214,7 +216,7 @@ class CupertinoDemoDocumentationButton extends StatelessWidget {
     : documentationUrl = kDemoDocumentationUrl[routeName],
       assert(
         kDemoDocumentationUrl[routeName] != null,
-        'A documentation URL was not specified for this demo route in kAllGalleryDemos',
+        'A documentation URL was not specified for demo route $routeName in kAllGalleryDemos',
       ),
       super(key: key);
 
