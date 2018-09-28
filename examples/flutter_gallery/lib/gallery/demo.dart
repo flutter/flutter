@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'demos.dart';
 import 'example_code_parser.dart';
 import 'syntax_highlighter.dart';
 
@@ -183,6 +185,47 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
         title: const Text('Example code')
       ),
       body: body
+    );
+  }
+}
+
+class MaterialDemoDocumentationButton extends StatelessWidget {
+  MaterialDemoDocumentationButton(String routeName, { Key key })
+    : documentationUrl = kDemoDocumentationUrl[routeName],
+      assert(
+        kDemoDocumentationUrl[routeName] != null,
+        'A documentation URL was not specified for this demo route in kAllGalleryDemos',
+      ),
+      super(key: key);
+
+  final String documentationUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.library_books),
+      onPressed: () => launch(documentationUrl, forceWebView: true)
+    );
+  }
+}
+
+class CupertinoDemoDocumentationButton extends StatelessWidget {
+  CupertinoDemoDocumentationButton(String routeName, { Key key })
+    : documentationUrl = kDemoDocumentationUrl[routeName],
+      assert(
+        kDemoDocumentationUrl[routeName] != null,
+        'A documentation URL was not specified for this demo route in kAllGalleryDemos',
+      ),
+      super(key: key);
+
+  final String documentationUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      child: const Icon(CupertinoIcons.book),
+      onPressed: () => launch(documentationUrl, forceWebView: true)
     );
   }
 }

@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../demo/all.dart';
 import 'icons.dart';
@@ -554,31 +552,9 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
     },
   );
 
-final Map<String, Widget> kDemoDocumentationMaterialButton =
-    Map<String, Widget>.fromIterable(
+final Map<String, String> kDemoDocumentationUrl =
+    Map<String, String>.fromIterable(
       kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
       key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => Builder(
-        builder: (BuildContext context) {
-          return IconButton(
-            icon: const Icon(Icons.library_books),
-            onPressed: () => launch(demo.documentationUrl, forceWebView: true)
-          );
-        },
-      ),
-    );
-
-final Map<String, Widget> kDemoDocumentationCupertinoButton =
-    Map<String, Widget>.fromIterable(
-      kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => Builder(
-        builder: (BuildContext context) {
-          return CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.book),
-            onPressed: () => launch(demo.documentationUrl, forceWebView: true)
-          );
-        },
-      ),
+      value: (dynamic demo) => demo.documentationUrl,
     );

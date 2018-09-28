@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 const String _text1 =
   'Snackbars provide lightweight feedback about an operation by '
@@ -76,7 +76,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Snackbar'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[SnackBarDemo.routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(SnackBarDemo.routeName)],
       ),
       body: Builder(
         // Create an inner BuildContext so that the snackBar onPressed methods

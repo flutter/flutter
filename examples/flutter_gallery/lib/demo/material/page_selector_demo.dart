@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class _PageSelector extends StatelessWidget {
   const _PageSelector({ this.icons });
@@ -89,7 +89,7 @@ class PageSelectorDemo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Page selector'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
       body: DefaultTabController(
         length: icons.length,

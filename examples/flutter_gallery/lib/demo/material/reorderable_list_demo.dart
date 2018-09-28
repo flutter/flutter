@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 enum _ReorderableListType {
   /// A list tile that contains a [CircleAvatar].
@@ -159,7 +159,7 @@ class _ListDemoState extends State<ReorderableListDemo> {
       appBar: AppBar(
         title: const Text('Reorderable list'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[ReorderableListDemo.routeName],
+          MaterialDemoDocumentationButton(ReorderableListDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',

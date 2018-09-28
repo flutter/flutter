@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
   const TextFormFieldDemo({ Key key }) : super(key: key);
@@ -167,7 +167,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Text fields'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[TextFormFieldDemo.routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(TextFormFieldDemo.routeName)],
       ),
       body: SafeArea(
         top: false,

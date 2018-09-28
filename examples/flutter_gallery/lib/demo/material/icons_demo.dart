@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class IconsDemo extends StatefulWidget {
   static const String routeName = '/material/icons';
@@ -51,7 +51,7 @@ class IconsDemoState extends State<IconsDemo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Icons'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[IconsDemo.routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(IconsDemo.routeName)],
       ),
       body: IconTheme(
         data: IconThemeData(color: iconColor),

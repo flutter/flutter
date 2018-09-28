@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
@@ -130,7 +130,7 @@ class ExitButton extends StatelessWidget {
 Widget trailingButtons = Row(
   mainAxisSize: MainAxisSize.min,
   children: <Widget>[
-    kDemoDocumentationCupertinoButton[CupertinoNavigationDemo.routeName],
+    CupertinoDemoDocumentationButton(CupertinoNavigationDemo.routeName),
     const Padding(padding: EdgeInsets.only(left: 8.0)),
     const ExitButton(),
   ],

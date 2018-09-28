@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 enum _MaterialListType {
   /// A list tile that contains a single line of text.
@@ -218,7 +218,7 @@ class _ListDemoState extends State<ListDemo> {
       appBar: AppBar(
         title: Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[ListDemo.routeName],
+          MaterialDemoDocumentationButton(ListDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',

@@ -6,7 +6,7 @@ import 'dart:math' show Random;
 
 import 'package:flutter/cupertino.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class CupertinoRefreshControlDemo extends StatefulWidget {
   static const String routeName = '/cupertino/refresh';
@@ -53,7 +53,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
               CupertinoSliverNavigationBar(
                 largeTitle: const Text('Cupertino Refresh'),
                 previousPageTitle: 'Cupertino',
-                trailing: kDemoDocumentationCupertinoButton[CupertinoRefreshControlDemo.routeName],
+                trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
               ),
               CupertinoSliverRefreshControl(
                 onRefresh: () {

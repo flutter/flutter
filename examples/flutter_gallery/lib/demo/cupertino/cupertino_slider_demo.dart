@@ -5,7 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class CupertinoSliderDemo extends StatefulWidget {
   static const String routeName = '/cupertino/slider';
@@ -23,7 +23,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cupertino Sliders'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[CupertinoSliderDemo.routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoSliderDemo.routeName)],
       ),
       body: Center(
         child: Column(

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class BottomAppBarDemo extends StatefulWidget {
   static const String routeName = '/material/bottom_app_bar';
@@ -145,7 +145,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         title: const Text('Bottom app bar'),
         elevation: 0.0,
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[BottomAppBarDemo.routeName],
+          MaterialDemoDocumentationButton(BottomAppBarDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {

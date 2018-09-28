@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class Dessert {
   Dessert(this.name, this.calories, this.fat, this.carbs, this.protein, this.sodium, this.calcium, this.iron);
@@ -169,7 +169,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
       appBar: AppBar(
         title: const Text('Data tables'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[DataTableDemo.routeName],
+          MaterialDemoDocumentationButton(DataTableDemo.routeName),
         ],
       ),
       body: ListView(

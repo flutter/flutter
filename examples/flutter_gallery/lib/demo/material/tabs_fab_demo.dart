@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 const String _explanatoryText =
   "When the Scaffold's floating action button changes, the new button fades and "
@@ -139,7 +139,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
           tabs: _allPages.map((_Page page) => Tab(text: page.label.toUpperCase())).toList(),
         ),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[TabsFabDemo.routeName],
+          MaterialDemoDocumentationButton(TabsFabDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {

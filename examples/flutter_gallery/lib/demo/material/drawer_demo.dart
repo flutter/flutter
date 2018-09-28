@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 const String _kAsset0 = 'people/square/trevor.png';
 const String _kAsset1 = 'people/square/stella.png';
@@ -90,7 +90,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
           },
         ),
         title: const Text('Navigation drawer'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[DrawerDemo.routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(DrawerDemo.routeName)],
       ),
       drawer: Drawer(
         child: Column(

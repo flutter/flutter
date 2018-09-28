@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 const List<String> _defaultMaterials = <String>[
   'poker',
@@ -305,7 +305,7 @@ class _ChipDemoState extends State<ChipDemo> {
       appBar: AppBar(
         title: const Text('Chips'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[ChipDemo.routeName],
+          MaterialDemoDocumentationButton(ChipDemo.routeName),
           IconButton(
             onPressed: () {
               setState(() {

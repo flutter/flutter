@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
   static const String routeName = '/material/progress-indicator';
@@ -104,7 +104,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     return Scaffold(
       appBar: AppBar(
         title: const Text('Progress indicators'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[ProgressIndicatorDemo.routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(ProgressIndicatorDemo.routeName)],
       ),
       body: Center(
         child: SingleChildScrollView(

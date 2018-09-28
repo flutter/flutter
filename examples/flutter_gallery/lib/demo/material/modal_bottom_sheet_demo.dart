@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class ModalBottomSheetDemo extends StatelessWidget {
   static const String routeName = '/material/modal-bottom-sheet';
@@ -14,7 +14,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modal bottom sheet'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
       body: Center(
         child: RaisedButton(

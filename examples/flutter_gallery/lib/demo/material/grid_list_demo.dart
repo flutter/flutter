@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 enum GridDemoTileStyle {
   imageOnly,
@@ -342,7 +342,7 @@ class GridListDemoState extends State<GridListDemo> {
       appBar: AppBar(
         title: const Text('Grid list'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[GridListDemo.routeName],
+          MaterialDemoDocumentationButton(GridListDemo.routeName),
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 enum TabsDemoStyle {
   iconsAndText,
@@ -127,7 +127,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       appBar: AppBar(
         title: const Text('Scrollable tabs'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[ScrollableTabsDemo.routeName],
+          MaterialDemoDocumentationButton(ScrollableTabsDemo.routeName),
           IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {

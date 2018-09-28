@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 class MenuDemo extends StatefulWidget {
   const MenuDemo({ Key key }) : super(key: key);
@@ -66,7 +66,7 @@ class MenuDemoState extends State<MenuDemo> {
       appBar: AppBar(
         title: const Text('Menus'),
         actions: <Widget>[
-          kDemoDocumentationMaterialButton[MenuDemo.routeName],
+          MaterialDemoDocumentationButton(MenuDemo.routeName),
           PopupMenuButton<String>(
             onSelected: showMenuSelection,
             itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[

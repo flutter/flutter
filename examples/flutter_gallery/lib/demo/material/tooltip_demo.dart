@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../gallery/demos.dart';
+import '../../gallery/demo.dart';
 
 const String _introText =
   'Tooltips are short identifying messages that briefly appear in response to '
@@ -21,7 +21,7 @@ class TooltipDemo extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tooltips'),
-        actions: <Widget>[kDemoDocumentationMaterialButton[routeName]],
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
       body: Builder(
         builder: (BuildContext context) {
