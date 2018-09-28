@@ -23,6 +23,13 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     'A', 'B', 'C', 'D', 'E',
   ];
 
+  static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
+    begin: const Offset(0.0, -1.0),
+    end: Offset.zero,
+  ).chain(CurveTween(
+    curve: Curves.fastOutSlowIn,
+  ));
+
   AnimationController _controller;
   Animation<double> _drawerContentsOpacity;
   Animation<Offset> _drawerDetailsPosition;
@@ -39,13 +46,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       parent: ReverseAnimation(_controller),
       curve: Curves.fastOutSlowIn,
     );
-    _drawerDetailsPosition = Tween<Offset>(
-      begin: const Offset(0.0, -1.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
-    ));
+    _drawerDetailsPosition = _controller.drive(_drawerDetailsTween);
   }
 
   @override

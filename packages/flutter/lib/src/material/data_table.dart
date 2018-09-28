@@ -694,6 +694,9 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   bool _down;
 
+  static final Animatable<double> _turnTween = Tween<double>(begin: 0.0, end: math.pi)
+    .chain(CurveTween(curve: Curves.easeIn));
+
   @override
   void initState() {
     super.initState();
@@ -706,18 +709,13 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     )
     ..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;
-    _orientationAnimation = Tween<double>(
-      begin: 0.0,
-      end: math.pi,
-    ).animate(CurvedAnimation(
-      parent: _orientationController = AnimationController(
-        duration: widget.duration,
-        vsync: this,
-      ),
-      curve: Curves.easeIn
-    ))
-    ..addListener(_rebuild)
-    ..addStatusListener(_resetOrientationAnimation);
+    _orientationController = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
+    _orientationAnimation = _orientationController.drive(_turnTween)
+      ..addListener(_rebuild)
+      ..addStatusListener(_resetOrientationAnimation);
     if (widget.visible)
       _orientationOffset = widget.down ? 0.0 : math.pi;
   }

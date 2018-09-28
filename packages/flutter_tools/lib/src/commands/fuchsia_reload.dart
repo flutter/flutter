@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
@@ -188,9 +189,6 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return result;
   }
 
-  static const String _bold = '\u001B[0;1m';
-  static const String _reset = '\u001B[0m';
-
   String _vmServiceToString(VMService vmService, {int tabDepth = 0}) {
     final Uri addr = vmService.httpAddress;
     final String embedder = vmService.vm.embedder;
@@ -218,7 +216,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final String tabs = '\t' * tabDepth;
     final String extraTabs = '\t' * (tabDepth + 1);
     final StringBuffer stringBuffer = StringBuffer(
-      '$tabs$_bold$embedder at $addr$_reset\n'
+      '$tabs${terminal.bolden('$embedder at $addr')}\n'
       '${extraTabs}RSS: $maxRSS\n'
       '${extraTabs}Native allocations: $heapSize\n'
       '${extraTabs}New Spaces: $newUsed of $newCap\n'
@@ -257,7 +255,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final String tabs = '\t' * tabDepth;
     final String extraTabs = '\t' * (tabDepth + 1);
     return
-      '$tabs$_bold$shortName$_reset\n'
+      '$tabs${terminal.bolden(shortName)}\n'
       '${extraTabs}Isolate number: $number\n'
       '${extraTabs}Observatory: $isolateAddr\n'
       '${extraTabs}Debugger: $debuggerAddr\n'

@@ -24,10 +24,9 @@ class NavigationIconView {
          duration: kThemeAnimationDuration,
          vsync: vsync,
        ) {
-    _animation = CurvedAnimation(
-      parent: controller,
+    _animation = controller.drive(CurveTween(
       curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
-    );
+    ));
   }
 
   final Widget _icon;
@@ -35,7 +34,7 @@ class NavigationIconView {
   final String _title;
   final BottomNavigationBarItem item;
   final AnimationController controller;
-  CurvedAnimation _animation;
+  Animation<double> _animation;
 
   FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
     Color iconColor;
@@ -51,10 +50,12 @@ class NavigationIconView {
     return FadeTransition(
       opacity: _animation,
       child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0.0, 0.02), // Slightly down.
-          end: Offset.zero,
-        ).animate(_animation),
+        position: _animation.drive(
+          Tween<Offset>(
+            begin: const Offset(0.0, 0.02), // Slightly down.
+            end: Offset.zero,
+          ),
+        ),
         child: IconTheme(
           data: IconThemeData(
             color: iconColor,

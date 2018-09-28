@@ -567,8 +567,8 @@ class ArchivePublisher {
 /// packages, and the flutter cache in bin/cache with the appropriate
 /// dependencies and snapshots.
 ///
-/// Note that archives contain the executables and customizations for the
-/// platform that they are created on.
+/// Archives contain the executables and customizations for the platform that
+/// they are created on.
 Future<Null> main(List<String> argList) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(

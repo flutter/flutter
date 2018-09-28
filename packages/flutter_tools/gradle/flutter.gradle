@@ -45,6 +45,13 @@ class FlutterPlugin implements Plugin<Project> {
     private File dynamicProfileFlutterJar
     private File dynamicReleaseFlutterJar
 
+    // The name prefix for flutter builds.  This is used to identify gradle tasks
+    // where we expect the flutter tool to provide any error output, and skip the
+    // standard Gradle error output in the FlutterEventLogger. If you change this,
+    // be sure to change any instances of this string in symbols in the code below
+    // to match.
+    static final String flutterBuildPrefix = "flutterBuild"
+
     private Properties readPropertiesIfExist(File propertiesFile) {
         Properties result = new Properties()
         if (propertiesFile.exists()) {
@@ -152,7 +159,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             // Add x86/x86_64 native library. Debug mode only, for now.
             flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-            Task flutterX86JarTask = project.tasks.create("flutterBuildX86Jar", Jar) {
+            Task flutterX86JarTask = project.tasks.create("${flutterBuildPrefix}X86Jar", Jar) {
                 destinationDir flutterX86Jar.parentFile
                 archiveName flutterX86Jar.name
                 from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
@@ -319,7 +326,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         def addFlutterDeps = { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
-            if (flutterBuildMode == 'debug' && project.tasks.findByName('flutterBuildX86Jar')) {
+            if (flutterBuildMode == 'debug' && project.tasks.findByName('${flutterBuildPrefix}X86Jar')) {
                 Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
                 if (task) {
                     task.dependsOn project.flutterBuildX86Jar
@@ -330,7 +337,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
 
-            FlutterTask flutterTask = project.tasks.create(name: "flutterBuild${variant.name.capitalize()}", type: FlutterTask) {
+            FlutterTask flutterTask = project.tasks.create(name: "${flutterBuildPrefix}${variant.name.capitalize()}", type: FlutterTask) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
                 buildMode flutterBuildMode
@@ -582,5 +589,25 @@ class FlutterTask extends BaseFlutterTask {
     @TaskAction
     void build() {
         buildBundle()
+    }
+}
+
+gradle.useLogger(new FlutterEventLogger())
+
+class FlutterEventLogger extends BuildAdapter implements TaskExecutionListener {
+    String mostRecentTask = ""
+
+    void beforeExecute(Task task) {
+        mostRecentTask = task.name
+    }
+
+    void afterExecute(Task task, TaskState state) {}
+
+    void buildFinished(BuildResult result) {
+        if (result.failure != null) {
+            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.flutterBuildPrefix)) {
+                result.rethrowFailure()
+            }
+        }
     }
 }

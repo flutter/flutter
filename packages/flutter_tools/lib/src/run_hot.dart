@@ -13,6 +13,7 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
@@ -740,14 +741,12 @@ class HotRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     const String fire = '🔥';
-    const String red = '\u001B[31m';
-    const String bold = '\u001B[0;1m';
-    const String reset = '\u001B[0m';
-    printStatus(
-      '$fire  To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".',
-      ansiAlternative: '$red$fire$bold  To hot reload changes while running, press "r". '
-                       'To hot restart (and rebuild state), press "R".$reset'
+    final String message = terminal.color(
+      fire + terminal.bolden('  To hot reload changes while running, press "r". '
+          'To hot restart (and rebuild state), press "R".'),
+      TerminalColor.red,
     );
+    printStatus(message);
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       for (Uri uri in device.observatoryUris)

@@ -498,7 +498,7 @@ class AndroidDevice extends Device {
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     final String output = runCheckedSync(adbCommandForDevice(<String>[
-      'logcat', '-v', 'time', '-t', '1'
+      'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
     ]));
 
     final Match timeMatch = _timeRegExp.firstMatch(output);
@@ -664,7 +664,7 @@ class _AdbLogReader extends DeviceLogReader {
 
   void _start() {
     // Start the adb logcat process.
-    final List<String> args = <String>['logcat', '-v', 'time'];
+    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time'];
     final String lastTimestamp = device.lastLogcatTimestamp;
     if (lastTimestamp != null)
         _timeOrigin = _adbTimestampToDateTime(lastTimestamp);

@@ -222,7 +222,7 @@ void main() {
     );
     expect(tester.hasRunningAnimations, isTrue);
 
-    await tester.pump(const Duration(milliseconds: 6666));
+    await tester.pump(const Duration(seconds: 5));
     expect(tester.hasRunningAnimations, isTrue);
 
     await tester.pump(const Duration(milliseconds: 1));
@@ -232,4 +232,27 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
+  testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
+    double progressValue;
+    StateSetter setState;
+    await tester.pumpWidget(
+      Center(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return CircularProgressIndicator(value: progressValue);
+          }
+        ),
+      )
+    );
+    expect(tester.hasRunningAnimations, isTrue);
+
+    setState(() { progressValue = 1.0; });
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isFalse);
+
+    setState(() { progressValue = null; });
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.hasRunningAnimations, isTrue);
+  });
 }

@@ -80,7 +80,7 @@ class Scrollable extends StatefulWidget {
     this.physics,
     @required this.viewportBuilder,
     this.excludeFromSemantics = false,
-    this.semanticChildren,
+    this.semanticChildrenCount,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
@@ -174,8 +174,8 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.scrollChildren], the corresponding semantics property.
-  final int semanticChildren;
+  ///  * [SemanticsConfiguration.scrollChildrenCount], the corresponding semantics property.
+  final int semanticChildrenCount;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -525,7 +525,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         child: result,
         position: position,
         allowImplicitScrolling: widget?.physics?.allowImplicitScrolling ?? false,
-        semanticChildren: widget.semanticChildren,
+        semanticChildrenCount: widget.semanticChildrenCount,
       );
     }
 
@@ -558,20 +558,20 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     Key key,
     @required this.position,
     @required this.allowImplicitScrolling,
-    @required this.semanticChildren,
+    @required this.semanticChildrenCount,
     Widget child
   }) : assert(position != null), super(key: key, child: child);
 
   final ScrollPosition position;
   final bool allowImplicitScrolling;
-  final int semanticChildren;
+  final int semanticChildrenCount;
 
   @override
   _RenderScrollSemantics createRenderObject(BuildContext context) {
     return _RenderScrollSemantics(
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
-      semanticChildren: semanticChildren,
+      semanticChildren: semanticChildrenCount,
     );
   }
 
@@ -580,7 +580,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
       ..position = position
-      ..semanticChildren = semanticChildren;
+      ..semanticChildrenCount = semanticChildrenCount;
   }
 }
 
@@ -620,10 +620,10 @@ class _RenderScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  int get semanticChildren => _semanticChildren;
+  int get semanticChildrenCount => _semanticChildren;
   int _semanticChildren;
-  set semanticChildren(int value) {
-    if (value == semanticChildren)
+  set semanticChildrenCount(int value) {
+    if (value == semanticChildrenCount)
       return;
     _semanticChildren = value;
     markNeedsSemanticsUpdate();
@@ -639,7 +639,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..scrollPosition = _position.pixels
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent
-          ..scrollChildren = semanticChildren;
+          ..scrollChildrenCount = semanticChildrenCount;
     }
   }
 

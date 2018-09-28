@@ -10,7 +10,7 @@ import 'framework.dart';
 
 /// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
-  /// Creates a widget that describes this app to the operating system.
+  /// Creates a widget that describes this app to the Android operating system.
   ///
   /// [title] will default to the empty string if not supplied.
   /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('ThemeDataTween control test', () {
     final ThemeData light = ThemeData.light();
-    final ThemeData dark = ThemeData.light();
+    final ThemeData dark = ThemeData.dark();
     final ThemeDataTween tween = ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });

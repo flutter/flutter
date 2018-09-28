@@ -76,7 +76,7 @@ void testUsingContext(String description, dynamic testMethod(), {
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger()..supportsColor = false,
           OperatingSystemUtils: () => MockOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
           Usage: () => MockUsage(),

@@ -287,10 +287,14 @@ class MemoryIOSink implements IOSink {
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
   final MemoryIOSink _stdout = MemoryIOSink();
+  final MemoryIOSink _stderr = MemoryIOSink();
   final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
   IOSink get stdout => _stdout;
+
+  @override
+  IOSink get stderr => _stderr;
 
   @override
   Stream<List<int>> get stdin => _stdin.stream;
@@ -300,6 +304,7 @@ class MockStdio extends Stdio {
   }
 
   List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();
+  List<String> get writtenToStderr => _stderr.writes.map(_stderr.encoding.decode).toList();
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {

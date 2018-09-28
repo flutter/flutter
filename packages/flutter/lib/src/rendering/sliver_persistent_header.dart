@@ -439,15 +439,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         markNeedsLayout();
       });
 
-    // Recreating the animation rather than updating a cached value, only
-    // to avoid the extra complexity of managing the animation's lifetime.
-    _animation = Tween<double>(
-      begin: _effectiveScrollOffset,
-      end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: snapConfiguration.curve,
-    ));
+    _animation = _controller.drive(
+      Tween<double>(
+        begin: _effectiveScrollOffset,
+        end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
+      ).chain(CurveTween(
+        curve: snapConfiguration.curve,
+      )),
+    );
 
     _controller.forward(from: 0.0);
   }

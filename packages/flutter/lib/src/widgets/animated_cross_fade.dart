@@ -243,29 +243,19 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       _controller.value = 1.0;
     _firstAnimation = _initAnimation(widget.firstCurve, true);
     _secondAnimation = _initAnimation(widget.secondCurve, false);
-  }
-
-  Animation<double> _initAnimation(Curve curve, bool inverted) {
-    Animation<double> animation = CurvedAnimation(
-      parent: _controller,
-      curve: curve,
-    );
-
-    if (inverted) {
-      animation = Tween<double>(
-        begin: 1.0,
-        end: 0.0,
-      ).animate(animation);
-    }
-
-    animation.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((AnimationStatus status) {
       setState(() {
         // Trigger a rebuild because it depends on _isTransitioning, which
         // changes its value together with animation status.
       });
     });
+  }
 
-    return animation;
+  Animation<double> _initAnimation(Curve curve, bool inverted) {
+    Animation<double> result = _controller.drive(CurveTween(curve: curve));
+    if (inverted)
+      result = result.drive(Tween<double>(begin: 1.0, end: 0.0));
+    return result;
   }
 
   @override
@@ -302,8 +292,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   Widget build(BuildContext context) {
     const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
-    final bool transitioningForwards = _controller.status == AnimationStatus.completed || _controller.status == AnimationStatus.forward;
-
+    final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
+                                       _controller.status == AnimationStatus.forward;
     Key topKey;
     Widget topChild;
     Animation<double> topAnimation;

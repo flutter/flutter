@@ -501,7 +501,7 @@ class ClipRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<Rect> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -564,7 +564,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -616,7 +616,7 @@ class ClipOval extends SingleChildRenderObjectWidget {
   /// object) instead.
   final CustomClipper<Rect> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override
@@ -667,7 +667,7 @@ class ClipPath extends SingleChildRenderObjectWidget {
   /// efficient way of obtaining that effect.
   final CustomClipper<Path> clipper;
 
-  /// {@macro flutter.widget.clipper.clipBehavior}
+  /// {@macro flutter.clipper.clipBehavior}
   final Clip clipBehavior;
 
   @override

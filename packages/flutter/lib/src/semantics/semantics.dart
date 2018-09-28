@@ -189,7 +189,7 @@ class SemanticsData extends Diagnosticable {
     @required this.rect,
     @required this.textSelection,
     @required this.scrollIndex,
-    @required this.scrollChildren,
+    @required this.scrollChildrenCount,
     @required this.scrollPosition,
     @required this.scrollExtentMax,
     @required this.scrollExtentMin,
@@ -251,8 +251,11 @@ class SemanticsData extends Diagnosticable {
   /// if this node represents a text field.
   final TextSelection textSelection;
 
-  /// The count of children of a scroll node which contribute semantics.
-  final int scrollChildren;
+  /// The total number of scrollable children that contribute to semantics.
+  ///
+  /// If the number of children are unknown or unbounded, this value will be
+  /// null.
+  final int scrollChildrenCount;
 
   /// The index of the first visible semantic child of a scroll node.
   final int scrollIndex;
@@ -351,7 +354,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
-    properties.add(IntProperty('scrollChildren', scrollChildren, defaultValue: null));
+    properties.add(IntProperty('scrollChildrenCount', scrollChildrenCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
@@ -373,7 +376,7 @@ class SemanticsData extends Diagnosticable {
         && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
-        && typedOther.scrollChildren == scrollChildren
+        && typedOther.scrollChildrenCount == scrollChildrenCount
         && typedOther.scrollIndex == scrollIndex
         && typedOther.textSelection == textSelection
         && typedOther.scrollPosition == scrollPosition
@@ -397,7 +400,7 @@ class SemanticsData extends Diagnosticable {
       rect,
       tags,
       textSelection,
-      scrollChildren,
+      scrollChildrenCount,
       scrollIndex,
       scrollPosition,
       scrollExtentMax,
@@ -1139,8 +1142,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
 
-  /// The index of this node with respect to its parent, including any hidden
-  /// siblings.
+  /// The index of this node within the parent's list of semantic children.
+  ///
+  /// This includes all semantic nodes, not just those currently in the
+  /// child list. For example, if a scrollable has five children but the first
+  /// two are not visible (and thus not included in the list of children), then
+  /// the index of the last node will still be 4.
   int indexInParent;
 
   /// Whether the node is invisible.
@@ -1434,7 +1441,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   int _flags = _kEmptyConfig._flags;
 
-  /// Whether the semantics node currently has a given [SemanticsFlag].
+  /// Whether this node currently has a given [SemanticsFlag].
   bool hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
 
   /// A textual description of this node.
@@ -1499,9 +1506,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
 
-  /// The count of children of a scroll node which contribute semantics.
-  int get scrollChildren => _scrollChildren;
-  int _scrollChildren;
+  /// The total number of scrollable children that contribute to semantics.
+  ///
+  /// If the number of children are unknown or unbounded, this value will be
+  /// null.
+  int get scrollChildrenCount => _scrollChildrenCount;
+  int _scrollChildrenCount;
 
   /// The index of the first visible semantic child of a scroll node.
   int get scrollIndex => _scrollIndex;
@@ -1581,7 +1591,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
-    _scrollChildren = config.scrollChildren;
+    _scrollChildrenCount = config.scrollChildrenCount;
     _scrollIndex = config.scrollIndex;
     indexInParent = config.indexInParent;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
@@ -1613,7 +1623,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
-    int scrollChildren = _scrollChildren;
+    int scrollChildrenCount = _scrollChildrenCount;
     int scrollIndex = _scrollIndex;
     double scrollPosition = _scrollPosition;
     double scrollExtentMax = _scrollExtentMax;
@@ -1645,7 +1655,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;
-        scrollChildren ??= node._scrollChildren;
+        scrollChildrenCount ??= node._scrollChildrenCount;
         scrollIndex ??= node._scrollIndex;
         scrollPosition ??= node._scrollPosition;
         scrollExtentMax ??= node._scrollExtentMax;
@@ -1709,7 +1719,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: transform,
       tags: mergedTags,
       textSelection: textSelection,
-      scrollChildren: scrollChildren,
+      scrollChildrenCount: scrollChildrenCount,
       scrollIndex: scrollIndex,
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
@@ -1769,7 +1779,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
-      scrollChildren: data.scrollChildren != null ? data.scrollChildren : 0,
+      scrollChildren: data.scrollChildrenCount != null ? data.scrollChildrenCount : 0,
       scrollIndex: data.scrollIndex != null ? data.scrollIndex : 0 ,
       scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
       scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
@@ -1907,7 +1917,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
-    properties.add(IntProperty('scrollChildren', scrollChildren, defaultValue: null));
+    properties.add(IntProperty('scrollChildren', scrollChildrenCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
@@ -2930,8 +2940,12 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The index of this semantic node this configuration describes with respect
-  /// to its parent.
+  /// The index of this node within the parent's list of semantic children.
+  ///
+  /// This includes all semantic nodes, not just those currently in the
+  /// child list. For example, if a scrollable has five children but the first
+  /// two are not visible (and thus not included in the list of children), then
+  /// the index of the last node will still be 4.
   int get indexInParent => _indexInParent;
   int _indexInParent;
   set indexInParent(int value) {
@@ -2940,12 +2954,15 @@ class SemanticsConfiguration {
   }
 
   /// The total number of scrollable children that contribute to semantics.
-  int get scrollChildren => _scrollChildren;
-  int _scrollChildren;
-  set scrollChildren(int value) {
-    if (value == scrollChildren)
+  ///
+  /// If the number of children are unknown or unbounded, this value will be
+  /// null.
+  int get scrollChildrenCount => _scrollChildrenCount;
+  int _scrollChildrenCount;
+  set scrollChildrenCount(int value) {
+    if (value == scrollChildrenCount)
       return;
-    _scrollChildren = value;
+    _scrollChildrenCount = value;
     _hasBeenAnnotated = true;
   }
 
@@ -3432,7 +3449,7 @@ class SemanticsConfiguration {
     _hintOverrides ??= other._hintOverrides;
     _indexInParent ??= other.indexInParent;
     _scrollIndex ??= other._scrollIndex;
-    _scrollChildren ??= other._scrollChildren;
+    _scrollChildrenCount ??= other._scrollChildrenCount;
 
     textDirection ??= other.textDirection;
     _sortKey ??= other._sortKey;
@@ -3483,7 +3500,7 @@ class SemanticsConfiguration {
       .._actionsAsBits = _actionsAsBits
       .._indexInParent = indexInParent
       .._scrollIndex = _scrollIndex
-      .._scrollChildren = _scrollChildren
+      .._scrollChildrenCount = _scrollChildrenCount
       .._actions.addAll(_actions)
       .._customSemanticsActions.addAll(_customSemanticsActions);
   }
