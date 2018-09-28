@@ -174,7 +174,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.scrollChildrenCount], the corresponding semantics property.
+  ///  * [SemanticsConfiguration.scrollChildCount], the corresponding semantics property.
   final int semanticChildrenCount;
 
   /// The axis along which the scroll view scrolls.
@@ -639,7 +639,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
           ..scrollPosition = _position.pixels
           ..scrollExtentMax = _position.maxScrollExtent
           ..scrollExtentMin = _position.minScrollExtent
-          ..scrollChildrenCount = semanticChildrenCount;
+          ..scrollChildCount = semanticChildrenCount;
     }
   }
 

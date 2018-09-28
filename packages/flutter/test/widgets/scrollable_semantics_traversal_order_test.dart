@@ -42,7 +42,7 @@ void main() {
             data: const MediaQueryData(),
             child: CustomScrollView(
               controller: ScrollController(initialScrollOffset: 3000.0),
-              semanticChildrenCount: 30,
+              semanticChildCount: 30,
               slivers: <Widget>[
                 SliverList(
                   delegate: SliverChildListDelegate(listChildren),
