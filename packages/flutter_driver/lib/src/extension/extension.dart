@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -138,6 +139,7 @@ class FlutterDriverExtension {
       'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
+      'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
     });
   }
 
@@ -272,6 +274,17 @@ class FlutterDriverExtension {
     return find.byElementPredicate((Element element) {
       return element.widget.runtimeType.toString() == arguments.type;
     }, description: 'widget with runtimeType "${arguments.type}"');
+  }
+
+  Finder _createPageBackFinder() {
+    return find.byElementPredicate((Element element) {
+      final Widget widget = element.widget;
+      if (widget is Tooltip)
+        return widget.message == 'Back';
+      if (widget is CupertinoNavigationBarBackButton)
+        return true;
+      return false;
+    }, description: 'Material or Cupertino back button');
   }
 
   Finder _createFinder(SerializableFinder finder) {
