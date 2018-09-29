@@ -54,13 +54,15 @@ class BottomSheet extends StatefulWidget {
     this.animationController,
     this.enableDrag = true,
     this.elevation = 0.0,
+    this.backgroundColor=Colors.white,
     @required this.onClosing,
     @required this.builder
   }) : assert(enableDrag != null),
-       assert(onClosing != null),
-       assert(builder != null),
-       assert(elevation != null),
-       super(key: key);
+        assert(onClosing != null),
+        assert(builder != null),
+        assert(elevation != null),
+        assert(backgroundColor != null),
+        super(key: key);
 
   /// The animation that controls the bottom sheet's position.
   ///
@@ -92,6 +94,9 @@ class BottomSheet extends StatefulWidget {
   ///
   /// Defaults to 0.
   final double elevation;
+
+  /// The color to fill in the background of the box.
+  final Color backgroundColor;
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
@@ -145,6 +150,7 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final Widget bottomSheet = Material(
       key: _childKey,
+      color: widget.backgroundColor,
       elevation: widget.elevation,
       child: widget.builder(context),
     );
@@ -172,10 +178,10 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     return BoxConstraints(
-      minWidth: constraints.maxWidth,
-      maxWidth: constraints.maxWidth,
-      minHeight: 0.0,
-      maxHeight: constraints.maxHeight * 9.0 / 16.0
+        minWidth: constraints.maxWidth,
+        maxWidth: constraints.maxWidth,
+        minHeight: 0.0,
+        maxHeight: constraints.maxHeight * 9.0 / 16.0
     );
   }
 
@@ -191,10 +197,18 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 }
 
 class _ModalBottomSheet<T> extends StatefulWidget {
-  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+  const _ModalBottomSheet({
+    Key key,
+    this.route,
+    this.backgroundColor,
+    this.enableDrag = true,
+    this.elevation=0.0,
+  }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
-
+  final bool enableDrag;
+  final Color backgroundColor;
+  final double elevation;
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
 }
@@ -216,32 +230,35 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     }
 
     return GestureDetector(
-      excludeFromSemantics: true,
-      onTap: () => Navigator.pop(context),
-      child: AnimatedBuilder(
-        animation: widget.route.animation,
-        builder: (BuildContext context, Widget child) {
-          // Disable the initial animation when accessible navigation is on so
-          // that the semantics are added to the tree at the correct time.
-          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
-          return Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            label: routeLabel,
-            explicitChildNodes: true,
-            child: ClipRect(
-              child: CustomSingleChildLayout(
-                delegate: _ModalBottomSheetLayout(animationValue),
-                child: BottomSheet(
-                  animationController: widget.route._animationController,
-                  onClosing: () => Navigator.pop(context),
-                  builder: widget.route.builder,
+        excludeFromSemantics: true,
+        onTap: () => Navigator.pop(context),
+        child: AnimatedBuilder(
+            animation: widget.route.animation,
+            builder: (BuildContext context, Widget child) {
+              // Disable the initial animation when accessible navigation is on so
+              // that the semantics are added to the tree at the correct time.
+              final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+              return Semantics(
+                scopesRoute: true,
+                namesRoute: true,
+                label: routeLabel,
+                explicitChildNodes: true,
+                child: ClipRect(
+                  child: CustomSingleChildLayout(
+                    delegate: _ModalBottomSheetLayout(animationValue),
+                    child: BottomSheet(
+                      animationController: widget.route._animationController,
+                      onClosing: () => Navigator.pop(context),
+                      builder: widget.route.builder,
+                      enableDrag: widget.enableDrag,
+                      elevation: widget.elevation,
+                      backgroundColor: widget.backgroundColor,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }
-      )
+              );
+            }
+        )
     );
   }
 }
@@ -251,17 +268,42 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
+    this.barrierDismiss=true,
+    this.enableDrag=true,
+    this.backgroundColor=Colors.white,
+    this.elevation=0.0,
     RouteSettings settings,
-  }) : super(settings: settings);
+  }) : assert(enableDrag != null),
+        assert(barrierDismiss != null),
+        assert(backgroundColor != null),
+        assert(elevation != null),
+        super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
+
+  ///if true,the bottom sheet would dismiss when touch out of the widget
+  final bool barrierDismiss;
+
+  /// The color to fill in the background of the box.
+  final Color backgroundColor;
+  /// If true, the bottom sheet can dragged up and down and dismissed by swiping
+  /// downards.
+  ///
+  /// Default is true.
+  final bool enableDrag;
+
+  /// The z-coordinate at which to place this material. This controls the size
+  /// of the shadow below the material.
+  ///
+  /// Defaults to 0.
+  final double elevation;
 
   @override
   Duration get transitionDuration => _kBottomSheetDuration;
 
   @override
-  bool get barrierDismissible => true;
+  bool get barrierDismissible => barrierDismiss;
 
   @override
   final String barrierLabel;
@@ -285,7 +327,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(route: this),
+      child: _ModalBottomSheet<T>(
+          route: this,
+          backgroundColor: backgroundColor,
+          enableDrag: enableDrag,
+          elevation: elevation),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
@@ -322,12 +368,20 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  Color backgroundColor=Colors.white,
+  bool barrierDismiss=true,
+  bool enableDrag=true,
+  double elevation=0.0,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(debugCheckHasMaterialLocalizations(context));
   return Navigator.push(context, _ModalBottomSheetRoute<T>(
     builder: builder,
+    barrierDismiss: barrierDismiss,
+    backgroundColor: backgroundColor,
+    elevation:elevation,
+    enableDrag:enableDrag,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
