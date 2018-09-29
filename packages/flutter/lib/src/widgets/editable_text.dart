@@ -79,7 +79,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// actions, not during the build, layout, or paint phases.
   set text(String newText) {
     value = value.copyWith(text: newText,
-                           selection: TextSelection.fromPosition(new TextPosition(offset: newText.length)),
+                           selection: TextSelection.collapsed(offset: newText.length),
                            composing: TextRange.empty);
   }
 
