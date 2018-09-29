@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../gallery/demo.dart';
 import 'cupertino_navigation_demo.dart' show coolColorNames;
@@ -21,6 +22,15 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedColorIndex = 0;
 
   Duration timer = Duration();
+
+  // Value that is shown in the date picker in date mode.
+  DateTime date = DateTime.now();
+
+  // Value that is shown in the date picker in time mode.
+  DateTime time = DateTime.now();
+
+  // Value that is shown in the date picker in dateAndTime mode.
+  DateTime dateTime = DateTime.now();
 
   Widget _buildMenu(List<Widget> children) {
     return Container(
@@ -53,30 +63,10 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildColorPicker() {
-    final FixedExtentScrollController scrollController =
-      FixedExtentScrollController(initialItem: _selectedColorIndex);
-    return CupertinoPicker(
-      scrollController: scrollController,
-      itemExtent: _kPickerItemHeight,
-      backgroundColor: CupertinoColors.white,
-      onSelectedItemChanged: (int index) {
-        setState(() {
-          _selectedColorIndex = index;
-        });
-      },
-      children: List<Widget>.generate(coolColorNames.length, (int index) {
-        return Center(child:
-        Text(coolColorNames[index]),
-        );
-      }),
-    );
-  }
-
   Widget _buildBottomPicker(Widget picker) {
     return Container(
       height: _kPickerSheetHeight,
-      padding: const EdgeInsets.only(top: 8.0),
+      padding: const EdgeInsets.only(top: 6.0),
       color: CupertinoColors.white,
       child: DefaultTextStyle(
         style: const TextStyle(
@@ -95,6 +85,47 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
+  Widget _buildColorPicker(BuildContext context) {
+    final FixedExtentScrollController scrollController =
+        FixedExtentScrollController(initialItem: _selectedColorIndex);
+
+    return GestureDetector(
+      onTap: () async {
+        await showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              CupertinoPicker(
+                scrollController: scrollController,
+                itemExtent: _kPickerItemHeight,
+                backgroundColor: CupertinoColors.white,
+                onSelectedItemChanged: (int index) {
+                  setState(() => _selectedColorIndex = index);
+                },
+                children: List<Widget>.generate(coolColorNames.length, (int index) {
+                  return Center(child:
+                  Text(coolColorNames[index]),
+                  );
+                }),
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+        <Widget>[
+          const Text('Favorite Color'),
+          Text(
+            coolColorNames[_selectedColorIndex],
+            style: const TextStyle(
+                color: CupertinoColors.inactiveGray
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCountdownTimerPicker(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -105,9 +136,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               CupertinoTimerPicker(
                 initialTimerDuration: timer,
                 onTimerDurationChanged: (Duration newTimer) {
-                  setState(() {
-                    timer = newTimer;
-                  });
+                  setState(() => timer = newTimer);
                 },
               ),
             );
@@ -115,15 +144,105 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         );
       },
       child: _buildMenu(
-          <Widget>[
-            const Text('Countdown Timer'),
-            Text(
-              '${timer.inHours}:'
+        <Widget>[
+          const Text('Countdown Timer'),
+          Text(
+            '${timer.inHours}:'
                 '${(timer.inMinutes % 60).toString().padLeft(2,'0')}:'
                 '${(timer.inSeconds % 60).toString().padLeft(2,'0')}',
-              style: const TextStyle(color: CupertinoColors.inactiveGray),
-            ),
-          ]
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: date,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() => date = newDateTime);
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+        <Widget>[
+          const Text('Date'),
+          Text(
+            DateFormat.yMMMMd().format(date),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ]
+      ),
+    );
+  }
+
+  Widget _buildTimePicker(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: time,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() => time = newDateTime);
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+        <Widget>[
+          const Text('Time'),
+          Text(
+            DateFormat.jm().format(time),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateAndTimePicker(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return _buildBottomPicker(
+              CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                initialDateTime: dateTime,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() => dateTime = newDateTime);
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: _buildMenu(
+        <Widget>[
+          const Text('Date and Time'),
+          Text(
+            DateFormat.yMMMd().add_jm().format(dateTime),
+            style: const TextStyle(color: CupertinoColors.inactiveGray),
+          ),
+        ],
       ),
     );
   }
@@ -146,28 +265,11 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           child: ListView(
             children: <Widget>[
               const Padding(padding: EdgeInsets.only(top: 32.0)),
-              GestureDetector(
-                onTap: () async {
-                  await showCupertinoModalPopup<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return _buildBottomPicker(_buildColorPicker());
-                    },
-                  );
-                },
-                child: _buildMenu(
-                    <Widget>[
-                      const Text('Favorite Color'),
-                      Text(
-                        coolColorNames[_selectedColorIndex],
-                        style: const TextStyle(
-                            color: CupertinoColors.inactiveGray
-                        ),
-                      ),
-                    ]
-                ),
-              ),
+              _buildColorPicker(context),
               _buildCountdownTimerPicker(context),
+              _buildDatePicker(context),
+              _buildTimePicker(context),
+              _buildDateAndTimePicker(context),
             ],
           ),
         ),
