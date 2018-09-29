@@ -13,6 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -746,15 +747,18 @@ class NotifyingLogger extends Logger {
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false, TerminalColor color }) {
     _messageController.add(LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
-    String message,
-    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
-  ) {
+      String message, {
+        bool emphasis = false,
+        TerminalColor color,
+        bool newline = true,
+        int indent,
+      }) {
     _messageController.add(LogMessage('status', message));
   }
 
@@ -768,6 +772,7 @@ class NotifyingLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation = false,
+    bool multilineOutput,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
@@ -868,7 +873,7 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis, TerminalColor color}) {
     if (parent != null) {
       parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
@@ -889,14 +894,22 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(
-    String message, {
-    bool emphasis = false, bool newline = true, String ansiAlternative, int indent
-  }) {
+      String message, {
+        bool emphasis = false,
+        TerminalColor color,
+        bool newline = true,
+        int indent,
+      }) {
     if (parent != null) {
-      parent.printStatus(message, emphasis: emphasis, newline: newline,
-          ansiAlternative: ansiAlternative, indent: indent);
+      parent.printStatus(
+        message,
+        emphasis: emphasis,
+        color: color,
+        newline: newline,
+        indent: indent,
+      );
     } else {
-      _sendLogEvent(<String, dynamic>{ 'log': message });
+      _sendLogEvent(<String, dynamic>{'log': message});
     }
   }
 
@@ -916,6 +929,7 @@ class _AppRunLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation = false,
+    bool multilineOutput,
     int progressIndicatorPadding = 52,
   }) {
     final int id = _nextProgressId++;

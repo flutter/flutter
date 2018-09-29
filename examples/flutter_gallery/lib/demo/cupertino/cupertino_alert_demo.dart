@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class CupertinoAlertDemo extends StatefulWidget {
   static const String routeName = '/cupertino/alert';
 
@@ -53,6 +55,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Cupertino Alerts'),
+        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoAlertDemo.routeName)],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),

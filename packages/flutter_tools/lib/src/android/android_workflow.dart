@@ -46,8 +46,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  AndroidValidator(): super('Android toolchain - develop for Android devices',
-                            ValidatorCategory.androidToolchain);
+  AndroidValidator(): super('Android toolchain - develop for Android devices',);
 
   static const String _jdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
@@ -95,7 +94,8 @@ class AndroidValidator extends DoctorValidator {
           'Install Android Studio from: https://developer.android.com/studio/index.html\n'
           'On first launch it will assist you in installing the Android SDK components.\n'
           '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
-          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.'
+          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.\n'
+          'You may also want to add it to your PATH environment variable.\n'
         ));
       }
 

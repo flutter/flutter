@@ -125,16 +125,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = Duration(milliseconds: 10);
   static const Duration kFadeInDuration = Duration(milliseconds: 100);
-  Tween<double> _opacityTween;
+  final Tween<double> _opacityTween = Tween<double>(begin: 1.0);
 
   AnimationController _animationController;
-
-  void _setTween() {
-    _opacityTween = Tween<double>(
-      begin: 1.0,
-      end: widget.pressedOpacity ?? 1.0,
-    );
-  }
+  Animation<double> _opacityAnimation;
 
   @override
   void initState() {
@@ -144,7 +138,20 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       value: 0.0,
       vsync: this,
     );
+    _opacityAnimation = _animationController
+      .drive(CurveTween(curve: Curves.decelerate))
+      .drive(_opacityTween);
     _setTween();
+  }
+
+  @override
+  void didUpdateWidget(CupertinoButton old) {
+    super.didUpdateWidget(old);
+    _setTween();
+  }
+
+  void _setTween() {
+    _opacityTween.end = widget.pressedOpacity ?? 1.0;
   }
 
   @override
@@ -152,12 +159,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     _animationController.dispose();
     _animationController = null;
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(CupertinoButton old) {
-    super.didUpdateWidget(old);
-    _setTween();
   }
 
   bool _buttonHeldDown = false;
@@ -217,10 +218,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               minHeight: widget.minSize,
             ),
           child: FadeTransition(
-            opacity: _opacityTween.animate(CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.decelerate,
-            )),
+            opacity: _opacityAnimation,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,

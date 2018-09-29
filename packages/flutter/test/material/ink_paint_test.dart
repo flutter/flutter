@@ -115,7 +115,7 @@ void main() {
       );
     }
 
-    // Initially the ripple's center is where the tap occurred. Note that
+    // Initially the ripple's center is where the tap occurred;
     // ripplePattern always add a translation of tapDownOffset.
     expect(box, ripplePattern(Offset.zero, 30.0, 0));
 

@@ -18,6 +18,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
@@ -192,10 +193,9 @@ enum _TestResult { crashed, harnessBailed, testBailed }
 typedef _Finalizer = Future<Null> Function();
 
 class _CompilationRequest {
+  _CompilationRequest(this.path, this.result);
   String path;
   Completer<String> result;
-
-  _CompilationRequest(this.path, this.result);
 }
 
 // This class is a wrapper around compiler that allows multiple isolates to
@@ -212,13 +212,17 @@ class _Compiler {
     printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
 
     bool suppressOutput = false;
-    void reportCompilerMessage(String message) {
+    void reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
       if (suppressOutput)
         return;
 
-      if (message.startsWith('compiler message: Error: Could not resolve the package \'test\'')) {
+      if (message.startsWith('Error: Could not resolve the package \'test\'')) {
         printTrace(message);
-        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+        printError(
+          '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',
+          emphasis: emphasis,
+          color: color,
+        );
         suppressOutput = true;
         return;
       }

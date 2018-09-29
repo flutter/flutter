@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 enum _Location {
   Barbados,
   Bahamas,
@@ -336,7 +338,12 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Expansion panels')),
+      appBar: AppBar(
+        title: const Text('Expansion panels'),
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(ExpansionPanelsDemo.routeName),
+        ],
+      ),
       body: SingleChildScrollView(
         child: SafeArea(
           top: false,

@@ -42,19 +42,22 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         tabName: 'CHECKBOX',
         description: _checkboxText,
         demoWidget: buildCheckbox(),
-        exampleCodeTag: _checkboxCode
+        exampleCodeTag: _checkboxCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/Checkbox-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'RADIO',
         description: _radioText,
         demoWidget: buildRadio(),
-        exampleCodeTag: _radioCode
+        exampleCodeTag: _radioCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/Radio-class.html',
       ),
       ComponentDemoTabData(
         tabName: 'SWITCH',
         description: _switchText,
         demoWidget: buildSwitch(),
-        exampleCodeTag: _switchCode
+        exampleCodeTag: _switchCode,
+        documentationUrl: 'https://docs.flutter.io/flutter/material/Switch-class.html',
       )
     ];
 

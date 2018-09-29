@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  const Duration doubleTapTimeout = Duration(milliseconds: 300);
-
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -39,8 +37,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(
               autofocus: true,
@@ -61,8 +59,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(),
           ),
@@ -73,7 +71,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.tap(find.byType(TextField));
-    await tester.pump(doubleTapTimeout);
+    await tester.idle();
 
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -82,7 +80,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.tap(find.byType(TextField));
-    await tester.pump(doubleTapTimeout);
+    await tester.idle();
 
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -95,8 +93,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(
               autofocus: true,
@@ -115,17 +113,17 @@ void main() {
       builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
     );
 
-    await tester.pump(doubleTapTimeout);
+    await tester.pump();
 
     expect(tester.testTextInput.isVisible, isFalse);
 
     Navigator.of(tester.element(find.text('Dialog'))).pop();
-    await tester.pump(doubleTapTimeout);
+    await tester.pump();
 
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.tap(find.byType(TextField));
-    await tester.pump(doubleTapTimeout);
+    await tester.idle();
 
     expect(tester.testTextInput.isVisible, isTrue);
 
@@ -213,8 +211,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(
               decoration: null
@@ -226,7 +224,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isFalse);
     await tester.tap(find.byType(TextField));
-    await tester.pump(doubleTapTimeout);
+    await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
   });
 }

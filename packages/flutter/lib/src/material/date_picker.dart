@@ -525,6 +525,9 @@ class MonthPicker extends StatefulWidget {
 }
 
 class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStateMixin {
+  static final Animatable<double> _chevronOpacityTween = Tween<double>(begin: 1.0, end: 0.0)
+    .chain(CurveTween(curve: Curves.easeInOut));
+
   @override
   void initState() {
     super.initState();
@@ -538,12 +541,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
     _chevronOpacityController = AnimationController(
       duration: const Duration(milliseconds: 250), vsync: this
     );
-    _chevronOpacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _chevronOpacityController,
-        curve: Curves.easeInOut,
-      )
-    );
+    _chevronOpacityAnimation = _chevronOpacityController.drive(_chevronOpacityTween);
   }
 
   @override

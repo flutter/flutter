@@ -50,10 +50,11 @@ void main() {
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
 
     testUsingContext('single dart failed compilation', () async {
@@ -70,10 +71,11 @@ void main() {
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
 
     testUsingContext('single dart abnormal compiler termination', () async {
@@ -92,10 +94,11 @@ void main() {
           mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
   });
 
@@ -146,10 +149,11 @@ void main() {
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(logger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
 
     testUsingContext('single dart compile abnormally terminates', () async {
@@ -163,6 +167,7 @@ void main() {
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
 
     testUsingContext('compile and recompile', () async {
@@ -181,11 +186,12 @@ void main() {
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals(
-        'compiler message: line0\ncompiler message: line1\n'
-        'compiler message: line1\ncompiler message: line2\n'
+        '\nCompiler message:\nline0\nline1\n'
+        '\nCompiler message:\nline1\nline2\n'
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
 
     testUsingContext('compile and recompile twice', () async {
@@ -208,12 +214,13 @@ void main() {
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals(
-        'compiler message: line0\ncompiler message: line1\n'
-        'compiler message: line1\ncompiler message: line2\n'
-        'compiler message: line2\ncompiler message: line3\n'
+        '\nCompiler message:\nline0\nline1\n'
+        '\nCompiler message:\nline1\nline2\n'
+        '\nCompiler message:\nline2\nline3\n'
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
   });
 
@@ -283,7 +290,7 @@ void main() {
             'compile /path/to/main.dart\n');
         verifyNoMoreInteractions(mockFrontendServerStdIn);
         expect(logger.errorText,
-            equals('compiler message: line1\ncompiler message: line2\n'));
+            equals('\nCompiler message:\nline1\nline2\n'));
         expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
         compileExpressionResponseCompleter.complete(
@@ -302,6 +309,7 @@ void main() {
 
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
 
     testUsingContext('compile expressions without awaiting', () async {
@@ -325,7 +333,7 @@ void main() {
           '/path/to/main.dart', null /* invalidatedFiles */
       ).then((CompilerOutput outputCompile) {
         expect(logger.errorText,
-            equals('compiler message: line1\ncompiler message: line2\n'));
+            equals('\nCompiler message:\nline1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
         compileExpressionResponseCompleter1.complete(Future<List<int>>.value(utf8.encode(
@@ -363,6 +371,7 @@ void main() {
       expect(await lastExpressionCompleted.future, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Logger: () => BufferLogger()..supportsColor = false,
     });
   });
 }

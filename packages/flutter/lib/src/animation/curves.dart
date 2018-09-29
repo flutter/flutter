@@ -6,11 +6,22 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-/// A mapping of the unit interval to the unit interval.
+/// An easing curve, i.e. a mapping of the unit interval to the unit interval.
+///
+/// Easing curves are used to adjust the rate of change of an animation over
+/// time, allowing them to speed up and slow down, rather than moving at a
+/// constant rate.
 ///
 /// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
 ///
-/// See [Curves] for a collection of common animation curves.
+/// See also:
+///
+///  * [Curves], a collection of common animation easing curves.
+///  * [CurveTween], which can be used to apply a [Curve] to an [Animation].
+///  * [Canvas.drawArc], which draws an arc, and has nothing to do with easing
+///    curves.
+///  * [Animatable], for a more flexible interface that maps fractions to
+///    arbitrary values.
 @immutable
 abstract class Curve {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -26,7 +37,8 @@ abstract class Curve {
   double transform(double t);
 
   /// Returns a new curve that is the reversed inversion of this one.
-  /// This is often useful as the reverseCurve of an [Animation].
+  ///
+  /// This is often useful with [CurvedAnimation.reverseCurve].
   ///
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in.mp4}
   /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_flipped.mp4}
@@ -34,6 +46,8 @@ abstract class Curve {
   /// See also:
   ///
   ///  * [FlippedCurve], the class that is used to implement this getter.
+  ///  * [ReverseAnimation], which reverses an [Animation] rather than a [Curve].
+  ///  * [CurvedAnimation], which can take a separate curve and reverse curve.
   Curve get flipped => FlippedCurve(this);
 
   @override
@@ -248,13 +262,21 @@ class Cubic extends Curve {
 /// A curve that is the reversed inversion of its given curve.
 ///
 /// This curve evaluates the given curve in reverse (i.e., from 1.0 to 0.0 as t
-/// increases from 0.0 to 1.0) and returns the inverse of the given curve's value
-/// (i.e., 1.0 minus the given curve's value).
+/// increases from 0.0 to 1.0) and returns the inverse of the given curve's
+/// value (i.e., 1.0 minus the given curve's value).
 ///
 /// This is the class used to implement the [flipped] getter on curves.
 ///
+/// This is often useful with [CurvedAnimation.reverseCurve].
+///
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_bounce_in.mp4}
-/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_flipped_curve.mp4}
+/// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_flipped.mp4}
+///
+/// See also:
+///
+///  * [Curve.flipped], which provides the [FlippedCurve] of a [Curve].
+///  * [ReverseAnimation], which reverses an [Animation] rather than a [Curve].
+///  * [CurvedAnimation], which can take a separate curve and reverse curve.
 class FlippedCurve extends Curve {
   /// Creates a flipped curve.
   ///

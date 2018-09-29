@@ -16,6 +16,7 @@ import 'plist_utils.dart' as plist;
 
 IOSWorkflow get iosWorkflow => context[IOSWorkflow];
 IOSValidator get iosValidator => context[IOSValidator];
+CocoaPodsValidator get cocoapodsValidator => context[CocoaPodsValidator];
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow();
@@ -42,8 +43,7 @@ class IOSWorkflow implements Workflow {
 
 class IOSValidator extends DoctorValidator {
 
-  const IOSValidator() : super('iOS toolchain - develop for iOS devices', ValidatorCategory.ios);
-
+  const IOSValidator() : super('iOS toolchain - develop for iOS devices');
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
@@ -175,13 +175,45 @@ class IOSValidator extends DoctorValidator {
         }
       }
 
-      final CocoaPodsStatus cocoaPodsStatus = await cocoaPods.evaluateCocoaPodsInstallation;
+    } else {
+      brewStatus = ValidationType.missing;
+      messages.add(ValidationMessage.error(
+          'Brew not installed; use this to install tools for iOS device development.\n'
+              'Download brew at https://brew.sh/.'
+      ));
+    }
+
+    return ValidationResult(
+        <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
+        messages,
+        statusInfo: xcodeVersionInfo
+    );
+  }
+
+  ValidationType _mergeValidationTypes(ValidationType t1, ValidationType t2) {
+    return t1 == t2 ? t1 : ValidationType.partial;
+  }
+}
+
+class CocoaPodsValidator extends DoctorValidator {
+  const CocoaPodsValidator() : super('CocoaPods subvalidator');
+
+  bool get hasHomebrew => os.which('brew') != null;
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+
+    ValidationType status = ValidationType.installed;
+    if (hasHomebrew) {
+      final CocoaPodsStatus cocoaPodsStatus = await cocoaPods
+          .evaluateCocoaPodsInstallation;
 
       if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
         if (await cocoaPods.isCocoaPodsInitialized) {
           messages.add(ValidationMessage('CocoaPods version ${await cocoaPods.cocoaPodsVersionText}'));
         } else {
-          brewStatus = ValidationType.partial;
+          status = ValidationType.partial;
           messages.add(ValidationMessage.error(
             'CocoaPods installed but not initialized.\n'
             '$noCocoaPodsConsequence\n'
@@ -191,8 +223,8 @@ class IOSValidator extends DoctorValidator {
           ));
         }
       } else {
-        brewStatus = ValidationType.partial;
         if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
+          status = ValidationType.missing;
           messages.add(ValidationMessage.error(
             'CocoaPods not installed.\n'
             '$noCocoaPodsConsequence\n'
@@ -200,6 +232,7 @@ class IOSValidator extends DoctorValidator {
             '$cocoaPodsInstallInstructions'
           ));
         } else {
+          status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
             'CocoaPods out of date (${cocoaPods.cocoaPodsRecommendedVersion} is recommended).\n'
             '$noCocoaPodsConsequence\n'
@@ -209,21 +242,9 @@ class IOSValidator extends DoctorValidator {
         }
       }
     } else {
-      brewStatus = ValidationType.missing;
-      messages.add(ValidationMessage.error(
-        'Brew not installed; use this to install tools for iOS device development.\n'
-        'Download brew at https://brew.sh/.'
-      ));
+      // Only set status. The main validator handles messages for missing brew.
+      status = ValidationType.missing;
     }
-
-    return ValidationResult(
-      <ValidationType>[xcodeStatus, brewStatus].reduce(_mergeValidationTypes),
-      messages,
-      statusInfo: xcodeVersionInfo
-    );
-  }
-
-  ValidationType _mergeValidationTypes(ValidationType t1, ValidationType t2) {
-    return t1 == t2 ? t1 : ValidationType.partial;
+    return ValidationResult(status, messages);
   }
 }

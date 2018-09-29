@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../gallery/demo.dart';
+
 class Dessert {
   Dessert(this.name, this.calories, this.fat, this.carbs, this.protein, this.sodium, this.calcium, this.iron);
   final String name;
@@ -164,7 +166,12 @@ class _DataTableDemoState extends State<DataTableDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Data tables')),
+      appBar: AppBar(
+        title: const Text('Data tables'),
+        actions: <Widget>[
+          MaterialDemoDocumentationButton(DataTableDemo.routeName),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: <Widget>[

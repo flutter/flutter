@@ -28,9 +28,9 @@ class StateMarkerState extends State<StateMarker> {
 void main() {
   testWidgets('Can nest apps', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: MaterialApp(
-          home: const Text('Home sweet home'),
+          home: Text('Home sweet home'),
         ),
       ),
     );
@@ -57,8 +57,8 @@ void main() {
     await tester.pumpWidget(FocusScope(
       autofocus: true,
       node: focusScopeNode,
-      child: MaterialApp(
-        home: const Text('Home'),
+      child: const MaterialApp(
+        home: Text('Home'),
       ),
     ));
 
@@ -67,8 +67,8 @@ void main() {
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const StateMarker(),
+      const MaterialApp(
+        home: StateMarker(),
       ),
     );
 
@@ -76,9 +76,9 @@ void main() {
     state1.marker = 'original';
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         debugShowMaterialGrid: true,
-        home: const StateMarker(),
+        home: StateMarker(),
       ),
     );
 
@@ -205,7 +205,7 @@ void main() {
   });
 
   testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: const Text('Home')));
+    await tester.pumpWidget(const MaterialApp(home: Text('Home')));
 
     expect(find.text('Home'), findsOneWidget);
 
@@ -400,9 +400,9 @@ void main() {
       home: const Placeholder(),
     ));
     expect(key.currentState, isInstanceOf<NavigatorState>());
-    await tester.pumpWidget(MaterialApp(
-      color: const Color(0xFF112233),
-      home: const Placeholder(),
+    await tester.pumpWidget(const MaterialApp(
+      color: Color(0xFF112233),
+      home: Placeholder(),
     ));
     expect(key.currentState, isNull);
     await tester.pumpWidget(MaterialApp(

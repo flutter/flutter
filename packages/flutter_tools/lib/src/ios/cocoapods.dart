@@ -156,7 +156,7 @@ class CocoaPods {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }
-    final Directory runnerProject = iosProject.directory.childDirectory('Runner.xcodeproj');
+    final Directory runnerProject = iosProject.xcodeProject;
     if (!runnerProject.existsSync()) {
       return;
     }
@@ -223,7 +223,7 @@ class CocoaPods {
     final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
-      workingDirectory: iosProject.directory.path,
+      workingDirectory: iosProject.hostAppRoot.path,
       environment: <String, String>{
         // For backward compatibility with previously created Podfile only.
         'FLUTTER_FRAMEWORK_DIR': engineDirectory,
