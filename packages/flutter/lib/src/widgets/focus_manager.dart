@@ -43,6 +43,13 @@ class FocusNode extends ChangeNotifier {
   FocusManager _manager;
   bool _hasKeyboardToken = false;
 
+  /// Whether the keyboard is disabled especially when there is a custom keyboard
+  bool _disableKeyboard = false;
+  bool get disableKeyboard => _disableKeyboard;
+  set disableKeyboard(bool isDisabled) {
+    _disableKeyboard = isDisabled;
+  }
+
   /// Whether this node has the overall focus.
   ///
   /// A [FocusNode] has the overall focus when the node is focused in its
@@ -74,8 +81,7 @@ class FocusNode extends ChangeNotifier {
   ///
   /// Returns whether this function successfully consumes a keyboard token.
   bool consumeKeyboardToken() {
-    if (!_hasKeyboardToken)
-      return false;
+    if (!_hasKeyboardToken || _disableKeyboard) return false;
     _hasKeyboardToken = false;
     return true;
   }
