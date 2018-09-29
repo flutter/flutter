@@ -19,7 +19,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
-#include "third_party/dart/runtime/bin/embedded_dart_io.h"
+#include "third_party/dart/runtime/include/bin/dart_io_api.h"
 
 #ifdef ERROR
 #undef ERROR

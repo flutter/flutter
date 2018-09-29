@@ -16,7 +16,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/dart/runtime/bin/embedded_dart_io.h"
+#include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/tonic/converter/dart_converter.h"

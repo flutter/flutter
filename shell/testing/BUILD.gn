@@ -20,7 +20,7 @@ executable("testing") {
     "$flutter_root/lib/snapshot",
     "$flutter_root/shell/common",
     "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/bin:embedded_dart_io",
+    "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/skia",
     "//third_party/tonic",
   ]

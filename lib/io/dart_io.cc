@@ -4,8 +4,7 @@
 
 #include "flutter/lib/io/dart_io.h"
 
-#include "third_party/dart/runtime/bin/crypto.h"
-#include "third_party/dart/runtime/bin/io_natives.h"
+#include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
@@ -15,12 +14,12 @@ namespace blink {
 
 void DartIO::InitForIsolate() {
   DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:io")),
-                                          dart::bin::IONativeLookup,
-                                          dart::bin::IONativeSymbol));
+                                          dart::bin::LookupIONative,
+                                          dart::bin::LookupIONativeSymbol));
 }
 
 bool DartIO::EntropySource(uint8_t* buffer, intptr_t length) {
-  return dart::bin::Crypto::GetRandomBytes(length, buffer);
+  return dart::bin::GetEntropy(buffer, length);
 }
 
 }  // namespace blink

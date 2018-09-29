@@ -102,7 +102,7 @@ source_set("ui") {
     "$flutter_root/flow",
     "$flutter_root/fml",
     "$flutter_root/runtime:test_font",
-    "//third_party/dart/runtime/bin:embedded_dart_io",
+    "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:effects",

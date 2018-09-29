@@ -10,7 +10,7 @@ source_set("io") {
 
   deps = [
     "//third_party/dart/runtime:dart_api",
-    "//third_party/dart/runtime/bin:embedded_dart_io",
+    "//third_party/dart/runtime/bin:dart_io_api",
     "//third_party/tonic",
   ]
 
