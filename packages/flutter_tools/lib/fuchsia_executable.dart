@@ -13,7 +13,6 @@ import 'src/artifacts.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
-import 'src/commands/attach.dart';
 import 'src/commands/fuchsia_reload.dart';
 import 'src/runner/flutter_command.dart';
 

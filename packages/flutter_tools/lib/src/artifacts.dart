@@ -318,7 +318,7 @@ class FuchsiaHostArtifacts extends CachedArtifacts {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.fuchsia:
-        return _getHostArtifactPath(artifact, platform);
+        return _getHostArtifactPath(artifact, platform, mode);
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
@@ -333,7 +333,7 @@ class FuchsiaHostArtifacts extends CachedArtifacts {
   }
 
   @override
-  String _getHostArtifactPath(Artifact artifact, TargetPlatform platform) {
+  String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
