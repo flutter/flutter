@@ -971,7 +971,6 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorBackwardByWord,
-            SemanticsAction.setSelection,
           ],
         ));
 
@@ -1427,8 +1426,13 @@ void main() {
                             SemanticsFlag.isTextField,
                             SemanticsFlag.isObscured
                           ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.moveCursorBackwardByCharacter,
+                            SemanticsAction.moveCursorBackwardByWord,
+                          ],
                           value: expectedValue,
                           textDirection: TextDirection.ltr,
+                          textSelection: const TextSelection(baseOffset: 24, extentOffset: 24),
                         ),
                       ],
                     ),
