@@ -62,8 +62,8 @@ class Checkbox extends StatefulWidget {
     this.checkColor,
     this.materialTapTargetSize,
   }) : assert(tristate != null),
-       assert(tristate || value != null),
-       super(key: key);
+        assert(tristate || value != null),
+        super(key: key);
 
   /// Whether this checkbox is checked.
   ///
@@ -178,12 +178,12 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
     @required this.vsync,
     @required this.additionalConstraints,
   }) : assert(tristate != null),
-       assert(tristate || value != null),
-       assert(activeColor != null),
-       assert(checkColor != null),
-       assert(inactiveColor != null),
-       assert(vsync != null),
-       super(key: key);
+        assert(tristate || value != null),
+        assert(activeColor != null),
+        assert(checkColor != null),
+        assert(inactiveColor != null),
+        assert(vsync != null),
+        super(key: key);
 
   final bool value;
   final bool tristate;
@@ -279,8 +279,8 @@ class _RenderCheckbox extends RenderToggleable {
   Color _colorAt(double t) {
     // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
     return onChanged == null
-      ? inactiveColor
-      : (t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0));
+        ? inactiveColor
+        : (t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0));
   }
 
   // White stroke used to paint the check and dash.
@@ -342,8 +342,8 @@ class _RenderCheckbox extends RenderToggleable {
     final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
     final AnimationStatus status = position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
-      ? position.value
-      : 1.0 - position.value;
+        ? position.value
+        : 1.0 - position.value;
 
     // Four cases: false to null, false to true, null to false, true to false
     if (_oldValue == false || value == false) {
