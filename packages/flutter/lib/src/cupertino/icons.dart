@@ -582,6 +582,29 @@ class CupertinoIcons {
   ///  * [fullscreen], which is similar, but has the corners facing inwards.
   static const IconData fullscreen_exit = IconData(0xf37d, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A filled in microphone with a diagonal line crossing it.
+  ///
+  /// See also:
+  ///
+  ///  * [mic], which is similar, but not filled in and without a diagonal line.
+  ///  * [mic_solid], which is similar, but without a diagonal line.
+  static const IconData mic_off = IconData(0xf45f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A microphone.
+  ///
+  /// See also:
+  ///
+  ///  * [mic_solid], which is similar, but filled in.
+  ///  * [mic_off], which is similar, but filled in and with a diagonal line crossing the icon.
+  static const IconData mic = IconData(0xf460, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in microphone.
+  ///
+  /// See also:
+  ///
+  ///  * [mic], which is similar, but not filled in.
+  ///  * [mic_off], which is similar, but with a diagonal line crossing the icon.
+  static const IconData mic_solid = IconData(0xf461, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A circle with a dotted clock face inside with hands showing 10:30.
   ///
