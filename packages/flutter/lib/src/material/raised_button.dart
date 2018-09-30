@@ -31,6 +31,80 @@ import 'theme_data.dart';
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
 /// with [ButtonTheme].
 ///
+/// ## Sample Code
+///
+/// Here is an example of using a [RaisedButton] widget in order to increment
+/// and decrement a counter.
+///
+/// ```dart
+///
+/// class RaisedButtonPage extends StatefulWidget {
+///   @override
+///   _RaisedButtonPageState createState() => new _RaisedButtonPageState();
+/// }
+///
+/// class _RaisedButtonPageState extends State<RaisedButtonPage> {
+///   int _counter = 0;
+///
+///   void _incrementCounter() {
+///     setState(() {
+///       _counter++;
+///     });
+///   }
+///
+///   void _decrementCounter() {
+///     setState(() {
+///       _counter--;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Scaffold(
+///       appBar: new AppBar(
+///         title: new Text("Raised Button Example"),
+///       ),
+///       body: new Center(
+///         child: new Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           children: <Widget>[
+///             new Text(
+///               '$_counter',
+///               style: new TextStyle(
+///                 fontWeight: FontWeight.bold,
+///                 fontSize: 160.0,
+///               ),
+///             ),
+///             new Row(
+///               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+///               children: <Widget>[
+///                 new RaisedButton(
+///                   padding: const EdgeInsets.all(8.0),
+///                   textColor: Colors.white,
+///                   color: Colors.blue,
+///                   onPressed: _incrementCounter,
+///                   child: new Text("Increment"),
+///                 ),
+///                 new RaisedButton(
+///                   onPressed: _decrementCounter,
+///                   textColor: Colors.white,
+///                   color: Colors.red,
+///                   padding: const EdgeInsets.all(8.0),
+///                   child: new Text(
+///                     "Decrement",
+///                   ),
+///                 ),
+///               ],
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
+///
 /// See also:
 ///
 ///  * [FlatButton], a material design button without a shadow.
