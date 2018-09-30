@@ -13,6 +13,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -52,13 +53,13 @@ class DaemonCommand extends FlutterCommand {
   Future<Null> runCommand() {
     printStatus('Starting device daemon...');
 
-    final NotifyingLogger notifyingLogger = new NotifyingLogger();
+    final NotifyingLogger notifyingLogger = NotifyingLogger();
 
     Cache.releaseLockEarly();
 
     return context.run<Null>(
       body: () async {
-        final Daemon daemon = new Daemon(
+        final Daemon daemon = Daemon(
             stdinCommandStream, stdoutCommandResponse,
             daemonCommand: this, notifyingLogger: notifyingLogger);
 
@@ -73,9 +74,9 @@ class DaemonCommand extends FlutterCommand {
   }
 }
 
-typedef void DispatchCommand(Map<String, dynamic> command);
+typedef DispatchCommand = void Function(Map<String, dynamic> command);
 
-typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
+typedef CommandHandler = Future<dynamic> Function(Map<String, dynamic> args);
 
 class Daemon {
   Daemon(
@@ -86,10 +87,10 @@ class Daemon {
     this.logToStdout = false,
   }) {
     // Set up domains.
-    _registerDomain(daemonDomain = new DaemonDomain(this));
-    _registerDomain(appDomain = new AppDomain(this));
-    _registerDomain(deviceDomain = new DeviceDomain(this));
-    _registerDomain(emulatorDomain = new EmulatorDomain(this));
+    _registerDomain(daemonDomain = DaemonDomain(this));
+    _registerDomain(appDomain = AppDomain(this));
+    _registerDomain(deviceDomain = DeviceDomain(this));
+    _registerDomain(emulatorDomain = EmulatorDomain(this));
 
     // Start listening.
     _commandSubscription = commandStream.listen(
@@ -112,7 +113,7 @@ class Daemon {
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
 
-  final Completer<int> _onExitCompleter = new Completer<int>();
+  final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
 
   void _registerDomain(Domain domain) {
@@ -184,6 +185,8 @@ abstract class Domain {
   String toString() => name;
 
   void handleCommand(String command, dynamic id, Map<String, dynamic> args) {
+    // Remove 'new' once Google catches up to dev4.0 Dart SDK.
+    //ignore: unnecessary_new
     new Future<dynamic>.sync(() {
       if (_handlers.containsKey(command))
         return _handlers[command](args);
@@ -289,12 +292,12 @@ class DaemonDomain extends Domain {
   StreamSubscription<LogMessage> _subscription;
 
   Future<String> version(Map<String, dynamic> args) {
-    return new Future<String>.value(protocolVersion);
+    return Future<String>.value(protocolVersion);
   }
 
   Future<Null> shutdown(Map<String, dynamic> args) {
     Timer.run(daemon.shutdown);
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   @override
@@ -303,7 +306,7 @@ class DaemonDomain extends Domain {
   }
 }
 
-typedef Future<void> _RunOrAttach({
+typedef _RunOrAttach = Future<void> Function({
   Completer<DebugConnectionInfo> connectionInfoCompleter,
   Completer<void> appStartedCompleter
 });
@@ -319,7 +322,7 @@ class AppDomain extends Domain {
     registerHandler('detach', detach);
   }
 
-  static final Uuid _uuidGenerator = new Uuid();
+  static final Uuid _uuidGenerator = Uuid();
 
   static String _getNewAppId() => _uuidGenerator.generateV4();
 
@@ -343,7 +346,7 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = new FlutterDevice(
+    final FlutterDevice flutterDevice = FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
@@ -352,7 +355,7 @@ class AppDomain extends Domain {
     ResidentRunner runner;
 
     if (enableHotReload) {
-      runner = new HotRunner(
+      runner = HotRunner(
         <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
@@ -365,7 +368,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
       );
     } else {
-      runner = new ColdRunner(
+      runner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
@@ -395,7 +398,7 @@ class AppDomain extends Domain {
       String projectDirectory,
       bool enableHotReload,
       Directory cwd) async {
-    final AppInstance app = new AppInstance(_getNewAppId(),
+    final AppInstance app = AppInstance(_getNewAppId(),
         runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
@@ -407,7 +410,7 @@ class AppDomain extends Domain {
     Completer<DebugConnectionInfo> connectionInfoCompleter;
 
     if (runner.debuggingOptions.debuggingEnabled) {
-      connectionInfoCompleter = new Completer<DebugConnectionInfo>();
+      connectionInfoCompleter = Completer<DebugConnectionInfo>();
       // We don't want to wait for this future to complete and callbacks won't fail.
       // As it just writes to stdout.
       connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) { // ignore: unawaited_futures
@@ -420,10 +423,15 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
-    final Completer<void> appStartedCompleter = new Completer<void>();
+    final Completer<void> appStartedCompleter = Completer<void>();
     // We don't want to wait for this future to complete and callbacks won't fail.
     // As it just writes to stdout.
-    appStartedCompleter.future.then<void>((_) { // ignore: unawaited_futures
+    appStartedCompleter.future.timeout(const Duration(minutes: 1), onTimeout: () { // ignore: unawaited_futures
+      _sendAppEvent(app, 'log', <String, dynamic>{
+        'log': 'timeout waiting for the application to start',
+        'error': true,
+      });
+    }).then<void>((_) {
       _sendAppEvent(app, 'started');
     });
 
@@ -546,7 +554,7 @@ class AppDomain extends Domain {
   }
 }
 
-typedef void _DeviceEventHandler(Device device);
+typedef _DeviceEventHandler = void Function(Device device);
 
 /// This domain lets callers list and monitor connected devices.
 ///
@@ -560,10 +568,10 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
-    addDeviceDiscoverer(new AndroidDevices());
-    addDeviceDiscoverer(new IOSDevices());
-    addDeviceDiscoverer(new IOSSimulators());
-    addDeviceDiscoverer(new FlutterTesterDevices());
+    addDeviceDiscoverer(AndroidDevices());
+    addDeviceDiscoverer(IOSDevices());
+    addDeviceDiscoverer(IOSSimulators());
+    addDeviceDiscoverer(FlutterTesterDevices());
   }
 
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
@@ -591,7 +599,7 @@ class DeviceDomain extends Domain {
     discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
   }
 
-  Future<Null> _serializeDeviceEvents = new Future<Null>.value();
+  Future<Null> _serializeDeviceEvents = Future<Null>.value();
 
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
@@ -615,14 +623,14 @@ class DeviceDomain extends Domain {
   Future<Null> enable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.startPolling();
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   /// Disable device events.
   Future<Null> disable(Map<String, dynamic> args) {
     for (PollingDeviceDiscovery discoverer in _discoverers)
       discoverer.stopPolling();
-    return new Future<Null>.value();
+    return Future<Null>.value();
   }
 
   /// Forward a host port to a device port.
@@ -650,7 +658,7 @@ class DeviceDomain extends Domain {
     if (device == null)
       throw "device '$deviceId' not found";
 
-    return device.portForwarder.unforward(new ForwardedPort(hostPort, devicePort));
+    return device.portForwarder.unforward(ForwardedPort(hostPort, devicePort));
   }
 
   @override
@@ -734,21 +742,24 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  final StreamController<LogMessage> _messageController = new StreamController<LogMessage>.broadcast();
+  final StreamController<LogMessage> _messageController = StreamController<LogMessage>.broadcast();
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
-    _messageController.add(new LogMessage('error', message, stackTrace));
+  void printError(String message, { StackTrace stackTrace, bool emphasis = false, TerminalColor color }) {
+    _messageController.add(LogMessage('error', message, stackTrace));
   }
 
   @override
   void printStatus(
-    String message,
-    { bool emphasis = false, bool newline = true, String ansiAlternative, int indent }
-  ) {
-    _messageController.add(new LogMessage('status', message));
+      String message, {
+        bool emphasis = false,
+        TerminalColor color,
+        bool newline = true,
+        int indent,
+      }) {
+    _messageController.add(LogMessage('status', message));
   }
 
   @override
@@ -761,10 +772,11 @@ class NotifyingLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation = false,
+    bool multilineOutput,
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     printStatus(message);
-    return new Status();
+    return Status();
   }
 
   void dispose() {
@@ -794,7 +806,7 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
-    _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
+    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     return context.run<T>(
       body: method,
@@ -807,7 +819,7 @@ class AppInstance {
 
 /// This domain responds to methods like [getEmulators] and [launch].
 class EmulatorDomain extends Domain {
-  EmulatorManager emulators = new EmulatorManager();
+  EmulatorManager emulators = EmulatorManager();
 
   EmulatorDomain(Daemon daemon) : super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);
@@ -861,7 +873,7 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis = false }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis, TerminalColor color}) {
     if (parent != null) {
       parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
@@ -882,14 +894,22 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(
-    String message, {
-    bool emphasis = false, bool newline = true, String ansiAlternative, int indent
-  }) {
+      String message, {
+        bool emphasis = false,
+        TerminalColor color,
+        bool newline = true,
+        int indent,
+      }) {
     if (parent != null) {
-      parent.printStatus(message, emphasis: emphasis, newline: newline,
-          ansiAlternative: ansiAlternative, indent: indent);
+      parent.printStatus(
+        message,
+        emphasis: emphasis,
+        color: color,
+        newline: newline,
+        indent: indent,
+      );
     } else {
-      _sendLogEvent(<String, dynamic>{ 'log': message });
+      _sendLogEvent(<String, dynamic>{'log': message});
     }
   }
 
@@ -909,6 +929,7 @@ class _AppRunLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation = false,
+    bool multilineOutput,
     int progressIndicatorPadding = 52,
   }) {
     final int id = _nextProgressId++;
@@ -919,7 +940,7 @@ class _AppRunLogger extends Logger {
       'message': message,
     });
 
-    _status = new Status(onFinish: () {
+    _status = Status(onFinish: () {
       _status = null;
       _sendProgressEvent(<String, dynamic>{
         'id': id.toString(),

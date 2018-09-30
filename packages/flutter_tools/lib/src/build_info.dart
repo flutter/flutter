@@ -13,6 +13,7 @@ class BuildInfo {
   const BuildInfo(this.mode, this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
+    this.buildHotUpdate,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -41,6 +42,9 @@ class BuildInfo {
 
   /// Dart compilation trace file to use for JIT VM snapshot.
   final String compilationTraceFilePath;
+
+  /// Build differential snapshot.
+  final bool buildHotUpdate;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -94,9 +98,10 @@ class BuildInfo {
   String get modeName => getModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      new BuildInfo(mode, flavor,
+      BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
+          buildHotUpdate: buildHotUpdate,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,
@@ -259,7 +264,7 @@ String getBuildDirectory() {
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
-    throw new Exception(
+    throw Exception(
         'build-dir config setting in ${config.configPath} must be relative');
   }
   return buildDir;

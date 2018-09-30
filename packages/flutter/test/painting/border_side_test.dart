@@ -15,10 +15,10 @@ void main() {
         style: BorderStyle.solid,
       ),
     );
-    expect(() => new BorderSide(color: nonconst(null)), throwsAssertionError);
-    expect(() => new BorderSide(width: nonconst(null)), throwsAssertionError);
-    expect(() => new BorderSide(style: nonconst(null)), throwsAssertionError);
-    expect(() => new BorderSide(width: nonconst(-1.0)), throwsAssertionError);
+    expect(() => BorderSide(color: nonconst(null)), throwsAssertionError);
+    expect(() => BorderSide(width: nonconst(null)), throwsAssertionError);
+    expect(() => BorderSide(style: nonconst(null)), throwsAssertionError);
+    expect(() => BorderSide(width: nonconst(-1.0)), throwsAssertionError);
     expect(
       const BorderSide(width: -0.0),
       const BorderSide(

@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Flutter gallery example code parser test', () async {
-    final TestAssetBundle bundle = new TestAssetBundle();
+    final TestAssetBundle bundle = TestAssetBundle();
 
     final String codeSnippet0 = await getExampleCode('test_0', bundle);
     expect(codeSnippet0, 'test 0 0\ntest 0 1');
@@ -46,7 +46,7 @@ class TestAssetBundle extends AssetBundle {
   @override
   Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'lib/gallery/example_code.dart')
-      return new Future<String>.value(testCodeFile);
+      return Future<String>.value(testCodeFile);
     return null;
   }
 

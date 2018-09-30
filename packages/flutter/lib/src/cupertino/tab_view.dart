@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'app.dart' show CupertinoApp;
 import 'route.dart';
 
 /// A single tab view with its own [Navigator] state and history.
@@ -103,7 +104,7 @@ class CupertinoTabView extends StatefulWidget {
 
   @override
   _CupertinoTabViewState createState() {
-    return new _CupertinoTabViewState();
+    return _CupertinoTabViewState();
   }
 }
 
@@ -114,7 +115,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void initState() {
     super.initState();
-    _heroController = new HeroController(); // Linear tweening.
+    _heroController = CupertinoApp.createCupertinoHeroController();
     _updateObservers();
   }
 
@@ -126,13 +127,13 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
 
   void _updateObservers() {
     _navigatorObservers =
-        new List<NavigatorObserver>.from(widget.navigatorObservers)
+        List<NavigatorObserver>.from(widget.navigatorObservers)
           ..add(_heroController);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Navigator(
+    return Navigator(
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
@@ -150,7 +151,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     else if (widget.routes != null)
       routeBuilder = widget.routes[name];
     if (routeBuilder != null) {
-      return new CupertinoPageRoute<dynamic>(
+      return CupertinoPageRoute<dynamic>(
         builder: routeBuilder,
         title: title,
         settings: settings,
@@ -164,7 +165,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'Could not find a generator for route $settings in the $runtimeType.\n'
           'Generators for routes are searched for in the following order:\n'
           ' 1. For the "/" route, the "builder" property, if non-null, is used.\n'
@@ -181,7 +182,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw new FlutterError(
+        throw FlutterError(
           'The onUnknownRoute callback returned null.\n'
           'When the $runtimeType requested the route $settings from its '
           'onUnknownRoute callback, the callback returned null. Such callbacks '

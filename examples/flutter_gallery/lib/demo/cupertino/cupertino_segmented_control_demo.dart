@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 const Color _kKeyUmbraOpacity = Color(0x33000000); // alpha = 0.2
 const Color _kKeyPenumbraOpacity = Color(0x24000000); // alpha = 0.14
 const Color _kAmbientShadowOpacity = Color(0x1F000000); // alpha = 0.12
@@ -13,7 +15,7 @@ class CupertinoSegmentedControlDemo extends StatefulWidget {
   static const String routeName = 'cupertino/segmented_control';
 
   @override
-  _CupertinoSegmentedControlDemoState createState() => new _CupertinoSegmentedControlDemoState();
+  _CupertinoSegmentedControlDemoState createState() => _CupertinoSegmentedControlDemoState();
 }
 
 class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedControlDemo> {
@@ -48,18 +50,19 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Segmented Control'),
+        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoSegmentedControlDemo.routeName)],
       ),
-      body: new Column(
+      body: Column(
         children: <Widget>[
           const Padding(
             padding: EdgeInsets.all(16.0),
           ),
-          new SizedBox(
+          SizedBox(
             width: 500.0,
-            child: new CupertinoSegmentedControl<int>(
+            child: CupertinoSegmentedControl<int>(
               children: children,
               onValueChanged: (int newValue) {
                 setState(() {
@@ -69,20 +72,20 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
               groupValue: sharedValue,
             ),
           ),
-          new Expanded(
-            child: new Padding(
+          Expanded(
+            child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 32.0,
                 horizontal: 16.0,
               ),
-              child: new Container(
+              child: Container(
                 padding: const EdgeInsets.symmetric(
                   vertical: 64.0,
                   horizontal: 16.0,
                 ),
-                decoration: new BoxDecoration(
+                decoration: BoxDecoration(
                   color: CupertinoColors.white,
-                  borderRadius: new BorderRadius.circular(3.0),
+                  borderRadius: BorderRadius.circular(3.0),
                   boxShadow: const <BoxShadow>[
                     BoxShadow(
                       offset: Offset(0.0, 3.0),

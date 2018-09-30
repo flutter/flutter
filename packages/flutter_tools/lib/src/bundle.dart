@@ -25,7 +25,6 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kVMSnapshotData = 'vm_snapshot_data';
-const String _kVMSnapshotInstr = 'vm_snapshot_instr';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 const String _kDylibKey = 'libapp.so';
@@ -46,6 +45,7 @@ Future<void> build({
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,
   String compilationTraceFilePath,
+  bool buildHotUpdate = false,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],
   List<String> fileSystemRoots,
@@ -79,13 +79,13 @@ Future<void> build({
     if (compilerOutput?.outputFilename == null) {
       throwToolExit('Compiler failed on $mainPath');
     }
-    kernelContent = new DevFSFileContent(fs.file(compilerOutput.outputFilename));
+    kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
     await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     if (compilationTraceFilePath != null) {
-      final CoreJITSnapshotter snapshotter = new CoreJITSnapshotter();
+      final JITSnapshotter snapshotter = JITSnapshotter();
       final int snapshotExitCode = await snapshotter.build(
         platform: platform,
         buildMode: buildMode,
@@ -94,6 +94,7 @@ Future<void> build({
         packagesPath: packagesPath,
         compilationTraceFilePath: compilationTraceFilePath,
         extraGenSnapshotOptions: extraGenSnapshotOptions,
+        buildHotUpdate: buildHotUpdate,
       );
       if (snapshotExitCode != 0) {
         throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
@@ -111,6 +112,7 @@ Future<void> build({
     throwToolExit('Error building assets', exitCode: 1);
 
   await assemble(
+    buildMode: buildMode,
     assetBundle: assets,
     kernelContent: kernelContent,
     privateKeyPath: privateKeyPath,
@@ -145,6 +147,7 @@ Future<AssetBundle> buildAssets({
 }
 
 Future<void> assemble({
+  BuildMode buildMode,
   AssetBundle assetBundle,
   DevFSContent kernelContent,
   File dylibFile,
@@ -155,29 +158,27 @@ Future<void> assemble({
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
 
-  final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
+  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = fs.path.join(getBuildDirectory(), _kVMSnapshotData);
-      final String vmSnapshotInstr = fs.path.join(getBuildDirectory(), _kVMSnapshotInstr);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
-      assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kVMSnapshotInstr] = new DevFSFileContent(fs.file(vmSnapshotInstr));
-      assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
-      assetEntries[_kIsolateSnapshotInstr] = new DevFSFileContent(fs.file(isolateSnapshotInstr));
+      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
+      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
+      assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {
       final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, null, buildMode);
+      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, null, buildMode);
       assetEntries[_kKernelKey] = kernelContent;
-      assetEntries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
-      assetEntries[_kVMSnapshotData] = new DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] = new DevFSFileContent(fs.file(isolateSnapshotData));
+      assetEntries[_kPlatformKernelKey] = DevFSFileContent(fs.file(platformKernelDill));
+      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
+      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
     }
   }
   if (dylibFile != null)
-    assetEntries[_kDylibKey] = new DevFSFileContent(dylibFile);
+    assetEntries[_kDylibKey] = DevFSFileContent(dylibFile);
 
   printTrace('Writing asset files to $assetDirPath');
   ensureDirectoryExists(assetDirPath);

@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 
 import 'run_command.dart';
 
-typedef Future<Null> ShardRunner();
+typedef ShardRunner = Future<Null> Function();
 
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -144,7 +144,6 @@ Future<Null> _runToolTests() async {
   await _pubRunTest(
     path.join(flutterRoot, 'packages', 'flutter_tools'),
     enableFlutterToolAsserts: true,
-    runConcurrently: false,
   );
 
   print('${bold}DONE: All tests successful.$reset');
@@ -173,7 +172,7 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
-  final File coverageFile = new File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
+  final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
     print('Expected to find: ${coverageFile.absolute}');
@@ -197,19 +196,15 @@ Future<Null> _runCoverage() async {
 Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  bool runConcurrently = true,
   bool enableFlutterToolAsserts = false
 }) {
   final List<String> args = <String>['run', 'test', '-rcompact'];
-  if (!runConcurrently) {
-    args.add('-j1');
-  }
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{};
-  if (new Directory(pubCache).existsSync()) {
+  if (Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
   if (enableFlutterToolAsserts) {
@@ -274,20 +269,20 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 }
 
 Future<Null> _verifyVersion(String filename) async {
-  if (!new File(filename).existsSync()) {
+  if (!File(filename).existsSync()) {
     print('$redLine');
     print('The version logic failed to create the Flutter version file.');
     print('$redLine');
     exit(1);
   }
-  final String version = await new File(filename).readAsString();
+  final String version = await File(filename).readAsString();
   if (version == '0.0.0-unknown') {
     print('$redLine');
     print('The version logic failed to determine the Flutter version.');
     print('$redLine');
     exit(1);
   }
-  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');

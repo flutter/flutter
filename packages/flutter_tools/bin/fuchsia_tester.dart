@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show json;
 import 'dart:math' as math;
 
 import 'package:args/args.dart';
@@ -27,36 +28,35 @@ const String _kOptionPackages = 'packages';
 const String _kOptionShell = 'shell';
 const String _kOptionTestDirectory = 'test-directory';
 const String _kOptionSdkRoot = 'sdk-root';
-const String _kOptionTestFile = 'test-file';
-const String _kOptionDillFile = 'dill-file';
 const String _kOptionIcudtl = 'icudtl';
+const String _kOptionTests = 'tests';
+const String _kOptionCoverageDirectory = 'coverage-directory';
 const List<String> _kRequiredOptions = <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,
   _kOptionSdkRoot,
-  _kOptionTestFile,
-  _kOptionDillFile,
-  _kOptionIcudtl
+  _kOptionIcudtl,
+  _kOptionTests,
 ];
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
 
 void main(List<String> args) {
   runInContext<Null>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => new DisabledUsage(),
+    Usage: () => DisabledUsage(),
   });
 }
 
 Future<Null> run(List<String> args) async {
-  final ArgParser parser = new ArgParser()
+  final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
-    ..addOption(_kOptionTestFile, help: 'Test file to execute')
-    ..addOption(_kOptionDillFile, help: 'Precompiled dill file for test')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
+    ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
+    ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
     ..addFlag(_kOptionCoverage,
       defaultsTo: false,
       negatable: false,
@@ -77,8 +77,6 @@ Future<Null> run(List<String> args) async {
     Cache.flutterRoot = tempDir.path;
     final Directory testDirectory =
         fs.directory(argResults[_kOptionTestDirectory]);
-    final File testFile = fs.file(argResults[_kOptionTestFile]);
-    final File dillFile = fs.file(argResults[_kOptionDillFile]);
 
     final String shellPath = argResults[_kOptionShell];
     if (!fs.isFileSync(shellPath)) {
@@ -88,6 +86,14 @@ Future<Null> run(List<String> args) async {
     final Directory sdkRootSrc = fs.directory(argResults[_kOptionSdkRoot]);
     if (!fs.isDirectorySync(sdkRootSrc.path)) {
       throwToolExit('Cannot find SDK files at ${sdkRootSrc.path}');
+    }
+    Directory coverageDirectory;
+    final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory];
+    if (coverageDirectoryPath != null) {
+      if (!fs.isDirectorySync(coverageDirectoryPath)) {
+        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
+      }
+      coverageDirectory = fs.directory(coverageDirectoryPath);
     }
 
     // Put the tester shell where runTests expects it.
@@ -112,24 +118,37 @@ Future<Null> run(List<String> args) async {
 
     CoverageCollector collector;
     if (argResults['coverage']) {
-      collector = new CoverageCollector();
+      collector = CoverageCollector();
+    }
+
+
+    final Map<String, String> tests = <String, String>{};
+    final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
+      json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
+    for (Map<String, dynamic> map in jsonList) {
+      tests[map['source']] = map['dill'];
     }
 
     exitCode = await runTests(
-      <String>[testFile.path],
+      tests.keys.toList(),
       workDir: testDirectory,
       watcher: collector,
       ipv6: false,
       enableObservatory: collector != null,
-      precompiledDillPath: dillFile.path,
+      precompiledDillFiles: tests,
       concurrency: math.max(1, platform.numberOfProcessors - 2),
     );
 
     if (collector != null) {
       // collector expects currentDirectory to be the root of the dart
-      // package (i.e. contains lib/ and test/ sub-dirs).
-      fs.currentDirectory = testDirectory.parent;
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath]))
+      // package (i.e. contains lib/ and test/ sub-dirs). In some cases,
+      // test files may appear to be in the root directory.
+      if (coverageDirectory == null) {
+        fs.currentDirectory = testDirectory.parent;
+      } else {
+        fs.currentDirectory = testDirectory;
+      }
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
         throwToolExit('Failed to collect coverage data');
     }
   } finally {

@@ -129,6 +129,14 @@ class RunCommand extends RunCommandBase {
               'engine, the application will use its own snapshot that includes\n'
               'additional functions.'
       )
+      ..addFlag('hotupdate',
+        hide: !verboseHelp,
+        help: 'Build differential snapshot based on the last state of the build\n'
+              'tree and any changes to the application source code since then.\n'
+              'This flag is only allowed when using --dynamic. With this flag,\n'
+              'a partial VM snapshot is generated that is loaded on top of the\n'
+              'original VM snapshot that contains precompiled code.'
+      )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
@@ -244,9 +252,9 @@ class RunCommand extends RunCommandBase {
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isRelease) {
-      return new DebuggingOptions.disabled(buildInfo);
+      return DebuggingOptions.disabled(buildInfo);
     } else {
-      return new DebuggingOptions.enabled(
+      return DebuggingOptions.enabled(
         buildInfo,
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
@@ -269,8 +277,8 @@ class RunCommand extends RunCommandBase {
     if (argResults['machine']) {
       if (devices.length > 1)
         throwToolExit('--machine does not support -d all.');
-      final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: new NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
         final String applicationBinaryPath = argResults['use-application-binary'];
@@ -293,7 +301,7 @@ class RunCommand extends RunCommandBase {
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
-      return new FlutterCommandResult(
+      return FlutterCommandResult(
         ExitStatus.success,
         timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
@@ -337,7 +345,7 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(
+      return FlutterDevice(
         device,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
@@ -349,7 +357,7 @@ class RunCommand extends RunCommandBase {
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
     if (hotMode) {
-      runner = new HotRunner(
+      runner = HotRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
@@ -364,7 +372,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6,
       );
     } else {
-      runner = new ColdRunner(
+      runner = ColdRunner(
         flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
@@ -382,7 +390,7 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics.
     //
     // Do not add more operations to the future.
-    final Completer<void> appStartedTimeRecorder = new Completer<void>.sync();
+    final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     appStartedTimeRecorder.future.then( // ignore: unawaited_futures
       (_) { appStartedTime = clock.now(); }
@@ -395,7 +403,7 @@ class RunCommand extends RunCommandBase {
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);
-    return new FlutterCommandResult(
+    return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[
         hotMode ? 'hot' : 'cold',

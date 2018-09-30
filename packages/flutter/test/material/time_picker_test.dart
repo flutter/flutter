@@ -27,13 +27,13 @@ class _TimePickerLauncher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       locale: locale,
-      home: new Material(
-        child: new Center(
-          child: new Builder(
+      home: Material(
+        child: Center(
+          child: Builder(
             builder: (BuildContext context) {
-              return new RaisedButton(
+              return RaisedButton(
                 child: const Text('X'),
                 onPressed: () async {
                   onChanged(await showTimePicker(
@@ -51,7 +51,7 @@ class _TimePickerLauncher extends StatelessWidget {
 }
 
 Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged) async {
-  await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US')));
+  await tester.pumpWidget(_TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US')));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
   return tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
@@ -74,23 +74,23 @@ void _tests() {
     TimeOfDay result;
 
     Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.dx, center.dy - 50.0)); // 12:00 AM
+    await tester.tapAt(Offset(center.dx, center.dy - 50.0)); // 12:00 AM
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.dx + 50.0, center.dy));
+    await tester.tapAt(Offset(center.dx + 50.0, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+    await tester.tapAt(Offset(center.dx, center.dy + 50.0));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
-    await tester.tapAt(new Offset(center.dx - 50, center.dy));
+    await tester.tapAt(Offset(center.dx, center.dy + 50.0));
+    await tester.tapAt(Offset(center.dx - 50, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 9, minute: 0)));
   });
@@ -99,10 +99,10 @@ void _tests() {
     TimeOfDay result;
 
     final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    final Offset hour0 = new Offset(center.dx, center.dy - 50.0); // 12:00 AM
-    final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
-    final Offset hour6 = new Offset(center.dx, center.dy + 50.0);
-    final Offset hour9 = new Offset(center.dx - 50.0, center.dy);
+    final Offset hour0 = Offset(center.dx, center.dy - 50.0); // 12:00 AM
+    final Offset hour3 = Offset(center.dx + 50.0, center.dy);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0);
+    final Offset hour9 = Offset(center.dx - 50.0, center.dy);
 
     TestGesture gesture;
 
@@ -140,7 +140,7 @@ void _tests() {
     FeedbackTester feedback;
 
     setUp(() {
-      feedback = new FeedbackTester();
+      feedback = FeedbackTester();
     });
 
     tearDown(() {
@@ -149,35 +149,35 @@ void _tests() {
 
     testWidgets('tap-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
       expect(feedback.hapticCount, 1);
     });
 
     testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await tester.pump(kFastFeedbackInterval);
-      await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy + 50.0));
       await finishPicker(tester);
       expect(feedback.hapticCount, 1);
     });
 
     testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await tester.pump(kSlowFeedbackInterval);
-      await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy + 50.0));
       await tester.pump(kSlowFeedbackInterval);
-      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
       expect(feedback.hapticCount, 3);
     });
 
     testWidgets('drag-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
-      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+      final Offset hour0 = Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
       final TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
@@ -188,8 +188,8 @@ void _tests() {
 
     testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
-      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+      final Offset hour0 = Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
       final TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
@@ -204,8 +204,8 @@ void _tests() {
 
     testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
-      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+      final Offset hour0 = Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = Offset(center.dx + 50.0, center.dy);
 
       final TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
@@ -226,21 +226,21 @@ void _tests() {
   Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
       { TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0) }) async {
     await tester.pumpWidget(
-      new Localizations(
+      Localizations(
         locale: const Locale('en', 'US'),
         delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
-        child: new MediaQuery(
-          data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-          child: new Material(
-            child: new Directionality(
+        child: MediaQuery(
+          data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+          child: Material(
+            child: Directionality(
               textDirection: TextDirection.ltr,
-              child: new Navigator(
+              child: Navigator(
                 onGenerateRoute: (RouteSettings settings) {
-                  return new MaterialPageRoute<void>(builder: (BuildContext context) {
-                    return new FlatButton(
+                  return MaterialPageRoute<void>(builder: (BuildContext context) {
+                    return FlatButton(
                       onPressed: () {
                         showTimePicker(context: context, initialTime: initialTime);
                       },
@@ -290,7 +290,7 @@ void _tests() {
   });
 
   testWidgets('provides semantics information for AM/PM indicator', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, false);
 
     expect(semantics, includesNodeWith(label: 'AM', actions: <SemanticsAction>[SemanticsAction.tap]));
@@ -300,7 +300,7 @@ void _tests() {
   });
 
   testWidgets('provides semantics information for header and footer', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, true);
 
     expect(semantics, isNot(includesNodeWith(label: ':')));
@@ -319,12 +319,12 @@ void _tests() {
   });
 
   testWidgets('provides semantics information for hours', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, true);
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final CustomPainter dialPainter = dialPaint.painter;
-    final _CustomPainterSemanticsTester painterTester = new _CustomPainterSemanticsTester(tester, dialPainter, semantics);
+    final _CustomPainterSemanticsTester painterTester = _CustomPainterSemanticsTester(tester, dialPainter, semantics);
 
     painterTester.addLabel('00', 86.0, 0.0, 134.0, 48.0);
     painterTester.addLabel('13', 129.0, 11.5, 177.0, 59.5);
@@ -356,14 +356,14 @@ void _tests() {
   });
 
   testWidgets('provides semantics information for minutes', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, true);
     await tester.tap(_minuteControl);
     await tester.pumpAndSettle();
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final CustomPainter dialPainter = dialPaint.painter;
-    final _CustomPainterSemanticsTester painterTester = new _CustomPainterSemanticsTester(tester, dialPainter, semantics);
+    final _CustomPainterSemanticsTester painterTester = _CustomPainterSemanticsTester(tester, dialPainter, semantics);
 
     painterTester.addLabel('00', 86.0, 0.0, 134.0, 48.0);
     painterTester.addLabel('05', 129.0, 11.5, 177.0, 59.5);
@@ -387,7 +387,7 @@ void _tests() {
     dynamic dialPaint = tester.widget(findDialPaint);
     expect('${dialPaint.painter.activeRing}', '_DialRing.inner');
 
-    await tester.pumpWidget(new Container()); // make sure previous state isn't reused
+    await tester.pumpWidget(Container()); // make sure previous state isn't reused
 
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 0, minute: 0));
     dialPaint = tester.widget(findDialPaint);
@@ -395,7 +395,7 @@ void _tests() {
   });
 
   testWidgets('can increment and decrement hours', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     Future<Null> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
       final SemanticsNode elevenHours = semantics.nodesWith(
@@ -432,7 +432,7 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '12',
     );
-    await tester.pumpWidget(new Container()); // clear old boilerplate
+    await tester.pumpWidget(Container()); // clear old boilerplate
 
     // 24-hour format
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 23, minute: 0));
@@ -461,7 +461,7 @@ void _tests() {
   });
 
   testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     Future<Null> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
       final SemanticsNode elevenHours = semantics.nodesWith(
@@ -532,11 +532,11 @@ class _CustomPainterSemanticsTester {
   final List<_SemanticsNodeExpectation> expectedNodes = <_SemanticsNodeExpectation>[];
 
   void addLabel(String label, double left, double top, double right, double bottom) {
-    expectedNodes.add(new _SemanticsNodeExpectation(label, left, top, right, bottom));
+    expectedNodes.add(_SemanticsNodeExpectation(label, left, top, right, bottom));
   }
 
   void assertExpectations() {
-    final TestRecordingCanvas canvasRecording = new TestRecordingCanvas();
+    final TestRecordingCanvas canvasRecording = TestRecordingCanvas();
     painter.paint(canvasRecording, const Size(220.0, 220.0));
     final List<ui.Paragraph> paragraphs = canvasRecording.invocations
       .where((RecordedInvocation recordedInvocation) {
@@ -556,7 +556,7 @@ class _CustomPainterSemanticsTester {
           .nodesWith(value: expectation.label)
           .where((SemanticsNode node) => node.tags?.contains(const SemanticsTag('dial-label')) ?? false);
       expect(dialLabelNodes, hasLength(1), reason: 'Expected exactly one label ${expectation.label}');
-      final Rect rect = new Rect.fromLTRB(expectation.left, expectation.top, expectation.right, expectation.bottom);
+      final Rect rect = Rect.fromLTRB(expectation.left, expectation.top, expectation.right, expectation.bottom);
       expect(dialLabelNodes.single.rect, within(distance: 1.0, from: rect),
         reason: 'This is checking the node rectangle for label ${expectation.label}');
 

@@ -133,7 +133,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     assert(() {
       if (minExtent <= maxExtent)
         return true;
-      throw new FlutterError(
+      throw FlutterError(
         'The maxExtent for this $runtimeType is less than its minExtent.\n'
         'The specified maxExtent was: ${maxExtent.toStringAsFixed(1)}\n'
         'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
@@ -189,16 +189,16 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       assert(constraints.axisDirection != null);
       switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
         case AxisDirection.up:
-          offset += new Offset(0.0, geometry.paintExtent - childMainAxisPosition(child) - childExtent);
+          offset += Offset(0.0, geometry.paintExtent - childMainAxisPosition(child) - childExtent);
           break;
         case AxisDirection.down:
-          offset += new Offset(0.0, childMainAxisPosition(child));
+          offset += Offset(0.0, childMainAxisPosition(child));
           break;
         case AxisDirection.left:
-          offset += new Offset(geometry.paintExtent - childMainAxisPosition(child) - childExtent, 0.0);
+          offset += Offset(geometry.paintExtent - childMainAxisPosition(child) - childExtent, 0.0);
           break;
         case AxisDirection.right:
-          offset += new Offset(childMainAxisPosition(child), 0.0);
+          offset += Offset(childMainAxisPosition(child), 0.0);
           break;
       }
       context.paintChild(child, offset);
@@ -231,8 +231,8 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty.lazy('maxExtent', () => maxExtent));
-    properties.add(new DoubleProperty.lazy('child position', () => childMainAxisPosition(child)));
+    properties.add(DoubleProperty.lazy('maxExtent', () => maxExtent));
+    properties.add(DoubleProperty.lazy('child position', () => childMainAxisPosition(child)));
   }
 }
 
@@ -257,7 +257,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     final double maxExtent = this.maxExtent;
     layoutChild(constraints.scrollOffset, maxExtent);
     final double paintExtent = maxExtent - constraints.scrollOffset;
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
@@ -293,7 +293,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
       paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
@@ -408,7 +408,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
     final double layoutExtent = maxExtent - constraints.scrollOffset;
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
@@ -431,7 +431,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
     final TickerProvider vsync = snapConfiguration.vsync;
     final Duration duration = snapConfiguration.duration;
-    _controller ??= new AnimationController(vsync: vsync, duration: duration)
+    _controller ??= AnimationController(vsync: vsync, duration: duration)
       ..addListener(() {
         if (_effectiveScrollOffset == _animation.value)
           return;
@@ -439,15 +439,14 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         markNeedsLayout();
       });
 
-    // Recreating the animation rather than updating a cached value, only
-    // to avoid the extra complexity of managing the animation's lifetime.
-    _animation = new Tween<double>(
-      begin: _effectiveScrollOffset,
-      end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
-    ).animate(new CurvedAnimation(
-      parent: _controller,
-      curve: snapConfiguration.curve,
-    ));
+    _animation = _controller.drive(
+      Tween<double>(
+        begin: _effectiveScrollOffset,
+        end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
+      ).chain(CurveTween(
+        curve: snapConfiguration.curve,
+      )),
+    );
 
     _controller.forward(from: 0.0);
   }
@@ -492,7 +491,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('effective scroll offset', _effectiveScrollOffset));
+    properties.add(DoubleProperty('effective scroll offset', _effectiveScrollOffset));
   }
 }
 
@@ -519,7 +518,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
     final double layoutExtent = maxExtent - constraints.scrollOffset;
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: maxExtent,
       paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),

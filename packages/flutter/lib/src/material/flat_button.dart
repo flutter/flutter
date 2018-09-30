@@ -98,7 +98,7 @@ class FlatButton extends StatelessWidget {
        assert(label != null),
        assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
-       child = new Row(
+       child = Row(
          mainAxisSize: MainAxisSize.min,
          children: <Widget>[
            icon,
@@ -301,7 +301,7 @@ class FlatButton extends StatelessWidget {
     final Color fillColor = enabled ? color : disabledColor;
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
 
-    return new RawMaterialButton(
+    return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
       fillColor: fillColor,
@@ -322,17 +322,17 @@ class FlatButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(new DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }

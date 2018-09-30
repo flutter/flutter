@@ -7,14 +7,14 @@ import '../flutter_test_alternative.dart';
 
 void main() {
   test('list body and paragraph intrinsics', () {
-    final RenderParagraph paragraph = new RenderParagraph(
+    final RenderParagraph paragraph = RenderParagraph(
       const TextSpan(
         style: TextStyle(height: 1.0),
         text: 'Hello World',
       ),
       textDirection: TextDirection.ltr,
     );
-    final RenderListBody testBlock = new RenderListBody(
+    final RenderListBody testBlock = RenderListBody(
       children: <RenderBox>[
         paragraph,
       ],

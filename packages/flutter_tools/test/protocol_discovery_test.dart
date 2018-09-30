@@ -30,13 +30,13 @@ void main() {
       /// This also exists for cases where our initialization requires access to
       /// a `Context` object, which is only set up inside the zone.
       ///
-      /// Note that these issues do not pertain to real code and are a test-only
-      /// concern, since in real code, the zone is set-up in `main()`.
+      /// These issues do not pertain to real code and are a test-only concern,
+      /// because in real code, the zone is set up in `main()`.
       ///
       /// See also: [runZoned]
       void initialize() {
-        logReader = new MockDeviceLogReader();
-        discoverer = new ProtocolDiscovery.observatory(logReader);
+        logReader = MockDeviceLogReader();
+        discoverer = ProtocolDiscovery.observatory(logReader);
       }
 
       tearDown(() {
@@ -124,10 +124,10 @@ void main() {
 
     group('port forwarding', () {
       testUsingContext('default port', () async {
-        final MockDeviceLogReader logReader = new MockDeviceLogReader();
-        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
-          portForwarder: new MockPortForwarder(99),
+          portForwarder: MockPortForwarder(99),
         );
 
         // Get next port future.
@@ -142,10 +142,10 @@ void main() {
       });
 
       testUsingContext('specified port', () async {
-        final MockDeviceLogReader logReader = new MockDeviceLogReader();
-        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
-          portForwarder: new MockPortForwarder(99),
+          portForwarder: MockPortForwarder(99),
           hostPort: 1243,
         );
 
@@ -161,10 +161,10 @@ void main() {
       });
 
       testUsingContext('specified port zero', () async {
-        final MockDeviceLogReader logReader = new MockDeviceLogReader();
-        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
-          portForwarder: new MockPortForwarder(99),
+          portForwarder: MockPortForwarder(99),
           hostPort: 0,
         );
 
@@ -180,10 +180,10 @@ void main() {
       });
 
       testUsingContext('ipv6', () async {
-        final MockDeviceLogReader logReader = new MockDeviceLogReader();
-        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
-          portForwarder: new MockPortForwarder(99),
+          portForwarder: MockPortForwarder(99),
           hostPort: 54777,
           ipv6: true,
         );
@@ -200,10 +200,10 @@ void main() {
       });
 
       testUsingContext('ipv6 with Ascii Escape code', () async {
-        final MockDeviceLogReader logReader = new MockDeviceLogReader();
-        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+        final MockDeviceLogReader logReader = MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = ProtocolDiscovery.observatory(
           logReader,
-          portForwarder: new MockPortForwarder(99),
+          portForwarder: MockPortForwarder(99),
           hostPort: 54777,
           ipv6: true,
         );

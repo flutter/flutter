@@ -43,7 +43,7 @@ class FlutterVersion {
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
 
-  static Set<String> officialChannels = new Set<String>.from(<String>[
+  static Set<String> officialChannels = Set<String>.from(<String>[
     'master',
     'dev',
     'beta',
@@ -292,7 +292,7 @@ class FlutterVersion {
         stamp.store(
           newTimeWarningWasPrinted: _clock.now(),
         ),
-        new Future<Null>.delayed(timeToPauseToLetUserReadTheMessage),
+        Future<Null>.delayed(timeToPauseToLetUserReadTheMessage),
       ]);
     }
   }
@@ -411,7 +411,7 @@ class VersionCheckStamp {
           : null;
     }
 
-    return new VersionCheckStamp(
+    return VersionCheckStamp(
       lastTimeVersionWasChecked: readDateTime('lastTimeVersionWasChecked'),
       lastKnownRemoteVersion: readDateTime('lastKnownRemoteVersion'),
       lastTimeWarningWasPrinted: readDateTime('lastTimeWarningWasPrinted'),
@@ -488,7 +488,7 @@ String _runSync(List<String> command, {bool lenient = true}) {
     return results.stdout.trim();
 
   if (!lenient) {
-    throw new VersionCheckError(
+    throw VersionCheckError(
       'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
       'Standard error: ${results.stderr}'
     );
@@ -511,7 +511,7 @@ Future<String> _run(List<String> command) async {
   if (results.exitCode == 0)
     return results.stdout.trim();
 
-  throw new VersionCheckError(
+  throw VersionCheckError(
     'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
     'Standard error: ${results.stderr}'
   );
@@ -544,14 +544,14 @@ class GitTagVersion {
 
   static GitTagVersion determine() {
     final String version = _runGit('git describe --match v*.*.* --first-parent --long --tags');
-    final RegExp versionPattern = new RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+    final RegExp versionPattern = RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5]);
     if (parts == null) {
       printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
     final List<int> parsedParts = parts.take(4).map<int>(int.tryParse).toList();
-    return new GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
+    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
   }
 
   String frameworkVersionFor(String revision) {
