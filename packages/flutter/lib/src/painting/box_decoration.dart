@@ -86,7 +86,7 @@ class BoxDecoration extends Decoration {
        assert(
          backgroundBlendMode == null || color != null || gradient != null,
          'backgroundBlendMode applies to BoxDecoration\'s background color or '
-         'gradient, but no color or gradient were provided.'
+         'gradient, but no color or gradient was provided.'
        );
 
   @override
