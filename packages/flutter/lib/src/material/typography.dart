@@ -88,7 +88,7 @@ enum ScriptCategory {
 /// display1   34.0   normal   0.0      headline4
 /// headline   24.0   normal   0.0      headline5
 /// title      20.0   medium   0.0      headline6
-/// subhead    16.0   normal   0.0      subtitle
+/// subhead    16.0   normal   0.0      subtitle1
 /// body2      14.0   medium   0.0      body1
 /// body1      14.0   normal   0.0      body2
 /// caption    12.0   normal   0.0      caption
@@ -184,7 +184,12 @@ class TextTheme extends Diagnosticable {
   /// Used for text on [RaisedButton] and [FlatButton].
   final TextStyle button;
 
+  /// For medium emphasis text that's a little smaller than [subhead].
   final TextStyle subtitle;
+
+  /// The smallest style,
+  ///
+  /// Typically used for captions or to introduce a (larger) headline.
   final TextStyle overline;
 
   /// Creates a copy of this text theme but with the given fields replaced with
