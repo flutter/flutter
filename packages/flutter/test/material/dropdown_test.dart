@@ -41,6 +41,7 @@ Widget buildFrame({
             key: buttonKey,
             value: value,
             hint: hint,
+            disabledHint: disabledHint,
             onChanged: onChanged,
             isDense: isDense,
             isExpanded: isExpanded,
