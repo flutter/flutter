@@ -854,4 +854,7 @@ class CommonFinders {
 
   /// Finds widgets whose class name matches the given string.
   SerializableFinder byType(String type) => ByType(type);
+
+  /// Finds the back button on a Material or Cupertino page's scaffold.
+  SerializableFinder pageBack() => PageBack();
 }
