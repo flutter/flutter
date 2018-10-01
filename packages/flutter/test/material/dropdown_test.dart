@@ -589,11 +589,11 @@ void main() {
   List<String> items = null;
   ValueChanged<String> onChanged = (s) => print(s);
 
-  
+
   Widget build() => buildFrame(buttonKey: buttonKey, value: value,
                       onChanged: onChanged,
-                      items: items, 
-                      hint: const Text('onetwothree'), 
+                      items: items,
+                      hint: const Text('onetwothree'),
                       disabledHint: const Text('four'));
 
   // items = null should display disabledHint
@@ -603,23 +603,23 @@ void main() {
   assert(buttonBoxHintValue.attached);
 
   // empty items should display disabledHint
-  items = <String>[];  
+  items = <String>[];
   onChanged = null;
-  
+
   await tester.pumpWidget(build());
   expect(find.text('four'), findsOneWidget);
 
   // onChanged = null should display disabledHint
-  items = menuItems;  
+  items = menuItems;
   onChanged = null;
-  
+
   await tester.pumpWidget(build());
   expect(find.text('four'), findsOneWidget);
 
   // onChanged != null and items != null should not display disabledHint but normal hint
-  items = menuItems;  
+  items = menuItems;
   onChanged = onChanged = (s) => print(s);
-  
+
   await tester.pumpWidget(build());
   expect(find.text('four'), findsNothing);
   expect(find.text('onetwothree'), findsOneWidget);

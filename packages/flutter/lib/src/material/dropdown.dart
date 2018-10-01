@@ -73,10 +73,10 @@ class _DropdownMenuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DropdownMenuPainter oldPainter) {
-    return oldPainter.color != color ||
-        oldPainter.elevation != elevation ||
-        oldPainter.selectedIndex != selectedIndex ||
-        oldPainter.resize != resize;
+    return oldPainter.color != color
+        || oldPainter.elevation != elevation
+        || oldPainter.selectedIndex != selectedIndex
+        || oldPainter.resize != resize;
   }
 }
 
@@ -89,8 +89,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) =>
-      child;
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
@@ -248,7 +247,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     double left;
     switch (textDirection) {
       case TextDirection.rtl:
-        left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
+      left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
         break;
       case TextDirection.ltr:
         left = buttonRect.left.clamp(0.0, size.width - childSize.width);
@@ -259,10 +258,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
-    return buttonRect != oldDelegate.buttonRect ||
-        menuTop != oldDelegate.menuTop ||
-        menuHeight != oldDelegate.menuHeight ||
-        textDirection != oldDelegate.textDirection;
+    return buttonRect != oldDelegate.buttonRect
+        || menuTop != oldDelegate.menuTop
+        || menuHeight != oldDelegate.menuHeight
+        || textDirection != oldDelegate.textDirection;
   }
 }
 
@@ -276,7 +275,8 @@ class _DropdownRouteResult<T> {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _DropdownRouteResult<T>) return false;
+    if (other is! _DropdownRouteResult<T>)
+      return false;
     final _DropdownRouteResult<T> typedOther = other;
     return result == typedOther.result;
   }
@@ -320,21 +320,19 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final String barrierLabel;
 
   @override
-  Widget buildPage(
-      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
-    final double preferredMenuHeight =
-        (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
+    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
     final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
 
     final double buttonTop = buttonRect.top;
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
-    double menuTop =
-        (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
+    double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
     const double topPreferredLimit = _kMenuItemHeight;
-    if (menuTop < topPreferredLimit) menuTop = math.min(buttonTop, topPreferredLimit);
+    if (menuTop < topPreferredLimit)
+      menuTop = math.min(buttonTop, topPreferredLimit);
     double bottom = menuTop + menuHeight;
     final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
     if (bottom > bottomPreferredLimit) {
@@ -396,8 +394,8 @@ class DropdownMenuItem<T> extends StatelessWidget {
     Key key,
     this.value,
     @required this.child,
-  })  : assert(child != null),
-        super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -431,8 +429,8 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   const DropdownButtonHideUnderline({
     Key key,
     @required Widget child,
-  })  : assert(child != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
@@ -487,7 +485,7 @@ class DropdownButton<T> extends StatefulWidget {
   })  : assert(items == null ||
             value == null ||
             items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-        super(key: key);
+      super(key: key);
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;
@@ -593,8 +591,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection textDirection = Directionality.of(context);
-    final EdgeInsetsGeometry menuMargin =
-        ButtonTheme.of(context).alignedDropdown ? _kAlignedMenuMargin : _kUnalignedMenuMargin;
+    final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
+      ?_kAlignedMenuMargin
+      : _kUnalignedMenuMargin;
 
     assert(_dropdownRoute == null);
     _dropdownRoute = new _DropdownRoute<T>(
@@ -610,8 +609,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
-      if (!mounted || newValue == null) return;
-      if (widget.onChanged != null) widget.onChanged(newValue.result);
+      if (!mounted || newValue == null)
+        return;
+      if (widget.onChanged != null)
+        widget.onChanged(newValue.result);
     });
   }
 
@@ -649,20 +650,22 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = _enabled ? new List<Widget>.from(widget.items) : <Widget>[];
+    final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       hintIndex = items.length;
       items.add(new DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
-        child: new IgnorePointer(
+        child: IgnorePointer(
           child: _enabled ? widget.hint : widget.disabledHint ?? widget.hint,
+          ignoringSemantics: false,
         ),
       ));
     }
 
-    final EdgeInsetsGeometry padding =
-        ButtonTheme.of(context).alignedDropdown ? _kAlignedButtonPadding : _kUnalignedButtonPadding;
+    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
+      ? _kAlignedButtonPadding
+      : _kUnalignedButtonPadding;
 
     Widget result = new DefaultTextStyle(
       style: _textStyle,
@@ -717,5 +720,4 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       child: result,
     );
   }
-
 }
