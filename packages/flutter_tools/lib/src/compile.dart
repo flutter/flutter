@@ -179,11 +179,11 @@ class KernelCompiler {
     final _StdoutHandler _stdoutHandler = _StdoutHandler();
 
     server.stderr
-      .transform(utf8.decoder)
+      .transform<String>(utf8.decoder)
       .listen((String message) { printError(message); });
     server.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
@@ -372,8 +372,8 @@ class ResidentCompiler {
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen(
         _stdoutHandler.handler,
         onDone: () {
@@ -385,8 +385,8 @@ class ResidentCompiler {
         });
 
     _server.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String message) { printError(message); });
 
     _server.stdin.writeln('compile $scriptFilename');

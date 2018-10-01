@@ -127,7 +127,7 @@ class FlutterTestDriver {
       // Proxy the stream/sink for the VM Client so we can debugPrint it.
       final StreamChannel<String> channel = IOWebSocketChannel.connect(_vmServiceWsUri)
           .cast<String>()
-          .changeStream((Stream<String> stream) => stream.map(_debugPrint))
+          .changeStream((Stream<String> stream) => stream.map<String>(_debugPrint))
           .changeSink((StreamSink<String> sink) =>
               StreamController<String>()
                 ..stream.listen((String s) => sink.add(_debugPrint(s))));
@@ -282,7 +282,7 @@ class FlutterTestDriver {
 
   Future<VMInstanceRef> evaluateExpression(String expression) async {
     final VMFrame topFrame = await getTopStackFrame();
-    return _timeoutWithMessages(() => topFrame.evaluate(expression),
+    return _timeoutWithMessages<VMInstanceRef>(() => topFrame.evaluate(expression),
         message: 'Timed out evaluating expression ($expression)');
   }
 
@@ -334,7 +334,7 @@ class FlutterTestDriver {
       }
     });
 
-    return _timeoutWithMessages(() => response.future,
+    return _timeoutWithMessages<Map<String, dynamic>>(() => response.future,
             timeout: timeout,
             message: event != null
                 ? 'Did not receive expected $event event.'
@@ -406,5 +406,5 @@ class FlutterTestDriver {
 }
 
 Stream<String> _transformToLines(Stream<List<int>> byteStream) {
-  return byteStream.transform(utf8.decoder).transform(const LineSplitter());
+  return byteStream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
 }

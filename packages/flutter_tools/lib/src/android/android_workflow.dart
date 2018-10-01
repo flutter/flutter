@@ -127,7 +127,7 @@ class AndroidValidator extends DoctorValidator {
 
     if (validationResult.isNotEmpty) {
       // Android SDK is not functional.
-      messages.addAll(validationResult.map((String message) {
+      messages.addAll(validationResult.map<ValidationMessage>((String message) {
         return ValidationMessage.error(message);
       }));
       messages.add(ValidationMessage(
@@ -200,13 +200,13 @@ class AndroidValidator extends DoctorValidator {
     );
     process.stdin.write('n\n');
     final Future<void> output = process.stdout
-      .transform(const Utf8Decoder(allowMalformed: true))
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);
     final Future<void> errors = process.stderr
-      .transform(const Utf8Decoder(allowMalformed: true))
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .transform<String>(const LineSplitter())
       .listen(_onLine)
       .asFuture<void>(null);
     try {

@@ -18,7 +18,7 @@ class VsCodeValidator extends DoctorValidator {
   static Iterable<DoctorValidator> get installedValidators {
     return VsCode
         .allInstalled()
-        .map((VsCode vsCode) => VsCodeValidator(vsCode));
+        .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
   @override
@@ -32,11 +32,11 @@ class VsCodeValidator extends DoctorValidator {
     if (_vsCode.isValid) {
       type = ValidationType.installed;
       messages.addAll(_vsCode.validationMessages
-          .map((String m) => ValidationMessage(m)));
+          .map<ValidationMessage>((String m) => ValidationMessage(m)));
     } else {
       type = ValidationType.partial;
       messages.addAll(_vsCode.validationMessages
-          .map((String m) => ValidationMessage.error(m)));
+          .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
       messages.add(ValidationMessage(
           'Flutter extension not installed; install from\n$extensionMarketplaceUrl'));
     }

@@ -98,10 +98,10 @@ class TimelineSummary {
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
       'frame_build_times': _extractFrameDurations()
-        .map((Duration duration) => duration.inMicroseconds)
+        .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
-        .map((TimedEvent event) => event.duration.inMicroseconds)
+        .map<int>((TimedEvent event) => event.duration.inMicroseconds)
         .toList(),
     };
   }
@@ -143,7 +143,7 @@ class TimelineSummary {
   }
 
   List<Duration> _extractDurations(String name) {
-    return _extractNamedEvents(name).map((TimelineEvent event) => event.duration).toList();
+    return _extractNamedEvents(name).map<Duration>((TimelineEvent event) => event.duration).toList();
   }
 
   /// Extracts timed events that are reported as a pair of begin/end events.
@@ -199,7 +199,7 @@ class TimelineSummary {
   List<Duration> _extractFrameDurations() => _extractDurations('Frame');
 
   Iterable<Duration> _extractDuration(Iterable<TimedEvent> events) {
-    return events.map((TimedEvent e) => e.duration);
+    return events.map<Duration>((TimedEvent e) => e.duration);
   }
 }
 

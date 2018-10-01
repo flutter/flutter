@@ -96,11 +96,11 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
           ),
           bottom: TabBar(
             isScrollable: true,
-            tabs: demos.map((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
+            tabs: demos.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
           ),
         ),
         body: TabBarView(
-          children: demos.map((ComponentDemoTabData demo) {
+          children: demos.map<Widget>((ComponentDemoTabData demo) {
             return SafeArea(
               top: false,
               bottom: false,

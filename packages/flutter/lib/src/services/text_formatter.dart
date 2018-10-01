@@ -233,7 +233,7 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
       (String substring) {
         return whitelistedPattern
             .allMatches(substring)
-            .map((Match match) => match.group(0))
+            .map<String>((Match match) => match.group(0))
             .join();
       } ,
     );

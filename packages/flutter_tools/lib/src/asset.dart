@@ -354,7 +354,7 @@ Future<DevFSContent> _obtainLicenses(
     printStatus(allPackagesList.join(', '));
   }
 
-  final List<String> combinedLicensesList = packageLicenses.keys.map(
+  final List<String> combinedLicensesList = packageLicenses.keys.map<String>(
     (String license) {
       final List<String> packageNames = packageLicenses[license].toList()
        ..sort();
@@ -444,7 +444,7 @@ List<Font> _parsePackageFonts(
 }
 
 List<Map<String, dynamic>> _createFontsDescriptor(List<Font> fonts) {
-  return fonts.map((Font font) => font.descriptor).toList();
+  return fonts.map<Map<String, dynamic>>((Font font) => font.descriptor).toList();
 }
 
 // Given an assets directory like this:

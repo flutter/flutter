@@ -306,9 +306,9 @@ class FuchsiaRemoteConnection {
       }
       isolates.add(vmService.getMainIsolatesByPattern(pattern));
     }
-    final List<IsolateRef> result = await Future.wait(isolates)
+    final List<IsolateRef> result = await Future.wait<List<IsolateRef>>(isolates)
         .timeout(timeout)
-        .then((List<List<IsolateRef>> listOfLists) {
+        .then<List<IsolateRef>>((List<List<IsolateRef>> listOfLists) {
       final List<List<IsolateRef>> mutableListOfLists =
           List<List<IsolateRef>>.from(listOfLists)
             ..retainWhere((List<IsolateRef> list) => list.isNotEmpty);
@@ -477,7 +477,7 @@ class FuchsiaRemoteConnection {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
     final List<PortForwarder> forwardedVmServicePorts =
-        await Future.wait(servicePorts.map((int deviceServicePort) {
+        await Future.wait<PortForwarder>(servicePorts.map<Future<PortForwarder>>((int deviceServicePort) {
       return fuchsiaPortForwardingFunction(
           _sshCommandRunner.address,
           deviceServicePort,

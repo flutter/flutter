@@ -129,7 +129,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Null> chooseWorkingDevice() async {
     final List<Device> allDevices = (await discoverDevices())
-      .map((String id) => AndroidDevice(deviceId: id))
+      .map<Device>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)
@@ -298,19 +298,19 @@ class AndroidDevice implements Device {
         await adb(<String>['logcat', '--clear']);
         final Process process = await startProcess(adbPath, <String>['-s', deviceId, 'logcat']);
         process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
             print('adb logcat: $line');
             stream.sink.add(line);
           }, onDone: () { stdoutDone.complete(); });
         process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
           .listen((String line) {
             print('adb logcat stderr: $line');
           }, onDone: () { stderrDone.complete(); });
-        process.exitCode.then((int exitCode) {
+        process.exitCode.then<void>((int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
             stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.'));
@@ -374,7 +374,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Null> chooseWorkingDevice() async {
     final List<IosDevice> allDevices = (await discoverDevices())
-      .map((String id) => IosDevice(deviceId: id))
+      .map<IosDevice>((String id) => IosDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)
@@ -387,7 +387,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<List<String>> discoverDevices() async {
     final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
-      .map((String line) => line.trim())
+      .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
       .toList();
     if (iosDeviceIDs.isEmpty)
