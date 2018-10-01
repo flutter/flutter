@@ -780,48 +780,29 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Empty items or items == null or onChangedHandler == null,  disables item and displays disabledHint', (WidgetTester tester) async {
-  final Key buttonKey = new UniqueKey();
-  String value;
-  List<String> items = null;
-  ValueChanged<String> onChanged = (s) => print(s);
+  testWidgets('Empty items disables menu and displays disabledHint', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    List<String> items;
 
+    Widget build() => buildFrame(buttonKey: buttonKey, value: null,
+                        items: items,
+                        hint: const Text('enabled'),
+                        disabledHint: const Text('disabled'));
 
-  Widget build() => buildFrame(buttonKey: buttonKey, value: value,
-                      onChanged: onChanged,
-                      items: items,
-                      hint: const Text('onetwothree'),
-                      disabledHint: const Text('four'));
+    // [disabledHint] should display when [items] is an empty list.
+    items = <String>[];
+    await tester.pumpWidget(build());
+    expect(find.text('disabled'), findsOneWidget);
+    final RenderBox disabledHintBox = tester.renderObject(find.byKey(buttonKey));
 
-  // items = null should display disabledHint
-  await tester.pumpWidget(build());
-  expect(find.text('four'), findsOneWidget);
-  final RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
-  assert(buttonBoxHintValue.attached);
-
-  // empty items should display disabledHint
-  items = <String>[];
-  onChanged = null;
-
-  await tester.pumpWidget(build());
-  expect(find.text('four'), findsOneWidget);
-
-  // onChanged = null should display disabledHint
-  items = menuItems;
-  onChanged = null;
-
-  await tester.pumpWidget(build());
-  expect(find.text('four'), findsOneWidget);
-
-  // onChanged != null and items != null should not display disabledHint but normal hint
-  items = menuItems;
-  onChanged = onChanged = (s) => print(s);
-
-  await tester.pumpWidget(build());
-  expect(find.text('four'), findsNothing);
-  expect(find.text('onetwothree'), findsOneWidget);
-
-});
-
-
+    // A Dropdown button with a disabled hint should be the same size as a
+    // one with a regular enabled hint.
+    items = menuItems;
+    await tester.pumpWidget(build());
+    expect(find.text('disabled'), findsNothing);
+    expect(find.text('enabled'), findsOneWidget);
+    final RenderBox enabledHintBox = tester.renderObject(find.byKey(buttonKey));
+    expect(enabledHintBox.localToGlobal(Offset.zero), equals(disabledHintBox.localToGlobal(Offset.zero)));
+    expect(enabledHintBox.size, equals(disabledHintBox.size));
+  });
 }
