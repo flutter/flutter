@@ -51,11 +51,11 @@ enum ScriptCategory {
 /// current (2018) version of the specification
 /// (https://material.io/design/typography).
 ///
-/// The current spec has thirteen text styles:
+/// The 2018 spec has thirteen text styles:
 /// ```
 /// NAME         SIZE  WEIGHT  SPACING
-/// headline1    96.0  thin    -1.5
-/// headline2    60.0  thin    -0.5
+/// headline1    96.0  light   -1.5
+/// headline2    60.0  light   -0.5
 /// headline3    48.0  normal   0.0
 /// headline4    34.0  normal   0.25
 /// headline5    24.0  normal   0.0
@@ -69,41 +69,37 @@ enum ScriptCategory {
 /// overline     10.0  normal   1.5
 ///
 /// ```
-/// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
+/// Where "light" is `FontWeight.w300`, "normal" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`. The spec calls 'paragraph1' and
 /// 'paragraph2', 'body1' and 'body2'. They've been changed here to
 /// make it possible to support both the old text style names and the
 /// new ones.
 ///
-///
-/// The original (2017) spec had eleven text styles. This class maps the
-/// old names to the new text styles.
-///
+/// Each of the [TextTheme] text styles corresponds to one of the
+/// styles from the 2018. By default, the font sizes, font weights
+/// and letter spacing have not changed. To create a theme that uses
+/// the new sizes, weights, and spacing, configure a [Theme] with
+/// [ThemeData.typographyVersion] set to 1 (default is 0).
 /// ```
-/// NAME       SIZE   WEIGHT   TARGET
-/// display4   112.0  thin     headline1
-/// display3   56.0   normal   headline2
-/// display2   45.0   normal   headline3
-/// display1   34.0   normal   headline4
-/// headline   24.0   normal   headline5
-/// title      20.0   medium   headline6
-/// subhead    16.0   normal   subtitle
-/// body2      14.0   medium   paragraph1
-/// body1      14.0   normal   paragraph2
-/// caption    12.0   normal   caption
-/// button     14.0   medium   button
+/// NAME       SIZE   WEIGHT   SPACING  2018 NAME
+/// display4   112.0  thin     0.0      headline1
+/// display3   56.0   normal   0.0      headline2
+/// display2   45.0   normal   0.0      headline3
+/// display1   34.0   normal   0.0      headline4
+/// headline   24.0   normal   0.0      headline5
+/// title      20.0   medium   0.0      headline6
+/// subhead    16.0   normal   0.0      subtitle
+/// body2      14.0   medium   0.0      body1
+/// body1      14.0   normal   0.0      body2
+/// caption    12.0   normal   0.0      caption
+/// button     14.0   medium   0.0      button
+/// subtitle   14.0   medium   0.0      subtitle2
+/// overline   10.0   normal   0.0      overline
 /// ```
 ///
 /// Where "thin" is `FontWeight.w100`, "normal" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`. Letter spacing for all of the original
 /// text styles was 0.0.
-///
-/// Application developers are encouraged to migrate to the new text
-/// styles. However, to preserve backwards compatibility, the font size
-/// and letter spacing changes specified by the new styles are only
-/// applied if [ThemeData.typographyVersion] is 1. By default
-/// [ThemeData.typographyVersion] is 0, which means that the original font
-/// sizes and 0.0 letter spacing remain unchanged.
 ///
 /// The following image [from the material design
 /// specification](https://material.io/go/design-typography#typography-styles)
@@ -716,7 +712,8 @@ class MaterialTextGeometry {
     return null;
   }
 
-  /// Defines text geometry for English-like scripts, such as English, French, Russian, etc.
+  /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
+  /// English, French, Russian, etc.
   static const TextTheme englishLike = TextTheme(
     display4 : TextStyle(debugLabel: 'englishLike display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
     display3 : TextStyle(debugLabel: 'englishLike display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
@@ -733,13 +730,15 @@ class MaterialTextGeometry {
     overline : TextStyle(debugLabel: 'englishLike overline', inherit: false, fontSize:  10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
-  /// Defines text geometry for English-like scripts, such as English, French, Russian, etc.
+  /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
+  /// English, French, Russian, etc.
   ///
-  /// This version matches the latest Material Design spec:
+  /// The font sizes, weights, and letter spacings in this version match the
+  /// latest Material Design spec:
   /// (https://material.io/go/design-typography#typography-styles).
   static const TextTheme englishLikeVersion1 = TextTheme(
-    display4   : TextStyle(debugLabel: 'englishLike display4 version1', fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
-    display3   : TextStyle(debugLabel: 'englishLike display3 version1', fontSize: 60.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
+    display4   : TextStyle(debugLabel: 'englishLike display4 version1', fontSize: 96.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -1.5),
+    display3   : TextStyle(debugLabel: 'englishLike display3 version1', fontSize: 60.0, fontWeight: FontWeight.w300, textBaseline: TextBaseline.alphabetic, letterSpacing: -0.5),
     display2   : TextStyle(debugLabel: 'englishLike display2 version1', fontSize: 48.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
     display1   : TextStyle(debugLabel: 'englishLike display1 version1', fontSize: 34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
     headline   : TextStyle(debugLabel: 'englishLike headline version1', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
@@ -753,7 +752,8 @@ class MaterialTextGeometry {
     overline   : TextStyle(debugLabel: 'englishLike overline version1', fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
-  /// Defines text geometry for dense scripts, such as Chinese, Japanese, Korean, etc.
+  /// Defines text geometry for dense scripts, such as Chinese, Japanese
+  /// and Korean.
   static const TextTheme dense = TextTheme(
     display4 : TextStyle(debugLabel: 'dense display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
     display3 : TextStyle(debugLabel: 'dense display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
@@ -770,9 +770,11 @@ class MaterialTextGeometry {
     overline : TextStyle(debugLabel: 'dense overline', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
-  /// Defines text geometry for dense scripts, such as Chinese, Japanese, Korean, etc.
+  /// Defines text geometry for dense scripts, such as Chinese, Japanese
+  /// and Korean.
   ///
-  /// This version matches the latest Material Design spec:
+  /// The font sizes, weights, and letter spacings in this version match the
+  /// latest Material Design spec:
   /// (https://material.io/go/design-typography#typography-styles).
   static const TextTheme denseVersion1 = TextTheme(
     display4  : TextStyle(debugLabel: 'dense display4 version1',  fontSize: 96.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
@@ -790,7 +792,7 @@ class MaterialTextGeometry {
     overline  : TextStyle(debugLabel: 'dense overline version1',  fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
-  /// Defines text geometry for tall scripts, such as Farsi, Hindi, Thai, etc.
+  /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   static const TextTheme tall = TextTheme(
     display4 : TextStyle(debugLabel: 'tall display4', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     display3 : TextStyle(debugLabel: 'tall display3', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
@@ -807,9 +809,10 @@ class MaterialTextGeometry {
     overline : TextStyle(debugLabel: 'tall overline', inherit: false, fontSize:  11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
   );
 
-  /// Defines text geometry for tall scripts, such as Farsi, Hindi, Thai, etc.
+  /// Defines text geometry for tall scripts, such as Farsi, Hindi, and Thai.
   ///
-  /// This version matches the latest Material Design spec:
+  /// The font sizes, weights, and letter spacings in this version match the
+  /// latest Material Design spec:
   /// (https://material.io/go/design-typography#typography-styles).
   static const TextTheme tallVersion1 = TextTheme(
     display4  : TextStyle(debugLabel: 'tall display4 version1',  fontSize: 96.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),

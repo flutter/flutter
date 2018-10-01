@@ -34,6 +34,10 @@ import 'typography.dart';
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
+//
+// 6. If you're adding a String for the sake of Flutter, not for an app-specific
+//    version of this interface, you are making a breaking API change. See
+//    https://flutter.io/design-principles/#handling-breaking-changes.
 
 /// Defines the localized resource values used by the Material widgets.
 ///
