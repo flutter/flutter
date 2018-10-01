@@ -37,12 +37,10 @@ void main() {
       await _flutter.hotRestart();
     });
 
-    test('reload hits breakpoints with file:// prefixes after reload', () async {
+    test('reload hits breakpoints after reload', () async {
       await _flutter.run(withDebugger: true);
-
-      // Hit breakpoint using a file:// URI.
       final VMIsolate isolate = await _flutter.breakAt(
-          Uri.file(_project.breakpointFile).toString(),
+          Uri.file(_project.breakpointFile),
           _project.breakpointLine);
       expect(isolate.pauseEvent, isInstanceOf<VMPauseBreakpointEvent>());
     });
