@@ -409,6 +409,14 @@ hooks = [
     ],
   },
   {
+    'name': 'download_android_support',
+    'pattern': '.',
+    'action': [
+        'python',
+        'src/flutter/tools/android_support/download_android_support.py',
+    ],
+  },
+  {
     'name': 'buildtools',
     'pattern': '.',
     'action': [
