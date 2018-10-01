@@ -44,8 +44,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   final Completer<int> port = Completer<int>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     if (!port.isCompleted) {
       final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
@@ -58,8 +58,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   });
 
   final StreamSubscription<String> stderrSub = runner.stderr
-      .transform(const Utf8Decoder())
-      .transform(const LineSplitter())
+      .transform<String>(const Utf8Decoder())
+      .transform<String>(const LineSplitter())
       .listen((String line) {
     stderr.writeln('[$taskName] [STDERR] $line');
   });

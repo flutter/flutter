@@ -127,7 +127,7 @@ class ProcessSignal implements io.ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    return _delegate.watch().map((io.ProcessSignal signal) => this);
+    return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
   }
 
   @override

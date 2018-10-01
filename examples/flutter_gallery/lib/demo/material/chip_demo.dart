@@ -92,7 +92,7 @@ class _ChipsTile extends StatelessWidget {
     ];
     if (children.isNotEmpty) {
       cardChildren.add(Wrap(
-        children: children.map((Widget chip) {
+        children: children.map<Widget>((Widget chip) {
         return Padding(
           padding: const EdgeInsets.all(2.0),
           child: chip,

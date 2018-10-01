@@ -54,7 +54,7 @@ class _PageSelector extends StatelessWidget {
                 color: color,
               ),
               child: TabBarView(
-                children: icons.map((Icon icon) {
+                children: icons.map<Widget>((Icon icon) {
                   return Container(
                     padding: const EdgeInsets.all(12.0),
                     child: Card(

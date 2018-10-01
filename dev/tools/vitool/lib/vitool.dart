@@ -314,7 +314,7 @@ class SvgPath {
 
   SvgPath applyTransform(_Transform transform) {
     final List<SvgPathCommand> transformedCommands =
-      commands.map((SvgPathCommand c) => c.applyTransform(transform)).toList();
+      commands.map<SvgPathCommand>((SvgPathCommand c) => c.applyTransform(transform)).toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 
@@ -400,7 +400,7 @@ class SvgPathCommandBuilder {
   SvgPathCommand build(String type, List<Point<double>> points) {
     List<Point<double>> absPoints = points;
     if (_isRelativeCommand(type)) {
-      absPoints = points.map((Point<double> p) => p + lastPoint).toList();
+      absPoints = points.map<Point<double>>((Point<double> p) => p + lastPoint).toList();
     }
 
     if (type == 'M' || type == 'm')

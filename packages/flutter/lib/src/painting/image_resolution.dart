@@ -223,7 +223,7 @@ class AssetImage extends AssetBundleImageProvider {
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest =
         Map<String, List<String>>.fromIterables(keys,
-          keys.map((String key) => List<String>.from(parsedJson[key])));
+          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key])));
     // TODO(ianh): convert that data structure to the right types.
     return SynchronousFuture<Map<String, List<String>>>(parsedManifest);
   }

@@ -120,7 +120,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     // Wrap everything in try/finally to make sure we kill the ssh processes
     // doing the port forwarding.
     try {
-      final List<int> servicePorts = forwardedPorts.map(
+      final List<int> servicePorts = forwardedPorts.map<int>(
           (_PortForwarder pf) => pf.port).toList();
 
       if (_list) {
@@ -145,10 +145,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
       // Set up a device and hot runner and attach the hot runner to the first
       // vm service we found.
-      final List<String> fullAddresses = targetPorts.map(
+      final List<String> fullAddresses = targetPorts.map<String>(
         (int p) => '$ipv4Loopback:$p'
       ).toList();
-      final List<Uri> observatoryUris = fullAddresses.map(
+      final List<Uri> observatoryUris = fullAddresses.map<Uri>(
         (String a) => Uri.parse('http://$a')
       ).toList();
       final FuchsiaDevice device = FuchsiaDevice(
@@ -168,7 +168,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       printStatus('Connecting to $_modName');
       await hotRunner.attach(viewFilter: isolateName);
     } finally {
-      await Future.wait(forwardedPorts.map((_PortForwarder pf) => pf.stop()));
+      await Future.wait<Null>(forwardedPorts.map<Future<Null>>((_PortForwarder pf) => pf.stop()));
     }
   }
 
@@ -474,11 +474,11 @@ class _PortForwarder {
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
     process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
         .listen((String data) { printTrace(data); });
     // Best effort to print the exit code.
-    process.exitCode.then((int c) { // ignore: unawaited_futures
+    process.exitCode.then<void>((int c) { // ignore: unawaited_futures
       printTrace("'${command.join(' ')}' exited with exit code $c");
     });
     printTrace('Set up forwarding from $localPort to $address:$remotePort');

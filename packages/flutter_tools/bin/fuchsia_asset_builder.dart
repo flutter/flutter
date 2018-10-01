@@ -77,7 +77,7 @@ Future<Null> run(List<String> args) async {
     final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
-  await Future.wait(calls);
+  await Future.wait<Null>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);

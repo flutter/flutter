@@ -56,7 +56,7 @@ void _tests() {
     final String code = semantics
       .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
       .split('\n')
-      .map((String line) => line.trim())
+      .map<String>((String line) => line.trim())
       .join('\n')
       .trim() + ',';
 
@@ -82,7 +82,7 @@ void _tests() {
       expectedCode.indexOf('^' * 12) - 3,
     )
       .split('\n')
-      .map((String line) => line.trim())
+      .map<String>((String line) => line.trim())
       .join('\n')
       .trim();
     semantics.dispose();

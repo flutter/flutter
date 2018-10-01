@@ -560,7 +560,7 @@ String _flattenNameNoSubdirs(String fileName) {
 @visibleForTesting
 String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
-  final Iterable<String> convertedPieces = pieces.map(_flattenNameNoSubdirs);
+  final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fs.path.joinAll(convertedPieces);
 }
 

@@ -29,11 +29,11 @@ TaskFunction createHotModeTest() {
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
-    await inDirectory(flutterDirectory, () async {
+    await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
       recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
-      await inDirectory(_editedFlutterGalleryDir, () async {
+      await inDirectory<void>(_editedFlutterGalleryDir, () async {
         if (deviceOperatingSystem == DeviceOperatingSystem.ios)
           await prepareProvisioningCertificates(_editedFlutterGalleryDir.path);
         {
@@ -46,8 +46,8 @@ TaskFunction createHotModeTest() {
           final Completer<Null> stdoutDone = Completer<Null>();
           final Completer<Null> stderrDone = Completer<Null>();
           process.stdout
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               if (hotReloadCount == 0) {
@@ -72,8 +72,8 @@ TaskFunction createHotModeTest() {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
           }, onDone: () {
@@ -99,8 +99,8 @@ TaskFunction createHotModeTest() {
           final Completer<Null> stdoutDone = Completer<Null>();
           final Completer<Null> stderrDone = Completer<Null>();
           process.stdout
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
               process.stdin.writeln('q');
@@ -110,8 +110,8 @@ TaskFunction createHotModeTest() {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(utf8.decoder)
-              .transform(const LineSplitter())
+              .transform<String>(utf8.decoder)
+              .transform<String>(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
           }, onDone: () {

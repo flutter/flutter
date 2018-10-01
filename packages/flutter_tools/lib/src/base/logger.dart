@@ -112,7 +112,7 @@ class StdoutLogger extends Logger {
       message = terminal.color(message, color);
     if (indent != null && indent > 0) {
       message = LineSplitter.split(message)
-          .map((String line) => ' ' * indent + line)
+          .map<String>((String line) => ' ' * indent + line)
           .join('\n');
     }
     if (newline != false)

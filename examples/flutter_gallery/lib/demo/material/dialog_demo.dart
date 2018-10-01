@@ -201,7 +201,7 @@ class DialogDemoState extends State<DialogDemo> {
           ),
         ]
         // Add a little space between the buttons
-        .map((Widget button) {
+        .map<Widget>((Widget button) {
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: button

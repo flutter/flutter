@@ -150,7 +150,7 @@ class ScrollController extends ChangeNotifier {
     final List<Future<Null>> animations = List<Future<Null>>(_positions.length);
     for (int i = 0; i < _positions.length; i += 1)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    return Future.wait<Null>(animations).then((List<Null> _) => null);
+    return Future.wait<Null>(animations).then<Null>((List<Null> _) => null);
   }
 
   /// Jumps the scroll position from its current value to the given value,

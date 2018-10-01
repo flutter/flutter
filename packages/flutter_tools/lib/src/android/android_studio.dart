@@ -188,7 +188,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .where((AndroidStudio s) => s != null)
         .toList();
   }
