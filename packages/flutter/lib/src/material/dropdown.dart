@@ -471,7 +471,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values and if [value] isn't null it must be among them.
-  /// If [items] or [onChanged] is null, the button will be disabled, the down arrow will be grayed out, and
+  /// If [items] is empty the button will be disabled, the down arrow will be grayed out, and
   /// the [disabledHint] will be shown (if provided).
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
@@ -584,15 +584,17 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   void _updateSelectedIndex() {
-    if (widget.items != null) {
-      assert(widget.value == null ||
-          widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
-      _selectedIndex = null;
-      for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
-        if (widget.items[itemIndex].value == widget.value) {
-          _selectedIndex = itemIndex;
-          return;
-        }
+    if (!_enabled) {
+      return;
+    }
+
+    assert(widget.value == null ||
+      widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
+    _selectedIndex = null;
+    for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
+      if (widget.items[itemIndex].value == widget.value) {
+        _selectedIndex = itemIndex;
+        return;
       }
     }
   }
@@ -636,8 +638,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
-
   Color get _downArrowColor {
+    // These colors are not defined in the Material Design spec.
     if (_enabled) {
       if (Theme.of(context).brightness == Brightness.light) {
         return Colors.grey.shade700;
@@ -653,8 +655,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-
-  bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
+  bool get _enabled => widget.items.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -663,14 +664,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
+    final List<Widget> items = List<Widget>.from(widget.items);
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
+      final Widget emplacedHint =
+        _enabled ? widget.hint : DropdownMenuItem<Widget>(child: widget.disabledHint ?? widget.hint);
       hintIndex = items.length;
       items.add(DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: IgnorePointer(
-          child: _enabled ? widget.hint : widget.disabledHint ?? widget.hint,
+          child: emplacedHint,
           ignoringSemantics: false,
         ),
       ));
@@ -680,8 +683,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ? _kAlignedButtonPadding
       : _kUnalignedButtonPadding;
 
-    // If value is null (then _selectedIndex is null) then we display
-    // the hint or nothing at all.
+    // If value is null (then _selectedIndex is null) or if disabled then we
+    // display the hint or nothing at all.
     final IndexedStack innerItemsWidget = IndexedStack(
       index: _enabled ? (_selectedIndex ?? hintIndex) : hintIndex,
       alignment: AlignmentDirectional.centerStart,
@@ -700,7 +703,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             widget.isExpanded ? Expanded(child: innerItemsWidget) : innerItemsWidget,
             Icon(Icons.arrow_drop_down,
               size: widget.iconSize,
-              // These colors are not defined in the Material Design spec.
               color: _downArrowColor,
             ),
           ],
