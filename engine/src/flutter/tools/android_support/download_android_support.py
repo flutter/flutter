@@ -23,7 +23,7 @@ def GetInstalledVersion(version_stamp):
 
 def main():
   # Read latest version.
-  version_stamp = 'VERSION_SUPPORT_V13'
+  version_stamp = 'VERSION_SUPPORT_FRAGMENT'
   version = ''
   with open(os.path.join(THIS_DIR, version_stamp)) as f:
     version = f.read().strip()
@@ -36,7 +36,7 @@ def main():
   aar_zip = zipfile.ZipFile(cStringIO.StringIO(aar))
   if not os.path.exists(INSTALL_DIR):
     os.mkdir(INSTALL_DIR)
-  with open(os.path.join(INSTALL_DIR, 'android_support_v13.jar'), 'w') as f:
+  with open(os.path.join(INSTALL_DIR, 'android_support_fragment.jar'), 'w') as f:
     f.write(aar_zip.read('classes.jar'))
 
   # Write version as the last step.
