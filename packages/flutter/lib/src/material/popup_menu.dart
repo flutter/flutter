@@ -818,8 +818,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.padding = const EdgeInsets.all(8.0),
     this.child,
     this.icon,
-    this.offsetX=0.0,
-    this.offsetY=0.0
+    this.offset = Offset.zero,
   }) : assert(itemBuilder != null),
        assert(!(child != null && icon != null)), // fails if passed both parameters
        super(key: key);
@@ -863,8 +862,10 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// If provided, the icon used for this button.
   final Icon icon;
-  final double offsetX;
-  final double offsetY;
+
+  /// The offset applied to the Popup Menu Button
+  final Offset offset;
+
   @override
   _PopupMenuButtonState<T> createState() => new _PopupMenuButtonState<T>();
 }
@@ -875,7 +876,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     final RelativeRect position = new RelativeRect.fromRect(
       new Rect.fromPoints(
-        button.localToGlobal(Offset(widget.offsetX, widget.offsetY), ancestor: overlay),
+        button.localToGlobal(widget.offset, ancestor: overlay),
         button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
       ),
       Offset.zero & overlay.size,
