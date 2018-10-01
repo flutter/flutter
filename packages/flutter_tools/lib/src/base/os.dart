@@ -16,9 +16,9 @@ OperatingSystemUtils get os => context[OperatingSystemUtils];
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
     if (platform.isWindows) {
-      return new _WindowsUtils();
+      return _WindowsUtils();
     } else {
-      return new _PosixUtils();
+      return _PosixUtils();
     }
   }
 
@@ -92,7 +92,7 @@ class _PosixUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return const <File>[];
     final String stdout = result.stdout;
-    return stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
+    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
   @override
@@ -155,7 +155,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   // This is a no-op.
   @override
   ProcessResult makeExecutable(File file) {
-    return new ProcessResult(0, 0, null, null);
+    return ProcessResult(0, 0, null, null);
   }
 
   @override
@@ -166,13 +166,13 @@ class _WindowsUtils extends OperatingSystemUtils {
       return const <File>[];
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
-      return lines.map((String path) => fs.file(path.trim())).toList();
+      return lines.map<File>((String path) => fs.file(path.trim())).toList();
     return <File>[fs.file(lines.first.trim())];
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    final Archive archive = new Archive();
+    final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
         continue;
@@ -180,21 +180,21 @@ class _WindowsUtils extends OperatingSystemUtils {
       final File file = entity;
       final String path = file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
-      archive.addFile(new ArchiveFile(path, bytes.length, bytes));
+      archive.addFile(ArchiveFile(path, bytes.length, bytes));
     }
-    zipFile.writeAsBytesSync(new ZipEncoder().encode(archive), flush: true);
+    zipFile.writeAsBytesSync(ZipEncoder().encode(archive), flush: true);
   }
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+    final Archive archive = ZipDecoder().decodeBytes(file.readAsBytesSync());
     _unpackArchive(archive, targetDirectory);
   }
 
   @override
   bool verifyZip(File zipFile) {
     try {
-      new ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
+      ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
     } on FileSystemException catch (_) {
       return false;
     } on ArchiveException catch (_) {
@@ -205,8 +205,8 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    final Archive archive = new TarDecoder().decodeBytes(
-      new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    final Archive archive = TarDecoder().decodeBytes(
+      GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
   }
@@ -214,7 +214,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   bool verifyGzip(File gzipFile) {
     try {
-      new GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
+      GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
     } on FileSystemException catch (_) {
       return false;
     } on ArchiveException catch (_) {
@@ -238,7 +238,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   File makePipe(String path) {
-    throw new UnsupportedError('makePipe is not implemented on Windows.');
+    throw UnsupportedError('makePipe is not implemented on Windows.');
   }
 
   String _name;

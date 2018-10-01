@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
@@ -19,5 +20,19 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
     expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
+  });
+
+  testWidgets('Vertical Divider Test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: VerticalDivider(),
+        ),
+      ),
+    );
+    final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
+    expect(box.size.width, 16.0);
+    expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
   });
 }

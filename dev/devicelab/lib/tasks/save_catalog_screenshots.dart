@@ -42,19 +42,19 @@ class Upload {
   Duration get timeLimit {
     if (retryCount == 0)
       return const Duration(milliseconds: 1000);
-    random ??= new math.Random();
-    return new Duration(milliseconds: random.nextInt(1000) + math.pow(2, retryCount) * 1000);
+    random ??= math.Random();
+    return Duration(milliseconds: random.nextInt(1000) + math.pow(2, retryCount) * 1000);
   }
 
   Future<bool> save(HttpClient client, String name, List<int> content) async {
     try {
-      final Uri uri = new Uri.https(uriAuthority, uriPath, <String, String>{
+      final Uri uri = Uri.https(uriAuthority, uriPath, <String, String>{
         'uploadType': 'media',
         'name': name,
       });
       final HttpClientRequest request = await client.postUrl(uri);
       request
-        ..headers.contentType = new ContentType('image', 'png')
+        ..headers.contentType = ContentType('image', 'png')
         ..headers.add('Authorization', 'Bearer $authorizationToken')
         ..add(content);
 
@@ -65,7 +65,7 @@ class Upload {
       } else {
         // TODO(hansmuller): only retry on 5xx and 429 responses
         logMessage('Request to save "$name" (length ${content.length}) failed with status ${response.statusCode}, will retry');
-        logMessage(await response.transform(utf8.decoder).join());
+        logMessage(await response.transform<String>(utf8.decoder).join());
       }
       return response.statusCode == HttpStatus.ok;
     } on TimeoutException catch (_) {
@@ -77,9 +77,9 @@ class Upload {
   Future<bool> run(HttpClient client) async {
     assert(!isComplete);
     if (retryCount > 2)
-      throw new UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 2 retries');
+      throw UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 2 retries');
 
-    largeImage ??= await new File(fromPath).readAsBytes();
+    largeImage ??= await File(fromPath).readAsBytes();
     smallImage ??= encodePng(copyResize(decodePng(largeImage), 300));
 
     if (!largeImageSaved)
@@ -97,14 +97,14 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
   assert(fromPaths.length == largeNames.length);
   assert(fromPaths.length == smallNames.length);
 
-  List<Upload> uploads = new List<Upload>(fromPaths.length);
+  List<Upload> uploads = List<Upload>(fromPaths.length);
   for (int index = 0; index < uploads.length; index += 1)
-    uploads[index] = new Upload(fromPaths[index], largeNames[index], smallNames[index]);
+    uploads[index] = Upload(fromPaths[index], largeNames[index], smallNames[index]);
 
   while (uploads.any(Upload.isNotComplete)) {
-    final HttpClient client = new HttpClient();
+    final HttpClient client = HttpClient();
     uploads = uploads.where(Upload.isNotComplete).toList();
-    await Future.wait(uploads.map((Upload upload) => upload.run(client)));
+    await Future.wait<bool>(uploads.map<Future<bool>>((Upload upload) => upload.run(client)));
     client.close(force: true);
   }
 }

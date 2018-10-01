@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -13,7 +14,7 @@ import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 
-final Type dropdownButtonType = new DropdownButton<String>(
+final Type dropdownButtonType = DropdownButton<String>(
   onChanged: (_) { },
   items: const <DropdownMenuItem<String>>[]
 ).runtimeType;
@@ -23,29 +24,33 @@ Widget buildFrame({
   String value = 'two',
   ValueChanged<String> onChanged,
   bool isDense = false,
+  bool isExpanded = false,
   Widget hint,
   List<String> items = menuItems,
   Alignment alignment = Alignment.center,
   TextDirection textDirection = TextDirection.ltr,
 }) {
-  return new TestApp(
+  return TestApp(
     textDirection: textDirection,
-    child: new Material(
-      child: new Align(
+    child: Material(
+      child: Align(
         alignment: alignment,
-        child: new DropdownButton<String>(
-          key: buttonKey,
-          value: value,
-          hint: hint,
-          onChanged: onChanged,
-          isDense: isDense,
-          items: items.map((String item) {
-            return new DropdownMenuItem<String>(
-              key: new ValueKey<String>(item),
-              value: item,
-              child: new Text(item, key: new ValueKey<String>(item + 'Text')),
-            );
-          }).toList(),
+        child: RepaintBoundary(
+          child: DropdownButton<String>(
+            key: buttonKey,
+            value: value,
+            hint: hint,
+            onChanged: onChanged,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            items: items.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          )
         ),
       ),
     ),
@@ -57,26 +62,26 @@ class TestApp extends StatefulWidget {
   final TextDirection textDirection;
   final Widget child;
   @override
-  _TestAppState createState() => new _TestAppState();
+  _TestAppState createState() => _TestAppState();
 }
 
 class _TestAppState extends State<TestApp> {
   @override
   Widget build(BuildContext context) {
-    return new Localizations(
+    return Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
-      child: new MediaQuery(
-        data: new MediaQueryData.fromWindow(window),
-        child: new Directionality(
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(window),
+        child: Directionality(
           textDirection: widget.textDirection,
-          child: new Navigator(
+          child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
-              return new MaterialPageRoute<void>(
+              return MaterialPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => widget.child,
               );
@@ -93,7 +98,7 @@ class _TestAppState extends State<TestApp> {
 // The RenderParagraphs should be aligned, i.e. they should have the same
 // size and location.
 void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
-  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(new ValueKey<String>(value + 'Text'))).toList();
+  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(ValueKey<String>(value + 'Text'))).toList();
   expect(boxes.length, equals(2));
   final RenderBox box0 = boxes[0];
   final RenderBox box1 = boxes[1];
@@ -108,6 +113,32 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
 }
 
 void main() {
+  testWidgets('Default dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two');
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.default.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
+  testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+    await tester.pumpWidget(build());
+    final Finder buttonFinder = find.byKey(buttonKey);
+    assert(tester.renderObject(buttonFinder).attached);
+    await expectLater(
+      find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
+      matchesGoldenFile('dropdown_test.expanded.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
+
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
     void didChangeValue(String newValue) {
@@ -154,15 +185,15 @@ void main() {
     }
 
     Widget build() {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Navigator(
+        child: Navigator(
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
-            return new MaterialPageRoute<void>(
+            return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
-                return new Material(
+                return Material(
                   child: buildFrame(value: 'one', onChanged: didChangeValue),
                 );
               },
@@ -208,16 +239,16 @@ void main() {
     // Positions a DropdownButton at the left and right edges of the screen,
     // forcing it to be sized down to the viewport width
     const String value = 'foo';
-    final UniqueKey itemKey = new UniqueKey();
+    final UniqueKey itemKey = UniqueKey();
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new ListView(
+      MaterialApp(
+        home: Material(
+          child: ListView(
             children: <Widget>[
-              new DropdownButton<String>(
+              DropdownButton<String>(
                 value: value,
                 items: <DropdownMenuItem<String>>[
-                  new DropdownMenuItem<String>(
+                  DropdownMenuItem<String>(
                     key: itemKey,
                     value: value,
                     child: const Text(value),
@@ -242,22 +273,22 @@ void main() {
     int value = 4;
     final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
     for (int i = 0; i < 20; ++i)
-      items.add(new DropdownMenuItem<int>(value: i, child: new Text('$i')));
+      items.add(DropdownMenuItem<int>(value: i, child: Text('$i')));
 
     void handleChanged(int newValue) {
       value = newValue;
     }
 
-    final DropdownButton<int> button = new DropdownButton<int>(
+    final DropdownButton<int> button = DropdownButton<int>(
       value: value,
       onChanged: handleChanged,
       items: items,
     );
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Align(
+      MaterialApp(
+        home: Material(
+          child: Align(
             alignment: Alignment.topCenter,
             child: button,
           ),
@@ -292,7 +323,7 @@ void main() {
 
   for (TextDirection textDirection in TextDirection.values) {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
-      final Key buttonKey = new UniqueKey();
+      final Key buttonKey = UniqueKey();
       const String value = 'two';
 
       Widget build() => buildFrame(buttonKey: buttonKey, value: value, textDirection: textDirection);
@@ -333,12 +364,29 @@ void main() {
       // should have the same size and location.
       checkSelectedItemTextGeometry(tester, 'two');
 
-      await tester.pumpWidget(new Container()); // reset test
+      await tester.pumpWidget(Container()); // reset test
     });
   }
 
+  testWidgets('Arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build() => buildFrame(buttonKey: buttonKey, value: 'two', isExpanded: true);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    final RenderBox arrowIcon = tester.renderObject(find.byIcon(Icons.arrow_drop_down));
+    assert(arrowIcon.attached);
+
+    // Arrow icon should be aligned with far right of button when expanded
+    expect(arrowIcon.localToGlobal(Offset.zero).dx,
+        buttonBox.size.centerRight(Offset(-arrowIcon.size.width, 0.0)).dx);
+  });
+
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
-    final Key buttonKey = new UniqueKey();
+    final Key buttonKey = UniqueKey();
     const String value = 'two';
 
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true);
@@ -359,7 +407,7 @@ void main() {
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    final double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
+    final double menuItemHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
     for (RenderBox itemBox in itemBoxes) {
@@ -374,8 +422,59 @@ void main() {
     checkSelectedItemTextGeometry(tester, 'two');
   });
 
+  testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: null, // nothing selected
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString())
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pumpAndSettle(); // finish the menu animation
+
+    // Find the first item in the scrollable dropdown list
+    final Finder menuItemFinder = find.byType(Scrollable);
+    final RenderBox menuItemContainer = tester.renderObject<RenderBox>(menuItemFinder);
+    final RenderBox firstItem = tester.renderObject<RenderBox>(
+      find.descendant(of: menuItemFinder, matching: find.byKey(const ValueKey<String>('0'))));
+
+    // List should be scrolled so that the first item is at the top. Menu items
+    // are offset 8.0 from the top edge of the scrollable menu.
+    const Offset selectedItemOffset = Offset(0.0, -8.0);
+    expect(
+      firstItem.size.topCenter(firstItem.localToGlobal(selectedItemOffset)).dy,
+      equals(menuItemContainer.size.topCenter(menuItemContainer.localToGlobal(Offset.zero)).dy)
+    );
+  });
+
+  testWidgets('Dropdown menu aligns selected item with button in long lists', (WidgetTester tester) async {
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(buildFrame(
+      buttonKey: buttonKey,
+      value: '50',
+      items: List<String>.generate(/*length=*/ 100, (int index) => index.toString())
+    ));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle(); // finish the menu animation
+
+    // Find the selected item in the scrollable dropdown list
+    final RenderBox selectedItem = tester.renderObject<RenderBox>(
+      find.descendant(of: find.byType(Scrollable), matching: find.byKey(const ValueKey<String>('50'))));
+
+    // List should be scrolled so that the selected item is in line with the button
+    expect(
+      selectedItem.size.center(selectedItem.localToGlobal(Offset.zero)).dy,
+      equals(buttonBox.size.center(buttonBox.localToGlobal(Offset.zero)).dy)
+    );
+  });
+
+
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
-    final Key buttonKey = new UniqueKey();
+    final Key buttonKey = UniqueKey();
     String value;
 
     Widget build() => buildFrame(buttonKey: buttonKey, value: value);
@@ -397,7 +496,7 @@ void main() {
   });
 
   testWidgets('Layout of a DropdownButton with null value', (WidgetTester tester) async {
-    final Key buttonKey = new UniqueKey();
+    final Key buttonKey = UniqueKey();
     String value;
 
     void onChanged(String newValue) {
@@ -425,7 +524,7 @@ void main() {
   });
 
   testWidgets('Size of DropdownButton with null value and a hint', (WidgetTester tester) async {
-    final Key buttonKey = new UniqueKey();
+    final Key buttonKey = UniqueKey();
     String value;
 
     // The hint will define the dropdown's width
@@ -498,18 +597,18 @@ void main() {
       buildFrame(alignment: Alignment.topLeft, value: menuItems.last)
     );
     expect(menuRect.topLeft, Offset.zero);
-    expect(menuRect.topRight, new Offset(menuRect.width, 0.0));
+    expect(menuRect.topRight, Offset(menuRect.width, 0.0));
 
     await popUpAndDown(
       buildFrame(alignment: Alignment.topCenter, value: menuItems.last)
     );
-    expect(menuRect.topLeft, new Offset(buttonRect.left, 0.0));
-    expect(menuRect.topRight, new Offset(buttonRect.right, 0.0));
+    expect(menuRect.topLeft, Offset(buttonRect.left, 0.0));
+    expect(menuRect.topRight, Offset(buttonRect.right, 0.0));
 
     await popUpAndDown(
       buildFrame(alignment: Alignment.topRight, value: menuItems.last)
     );
-    expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, 0.0));
+    expect(menuRect.topLeft, Offset(800.0 - menuRect.width, 0.0));
     expect(menuRect.topRight, const Offset(800.0, 0.0));
 
     // Dropdown button is along the middle of the app. The top of the menu is
@@ -519,8 +618,8 @@ void main() {
     await popUpAndDown(
       buildFrame(alignment: Alignment.centerLeft, value: menuItems.first)
     );
-    expect(menuRect.topLeft, new Offset(0.0, buttonRect.top));
-    expect(menuRect.topRight, new Offset(menuRect.width, buttonRect.top));
+    expect(menuRect.topLeft, Offset(0.0, buttonRect.top));
+    expect(menuRect.topRight, Offset(menuRect.width, buttonRect.top));
 
     await popUpAndDown(
       buildFrame(alignment: Alignment.center, value: menuItems.first)
@@ -531,8 +630,8 @@ void main() {
     await popUpAndDown(
       buildFrame(alignment: Alignment.centerRight, value: menuItems.first)
     );
-    expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, buttonRect.top));
-    expect(menuRect.topRight, new Offset(800.0, buttonRect.top));
+    expect(menuRect.topLeft, Offset(800.0 - menuRect.width, buttonRect.top));
+    expect(menuRect.topRight, Offset(800.0, buttonRect.top));
 
     // Dropdown button is along the bottom of the app. The bottom of the menu is
     // aligned with the bottom of the expanded button and shifted horizontally
@@ -542,18 +641,18 @@ void main() {
       buildFrame(alignment: Alignment.bottomLeft, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, const Offset(0.0, 600.0));
-    expect(menuRect.bottomRight, new Offset(menuRect.width, 600.0));
+    expect(menuRect.bottomRight, Offset(menuRect.width, 600.0));
 
     await popUpAndDown(
       buildFrame(alignment: Alignment.bottomCenter, value: menuItems.first)
     );
-    expect(menuRect.bottomLeft, new Offset(buttonRect.left, 600.0));
-    expect(menuRect.bottomRight, new Offset(buttonRect.right, 600.0));
+    expect(menuRect.bottomLeft, Offset(buttonRect.left, 600.0));
+    expect(menuRect.bottomRight, Offset(buttonRect.right, 600.0));
 
     await popUpAndDown(
       buildFrame(alignment: Alignment.bottomRight, value: menuItems.first)
     );
-    expect(menuRect.bottomLeft, new Offset(800.0 - menuRect.width, 600.0));
+    expect(menuRect.bottomLeft, Offset(800.0 - menuRect.width, 600.0));
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
   });
 
@@ -570,7 +669,7 @@ void main() {
 
 
   testWidgets('Semantics Tree contains only selected element', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(buildFrame(items: menuItems));
 
     expect(semantics, isNot(includesNodeWith(label: menuItems[0])));
@@ -617,7 +716,7 @@ void main() {
   });
 
   testWidgets('Dropdown menu includes semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
     const Key key = Key('test');
     await tester.pumpWidget(buildFrame(
       buttonKey: key,
@@ -627,40 +726,40 @@ void main() {
     await tester.tap(find.byKey(key));
     await tester.pumpAndSettle();
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               flags: <SemanticsFlag>[
                 SemanticsFlag.scopesRoute,
                 SemanticsFlag.namesRoute,
               ],
               label: 'Popup menu',
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   children: <TestSemantics>[
-                    new TestSemantics(
+                    TestSemantics(
                       children: <TestSemantics>[
-                        new TestSemantics(
+                        TestSemantics(
                           label: 'one',
                           textDirection: TextDirection.ltr,
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                           actions: <SemanticsAction>[SemanticsAction.tap],
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: 'two',
                           textDirection: TextDirection.ltr,
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                           actions: <SemanticsAction>[SemanticsAction.tap],
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: 'three',
                           textDirection: TextDirection.ltr,
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                           actions: <SemanticsAction>[SemanticsAction.tap],
                         ),
-                        new TestSemantics(
+                        TestSemantics(
                           label: 'four',
                           textDirection: TextDirection.ltr,
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],

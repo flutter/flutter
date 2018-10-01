@@ -69,7 +69,7 @@ Future<Null> main(List<String> rawArgs) async {
 }
 
 /// Command-line options for the `run.dart` command.
-final ArgParser _argParser = new ArgParser()
+final ArgParser _argParser = ArgParser()
   ..addMultiOption(
     'task',
     abbr: 't',
@@ -89,7 +89,7 @@ final ArgParser _argParser = new ArgParser()
           _taskNames.add(nameOrPath);
         } else if (!isDartFile || fragments.length != 3 || !_listsEqual(<String>['bin', 'tasks'], fragments.take(2).toList())) {
           // Unsupported executable location
-          throw new FormatException('Invalid value for option -t (--task): $nameOrPath');
+          throw FormatException('Invalid value for option -t (--task): $nameOrPath');
         } else {
           _taskNames.add(path.withoutExtension(fragments.last));
         }

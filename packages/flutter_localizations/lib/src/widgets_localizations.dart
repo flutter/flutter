@@ -53,7 +53,7 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [WidgetsApp] does so by default.
   static Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(new GlobalWidgetsLocalizations(locale));
+    return SynchronousFuture<WidgetsLocalizations>(GlobalWidgetsLocalizations(locale));
   }
 
   /// A [LocalizationsDelegate] that uses [GlobalWidgetsLocalizations.load]

@@ -8,27 +8,27 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Composited transforms - only offsets', (WidgetTester tester) async {
-    final LayerLink link = new LayerLink();
-    final GlobalKey key = new GlobalKey();
+    final LayerLink link = LayerLink();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Stack(
+        child: Stack(
           children: <Widget>[
-            new Positioned(
+            Positioned(
               left: 123.0,
               top: 456.0,
-              child: new CompositedTransformTarget(
+              child: CompositedTransformTarget(
                 link: link,
-                child: new Container(height: 10.0, width: 10.0),
+                child: Container(height: 10.0, width: 10.0),
               ),
             ),
-            new Positioned(
+            Positioned(
               left: 787.0,
               top: 343.0,
-              child: new CompositedTransformFollower(
+              child: CompositedTransformFollower(
                 link: link,
-                child: new Container(key: key, height: 10.0, width: 10.0),
+                child: Container(key: key, height: 10.0, width: 10.0),
               ),
             ),
           ],
@@ -40,33 +40,33 @@ void main() {
   });
 
   testWidgets('Composited transforms - with rotations', (WidgetTester tester) async {
-    final LayerLink link = new LayerLink();
-    final GlobalKey key1 = new GlobalKey();
-    final GlobalKey key2 = new GlobalKey();
+    final LayerLink link = LayerLink();
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Stack(
+        child: Stack(
           children: <Widget>[
-            new Positioned(
+            Positioned(
               top: 123.0,
               left: 456.0,
-              child: new Transform.rotate(
+              child: Transform.rotate(
                 angle: 1.0, // radians
-                child: new CompositedTransformTarget(
+                child: CompositedTransformTarget(
                   link: link,
-                  child: new Container(key: key1, height: 10.0, width: 10.0),
+                  child: Container(key: key1, height: 10.0, width: 10.0),
                 ),
               ),
             ),
-            new Positioned(
+            Positioned(
               top: 787.0,
               left: 343.0,
-              child: new Transform.rotate(
+              child: Transform.rotate(
                 angle: -0.3, // radians
-                child: new CompositedTransformFollower(
+                child: CompositedTransformFollower(
                   link: link,
-                  child: new Container(key: key2, height: 10.0, width: 10.0),
+                  child: Container(key: key2, height: 10.0, width: 10.0),
                 ),
               ),
             ),
@@ -83,41 +83,41 @@ void main() {
   });
 
   testWidgets('Composited transforms - nested', (WidgetTester tester) async {
-    final LayerLink link = new LayerLink();
-    final GlobalKey key1 = new GlobalKey();
-    final GlobalKey key2 = new GlobalKey();
+    final LayerLink link = LayerLink();
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Stack(
+        child: Stack(
           children: <Widget>[
-            new Positioned(
+            Positioned(
               top: 123.0,
               left: 456.0,
-              child: new Transform.rotate(
+              child: Transform.rotate(
                 angle: 1.0, // radians
-                child: new CompositedTransformTarget(
+                child: CompositedTransformTarget(
                   link: link,
-                  child: new Container(key: key1, height: 10.0, width: 10.0),
+                  child: Container(key: key1, height: 10.0, width: 10.0),
                 ),
               ),
             ),
-            new Positioned(
+            Positioned(
               top: 787.0,
               left: 343.0,
-              child: new Transform.rotate(
+              child: Transform.rotate(
                 angle: -0.3, // radians
-                child: new Padding(
+                child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: new CompositedTransformFollower(
-                    link: new LayerLink(),
-                    child: new Transform(
-                      transform: new Matrix4.skew(0.9, 1.1),
-                      child: new Padding(
+                  child: CompositedTransformFollower(
+                    link: LayerLink(),
+                    child: Transform(
+                      transform: Matrix4.skew(0.9, 1.1),
+                      child: Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: new CompositedTransformFollower(
+                        child: CompositedTransformFollower(
                           link: link,
-                          child: new Container(key: key2, height: 10.0, width: 10.0),
+                          child: Container(key: key2, height: 10.0, width: 10.0),
                         ),
                       ),
                     ),
@@ -138,31 +138,31 @@ void main() {
   });
 
   testWidgets('Composited transforms - hit testing', (WidgetTester tester) async {
-    final LayerLink link = new LayerLink();
-    final GlobalKey key1 = new GlobalKey();
-    final GlobalKey key2 = new GlobalKey();
-    final GlobalKey key3 = new GlobalKey();
+    final LayerLink link = LayerLink();
+    final GlobalKey key1 = GlobalKey();
+    final GlobalKey key2 = GlobalKey();
+    final GlobalKey key3 = GlobalKey();
     bool _tapped = false;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Stack(
+        child: Stack(
           children: <Widget>[
-            new Positioned(
+            Positioned(
               left: 123.0,
               top: 456.0,
-              child: new CompositedTransformTarget(
+              child: CompositedTransformTarget(
                 link: link,
-                child: new Container(key: key1, height: 10.0, width: 10.0),
+                child: Container(key: key1, height: 10.0, width: 10.0),
               ),
             ),
-            new CompositedTransformFollower(
+            CompositedTransformFollower(
               link: link,
-              child: new GestureDetector(
+              child: GestureDetector(
                 key: key2,
                 behavior: HitTestBehavior.opaque,
                 onTap: () { _tapped = true; },
-                child: new Container(key: key3, height: 10.0, width: 10.0),
+                child: Container(key: key3, height: 10.0, width: 10.0),
               ),
             ),
           ],

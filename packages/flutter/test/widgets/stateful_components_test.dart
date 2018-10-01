@@ -9,7 +9,7 @@ class InnerWidget extends StatefulWidget {
   const InnerWidget({ Key key }) : super(key: key);
 
   @override
-  InnerWidgetState createState() => new InnerWidgetState();
+  InnerWidgetState createState() => InnerWidgetState();
 }
 
 class InnerWidgetState extends State<InnerWidget> {
@@ -23,7 +23,7 @@ class InnerWidgetState extends State<InnerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return new Container();
+    return Container();
   }
 }
 
@@ -33,7 +33,7 @@ class OuterContainer extends StatefulWidget {
   final InnerWidget child;
 
   @override
-  OuterContainerState createState() => new OuterContainerState();
+  OuterContainerState createState() => OuterContainerState();
 }
 
 class OuterContainerState extends State<OuterContainer> {
@@ -62,7 +62,7 @@ void main() {
     expect(innerElement.renderObject.attached, isTrue);
 
     inner2 = const InnerWidget(key: innerKey);
-    outer2 = new OuterContainer(key: outerKey, child: inner2);
+    outer2 = OuterContainer(key: outerKey, child: inner2);
 
     await tester.pumpWidget(outer2);
 

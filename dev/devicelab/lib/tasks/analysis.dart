@@ -22,19 +22,19 @@ const int _kRunsPerBenchmark = 3;
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
 Future<TaskResult> analyzerBenchmarkTask() async {
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
   final Map<String, dynamic> data = <String, dynamic>{};
-  data.addAll((await _run(new _FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'));
-  data.addAll((await _run(new _FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'));
-  data.addAll((await _run(new _MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'));
-  data.addAll((await _run(new _MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'));
+  data.addAll((await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'));
+  data.addAll((await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'));
+  data.addAll((await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'));
+  data.addAll((await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'));
 
-  return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+  return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
 }
 
 class _BenchmarkResult {
@@ -73,8 +73,8 @@ abstract class _Benchmark {
 
   Future<double> execute(int iteration, int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
-    final Stopwatch stopwatch = new Stopwatch();
-    await inDirectory(directory, () async {
+    final Stopwatch stopwatch = Stopwatch();
+    await inDirectory<void>(directory, () async {
       stopwatch.start();
       await flutter('analyze', options: options);
       stopwatch.stop();
@@ -124,5 +124,5 @@ Future<_BenchmarkResult> _run(_Benchmark benchmark) async {
     0.0,
     (double previousValue, double element) => previousValue + element,
   );
-  return new _BenchmarkResult(sum / results.length, results.first, results.last);
+  return _BenchmarkResult(sum / results.length, results.first, results.last);
 }

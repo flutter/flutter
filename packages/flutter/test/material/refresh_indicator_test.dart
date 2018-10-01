@@ -12,27 +12,27 @@ bool refreshCalled = false;
 
 Future<void> refresh() {
   refreshCalled = true;
-  return new Future<void>.value();
+  return Future<void>.value();
 }
 
 Future<void> holdRefresh() {
   refreshCalled = true;
-  return new Completer<void>().future;
+  return Completer<void>().future;
 }
 
 void main() {
   testWidgets('RefreshIndicator', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
                 height: 200.0,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),
@@ -51,20 +51,20 @@ void main() {
   testWidgets('Refresh Indicator - nested', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
           onRefresh: refresh,
-          child: new SingleChildScrollView(
+          child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            child: new Container(
+            child: Container(
               width: 600.0,
-              child: new ListView(
+              child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-                  return new SizedBox(
+                children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                  return SizedBox(
                     height: 200.0,
-                    child: new Text(item),
+                    child: Text(item),
                   );
                 }).toList(),
               ),
@@ -93,10 +93,10 @@ void main() {
   testWidgets('RefreshIndicator - bottom', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
@@ -121,10 +121,10 @@ void main() {
   testWidgets('RefreshIndicator - top - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: holdRefresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
               SizedBox(
@@ -147,10 +147,10 @@ void main() {
   testWidgets('RefreshIndicator - bottom - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: holdRefresh,
-          child: new ListView(
+          child: ListView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
@@ -174,10 +174,10 @@ void main() {
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
               SizedBox(
@@ -202,10 +202,10 @@ void main() {
   testWidgets('RefreshIndicator - not enough', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
               SizedBox(
@@ -229,10 +229,10 @@ void main() {
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: holdRefresh, // this one never returns
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
               SizedBox(
@@ -272,10 +272,10 @@ void main() {
   testWidgets('RefreshIndicator - show - fast', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
               SizedBox(
@@ -316,10 +316,10 @@ void main() {
   testWidgets('RefreshIndicator - show - fast - twice', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const <Widget>[
               SizedBox(
@@ -354,18 +354,18 @@ void main() {
   testWidgets('RefreshIndicator - onRefresh asserts', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: () {
             refreshCalled = true;
-            // Missing a returned Future value here.
+            return null; // Missing a returned Future value here, should cause framework to throw.
           },
-          child: new ListView(
+          child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
                 height: 200.0,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),
@@ -384,19 +384,19 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     refreshCalled = false;
     double lastScrollOffset;
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new RefreshIndicator(
+      MaterialApp(
+        home: RefreshIndicator(
           onRefresh: refresh,
-          child: new ListView(
+          child: ListView(
             controller: controller,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-              return new SizedBox(
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+              return SizedBox(
                 height: 200.0,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),

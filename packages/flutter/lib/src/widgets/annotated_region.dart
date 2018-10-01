@@ -44,7 +44,7 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return new RenderAnnotatedRegion<T>(value: value, sized: sized);
+    return RenderAnnotatedRegion<T>(value: value, sized: sized);
   }
 
   @override

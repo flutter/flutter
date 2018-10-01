@@ -9,25 +9,25 @@ const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
 Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Theme(
-      data: new ThemeData(accentColor: kSelectedColor),
-      child: new SizedBox.expand(
-        child: new Center(
-          child: new SizedBox(
+    child: Theme(
+      data: ThemeData(accentColor: kSelectedColor),
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
             width: 400.0,
             height: 400.0,
-            child: new Column(
+            child: Column(
               children: <Widget>[
-                new TabPageSelector(
+                TabPageSelector(
                   controller: tabController,
                   color: color,
                   selectedColor: selectedColor,
                   indicatorSize: indicatorSize,
                 ),
-                new Flexible(
-                  child: new TabBarView(
+                Flexible(
+                  child: TabBarView(
                     controller: tabController,
                     children: const <Widget>[
                       Center(child: Text('0')),
@@ -52,12 +52,12 @@ List<Color> indicatorColors(WidgetTester tester) {
       matching: find.byType(TabPageSelectorIndicator)
     )
   );
-  return indicators.map((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
+  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }
 
 void main() {
   testWidgets('PageSelector responds correctly to setting the TabController index', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
     );
@@ -78,7 +78,7 @@ void main() {
   });
 
   testWidgets('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
     );
@@ -121,7 +121,7 @@ void main() {
   });
 
   testWidgets('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
@@ -183,7 +183,7 @@ void main() {
     const Color kRed = Color(0xFFFF0000);
     const Color kBlue = Color(0xFF0000FF);
 
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
@@ -199,7 +199,7 @@ void main() {
   });
 
   testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,

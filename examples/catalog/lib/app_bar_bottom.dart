@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 class AppBarBottomSample extends StatefulWidget {
   @override
-  _AppBarBottomSampleState createState() => new _AppBarBottomSampleState();
+  _AppBarBottomSampleState createState() => _AppBarBottomSampleState();
 }
 
 class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTickerProviderStateMixin {
@@ -15,7 +15,7 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
   @override
   void initState() {
     super.initState();
-    _tabController = new TabController(vsync: this, length: choices.length);
+    _tabController = TabController(vsync: this, length: choices.length);
   }
 
   @override
@@ -33,40 +33,40 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('AppBar Bottom Widget'),
-          leading: new IconButton(
+          leading: IconButton(
             tooltip: 'Previous choice',
             icon: const Icon(Icons.arrow_back),
             onPressed: () { _nextPage(-1); },
           ),
           actions: <Widget>[
-            new IconButton(
+            IconButton(
               icon: const Icon(Icons.arrow_forward),
               tooltip: 'Next choice',
               onPressed: () { _nextPage(1); },
             ),
           ],
-          bottom: new PreferredSize(
+          bottom: PreferredSize(
             preferredSize: const Size.fromHeight(48.0),
-            child: new Theme(
+            child: Theme(
               data: Theme.of(context).copyWith(accentColor: Colors.white),
-              child: new Container(
+              child: Container(
                 height: 48.0,
                 alignment: Alignment.center,
-                child: new TabPageSelector(controller: _tabController),
+                child: TabPageSelector(controller: _tabController),
               ),
             ),
           ),
         ),
-        body: new TabBarView(
+        body: TabBarView(
           controller: _tabController,
-          children: choices.map((Choice choice) {
-            return new Padding(
+          children: choices.map<Widget>((Choice choice) {
+            return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: new ChoiceCard(choice: choice),
+              child: ChoiceCard(choice: choice),
             );
           }).toList(),
         ),
@@ -98,15 +98,15 @@ class ChoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
-    return new Card(
+    return Card(
       color: Colors.white,
-      child: new Center(
-        child: new Column(
+      child: Center(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            new Icon(choice.icon, size: 128.0, color: textStyle.color),
-            new Text(choice.title, style: textStyle),
+            Icon(choice.icon, size: 128.0, color: textStyle.color),
+            Text(choice.title, style: textStyle),
           ],
         ),
       ),
@@ -115,7 +115,7 @@ class ChoiceCard extends StatelessWidget {
 }
 
 void main() {
-  runApp(new AppBarBottomSample());
+  runApp(AppBarBottomSample());
 }
 
 /*

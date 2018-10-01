@@ -26,7 +26,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
   String analysisTarget;
   bool firstAnalysis = true;
-  Set<String> analyzedPaths = new Set<String>();
+  Set<String> analyzedPaths = Set<String>();
   Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
@@ -37,7 +37,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     List<String> directories;
 
     if (argResults['flutter-repo']) {
-      final PackageDependencyTracker dependencies = new PackageDependencyTracker();
+      final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
       directories = repoRoots;
@@ -54,7 +54,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
-    final AnalysisServer server = new AnalysisServer(sdkPath, directories);
+    final AnalysisServer server = AnalysisServer(sdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -76,7 +76,7 @@ class AnalyzeContinuously extends AnalyzeBase {
         printStatus('\n');
       analysisStatus = logger.startProgress('Analyzing $analysisTarget...');
       analyzedPaths.clear();
-      analysisTimer = new Stopwatch()..start();
+      analysisTimer = Stopwatch()..start();
     } else {
       analysisStatus?.stop();
       analysisTimer.stop();

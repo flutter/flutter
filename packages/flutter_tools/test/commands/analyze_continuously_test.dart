@@ -34,7 +34,7 @@ void main() {
 
       await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
-      server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+      server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
       int errorCount = 0;
       final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -54,7 +54,7 @@ void main() {
 
     await pubGet(context: PubContext.flutterTests, directory: tempDir.path);
 
-    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+    server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
@@ -70,10 +70,11 @@ void main() {
     OperatingSystemUtils: () => os
   });
 
-  testUsingContext('analyze', () async {
+  testUsingContext('Returns no errors when source is error-free', () async {
     const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
-    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+    server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
+
     int errorCount = 0;
     final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
