@@ -106,8 +106,8 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
     messages.add(ValidationMessage(androidSdk.ndk == null
-        ? 'Android NDK location not configured (optional; useful for native profiling support)'
-        : 'Android NDK at ${androidSdk.ndk.directory}'));
+      ? 'Android NDK location not configured (optional; useful for native profiling support)'
+      : 'Android NDK at ${androidSdk.ndk.directory}'));
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
@@ -133,7 +133,7 @@ class AndroidValidator extends DoctorValidator {
       }));
       messages.add(ValidationMessage(
           'Try re-installing or updating your Android SDK,\n'
-              'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
+          'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 

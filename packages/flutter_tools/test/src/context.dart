@@ -199,7 +199,7 @@ class MockDoctor extends Doctor {
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
     return superValidators.map((DoctorValidator v) {
-      if (v is AndroidValidator) {
+      if (v is AndroidLicenseValidator) {
         return MockAndroidLicenseValidator();
       }
       return v;
