@@ -425,7 +425,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   List<String> getRepoRoots() {
     final String root = fs.path.absolute(Cache.flutterRoot);
     // not bin, and not the root
-    return <String>['dev', 'examples', 'packages'].map((String item) {
+    return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return fs.path.join(root, item);
     }).toList();
   }
@@ -434,7 +434,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   List<Directory> getRepoPackages() {
     return getRepoRoots()
       .expand<String>((String root) => _gatherProjectPaths(root))
-      .map((String dir) => fs.directory(dir))
+      .map<Directory>((String dir) => fs.directory(dir))
       .toList();
   }
 

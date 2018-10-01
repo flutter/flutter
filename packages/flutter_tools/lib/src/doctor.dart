@@ -569,9 +569,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     try {
       final Iterable<Directory> installDirs = installPaths
-              .map((String installPath) => fs.directory(installPath))
-              .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-              .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
+              .map<Directory>((String installPath) => fs.directory(installPath))
+              .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+              .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .whereType<Directory>();
       for (Directory dir in installDirs) {
         checkForIntelliJ(dir);
@@ -626,13 +626,13 @@ class DeviceValidator extends DoctorValidator {
     if (devices.isEmpty) {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
-        messages = diagnostics.map((String message) => ValidationMessage(message)).toList();
+        messages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage(message)).toList();
       } else {
         messages = <ValidationMessage>[ValidationMessage.hint('No devices available')];
       }
     } else {
       messages = await Device.descriptions(devices)
-          .map((String msg) => ValidationMessage(msg)).toList();
+          .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     if (devices.isEmpty) {

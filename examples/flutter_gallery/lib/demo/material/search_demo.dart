@@ -160,7 +160,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
 
     return _SuggestionList(
       query: query,
-      suggestions: suggestions.map((int i) => '$i').toList(),
+      suggestions: suggestions.map<String>((int i) => '$i').toList(),
       onSelected: (String suggestion) {
         query = suggestion;
         showResults(context);

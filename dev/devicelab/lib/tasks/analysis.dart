@@ -22,7 +22,7 @@ const int _kRunsPerBenchmark = 3;
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
 Future<TaskResult> analyzerBenchmarkTask() async {
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<void>(flutterDirectory, () async {
     rmTree(_megaGalleryDirectory);
     mkdirs(_megaGalleryDirectory);
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
@@ -74,7 +74,7 @@ abstract class _Benchmark {
   Future<double> execute(int iteration, int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
     final Stopwatch stopwatch = Stopwatch();
-    await inDirectory(directory, () async {
+    await inDirectory<void>(directory, () async {
       stopwatch.start();
       await flutter('analyze', options: options);
       stopwatch.stop();

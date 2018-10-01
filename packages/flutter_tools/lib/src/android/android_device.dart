@@ -474,7 +474,7 @@ class AndroidDevice extends Device {
   @override
   Future<bool> stopApp(ApplicationPackage app) {
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
-    return runCommandAndStreamOutput(command).then((int exitCode) => exitCode == 0);
+    return runCommandAndStreamOutput(command).then<bool>((int exitCode) => exitCode == 0);
   }
 
   @override
@@ -673,8 +673,8 @@ class _AdbLogReader extends DeviceLogReader {
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
       const Utf8Decoder decoder = Utf8Decoder(allowMalformed: true);
-      _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stdout.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
+      _process.stderr.transform<String>(decoder).transform<String>(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();

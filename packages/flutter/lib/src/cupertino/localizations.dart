@@ -173,19 +173,6 @@ abstract class CupertinoLocalizations {
   /// This function will deal with pluralization based on the `second` parameter.
   String timerPickerSecondLabel(int second);
 
-  /// The `CupertinoLocalizations` from the closest [Localizations] instance
-  /// that encloses the given context.
-  ///
-  /// This method is just a convenient shorthand for:
-  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)`.
-  ///
-  /// References to the localized resources defined by this class are typically
-  /// written in terms of this method. For example:
-  ///
-  /// ```dart
-  /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
-  /// ```
-
   /// The term used for cutting
   String get cutButtonLabel;
 
@@ -198,6 +185,18 @@ abstract class CupertinoLocalizations {
   /// The term used for selecting everything
   String get selectAllButtonLabel;
 
+  /// The `CupertinoLocalizations` from the closest [Localizations] instance
+  /// that encloses the given context.
+  ///
+  /// This method is just a convenient shorthand for:
+  /// `Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)`.
+  ///
+  /// References to the localized resources defined by this class are typically
+  /// written in terms of this method. For example:
+  ///
+  /// ```dart
+  /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
+  /// ```
   static CupertinoLocalizations of(BuildContext context) {
     return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations);
   }

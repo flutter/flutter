@@ -136,7 +136,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         title: const Text('FAB per tab'),
         bottom: TabBar(
           controller: _controller,
-          tabs: _allPages.map((_Page page) => Tab(text: page.label.toUpperCase())).toList(),
+          tabs: _allPages.map<Widget>((_Page page) => Tab(text: page.label.toUpperCase())).toList(),
         ),
         actions: <Widget>[
           MaterialDemoDocumentationButton(TabsFabDemo.routeName),
@@ -153,7 +153,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       floatingActionButton: buildFloatingActionButton(_selectedPage),
       body: TabBarView(
         controller: _controller,
-        children: _allPages.map(buildTabView).toList()
+        children: _allPages.map<Widget>(buildTabView).toList()
       ),
     );
   }

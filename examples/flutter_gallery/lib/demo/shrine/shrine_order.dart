@@ -46,7 +46,7 @@ class _ProductItem extends StatelessWidget {
                 ),
               ),
               child: DropdownButton<int>(
-                items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
+                items: <int>[0, 1, 2, 3, 4, 5].map<DropdownMenuItem<int>>((int value) {
                   return DropdownMenuItem<int>(
                     value: value,
                     child: Padding(

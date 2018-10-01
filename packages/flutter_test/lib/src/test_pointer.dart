@@ -142,7 +142,7 @@ class TestGesture {
     assert(hitTester != null);
     assert(dispatcher != null);
     TestGesture result;
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
       final TestPointer testPointer = TestPointer(pointer);
@@ -170,7 +170,7 @@ class TestGesture {
 
   /// Send a move event moving the pointer to the given location.
   Future<Null> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
-    return TestAsyncUtils.guard(() {
+    return TestAsyncUtils.guard<Null>(() {
       assert(_pointer._isDown);
       return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
     });
@@ -180,7 +180,7 @@ class TestGesture {
   ///
   /// The object is no longer usable after this method has been called.
   Future<Null> up() {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.up(), _result);
       assert(!_pointer._isDown);
@@ -194,7 +194,7 @@ class TestGesture {
   ///
   /// The object is no longer usable after this method has been called.
   Future<Null> cancel() {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       assert(_pointer._isDown);
       await _dispatcher(_pointer.cancel(), _result);
       assert(!_pointer._isDown);

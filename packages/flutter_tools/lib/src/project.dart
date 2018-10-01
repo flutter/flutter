@@ -77,7 +77,7 @@ class FlutterProject {
       example.ios.productBundleIdentifier,
     ];
     return Set<String>.from(candidates
-        .map(_organizationNameFromPackageName)
+        .map<String>(_organizationNameFromPackageName)
         .where((String name) => name != null));
   }
 

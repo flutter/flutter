@@ -1564,7 +1564,7 @@ class _RenderCupertinoDialogActions extends RenderBox
         )
       : Rect.zero;
 
-    final List<Rect> pressedButtonRects = _pressedButtons.map((RenderBox pressedButton) {
+    final List<Rect> pressedButtonRects = _pressedButtons.map<Rect>((RenderBox pressedButton) {
       final MultiChildLayoutParentData buttonParentData = pressedButton.parentData;
 
       return Rect.fromLTWH(

@@ -94,7 +94,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   final String oldContents = _readFlutterPluginsList(project);
   final String pluginManifest =
-      plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
+      plugins.map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
     pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
@@ -147,7 +147,7 @@ public final class GeneratedPluginRegistrant {
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> androidPlugins = plugins
       .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
-      .map((Plugin p) => <String, dynamic>{
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
           'name': p.name,
           'package': p.androidPackage,
           'class': p.pluginClass,
@@ -238,7 +238,7 @@ end
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
-      .map((Plugin p) => <String, dynamic>{
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
     'name': p.name,
     'prefix': p.iosPrefix,
     'class': p.pluginClass,

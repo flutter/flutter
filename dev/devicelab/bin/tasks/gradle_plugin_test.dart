@@ -297,7 +297,7 @@ class _Dependencies {
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
         // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }

@@ -356,7 +356,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   _demoItems[index].isExpanded = !isExpanded;
                 });
               },
-              children: _demoItems.map((DemoItem<dynamic> item) {
+              children: _demoItems.map<ExpansionPanel>((DemoItem<dynamic> item) {
                 return ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,

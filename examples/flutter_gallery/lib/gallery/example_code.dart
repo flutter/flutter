@@ -104,7 +104,7 @@ DropdownButton<String>(
     });
   },
   items: <String>['One', 'Two', 'Free', 'Four']
-    .map((String value) {
+    .map<DropdownMenuItem<String>>((String value) {
       return DropdownMenuItem<String>(
         value: value,
         child: Text(value));
@@ -263,7 +263,7 @@ GridView.count(
     'https://example.com/image-2.jpg',
     '...',
     'https://example.com/image-n.jpg'
-  ].map((String url) {
+  ].map<Widget>((String url) {
     return GridTile(
       footer: GridTileBar(
         title: Text(url)

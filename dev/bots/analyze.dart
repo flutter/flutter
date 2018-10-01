@@ -207,8 +207,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
   final int exitCode = await process.exitCode;
   final EvalResult result = EvalResult(
-    stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
-    stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+    stdout: utf8.decode((await savedStdout).expand<int>((List<int> ints) => ints).toList()),
+    stderr: utf8.decode((await savedStderr).expand<int>((List<int> ints) => ints).toList()),
     exitCode: exitCode,
   );
 
@@ -328,13 +328,13 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
     .whereType<Directory>()
     .map<String>((Directory entity) => path.basename(entity.path))
     .toList()..sort();
-  if (!_matches(packages, directories)) {
+  if (!_matches<String>(packages, directories)) {
     errors.add(
       'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
       'These are the exported packages:\n' +
-      packages.map((String path) => '  lib/$path.dart').join('\n') +
+      packages.map<String>((String path) => '  lib/$path.dart').join('\n') +
       'These are the directories:\n' +
-      directories.map((String path) => '  lib/src/$path/').join('\n')
+      directories.map<String>((String path) => '  lib/src/$path/').join('\n')
     );
   }
   // Verify that the imports are well-ordered.
@@ -350,7 +350,7 @@ Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
     }
   }
   for (String package in dependencyMap.keys) {
-    final List<String> loop = _deepSearch(dependencyMap, package);
+    final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
       errors.add(
         '${yellow}Dependency loop:$reset ' +
@@ -421,7 +421,7 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
       continue; // we catch these separately
     if (seen != null && seen.contains(key))
       return <T>[start, key];
-    final List<T> result = _deepSearch(
+    final List<T> result = _deepSearch<T>(
       map,
       key,
       (seen == null ? Set<T>.from(<T>[start]) : Set<T>.from(seen))..add(key),

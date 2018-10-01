@@ -146,7 +146,7 @@ Future<Null> main(List<String> arguments) async {
   }
 
   String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
-  print('Executing: (cd dev/docs ; $pubExecutable ${dartdocArgs.map(quote).join(' ')})');
+  print('Executing: (cd dev/docs ; $pubExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
   process = await Process.start(
     pubExecutable,
@@ -302,7 +302,7 @@ void putRedirectInOldIndexLocation() {
 }
 
 List<String> findPackageNames() {
-  return findPackages().map((FileSystemEntity file) => path.basename(file.path)).toList();
+  return findPackages().map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
@@ -350,8 +350,8 @@ void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> f
   assert(prefix != null);
   assert(filter != null);
   stream
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .listen((String line) {
       if (!filter.any((Pattern pattern) => line.contains(pattern)))
         print('$prefix$line'.trim());
