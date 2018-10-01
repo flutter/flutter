@@ -184,23 +184,6 @@ abstract class MaterialLocalizations {
   /// [ScriptCategory.englishLike] scripts.
   ScriptCategory get scriptCategory;
 
-  /// Provides geometric text preferences for the current locale.
-  ///
-  /// This text theme is incomplete. For example, it lacks text color
-  /// information. This theme must be merged with another text theme that
-  /// provides the missing values.
-  ///
-  /// Typically a complete theme is obtained via [Theme.of], which can be
-  /// localized using the [Localizations] widget.
-  ///
-  /// The text styles provided by this theme are expected to have their
-  /// [TextStyle.inherit] property set to false, so that the [ThemeData]
-  /// obtained from [Theme.of] no longer inherits text style properties and
-  /// contains a complete set of properties needed to style a [Text] widget.
-  ///
-  /// See also: https://material.io/go/design-typography
-  // TextTheme localTextGeometry({ int version = 0 });
-
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
   /// separators as necessary.
   String formatDecimal(int number);
