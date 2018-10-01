@@ -880,7 +880,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final RenderBox button = context.findRenderObject();
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
-    final RelativeRect position = new RelativeRect.fromRect(
+    final RelativeRect position = RelativeRect.fromRect(
       new Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
         button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),

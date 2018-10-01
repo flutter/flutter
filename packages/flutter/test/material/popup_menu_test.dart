@@ -450,15 +450,16 @@ void main() {
         },
       );
 
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(
+      new MaterialApp(
         home: Scaffold(
           body: Center(
             child:  new Material(
               child: popupMenuButton,
-          ),
-        )
+            ),
+          )
         ),
-    ),
+      ),
     );
 
     await tester.tap(find.byType(IconButton));
