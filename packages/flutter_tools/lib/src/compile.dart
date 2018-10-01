@@ -81,7 +81,7 @@ class KernelCompiler {
     String sdkRoot,
     String mainPath,
     String outputFilePath,
-    String depfilePath,
+    String depFilePath,
     bool linkPlatformKernelIn = false,
     bool aot = false,
     bool trackWidgetCreation = false,
@@ -100,16 +100,16 @@ class KernelCompiler {
     // Currently the compiler emits buildbot paths for the core libs in the
     // depfile. None of these are available on the local host.
     Fingerprinter fingerprinter;
-    if (depfilePath != null) {
+    if (depFilePath != null) {
       fingerprinter = Fingerprinter(
-        fingerprintPath: '$depfilePath.fingerprint',
+        fingerprintPath: '$depFilePath.fingerprint',
         paths: <String>[mainPath],
         properties: <String, String>{
           'entryPoint': mainPath,
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
         },
-        depfilePaths: <String>[depfilePath],
+        depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
       );
 
@@ -154,8 +154,8 @@ class KernelCompiler {
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
     }
-    if (depfilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
-      command.addAll(<String>['--depfile', depfilePath]);
+    if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
+      command.addAll(<String>['--depfile', depFilePath]);
     }
     if (fileSystemRoots != null) {
       for (String root in fileSystemRoots) {
