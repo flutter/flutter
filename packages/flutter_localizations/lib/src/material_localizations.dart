@@ -502,22 +502,8 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
   }
 
-  /// The script category used by [localTextGeometry]. Must be one of the strings
-  /// declared in [MaterialTextGeometry].
-  //
-  // TODO(ianh): make this return a TextTheme from MaterialTextGeometry.
-  // TODO(ianh): drop the constructor on MaterialTextGeometry.
-  // TODO(ianh): drop the strings on MaterialTextGeometry.
-  @protected
-  String get scriptCategory;
-
   @override
-  TextTheme localTextGeometry({ int version }) {
-    return MaterialTextGeometry.localizedFor(
-      version: version,
-      scriptCategory: scriptCategory,
-    );
-  }
+  ScriptCategory get scriptCategory;
 
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.

@@ -74,16 +74,7 @@ void main() {
       expect(textTheme.body1, isTextFont);
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
-      expect(textTheme.headline1, isDisplayFont);
-      expect(textTheme.headline2, isDisplayFont);
-      expect(textTheme.headline3, isDisplayFont);
-      expect(textTheme.headline4, isDisplayFont);
-      expect(textTheme.headline5, isDisplayFont);
-      expect(textTheme.headline6, isDisplayFont);
-      expect(textTheme.subtitle1, isTextFont);
-      expect(textTheme.subtitle2, isTextFont);
-      expect(textTheme.paragraph1, isTextFont);
-      expect(textTheme.paragraph2, isTextFont);
+      expect(textTheme.subtitle, isTextFont);
       expect(textTheme.overline, isTextFont);
     }
   });

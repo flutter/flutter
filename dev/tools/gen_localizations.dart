@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This program generates a Dart "localizations" Map definition that combines
-// the contents of the arb files. The map can be used to lookup a localized
-// string: `localizations[localeString][resourceId]`.
+// This program generates a getTranslation() function that looks up the
+// translations contained by the arb files. The returned value is an
+// instance of GlobalMaterialLocalizations that corresponds to a single
+// locale.
 //
 // The *.arb files are in packages/flutter_localizations/lib/src/l10n.
 //
@@ -273,6 +274,8 @@ String generateType(Map<String, dynamic> attributes) {
     switch (attributes['x-flutter-type']) {
       case 'icuShortTimePattern':
         return 'TimeOfDayFormat';
+      case 'scriptCategory':
+        return 'ScriptCategory';
     }
   }
   return 'String';
@@ -308,6 +311,12 @@ const Map<String, String> _icuTimeOfDayToEnum = <String, String>{
   'ah:mm': 'TimeOfDayFormat.a_space_h_colon_mm',
 };
 
+const Map<String, String> _scriptCategoryToEnum = <String, String>{
+  'English-like': 'ScriptCategory.englishLike',
+  'dense': 'ScriptCategory.dense',
+  'tall': 'ScriptCategory.tall',
+};
+
 /// Returns the literal that describes the value returned by getters
 /// with the given attributes.
 ///
@@ -330,6 +339,15 @@ String generateValue(String value, Map<String, dynamic> attributes) {
           );
         }
         return _icuTimeOfDayToEnum[value];
+      case 'scriptCategory':
+        if (!_scriptCategoryToEnum.containsKey(value)) {
+          throw Exception(
+            '"$value" is not one of the scriptCategory values supported '
+            'by the material library. Here is the list of supported '
+            'values:\n  ' + _scriptCategoryToEnum.keys.join('\n  ')
+          );
+        }
+        return _scriptCategoryToEnum[value];
     }
   }
   return generateString(value);

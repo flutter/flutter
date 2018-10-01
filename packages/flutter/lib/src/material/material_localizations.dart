@@ -168,6 +168,18 @@ abstract class MaterialLocalizations {
   /// each supported layout.
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
 
+  /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
+  ///
+  /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
+  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// three language categories defined in https://material.io/go/design-typography.
+  ///
+  /// Generally speaking, font sizes for [ScriptCategory.tall] and
+  /// [ScriptCategory.dense] scripts - for text styles that are smaller than the
+  /// title style - are one unit larger than they are for
+  /// [ScriptCategory.englishLike] scripts.
+  ScriptCategory get scriptCategory;
+
   /// Provides geometric text preferences for the current locale.
   ///
   /// This text theme is incomplete. For example, it lacks text color
@@ -183,7 +195,7 @@ abstract class MaterialLocalizations {
   /// contains a complete set of properties needed to style a [Text] widget.
   ///
   /// See also: https://material.io/go/design-typography
-  TextTheme localTextGeometry({ int version = 0 });
+  // TextTheme localTextGeometry({ int version = 0 });
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
   /// separators as necessary.
@@ -653,15 +665,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;
-  }
-
-  @override
-  TextTheme localTextGeometry({ int version = 0 }) {
-    return MaterialTextGeometry.localizedFor(version: version);
   }
 
   @override

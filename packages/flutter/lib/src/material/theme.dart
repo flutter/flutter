@@ -133,7 +133,10 @@ class Theme extends StatelessWidget {
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (inheritedTheme == null) {
-      final TextTheme geometryTheme = localizations?.localTextGeometry() ?? MaterialTextGeometry.englishLike;
+      final TextTheme geometryTheme = MaterialTextGeometry.localizedFor(
+        version: 0,
+        scriptCategory: localizations?.scriptCategory ?? ScriptCategory.englishLike,
+      );
       return ThemeData.localize(_kFallbackTheme, geometryTheme);
     }
     return inheritedTheme.theme.data.localizeFor(localizations);

@@ -633,8 +633,8 @@ class ThemeData extends Diagnosticable {
   final ColorScheme colorScheme;
 =======
   /// Font sizes, weights, and letter spacing will match the original (2017)
-  /// Material Design spec if [typographyVersion] is 1, the current (2018)
-  /// version of the spec if [typographyVersion] is 2.
+  /// Material Design spec if [typographyVersion] is 0, the current (2018)
+  /// version of the spec if [typographyVersion] is 1.
   ///
   /// The current spec is https://material.io/design/typography.
   final int typographyVersion;
@@ -740,9 +740,17 @@ class ThemeData extends Diagnosticable {
     );
   }
 
+  /// Returns a copy of this theme with [primaryTextTheme], [accentTextTheme],
+  /// and [textTheme] replaced by versions that have been localized
+  /// per [MaterialLocalizations.scriptCategory] and whose sizes, weights,
+  /// and letter spacing correspond to [typographyVersion].
+  ///
+  /// The returned values are cached, see [ThemeData.localize].
   ThemeData localizeFor(MaterialLocalizations localizations) {
-    final TextTheme geometryTheme = localizations?.localTextGeometry(version: typographyVersion)
-      ?? MaterialTextGeometry.englishLike;
+    final TextTheme geometryTheme = MaterialTextGeometry.localizedFor(
+      version: typographyVersion,
+      scriptCategory: localizations?.scriptCategory ?? ScriptCategory.englishLike,
+    );
     return ThemeData.localize(this, geometryTheme);
   }
 
