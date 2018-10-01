@@ -37,9 +37,7 @@ void main() {
     test('restart works without error', () async {
       await _flutter.run();
       await _flutter.hotRestart();
-      // TODO(dantup): Unskip after flutter-tester restart issue is fixed on Windows:
-      // https://github.com/flutter/flutter/issues/21348.
-    }, skip: platform.isWindows);
+    });
 
     test('reload hits breakpoints with file:// prefixes after reload', () async {
       await _flutter.run(withDebugger: true);
