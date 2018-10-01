@@ -136,6 +136,7 @@ abstract class SerializableFinder {
       case 'ByValueKey': return ByValueKey.deserialize(json);
       case 'ByTooltipMessage': return ByTooltipMessage.deserialize(json);
       case 'ByText': return ByText.deserialize(json);
+      case 'PageBack': return PageBack();
     }
     throw DriverError('Unsupported search specification type $finderType');
   }
@@ -251,6 +252,17 @@ class ByType extends SerializableFinder {
   static ByType deserialize(Map<String, String> json) {
     return ByType(json['type']);
   }
+}
+
+/// A Flutter Driver finder that finds the back button on the page's Material
+/// or Cupertino scaffold.
+///
+/// See also:
+///
+///  * [WidgetTester.pageBack], for a similar functionality in widget tests.
+class PageBack extends SerializableFinder {
+  @override
+  String get finderType => 'PageBack';
 }
 
 /// A Flutter driver command that retrieves a semantics id using a specified finder.
