@@ -106,8 +106,8 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
     messages.add(ValidationMessage(androidSdk.ndk == null
-      ? 'Android NDK location not configured (optional; useful for native profiling support)'
-      : 'Android NDK at ${androidSdk.ndk.directory}'));
+          ? 'Android NDK location not configured (optional; useful for native profiling support)'
+          : 'Android NDK at ${androidSdk.ndk.directory}'));
 
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
@@ -193,6 +193,9 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   bool _checkJavaVersionNoOutput() {
     final String javaBinary = AndroidSdk.findJavaBinary();
+    if (javaBinary == null) {
+      return false;
+    }
     if (!processManager.canRun(javaBinary)) {
       return false;
     }
