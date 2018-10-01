@@ -13,7 +13,7 @@ import 'picker.dart';
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
-const double _kMagnification = 1.1;
+const double _kMagnification = 1.05;
 const double _kDatePickerPadSize = 12.0;
 // Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
