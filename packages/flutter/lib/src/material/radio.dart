@@ -81,7 +81,7 @@ class Radio<T> extends StatefulWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new Radio<SingingCharacter>(
+  /// Radio<SingingCharacter>(
   ///   value: SingingCharacter.lafayette,
   ///   groupValue: _character,
   ///   onChanged: (SingingCharacter newValue) {
@@ -108,7 +108,7 @@ class Radio<T> extends StatefulWidget {
   final MaterialTapTargetSize materialTapTargetSize;
 
   @override
-  _RadioState<T> createState() => new _RadioState<T>();
+  _RadioState<T> createState() => _RadioState<T>();
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
@@ -136,8 +136,8 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
         size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
         break;
     }
-    final BoxConstraints additionalConstraints = new BoxConstraints.tight(size);
-    return new _RadioRenderObjectWidget(
+    final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
+    return _RadioRenderObjectWidget(
       selected: widget.value == widget.groupValue,
       activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
       inactiveColor: _getInactiveColor(themeData),
@@ -171,7 +171,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   final BoxConstraints additionalConstraints;
 
   @override
-  _RenderRadio createRenderObject(BuildContext context) => new _RenderRadio(
+  _RenderRadio createRenderObject(BuildContext context) => _RenderRadio(
     value: selected,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
@@ -220,7 +220,7 @@ class _RenderRadio extends RenderToggleable {
     final Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
       ..color = Color.lerp(inactiveColor, radioColor, position.value)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
@@ -236,6 +236,8 @@ class _RenderRadio extends RenderToggleable {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isInMutuallyExclusiveGroup = true;
+    config
+      ..isInMutuallyExclusiveGroup = true
+      ..isChecked = value == true;
   }
 }

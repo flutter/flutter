@@ -10,8 +10,8 @@ import 'package:flutter/scheduler.dart';
 
 import 'constants.dart';
 
-const Duration _kToggleDuration = const Duration(milliseconds: 200);
-final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, end: kRadialReactionRadius);
+const Duration _kToggleDuration = Duration(milliseconds: 200);
+final Animatable<double> _kRadialReactionRadiusTween = Tween<double>(begin: 0.0, end: kRadialReactionRadius);
 
 /// A base class for material style toggleable controls with toggle animations.
 ///
@@ -43,26 +43,26 @@ abstract class RenderToggleable extends RenderConstrainedBox {
        _onChanged = onChanged,
        _vsync = vsync,
        super(additionalConstraints: additionalConstraints) {
-    _tap = new TapGestureRecognizer()
+    _tap = TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapUp = _handleTapUp
       ..onTapCancel = _handleTapCancel;
-    _positionController = new AnimationController(
+    _positionController = AnimationController(
       duration: _kToggleDuration,
       value: value == false ? 0.0 : 1.0,
       vsync: vsync,
     );
-    _position = new CurvedAnimation(
+    _position = CurvedAnimation(
       parent: _positionController,
       curve: Curves.linear,
     )..addListener(markNeedsPaint)
      ..addStatusListener(_handlePositionStateChanged);
-    _reactionController = new AnimationController(
+    _reactionController = AnimationController(
       duration: kRadialReactionDuration,
       vsync: vsync,
     );
-    _reaction = new CurvedAnimation(
+    _reaction = CurvedAnimation(
       parent: _reactionController,
       curve: Curves.fastOutSlowIn,
     )..addListener(markNeedsPaint);
@@ -325,7 +325,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   void paintRadialReaction(Canvas canvas, Offset offset, Offset origin) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
-      final Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
+      final Paint reactionPaint = Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
       final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value);
       final double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
       canvas.drawCircle(center + offset, radius, reactionPaint);
@@ -339,13 +339,12 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     config.isEnabled = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value == true;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
-    properties.add(new FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', defaultValue: true));
+    properties.add(FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
+    properties.add(FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', defaultValue: true));
   }
 }

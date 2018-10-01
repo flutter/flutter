@@ -72,7 +72,11 @@ class EmulatorsCommand extends FlutterCommand {
         await emulators.first.launch();
       }
       catch (e) {
-        printError(e);
+        if (e is String) {
+          printError(e);
+        } else {
+          rethrow;
+        }
       }
     }
   }

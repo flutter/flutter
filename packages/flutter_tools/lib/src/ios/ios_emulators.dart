@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../emulator.dart';
@@ -40,7 +39,8 @@ class IOSEmulator extends Emulator {
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final List<String> args = <String>['open']
           .followedBy(additionalArgs)
-          .followedBy(<String>['-a', getSimulatorPath()]);
+          .followedBy(<String>['-a', xcode.getSimulatorPath()])
+          .toList();
 
       final RunResult launchResult = await runAsync(args);
       if (launchResult.exitCode != 0) {
@@ -62,22 +62,10 @@ class IOSEmulator extends Emulator {
 
 /// Return the list of iOS Simulators (there can only be zero or one).
 List<IOSEmulator> getEmulators() {
-  final String simulatorPath = getSimulatorPath();
+  final String simulatorPath = xcode.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[new IOSEmulator('apple_ios_simulator')];
-}
-
-String getSimulatorPath() {
-  if (xcode.xcodeSelectPath == null)
-    return null;
-  final List<String> searchPaths = <String>[
-    fs.path.join(xcode.xcodeSelectPath, 'Applications', 'Simulator.app'),
-  ];
-  return searchPaths.where((String p) => p != null).firstWhere(
-        (String p) => fs.directory(p).existsSync(),
-        orElse: () => null,
-      );
+  return <IOSEmulator>[IOSEmulator('apple_ios_simulator')];
 }

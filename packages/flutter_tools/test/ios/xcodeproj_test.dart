@@ -9,15 +9,15 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
+import '../src/pubspec_schema.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
@@ -29,10 +29,10 @@ void main() {
     FileSystem fs;
 
     setUp(() {
-      mockProcessManager = new MockProcessManager();
-      xcodeProjectInterpreter = new XcodeProjectInterpreter();
+      mockProcessManager = MockProcessManager();
+      xcodeProjectInterpreter = XcodeProjectInterpreter();
       macOS = fakePlatform('macos');
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
       fs.file(xcodebuild).createSync(recursive: true);
     });
 
@@ -46,13 +46,13 @@ void main() {
 
     testUsingOsxContext('versionText returns null when xcodebuild is not installed', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenThrow(const ProcessException(xcodebuild, const <String>['-version']));
+          .thenThrow(const ProcessException(xcodebuild, <String>['-version']));
       expect(xcodeProjectInterpreter.versionText, isNull);
     });
 
     testUsingOsxContext('versionText returns null when xcodebuild is not fully installed', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version'])).thenReturn(
-        new ProcessResult(
+        ProcessResult(
           0,
           1,
           "xcode-select: error: tool 'xcodebuild' requires Xcode, "
@@ -66,43 +66,43 @@ void main() {
 
     testUsingOsxContext('versionText returns formatted version text', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.versionText, 'Xcode 8.3.3, Build version 8E3004b');
     });
 
     testUsingOsxContext('versionText handles Xcode version string with unexpected format', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
     });
 
     testUsingOsxContext('majorVersion returns major version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.majorVersion, 8);
     });
 
     testUsingOsxContext('majorVersion is null when version has unexpected format', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.majorVersion, isNull);
     });
 
     testUsingOsxContext('minorVersion returns minor version', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.minorVersion, 3);
     });
 
     testUsingOsxContext('minorVersion returns 0 when minor version is unspecified', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.minorVersion, 0);
     });
 
     testUsingOsxContext('minorVersion is null when version has unexpected format', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.minorVersion, isNull);
     });
 
@@ -120,7 +120,7 @@ void main() {
 
     testUsingOsxContext('isInstalled is false when Xcode is not fully installed', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version'])).thenReturn(
-        new ProcessResult(
+        ProcessResult(
           0,
           1,
           "xcode-select: error: tool 'xcodebuild' requires Xcode, "
@@ -134,13 +134,13 @@ void main() {
 
     testUsingOsxContext('isInstalled is false when version has unexpected format', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     });
 
     testUsingOsxContext('isInstalled is true when version has expected format', () {
       when(mockProcessManager.runSync(<String>[xcodebuild, '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+          .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.isInstalled, isTrue);
     });
   });
@@ -161,7 +161,7 @@ Information about project "Runner":
         Runner
 
 ''';
-      final XcodeProjectInfo info = new XcodeProjectInfo.fromXcodeBuildOutput(output);
+      final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
       expect(info.targets, <String>['Runner']);
       expect(info.schemes, <String>['Runner']);
       expect(info.buildConfigurations, <String>['Debug', 'Release']);
@@ -185,7 +185,7 @@ Information about project "Runner":
         Paid
 
 ''';
-      final XcodeProjectInfo info = new XcodeProjectInfo.fromXcodeBuildOutput(output);
+      final XcodeProjectInfo info = XcodeProjectInfo.fromXcodeBuildOutput(output);
       expect(info.targets, <String>['Runner']);
       expect(info.schemes, <String>['Free', 'Paid']);
       expect(info.buildConfigurations, <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)']);
@@ -211,20 +211,20 @@ Information about project "Runner":
       expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.release, 'Hello'), 'Hello'), 'Release-Hello');
     });
     test('scheme for default project is Runner', () {
-      final XcodeProjectInfo info = new XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
+      final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
       expect(info.schemeFor(BuildInfo.debug), 'Runner');
       expect(info.schemeFor(BuildInfo.profile), 'Runner');
       expect(info.schemeFor(BuildInfo.release), 'Runner');
       expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
     });
     test('build configuration for default project is matched against BuildMode', () {
-      final XcodeProjectInfo info = new XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
+      final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner']);
       expect(info.buildConfigurationFor(BuildInfo.debug, 'Runner'), 'Debug');
       expect(info.buildConfigurationFor(BuildInfo.profile, 'Runner'), 'Release');
       expect(info.buildConfigurationFor(BuildInfo.release, 'Runner'), 'Release');
     });
     test('scheme for project with custom schemes is matched against flavor', () {
-      final XcodeProjectInfo info = new XcodeProjectInfo(
+      final XcodeProjectInfo info = XcodeProjectInfo(
         <String>['Runner'],
         <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)'],
         <String>['Free', 'Paid'],
@@ -236,7 +236,7 @@ Information about project "Runner":
       expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown')), isNull);
     });
     test('build configuration for project with custom schemes is matched against BuildMode and flavor', () {
-      final XcodeProjectInfo info = new XcodeProjectInfo(
+      final XcodeProjectInfo info = XcodeProjectInfo(
         <String>['Runner'],
         <String>['debug (free)', 'Debug paid', 'release - Free', 'Release-Paid'],
         <String>['Free', 'Paid'],
@@ -247,7 +247,7 @@ Information about project "Runner":
       expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid'), 'Paid'), 'Release-Paid');
     });
     test('build configuration for project with inconsistent naming is null', () {
-      final XcodeProjectInfo info = new XcodeProjectInfo(
+      final XcodeProjectInfo info = XcodeProjectInfo(
         <String>['Runner'],
         <String>['Debug-F', 'Dbg Paid', 'Rel Free', 'Release Full'],
         <String>['Free', 'Paid'],
@@ -265,9 +265,9 @@ Information about project "Runner":
     FileSystem fs;
 
     setUp(() {
-      fs = new MemoryFileSystem();
-      mockArtifacts = new MockLocalEngineArtifacts();
-      mockProcessManager = new MockProcessManager();
+      fs = MemoryFileSystem();
+      mockArtifacts = MockLocalEngineArtifacts();
+      mockProcessManager = MockProcessManager();
       macOS = fakePlatform('macos');
       fs.file(xcodebuild).createSync(recursive: true);
     });
@@ -285,17 +285,11 @@ Information about project "Runner":
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
-        previewDart2: true,
-        targetPlatform: TargetPlatform.ios,
-      );
-      final FlutterManifest manifest =
-        await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -308,18 +302,11 @@ Information about project "Runner":
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
-        previewDart2: true,
-        trackWidgetCreation: true,
-        targetPlatform: TargetPlatform.ios,
-      );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, targetPlatform: TargetPlatform.ios);
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -332,17 +319,11 @@ Information about project "Runner":
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
-        previewDart2: true,
-        targetPlatform: TargetPlatform.ios,
-      );
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -355,18 +336,12 @@ Information about project "Runner":
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, any)).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.debug, null,
-        previewDart2: true,
-        targetPlatform: TargetPlatform.ios,
-      );
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      await updateGeneratedXcodeProperties(
+        project: project,
         buildInfo: buildInfo,
-        previewDart2: true,
       );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -385,16 +360,6 @@ Information about project "Runner":
       return properties.isEmpty ? null : properties.first;
     }
 
-    void writeSchemaFile(FileSystem filesystem, String schemaData) {
-      final String schemaPath = buildSchemaPath(filesystem);
-      final File schemaFile = filesystem.file(schemaPath);
-
-      final String schemaDir = buildSchemaDir(filesystem);
-
-      filesystem.directory(schemaDir).createSync(recursive: true);
-      filesystem.file(schemaFile).writeAsStringSync(schemaData);
-    }
-
     Future<void> checkBuildVersion({
       String manifestString,
       BuildInfo buildInfo,
@@ -409,16 +374,11 @@ Information about project "Runner":
       manifestFile.writeAsStringSync(manifestString);
 
       // write schemaData otherwise pubspec.yaml file can't be loaded
-      const String schemaData = '{}';
-      writeSchemaFile(fs, schemaData);
+      writeEmptySchemaFile(fs);
 
-      final FlutterManifest manifest =
-          await new FlutterProject.fromPath('path/to/project').manifest;
-      updateGeneratedXcodeProperties(
-        projectPath: 'path/to/project',
-        manifest: manifest,
+      await updateGeneratedXcodeProperties(
+        project: await FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
-        previewDart2: false,
       );
 
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -436,7 +396,7 @@ dependencies:
 flutter:
 ''';
 
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -454,7 +414,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -472,7 +432,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -490,7 +450,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: 3);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -508,7 +468,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -526,7 +486,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -543,7 +503,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
       await checkBuildVersion(
         manifestString: manifest,
         buildInfo: buildInfo,
@@ -555,7 +515,7 @@ flutter:
 }
 
 Platform fakePlatform(String name) {
-  return new FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
+  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}

@@ -10,7 +10,7 @@ class Calculator extends StatefulWidget {
   const Calculator({Key key}) : super(key: key);
 
   @override
-  _CalculatorState createState() => new _CalculatorState();
+  _CalculatorState createState() => _CalculatorState();
 }
 
 class _CalculatorState extends State<Calculator> {
@@ -18,7 +18,7 @@ class _CalculatorState extends State<Calculator> {
   /// keep a stack of previous expressions so we can return to earlier states
   /// when the user hits the DEL key.
   final List<CalcExpression> _expressionStack = <CalcExpression>[];
-  CalcExpression _expression = new CalcExpression.empty();
+  CalcExpression _expression = CalcExpression.empty();
 
   // Make `expression` the current expression and push the previous current
   // expression onto the stack.
@@ -32,7 +32,7 @@ class _CalculatorState extends State<Calculator> {
     if (_expressionStack.isNotEmpty) {
       _expression = _expressionStack.removeLast();
     } else {
-      _expression = new CalcExpression.empty();
+      _expression = CalcExpression.empty();
     }
   }
 
@@ -113,23 +113,23 @@ class _CalculatorState extends State<Calculator> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Theme.of(context).canvasColor,
         elevation: 0.0
       ),
-      body: new Column(
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           // Give the key-pad 3/5 of the vertical space and the display 2/5.
-          new Expanded(
+          Expanded(
             flex: 2,
-            child: new CalcDisplay(content: _expression.toString())
+            child: CalcDisplay(content: _expression.toString())
           ),
           const Divider(height: 1.0),
-          new Expanded(
+          Expanded(
             flex: 3,
-            child: new KeyPad(calcState: this)
+            child: KeyPad(calcState: this)
           )
         ]
       )
@@ -144,8 +144,8 @@ class CalcDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Center(
-      child: new Text(
+    return Center(
+      child: Text(
         content,
         style: const TextStyle(fontSize: 24.0)
       )
@@ -160,56 +160,56 @@ class KeyPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = new ThemeData(
+    final ThemeData themeData = ThemeData(
       primarySwatch: Colors.purple,
       brightness: Brightness.dark,
       platform: Theme.of(context).platform,
     );
-    return new Theme(
+    return Theme(
       data: themeData,
-      child: new Material(
-        child: new Row(
+      child: Material(
+        child: Row(
           children: <Widget>[
-            new Expanded(
+            Expanded(
               // We set flex equal to the number of columns so that the main keypad
               // and the op keypad have sizes proportional to their number of
               // columns.
               flex: 3,
-              child: new Column(
+              child: Column(
                 children: <Widget>[
-                  new KeyRow(<Widget>[
-                    new NumberKey(7, calcState),
-                    new NumberKey(8, calcState),
-                    new NumberKey(9, calcState)
+                  KeyRow(<Widget>[
+                    NumberKey(7, calcState),
+                    NumberKey(8, calcState),
+                    NumberKey(9, calcState)
                   ]),
-                  new KeyRow(<Widget>[
-                    new NumberKey(4, calcState),
-                    new NumberKey(5, calcState),
-                    new NumberKey(6, calcState)
+                  KeyRow(<Widget>[
+                    NumberKey(4, calcState),
+                    NumberKey(5, calcState),
+                    NumberKey(6, calcState)
                   ]),
-                  new KeyRow(<Widget>[
-                    new NumberKey(1, calcState),
-                    new NumberKey(2, calcState),
-                    new NumberKey(3, calcState)
+                  KeyRow(<Widget>[
+                    NumberKey(1, calcState),
+                    NumberKey(2, calcState),
+                    NumberKey(3, calcState)
                   ]),
-                  new KeyRow(<Widget>[
-                    new CalcKey('.', calcState.handlePointTap),
-                    new NumberKey(0, calcState),
-                    new CalcKey('=', calcState.handleEqualsTap),
+                  KeyRow(<Widget>[
+                    CalcKey('.', calcState.handlePointTap),
+                    NumberKey(0, calcState),
+                    CalcKey('=', calcState.handleEqualsTap),
                   ])
                 ]
               )
             ),
-            new Expanded(
-              child: new Material(
+            Expanded(
+              child: Material(
                 color: themeData.backgroundColor,
-                child: new Column(
+                child: Column(
                   children: <Widget>[
-                    new CalcKey('\u232B', calcState.handleDelTap),
-                    new CalcKey('\u00F7', calcState.handleDivTap),
-                    new CalcKey('\u00D7', calcState.handleMultTap),
-                    new CalcKey('-', calcState.handleMinusTap),
-                    new CalcKey('+', calcState.handlePlusTap)
+                    CalcKey('\u232B', calcState.handleDelTap),
+                    CalcKey('\u00F7', calcState.handleDivTap),
+                    CalcKey('\u00D7', calcState.handleMultTap),
+                    CalcKey('-', calcState.handleMinusTap),
+                    CalcKey('+', calcState.handlePlusTap)
                   ]
                 )
               )
@@ -228,8 +228,8 @@ class KeyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Expanded(
-      child: new Row(
+    return Expanded(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: keys
       )
@@ -246,13 +246,13 @@ class CalcKey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
-    return new Expanded(
-      child: new InkResponse(
+    return Expanded(
+      child: InkResponse(
         onTap: onTap,
-        child: new Center(
-          child: new Text(
+        child: Center(
+          child: Text(
             text,
-            style: new TextStyle(
+            style: TextStyle(
               fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
             )
           )

@@ -10,10 +10,10 @@ import 'rendering_tester.dart';
 
 void main() {
   test('should size to render view', () {
-    final RenderBox root = new RenderDecoratedBox(
-      decoration: new BoxDecoration(
+    final RenderBox root = RenderDecoratedBox(
+      decoration: BoxDecoration(
         color: const Color(0xFF00FF00),
-        gradient: new RadialGradient(
+        gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]],
@@ -27,27 +27,27 @@ void main() {
   });
 
   test('Flex and padding', () {
-    final RenderBox size = new RenderConstrainedBox(
+    final RenderBox size = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints().tighten(height: 100.0),
     );
-    final RenderBox inner = new RenderDecoratedBox(
+    final RenderBox inner = RenderDecoratedBox(
       decoration: const BoxDecoration(
-        color: const Color(0xFF00FF00),
+        color: Color(0xFF00FF00),
       ),
       child: size,
     );
-    final RenderBox padding = new RenderPadding(
+    final RenderBox padding = RenderPadding(
       padding: const EdgeInsets.all(50.0),
       child: inner,
     );
-    final RenderBox flex = new RenderFlex(
+    final RenderBox flex = RenderFlex(
       children: <RenderBox>[padding],
       direction: Axis.vertical,
       crossAxisAlignment: CrossAxisAlignment.stretch,
     );
-    final RenderBox outer = new RenderDecoratedBox(
+    final RenderBox outer = RenderDecoratedBox(
       decoration: const BoxDecoration(
-        color: const Color(0xFF0000FF),
+        color: Color(0xFF0000FF),
       ),
       child: flex,
     );
@@ -67,7 +67,7 @@ void main() {
   });
 
   test('should not have a 0 sized colored Box', () {
-    final RenderBox coloredBox = new RenderDecoratedBox(
+    final RenderBox coloredBox = RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );
 
@@ -84,11 +84,11 @@ void main() {
           '   configuration: ImageConfiguration()\n'),
     );
 
-    final RenderBox paddingBox = new RenderPadding(
+    final RenderBox paddingBox = RenderPadding(
       padding: const EdgeInsets.all(10.0),
       child: coloredBox,
     );
-    final RenderBox root = new RenderDecoratedBox(
+    final RenderBox root = RenderDecoratedBox(
       decoration: const BoxDecoration(),
       child: paddingBox,
     );
@@ -112,11 +112,11 @@ void main() {
   });
 
   test('reparenting should clear position', () {
-    final RenderDecoratedBox coloredBox = new RenderDecoratedBox(
+    final RenderDecoratedBox coloredBox = RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );
 
-    final RenderPadding paddedBox = new RenderPadding(
+    final RenderPadding paddedBox = RenderPadding(
       child: coloredBox,
       padding: const EdgeInsets.all(10.0),
     );
@@ -125,7 +125,7 @@ void main() {
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
-    final RenderConstrainedBox constraintedBox = new RenderConstrainedBox(
+    final RenderConstrainedBox constraintedBox = RenderConstrainedBox(
       child: coloredBox,
       additionalConstraints: const BoxConstraints(),
     );
@@ -134,10 +134,10 @@ void main() {
   });
 
   test('UnconstrainedBox expands to fit children', () {
-    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       constrainedAxis: Axis.horizontal, // This is reset to null below.
       textDirection: TextDirection.ltr,
-      child: new RenderConstrainedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
       ),
       alignment: Alignment.center,
@@ -160,14 +160,14 @@ void main() {
   });
 
   test('UnconstrainedBox handles vertical overflow', () {
-    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,
-      child: new RenderConstrainedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 200.0),
       ),
       alignment: Alignment.center,
     );
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
     expect(unconstrained.getMinIntrinsicHeight(100.0), equals(200.0));
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(200.0));
@@ -176,14 +176,14 @@ void main() {
   });
 
   test('UnconstrainedBox handles horizontal overflow', () {
-    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,
-      child: new RenderConstrainedBox(
+      child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
       ),
       alignment: Alignment.center,
     );
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
     expect(unconstrained.getMinIntrinsicHeight(100.0), equals(0.0));
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(0.0));
@@ -192,7 +192,7 @@ void main() {
   });
 
   test('UnconstrainedBox.toStringDeep returns useful information', () {
-    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       textDirection: TextDirection.ltr,
       alignment: Alignment.center,
     );
@@ -213,11 +213,11 @@ void main() {
 
   test('UnconstrainedBox honors constrainedAxis=Axis.horizontal', () {
     final RenderConstrainedBox flexible =
-        new RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(height: 200.0));
-    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+        RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(height: 200.0));
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       constrainedAxis: Axis.horizontal,
       textDirection: TextDirection.ltr,
-      child: new RenderFlex(
+      child: RenderFlex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
         children: <RenderBox>[flexible],
@@ -228,7 +228,7 @@ void main() {
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
-    const BoxConstraints viewport = const BoxConstraints(maxWidth: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
 
     expect(unconstrained.size.width, equals(100.0), reason: 'constrained width');
@@ -237,11 +237,11 @@ void main() {
 
   test('UnconstrainedBox honors constrainedAxis=Axis.vertical', () {
     final RenderConstrainedBox flexible =
-    new RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
-    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+    RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
       constrainedAxis: Axis.vertical,
       textDirection: TextDirection.ltr,
-      child: new RenderFlex(
+      child: RenderFlex(
         direction: Axis.vertical,
         textDirection: TextDirection.ltr,
         children: <RenderBox>[flexible],
@@ -252,7 +252,7 @@ void main() {
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
-    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0);
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0);
     layout(unconstrained, constraints: viewport);
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');

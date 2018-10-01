@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Use home', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
+      CupertinoApp(
+        home: CupertinoTabView(
           builder: (BuildContext context) => const Text('home'),
         ),
       ),
@@ -20,8 +20,8 @@ void main() {
 
   testWidgets('Use routes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
+      CupertinoApp(
+        home: CupertinoTabView(
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => const Text('first route'),
           },
@@ -34,10 +34,10 @@ void main() {
 
   testWidgets('Use home and named routes', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
+      CupertinoApp(
+        home: CupertinoTabView(
           builder: (BuildContext context) {
-            return new CupertinoButton(
+            return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
                 Navigator.of(context).pushNamed('/2');
@@ -60,17 +60,18 @@ void main() {
 
   testWidgets('Use onGenerateRoute', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
+      CupertinoApp(
+        home: CupertinoTabView(
           onGenerateRoute: (RouteSettings settings) {
             if (settings.name == Navigator.defaultRouteName) {
-              return new CupertinoPageRoute<void>(
+              return CupertinoPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) {
                   return const Text('generated home');
                 }
               );
             }
+            return null;
           },
         ),
       ),
@@ -82,10 +83,11 @@ void main() {
   testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
     String unknownForRouteCalled;
     await tester.pumpWidget(
-      new CupertinoApp(
-        home: new CupertinoTabView(
+      CupertinoApp(
+        home: CupertinoTabView(
           onUnknownRoute: (RouteSettings settings) {
             unknownForRouteCalled = settings.name;
+            return null;
           },
         ),
       ),

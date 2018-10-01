@@ -3,22 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   group('android_emulator', () {
     testUsingContext('flags emulators without config', () {
       const String emulatorID = '1234';
-      final AndroidEmulator emulator = new AndroidEmulator(emulatorID);
+      final AndroidEmulator emulator = AndroidEmulator(emulatorID);
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, false);
     });
     testUsingContext('flags emulators with config', () {
       const String emulatorID = '1234';
       final AndroidEmulator emulator =
-          new AndroidEmulator(emulatorID, <String, String>{'name': 'test'});
+          AndroidEmulator(emulatorID, <String, String>{'name': 'test'});
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, true);
     });
@@ -33,7 +33,7 @@ void main() {
         'avd.ini.displayname': label
       };
       final AndroidEmulator emulator =
-          new AndroidEmulator(emulatorID, properties);
+          AndroidEmulator(emulatorID, properties);
       expect(emulator.id, emulatorID);
       expect(emulator.name, name);
       expect(emulator.manufacturer, manufacturer);

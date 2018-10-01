@@ -5,11 +5,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class CupertinoSwitchDemo extends StatefulWidget {
   static const String routeName = '/cupertino/switch';
 
   @override
-  _CupertinoSwitchDemoState createState() => new _CupertinoSwitchDemoState();
+  _CupertinoSwitchDemoState createState() => _CupertinoSwitchDemoState();
 }
 
 class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
@@ -18,50 +20,60 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Cupertino Switch'),
+        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoSwitchDemo.routeName)],
       ),
-      body: new Center(
-        child: new Column(
+      body: Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            new Column(
-              children: <Widget>[
-                new CupertinoSwitch(
-                  value: _switchValue,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _switchValue = value;
-                    });
-                  },
-                ),
-                const Text(
-                  'Active'
-                ),
-              ],
+            Semantics(
+              container: true,
+              child: Column(
+                children: <Widget>[
+                  CupertinoSwitch(
+                    value: _switchValue,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _switchValue = value;
+                      });
+                    },
+                  ),
+                  const Text(
+                    'Active'
+                  ),
+                ],
+              ),
             ),
-            new Column(
-              children: const <Widget>[
-                const CupertinoSwitch(
-                  value: true,
-                  onChanged: null,
-                ),
-                const Text(
-                  'Disabled'
-                ),
-              ],
+            Semantics(
+              container: true,
+              child: Column(
+                children: const <Widget>[
+                  CupertinoSwitch(
+                    value: true,
+                    onChanged: null,
+                  ),
+                  Text(
+                    'Disabled'
+                  ),
+                ],
+              ),
             ),
-            new Column(
-              children: const <Widget>[
-                const CupertinoSwitch(
-                  value: false,
-                  onChanged: null,
-                ),
-                const Text(
-                  'Disabled'
-                ),
-              ],
+            Semantics(
+              container: true,
+              child: Column(
+                children: const <Widget>[
+                  CupertinoSwitch(
+                    value: false,
+                    onChanged: null,
+                  ),
+                  Text(
+                    'Disabled'
+                  ),
+                ],
+              ),
             ),
           ],
         ),

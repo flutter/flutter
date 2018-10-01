@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import '../flutter_test_alternative.dart';
 
 class RenderTestBox extends RenderBox {
   double value = 0.0;
@@ -16,7 +16,7 @@ class RenderTestBox extends RenderBox {
 
 void main() {
   test('Intrinsics cache', () {
-    final RenderBox test = new RenderTestBox();
+    final RenderBox test = RenderTestBox();
 
     expect(test.getMinIntrinsicWidth(0.0), equals(1.0));
     expect(test.getMinIntrinsicWidth(100.0), equals(2.0));

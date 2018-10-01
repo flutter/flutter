@@ -7,30 +7,28 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:test/test.dart';
+
 import 'package:vm_service_client/vm_service_client.dart';
 
+import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 
-BasicProject _project = new BasicProject();
-FlutterTestDriver _flutter;
-
 void main() {
   group('expression evaluation', () {
+    Directory tempDir;
+    final BasicProject _project = BasicProject();
+    FlutterTestDriver _flutter;
+
     setUp(() async {
-      final Directory tempDir = await fs.systemTempDirectory.createTemp('test_app');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_expression_test.');
       await _project.setUpIn(tempDir);
-      _flutter = new FlutterTestDriver(tempDir);
+      _flutter = FlutterTestDriver(tempDir);
     });
 
     tearDown(() async {
-      try {
-        await _flutter.stop();
-        _project.cleanup();
-      } catch (e) {
-        // Don't fail tests if we failed to clean up temp folder.
-      }
+      await _flutter.stop();
+      tryToDelete(tempDir);
     });
 
     Future<VMIsolate> breakInBuildMethod(FlutterTestDriver flutter) async {
@@ -60,11 +58,11 @@ void main() {
 
     Future<void> evaluateComplexExpressions() async {
       final VMInstanceRef res = await _flutter.evaluateExpression('new DateTime.now().year');
-      expect(res is VMIntInstanceRef && res.value == new DateTime.now().year, isTrue);
+      expect(res is VMIntInstanceRef && res.value == DateTime.now().year, isTrue);
     }
 
     Future<void> evaluateComplexReturningExpressions() async {
-      final DateTime now = new DateTime.now();
+      final DateTime now = DateTime.now();
       final VMInstanceRef resp = await _flutter.evaluateExpression('new DateTime.now()');
       expect(resp.klass.name, equals('DateTime'));
       // Ensure we got a reasonable approximation. The more accurate we try to
@@ -90,7 +88,7 @@ void main() {
     test('can evaluate complex expressions in top level function', () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
-      await evaluateTrivialExpressions();
+      await evaluateComplexExpressions();
     });
 
     test('can evaluate complex expressions in build method', () async {
@@ -110,6 +108,8 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions();
     });
-  // https://github.com/flutter/flutter/issues/17833
-  }, timeout: const Timeout.factor(3), skip: platform.isWindows);
+    // TODO(dantup): Unskip after flutter-tester is fixed on Windows:
+    // https://github.com/flutter/flutter/issues/17833.
+    // https://github.com/flutter/flutter/issues/21348.
+  }, timeout: const Timeout.factor(6), skip: platform.isWindows);
 }

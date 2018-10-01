@@ -3,25 +3,25 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
+import '../flutter_test_alternative.dart';
 import 'gesture_tester.dart';
 
-const PointerDownEvent down = const PointerDownEvent(
+const PointerDownEvent down = PointerDownEvent(
   pointer: 5,
-  position: const Offset(10.0, 10.0)
+  position: Offset(10.0, 10.0)
 );
 
-const PointerUpEvent up = const PointerUpEvent(
+const PointerUpEvent up = PointerUpEvent(
   pointer: 5,
-  position: const Offset(11.0, 9.0)
+  position: Offset(11.0, 9.0)
 );
 
 void main() {
   setUp(ensureGestureBinding);
 
   testGesture('Should recognize long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -42,7 +42,7 @@ void main() {
   });
 
   testGesture('Up cancels long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -65,8 +65,8 @@ void main() {
   });
 
   testGesture('Should recognize both tap down and long press', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
-    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+    final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool tapDownRecognized = false;
     tap.onTapDown = (_) {
@@ -98,8 +98,8 @@ void main() {
   });
 
   testGesture('Drag start delayed by microtask', (GestureTester tester) {
-    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
-    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     bool isDangerousStack = false;
 

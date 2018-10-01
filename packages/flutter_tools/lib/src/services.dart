@@ -30,7 +30,7 @@ Future<Null> parseServiceConfigs(
 ) async {
   Map<String, Uri> packageMap;
   try {
-    packageMap = new PackageMap(PackageMap.globalPackagesPath).map;
+    packageMap = PackageMap(PackageMap.globalPackagesPath).map;
   } on FormatException catch (error) {
     printTrace('Invalid ".packages" file while parsing service configs:\n$error');
     return;
@@ -105,6 +105,6 @@ File generateServiceDefinitions(
 
   final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true); // ignore: deprecated_member_use
+  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
   return servicesFile;
 }

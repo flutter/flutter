@@ -10,7 +10,7 @@ import 'framework.dart';
 
 /// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
-  /// Creates a widget that describes this app to the operating system.
+  /// Creates a widget that describes this app to the Android operating system.
   ///
   /// [title] will default to the empty string if not supplied.
   /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).
@@ -41,7 +41,7 @@ class Title extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setApplicationSwitcherDescription(
-      new ApplicationSwitcherDescription(
+      ApplicationSwitcherDescription(
         label: title,
         primaryColor: color.value,
       )
@@ -52,7 +52,7 @@ class Title extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new StringProperty('title', title, defaultValue: ''));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(StringProperty('title', title, defaultValue: ''));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

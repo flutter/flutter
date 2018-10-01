@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
@@ -13,58 +15,27 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
-import '../flutter_manifest.dart';
 import '../globals.dart';
+import '../project.dart';
 
-final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
-final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
+final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
+final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
-}
-
-String _generatedXcodePropertiesPath({@required String projectPath, @required FlutterManifest manifest}) {
-  if (manifest.isModule) {
-    return fs.path.join(projectPath, '.ios', 'Flutter', 'Generated.xcconfig');
-  } else {
-    return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
-  }
-}
-
-/// Writes default Xcode properties files in the Flutter project at [projectPath],
-/// if project is an iOS project and such files are out of date or do not
-/// already exist.
-void generateXcodeProperties({String projectPath, FlutterManifest manifest}) {
-  if (manifest.isModule || fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
-    final File propertiesFile = fs.file(_generatedXcodePropertiesPath(projectPath: projectPath, manifest: manifest));
-    if (!Cache.instance.fileOlderThanToolsStamp(propertiesFile)) {
-      return;
-    }
-
-    updateGeneratedXcodeProperties(
-      projectPath: projectPath,
-      manifest: manifest,
-      buildInfo: BuildInfo.debug,
-      targetOverride: bundle.defaultMainPath,
-      previewDart2: true,
-    );
-  }
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
 ///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
-void updateGeneratedXcodeProperties({
-  @required String projectPath,
-  @required FlutterManifest manifest,
+Future<void> updateGeneratedXcodeProperties({
+  @required FlutterProject project,
   @required BuildInfo buildInfo,
   String targetOverride,
-  @required bool previewDart2,
-}) {
-  final StringBuffer localsBuffer = new StringBuffer();
+}) async {
+  final StringBuffer localsBuffer = StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
@@ -72,7 +43,7 @@ void updateGeneratedXcodeProperties({
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(projectPath)}');
+  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null)
@@ -86,19 +57,19 @@ void updateGeneratedXcodeProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  if (!manifest.isModule) {
+  if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
   }
 
-  final String buildName = buildInfo?.buildName ?? manifest.buildName;
+  final String buildName = buildInfo?.buildName ?? project.manifest.buildName;
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final int buildNumber = buildInfo?.buildNumber ?? manifest.buildNumber;
+  final int buildNumber = buildInfo?.buildNumber ?? project.manifest.buildNumber;
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
@@ -117,17 +88,13 @@ void updateGeneratedXcodeProperties({
     localsBuffer.writeln('ARCHS=$arch');
   }
 
-  if (previewDart2) {
-    localsBuffer.writeln('PREVIEW_DART_2=true');
-  }
-
   if (buildInfo.trackWidgetCreation) {
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath: projectPath, manifest: manifest));
-  localsFile.createSync(recursive: true);
-  localsFile.writeAsStringSync(localsBuffer.toString());
+  final File generatedXcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
+  generatedXcodePropertiesFile.createSync(recursive: true);
+  generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
 XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter];
@@ -135,7 +102,7 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInter
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   static const String _executable = '/usr/bin/xcodebuild';
-  static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  static final RegExp _versionRegex = RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
     if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
@@ -198,7 +165,7 @@ class XcodeProjectInterpreter {
     final String out = runCheckedSync(<String>[
       _executable, '-list',
     ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+    return XcodeProjectInfo.fromXcodeBuildOutput(out);
   }
 }
 
@@ -251,7 +218,7 @@ class XcodeProjectInfo {
     }
     if (schemes.isEmpty)
       schemes.add('Runner');
-    return new XcodeProjectInfo(targets, buildConfigurations, schemes);
+    return XcodeProjectInfo(targets, buildConfigurations, schemes);
   }
 
   final List<String> targets;

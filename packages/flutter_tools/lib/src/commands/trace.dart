@@ -64,7 +64,7 @@ class TraceCommand extends FlutterCommand {
     Duration duration;
     if (argResults.wasParsed('duration')) {
       try {
-        duration = new Duration(seconds: int.parse(argResults['duration']));
+        duration = Duration(seconds: int.parse(argResults['duration']));
       } on FormatException {
         throwToolExit('Invalid duration passed to --duration; it should be a positive number of seconds.');
       }
@@ -88,7 +88,7 @@ class TraceCommand extends FlutterCommand {
 
     if (start)
       await tracing.startTracing();
-    await new Future<Null>.delayed(duration);
+    await Future<Null>.delayed(duration);
     if (stop)
       await _stopTracing(tracing);
   }

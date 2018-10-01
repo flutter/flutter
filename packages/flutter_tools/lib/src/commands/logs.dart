@@ -29,7 +29,7 @@ class LogsCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit(null);
@@ -47,7 +47,7 @@ class LogsCommand extends FlutterCommand {
 
     printStatus('Showing $logReader logs:');
 
-    final Completer<int> exitCompleter = new Completer<int>();
+    final Completer<int> exitCompleter = Completer<int>();
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(

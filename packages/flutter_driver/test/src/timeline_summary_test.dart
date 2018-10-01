@@ -8,13 +8,14 @@ import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/driver/common.dart';
 import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
+
+import '../common.dart';
 
 void main() {
   group('TimelineSummary', () {
 
     TimelineSummary summarize(List<Map<String, dynamic>> testEvents) {
-      return new TimelineSummary.summarize(new Timeline.fromJson(<String, dynamic>{
+      return TimelineSummary.summarize(Timeline.fromJson(<String, dynamic>{
         'traceEvents': testEvents,
       }));
     }
@@ -265,6 +266,8 @@ void main() {
           ]).summaryJson,
           <String, dynamic>{
             'average_frame_build_time_millis': 7.0,
+            '90th_percentile_frame_build_time_millis': 11.0,
+            '99th_percentile_frame_build_time_millis': 11.0,
             'worst_frame_build_time_millis': 11.0,
             'missed_frame_build_budget_count': 2,
             'average_frame_rasterizer_time_millis': 8.0,
@@ -286,11 +289,11 @@ void main() {
 
       setUp(() {
         useMemoryFileSystemForTesting();
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_driver_test.');
       });
 
       tearDown(() {
-        tempDir.deleteSync(recursive: true);
+        tryToDelete(tempDir);
         restoreFileSystem();
       });
 
@@ -316,6 +319,8 @@ void main() {
         expect(json.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,
           'worst_frame_build_time_millis': 11.0,
+          '90th_percentile_frame_build_time_millis': 11.0,
+          '99th_percentile_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,
           'average_frame_rasterizer_time_millis': 8.0,
           '90th_percentile_frame_rasterizer_time_millis': 12.0,
