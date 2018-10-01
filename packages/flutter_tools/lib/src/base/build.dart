@@ -308,7 +308,7 @@ class AOTSnapshotter {
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: fs.path.join(outputPath, 'app.dill'),
-      depfilePath: depfilePath,
+      depFilePath: depfilePath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,

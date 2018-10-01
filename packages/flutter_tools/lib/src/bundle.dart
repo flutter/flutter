@@ -35,7 +35,9 @@ Future<void> build({
   BuildMode buildMode,
   String mainPath = defaultMainPath,
   String manifestPath = defaultManifestPath,
+  String snapshotPath,
   String applicationKernelFilePath,
+  String depfilePath,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String packagesPath,
@@ -49,6 +51,8 @@ Future<void> build({
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
+  snapshotPath ??= defaultSnapshotPath;
+  depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= defaultApplicationKernelPath;
@@ -64,7 +68,7 @@ Future<void> build({
           fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
-      depfilePath: defaultDepfilePath,
+      depFilePath: depfilePath,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       fileSystemRoots: fileSystemRoots,
