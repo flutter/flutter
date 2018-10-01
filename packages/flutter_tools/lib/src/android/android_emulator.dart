@@ -38,7 +38,7 @@ class AndroidEmulator extends Emulator {
   String get manufacturer => _prop('hw.device.manufacturer');
 
   @override
-  String get label => _properties['avd.ini.displayname'];
+  String get label => _prop('avd.ini.displayname');
 
   String _prop(String name) => _properties != null ? _properties[name] : null;
 
