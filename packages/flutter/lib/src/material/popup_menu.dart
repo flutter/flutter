@@ -820,6 +820,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.icon,
     this.offset = Offset.zero,
   }) : assert(itemBuilder != null),
+       assert(offset != null),
        assert(!(child != null && icon != null)), // fails if passed both parameters
        super(key: key);
 
@@ -863,7 +864,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, the icon used for this button.
   final Icon icon;
 
-  /// The offset applied to the Popup Menu Button
+  /// The offset applied to the Popup Menu Button.
+  ///
+  /// When not set, the Popup Menu Button will be positioned directly next to
+  /// the button that was used to create it.
   final Offset offset;
 
   @override
