@@ -149,6 +149,10 @@ class FlutterManifest {
   }
 
   List<Map<String, dynamic>> get fontsDescriptor {
+    return fonts.map((Font font) => font.descriptor).toList();
+  }
+
+  List<Map<String, dynamic>> get _rawFontsDescriptor {
     final List<dynamic> fontList = _flutterDescriptor['fonts'];
     return fontList == null
         ? const <Map<String, dynamic>>[]
@@ -179,7 +183,7 @@ class FlutterManifest {
       return <Font>[];
 
     final List<Font> fonts = <Font>[];
-    for (Map<String, dynamic> fontFamily in fontsDescriptor) {
+    for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
       final List<dynamic> fontFiles = fontFamily['fonts'];
       final String familyName = fontFamily['family'];
       if (familyName == null) {
