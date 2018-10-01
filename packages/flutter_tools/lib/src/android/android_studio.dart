@@ -32,7 +32,7 @@ String get javaPath => androidStudio?.javaPath;
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory,
       {Version version, this.configured, this.studioAppName = 'AndroidStudio'})
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
     _init();
   }
 
