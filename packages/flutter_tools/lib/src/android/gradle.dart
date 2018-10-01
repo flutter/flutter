@@ -365,6 +365,8 @@ Future<Null> _buildGradleProjectV2(
     command.add('-Ptrack-widget-creation=true');
   if (buildInfo.compilationTraceFilePath != null)
     command.add('-Pprecompile=${buildInfo.compilationTraceFilePath}');
+  if (buildInfo.buildHotUpdate)
+    command.add('-Photupdate=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
