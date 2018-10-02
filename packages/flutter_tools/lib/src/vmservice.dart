@@ -921,13 +921,12 @@ class VM extends ServiceObjectOwner {
                                Uri main,
                                Uri packages,
                                Uri assetsDirectory) {
-    // TODO(goderbauer): Transfer Uri (instead of file path) when remote end supports it.
     return invokeRpc<ServiceMap>('_flutter.runInView',
       params: <String, dynamic> {
         'viewId': viewId,
-        'mainScript': main.toFilePath(windows: false),
-        'packagesFile': packages.toFilePath(windows: false),
-        'assetDirectory': assetsDirectory.toFilePath(windows: false)
+        'mainScript': main.toString(),
+        'packagesFile': packages.toString(),
+        'assetDirectory': assetsDirectory.toString()
     });
   }
 
