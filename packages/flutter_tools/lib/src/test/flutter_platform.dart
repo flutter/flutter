@@ -238,7 +238,8 @@ class _Compiler {
         packagesPath: PackageMap.globalPackagesPath,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: reportCompilerMessage,
-        initializeFromDill: testFilePath
+        initializeFromDill: testFilePath,
+        unsafePackageSerialization: true,
       );
     }
 
