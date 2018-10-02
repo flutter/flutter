@@ -282,12 +282,55 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('09'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('9'), const Offset(0.0, 32.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       // Moving up an hour is still based on the original initial date time.
       expect(selectedDateTime, DateTime(2018, 1, 1, 8, 30));
+    });
+
+    testWidgets('date picker has expected string', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (_) {},
+              initialDateTime: DateTime(2018, 9, 15, 0, 0),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('September'), findsOneWidget);
+      expect(find.text('9'), findsOneWidget);
+      expect(find.text('2018'), findsOneWidget);
+    });
+
+    testWidgets('datetime picker has expected string', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        SizedBox(
+          height: 400.0,
+          width: 400.0,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              onDateTimeChanged: (_) {},
+              initialDateTime: DateTime(2018, 9, 15, 3, 14),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Sat Sep 15'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('14'), findsOneWidget);
+      expect(find.text('AM'), findsOneWidget);
     });
 
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
@@ -308,7 +351,7 @@ void main() {
 
       // Distance between the first column and the last column.
       final double distance =
-          tester.getCenter(find.text('Mon Jan 1')).dx - tester.getCenter(find.text('AM')).dx;
+          tester.getCenter(find.text('Mon Jan 1 ')).dx - tester.getCenter(find.text('AM')).dx;
 
       await tester.pumpWidget(
         SizedBox(
@@ -327,7 +370,7 @@ void main() {
 
       // Distance between the first and the last column should be the same.
       expect(
-        tester.getCenter(find.text('Mon Jan 1')).dx - tester.getCenter(find.text('AM')).dx,
+        tester.getCenter(find.text('Mon Jan 1 ')).dx - tester.getCenter(find.text('AM')).dx,
         distance,
       );
     });
@@ -546,7 +589,7 @@ void main() {
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
-      await tester.drag(find.text('09'), const Offset(0.0, -192.0));
+      await tester.drag(find.text('9'), const Offset(0.0, -192.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
