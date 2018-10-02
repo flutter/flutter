@@ -172,7 +172,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-  }) : this.initialDateTime = initialDateTime ?? DateTime.now(),
+  }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(initialDateTime != null),
