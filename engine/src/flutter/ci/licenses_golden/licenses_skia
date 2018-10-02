@@ -1,4 +1,4 @@
-Signature: af42f4f10947f3b1f851402388df9efe
+Signature: c796eacb93056c0b4f8856c2ac2e3f79
 
 UNUSED LICENSES:
 
@@ -1336,7 +1336,6 @@ FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
 FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/gm/skinning.cpp
 FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
-FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
 FILE: ../../../third_party/skia/include/c/sk_colorspace.h
 FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
@@ -1523,9 +1522,6 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
