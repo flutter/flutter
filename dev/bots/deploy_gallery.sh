@@ -44,7 +44,7 @@ if [[ "$SHARD" = "deploy_gallery" ]]; then
     else
       echo "Not deployed: Flutter Gallery is only deployed to the Play Store on merged and tagged dev branch commits"
     fi
-  elif [[ "$OS" == "macos" ]]; then
+  elif [[ "$OS" == "darwin" ]]; then
     echo "Building Flutter Gallery $version for iOS..."
     (
       cd examples/flutter_gallery
