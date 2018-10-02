@@ -112,7 +112,7 @@ class FlatButton extends MaterialButton {
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
-  }) = FlatButtonWithIcon._;
+  }) = _FlatButtonWithIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -161,8 +161,8 @@ class FlatButton extends MaterialButton {
 ///
 /// This class only exists to give FlatButtons created with [FlatButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
-class FlatButtonWithIcon extends FlatButton {
-  FlatButtonWithIcon._({
+class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
+  _FlatButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
     ValueChanged<bool> onHighlightChanged,

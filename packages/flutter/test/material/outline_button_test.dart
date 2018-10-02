@@ -9,13 +9,6 @@ import 'package:flutter/rendering.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
-Finder findOutlineButton() {
-  return find.descendant(
-    of: find.byType(OutlineButton),
-    matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_OutlineButton'),
-  );
-}
-
 void main() {
   testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
     int pressedCount = 0;
@@ -87,7 +80,6 @@ void main() {
     final Path clipPath = Path()..addRect(clipRect);
 
     final Finder outlineButton = find.byType(OutlineButton);
-    final Finder _outlineButton = findOutlineButton();
 
     // Pump a button with a null onPressed callback to make it disabled.
     await tester.pumpWidget(
@@ -97,7 +89,7 @@ void main() {
     // Expect that the button is disabled and painted with the disabled border color.
     expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
     expect(
-      _outlineButton,
+      outlineButton, //find.byType(OutlineButton),
       paints
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
@@ -113,7 +105,7 @@ void main() {
     // Expect that the button is disabled and painted with the enabled border color.
     expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
     expect(
-      _outlineButton,
+      outlineButton,
       paints
         // initially the interior of the button is transparent
         ..path(color: fillColor.withAlpha(0x00))
@@ -127,7 +119,7 @@ void main() {
     // the fillColor to become opaque.
     await tester.pump(const Duration(milliseconds: 200));
     expect(
-      _outlineButton,
+      outlineButton,
       paints
         ..path(color: fillColor.withAlpha(0xFF))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
@@ -137,7 +129,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(
-      _outlineButton,
+      outlineButton,
       paints
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))

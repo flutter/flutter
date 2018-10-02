@@ -121,7 +121,7 @@ class RaisedButton extends MaterialButton {
     Duration animationDuration,
     @required Widget icon,
     @required Widget label,
-  }) = RaisedButtonWithIcon._;
+  }) = _RaisedButtonWithIcon;
 
  @override
   Widget build(BuildContext context) {
@@ -171,8 +171,8 @@ class RaisedButton extends MaterialButton {
 ///
 /// This class only exists to give RaisedButtons created with [RaisedButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
-class RaisedButtonWithIcon extends RaisedButton {
-  RaisedButtonWithIcon._({
+class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixin {
+  _RaisedButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
     ValueChanged<bool> onHighlightChanged,

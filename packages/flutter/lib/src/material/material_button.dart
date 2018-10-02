@@ -285,3 +285,14 @@ class MaterialButton extends StatelessWidget {
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
+
+/// The type of [MaterialButton]s created with [RaisedButton.icon], [FlatButton.icon],
+/// and [OutlineButton.icon].
+//
+// This class only exists to give the label and icon button widgets a distinct
+/// class for the sake of [ButtonTheme]. It can not be instantiated.
+abstract class MaterialButtonWithIconMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory MaterialButtonWithIconMixin._() => null;
+}

@@ -114,7 +114,7 @@ class OutlineButton extends MaterialButton {
     Clip clipBehavior,
     @required Widget icon,
     @required Widget label,
-  }) = OutlineButtonWithIcon._;
+  }) = _OutlineButtonWithIcon;
 
   /// The outline border's color when the button is [enabled] and pressed.
   ///
@@ -181,12 +181,12 @@ class OutlineButton extends MaterialButton {
   }
 }
 
-/// The type of of OutlineButtons created with [OutlineButton.icon].
-///
-/// This class only exists to give RaisedButtons created with [RaisedButton.icon]
-/// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
-class OutlineButtonWithIcon extends OutlineButton {
-  OutlineButtonWithIcon._({
+// The type of of OutlineButtons created with [OutlineButton.icon].
+//
+// This class only exists to give RaisedButtons created with [RaisedButton.icon]
+// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
+class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMixin {
+  _OutlineButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
     ButtonTextTheme textTheme,
