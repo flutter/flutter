@@ -146,7 +146,10 @@ BuildApp() {
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
     StreamOutput " ├─Generating dSYM file..."
-    RunCommand xcrun dsymutil -o "${build_dir}/aot/App.dSYM" "${app_framework}/App"
+    # Placing dSYMs in a folder ending with ".noindex" so xcode cannot find them
+    # via Spotlight and get confused when uploading an App to the App Store.
+    mkdir "${build_dir}/dSYMs.noindex"
+    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
       exit -1
