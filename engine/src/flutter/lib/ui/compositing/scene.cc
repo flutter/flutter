@@ -26,7 +26,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
-fml::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
+fml::RefPtr<Scene> Scene::create(std::shared_ptr<flow::Layer> rootLayer,
                                  uint32_t rasterizerTracingThreshold,
                                  bool checkerboardRasterCacheImages,
                                  bool checkerboardOffscreenLayers) {
@@ -35,7 +35,7 @@ fml::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
       checkerboardRasterCacheImages, checkerboardOffscreenLayers);
 }
 
-Scene::Scene(std::unique_ptr<flow::Layer> rootLayer,
+Scene::Scene(std::shared_ptr<flow::Layer> rootLayer,
              uint32_t rasterizerTracingThreshold,
              bool checkerboardRasterCacheImages,
              bool checkerboardOffscreenLayers)
