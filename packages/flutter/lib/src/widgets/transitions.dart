@@ -265,7 +265,7 @@ class RotationTransition extends AnimatedWidget {
   Animation<double> get turns => listenable;
 
   /// The alignment of the origin of the coordinate system around which the
-  /// rotation occurs takes place, relative to the size of the box.
+  /// rotation occurs, relative to the size of the box.
   ///
   /// For example, to set the origin of the rotation to top right corner, use
   /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
