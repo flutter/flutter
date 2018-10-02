@@ -267,12 +267,42 @@ class SystemChrome {
   ///
   /// If a particular overlay is unsupported on the platform, enabling or
   /// disabling that overlay will be ignored.
+  ///
+  /// The settings here can be overidden by the platform when System UI becomes
+  /// necessary for functionality.
+  ///
+  /// For example, on Android, when the keyboard becomes visible, it will enable the
+  /// navigation bar and status bar system UI overlays. When the keyboard is closed,
+  /// Android will not restore the previous UI visibility settings, and the UI
+  /// visibility cannot be changed until 1 second after the keyboard is closed to
+  /// prevent malware locking users from navigation buttons.
+  ///
+  /// To regain "fullscreen" after text entry, the UI overlays should be set again
+  /// after a delay of 1 second. This can be achieved through [restoreSystemUIOverlays]
+  /// or calling this again. Otherwise, the original UI overlay settings will be
+  /// automatically restored only when the application loses and regains focus.
   static Future<Null> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
     await SystemChannels.platform.invokeMethod(
       'SystemChrome.setEnabledSystemUIOverlays',
       _stringify(overlays),
     );
- }
+  }
+
+  /// Restores the system overlays to the last settings provided via
+  /// [setEnabledSystemUIOverlays]. May be used when the platform force enables/disables
+  /// UI elements.
+  ///
+  /// For example, when the Android keyboard disables hidden status and navigation bars,
+  /// this can be called to re-disable the bars when the keyboard is closed.
+  ///
+  /// On Android, the system UI cannot be changed until 1 second after the previous
+  /// change. This is to prevent malware from permanently hiding navigation buttons.
+  static Future<Null> restoreSystemUIOverlays() async {
+    await SystemChannels.platform.invokeMethod(
+      'SystemChrome.restoreSystemUIOverlays',
+      null,
+    );
+  }
 
   /// Specifies the style to use for the system overlays that are visible (if
   /// any).
