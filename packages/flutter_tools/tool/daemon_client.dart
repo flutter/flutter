@@ -23,13 +23,13 @@ Future<Null> main() async {
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
-    .transform(utf8.decoder)
-    .transform(const LineSplitter())
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
     .listen((String line) => print('<== $line'));
   daemon.stderr.listen((dynamic data) => stderr.add(data));
 
   stdout.write('> ');
-  stdin.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
@@ -81,7 +81,8 @@ Future<Null> main() async {
     stdout.write('> ');
   });
 
-  daemon.exitCode.then<Null>((int code) {
+  // Print in the callback can't fail.
+  daemon.exitCode.then<Null>((int code) { // ignore: unawaited_futures
     print('daemon exiting ($code)');
     exit(code);
   });

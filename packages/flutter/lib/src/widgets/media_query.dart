@@ -43,6 +43,10 @@ class MediaQueryData {
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
+    this.accessibleNavigation = false,
+    this.invertColors = false,
+    this.disableAnimations = false,
+    this.boldText = false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -55,8 +59,12 @@ class MediaQueryData {
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
+      invertColors = window.accessibilityFeatures.invertColors,
+      disableAnimations = window.accessibilityFeatures.disableAnimations,
+      boldText = window.accessibilityFeatures.boldText,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -120,6 +128,43 @@ class MediaQueryData {
   ///   formatting.
   final bool alwaysUse24HourFormat;
 
+  /// Whether the user is using an accessibility service like TalkBack or
+  /// VoiceOver to interact with the application.
+  ///
+  /// When this setting is true, features such as timeouts should be disabled or
+  /// have minimum durations increased.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool accessibleNavigation;
+
+  /// Whether the device is inverting the colors of the platform.
+  ///
+  /// This flag is currently only updated on iOS devices.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool invertColors;
+
+  /// Whether the platform is requesting that animations be disabled or reduced
+  /// as much as possible.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  ///
+  final bool disableAnimations;
+
+  /// Whether the platform is requesting that text be drawn with a bold font
+  /// weight.
+  ///
+  /// See also:
+  ///
+  ///  * [Window.AccessibilityFeatures], where the setting originates.
+  final bool boldText;
+
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
@@ -134,14 +179,22 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
+    bool disableAnimations,
+    bool invertColors,
+    bool accessibleNavigation,
+    bool boldText,
   }) {
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
+      invertColors: invertColors ?? this.invertColors,
+      disableAnimations: disableAnimations ?? this.disableAnimations,
+      accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
+      boldText: boldText ?? this.boldText,
     );
   }
 
@@ -167,7 +220,7 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
@@ -179,6 +232,10 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      disableAnimations: disableAnimations,
+      invertColors: invertColors,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
     );
   }
 
@@ -202,7 +259,7 @@ class MediaQueryData {
   }) {
     if (!(removeLeft || removeTop || removeRight || removeBottom))
       return this;
-    return new MediaQueryData(
+    return MediaQueryData(
       size: size,
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
@@ -214,6 +271,10 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      disableAnimations: disableAnimations,
+      invertColors: invertColors,
+      accessibleNavigation: accessibleNavigation,
+      boldText: boldText,
     );
   }
 
@@ -227,21 +288,42 @@ class MediaQueryData {
         && typedOther.textScaleFactor == textScaleFactor
         && typedOther.padding == padding
         && typedOther.viewInsets == viewInsets
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat;
+        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && typedOther.disableAnimations == disableAnimations
+        && typedOther.invertColors == invertColors
+        && typedOther.accessibleNavigation == accessibleNavigation
+        && typedOther.boldText == boldText;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets, alwaysUse24HourFormat);
+  int get hashCode {
+    return hashValues(
+      size,
+      devicePixelRatio,
+      textScaleFactor,
+      padding,
+      viewInsets,
+      alwaysUse24HourFormat,
+      disableAnimations,
+      invertColors,
+      accessibleNavigation,
+      boldText,
+    );
+  }
 
   @override
   String toString() {
     return '$runtimeType('
              'size: $size, '
-             'devicePixelRatio: $devicePixelRatio, '
-             'textScaleFactor: $textScaleFactor, '
+             'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}, '
+             'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}, '
              'padding: $padding, '
              'viewInsets: $viewInsets, '
-             'alwaysUse24HourFormat: $alwaysUse24HourFormat'
+             'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
+             'accessibleNavigation: $accessibleNavigation'
+             'disableAnimations: $disableAnimations'
+             'invertColors: $invertColors'
+             'boldText: $boldText'
            ')';
   }
 }
@@ -310,7 +392,7 @@ class MediaQuery extends InheritedWidget {
     bool removeBottom = false,
     @required Widget child,
   }) {
-    return new MediaQuery(
+    return MediaQuery(
       key: key,
       data: MediaQuery.of(context).removePadding(
         removeLeft: removeLeft,
@@ -352,7 +434,7 @@ class MediaQuery extends InheritedWidget {
     bool removeBottom = false,
     @required Widget child,
   }) {
-    return new MediaQuery(
+    return MediaQuery(
       key: key,
       data: MediaQuery.of(context).removeViewInsets(
         removeLeft: removeLeft,
@@ -396,7 +478,7 @@ class MediaQuery extends InheritedWidget {
       return query.data;
     if (nullOk)
       return null;
-    throw new FlutterError(
+    throw FlutterError(
       'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
       'No MediaQuery ancestor could be found starting from the context that was passed '
       'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
@@ -413,12 +495,18 @@ class MediaQuery extends InheritedWidget {
     return MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
   }
 
+  /// Returns the boldText accessibility setting for the nearest MediaQuery
+  /// ancestor, or false if no such ancestor exists.
+  static bool boldTextOverride(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.boldText ?? false;
+  }
+
   @override
   bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
+    properties.add(DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }

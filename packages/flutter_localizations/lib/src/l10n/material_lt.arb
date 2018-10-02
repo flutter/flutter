@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountFew": "Liko $remainingCount simboliai",
+  "remainingTextFieldCharacterCountMany": "Liko $remainingCount simbolio",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "Pasirinkti $selectedRowCount elementai",
@@ -40,6 +42,17 @@
   "drawerLabel": "Naršymo meniu",
   "popupMenuLabel": "Iššokantysis meniu",
   "dialogLabel": "Dialogo langas",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Įspėjimas",
+  "searchFieldLabel": "Paieška",
+  "reorderItemToStart": "Perkelti į pradžią",
+  "reorderItemToEnd": "Perkelti į pabaigą",
+  "reorderItemUp": "Perkelti aukštyn",
+  "reorderItemDown": "Perkelti žemyn",
+  "reorderItemLeft": "Perkelti kairėn",
+  "reorderItemRight": "Perkelti dešinėn",
+  "expandedIconTapHint": "Sutraukti",
+  "collapsedIconTapHint": "Išskleisti",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Liko 1 simbolis",
+  "remainingTextFieldCharacterCountOther": "Liko $remainingCount simbolių"
 }

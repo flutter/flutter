@@ -50,7 +50,8 @@ abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
   /// If the [primary] argument is true, the [controller] must be null.
-  ScrollView({
+  ScrollView({ // ignore: prefer_const_constructors_in_immutables
+               // TODO(aam): Remove lint ignore above once dartbug.com/34297 is fixed
     Key key,
     this.scrollDirection = Axis.vertical,
     this.reverse = false,
@@ -207,13 +208,13 @@ abstract class ScrollView extends StatelessWidget {
     List<Widget> slivers,
   ) {
     if (shrinkWrap) {
-      return new ShrinkWrappingViewport(
+      return ShrinkWrappingViewport(
         axisDirection: axisDirection,
         offset: offset,
         slivers: slivers,
       );
     }
-    return new Viewport(
+    return Viewport(
       axisDirection: axisDirection,
       offset: offset,
       slivers: slivers,
@@ -227,9 +228,9 @@ abstract class ScrollView extends StatelessWidget {
     final AxisDirection axisDirection = getDirection(context);
 
     final ScrollController scrollController = primary
-        ? PrimaryScrollController.of(context)
-        : controller;
-    final Scrollable scrollable = new Scrollable(
+      ? PrimaryScrollController.of(context)
+      : controller;
+    final Scrollable scrollable = Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
@@ -238,19 +239,19 @@ abstract class ScrollView extends StatelessWidget {
       },
     );
     return primary && scrollController != null
-      ? new PrimaryScrollController.none(child: scrollable)
+      ? PrimaryScrollController.none(child: scrollable)
       : scrollable;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<Axis>('scrollDirection', scrollDirection));
-    properties.add(new FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
-    properties.add(new DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
-    properties.add(new FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
-    properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
-    properties.add(new FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
+    properties.add(EnumProperty<Axis>('scrollDirection', scrollDirection));
+    properties.add(FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
+    properties.add(DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
+    properties.add(FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
+    properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
+    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
   }
 }
 
@@ -273,41 +274,41 @@ abstract class ScrollView extends StatelessWidget {
 /// bar, a grid, and an infinite list.
 ///
 /// ```dart
-/// new CustomScrollView(
+/// CustomScrollView(
 ///   slivers: <Widget>[
 ///     const SliverAppBar(
 ///       pinned: true,
 ///       expandedHeight: 250.0,
-///       flexibleSpace: const FlexibleSpaceBar(
-///         title: const Text('Demo'),
+///       flexibleSpace: FlexibleSpaceBar(
+///         title: Text('Demo'),
 ///       ),
 ///     ),
-///     new SliverGrid(
-///       gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+///     SliverGrid(
+///       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
 ///         maxCrossAxisExtent: 200.0,
 ///         mainAxisSpacing: 10.0,
 ///         crossAxisSpacing: 10.0,
 ///         childAspectRatio: 4.0,
 ///       ),
-///       delegate: new SliverChildBuilderDelegate(
+///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
-///           return new Container(
+///           return Container(
 ///             alignment: Alignment.center,
 ///             color: Colors.teal[100 * (index % 9)],
-///             child: new Text('grid item $index'),
+///             child: Text('grid item $index'),
 ///           );
 ///         },
 ///         childCount: 20,
 ///       ),
 ///     ),
-///     new SliverFixedExtentList(
+///     SliverFixedExtentList(
 ///       itemExtent: 50.0,
-///       delegate: new SliverChildBuilderDelegate(
+///       delegate: SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
-///           return new Container(
+///           return Container(
 ///             alignment: Alignment.center,
 ///             color: Colors.lightBlue[100 * (index % 9)],
-///             child: new Text('list item $index'),
+///             child: Text('list item $index'),
 ///           );
 ///         },
 ///       ),
@@ -413,7 +414,7 @@ abstract class BoxScrollView extends ScrollView {
             ? mediaQueryVerticalPadding
             : mediaQueryHorizontalPadding;
         // Leave behind the cross axis padding.
-        sliver = new MediaQuery(
+        sliver = MediaQuery(
           data: mediaQuery.copyWith(
             padding: scrollDirection == Axis.vertical
                 ? mediaQueryHorizontalPadding
@@ -425,7 +426,7 @@ abstract class BoxScrollView extends ScrollView {
     }
 
     if (effectivePadding != null)
-      sliver = new SliverPadding(padding: effectivePadding, sliver: sliver);
+      sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
     return <Widget>[ sliver ];
   }
 
@@ -436,7 +437,7 @@ abstract class BoxScrollView extends ScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 
@@ -487,14 +488,71 @@ abstract class BoxScrollView extends ScrollView {
 /// An infinite list of children:
 ///
 /// ```dart
-/// new ListView.builder(
-///   padding: new EdgeInsets.all(8.0),
+/// ListView.builder(
+///   padding: EdgeInsets.all(8.0),
 ///   itemExtent: 20.0,
 ///   itemBuilder: (BuildContext context, int index) {
-///     return new Text('entry $index');
+///     return Text('entry $index');
 ///   },
 /// )
 /// ```
+///
+/// ## Child elements' lifecycle
+///
+/// ### Creation
+///
+/// While laying out the list, visible children's elements, states and render
+/// objects will be created lazily based on existing widgets (such as when using
+/// the default constructor) or lazily provided ones (such as when using the
+/// [ListView.builder] constructor).
+///
+/// ### Destruction
+///
+/// When a child is scrolled out of view, the associated element subtree,
+/// states and render objects are destroyed. A new child at the same position
+/// in the list will be lazily recreated along with new elements, states and
+/// render objects when it is scrolled back.
+///
+/// ### Destruction mitigation
+///
+/// In order to preserve state as child elements are scrolled in and out of
+/// view, the following options are possible:
+///
+///  * Moving the ownership of non-trivial UI-state-driving business logic
+///    out of the list child subtree. For instance, if a list contains posts
+///    with their number of upvotes coming from a cached network response, store
+///    the list of posts and upvote number in a data model outside the list. Let
+///    the list child UI subtree be easily recreate-able from the
+///    source-of-truth model object. Use [StatefulWidget]s in the child
+///    widget subtree to store instantaneous UI state only.
+///
+///  * Letting [KeepAlive] be the root widget of the list child widget subtree
+///    that needs to be preserved. The [KeepAlive] widget marks the child
+///    subtree's top render object child for keep-alive. When the associated top
+///    render object is scrolled out of view, the list keeps the child's render
+///    object (and by extension, its associated elements and states) in a cache
+///    list instead of destroying them. When scrolled back into view, the render
+///    object is repainted as-is (if it wasn't marked dirty in the interim).
+///
+///    This only works if [addAutomaticKeepAlives] and [addRepaintBoundaries]
+///    are false since those parameters cause the [ListView] to wrap each child
+///    widget subtree with other widgets.
+///
+///  * Using [AutomaticKeepAlive] widgets (inserted by default when
+///    [addAutomaticKeepAlives] is true). Instead of unconditionally caching the
+///    child element subtree when scrolling off-screen like [KeepAlive],
+///    [AutomaticKeepAlive] can let whether to cache the subtree be determined
+///    by descendant logic in the subtree.
+///
+///    As an example, the [EditableText] widget signals its list child element
+///    subtree to stay alive while its text field has input focus. If it doesn't
+///    have focus and no other descendants signaled for keep-alive via a
+///    [KeepAliveNotification], the list child element subtree will be destroyed
+///    when scrolled away.
+///
+///    [AutomaticKeepAlive] descendants typically signal it to be kept alive
+///    by using the [AutomaticKeepAliveClientMixin], then implementing the
+///    [wantKeepAlive] getter and calling [updateKeepAlive].
 ///
 /// ## Transitioning to [CustomScrollView]
 ///
@@ -540,7 +598,7 @@ abstract class BoxScrollView extends ScrollView {
 /// [CustomScrollView]:
 ///
 /// ```dart
-/// new ListView(
+/// ListView(
 ///   shrinkWrap: true,
 ///   padding: const EdgeInsets.all(20.0),
 ///   children: <Widget>[
@@ -553,13 +611,13 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 ///
 /// ```dart
-/// new CustomScrollView(
+/// CustomScrollView(
 ///   shrinkWrap: true,
 ///   slivers: <Widget>[
-///     new SliverPadding(
+///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),
-///       sliver: new SliverList(
-///         delegate: new SliverChildListDelegate(
+///       sliver: SliverList(
+///         delegate: SliverChildListDelegate(
 ///           <Widget>[
 ///             const Text('I\'m dedicating every day to you'),
 ///             const Text('Domestic life was never quite my style'),
@@ -616,7 +674,7 @@ class ListView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     double cacheExtent,
     List<Widget> children = const <Widget>[],
-  }) : childrenDelegate = new SliverChildListDelegate(
+  }) : childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -671,7 +729,7 @@ class ListView extends BoxScrollView {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     double cacheExtent,
-  }) : childrenDelegate = new SliverChildBuilderDelegate(
+  }) : childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -716,12 +774,12 @@ class ListView extends BoxScrollView {
   /// are separated by [Divider]s.
   ///
   /// ```dart
-  /// new ListView.separated(
+  /// ListView.separated(
   ///   itemCount: 25,
-  ///   separatorBuilder: (BuildContext context, int index) => new Divider(),
+  ///   separatorBuilder: (BuildContext context, int index) => Divider(),
   ///   itemBuilder: (BuildContext context, int index) {
-  ///     return new ListTile(
-  ///       title: new Text('item $index'),
+  ///     return ListTile(
+  ///       title: Text('item $index'),
   ///     );
   ///   },
   /// )
@@ -751,7 +809,7 @@ class ListView extends BoxScrollView {
        assert(separatorBuilder != null),
        assert(itemCount != null && itemCount >= 0),
        itemExtent = null,
-       childrenDelegate = new SliverChildBuilderDelegate(
+       childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
            return index.isEven
@@ -799,7 +857,7 @@ class ListView extends BoxScrollView {
          physics: physics,
          shrinkWrap: shrinkWrap,
          padding: padding,
-        cacheExtent: cacheExtent,
+         cacheExtent: cacheExtent,
        );
 
   /// If non-null, forces the children to have the given extent in the scroll
@@ -822,18 +880,18 @@ class ListView extends BoxScrollView {
   @override
   Widget buildChildLayout(BuildContext context) {
     if (itemExtent != null) {
-      return new SliverFixedExtentList(
+      return SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent,
       );
     }
-    return new SliverList(delegate: childrenDelegate);
+    return SliverList(delegate: childrenDelegate);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+    properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }
 }
 
@@ -912,7 +970,7 @@ class ListView extends BoxScrollView {
 /// [CustomScrollView]:
 ///
 /// ```dart
-/// new GridView.count(
+/// GridView.count(
 ///   primary: false,
 ///   padding: const EdgeInsets.all(20.0),
 ///   crossAxisSpacing: 10.0,
@@ -929,12 +987,12 @@ class ListView extends BoxScrollView {
 /// ```
 ///
 /// ```dart
-/// new CustomScrollView(
+/// CustomScrollView(
 ///   primary: false,
 ///   slivers: <Widget>[
-///     new SliverPadding(
+///     SliverPadding(
 ///       padding: const EdgeInsets.all(20.0),
-///       sliver: new SliverGrid.count(
+///       sliver: SliverGrid.count(
 ///         crossAxisSpacing: 10.0,
 ///         crossAxisCount: 2,
 ///         children: <Widget>[
@@ -992,7 +1050,7 @@ class GridView extends BoxScrollView {
     double cacheExtent,
     List<Widget> children = const <Widget>[],
   }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildListDelegate(
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1044,7 +1102,7 @@ class GridView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     double cacheExtent,
   }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildBuilderDelegate(
+       childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -1126,13 +1184,13 @@ class GridView extends BoxScrollView {
     bool addRepaintBoundaries = true,
     double cacheExtent,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+  }) : gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       childrenDelegate = new SliverChildListDelegate(
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1178,13 +1236,13 @@ class GridView extends BoxScrollView {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     List<Widget> children = const <Widget>[],
-  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+  }) : gridDelegate = SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
          mainAxisSpacing: mainAxisSpacing,
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       childrenDelegate = new SliverChildListDelegate(
+       childrenDelegate = SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
@@ -1215,7 +1273,7 @@ class GridView extends BoxScrollView {
 
   @override
   Widget buildChildLayout(BuildContext context) {
-    return new SliverGrid(
+    return SliverGrid(
       delegate: childrenDelegate,
       gridDelegate: gridDelegate,
     );

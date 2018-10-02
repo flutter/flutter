@@ -38,6 +38,17 @@
   "drawerLabel": "Menú de navegació",
   "popupMenuLabel": "Menú emergent",
   "dialogLabel": "Diàleg",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Alerta",
+  "searchFieldLabel": "Cerca",
+  "reorderItemToStart": "Mou al principi",
+  "reorderItemToEnd": "Mou al final",
+  "reorderItemUp": "Mou amunt",
+  "reorderItemDown": "Mou avall",
+  "reorderItemLeft": "Mou cap a l'esquerra",
+  "reorderItemRight": "Mou cap a la dreta",
+  "expandedIconTapHint": "Replega",
+  "collapsedIconTapHint": "Desplega",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Queda 1 caràcter",
+  "remainingTextFieldCharacterCountOther": "Queden $remainingCount caràcters"
 }

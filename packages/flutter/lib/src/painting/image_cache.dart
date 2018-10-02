@@ -143,8 +143,8 @@ class ImageCache {
     result = loader();
     void listener(ImageInfo info, bool syncCall) {
       // Images that fail to load don't contribute to cache size.
-      final int imageSize = info.image == null ? 0 : info.image.height * info.image.width * 4;
-      final _CachedImage image = new _CachedImage(result, imageSize);
+      final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
+      final _CachedImage image = _CachedImage(result, imageSize);
       // If the image is bigger than the maximum cache size, and the cache size
       // is not zero, then increase the cache size to the size of the image plus
       // some change.

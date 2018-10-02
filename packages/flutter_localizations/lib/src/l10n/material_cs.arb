@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountFew": "Zbývají $remainingCount znaky",
+  "remainingTextFieldCharacterCountMany": "Zbývá $remainingCount znaku",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "Jsou vybrány $selectedRowCount položky",
@@ -40,6 +42,17 @@
   "drawerLabel": "Navigační nabídka",
   "popupMenuLabel": "Vyskakovací nabídka",
   "dialogLabel": "Dialogové okno",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Upozornění",
+  "searchFieldLabel": "Hledat",
+  "reorderItemToStart": "Přesunout na začátek",
+  "reorderItemToEnd": "Přesunout na konec",
+  "reorderItemUp": "Přesunout nahoru",
+  "reorderItemDown": "Přesunout dolů",
+  "reorderItemLeft": "Přesunout doleva",
+  "reorderItemRight": "Přesunout doprava",
+  "expandedIconTapHint": "Sbalit",
+  "collapsedIconTapHint": "Rozbalit",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Zbývá 1 znak",
+  "remainingTextFieldCharacterCountOther": "Zbývá $remainingCount znaků"
 }

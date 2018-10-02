@@ -9,15 +9,15 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('awaiting animation controllers - using direct future', (WidgetTester tester) async {
-    final AnimationController controller1 = new AnimationController(
+    final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final AnimationController controller2 = new AnimationController(
+    final AnimationController controller2 = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: const TestVSync(),
     );
-    final AnimationController controller3 = new AnimationController(
+    final AnimationController controller3 = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: const TestVSync(),
     );
@@ -58,15 +58,15 @@ void main() {
   });
 
   testWidgets('awaiting animation controllers - using orCancel', (WidgetTester tester) async {
-    final AnimationController controller1 = new AnimationController(
+    final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final AnimationController controller2 = new AnimationController(
+    final AnimationController controller2 = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: const TestVSync(),
     );
-    final AnimationController controller3 = new AnimationController(
+    final AnimationController controller3 = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: const TestVSync(),
     );
@@ -107,7 +107,7 @@ void main() {
   });
 
   testWidgets('awaiting animation controllers and failing', (WidgetTester tester) async {
-    final AnimationController controller1 = new AnimationController(
+    final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -135,7 +135,7 @@ void main() {
   });
 
   testWidgets('creating orCancel future later', (WidgetTester tester) async {
-    final AnimationController controller1 = new AnimationController(
+    final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -148,7 +148,7 @@ void main() {
   });
 
   testWidgets('creating orCancel future later', (WidgetTester tester) async {
-    final AnimationController controller1 = new AnimationController(
+    final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -165,7 +165,7 @@ void main() {
   });
 
   testWidgets('TickerFuture is a Future', (WidgetTester tester) async {
-    final AnimationController controller1 = new AnimationController(
+    final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );

@@ -10,7 +10,7 @@
   "nextPageTooltip": "Seuraava sivu",
   "previousPageTooltip": "Edellinen sivu",
   "showMenuTooltip": "Näytä valikko",
-  "aboutListTileTitle": "Tietoja sovelluksesta $applicationName",
+  "aboutListTileTitle": "Tietoja: $applicationName",
   "licensesPageTitle": "Lisenssit",
   "pageRowsInfoTitle": "$firstRow–$lastRow/$rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow/~$rowCount",
@@ -38,6 +38,17 @@
   "drawerLabel": "Navigointivalikko",
   "popupMenuLabel": "Ponnahdusvalikko",
   "dialogLabel": "Valintaikkuna",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Ilmoitus",
+  "searchFieldLabel": "Haku",
+  "reorderItemToStart": "Siirrä alkuun",
+  "reorderItemToEnd": "Siirrä loppuun",
+  "reorderItemUp": "Siirrä ylös",
+  "reorderItemDown": "Siirrä alas",
+  "reorderItemLeft": "Siirrä vasemmalle",
+  "reorderItemRight": "Siirrä oikealle",
+  "expandedIconTapHint": "Tiivistä",
+  "collapsedIconTapHint": "Laajenna",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 merkki jäljellä",
+  "remainingTextFieldCharacterCountOther": "$remainingCount merkkiä jäljellä"
 }

@@ -38,6 +38,17 @@
   "drawerLabel": "Navigationsmenu",
   "popupMenuLabel": "Pop op-menu",
   "dialogLabel": "Dialogboks",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Underretning",
+  "searchFieldLabel": "Søg",
+  "reorderItemToStart": "Flyt til først på listen",
+  "reorderItemToEnd": "Flyt til sidst på listen",
+  "reorderItemUp": "Flyt op",
+  "reorderItemDown": "Flyt ned",
+  "reorderItemLeft": "Flyt til venstre",
+  "reorderItemRight": "Flyt til højre",
+  "expandedIconTapHint": "Skjul",
+  "collapsedIconTapHint": "Udvid",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Ét tegn tilbage",
+  "remainingTextFieldCharacterCountOther": "$remainingCount tegn tilbage"
 }

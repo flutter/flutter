@@ -38,6 +38,17 @@
   "drawerLabel": "नेविगेशन मेन्यू",
   "popupMenuLabel": "पॉपअप मेन्यू",
   "dialogLabel": "संवाद",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "अलर्ट",
+  "searchFieldLabel": "खोजें",
+  "reorderItemToStart": "शुरुआत पर ले जाएं",
+  "reorderItemToEnd": "आखिर में ले जाएं",
+  "reorderItemUp": "ऊपर ले जाएं",
+  "reorderItemDown": "नीचे ले जाएं",
+  "reorderItemLeft": "बाएं ले जाएं",
+  "reorderItemRight": "दाएं ले जाएं",
+  "expandedIconTapHint": "छोटा करें",
+  "collapsedIconTapHint": "बड़ा करें",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "एक वर्ण अाैर डाला जा सकता है",
+  "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण अाैर डाले जा सकते हैं"
 }

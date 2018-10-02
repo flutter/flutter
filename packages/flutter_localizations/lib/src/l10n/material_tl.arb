@@ -38,6 +38,17 @@
   "drawerLabel": "Menu ng navigation",
   "popupMenuLabel": "Popup na menu",
   "dialogLabel": "Dialog",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Alerto",
+  "searchFieldLabel": "Maghanap",
+  "reorderItemToStart": "Ilipat sa simula",
+  "reorderItemToEnd": "Ilipat sa dulo",
+  "reorderItemUp": "Ilipat pataas",
+  "reorderItemDown": "Ilipat pababa",
+  "reorderItemLeft": "Ilipat pakaliwa",
+  "reorderItemRight": "Ilipat pakanan",
+  "expandedIconTapHint": "I-collapse",
+  "collapsedIconTapHint": "I-expand",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 character ang natitira",
+  "remainingTextFieldCharacterCountOther": "$remainingCount na character ang natitira"
 }

@@ -46,6 +46,7 @@ library flutter_test;
 
 export 'dart:async' show Future;
 
+export 'src/accessibility.dart';
 export 'src/all_elements.dart';
 export 'src/binding.dart';
 export 'src/controller.dart';
@@ -53,7 +54,6 @@ export 'src/finders.dart';
 export 'src/goldens.dart';
 export 'src/matchers.dart';
 export 'src/nonconst.dart';
-export 'src/platform.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
 export 'src/test_exception_reporter.dart';

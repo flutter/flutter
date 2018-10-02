@@ -38,6 +38,17 @@
   "drawerLabel": "Μενού πλοήγησης",
   "popupMenuLabel": "Αναδυόμενο μενού",
   "dialogLabel": "Παράθυρο διαλόγου",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Ειδοποίηση",
+  "searchFieldLabel": "Αναζήτηση",
+  "reorderItemToStart": "Μετακίνηση στην αρχή",
+  "reorderItemToEnd": "Μετακίνηση στο τέλος",
+  "reorderItemUp": "Μετακίνηση προς τα πάνω",
+  "reorderItemDown": "Μετακίνηση προς τα κάτω",
+  "reorderItemLeft": "Μετακίνηση αριστερά",
+  "reorderItemRight": "Μετακίνηση δεξιά",
+  "expandedIconTapHint": "Σύμπτυξη",
+  "collapsedIconTapHint": "Ανάπτυξη",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "απομένει 1 χαρακτήρας",
+  "remainingTextFieldCharacterCountOther": "απομένουν $remainingCount χαρακτήρες"
 }

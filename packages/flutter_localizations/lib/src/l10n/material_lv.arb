@@ -39,6 +39,17 @@
   "drawerLabel": "Navigācijas izvēlne",
   "popupMenuLabel": "Uznirstošā izvēlne",
   "dialogLabel": "Dialoglodziņš",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Brīdinājums",
+  "searchFieldLabel": "Meklēt",
+  "reorderItemToStart": "Pārvietot uz sākumu",
+  "reorderItemToEnd": "Pārvietot uz beigām",
+  "reorderItemUp": "Pārvietot uz augšu",
+  "reorderItemDown": "Pārvietot uz leju",
+  "reorderItemLeft": "Pārvietot pa kreisi",
+  "reorderItemRight": "Pārvietot pa labi",
+  "expandedIconTapHint": "Sakļaut",
+  "collapsedIconTapHint": "Izvērst",
+  "remainingTextFieldCharacterCountZero": "Nav atlikusi neviena rakstzīme.",
+  "remainingTextFieldCharacterCountOne": "Atlikusi 1 rakstzīme.",
+  "remainingTextFieldCharacterCountOther": "Atlikušas $remainingCount rakstzīmes."
 }

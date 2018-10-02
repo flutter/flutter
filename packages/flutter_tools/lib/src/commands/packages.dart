@@ -12,10 +12,10 @@ import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
-    addSubcommand(new PackagesGetCommand('get', false));
-    addSubcommand(new PackagesGetCommand('upgrade', true));
-    addSubcommand(new PackagesTestCommand());
-    addSubcommand(new PackagesPassthroughCommand());
+    addSubcommand(PackagesGetCommand('get', false));
+    addSubcommand(PackagesGetCommand('upgrade', true));
+    addSubcommand(PackagesTestCommand());
+    addSubcommand(PackagesPassthroughCommand());
   }
 
   @override
@@ -80,7 +80,7 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     await _runPubGet(target);
-    final FlutterProject rootProject = new FlutterProject.fromPath(target);
+    final FlutterProject rootProject = await FlutterProject.fromPath(target);
     await rootProject.ensureReadyForPlatformSpecificTooling();
 
     // Get/upgrade packages in example app as well

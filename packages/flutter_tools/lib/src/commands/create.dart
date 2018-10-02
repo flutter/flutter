@@ -129,13 +129,11 @@ class CreateCommand extends FlutterCommand {
     final bool generatePackage = template == 'package';
 
     final Directory projectDir = fs.directory(argResults.rest.first);
-    String dirPath = fs.path.normalize(projectDir.absolute.path);
-    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
-    if (fs.path.basename(dirPath) == '.')
-      dirPath = fs.path.dirname(dirPath);
+    final String dirPath = fs.path.normalize(projectDir.absolute.path);
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
-      final Set<String> existingOrganizations = await new FlutterProject(projectDir).organizationNames();
+      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+      final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
       } else if (1 < existingOrganizations.length) {
@@ -167,21 +165,20 @@ class CreateCommand extends FlutterCommand {
     );
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
+    final Directory directory = fs.directory(dirPath);
     int generatedFileCount = 0;
-    String appPath = dirPath;
     switch (template) {
       case 'app':
-        generatedFileCount += await _generateApp(dirPath, templateContext);
+        generatedFileCount += await _generateApp(directory, templateContext);
         break;
       case 'module':
-        generatedFileCount += await _generateModule(dirPath, templateContext);
+        generatedFileCount += await _generateModule(directory, templateContext);
         break;
       case 'package':
-        generatedFileCount += await _generatePackage(dirPath, templateContext);
+        generatedFileCount += await _generatePackage(directory, templateContext);
         break;
       case 'plugin':
-        appPath = fs.path.join(dirPath, 'example');
-        generatedFileCount += await _generatePlugin(dirPath, appPath, templateContext);
+        generatedFileCount += await _generatePlugin(directory, templateContext);
         break;
     }
     printStatus('Wrote $generatedFileCount files.');
@@ -194,7 +191,9 @@ class CreateCommand extends FlutterCommand {
       printStatus('Your module code is in lib/main.dart in the $relativePath directory.');
     } else {
       // Run doctor; tell the user the next steps.
-      final String relativeAppPath = fs.path.relative(appPath);
+      final FlutterProject project = await FlutterProject.fromPath(dirPath);
+      final FlutterProject app = project.hasExampleApp ? project.example : project;
+      final String relativeAppPath = fs.path.relative(app.directory.path);
       final String relativePluginPath = fs.path.relative(dirPath);
       if (doctor.canLaunchAnything) {
         // Let them know a summary of the state of their tooling.
@@ -233,60 +232,58 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     }
   }
 
-  Future<int> _generateModule(String path, Map<String, dynamic> templateContext) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
         : 'A new flutter module project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate(fs.path.join('module', 'common'), path, templateContext);
+    generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.create,
-        directory: path,
+        directory: directory.path,
         offline: argResults['offline'],
       );
-      final FlutterProject project = new FlutterProject.fromPath(path);
+      final FlutterProject project = await FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling();
     }
     return generatedCount;
   }
 
-  Future<int> _generatePackage(String dirPath, Map<String, dynamic> templateContext) async {
+  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
        ? argResults['description']
        : 'A new flutter package project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('package', dirPath, templateContext);
-
+    generatedCount += _renderTemplate('package', directory, templateContext);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.createPackage,
-        directory: dirPath,
+        directory: directory.path,
         offline: argResults['offline'],
       );
     }
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(String dirPath, String appPath, Map<String, dynamic> templateContext) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
         : 'A new flutter plugin project.';
     templateContext['description'] = description;
-    generatedCount += _renderTemplate('plugin', dirPath, templateContext);
-
+    generatedCount += _renderTemplate('plugin', directory, templateContext);
     if (argResults['pub']) {
       await pubGet(
         context: PubContext.createPlugin,
-        directory: dirPath,
+        directory: directory.path,
         offline: argResults['offline'],
       );
     }
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(projectPath: dirPath);
+    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
     final String organization = templateContext['organization'];
@@ -299,27 +296,27 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
 
-    generatedCount += await _generateApp(appPath, templateContext);
+    generatedCount += await _generateApp(project.example.directory, templateContext);
     return generatedCount;
   }
 
-  Future<int> _generateApp(String projectPath, Map<String, dynamic> templateContext) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext) async {
     int generatedCount = 0;
-    generatedCount += _renderTemplate('create', projectPath, templateContext);
-    generatedCount += _injectGradleWrapper(projectPath);
+    generatedCount += _renderTemplate('create', directory, templateContext);
+    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    generatedCount += _injectGradleWrapper(project);
 
     if (argResults['with-driver-test']) {
-      final String testPath = fs.path.join(projectPath, 'test_driver');
-      generatedCount += _renderTemplate('driver', testPath, templateContext);
+      final Directory testDirectory = directory.childDirectory('test_driver');
+      generatedCount += _renderTemplate('driver', testDirectory, templateContext);
     }
 
     if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: projectPath, offline: argResults['offline']);
-      await new FlutterProject.fromPath(projectPath).ensureReadyForPlatformSpecificTooling();
+      await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
+      await project.ensureReadyForPlatformSpecificTooling();
     }
 
-    if (android_sdk.androidSdk != null)
-      await gradle.updateLocalProperties(projectPath: projectPath);
+    gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     return generatedCount;
   }
@@ -362,16 +359,16 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     };
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
-    final Template template = new Template.fromName(templateName);
-    return template.render(fs.directory(dirPath), context, overwriteExisting: false);
+  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context) {
+    final Template template = Template.fromName(templateName);
+    return template.render(directory, context, overwriteExisting: false);
   }
 
-  int _injectGradleWrapper(String projectDir) {
+  int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
     copyDirectorySync(
       cache.getArtifactDirectory('gradle_wrapper'),
-      fs.directory(fs.path.join(projectDir, 'android')),
+      project.android.hostAppGradleRoot,
       (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
@@ -395,13 +392,13 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  final RegExp disallowed = new RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
+  final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return '$organization.$name';
 }
 
-final Set<String> _packageDependencies = new Set<String>.from(<String>[
+final Set<String> _packageDependencies = Set<String>.from(<String>[
   'analyzer',
   'args',
   'async',
@@ -434,7 +431,7 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
   if (!linter_utils.isValidPackageName(projectName)) {
-    final String packageNameDetails = new package_names.PubPackageNames().details;
+    final String packageNameDetails = package_names.PubPackageNames().details;
     return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
   }
   if (_packageDependencies.contains(projectName)) {
@@ -454,12 +451,12 @@ String _validateProjectDir(String dirPath, { String flutterRoot }) {
 
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
-  if (type != FileSystemEntityType.NOT_FOUND) { // ignore: deprecated_member_use
+  if (type != FileSystemEntityType.notFound) {
     switch (type) {
-      case FileSystemEntityType.FILE: // ignore: deprecated_member_use
+      case FileSystemEntityType.file:
         // Do not overwrite files.
         return "Invalid project name: '$dirPath' - file exists.";
-      case FileSystemEntityType.LINK: // ignore: deprecated_member_use
+      case FileSystemEntityType.link:
         // Do not overwrite links.
         return "Invalid project name: '$dirPath' - refers to a link.";
     }

@@ -52,26 +52,26 @@ class TextInputType {
   /// Optimize for textual information.
   ///
   /// Requests the default platform keyboard.
-  static const TextInputType text = const TextInputType._(0);
+  static const TextInputType text = TextInputType._(0);
 
   /// Optimize for multi-line textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
   /// enter key is pressed. This is the input type used for all multi-line text
   /// fields.
-  static const TextInputType multiline = const TextInputType._(1);
+  static const TextInputType multiline = TextInputType._(1);
 
   /// Optimize for unsigned numerical information without a decimal point.
   ///
   /// Requests a default keyboard with ready access to the number keys.
   /// Additional options, such as decimal point and/or positive/negative
   /// signs, can be requested using [new TextInputType.numberWithOptions].
-  static const TextInputType number = const TextInputType.numberWithOptions();
+  static const TextInputType number = TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
   ///
   /// Requests a keyboard with ready access to the number keys, "*", and "#".
-  static const TextInputType phone = const TextInputType._(3);
+  static const TextInputType phone = TextInputType._(3);
 
   /// Optimize for date and time information.
   ///
@@ -79,25 +79,25 @@ class TextInputType {
   ///
   /// On Android, requests a keyboard with ready access to the number keys,
   /// ":", and "-".
-  static const TextInputType datetime = const TextInputType._(4);
+  static const TextInputType datetime = TextInputType._(4);
 
   /// Optimize for email addresses.
   ///
   /// Requests a keyboard with ready access to the "@" and "." keys.
-  static const TextInputType emailAddress = const TextInputType._(5);
+  static const TextInputType emailAddress = TextInputType._(5);
 
   /// Optimize for URLs.
   ///
   /// Requests a keyboard with ready access to the "/" and "." keys.
-  static const TextInputType url = const TextInputType._(6);
+  static const TextInputType url = TextInputType._(6);
 
   /// All possible enum values.
-  static const List<TextInputType> values = const <TextInputType>[
+  static const List<TextInputType> values = <TextInputType>[
     text, multiline, number, phone, datetime, emailAddress, url,
   ];
 
   // Corresponding string name for each of the [values].
-  static const List<String> _names = const <String>[
+  static const List<String> _names = <String>[
     'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
   ];
 
@@ -314,26 +314,26 @@ enum TextInputAction {
   newline,
 }
 
-/// Configures how the platform keyboard will select an uppercase or 
+/// Configures how the platform keyboard will select an uppercase or
 /// lowercase keyboard.
 ///
 /// Only supports text keyboards, other keyboard types will ignore this
 /// configuration. Capitalization is locale-aware.
 enum TextCapitalization {
   /// Defaults to an uppercase keyboard for the first letter of each word.
-  /// 
+  ///
   /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_WORDS` on Android, and
   /// `UITextAutocapitalizationTypeWords` on iOS.
   words,
 
   /// Defaults to an uppercase keyboard for the first letter of each sentence.
-  /// 
+  ///
   /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_SENTENCES` on Android, and
   /// `UITextAutocapitalizationTypeSentences` on iOS.
   sentences,
 
   /// Defaults to an uppercase keyboard for each character.
-  /// 
+  ///
   /// Corresponds to `InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS` on Android, and
   /// `UITextAutocapitalizationTypeAllCharacters` on iOS.
   characters,
@@ -400,18 +400,18 @@ class TextInputConfiguration {
 
   /// Specifies how platforms may automatically capitialize text entered by the
   /// user.
-  /// 
+  ///
   /// Defaults to [TextCapitalization.none].
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
-  
+
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// Defaults to [Brightness.light].
   final Brightness keyboardAppearance;
 
@@ -458,15 +458,15 @@ class TextEditingValue {
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
-    return new TextEditingValue(
+    return TextEditingValue(
       text: encoded['text'],
-      selection: new TextSelection(
+      selection: TextSelection(
         baseOffset: encoded['selectionBase'] ?? -1,
         extentOffset: encoded['selectionExtent'] ?? -1,
         affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
         isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
-      composing: new TextRange(
+      composing: TextRange(
         start: encoded['composingBase'] ?? -1,
         end: encoded['composingExtent'] ?? -1,
       ),
@@ -496,7 +496,7 @@ class TextEditingValue {
   final TextRange composing;
 
   /// A value that corresponds to the empty string with no selection and no composing range.
-  static const TextEditingValue empty = const TextEditingValue();
+  static const TextEditingValue empty = TextEditingValue();
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
@@ -504,7 +504,7 @@ class TextEditingValue {
     TextSelection selection,
     TextRange composing
   }) {
-    return new TextEditingValue(
+    return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
       composing: composing ?? this.composing
@@ -532,6 +532,23 @@ class TextEditingValue {
     selection.hashCode,
     composing.hashCode
   );
+}
+
+/// An interface for manipulating the selection, to be used by the implementor
+/// of the toolbar widget.
+abstract class TextSelectionDelegate {
+  /// Gets the current text input.
+  TextEditingValue get textEditingValue;
+
+  /// Sets the current text input (replaces the whole line).
+  set textEditingValue(TextEditingValue value);
+
+  /// Hides the text selection toolbar.
+  void hideToolbar();
+
+  /// Brings the provided [TextPosition] into the visible area of the text
+  /// input.
+  void bringIntoView(TextPosition position);
 }
 
 /// An interface to receive information from [TextInput].
@@ -628,7 +645,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.newline':
       return TextInputAction.newline;
   }
-  throw new FlutterError('Unknown text input action: $action');
+  throw FlutterError('Unknown text input action: $action');
 }
 
 class _TextInputClientHandler {
@@ -649,13 +666,13 @@ class _TextInputClientHandler {
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(new TextEditingValue.fromJSON(args[1]));
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
         break;
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
       default:
-        throw new MissingPluginException();
+        throw MissingPluginException();
     }
   }
 
@@ -677,7 +694,7 @@ class _TextInputClientHandler {
   }
 }
 
-final _TextInputClientHandler _clientHandler = new _TextInputClientHandler();
+final _TextInputClientHandler _clientHandler = _TextInputClientHandler();
 
 /// An interface to the system's text input control.
 class TextInput {
@@ -723,7 +740,7 @@ class TextInput {
     assert(client != null);
     assert(configuration != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    final TextInputConnection connection = new TextInputConnection._(client);
+    final TextInputConnection connection = TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
     SystemChannels.textInput.invokeMethod(
       'TextInput.setClient',

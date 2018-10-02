@@ -38,6 +38,17 @@
   "drawerLabel": "Navigeerimismenüü",
   "popupMenuLabel": "Hüpikmenüü",
   "dialogLabel": "Dialoog",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Märguanne",
+  "searchFieldLabel": "Otsing",
+  "reorderItemToStart": "Teisalda algusesse",
+  "reorderItemToEnd": "Teisalda lõppu",
+  "reorderItemUp": "Teisalda üles",
+  "reorderItemDown": "Teisalda alla",
+  "reorderItemLeft": "Teisalda vasakule",
+  "reorderItemRight": "Teisalda paremale",
+  "expandedIconTapHint": "Ahenda",
+  "collapsedIconTapHint": "Laienda",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Jäänud on 1 tähemärk",
+  "remainingTextFieldCharacterCountOther": "Jäänud on $remainingCount tähemärki"
 }

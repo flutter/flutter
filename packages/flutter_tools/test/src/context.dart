@@ -23,7 +23,6 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
-import 'package:test/test.dart';
 
 import 'common.dart';
 
@@ -35,7 +34,7 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef void ContextInitializer(AppContext testContext);
+typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
 void testUsingContext(String description, dynamic testMethod(), {
@@ -49,14 +48,17 @@ void testUsingContext(String description, dynamic testMethod(), {
   // leak a sticky $HOME/.flutter_settings behind!
   Directory configDir;
   tearDown(() {
-    configDir?.deleteSync(recursive: true);
-    configDir = null;
+    if (configDir != null) {
+      tryToDelete(configDir);
+      configDir = null;
+    }
   });
   Config buildConfig(FileSystem fs) {
-    configDir = fs.systemTempDirectory.createTempSync('config-dir');
+    configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     final File settingsFile = fs.file(
-        fs.path.join(configDir.path, '.flutter_settings'));
-    return new Config(settingsFile);
+      fs.path.join(configDir.path, '.flutter_settings')
+    );
+    return Config(settingsFile);
   }
 
   test(description, () async {
@@ -65,25 +67,25 @@ void testUsingContext(String description, dynamic testMethod(), {
         name: 'mocks',
         overrides: <Type, Generator>{
           Config: () => buildConfig(fs),
-          DeviceManager: () => new MockDeviceManager(),
-          Doctor: () => new MockDoctor(),
-          FlutterVersion: () => new MockFlutterVersion(),
-          HttpClient: () => new MockHttpClient(),
+          DeviceManager: () => MockDeviceManager(),
+          Doctor: () => MockDoctor(),
+          FlutterVersion: () => MockFlutterVersion(),
+          HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
-            final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
+            final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
             when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
             return mock;
           },
-          Logger: () => new BufferLogger(),
-          OperatingSystemUtils: () => new MockOperatingSystemUtils(),
-          SimControl: () => new MockSimControl(),
-          Usage: () => new MockUsage(),
-          XcodeProjectInterpreter: () => new MockXcodeProjectInterpreter(),
+          Logger: () => BufferLogger()..supportsColor = false,
+          OperatingSystemUtils: () => MockOperatingSystemUtils(),
+          SimControl: () => MockSimControl(),
+          Usage: () => MockUsage(),
+          XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
 
-          return runZoned(() {
+          return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
@@ -113,7 +115,7 @@ void testUsingContext(String description, dynamic testMethod(), {
         },
       );
     });
-  }, timeout: timeout != null ? timeout : const Timeout(const Duration(seconds: 60)),
+  }, timeout: timeout != null ? timeout : const Timeout(Duration(seconds: 60)),
       testOn: testOn, skip: skip);
 }
 
@@ -152,11 +154,11 @@ class MockDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => new Stream<Device>.fromIterable(devices);
+  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
 
   @override
   Stream<Device> getDevicesById(String deviceId) {
-    return new Stream<Device>.fromIterable(
+    return Stream<Device>.fromIterable(
         devices.where((Device device) => device.id == deviceId));
   }
 
@@ -176,7 +178,7 @@ class MockDeviceManager implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
-class MockAndroidWorkflowValidator extends AndroidWorkflow {
+class MockAndroidWorkflowValidator extends AndroidValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
@@ -196,9 +198,9 @@ class MockDoctor extends Doctor {
   /// the Doctor.
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
-    return superValidators.map((DoctorValidator v) {
-      if (v is AndroidWorkflow) {
-        return new MockAndroidWorkflowValidator();
+    return superValidators.map<DoctorValidator>((DoctorValidator v) {
+      if (v is AndroidValidator) {
+        return MockAndroidWorkflowValidator();
       }
       return v;
     }).toList();
@@ -259,7 +261,7 @@ class MockUsage implements Usage {
   Stream<Map<String, dynamic>> get onSend => null;
 
   @override
-  Future<Null> ensureAnalyticsSent() => new Future<Null>.value();
+  Future<Null> ensureAnalyticsSent() => Future<Null>.value();
 
   @override
   void printWelcome() { }
@@ -285,7 +287,7 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   XcodeProjectInfo getInfo(String projectPath) {
-    return new XcodeProjectInfo(
+    return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
       <String>['Runner'],

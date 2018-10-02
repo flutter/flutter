@@ -1,4 +1,5 @@
 {
+  "remainingTextFieldCharacterCountFew": "Preostala su $remainingCount znaka",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "Izabrane su $selectedRowCount stavke",
@@ -39,6 +40,17 @@
   "drawerLabel": "Meni za navigaciju",
   "popupMenuLabel": "Iskačući meni",
   "dialogLabel": "Dijalog",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Obaveštenje",
+  "searchFieldLabel": "Pretražite",
+  "reorderItemToStart": "Pomerite na početak",
+  "reorderItemToEnd": "Pomerite na kraj",
+  "reorderItemUp": "Pomerite nagore",
+  "reorderItemDown": "Pomerite nadole",
+  "reorderItemLeft": "Pomerite ulevo",
+  "reorderItemRight": "Pomerite udesno",
+  "expandedIconTapHint": "Skupi",
+  "collapsedIconTapHint": "Proširi",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Preostao je 1 znak",
+  "remainingTextFieldCharacterCountOther": "Preostalo je $remainingCount znakova"
 }

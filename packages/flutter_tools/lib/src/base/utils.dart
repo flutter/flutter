@@ -15,7 +15,7 @@ import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
-const BotDetector _kBotDetector = const BotDetector();
+const BotDetector _kBotDetector = BotDetector();
 
 class BotDetector {
   const BotDetector();
@@ -24,21 +24,24 @@ class BotDetector {
     return platform.environment['BOT'] != 'false'
        && (platform.environment['BOT'] == 'true'
 
-           // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+        // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
         || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
         || platform.environment.containsKey('CI') // Travis and AppVeyor
 
-           // https://www.appveyor.com/docs/environment-variables/
+        // https://www.appveyor.com/docs/environment-variables/
         || platform.environment.containsKey('APPVEYOR')
 
-           // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+        // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+        || platform.environment.containsKey('CIRRUS_CI')
+
+        // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
         || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
-           // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+        // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
         || platform.environment.containsKey('JENKINS_URL')
 
-           // Properties on Flutter's Chrome Infra bots.
+        // Properties on Flutter's Chrome Infra bots.
         || platform.environment['CHROME_HEADLESS'] == '1'
         || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
   }
@@ -50,7 +53,7 @@ bool get isRunningOnBot {
 }
 
 String hex(List<int> bytes) {
-  final StringBuffer result = new StringBuffer();
+  final StringBuffer result = StringBuffer();
   for (int part in bytes)
     result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
   return result.toString();
@@ -70,6 +73,14 @@ String camelCase(String str) {
     index = str.indexOf('_');
   }
   return str;
+}
+
+final RegExp _upperRegex = RegExp(r'[A-Z]');
+
+/// Convert `fooBar` to `foo_bar`.
+String snakeCase(String str, [String sep = '_']) {
+  return str.replaceAllMapped(_upperRegex,
+      (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
 
 String toTitleCase(String str) {
@@ -110,8 +121,8 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
-final NumberFormat kSecondsFormat = new NumberFormat('0.0');
-final NumberFormat kMillisecondsFormat = new NumberFormat.decimalPattern();
+final NumberFormat kSecondsFormat = NumberFormat('0.0');
+final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
   final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
@@ -134,17 +145,17 @@ String getDisplayPath(String fullPath) {
 /// available.
 class ItemListNotifier<T> {
   ItemListNotifier() {
-    _items = new Set<T>();
+    _items = Set<T>();
   }
 
   ItemListNotifier.from(List<T> items) {
-    _items = new Set<T>.from(items);
+    _items = Set<T>.from(items);
   }
 
   Set<T> _items;
 
-  final StreamController<T> _addedController = new StreamController<T>.broadcast();
-  final StreamController<T> _removedController = new StreamController<T>.broadcast();
+  final StreamController<T> _addedController = StreamController<T>.broadcast();
+  final StreamController<T> _removedController = StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -152,7 +163,7 @@ class ItemListNotifier<T> {
   List<T> get items => _items.toList();
 
   void updateWithNewList(List<T> updatedList) {
-    final Set<T> updatedSet = new Set<T>.from(updatedList);
+    final Set<T> updatedSet = Set<T>.from(updatedList);
 
     final Set<T> addedItems = updatedSet.difference(_items);
     final Set<T> removedItems = _items.difference(updatedSet);
@@ -185,13 +196,13 @@ class SettingsFile {
   }
 
   factory SettingsFile.parseFromFile(File file) {
-    return new SettingsFile.parse(file.readAsStringSync());
+    return SettingsFile.parse(file.readAsStringSync());
   }
 
   final Map<String, String> values = <String, String>{};
 
   void writeContents(File file) {
-    file.writeAsStringSync(values.keys.map((String key) {
+    file.writeAsStringSync(values.keys.map<String>((String key) {
       return '$key=${values[key]}';
     }).join('\n'));
   }
@@ -206,7 +217,7 @@ class SettingsFile {
 /// For more information, see
 /// http://en.wikipedia.org/wiki/Universally_unique_identifier.
 class Uuid {
-  final Random _random = new Random();
+  final Random _random = Random();
 
   /// Generate a version 4 (random) UUID. This is a UUID scheme that only uses
   /// random numbers as the source of the generated UUID.
@@ -240,14 +251,14 @@ Map<String, dynamic> castStringKeyedMap(dynamic untyped) {
 
 Clock get clock => context[Clock];
 
-typedef Future<Null> AsyncCallback();
+typedef AsyncCallback = Future<Null> Function();
 
 /// A [Timer] inspired class that:
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
   Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
-    new Future<Null>.delayed(initialDelay, _handleCallback);
+    Future<Null>.delayed(initialDelay, _handleCallback);
   }
 
   final AsyncCallback callback;
@@ -268,7 +279,7 @@ class Poller {
     }
 
     if (!_cancelled)
-      _timer = new Timer(pollingInterval, _handleCallback);
+      _timer = Timer(pollingInterval, _handleCallback);
   }
 
   /// Cancels the poller.

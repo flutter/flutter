@@ -38,6 +38,17 @@
   "drawerLabel": "Navigációs menü",
   "popupMenuLabel": "Előugró menü",
   "dialogLabel": "Párbeszédablak",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Értesítés",
+  "searchFieldLabel": "Keresés",
+  "reorderItemToStart": "Áthelyezés az elejére",
+  "reorderItemToEnd": "Áthelyezés a végére",
+  "reorderItemUp": "Áthelyezés felfelé",
+  "reorderItemDown": "Áthelyezés lefelé",
+  "reorderItemLeft": "Áthelyezés balra",
+  "reorderItemRight": "Áthelyezés jobbra",
+  "expandedIconTapHint": "Összecsukás",
+  "collapsedIconTapHint": "Kibontás",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "1 karakter maradt",
+  "remainingTextFieldCharacterCountOther": "$remainingCount karakter maradt"
 }

@@ -59,7 +59,7 @@ class LinkedScrollController extends ScrollController {
 
   @override
   LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
-    return new LinkedScrollPosition(
+    return LinkedScrollPosition(
       this,
       physics: physics,
       context: context,
@@ -151,7 +151,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     double beforeOverscroll = 0.0;
     if (owner.canLinkWithBefore && (value < minScrollExtent)) {
       final double delta = value - minScrollExtent;
-      _beforeActivities ??= new HashSet<LinkedScrollActivity>();
+      _beforeActivities ??= HashSet<LinkedScrollActivity>();
       _beforeActivities.addAll(owner.linkWithBefore(this));
       for (LinkedScrollActivity activity in _beforeActivities)
         beforeOverscroll = math.min(activity.moveBy(delta), beforeOverscroll);
@@ -161,7 +161,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     double afterOverscroll = 0.0;
     if (owner.canLinkWithAfter && (value > maxScrollExtent)) {
       final double delta = value - maxScrollExtent;
-      _afterActivities ??= new HashSet<LinkedScrollActivity>();
+      _afterActivities ??= HashSet<LinkedScrollActivity>();
       _afterActivities.addAll(owner.linkWithAfter(this));
       for (LinkedScrollActivity activity in _afterActivities)
         afterOverscroll = math.max(activity.moveBy(delta), afterOverscroll);
@@ -184,7 +184,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   LinkedScrollActivity link(LinkedScrollPosition driver) {
     if (this.activity is! LinkedScrollActivity)
-      beginActivity(new LinkedScrollActivity(this));
+      beginActivity(LinkedScrollActivity(this));
     final LinkedScrollActivity activity = this.activity;
     activity.link(driver);
     return activity;
@@ -212,7 +212,7 @@ class LinkedScrollActivity extends ScrollActivity {
   @override
   LinkedScrollPosition get delegate => super.delegate;
 
-  final Set<LinkedScrollPosition> drivers = new HashSet<LinkedScrollPosition>();
+  final Set<LinkedScrollPosition> drivers = HashSet<LinkedScrollPosition>();
 
   void link(LinkedScrollPosition driver) {
     drivers.add(driver);
@@ -257,7 +257,7 @@ class LinkedScrollActivity extends ScrollActivity {
 
 class Test extends StatefulWidget {
   @override
-  _TestState createState() => new _TestState();
+  _TestState createState() => _TestState();
 }
 
 class _TestState extends State<Test> {
@@ -267,8 +267,8 @@ class _TestState extends State<Test> {
   @override
   void initState() {
     super.initState();
-    _beforeController = new LinkedScrollController();
-    _afterController = new LinkedScrollController(before: _beforeController);
+    _beforeController = LinkedScrollController();
+    _afterController = LinkedScrollController(before: _beforeController);
     _beforeController.after = _afterController;
   }
 
@@ -288,77 +288,77 @@ class _TestState extends State<Test> {
 
   @override
   Widget build(BuildContext context) {
-    return new Directionality(
+    return Directionality(
       textDirection: TextDirection.ltr,
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Expanded(
-            child: new ListView(
+          Expanded(
+            child: ListView(
               controller: _beforeController,
               children: <Widget>[
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello A')),
+                  child: const Center(child: Text('Hello A')),
                 ),
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello B')),
+                  child: const Center(child: Text('Hello B')),
                 ),
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello C')),
+                  child: const Center(child: Text('Hello C')),
                 ),
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF90F090),
-                  child: const Center(child: const Text('Hello D')),
+                  child: const Center(child: Text('Hello D')),
                 ),
               ],
             ),
           ),
           const Divider(),
-          new Expanded(
-            child: new ListView(
+          Expanded(
+            child: ListView(
               controller: _afterController,
               children: <Widget>[
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 1')),
+                  child: const Center(child: Text('Hello 1')),
                 ),
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 2')),
+                  child: const Center(child: Text('Hello 2')),
                 ),
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 3')),
+                  child: const Center(child: Text('Hello 3')),
                 ),
-                new Container(
+                Container(
                   margin: const EdgeInsets.all(8.0),
                   padding: const EdgeInsets.all(8.0),
                   height: 250.0,
                   color: const Color(0xFF9090F0),
-                  child: const Center(child: const Text('Hello 4')),
+                  child: const Center(child: Text('Hello 4')),
                 ),
               ],
             ),
@@ -371,7 +371,7 @@ class _TestState extends State<Test> {
 
 void main() {
   testWidgets('LinkedScrollController - 1', (WidgetTester tester) async {
-    await tester.pumpWidget(new Test());
+    await tester.pumpWidget(Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello 1'), findsOneWidget);
     expect(find.text('Hello D'), findsNothing);
@@ -449,7 +449,7 @@ void main() {
     expect(find.text('Hello 4'), findsOneWidget);
   });
   testWidgets('LinkedScrollController - 2', (WidgetTester tester) async {
-    await tester.pumpWidget(new Test());
+    await tester.pumpWidget(Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello B'), findsOneWidget);
     expect(find.text('Hello C'), findsNothing);

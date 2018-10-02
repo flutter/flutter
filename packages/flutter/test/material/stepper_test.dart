@@ -10,23 +10,23 @@ void main() {
     int index = 0;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             onStepTapped: (int i) {
               index = i;
             },
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 2'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
@@ -42,21 +42,21 @@ void main() {
 
   testWidgets('Stepper expansion test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Material(
-            child: new Stepper(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
               steps: const <Step>[
-                const Step(
-                  title: const Text('Step 1'),
-                  content: const SizedBox(
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
                     width: 100.0,
                     height: 100.0,
                   ),
                 ),
-                const Step(
-                  title: const Text('Step 2'),
-                  content: const SizedBox(
+                Step(
+                  title: Text('Step 2'),
+                  content: SizedBox(
                     width: 200.0,
                     height: 200.0,
                   ),
@@ -72,22 +72,22 @@ void main() {
     expect(box.size.height, 332.0);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Material(
-            child: new Stepper(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
               currentStep: 1,
               steps: const <Step>[
-                const Step(
-                  title: const Text('Step 1'),
-                  content: const SizedBox(
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
                     width: 100.0,
                     height: 100.0,
                   ),
                 ),
-                const Step(
-                  title: const Text('Step 2'),
-                  content: const SizedBox(
+                Step(
+                  title: Text('Step 2'),
+                  content: SizedBox(
                     width: 200.0,
                     height: 200.0,
                   ),
@@ -109,15 +109,15 @@ void main() {
 
   testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Material(
-            child: new Stepper(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
               type: StepperType.horizontal,
               steps: const <Step>[
-                const Step(
-                  title: const Text('Step 1'),
-                  content: const SizedBox(
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
                     width: 100.0,
                     height: 100.0,
                   ),
@@ -135,18 +135,18 @@ void main() {
 
   testWidgets('Stepper visibility test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             type: StepperType.horizontal,
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const Text('A'),
+              Step(
+                title: Text('Step 1'),
+                content: Text('A'),
               ),
-              const Step(
-                title: const Text('Step 2'),
-                content: const Text('B'),
+              Step(
+                title: Text('Step 2'),
+                content: Text('B'),
               ),
             ],
           ),
@@ -158,19 +158,19 @@ void main() {
     expect(find.text('B'), findsNothing);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             currentStep: 1,
             type: StepperType.horizontal,
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const Text('A'),
+              Step(
+                title: Text('Step 1'),
+                content: Text('A'),
               ),
-              const Step(
-                title: const Text('Step 2'),
-                content: const Text('B'),
+              Step(
+                title: Text('Step 2'),
+                content: Text('B'),
               ),
             ],
           ),
@@ -187,9 +187,9 @@ void main() {
     bool cancelPressed = false;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             type: StepperType.horizontal,
             onStepContinue: () {
               continuePressed = true;
@@ -198,16 +198,16 @@ void main() {
               cancelPressed = true;
             },
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 2'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
                   width: 200.0,
                   height: 200.0,
                 ),
@@ -229,24 +229,24 @@ void main() {
     int index = 0;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             onStepTapped: (int i) {
               index = i;
             },
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 2'),
+              Step(
+                title: Text('Step 2'),
                 state: StepState.disabled,
-                content: const SizedBox(
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
@@ -263,27 +263,27 @@ void main() {
 
   testWidgets('Stepper scroll test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
                   width: 100.0,
                   height: 300.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 2'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
                   width: 100.0,
                   height: 300.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 3'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 3'),
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
@@ -299,28 +299,28 @@ void main() {
 
     await tester.tap(find.text('Step 3'));
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Stepper(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
             currentStep: 2,
             steps: const <Step>[
-              const Step(
-                title: const Text('Step 1'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 1'),
+                content: SizedBox(
                   width: 100.0,
                   height: 300.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 2'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 2'),
+                content: SizedBox(
                   width: 100.0,
                   height: 300.0,
                 ),
               ),
-              const Step(
-                title: const Text('Step 3'),
-                content: const SizedBox(
+              Step(
+                title: Text('Step 3'),
+                content: SizedBox(
                   width: 100.0,
                   height: 100.0,
                 ),
@@ -337,22 +337,22 @@ void main() {
 
   testWidgets('Stepper index test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Material(
-            child: new Stepper(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
               steps: const <Step>[
-                const Step(
-                  title: const Text('A'),
+                Step(
+                  title: Text('A'),
                   state: StepState.complete,
-                  content: const SizedBox(
+                  content: SizedBox(
                     width: 100.0,
                     height: 100.0,
                   ),
                 ),
-                const Step(
-                  title: const Text('B'),
-                  content: const SizedBox(
+                Step(
+                  title: Text('B'),
+                  content: SizedBox(
                     width: 100.0,
                     height: 100.0,
                   ),
@@ -370,15 +370,15 @@ void main() {
 
   testWidgets('Stepper error test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Material(
-            child: new Stepper(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: Stepper(
               steps: const <Step>[
-                const Step(
-                  title: const Text('A'),
+                Step(
+                  title: Text('A'),
                   state: StepState.error,
-                  content: const SizedBox(
+                  content: SizedBox(
                     width: 100.0,
                     height: 100.0,
                   ),
@@ -391,5 +391,35 @@ void main() {
     );
 
     expect(find.text('!'), findsOneWidget);
+  });
+
+  ///https://github.com/flutter/flutter/issues/16920
+  testWidgets('Stepper icons size test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Stepper(
+            steps: const <Step>[
+              Step(
+                title: Text('A'),
+                state: StepState.editing,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+              Step(
+                title: Text('B'),
+                state: StepState.complete,
+                content: SizedBox(width: 100.0, height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    RenderBox renderObject = tester.renderObject(find.byIcon(Icons.edit));
+    expect(renderObject.size, equals(const Size.square(18.0)));
+
+    renderObject = tester.renderObject(find.byIcon(Icons.check));
+    expect(renderObject.size, equals(const Size.square(18.0)));
   });
 }

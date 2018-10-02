@@ -14,10 +14,11 @@ import 'feedback.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
 
 /// A material design text field.
 ///
@@ -71,9 +72,7 @@ class TextField extends StatefulWidget {
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
   /// the number of lines. By default, it is one, meaning this is a single-line
-  /// text field. [maxLines] must not be zero. If [maxLines] is not one, then
-  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard
-  /// type is used.
+  /// text field. [maxLines] must not be zero.
   ///
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
@@ -89,8 +88,8 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
-  /// [autocorrect] arguments must not be null.
+  /// The [textAlign], [autofocus], [obscureText], and [autocorrect] arguments
+  /// must not be null.
   ///
   /// See also:
   ///
@@ -101,8 +100,8 @@ class TextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration = const InputDecoration(),
-    TextInputType keyboardType = TextInputType.text,
-    this.textInputAction = TextInputAction.done,
+    TextInputType keyboardType,
+    this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
     this.textAlign = TextAlign.start,
@@ -117,17 +116,20 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.enabled,
+    this.cursorWidth = 2.0,
+    this.cursorRadius,
+    this.cursorColor,
     this.keyboardAppearance,
-  }) : assert(keyboardType != null),
-       assert(textInputAction != null),
-       assert(textAlign != null),
+    this.scrollPadding = const EdgeInsets.all(20.0),
+  }) : assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLengthEnforced != null),
+       assert(scrollPadding != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
-       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        super(key: key);
 
   /// Controls the text being edited.
@@ -151,26 +153,26 @@ class TextField extends StatefulWidget {
 
   /// The type of keyboard to use for editing the text.
   ///
-  /// Defaults to [TextInputType.text]. Must not be null. If
-  /// [maxLines] is not one, then [keyboardType] is ignored, and the
-  /// [TextInputType.multiline] keyboard type is used.
+  /// Defaults to [TextInputType.text] if [maxLines] is one and
+  /// [TextInputType.multiline] otherwise.
   final TextInputType keyboardType;
 
   /// The type of action button to use for the keyboard.
   ///
-  /// Defaults to [TextInputAction.done]. Must not be null.
+  /// Defaults to [TextInputAction.newline] if [keyboardType] is
+  /// [TextInputType.multiline] and [TextInputAction.done] otherwise.
   final TextInputAction textInputAction;
 
-  /// Configures how the platform keyboard will select an uppercase or 
+  /// Configures how the platform keyboard will select an uppercase or
   /// lowercase keyboard.
   ///
   /// Only supports text keyboards, other keyboard types will ignore this
   /// configuration. Capitalization is locale-aware.
   ///
   /// Defaults to [TextCapitalization.none]. Must not be null.
-  /// 
+  ///
   /// See also:
-  /// 
+  ///
   ///   * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
 
@@ -312,35 +314,57 @@ class TextField extends StatefulWidget {
   /// [Decoration.enabled] property.
   final bool enabled;
 
+  /// How thick the cursor will be.
+  ///
+  /// Defaults to 2.0.
+  final double cursorWidth;
+
+  /// How rounded the corners of the cursor should be.
+  /// By default, the cursor has a null Radius
+  final Radius cursorRadius;
+
+  /// The color to use when painting the cursor.
+  final Color cursorColor;
+
   /// The appearance of the keyboard.
-  /// 
+  ///
   /// This setting is only honored on iOS devices.
-  /// 
+  ///
   /// If unset, defaults to the brightness of [ThemeData.primaryColorBrightness].
   final Brightness keyboardAppearance;
 
+  /// Configures padding to edges surrounding a [Scrollable] when the Textfield scrolls into view.
+  ///
+  /// When this widget receives focus and is not completely visible (for example scrolled partially
+  /// off the screen or overlapped by the keyboard)
+  /// then it will attempt to make itself visible by scrolling a surrounding [Scrollable], if one is present.
+  /// This value controls how far from the edges of a [Scrollable] the TextField will be positioned after the scroll.
+  ///
+  /// Defaults to EdgeInserts.all(20.0).
+  final EdgeInsets scrollPadding;
+
   @override
-  _TextFieldState createState() => new _TextFieldState();
+  _TextFieldState createState() => _TextFieldState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
-    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
-    properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
-    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    properties.add(new IntProperty('maxLength', maxLength, defaultValue: null));
-    properties.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+    properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
+    properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 
 class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
-  final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+  final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
 
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
@@ -349,13 +373,14 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   FocusNode _focusNode;
-  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
   bool get needsCounter => widget.maxLength != null
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
   InputDecoration _getEffectiveDecoration() {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
       .applyDefaults(Theme.of(context).inputDecorationTheme)
       .copyWith(
@@ -365,7 +390,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (!needsCounter)
       return effectiveDecoration;
 
-    final String counterText = '${_effectiveController.value.text.runes.length}/${widget.maxLength}';
+    final int currentLength = _effectiveController.value.text.runes.length;
+    final String counterText = '$currentLength/${widget.maxLength}';
+    final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
+    final String semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
@@ -373,23 +401,27 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         counterStyle: effectiveDecoration.errorStyle
           ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
         counterText: counterText,
+        semanticCounterText: semanticCounterText,
       );
     }
-    return effectiveDecoration.copyWith(counterText: counterText);
+    return effectiveDecoration.copyWith(
+      counterText: counterText,
+      semanticCounterText: semanticCounterText,
+    );
   }
 
   @override
   void initState() {
     super.initState();
     if (widget.controller == null)
-      _controller = new TextEditingController();
+      _controller = TextEditingController();
   }
 
   @override
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null)
-      _controller = new TextEditingController.fromValue(oldWidget.controller.value);
+      _controller = TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
     final bool isEnabled = widget.enabled ?? widget.decoration?.enabled ?? true;
@@ -441,6 +473,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
       borderRadius: BorderRadius.zero,
       onRemoved: handleRemoved,
+      textDirection: Directionality.of(context),
     );
 
     return splash;
@@ -472,7 +505,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (_effectiveFocusNode.hasFocus)
       return;
     final InteractiveInkFeature splash = _createInkFeature(details);
-    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     updateKeepAlive();
@@ -507,6 +540,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasMaterial(context));
+    // TODO(jonahwilliams): uncomment out this check once we have migrated tests.
+    // assert(debugCheckHasMaterialLocalizations(context));
+    assert(debugCheckHasDirectionality(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.primaryColorBrightness;
@@ -514,10 +550,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
     if (widget.maxLength != null && widget.maxLengthEnforced)
-      formatters.add(new LengthLimitingTextInputFormatter(widget.maxLength));
+      formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
-    Widget child = new RepaintBoundary(
-      child: new EditableText(
+    Widget child = RepaintBoundary(
+      child: EditableText(
         key: _editableTextKey,
         controller: controller,
         focusNode: focusNode,
@@ -530,7 +566,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
-        cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
@@ -541,15 +576,19 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
+        cursorWidth: widget.cursorWidth,
+        cursorRadius: widget.cursorRadius,
+        cursorColor: widget.cursorColor ?? Theme.of(context).cursorColor,
+        scrollPadding: widget.scrollPadding,
         keyboardAppearance: keyboardAppearance,
       ),
     );
 
     if (widget.decoration != null) {
-      child = new AnimatedBuilder(
-        animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
+      child = AnimatedBuilder(
+        animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
-          return new InputDecorator(
+          return InputDecorator(
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
@@ -562,15 +601,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       );
     }
 
-    return new Semantics(
+    return Semantics(
       onTap: () {
         if (!_effectiveController.selection.isValid)
-          _effectiveController.selection = new TextSelection.collapsed(offset: _effectiveController.text.length);
+          _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
-      child: new IgnorePointer(
+      child: IgnorePointer(
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-        child: new GestureDetector(
+        child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTapDown: _handleTapDown,
           onTap: _handleTap,

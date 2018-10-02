@@ -24,26 +24,26 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Stream<T> asStream() {
-    final StreamController<T> controller = new StreamController<T>();
+    final StreamController<T> controller = StreamController<T>();
     controller.add(_value);
     controller.close();
     return controller.stream;
   }
 
   @override
-  Future<T> catchError(Function onError, { bool test(dynamic error) }) => new Completer<T>().future;
+  Future<T> catchError(Function onError, { bool test(dynamic error) }) => Completer<T>().future;
 
   @override
   Future<E> then<E>(dynamic f(T value), { Function onError }) {
     final dynamic result = f(_value);
     if (result is Future<E>)
       return result;
-    return new SynchronousFuture<E>(result);
+    return SynchronousFuture<E>(result);
   }
 
   @override
   Future<T> timeout(Duration timeLimit, { dynamic onTimeout() }) {
-    return new Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
+    return Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
@@ -54,7 +54,7 @@ class SynchronousFuture<T> implements Future<T> {
         return result.then<T>((dynamic value) => _value);
       return this;
     } catch (e, stack) {
-      return new Future<T>.error(e, stack);
+      return Future<T>.error(e, stack);
     }
   }
 }

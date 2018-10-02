@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountFew": "Залишилося $remainingCount символи",
+  "remainingTextFieldCharacterCountMany": "Залишилося $remainingCount символів",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "Вибрано $selectedRowCount елементи",
@@ -40,6 +42,17 @@
   "drawerLabel": "Меню навігації",
   "popupMenuLabel": "Спливаюче меню",
   "dialogLabel": "Вікно",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Сповіщення",
+  "searchFieldLabel": "Пошук",
+  "reorderItemToStart": "Перемістити на початок",
+  "reorderItemToEnd": "Перемістити в кінець",
+  "reorderItemUp": "Перемістити вгору",
+  "reorderItemDown": "Перемістити вниз",
+  "reorderItemLeft": "Перемістити ліворуч",
+  "reorderItemRight": "Перемістити праворуч",
+  "expandedIconTapHint": "Згорнути",
+  "collapsedIconTapHint": "Розгорнути",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Залишився 1 символ",
+  "remainingTextFieldCharacterCountOther": "Залишилося $remainingCount символу"
 }

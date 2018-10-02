@@ -4,16 +4,18 @@
 
 import 'dart:convert';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:mockito/mockito.dart';
+
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
-import 'package:test/test.dart';
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
-import 'package:mockito/mockito.dart';
+
+import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
@@ -39,25 +41,14 @@ void main() {
     });
   });
 
-  group('BuildableIOSApp', () {
-    testUsingContext('check isSwift', () {
-      final BuildableIOSApp buildableIOSApp = new BuildableIOSApp(
-        projectBundleId: 'blah',
-        appDirectory: 'not/important',
-        buildSettings: _swiftBuildSettings,
-      );
-      expect(buildableIOSApp.isSwift, true);
-    });
-  });
-
   group('PrebuiltIOSApp', () {
     final Map<Type, Generator> overrides = <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-      IOSWorkflow: () => new MockIosWorkFlow()
+      FileSystem: () => MemoryFileSystem(),
+      IOSWorkflow: () => MockIosWorkFlow()
     };
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =
-          new IOSApp.fromPrebuiltApp('not_existing.ipa');
+          IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa'));
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(
@@ -68,7 +59,7 @@ void main() {
     testUsingContext('Error on non-app-bundle folder', () {
       fs.directory('regular_folder').createSync();
       final PrebuiltIOSApp iosApp =
-          new IOSApp.fromPrebuiltApp('regular_folder');
+          IOSApp.fromPrebuiltApp(fs.file('regular_folder'));
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(
@@ -76,7 +67,7 @@ void main() {
     }, overrides: overrides);
     testUsingContext('Error on no info.plist', () {
       fs.directory('bundle.app').createSync();
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(
@@ -87,7 +78,7 @@ void main() {
     testUsingContext('Error on bad info.plist', () {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(badPlistData);
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(
@@ -99,7 +90,7 @@ void main() {
     testUsingContext('Success with app bundle', () {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('bundle.app');
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
       final BufferLogger logger = context[Logger];
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, 'bundle.app');
@@ -109,7 +100,7 @@ void main() {
     testUsingContext('Bad ipa zip-file, no payload dir', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) {});
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(
@@ -132,7 +123,7 @@ void main() {
         fs.directory(bundlePath1).createSync(recursive: true);
         fs.directory(bundlePath2).createSync(recursive: true);
       });
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       expect(iosApp, isNull);
       final BufferLogger logger = context[Logger];
       expect(logger.errorText,
@@ -153,7 +144,7 @@ void main() {
             .file(fs.path.join(bundleAppDir.path, 'Info.plist'))
             .writeAsStringSync(plistData);
       });
-      final PrebuiltIOSApp iosApp = new IOSApp.fromPrebuiltApp('app.ipa');
+      final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('app.ipa'));
       final BufferLogger logger = context[Logger];
       expect(logger.errorText, isEmpty);
       expect(iosApp.bundleDir.path, endsWith('bundle.app'));
@@ -162,19 +153,6 @@ void main() {
     }, overrides: overrides);
   });
 }
-
-final Map<String, String> _swiftBuildSettings = <String, String>{
-  'ARCHS': 'arm64',
-  'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
-  'CLANG_ENABLE_MODULES': 'YES',
-  'ENABLE_BITCODE': 'NO',
-  'INFOPLIST_FILE': 'Runner/Info.plist',
-  'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test',
-  'PRODUCT_NAME': 'blah',
-  'SWIFT_OBJC_BRIDGING_HEADER': 'Runner/Runner-Bridging-Header.h',
-  'SWIFT_OPTIMIZATION_LEVEL': '-Onone',
-  'SWIFT_VERSION': '3.0',
-};
 
 const String _aaptDataWithExplicitEnabledActivity =
 '''N: android=http://schemas.android.com/apk/res/android

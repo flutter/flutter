@@ -10,9 +10,9 @@ void main() {
   testWidgets('receiveAction() forwards exception when exception occurs during action processing',
           (WidgetTester tester) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
-    final Widget widget = new MaterialApp(
-      home: const Material(
-        child: const TextField(),
+    const Widget widget = MaterialApp(
+      home: Material(
+        child: TextField(),
       ),
     );
     await tester.pumpWidget(widget);
@@ -23,7 +23,7 @@ void main() {
     // Register a handler for the text input channel that throws an error. This
     // error should be reported within a PlatformException by TestTextInput.
     SystemChannels.textInput.setMethodCallHandler((MethodCall call) {
-      throw new FlutterError('A fake error occurred during action processing.');
+      throw FlutterError('A fake error occurred during action processing.');
     });
 
     try {

@@ -22,7 +22,10 @@ end
 platform :ios do
   desc 'Push a new release to TestFlight'
   lane :build_and_deploy_testflight do |options|
-    # Doesn't do anything when not on Travis.
+    # Doesn't do anything when not on a CI bot. Even though it's called
+    # "setup_travis", this also runs on Cirrus, since the CI environment
+    # variable is set. When on a CI bot, it creates a temporary keychain and
+    # switches "match" to readonly mode to not create new profiles/certs on CI.
     setup_travis
 
     # Relative to this file.

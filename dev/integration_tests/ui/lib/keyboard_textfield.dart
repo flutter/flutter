@@ -10,27 +10,27 @@ import 'keys.dart' as keys;
 void main() {
   enableFlutterDriverExtension();
 
-  runApp(new MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Keyboard & TextField',
-      theme: new ThemeData(primarySwatch: Colors.blue),
-      home: new MyHomePage(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final ScrollController _controller = new ScrollController();
+  final ScrollController _controller = ScrollController();
   double offset = 0.0;
 
   @override
@@ -45,22 +45,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Column(
+    return Scaffold(
+      body: Column(
         children: <Widget>[
-          new Text('$offset',
+          Text('$offset',
             key: const ValueKey<String>(keys.kOffsetText),
           ),
-          new Expanded(
-            child: new ListView(
+          Expanded(
+            child: ListView(
               key: const ValueKey<String>(keys.kListView),
               controller: _controller,
               children: <Widget>[
-                new Container(
+                Container(
                   height: MediaQuery.of(context).size.height,
                 ),
                 const TextField(
-                  key: const ValueKey<String>(keys.kDefaultTextField),
+                  key: ValueKey<String>(keys.kDefaultTextField),
                 ),
               ],
             ),

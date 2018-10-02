@@ -1,4 +1,5 @@
 {
+  "remainingTextFieldCharacterCountFew": "Преостала су $remainingCount знака",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "Изабране су $selectedRowCount ставке",
@@ -39,6 +40,17 @@
   "drawerLabel": "Мени за навигацију",
   "popupMenuLabel": "Искачући мени",
   "dialogLabel": "Дијалог",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Обавештење",
+  "searchFieldLabel": "Претражите",
+  "reorderItemToStart": "Померите на почетак",
+  "reorderItemToEnd": "Померите на крај",
+  "reorderItemUp": "Померите нагоре",
+  "reorderItemDown": "Померите надоле",
+  "reorderItemLeft": "Померите улево",
+  "reorderItemRight": "Померите удесно",
+  "expandedIconTapHint": "Скупи",
+  "collapsedIconTapHint": "Прошири",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Преостао је 1 знак",
+  "remainingTextFieldCharacterCountOther": "Преостало је $remainingCount знакова"
 }

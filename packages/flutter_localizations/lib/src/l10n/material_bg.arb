@@ -38,6 +38,17 @@
   "drawerLabel": "Меню за навигация",
   "popupMenuLabel": "Изскачащо меню",
   "dialogLabel": "Диалогов прозорец",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Сигнал",
+  "searchFieldLabel": "Търсене",
+  "reorderItemToStart": "Преместване в началото",
+  "reorderItemToEnd": "Преместване в края",
+  "reorderItemUp": "Преместване нагоре",
+  "reorderItemDown": "Преместване надолу",
+  "reorderItemLeft": "Преместване наляво",
+  "reorderItemRight": "Преместване надясно",
+  "expandedIconTapHint": "Свиване",
+  "collapsedIconTapHint": "Разгъване",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Остава 1 знак",
+  "remainingTextFieldCharacterCountOther": "Остават $remainingCount знака"
 }

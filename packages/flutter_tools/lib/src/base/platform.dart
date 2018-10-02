@@ -11,7 +11,7 @@ import 'file_system.dart';
 
 export 'package:platform/platform.dart';
 
-const Platform _kLocalPlatform = const LocalPlatform();
+const Platform _kLocalPlatform = LocalPlatform();
 const String _kRecordingType = 'platform';
 
 Platform get platform => context[Platform] ?? _kLocalPlatform;
@@ -36,7 +36,7 @@ Future<FakePlatform> getReplayPlatform(String location) async {
   final Directory dir = getReplaySource(location, _kRecordingType);
   final File file = _getPlatformManifest(dir);
   final String json = await file.readAsString();
-  return new FakePlatform.fromJson(json);
+  return FakePlatform.fromJson(json);
 }
 
 File _getPlatformManifest(Directory dir) {

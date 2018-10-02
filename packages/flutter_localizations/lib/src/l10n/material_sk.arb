@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountFew": "Zostávajú $remainingCount znaky",
+  "remainingTextFieldCharacterCountMany": "$remainingCount characters remaining",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "selectedRowCountTitleFew": "$selectedRowCount vybraté položky",
@@ -40,6 +42,17 @@
   "drawerLabel": "Navigačná ponuka",
   "popupMenuLabel": "Kontextová ponuka",
   "dialogLabel": "Dialógové okno",
-  "alertDialogLabel": "TBD",
-  "searchFieldLabel": "TBD"
+  "alertDialogLabel": "Upozornenie",
+  "searchFieldLabel": "Hľadať",
+  "reorderItemToStart": "Presunúť na začiatok",
+  "reorderItemToEnd": "Presunúť na koniec",
+  "reorderItemUp": "Presunúť nahor",
+  "reorderItemDown": "Presunúť nadol",
+  "reorderItemLeft": "Presunúť doľava",
+  "reorderItemRight": "Presunúť doprava",
+  "expandedIconTapHint": "Zbaliť",
+  "collapsedIconTapHint": "Rozbaliť",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "Zostáva 1 znak",
+  "remainingTextFieldCharacterCountOther": "Zostáva $remainingCount znakov"
 }

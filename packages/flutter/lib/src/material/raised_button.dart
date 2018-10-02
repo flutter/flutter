@@ -44,8 +44,8 @@ import 'theme_data.dart';
 class RaisedButton extends StatelessWidget {
   /// Create a filled button.
   ///
-  /// The [elevation], [highlightElevation], and [disabledElevation]
-  /// arguments must not be null.
+  /// The [elevation], [highlightElevation], [disabledElevation], and
+  /// [clipBehavior] arguments must not be null.
   const RaisedButton({
     Key key,
     @required this.onPressed,
@@ -63,6 +63,7 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation = 0.0,
     this.padding,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     this.child,
@@ -70,6 +71,7 @@ class RaisedButton extends StatelessWidget {
        assert(highlightElevation != null),
        assert(disabledElevation != null),
        assert(animationDuration != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// Create a filled button from a pair of widgets that serve as the button's
@@ -78,8 +80,8 @@ class RaisedButton extends StatelessWidget {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [elevation], [highlightElevation], [disabledElevation], [icon], and
-  /// [label] arguments must not be null.
+  /// The [elevation], [highlightElevation], [disabledElevation], [icon],
+  /// [label], and [clipBehavior] arguments must not be null.
   RaisedButton.icon({
     Key key,
     @required this.onPressed,
@@ -96,6 +98,7 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation = 8.0,
     this.disabledElevation = 0.0,
     this.shape,
+    this.clipBehavior = Clip.none,
     this.materialTapTargetSize,
     this.animationDuration = kThemeChangeDuration,
     @required Widget icon,
@@ -106,8 +109,9 @@ class RaisedButton extends StatelessWidget {
        assert(icon != null),
        assert(label != null),
        assert(animationDuration != null),
+       assert(clipBehavior != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
-       child = new Row(
+       child = Row(
          mainAxisSize: MainAxisSize.min,
          children: <Widget>[
            icon,
@@ -166,10 +170,10 @@ class RaisedButton extends StatelessWidget {
   /// for example:
   ///
   /// ```dart
-  ///  new RaisedButton(
+  ///  RaisedButton(
   ///    color: Colors.blue,
   ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
+  ///    child: Text('DEMO'),
   ///  ),
   /// ```
   ///
@@ -287,6 +291,9 @@ class RaisedButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
+
   /// Defines the duration of animated changes for [shape] and [elevation].
   ///
   /// The default value is [kThemeChangeDuration].
@@ -377,7 +384,7 @@ class RaisedButton extends StatelessWidget {
     final Color fillColor = _getFillColor(theme, buttonTheme);
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
 
-    return new RawMaterialButton(
+    return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
       fillColor: fillColor,
@@ -390,6 +397,7 @@ class RaisedButton extends StatelessWidget {
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
+      clipBehavior: clipBehavior,
       animationDuration: animationDuration,
       child: child,
       materialTapTargetSize: materialTapTargetSize ?? theme.materialTapTargetSize,
@@ -399,18 +407,18 @@ class RaisedButton extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    properties.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
-    properties.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

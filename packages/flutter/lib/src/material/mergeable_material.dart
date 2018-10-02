@@ -126,12 +126,12 @@ class MergeableMaterial extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new EnumProperty<Axis>('mainAxis', mainAxis));
-    properties.add(new DoubleProperty('elevation', elevation.toDouble()));
+    properties.add(EnumProperty<Axis>('mainAxis', mainAxis));
+    properties.add(DoubleProperty('elevation', elevation.toDouble()));
   }
 
   @override
-  _MergeableMaterialState createState() => new _MergeableMaterialState();
+  _MergeableMaterialState createState() => _MergeableMaterialState();
 }
 
 class _AnimationTuple {
@@ -158,7 +158,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _children = new List<MergeableMaterialItem>.from(widget.children);
+    _children = List<MergeableMaterialItem>.from(widget.children);
 
     for (int i = 0; i < _children.length; i += 1) {
       if (_children[i] is MaterialGap) {
@@ -170,27 +170,27 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   void _initGap(MaterialGap gap) {
-    final AnimationController controller = new AnimationController(
+    final AnimationController controller = AnimationController(
       duration: kThemeAnimationDuration,
       vsync: this,
     );
 
-    final CurvedAnimation startAnimation = new CurvedAnimation(
+    final CurvedAnimation startAnimation = CurvedAnimation(
       parent: controller,
       curve: Curves.fastOutSlowIn
     );
-    final CurvedAnimation endAnimation = new CurvedAnimation(
+    final CurvedAnimation endAnimation = CurvedAnimation(
       parent: controller,
       curve: Curves.fastOutSlowIn
     );
-    final CurvedAnimation gapAnimation = new CurvedAnimation(
+    final CurvedAnimation gapAnimation = CurvedAnimation(
       parent: controller,
       curve: Curves.fastOutSlowIn
     );
 
     controller.addListener(_handleTick);
 
-    _animationTuples[gap.key] = new _AnimationTuple(
+    _animationTuples[gap.key] = _AnimationTuple(
       controller: controller,
       startAnimation: startAnimation,
       endAnimation: endAnimation,
@@ -278,10 +278,10 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   void didUpdateWidget(MergeableMaterial oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys = oldWidget.children.map(
+    final Set<LocalKey> oldKeys = oldWidget.children.map<LocalKey>(
       (MergeableMaterialItem child) => child.key
     ).toSet();
-    final Set<LocalKey> newKeys = widget.children.map(
+    final Set<LocalKey> newKeys = widget.children.map<LocalKey>(
       (MergeableMaterialItem child) => child.key
     ).toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
@@ -411,8 +411,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             }
 
             if (gapSizeSum != 0.0) {
-              final MaterialGap gap = new MaterialGap(
-                key: new UniqueKey(),
+              final MaterialGap gap = MaterialGap(
+                key: UniqueKey(),
                 size: gapSizeSum
               );
               _insertChild(startOld, gap);
@@ -482,12 +482,12 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     }
 
     if (widget.mainAxis == Axis.vertical) {
-      return new BorderRadius.vertical(
+      return BorderRadius.vertical(
         top: start ? cardRadius : startRadius,
         bottom: end ? cardRadius : endRadius
       );
     } else {
-      return new BorderRadius.horizontal(
+      return BorderRadius.horizontal(
         left: start ? cardRadius : startRadius,
         right: end ? cardRadius : endRadius
       );
@@ -524,13 +524,13 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       if (_children[i] is MaterialGap) {
         assert(slices.isNotEmpty);
         widgets.add(
-          new Container(
-            decoration: new BoxDecoration(
+          Container(
+            decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
               shape: BoxShape.rectangle
             ),
-            child: new ListBody(
+            child: ListBody(
               mainAxis: widget.mainAxis,
               children: slices
             )
@@ -539,7 +539,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         slices = <Widget>[];
 
         widgets.add(
-          new SizedBox(
+          SizedBox(
             width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
             height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null
           )
@@ -559,15 +559,15 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           );
 
           if (i == 0) {
-            border = new Border(
+            border = Border(
               bottom: hasBottomDivider ? divider : BorderSide.none
             );
           } else if (i == _children.length - 1) {
-            border = new Border(
+            border = Border(
               top: hasTopDivider ? divider : BorderSide.none
             );
           } else {
-            border = new Border(
+            border = Border(
               top: hasTopDivider ? divider : BorderSide.none,
               bottom: hasBottomDivider ? divider : BorderSide.none
             );
@@ -575,9 +575,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
           assert(border != null);
 
-          child = new AnimatedContainer(
-            key: new _MergeableMaterialSliceKey(_children[i].key),
-            decoration: new BoxDecoration(border: border),
+          child = AnimatedContainer(
+            key: _MergeableMaterialSliceKey(_children[i].key),
+            decoration: BoxDecoration(border: border),
             duration: kThemeAnimationDuration,
             curve: Curves.fastOutSlowIn,
             child: child
@@ -585,7 +585,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         }
 
         slices.add(
-          new Material(
+          Material(
             type: MaterialType.transparency,
             child: child
           )
@@ -595,13 +595,13 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
     if (slices.isNotEmpty) {
       widgets.add(
-        new Container(
-          decoration: new BoxDecoration(
+        Container(
+          decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
             shape: BoxShape.rectangle
           ),
-          child: new ListBody(
+          child: ListBody(
             mainAxis: widget.mainAxis,
             children: slices
           )
@@ -610,7 +610,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       slices = <Widget>[];
     }
 
-    return new _MergeableMaterialListBody(
+    return _MergeableMaterialListBody(
       mainAxis: widget.mainAxis,
       boxShadows: kElevationToShadow[widget.elevation],
       items: _children,
@@ -660,7 +660,7 @@ class _MergeableMaterialListBody extends ListBody {
 
   @override
   RenderListBody createRenderObject(BuildContext context) {
-    return new _RenderMergeableMaterialListBody(
+    return _RenderMergeableMaterialListBody(
       axisDirection: _getDirection(context),
       boxShadows: boxShadows,
     );
