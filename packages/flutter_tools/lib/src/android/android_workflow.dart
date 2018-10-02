@@ -53,7 +53,7 @@ class AndroidValidator extends DoctorValidator {
 
   /// Returns false if we cannot determine the Java version or if the version
   /// is not compatible.
-  bool _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) {
+  Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
     if (!processManager.canRun(javaBinary)) {
       messages.add(ValidationMessage.error('Cannot execute $javaBinary to determine the version'));
       return false;
@@ -61,12 +61,14 @@ class AndroidValidator extends DoctorValidator {
     String javaVersion;
     try {
       printTrace('java -version');
-      final ProcessResult result = processManager.runSync(<String>[javaBinary, '-version']);
+      final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
-    } catch (_) { /* ignore */ }
+    } catch (error) {
+      printTrace(error.toString());
+    }
     if (javaVersion == null) {
       // Could not determine the java version.
       messages.add(ValidationMessage.error('Could not determine java version'));
@@ -149,15 +151,15 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage('Java binary at: $javaBinary'));
 
     // Check JDK version.
-    if (!_checkJavaVersion(javaBinary, messages)) {
+    if (! await _checkJavaVersion(javaBinary, messages)) {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
     // Success.
     return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
   }
-
 }
+
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator(): super('Android license subvalidator',);
 
@@ -167,7 +169,8 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     // Match pre-existing early termination behavior
     if (androidSdk == null || androidSdk.latestVersion == null ||
-        androidSdk.validateSdkWellFormed().isNotEmpty || !_checkJavaVersionNoOutput() ) {
+        androidSdk.validateSdkWellFormed().isNotEmpty ||
+        ! await _checkJavaVersionNoOutput()) {
       return ValidationResult(ValidationType.missing, messages);
     }
 
@@ -191,7 +194,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
   }
 
-  bool _checkJavaVersionNoOutput() {
+  Future<bool> _checkJavaVersionNoOutput() async {
     final String javaBinary = AndroidSdk.findJavaBinary();
     if (javaBinary == null) {
       return false;
@@ -201,12 +204,14 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
     String javaVersion;
     try {
-      final ProcessResult result = processManager.runSync(<String>[javaBinary, '-version']);
+      final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
-    } catch (_) { /* ignore */ }
+    } catch (error) {
+      printTrace(error.toString());
+    }
     if (javaVersion == null) {
       // Could not determine the java version.
       return false;
