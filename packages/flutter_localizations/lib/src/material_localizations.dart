@@ -100,19 +100,19 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     @required intl.NumberFormat decimalFormat,
     @required intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : assert(localeName != null),
-       this._localeName = localeName,
+       _localeName = localeName,
        assert(fullYearFormat != null),
-       this._fullYearFormat = fullYearFormat,
+       _fullYearFormat = fullYearFormat,
        assert(mediumDateFormat != null),
-       this._mediumDateFormat = mediumDateFormat,
+       _mediumDateFormat = mediumDateFormat,
        assert(longDateFormat != null),
-       this._longDateFormat = longDateFormat,
+       _longDateFormat = longDateFormat,
        assert(yearMonthFormat != null),
-       this._yearMonthFormat = yearMonthFormat,
+       _yearMonthFormat = yearMonthFormat,
        assert(decimalFormat != null),
-       this._decimalFormat = decimalFormat,
+       _decimalFormat = decimalFormat,
        assert(twoDigitZeroPaddedFormat != null),
-       this._twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
+       _twoDigitZeroPaddedFormat = twoDigitZeroPaddedFormat;
 
   final String _localeName;
   final intl.DateFormat _fullYearFormat;
@@ -402,6 +402,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [Intl.plural], to which this form is passed.
   ///  * [remainingTextFieldCharacterCountZero], the "zero" form
   ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountZero;
@@ -412,12 +415,62 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///
   /// See also:
   ///
-  ///  * [Intl.plural], to which this form is passed.
   ///  * [remainingTextFieldCharacterCountZero], the "zero" form
   ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountOne => null;
+
+  /// The "two" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  /// The "many" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountMany => null;
+
+  /// The "few" form of [remainingTextFieldCharacterCount].
+  ///
+  /// This form is optional.
+  ///
+  /// See also:
+  ///
+  ///  * [Intl.plural], to which this form is passed.
+  ///  * [remainingTextFieldCharacterCountZero], the "zero" form
+  ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
+  ///  * [remainingTextFieldCharacterCountOther], the "other" form
+  @protected
+  String get remainingTextFieldCharacterCountFew => null;
 
   /// The "other" form of [remainingTextFieldCharacterCount].
   ///
@@ -428,6 +481,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * [Intl.plural], to which this form is passed.
   ///  * [remainingTextFieldCharacterCountZero], the "zero" form
   ///  * [remainingTextFieldCharacterCountOne], the "one" form
+  ///  * [remainingTextFieldCharacterCountTwo], the "two" form
+  ///  * [remainingTextFieldCharacterCountFew], the "few" form
+  ///  * [remainingTextFieldCharacterCountMany], the "many" form
   ///  * [remainingTextFieldCharacterCountOther], the "other" form
   @protected
   String get remainingTextFieldCharacterCountOther;
@@ -438,6 +494,9 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
       remainingCount,
       zero: remainingTextFieldCharacterCountZero,
       one: remainingTextFieldCharacterCountOne,
+      two: remainingTextFieldCharacterCountTwo,
+      many: remainingTextFieldCharacterCountMany,
+      few: remainingTextFieldCharacterCountFew,
       other: remainingTextFieldCharacterCountOther,
       locale: _localeName,
     ).replaceFirst(r'$remainingCount', formatDecimal(remainingCount));
@@ -525,7 +584,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     if (!_dateIntlDataInitialized) {
       date_localizations.dateSymbols.forEach((String locale, dynamic data) {
         assert(date_localizations.datePatterns.containsKey(locale));
-        final intl.DateSymbols symbols = new intl.DateSymbols.deserializeFromMap(data);
+        final intl.DateSymbols symbols = intl.DateSymbols.deserializeFromMap(data);
         date_symbol_data_custom.initializeDateFormattingCustom(
           locale: locale,
           symbols: symbols,
@@ -551,38 +610,38 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
       intl.DateFormat longDateFormat;
       intl.DateFormat yearMonthFormat;
       if (intl.DateFormat.localeExists(localeName)) {
-        fullYearFormat = new intl.DateFormat.y(localeName);
-        mediumDateFormat = new intl.DateFormat.MMMEd(localeName);
-        longDateFormat = new intl.DateFormat.yMMMMEEEEd(localeName);
-        yearMonthFormat = new intl.DateFormat.yMMMM(localeName);
+        fullYearFormat = intl.DateFormat.y(localeName);
+        mediumDateFormat = intl.DateFormat.MMMEd(localeName);
+        longDateFormat = intl.DateFormat.yMMMMEEEEd(localeName);
+        yearMonthFormat = intl.DateFormat.yMMMM(localeName);
       } else if (intl.DateFormat.localeExists(locale.languageCode)) {
-        fullYearFormat = new intl.DateFormat.y(locale.languageCode);
-        mediumDateFormat = new intl.DateFormat.MMMEd(locale.languageCode);
-        longDateFormat = new intl.DateFormat.yMMMMEEEEd(locale.languageCode);
-        yearMonthFormat = new intl.DateFormat.yMMMM(locale.languageCode);
+        fullYearFormat = intl.DateFormat.y(locale.languageCode);
+        mediumDateFormat = intl.DateFormat.MMMEd(locale.languageCode);
+        longDateFormat = intl.DateFormat.yMMMMEEEEd(locale.languageCode);
+        yearMonthFormat = intl.DateFormat.yMMMM(locale.languageCode);
       } else {
-        fullYearFormat = new intl.DateFormat.y();
-        mediumDateFormat = new intl.DateFormat.MMMEd();
-        longDateFormat = new intl.DateFormat.yMMMMEEEEd();
-        yearMonthFormat = new intl.DateFormat.yMMMM();
+        fullYearFormat = intl.DateFormat.y();
+        mediumDateFormat = intl.DateFormat.MMMEd();
+        longDateFormat = intl.DateFormat.yMMMMEEEEd();
+        yearMonthFormat = intl.DateFormat.yMMMM();
       }
 
       intl.NumberFormat decimalFormat;
       intl.NumberFormat twoDigitZeroPaddedFormat;
       if (intl.NumberFormat.localeExists(localeName)) {
-        decimalFormat = new intl.NumberFormat.decimalPattern(localeName);
-        twoDigitZeroPaddedFormat = new intl.NumberFormat('00', localeName);
+        decimalFormat = intl.NumberFormat.decimalPattern(localeName);
+        twoDigitZeroPaddedFormat = intl.NumberFormat('00', localeName);
       } else if (intl.NumberFormat.localeExists(locale.languageCode)) {
-        decimalFormat = new intl.NumberFormat.decimalPattern(locale.languageCode);
-        twoDigitZeroPaddedFormat = new intl.NumberFormat('00', locale.languageCode);
+        decimalFormat = intl.NumberFormat.decimalPattern(locale.languageCode);
+        twoDigitZeroPaddedFormat = intl.NumberFormat('00', locale.languageCode);
       } else {
-        decimalFormat = new intl.NumberFormat.decimalPattern();
-        twoDigitZeroPaddedFormat = new intl.NumberFormat('00');
+        decimalFormat = intl.NumberFormat.decimalPattern();
+        twoDigitZeroPaddedFormat = intl.NumberFormat('00');
       }
 
       assert(locale.toString() == localeName, 'comparing "$locale" to "$localeName"');
 
-      return new SynchronousFuture<MaterialLocalizations>(getTranslation(
+      return SynchronousFuture<MaterialLocalizations>(getTranslation(
         locale,
         fullYearFormat,
         mediumDateFormat,

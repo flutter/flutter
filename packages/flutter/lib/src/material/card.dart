@@ -17,23 +17,23 @@ import 'theme.dart';
 /// Here is an example of using a [Card] widget.
 ///
 /// ```dart
-/// new Card(
-///   child: new Column(
+/// Card(
+///   child: Column(
 ///     mainAxisSize: MainAxisSize.min,
 ///     children: <Widget>[
 ///       const ListTile(
-///         leading: const Icon(Icons.album),
-///         title: const Text('The Enchanted Nightingale'),
-///         subtitle: const Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
+///         leading: Icon(Icons.album),
+///         title: Text('The Enchanted Nightingale'),
+///         subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///       ),
-///       new ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///         child: new ButtonBar(
+///       ButtonTheme.bar( // make buttons use the appropriate styles for cards
+///         child: ButtonBar(
 ///           children: <Widget>[
-///             new FlatButton(
+///             FlatButton(
 ///               child: const Text('BUY TICKETS'),
 ///               onPressed: () { /* ... */ },
 ///             ),
-///             new FlatButton(
+///             FlatButton(
 ///               child: const Text('LISTEN'),
 ///               onPressed: () { /* ... */ },
 ///             ),
@@ -60,12 +60,15 @@ import 'theme.dart';
 ///  * <https://material.google.com/components/cards.html>
 class Card extends StatelessWidget {
   /// Creates a material design card.
+  ///
+  /// The [clipBehavior] argument must not be null.
   const Card({
     Key key,
     this.color,
     this.elevation,
     this.shape,
     this.margin = const EdgeInsets.all(4.0),
+    this.clipBehavior = Clip.none,
     this.child,
     this.semanticContainer = true,
   }) : super(key: key);
@@ -92,6 +95,9 @@ class Card extends StatelessWidget {
   /// The default shape is a [RoundedRectangleBorder] with a circular corner
   /// radius of 4.0.
   final ShapeBorder shape;
+
+  /// {@macro flutter.widgets.Clip}
+  final Clip clipBehavior;
 
   /// The empty space that surrounds the card.
   ///
@@ -121,18 +127,19 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Semantics(
+    return Semantics(
       container: semanticContainer,
       explicitChildNodes: !semanticContainer,
-      child: new Container(
+      child: Container(
         margin: margin ?? const EdgeInsets.all(4.0),
-        child: new Material(
+        child: Material(
           type: MaterialType.card,
           color: color ?? Theme.of(context).cardColor,
           elevation: elevation ?? 1.0,
           shape: shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0)),
           ),
+          clipBehavior: clipBehavior,
           child: child,
         ),
       ),

@@ -73,7 +73,7 @@ abstract class FlutterCommand extends Command<Null> {
 
   @override
   ArgParser get argParser => _argParser;
-  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+  final ArgParser _argParser = ArgParser(allowTrailingOptions: false);
 
   @override
   FlutterCommandRunner get runner => super.runner;
@@ -122,6 +122,31 @@ abstract class FlutterCommand extends Command<Null> {
     _usesPubOption = true;
   }
 
+  /// Adds flags for using a specific filesystem root and scheme.
+  ///
+  /// [hide] indicates whether or not to hide these options when the user asks
+  /// for help.
+  void usesFilesystemOptions({@required bool hide}) {
+    argParser
+      ..addOption('output-dill',
+        hide: hide,
+        help: 'Specify the path to frontend server output kernel file.',
+      )
+      ..addMultiOption(FlutterOptions.kFileSystemRoot,
+        hide: hide,
+        help: 'Specify the path, that is used as root in a virtual file system\n'
+            'for compilation. Input file name should be specified as Uri in\n'
+            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
+            'Requires --output-dill option to be explicitly specified.\n',
+      )
+      ..addOption(FlutterOptions.kFileSystemScheme,
+        defaultsTo: 'org-dartlang-root',
+        hide: hide,
+        help: 'Specify the scheme that is used for virtual file system used in\n'
+            'compilation. See more details on filesystem-root option.\n',
+      );
+  }
+
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
         help: 'An integer used as an internal version number.\n'
@@ -167,7 +192,7 @@ abstract class FlutterCommand extends Command<Null> {
   BuildMode getBuildMode() {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
-      throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+      throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic']
         : false;
@@ -190,10 +215,6 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildInfo getBuildInfo() {
-    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
-        ? argResults['preview-dart-2']
-        : true;
-
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&
         argResults['target-platform'] != 'default') {
@@ -203,10 +224,6 @@ abstract class FlutterCommand extends Command<Null> {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
         ? argResults['track-widget-creation']
         : false;
-    if (trackWidgetCreation == true && previewDart2 == false) {
-      throw new UsageException(
-          '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
-    }
 
     int buildNumber;
     try {
@@ -214,19 +231,21 @@ abstract class FlutterCommand extends Command<Null> {
           ? int.parse(argResults['build-number'])
           : null;
     } catch (e) {
-      throw new UsageException(
+      throw UsageException(
           '--build-number (${argResults['build-number']}) must be an int.', null);
     }
 
-    return new BuildInfo(getBuildMode(),
+    return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
-      previewDart2: previewDart2,
       trackWidgetCreation: trackWidgetCreation,
       compilationTraceFilePath: argParser.options.containsKey('precompile')
           ? argResults['precompile']
           : null,
+      buildHotUpdate: argParser.options.containsKey('hotupdate')
+          ? argResults['hotupdate']
+          : false,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -249,7 +268,7 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   void setupApplicationPackages() {
-    applicationPackages ??= new ApplicationPackageStore();
+    applicationPackages ??= ApplicationPackageStore();
   }
 
   /// The path to send to Google Analytics. Return null here to disable
@@ -294,7 +313,7 @@ abstract class FlutterCommand extends Command<Null> {
         } finally {
           final DateTime endTime = clock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          // Note that this is checking the result of the call to 'usagePath'
+          // This is checking the result of the call to 'usagePath'
           // (a Future<String>), and not the result of evaluating the Future.
           if (usagePath != null) {
             final List<String> labels = <String>[];
@@ -436,7 +455,7 @@ abstract class FlutterCommand extends Command<Null> {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
-        throw new ToolExit(
+        throw ToolExit(
           'Error: No pubspec.yaml file found.\n'
           'This command should be run from the root of your Flutter project.\n'
           'Do not run this command from the root of your git clone of Flutter.'
@@ -444,7 +463,7 @@ abstract class FlutterCommand extends Command<Null> {
       }
 
       if (fs.isFileSync('flutter.yaml')) {
-        throw new ToolExit(
+        throw ToolExit(
           'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
           'We have changed from having separate flutter.yaml and pubspec.yaml\n'
           'files to having just one pubspec.yaml file. Transitioning is simple:\n'
@@ -463,26 +482,31 @@ abstract class FlutterCommand extends Command<Null> {
 
       // Validate the current package map only if we will not be running "pub get" later.
       if (parent?.name != 'packages' && !(_usesPubOption && argResults['pub'])) {
-        final String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
+        final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
         if (error != null)
-          throw new ToolExit(error);
+          throw ToolExit(error);
       }
     }
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
-        throw new ToolExit('Target file "$targetPath" not found.');
+        throw ToolExit('Target file "$targetPath" not found.');
     }
 
     final bool dynamicFlag = argParser.options.containsKey('dynamic')
         ? argResults['dynamic'] : false;
     final String compilationTraceFilePath = argParser.options.containsKey('precompile')
         ? argResults['precompile'] : null;
+    final bool buildHotUpdate = argParser.options.containsKey('hotupdate')
+        ? argResults['hotupdate'] : false;
+
     if (compilationTraceFilePath != null && getBuildMode() == BuildMode.debug)
-      throw new ToolExit('Error: --precompile is not allowed when --debug is specified.');
+      throw ToolExit('Error: --precompile is not allowed when --debug is specified.');
     if (compilationTraceFilePath != null && !dynamicFlag)
-      throw new ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
+      throw ToolExit('Error: --precompile is allowed only when --dynamic is specified.');
+    if (buildHotUpdate && compilationTraceFilePath == null)
+      throw ToolExit('Error: --hotupdate is allowed only when --precompile is specified.');
   }
 
   ApplicationPackageStore applicationPackages;

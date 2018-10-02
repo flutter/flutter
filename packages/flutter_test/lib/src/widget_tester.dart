@@ -30,7 +30,7 @@ export 'package:test/test.dart' hide
   isInstanceOf; // we have our own wrapper in matchers.dart
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
-typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
+typedef WidgetTesterCallback = Future<Null> Function(WidgetTester widgetTester);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -61,7 +61,7 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   test_package.Timeout timeout
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  final WidgetTester tester = new WidgetTester._(binding);
+  final WidgetTester tester = WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test_package.test(
     description,
@@ -131,12 +131,12 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
-  final WidgetTester tester = new WidgetTester._(binding);
+  final WidgetTester tester = WidgetTester._(binding);
   tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
     () => callback(tester),
     tester._endOfTestVerifications,
-  ) ?? new Future<Null>.value();
+  ) ?? Future<Null>.value();
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -221,7 +221,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
-    return TestAsyncUtils.guard(() {
+    return TestAsyncUtils.guard<Null>(() {
       binding.attachRootWidget(widget);
       binding.scheduleFrame();
       return binding.pump(duration, phase);
@@ -244,7 +244,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
-    return TestAsyncUtils.guard(() => binding.pump(duration, phase));
+    return TestAsyncUtils.guard<Null>(() => binding.pump(duration, phase));
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
@@ -292,11 +292,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       return true;
     }());
     int count = 0;
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);
       do {
         if (binding.clock.now().isAfter(endTime))
-          throw new FlutterError('pumpAndSettle timed out');
+          throw FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (binding.hasScheduledFrame);
@@ -325,7 +325,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// [TestFailure] error being thrown.
   Future<T> runAsync<T>(Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 250),
-  }) => binding.runAsync(callback, additionalTime: additionalTime);
+  }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.
   ///
@@ -351,7 +351,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Future<Null> sendEventToBinding(PointerEvent event, HitTestResult result) {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
       return null;
     });
@@ -485,15 +485,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Does not run timers. May result in an infinite loop or run out of memory
   /// if microtasks continue to recursively schedule new microtasks.
   Future<Null> idle() {
-    return TestAsyncUtils.guard(() => binding.idle());
+    return TestAsyncUtils.guard<Null>(() => binding.idle());
   }
 
   Set<Ticker> _tickers;
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= new Set<_TestTicker>();
-    final _TestTicker result = new _TestTicker(onTick, _removeTicker);
+    _tickers ??= Set<_TestTicker>();
+    final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers.add(result);
     return result;
   }
@@ -515,7 +515,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (_tickers != null) {
       for (Ticker ticker in _tickers) {
         if (ticker.isActive) {
-          throw new FlutterError(
+          throw FlutterError(
             'A Ticker was active $when.\n'
             'All Tickers must be disposed. Tickers used by AnimationControllers '
             'should be disposed by calling dispose() on the AnimationController itself. '
@@ -535,7 +535,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
-      throw new FlutterError(
+      throw FlutterError(
         'A SemanticsHandle was active at the end of the test.\n'
         'All SemanticsHandle instances must be disposed by calling dispose() on '
         'the SemanticsHandle. If your test uses SemanticsTester, it is '
@@ -570,8 +570,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Tests that just need to add text to widgets like [TextField]
   /// or [TextFormField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
-    return TestAsyncUtils.guard(() async {
-      final EditableTextState editable = state(
+    return TestAsyncUtils.guard<Null>(() async {
+      final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
           matching: find.byType(EditableText),
@@ -593,7 +593,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].
   Future<Null> enterText(Finder finder, String text) async {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<Null>(() async {
       await showKeyboard(finder);
       testTextInput.enterText(text);
       await idle();
@@ -605,7 +605,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Will throw an error if there is no back button in the page.
   Future<void> pageBack() async {
-    return TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard<void>(() async {
       Finder backButton = find.byTooltip('Back');
       if (backButton.evaluate().isEmpty) {
         backButton = find.byType(CupertinoNavigationBarBackButton);
@@ -628,13 +628,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// if no semantics are found or are not enabled.
   SemanticsData getSemanticsData(Finder finder) {
     if (binding.pipelineOwner.semanticsOwner == null)
-      throw new StateError('Semantics are not enabled.');
+      throw StateError('Semantics are not enabled.');
     final Iterable<Element> candidates = finder.evaluate();
     if (candidates.isEmpty) {
-      throw new StateError('Finder returned no matching elements.');
+      throw StateError('Finder returned no matching elements.');
     }
     if (candidates.length > 1) {
-      throw new StateError('Finder returned more than one element.');
+      throw StateError('Finder returned more than one element.');
     }
     final Element element = candidates.single;
     RenderObject renderObject = element.findRenderObject();
@@ -644,7 +644,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       result = renderObject?.debugSemantics;
     }
     if (result == null)
-      throw new StateError('No Semantics data found.');
+      throw StateError('No Semantics data found.');
     return result.getSemanticsData();
   }
 
@@ -656,7 +656,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 }
 
-typedef void _TickerDisposeCallback(_TestTicker ticker);
+typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);

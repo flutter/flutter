@@ -20,7 +20,7 @@ const Duration _kDefaultTaskTimeout = Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
-typedef Future<TaskResult> TaskFunction();
+typedef TaskFunction = Future<TaskResult> Function();
 
 bool _isTaskRegistered = false;
 
@@ -33,7 +33,7 @@ bool _isTaskRegistered = false;
 /// registered per Dart VM.
 Future<TaskResult> task(TaskFunction task) {
   if (_isTaskRegistered)
-    throw new StateError('A task is already registered');
+    throw StateError('A task is already registered');
 
   _isTaskRegistered = true;
 
@@ -43,13 +43,13 @@ Future<TaskResult> task(TaskFunction task) {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
-  final _TaskRunner runner = new _TaskRunner(task);
+  final _TaskRunner runner = _TaskRunner(task);
   runner.keepVmAliveUntilTaskRunRequested();
   return runner.whenDone;
 }
 
 class _TaskRunner {
-  static final Logger logger = new Logger('TaskRunner');
+  static final Logger logger = Logger('TaskRunner');
 
   final TaskFunction task;
 
@@ -58,20 +58,20 @@ class _TaskRunner {
   Timer _startTaskTimeout;
   bool _taskStarted = false;
 
-  final Completer<TaskResult> _completer = new Completer<TaskResult>();
+  final Completer<TaskResult> _completer = Completer<TaskResult>();
 
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
       final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
-        ? new Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+        ? Duration(minutes: int.parse(parameters['timeoutInMinutes']))
         : _kDefaultTaskTimeout;
       final TaskResult result = await run(taskTimeout);
-      return new ServiceExtensionResponse.result(json.encode(result.toJson()));
+      return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
         (String method, Map<String, String> parameters) async {
-      return new ServiceExtensionResponse.result('"ready"');
+      return ServiceExtensionResponse.result('"ready"');
     });
   }
 
@@ -87,7 +87,7 @@ class _TaskRunner {
       return result;
     } on TimeoutException catch (_) {
       print('Task timed out in framework.dart after $taskTimeout.');
-      return new TaskResult.failure('Task timed out after $taskTimeout');
+      return TaskResult.failure('Task timed out after $taskTimeout');
     } finally {
       print('Cleaning up after task...');
       await forceQuitRunningProcesses();
@@ -99,15 +99,15 @@ class _TaskRunner {
   /// received via the VM service protocol.
   void keepVmAliveUntilTaskRunRequested() {
     if (_taskStarted)
-      throw new StateError('Task already started.');
+      throw StateError('Task already started.');
 
     // Merely creating this port object will cause the VM to stay alive and keep
     // the VM service server running until the port is disposed of.
-    _keepAlivePort = new RawReceivePort();
+    _keepAlivePort = RawReceivePort();
 
     // Timeout if nothing bothers to connect and ask us to run the task.
     const Duration taskStartTimeout = Duration(seconds: 60);
-    _startTaskTimeout = new Timer(taskStartTimeout, () {
+    _startTaskTimeout = Timer(taskStartTimeout, () {
       if (!_taskStarted) {
         logger.severe('Task did not start in $taskStartTimeout.');
         _closeKeepAlivePort();
@@ -123,7 +123,7 @@ class _TaskRunner {
   }
 
   Future<TaskResult> _performTask() {
-    final Completer<TaskResult> completer = new Completer<TaskResult>();
+    final Completer<TaskResult> completer = Completer<TaskResult>();
     Chain.capture(() async {
       completer.complete(await task());
     }, onError: (dynamic taskError, Chain taskErrorStack) {
@@ -138,7 +138,7 @@ class _TaskRunner {
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
       if (!completer.isCompleted)
-        completer.complete(new TaskResult.failure(message));
+        completer.complete(TaskResult.failure(message));
     });
     return completer.future;
   }
@@ -148,8 +148,8 @@ class _TaskRunner {
 class TaskResult {
   /// Constructs a successful result.
   TaskResult.success(this.data, {this.benchmarkScoreKeys = const <String>[]})
-      : this.succeeded = true,
-        this.message = 'success' {
+      : succeeded = true,
+        message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
       for (String key in benchmarkScoreKeys) {
@@ -167,15 +167,15 @@ class TaskResult {
   /// Constructs a successful result using JSON data stored in a file.
   factory TaskResult.successFromFile(File file,
       {List<String> benchmarkScoreKeys}) {
-    return new TaskResult.success(json.decode(file.readAsStringSync()),
+    return TaskResult.success(json.decode(file.readAsStringSync()),
         benchmarkScoreKeys: benchmarkScoreKeys);
   }
 
   /// Constructs an unsuccessful result.
   TaskResult.failure(this.message)
-      : this.succeeded = false,
-        this.data = null,
-        this.benchmarkScoreKeys = const <String>[];
+      : succeeded = false,
+        data = null,
+        benchmarkScoreKeys = const <String>[];
 
   /// Whether the task succeeded.
   final bool succeeded;

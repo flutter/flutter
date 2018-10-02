@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class ElevationDemo extends StatefulWidget {
   static const String routeName = '/material/elevation';
 
@@ -23,16 +25,16 @@ class _ElevationDemoState extends State<ElevationDemo> {
       24.0,
     ];
 
-    return elevations.map((double elevation) {
-      return new Center(
-        child: new Card(
+    return elevations.map<Widget>((double elevation) {
+      return Center(
+        child: Card(
           margin: const EdgeInsets.all(20.0),
           elevation: _showElevation ? elevation : 0.0,
-          child: new SizedBox(
+          child: SizedBox(
             height: 100.0,
             width: 100.0,
-            child: new Center(
-              child: new Text('${elevation.toStringAsFixed(0)} pt'),
+            child: Center(
+              child: Text('${elevation.toStringAsFixed(0)} pt'),
             ),
           ),
         ),
@@ -42,11 +44,12 @@ class _ElevationDemoState extends State<ElevationDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Elevation'),
         actions: <Widget>[
-          new IconButton(
+          MaterialDemoDocumentationButton(ElevationDemo.routeName),
+          IconButton(
             icon: const Icon(Icons.sentiment_very_satisfied),
             onPressed: () {
               setState(() => _showElevation = !_showElevation);
@@ -54,7 +57,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
           )
         ],
       ),
-      body: new ListView(
+      body: ListView(
         children: buildCards(),
       ),
     );

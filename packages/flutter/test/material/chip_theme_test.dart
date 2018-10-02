@@ -43,7 +43,7 @@ DefaultTextStyle getLabelStyle(WidgetTester tester) {
 
 void main() {
   testWidgets('Chip theme is built by ThemeData', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
       backgroundColor: Colors.blue,
@@ -64,15 +64,17 @@ void main() {
     bool value;
 
     Widget buildChip(ChipThemeData data) {
-      return new Directionality(
+      return MaterialApp(
+        locale: const Locale('en', 'us'),
+        home: Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
                 data: theme,
-                child: new RawChip(
+                child: RawChip(
                   showCheckmark: true,
                   onDeleted: () {},
                   tapEnabled: true,
@@ -80,7 +82,7 @@ void main() {
                   deleteIcon: const Placeholder(),
                   isEnabled: true,
                   selected: value,
-                  label: new Text('$value'),
+                  label: Text('$value'),
                   onSelected: (bool newValue) {},
                   onPressed: null,
                 ),
@@ -88,7 +90,7 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -100,7 +102,7 @@ void main() {
   });
 
   testWidgets('Chip overrides ThemeData theme if ChipTheme present', (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
+    final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -111,17 +113,18 @@ void main() {
     );
     const bool value = false;
     Widget buildChip(ChipThemeData data) {
-      return new Directionality(
+      return MaterialApp(
+        home: Directionality(
         textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
-          child: new Material(
-            child: new Center(
-              child: new Theme(
+        child: MediaQuery(
+          data: MediaQueryData.fromWindow(window),
+          child: Material(
+            child: Center(
+              child: Theme(
                 data: theme,
-                child: new ChipTheme(
+                child: ChipTheme(
                   data: customTheme,
-                  child: new RawChip(
+                  child: RawChip(
                     showCheckmark: true,
                     onDeleted: () {},
                     tapEnabled: true,
@@ -138,7 +141,7 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
     }
 
     await tester.pumpWidget(buildChip(chipTheme));
@@ -146,15 +149,15 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
 
-    expect(materialBox, paints..path(color: new Color(customTheme.backgroundColor.value)));
+    expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
   });
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
-    final TextStyle customStyle = new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor2);
+    final TextStyle customStyle = ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor2);
 
-    final ChipThemeData lightTheme = new ChipThemeData.fromDefaults(
+    final ChipThemeData lightTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
       brightness: Brightness.light,
       labelStyle: customStyle,
@@ -172,7 +175,7 @@ void main() {
     expect(lightTheme.secondaryLabelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(lightTheme.brightness, equals(Brightness.light));
 
-    final ChipThemeData darkTheme = new ChipThemeData.fromDefaults(
+    final ChipThemeData darkTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
       brightness: Brightness.dark,
       labelStyle: customStyle,
@@ -190,7 +193,7 @@ void main() {
     expect(darkTheme.secondaryLabelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(darkTheme.brightness, equals(Brightness.dark));
 
-    final ChipThemeData customTheme = new ChipThemeData.fromDefaults(
+    final ChipThemeData customTheme = ChipThemeData.fromDefaults(
       primaryColor: customColor1,
       secondaryColor: customColor2,
       labelStyle: customStyle,
@@ -210,15 +213,15 @@ void main() {
   });
 
   testWidgets('ChipThemeData lerps correctly', (WidgetTester tester) async {
-    final ChipThemeData chipThemeBlack = new ChipThemeData.fromDefaults(
+    final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
-      labelStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+      labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
     );
-    final ChipThemeData chipThemeWhite = new ChipThemeData.fromDefaults(
+    final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
       brightness: Brightness.light,
-      labelStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
+      labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     ).copyWith(padding: const EdgeInsets.all(2.0), labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0));
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
     const Color middleGrey = Color(0xff7f7f7f);

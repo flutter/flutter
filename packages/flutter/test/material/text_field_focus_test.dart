@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new TextField(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
               focusNode: focusNode,
             ),
           ),
@@ -28,7 +28,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -37,8 +37,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(
               autofocus: true,
@@ -50,7 +50,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -59,8 +59,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(),
           ),
@@ -84,7 +84,7 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
@@ -93,8 +93,8 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(
               autofocus: true,
@@ -127,23 +127,23 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new ListView(
+      MaterialApp(
+        home: Material(
+          child: ListView(
             children: <Widget>[
-              new TextField(
+              TextField(
                 focusNode: focusNode,
               ),
-              new Container(
+              Container(
                 height: 1000.0,
               ),
             ],
@@ -173,20 +173,20 @@ void main() {
   });
 
   testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
-    final FocusNode focusNode = new FocusNode();
+    final FocusNode focusNode = FocusNode();
 
     Widget makeTest(String prefix) {
-      return new MaterialApp(
-        home: new Material(
-          child: new ListView(
+      return MaterialApp(
+        home: Material(
+          child: ListView(
             children: <Widget>[
-              new TextField(
+              TextField(
                 focusNode: focusNode,
-                decoration: new InputDecoration(
+                decoration: InputDecoration(
                   prefixText: prefix,
                 ),
               ),
-              new Container(
+              Container(
                 height: 1000.0,
               ),
             ],
@@ -211,8 +211,8 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Material(
+      const MaterialApp(
+        home: Material(
           child: Center(
             child: TextField(
               decoration: null

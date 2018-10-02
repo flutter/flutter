@@ -39,7 +39,7 @@ class PlatformViewsRegistry {
 /// Callback signature for when a platform view was created.
 ///
 /// `id` is the platform view's unique identifier.
-typedef void PlatformViewCreatedCallback(int id);
+typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
 ///
@@ -82,7 +82,7 @@ class PlatformViewsService {
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
-    return new AndroidViewController._(
+    return AndroidViewController._(
       id,
       viewType,
       creationParams,
@@ -328,8 +328,8 @@ class AndroidMotionEvent {
       eventTime,
       action,
       pointerCount,
-      pointerProperties.map((AndroidPointerProperties p) => p._asList()).toList(),
-      pointerCoords.map((AndroidPointerCoords p) => p._asList()).toList(),
+      pointerProperties.map<List<int>>((AndroidPointerProperties p) => p._asList()).toList(),
+      pointerCoords.map<List<double>>((AndroidPointerCoords p) => p._asList()).toList(),
       metaState,
       buttonState,
       xPrecision,
@@ -456,7 +456,7 @@ class AndroidViewController {
   /// The first time a size is set triggers the creation of the Android view.
   Future<void> setSize(Size size) async {
     if (_state == _AndroidViewState.disposed)
-      throw new FlutterError('trying to size a disposed Android View. View id: $id');
+      throw FlutterError('trying to size a disposed Android View. View id: $id');
 
     assert(size != null);
     assert(!size.isEmpty);
@@ -474,7 +474,7 @@ class AndroidViewController {
   /// Sets the layout direction for the Android view.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
     if (_state == _AndroidViewState.disposed)
-      throw new FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
+      throw FlutterError('trying to set a layout direction for a disposed Android View. View id: $id');
 
     if (layoutDirection == _layoutDirection)
       return;

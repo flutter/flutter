@@ -24,6 +24,6 @@ Future<Null> main() async {
       benchmarkScoreKeys.add(deltaKey);
     }
 
-    return new TaskResult.success(data, benchmarkScoreKeys: benchmarkScoreKeys);
+    return TaskResult.success(data, benchmarkScoreKeys: benchmarkScoreKeys);
   });
 }

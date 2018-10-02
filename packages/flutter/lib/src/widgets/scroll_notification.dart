@@ -284,7 +284,7 @@ class UserScrollNotification extends ScrollNotification {
 
 /// A predicate for [ScrollNotification], used to customize widgets that
 /// listen to notifications from their children.
-typedef bool ScrollNotificationPredicate(ScrollNotification notification);
+typedef ScrollNotificationPredicate = bool Function(ScrollNotification notification);
 
 /// A [ScrollNotificationPredicate] that checks whether
 /// `notification.depth == 0`, which means that the notification did not bubble

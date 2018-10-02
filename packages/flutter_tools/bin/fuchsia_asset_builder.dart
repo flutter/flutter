@@ -32,7 +32,7 @@ const List<String> _kRequiredOptions = <String>[
 
 Future<Null> main(List<String> args) {
   return runInContext<Null>(() => run(args), overrides: <Type, Generator>{
-    Usage: () => new DisabledUsage(),
+    Usage: () => DisabledUsage(),
   });
 }
 
@@ -44,7 +44,7 @@ Future<Null> writeFile(libfs.File outputFile, DevFSContent content) async {
 }
 
 Future<Null> run(List<String> args) async {
-  final ArgParser parser = new ArgParser()
+  final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionAsset,
         help: 'The directory where to put temporary files')
@@ -77,7 +77,7 @@ Future<Null> run(List<String> args) async {
     final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
-  await Future.wait(calls);
+  await Future.wait<Null>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);

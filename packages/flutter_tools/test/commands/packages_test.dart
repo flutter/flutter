@@ -58,7 +58,7 @@ void main() {
     }
 
     Future<Null> runCommandIn(String projectPath, String verb, { List<String> args }) async {
-      final PackagesCommand command = new PackagesCommand();
+      final PackagesCommand command = PackagesCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       final List<String> commandArgs = <String>['packages', verb];
@@ -159,7 +159,7 @@ void main() {
         pubOutput,
         pluginRegistrants,
         pluginWitnesses,
-      ].expand((List<String> list) => list);
+      ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
         final File file = fs.file(fs.path.join(projectPath, path));
         if (file.existsSync())
@@ -233,12 +233,12 @@ void main() {
     MockStdio mockStdio;
 
     setUp(() {
-      mockProcessManager = new MockProcessManager();
-      mockStdio = new MockStdio();
+      mockProcessManager = MockProcessManager();
+      mockStdio = MockStdio();
     });
 
     testUsingContext('test without bot', () async {
-      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -251,7 +251,7 @@ void main() {
     });
 
     testUsingContext('test with bot', () async {
-      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -265,7 +265,7 @@ void main() {
     });
 
     testUsingContext('run', () async {
-      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -278,14 +278,14 @@ void main() {
     });
 
     testUsingContext('publish', () async {
-      final PromptingProcess process = new PromptingProcess();
+      final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<Null> runPackages = createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      final Future<Null> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
       final Future<Null> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
-      final Future<Null> simulateUserInput = new Future<Null>(() {
+      final Future<Null> simulateUserInput = Future<Null>(() {
         mockStdio.simulateStdin('y');
       });
-      await Future.wait(<Future<Null>>[runPackages, runPrompt, simulateUserInput]);
+      await Future.wait<Null>(<Future<Null>>[runPackages, runPrompt, simulateUserInput]);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));

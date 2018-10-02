@@ -23,16 +23,16 @@ import 'ticker_provider.dart';
 /// Creates a route for the given route settings.
 ///
 /// Used by [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute].
-typedef Route<dynamic> RouteFactory(RouteSettings settings);
+typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
 
 /// Signature for the [Navigator.popUntil] predicate argument.
-typedef bool RoutePredicate(Route<dynamic> route);
+typedef RoutePredicate = bool Function(Route<dynamic> route);
 
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///
 /// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
 /// [ModalRoute.removeScopedWillPopCallback], and [WillPopScope].
-typedef Future<bool> WillPopCallback();
+typedef WillPopCallback = Future<bool> Function();
 
 /// Indicates whether the current route should be popped.
 ///
@@ -78,7 +78,7 @@ abstract class Route<T> {
   ///
   /// If the [settings] are not provided, an empty [RouteSettings] object is
   /// used instead.
-  Route({ RouteSettings settings }) : this.settings = settings ?? const RouteSettings();
+  Route({ RouteSettings settings }) : settings = settings ?? const RouteSettings();
 
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
@@ -114,7 +114,7 @@ abstract class Route<T> {
   /// The [didChangeNext] and [didChangePrevious] methods are typically called
   /// immediately after this method is called.
   @protected
-  TickerFuture didPush() => new TickerFuture.complete();
+  TickerFuture didPush() => TickerFuture.complete();
 
   /// Called after [install] when the route replaced another in the navigator.
   ///
@@ -152,7 +152,7 @@ abstract class Route<T> {
   ///
   /// The future completes with the value given to [Navigator.pop], if any.
   Future<T> get popped => _popCompleter.future;
-  final Completer<T> _popCompleter = new Completer<T>();
+  final Completer<T> _popCompleter = Completer<T>();
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -295,7 +295,7 @@ class RouteSettings {
     String name,
     bool isInitialRoute,
   }) {
-    return new RouteSettings(
+    return RouteSettings(
       name: name ?? this.name,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
     );
@@ -388,7 +388,7 @@ class NavigatorObserver {
 ///
 /// ```dart
 /// void main() {
-///   runApp(new MaterialApp(home: new MyAppHome()));
+///   runApp(MaterialApp(home: MyAppHome()));
 /// }
 /// ```
 ///
@@ -397,13 +397,13 @@ class NavigatorObserver {
 /// want to appear on the screen. For example:
 ///
 /// ```dart
-/// Navigator.push(context, new MaterialPageRoute<void>(
+/// Navigator.push(context, MaterialPageRoute<void>(
 ///   builder: (BuildContext context) {
-///     return new Scaffold(
-///       appBar: new AppBar(title: new Text('My Page')),
-///       body: new Center(
-///         child: new FlatButton(
-///           child: new Text('POP'),
+///     return Scaffold(
+///       appBar: AppBar(title: Text('My Page')),
+///       body: Center(
+///         child: FlatButton(
+///           child: Text('POP'),
 ///           onPressed: () {
 ///             Navigator.pop(context);
 ///           },
@@ -445,12 +445,12 @@ class NavigatorObserver {
 ///
 /// ```dart
 /// void main() {
-///   runApp(new MaterialApp(
-///     home: new MyAppHome(), // becomes the route named '/'
+///   runApp(MaterialApp(
+///     home: MyAppHome(), // becomes the route named '/'
 ///     routes: <String, WidgetBuilder> {
-///       '/a': (BuildContext context) => new MyPage(title: 'page A'),
-///       '/b': (BuildContext context) => new MyPage(title: 'page B'),
-///       '/c': (BuildContext context) => new MyPage(title: 'page C'),
+///       '/a': (BuildContext context) => MyPage(title: 'page A'),
+///       '/b': (BuildContext context) => MyPage(title: 'page B'),
+///       '/c': (BuildContext context) => MyPage(title: 'page C'),
 ///     },
 ///   ));
 /// }
@@ -475,11 +475,11 @@ class NavigatorObserver {
 /// operation we could `await` the result of [Navigator.push]:
 ///
 /// ```dart
-/// bool value = await Navigator.push(context, new MaterialPageRoute<bool>(
+/// bool value = await Navigator.push(context, MaterialPageRoute<bool>(
 ///   builder: (BuildContext context) {
-///     return new Center(
-///       child: new GestureDetector(
-///         child: new Text('OK'),
+///     return Center(
+///       child: GestureDetector(
+///         child: Text('OK'),
 ///         onTap: () { Navigator.pop(context, true); }
 ///       ),
 ///     );
@@ -527,16 +527,16 @@ class NavigatorObserver {
 /// screen because it specifies `opaque: false`, just as a popup route does.
 ///
 /// ```dart
-/// Navigator.push(context, new PageRouteBuilder(
+/// Navigator.push(context, PageRouteBuilder(
 ///   opaque: false,
 ///   pageBuilder: (BuildContext context, _, __) {
-///     return new Center(child: new Text('My PageRoute'));
+///     return Center(child: Text('My PageRoute'));
 ///   },
 ///   transitionsBuilder: (___, Animation<double> animation, ____, Widget child) {
-///     return new FadeTransition(
+///     return FadeTransition(
 ///       opacity: animation,
-///       child: new RotationTransition(
-///         turns: new Tween<double>(begin: 0.5, end: 1.0).animate(animation),
+///       child: RotationTransition(
+///         turns: Tween<double>(begin: 0.5, end: 1.0).animate(animation),
 ///         child: child,
 ///       ),
 ///     );
@@ -588,13 +588,13 @@ class NavigatorObserver {
 /// class MyApp extends StatelessWidget {
 ///  @override
 ///  Widget build(BuildContext context) {
-///    return new MaterialApp(
+///    return MaterialApp(
 ///      // ...some parameters omitted...
 ///      // MaterialApp contains our top-level Navigator
 ///      initialRoute: '/',
 ///      routes: {
-///        '/': (BuildContext context) => new HomePage(),
-///        '/signup': (BuildContext context) => new SignUpPage(),
+///        '/': (BuildContext context) => HomePage(),
+///        '/signup': (BuildContext context) => SignUpPage(),
 ///      },
 ///    );
 ///  }
@@ -605,7 +605,7 @@ class NavigatorObserver {
 ///  Widget build(BuildContext context) {
 ///    // SignUpPage builds its own Navigator which ends up being a nested
 ///    // Navigator in our app.
-///    return new Navigator(
+///    return Navigator(
 ///      initialRoute: 'signup/personal_info',
 ///      onGenerateRoute: (RouteSettings settings) {
 ///        WidgetBuilder builder;
@@ -613,12 +613,12 @@ class NavigatorObserver {
 ///          case 'signup/personal_info':
 ///            // Assume CollectPersonalInfoPage collects personal info and then
 ///            // navigates to 'signup/choose_credentials'.
-///            builder = (BuildContext _) => new CollectPersonalInfoPage();
+///            builder = (BuildContext _) => CollectPersonalInfoPage();
 ///            break;
 ///          case 'signup/choose_credentials':
 ///            // Assume ChooseCredentialsPage collects new credentials and then
 ///            // invokes 'onSignupComplete()'.
-///            builder = (BuildContext _) => new ChooseCredentialsPage(
+///            builder = (BuildContext _) => ChooseCredentialsPage(
 ///              onSignupComplete: () {
 ///                // Referencing Navigator.of(context) from here refers to the
 ///                // top level Navigator because SignUpPage is above the
@@ -630,9 +630,9 @@ class NavigatorObserver {
 ///            );
 ///            break;
 ///          default:
-///            throw new Exception('Invalid route: ${settings.name}');
+///            throw Exception('Invalid route: ${settings.name}');
 ///        }
-///        return new MaterialPageRoute(builder: builder, settings: settings);
+///        return MaterialPageRoute(builder: builder, settings: settings);
 ///      },
 ///    );
 ///  }
@@ -901,7 +901,7 @@ class Navigator extends StatefulWidget {
   ///
   /// ```dart
   /// void _openMyPage() {
-  ///   Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) => new MyPage()));
+  ///   Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -944,7 +944,7 @@ class Navigator extends StatefulWidget {
   /// ```dart
   /// void _completeLogin() {
   ///   Navigator.pushReplacement(
-  ///       context, new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///       context, MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -995,7 +995,7 @@ class Navigator extends StatefulWidget {
   /// void _finishAccountCreation() {
   ///   Navigator.pushAndRemoveUntil(
   ///     context,
-  ///     new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()),
+  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
@@ -1270,7 +1270,7 @@ class Navigator extends StatefulWidget {
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null && !nullOk) {
-        throw new FlutterError(
+        throw FlutterError(
           'Navigator operation requested with a context that does not include a Navigator.\n'
           'The context used to push or pop routes from the Navigator must be that of a '
           'widget that is a descendant of a Navigator widget.'
@@ -1282,17 +1282,17 @@ class Navigator extends StatefulWidget {
   }
 
   @override
-  NavigatorState createState() => new NavigatorState();
+  NavigatorState createState() => NavigatorState();
 }
 
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
-  final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
+  final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   final List<Route<dynamic>> _history = <Route<dynamic>>[];
-  final Set<Route<dynamic>> _poppedRoutes = new Set<Route<dynamic>>();
+  final Set<Route<dynamic>> _poppedRoutes = Set<Route<dynamic>>();
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
-  final FocusScopeNode focusScopeNode = new FocusScopeNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode();
 
   final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
 
@@ -1325,7 +1325,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (plannedInitialRoutes.contains(null)) {
         assert(() {
           FlutterError.reportError(
-            new FlutterErrorDetails(
+            FlutterErrorDetails(
               exception:
                 'Could not navigate to initial route.\n'
                 'The requested route name was: "/$initialRouteName"\n'
@@ -1401,7 +1401,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Route<T> _routeNamed<T>(String name, { bool allowNull = false }) {
     assert(!_debugLocked);
     assert(name != null);
-    final RouteSettings settings = new RouteSettings(
+    final RouteSettings settings = RouteSettings(
       name: name,
       isInitialRoute: _history.isEmpty,
     );
@@ -1409,7 +1409,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
-          throw new FlutterError(
+          throw FlutterError(
             'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
             'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
             'onUnknownRoute callback specified.\n'
@@ -1422,7 +1422,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route = widget.onUnknownRoute(settings);
       assert(() {
         if (route == null) {
-          throw new FlutterError(
+          throw FlutterError(
             'A Navigator\'s onUnknownRoute returned null.\n'
             'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
             'null. The onUnknownRoute callback should never return null.\n'
@@ -1523,7 +1523,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// ```dart
   /// void _openPage() {
-  ///   navigator.push(new MaterialPageRoute(builder: (BuildContext context) => new MyPage()));
+  ///   navigator.push(MaterialPageRoute(builder: (BuildContext context) => MyPage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1562,7 +1562,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// void _doOpenPage() {
   ///   navigator.pushReplacement(
-  ///       new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()));
+  ///       MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
   /// }
   /// ```
   @optionalTypeArgs
@@ -1613,7 +1613,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// void _resetAndOpenPage() {
   ///   navigator.pushAndRemoveUntil(
-  ///     new MaterialPageRoute(builder: (BuildContext context) => new MyHomePage()),
+  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
   ///     ModalRoute.withName('/'),
   ///   );
   /// }
@@ -1915,7 +1915,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
   }
 
-  final Set<int> _activePointers = new Set<int>();
+  final Set<int> _activePointers = Set<int>();
 
   void _handlePointerDown(PointerDownEvent event) {
     _activePointers.add(event.pointer);
@@ -1945,16 +1945,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    return new Listener(
+    return Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
       onPointerCancel: _handlePointerUpOrCancel,
-      child: new AbsorbPointer(
+      child: AbsorbPointer(
         absorbing: false, // it's mutated directly by _cancelActivePointers above
-        child: new FocusScope(
+        child: FocusScope(
           node: focusScopeNode,
           autofocus: true,
-          child: new Overlay(
+          child: Overlay(
             key: _overlayKey,
             initialEntries: _initialOverlayEntries,
           ),

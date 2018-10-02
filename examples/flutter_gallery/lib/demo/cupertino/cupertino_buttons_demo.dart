@@ -5,11 +5,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class CupertinoButtonsDemo extends StatefulWidget {
   static const String routeName = '/cupertino/buttons';
 
   @override
-  _CupertinoButtonDemoState createState() => new _CupertinoButtonDemoState();
+  _CupertinoButtonDemoState createState() => _CupertinoButtonDemoState();
 }
 
 class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
@@ -17,11 +19,12 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Cupertino Buttons'),
+        actions: <Widget>[MaterialDemoDocumentationButton(CupertinoButtonsDemo.routeName)],
       ),
-      body: new Column(
+      body: Column(
         children: <Widget> [
           const Padding(
             padding: EdgeInsets.all(16.0),
@@ -30,20 +33,20 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
               'only when necessary.'
             ),
           ),
-          new Expanded(
-            child: new Column(
+          Expanded(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
-                new Text(_pressedCount > 0
+                Text(_pressedCount > 0
                     ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}'
                     : ' '),
                 const Padding(padding: EdgeInsets.all(12.0)),
-                new Align(
+                Align(
                   alignment: const Alignment(0.0, -0.2),
-                  child: new Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      new CupertinoButton(
+                      CupertinoButton(
                         child: const Text('Cupertino Button'),
                         onPressed: () {
                           setState(() { _pressedCount += 1; });
@@ -57,7 +60,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(12.0)),
-                new CupertinoButton(
+                CupertinoButton(
                   child: const Text('With Background'),
                   color: CupertinoColors.activeBlue,
                   onPressed: () {
