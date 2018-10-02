@@ -55,6 +55,25 @@ class Paragraph {
 
   enum Affinity { UPSTREAM, DOWNSTREAM };
 
+  // TODO(garyq): Implement kIncludeLineSpacing and kExtendEndOfLine
+
+  // Options for various types of bounding boxes provided by
+  // GetRectsForRange(...).
+  // These options can be individually enabled, for example:
+  //
+  //   (RectStyle::kTight | RectStyle::kExtendEndOfLine)
+  //
+  // provides tight bounding boxes and extends the last box per line to the end
+  // of the layout area.
+  enum RectStyle {
+    kNone = 0x0,  // kNone cannot be combined with |.
+
+    // Provide tight bounding boxes that fit heights per span. Otherwise, the
+    // heights of spans are the max of the heights of the line the span belongs
+    // in.
+    kTight = 0x1
+  };
+
   struct PositionWithAffinity {
     const size_t position;
     const Affinity affinity;
@@ -137,7 +156,9 @@ class Paragraph {
 
   // Returns a vector of bounding boxes that enclose all text between start and
   // end glyph indexes, including start and excluding end.
-  std::vector<TextBox> GetRectsForRange(size_t start, size_t end) const;
+  std::vector<TextBox> GetRectsForRange(size_t start,
+                                        size_t end,
+                                        RectStyle rect_style) const;
 
   // Returns the index of the glyph that corresponds to the provided coordinate,
   // with the top left corner as the origin, and +y direction as down.

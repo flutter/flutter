@@ -7,6 +7,7 @@
 
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/text_box.h"
+#include "flutter/third_party/txt/src/txt/paragraph.h"
 
 namespace blink {
 
@@ -32,8 +33,10 @@ class ParagraphImpl {
 
   virtual void paint(Canvas* canvas, double x, double y) = 0;
 
-  virtual std::vector<TextBox> getRectsForRange(unsigned start,
-                                                unsigned end) = 0;
+  virtual std::vector<TextBox> getRectsForRange(
+      unsigned start,
+      unsigned end,
+      txt::Paragraph::RectStyle rect_style) = 0;
 
   virtual Dart_Handle getPositionForOffset(double dx, double dy) = 0;
 

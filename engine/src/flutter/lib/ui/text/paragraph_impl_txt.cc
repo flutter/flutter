@@ -61,11 +61,13 @@ void ParagraphImplTxt::paint(Canvas* canvas, double x, double y) {
   m_paragraph->Paint(sk_canvas, x, y);
 }
 
-std::vector<TextBox> ParagraphImplTxt::getRectsForRange(unsigned start,
-                                                        unsigned end) {
+std::vector<TextBox> ParagraphImplTxt::getRectsForRange(
+    unsigned start,
+    unsigned end,
+    txt::Paragraph::RectStyle rect_style) {
   std::vector<TextBox> result;
   std::vector<txt::Paragraph::TextBox> boxes =
-      m_paragraph->GetRectsForRange(start, end);
+      m_paragraph->GetRectsForRange(start, end, rect_style);
   for (const txt::Paragraph::TextBox& box : boxes) {
     result.emplace_back(box.rect,
                         static_cast<blink::TextDirection>(box.direction));
