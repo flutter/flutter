@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.Nullable;
 import java.util.Map;
 import org.json.JSONObject;
 
@@ -61,6 +62,7 @@ public final class MethodCall {
      * {@link JSONObject}.
      */
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T> T argument(String key) {
         if (arguments == null) {
             return null;
