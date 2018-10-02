@@ -49,7 +49,7 @@ class RawMaterialButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
-  }) : this.materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
+  }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
        assert(shape != null),
        assert(elevation != null),
        assert(highlightElevation != null),

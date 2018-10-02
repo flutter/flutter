@@ -446,7 +446,7 @@ class _Transform {
 
   /// Constructs a new _Transform, default arguments create a no-op transform.
   _Transform({Matrix3 transformMatrix, this.opacity = 1.0}) :
-      this.transformMatrix = transformMatrix ?? Matrix3.identity();
+      transformMatrix = transformMatrix ?? Matrix3.identity();
 
   final Matrix3 transformMatrix;
   final double opacity;

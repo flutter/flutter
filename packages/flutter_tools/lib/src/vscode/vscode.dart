@@ -14,7 +14,7 @@ const bool _includeInsiders = false;
 
 class VsCode {
   VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
-      : this.version = version ?? Version.unknown {
+      : version = version ?? Version.unknown {
 
     if (!fs.isDirectorySync(directory)) {
       _validationMessages.add('VS Code not found at $directory');
@@ -195,7 +195,7 @@ class VsCode {
 
 class _VsCodeInstallLocation {
   const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : this.isInsiders = isInsiders ?? false;
+    : isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;

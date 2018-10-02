@@ -24,7 +24,7 @@ const Duration quitTimeout = Duration(seconds: 10);
 
 class FlutterTestDriver {
   FlutterTestDriver(this._projectFolder, {String logPrefix}):
-    this._logPrefix = logPrefix != null ? '$logPrefix: ' : '';
+    _logPrefix = logPrefix != null ? '$logPrefix: ' : '';
 
   final Directory _projectFolder;
   final String _logPrefix;
