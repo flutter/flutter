@@ -47,6 +47,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     this.title,
     this.background,
     this.centerTitle,
+    this.titleStartOffset = 72.0,
     this.collapseMode = CollapseMode.parallax
   }) : assert(collapseMode != null),
        super(key: key);
@@ -65,6 +66,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
+
+  /// Start padding of [title] widget.
+  ///
+  /// Defaults to 72.0.
+  final double titleStartOffset;
 
   /// Collapse effect while scrolling.
   ///
@@ -199,7 +205,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
         children.add(Container(
           padding: EdgeInsetsDirectional.only(
-            start: effectiveCenterTitle ? 0.0 : 72.0,
+            start: effectiveCenterTitle ? 0.0 : widget.titleStartOffset,
             bottom: 16.0
           ),
           child: Transform(

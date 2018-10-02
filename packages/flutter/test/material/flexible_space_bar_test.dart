@@ -6,18 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar centers title on iOS',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: const FlexibleSpaceBar(
-              title: Text('X')
-            )
-          )
-        )
-      )
+              title: Text('X'),
+            ),
+          ),
+        ),
+      ),
     );
 
     final Finder title = find.text('X');
@@ -34,16 +35,51 @@ void main() {
         home: Scaffold(
           appBar: AppBar(
             flexibleSpace: const FlexibleSpaceBar(
-              title: Text('X')
-            )
-          )
-        )
-      )
+              title: Text('X'),
+            ),
+          ),
+        ),
+      ),
     );
 
     center = tester.getCenter(title);
     size = tester.getSize(title);
     expect(center.dx, greaterThan(400.0 - size.width / 2.0));
     expect(center.dx, lessThan(400.0 + size.width / 2.0));
+  });
+
+  testWidgets('FlexibleSpaceBar test title start offset default.',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+            appBar: AppBar(
+                flexibleSpace: const FlexibleSpaceBar(title: Text('X'))))));
+
+    final Finder title = find.text('X');
+    final Offset topLeft = tester.getTopLeft(title);
+    expect(topLeft.dx, equals(72.0));
+  });
+
+  testWidgets('FlexibleSpaceBar test title start offset by custom size.',
+      (WidgetTester tester) async {
+    const double offsetSize = 8.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          appBar: AppBar(
+            flexibleSpace: const FlexibleSpaceBar(
+              title: Text('X'),
+              titleStartOffset: offsetSize,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder title = find.text('X');
+    final Offset topLeft = tester.getTopLeft(title);
+    expect(topLeft.dx, equals(offsetSize));
   });
 }
