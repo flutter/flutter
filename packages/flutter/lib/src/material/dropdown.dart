@@ -471,7 +471,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// Creates a dropdown button.
   ///
   /// The [items] must have distinct values and if [value] isn't null it must be among them.
-  /// If [items] is empty the button will be disabled, the down arrow will be grayed out, and
+  /// If [items] or [onChanged] is null, the button will be disabled, the down arrow will be grayed out, and
   /// the [disabledHint] will be shown (if provided).
   ///
   /// The [elevation] and [iconSize] arguments must not be null (they both have
@@ -488,8 +488,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
-  }) : assert(items != null),
-       assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+  }) : assert(items == null || (value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1)),
       super(key: key);
 
   /// The list of possible items to select among.
@@ -503,7 +502,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// Displayed if [value] is null.
   final Widget hint;
 
-  /// Displayed if [items] is null.
+  /// Displayed if [items] or [onChanged] is null.
   final Widget disabledHint;
 
   /// Called when the user selects an item.
@@ -655,7 +654,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
   }
 
-  bool get _enabled => widget.items.isNotEmpty;
+  bool get _enabled => widget.items != null && widget.items.isNotEmpty && widget.onChanged != null;
 
   @override
   Widget build(BuildContext context) {
@@ -664,7 +663,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = List<Widget>.from(widget.items);
+    final List<Widget> items = _enabled ? List<Widget>.from(widget.items) : <Widget>[];
     int hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
       final Widget emplacedHint =
