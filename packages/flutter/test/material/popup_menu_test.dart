@@ -434,13 +434,13 @@ void main() {
     const Offset offset = Offset(100.0, 100.0);
 
     final PopupMenuButton<int> popupMenuButton =
-      new PopupMenuButton<int>(
+      PopupMenuButton<int>(
         offset: offset,
         itemBuilder: (BuildContext context) {
           return <PopupMenuItem<int>>[
-            new PopupMenuItem<int>(
+            PopupMenuItem<int>(
               value: 1,
-              child: new Builder(
+              child: Builder(
                 builder: (BuildContext context) {
                   return const Text('AAA');
                 },
@@ -451,10 +451,10 @@ void main() {
       );
 
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         home: Scaffold(
           body: Center(
-            child:  new Material(
+            child: Material(
               child: popupMenuButton,
             ),
           )
