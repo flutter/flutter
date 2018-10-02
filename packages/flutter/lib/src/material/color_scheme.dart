@@ -9,7 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme_data.dart';
 
-/// A set of thirteen colors based on the [Material spec](https://material.io/design/color/the-color-system.html)
+/// A set of twelve colors based on the
+/// [Material spec](https://material.io/design/color/the-color-system.html)
 /// that can be used to configure the color properties of most components.
 ///
 /// The [Theme] has a color scheme, [ThemeData.colorScheme], which is constructed
@@ -19,7 +20,6 @@ class ColorScheme extends Diagnosticable {
   const ColorScheme({
     @required this.primary,
     @required this.primaryVariant,
-    @required this.primaryVariant2,
     @required this.secondary,
     @required this.secondaryVariant,
     @required this.surface,
@@ -33,7 +33,6 @@ class ColorScheme extends Diagnosticable {
     @required this.brightness,
   }) : assert(primary != null),
        assert(primaryVariant != null),
-       assert(primaryVariant2 != null),
        assert(secondary != null),
        assert(secondaryVariant != null),
        assert(surface != null),
@@ -49,7 +48,6 @@ class ColorScheme extends Diagnosticable {
   const ColorScheme.light({
     this.primary = const Color(0xff6200ee),
     this.primaryVariant = const Color(0xff3700b3),
-    this.primaryVariant2 = const Color(0xffbb86fc),
     this.secondary = const Color(0xff03dac6),
     this.secondaryVariant = const Color(0xff018786),
     this.surface = Colors.white,
@@ -63,7 +61,6 @@ class ColorScheme extends Diagnosticable {
     this.brightness = Brightness.light,
   }) : assert(primary != null),
        assert(primaryVariant != null),
-       assert(primaryVariant2 != null),
        assert(secondary != null),
        assert(secondaryVariant != null),
        assert(surface != null),
@@ -79,7 +76,6 @@ class ColorScheme extends Diagnosticable {
   const ColorScheme.dark({
     this.primary = const Color(0xffbb86fc),
     this.primaryVariant = const Color(0xff4b01d0),
-    this.primaryVariant2 = const Color(0xff4b01d0),
     this.secondary = const Color(0xff03dac6),
     this.secondaryVariant = const Color(0xff03dac6),
     this.surface = Colors.black,
@@ -93,7 +89,6 @@ class ColorScheme extends Diagnosticable {
     this.brightness = Brightness.dark,
   }) : assert(primary != null),
        assert(primaryVariant != null),
-       assert(primaryVariant2 != null),
        assert(secondary != null),
        assert(secondaryVariant != null),
        assert(surface != null),
@@ -127,7 +122,6 @@ class ColorScheme extends Diagnosticable {
     return ColorScheme(
       primary: primarySwatch,
       primaryVariant: primaryColorDark ?? (isDark ? Colors.black : primarySwatch[700]),
-      primaryVariant2: primaryColorLight ?? (isDark ? Colors.grey[500] : primarySwatch[100]),
       secondary: secondary,
       secondaryVariant: isDark ? Colors.tealAccent[700] : primarySwatch[700],
       surface: cardColor ?? (isDark ? Colors.grey[800] : Colors.white),
@@ -146,7 +140,6 @@ class ColorScheme extends Diagnosticable {
 
   final Color primary;
   final Color primaryVariant;
-  final Color primaryVariant2;
   final Color secondary;
   final Color secondaryVariant;
   final Color background;
@@ -162,7 +155,6 @@ class ColorScheme extends Diagnosticable {
   ColorScheme copyWith({
     Color primary,
     Color primaryVariant,
-    Color primaryVariant2,
     Color secondary,
     Color secondaryVariant,
     Color surface,
@@ -178,7 +170,6 @@ class ColorScheme extends Diagnosticable {
     return ColorScheme(
       primary: primary ?? this.primary,
       primaryVariant: primaryVariant ?? this.primaryVariant,
-      primaryVariant2: primaryVariant2 ?? this.primaryVariant2,
       secondary: secondary ?? this.secondary,
       secondaryVariant: secondaryVariant ?? this.secondaryVariant,
       surface: surface ?? this.surface,
@@ -197,7 +188,6 @@ class ColorScheme extends Diagnosticable {
     return ColorScheme(
       primary: Color.lerp(a.primary, b.primary, t),
       primaryVariant: Color.lerp(a.primaryVariant, b.primaryVariant, t),
-      primaryVariant2: Color.lerp(a.primaryVariant2, b.primaryVariant2, t),
       secondary: Color.lerp(a.secondary, b.secondary, t),
       secondaryVariant: Color.lerp(a.secondaryVariant, b.secondaryVariant, t),
       surface: Color.lerp(a.surface, b.surface, t),
@@ -221,7 +211,6 @@ class ColorScheme extends Diagnosticable {
     final ColorScheme otherScheme = other;
     return otherScheme.primary == primary
         && otherScheme.primaryVariant == primaryVariant
-        && otherScheme.primaryVariant2 == primaryVariant2
         && otherScheme.secondary == secondary
         && otherScheme.secondaryVariant == secondaryVariant
         && otherScheme.surface == surface
@@ -240,7 +229,6 @@ class ColorScheme extends Diagnosticable {
     return hashValues(
       primary,
       primaryVariant,
-      primaryVariant2,
       secondary,
       secondaryVariant,
       surface,
@@ -261,7 +249,6 @@ class ColorScheme extends Diagnosticable {
     const ColorScheme defaultScheme = ColorScheme.light();
     properties.add(DiagnosticsProperty<Color>('primary', primary, defaultValue: defaultScheme.primary));
     properties.add(DiagnosticsProperty<Color>('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
-    properties.add(DiagnosticsProperty<Color>('primaryVariant2', primaryVariant2, defaultValue: defaultScheme.primaryVariant2));
     properties.add(DiagnosticsProperty<Color>('secondary', secondary, defaultValue: defaultScheme.secondary));
     properties.add(DiagnosticsProperty<Color>('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
     properties.add(DiagnosticsProperty<Color>('surface', surface, defaultValue: defaultScheme.surface));
