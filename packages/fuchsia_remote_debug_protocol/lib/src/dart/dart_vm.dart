@@ -133,13 +133,12 @@ class DartVm {
     final List<IsolateRef> result = <IsolateRef>[];
     for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
       final String name = jsonIsolate['name'];
-      if (name.contains(pattern)) {
-        // `:main()` is included at the end of a flutter isolate, whereas the
-        // name of a dart Isolate is concluded as if the name were a function.
-        if (includeNonFlutterIsolates || name.contains(RegExp(r':main\(\)'))) {
-          _log.fine('Found Isolate matching "$pattern": "$name"');
-          result.add(IsolateRef._fromJson(jsonIsolate, this));
-        }
+      // `:main()` is included at the end of a flutter isolate, whereas the
+      // name of a dart Isolate is concluded as if the name were a function.
+      if (name.contains(pattern) &&
+          (includeNonFlutterIsolates || name.contains(RegExp(r':main\(\)')))) {
+        _log.fine('Found Isolate matching "$pattern": "$name"');
+        result.add(IsolateRef._fromJson(jsonIsolate, this));
       }
     }
     return result;
