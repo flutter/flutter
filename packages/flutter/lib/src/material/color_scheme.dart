@@ -103,7 +103,6 @@ class ColorScheme extends Diagnosticable {
 
   factory ColorScheme.fromSwatch({
     MaterialColor primarySwatch = Colors.blue,
-    Color primaryColorLight,
     Color primaryColorDark,
     Color accentColor,
     Color cardColor,

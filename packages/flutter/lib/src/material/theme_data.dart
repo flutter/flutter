@@ -172,7 +172,6 @@ class ThemeData extends Diagnosticable {
     // with the existing default ThemeData color values.
     colorScheme ??= ColorScheme.fromSwatch(
       primarySwatch: primarySwatch,
-      primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
       accentColor: accentColor,
       cardColor: cardColor,
