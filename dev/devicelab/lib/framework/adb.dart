@@ -100,18 +100,18 @@ abstract class Device {
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
+  factory AndroidDeviceDiscovery() {
+    return _instance ??= AndroidDeviceDiscovery._();
+  }
+
+  AndroidDeviceDiscovery._();
+
   // Parses information about a device. Example:
   //
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
   static final RegExp _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
 
   static AndroidDeviceDiscovery _instance;
-
-  factory AndroidDeviceDiscovery() {
-    return _instance ??= AndroidDeviceDiscovery._();
-  }
-
-  AndroidDeviceDiscovery._();
 
   AndroidDevice _workingDevice;
 
@@ -349,14 +349,13 @@ class AndroidDevice implements Device {
 }
 
 class IosDeviceDiscovery implements DeviceDiscovery {
-
-  static IosDeviceDiscovery _instance;
-
   factory IosDeviceDiscovery() {
     return _instance ??= IosDeviceDiscovery._();
   }
 
   IosDeviceDiscovery._();
+
+  static IosDeviceDiscovery _instance;
 
   IosDevice _workingDevice;
 

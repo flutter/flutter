@@ -281,8 +281,6 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 }
 
 class _Dependencies {
-  String target;
-  Set<String> dependencies;
   _Dependencies(String depfilePath) {
     final RegExp _separatorExpr = RegExp(r'([^\\]) ');
     final RegExp _escapeExpr = RegExp(r'\\(.)');
@@ -301,6 +299,9 @@ class _Dependencies {
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
+
+  String target;
+  Set<String> dependencies;
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.

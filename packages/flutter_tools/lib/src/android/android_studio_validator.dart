@@ -11,9 +11,9 @@ import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
-  final AndroidStudio _studio;
-
   AndroidStudioValidator(this._studio) : super('Android Studio');
+
+  final AndroidStudio _studio;
 
   static List<DoctorValidator> get allValidators {
     final List<DoctorValidator> validators = <DoctorValidator>[];

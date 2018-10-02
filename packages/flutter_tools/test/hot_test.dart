@@ -135,9 +135,9 @@ class MockDevice extends Mock implements Device {
 }
 
 class TestHotRunnerConfig extends HotRunnerConfig {
-  bool successfulSetup;
-
   TestHotRunnerConfig({@required this.successfulSetup});
+
+  bool successfulSetup;
 
   @override
   Future<bool> setupHotRestart() async {

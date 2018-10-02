@@ -231,11 +231,11 @@ class CachedArtifacts extends Artifacts {
 
 /// Manages the artifacts of a locally built engine.
 class LocalEngineArtifacts extends Artifacts {
+  LocalEngineArtifacts(this._engineSrcPath, this.engineOutPath, this._hostEngineOutPath);
+
   final String _engineSrcPath;
   final String engineOutPath; // TODO(goderbauer): This should be private.
   String _hostEngineOutPath;
-
-  LocalEngineArtifacts(this._engineSrcPath, this.engineOutPath, this._hostEngineOutPath);
 
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {

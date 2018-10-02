@@ -15,10 +15,10 @@ import '../globals.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
+  AnalyzeBase(this.argResults);
+
   /// The parsed argument results for execution.
   final ArgResults argResults;
-
-  AnalyzeBase(this.argResults);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<Null> analyze();

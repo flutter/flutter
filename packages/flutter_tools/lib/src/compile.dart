@@ -21,10 +21,10 @@ KernelCompiler get kernelCompiler => context[KernelCompiler];
 typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
 class CompilerOutput {
+  const CompilerOutput(this.outputFilename, this.errorCount);
+
   final String outputFilename;
   final int errorCount;
-
-  const CompilerOutput(this.outputFilename, this.errorCount);
 }
 
 class _StdoutHandler {
@@ -198,9 +198,9 @@ class KernelCompiler {
 
 /// Class that allows to serialize compilation requests to the compiler.
 abstract class _CompilationRequest {
-  Completer<CompilerOutput> completer;
-
   _CompilationRequest(this.completer);
+
+  Completer<CompilerOutput> completer;
 
   Future<CompilerOutput> _run(ResidentCompiler compiler);
 

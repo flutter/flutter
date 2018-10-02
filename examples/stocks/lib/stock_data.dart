@@ -16,12 +16,6 @@ import 'package:http/http.dart' as http;
 final math.Random _rng = math.Random();
 
 class Stock {
-  String symbol;
-  String name;
-  double lastSale;
-  String marketCap;
-  double percentChange;
-
   Stock(this.symbol, this.name, this.lastSale, this.marketCap, this.percentChange);
 
   Stock.fromFields(List<String> fields) {
@@ -36,6 +30,12 @@ class Stock {
     marketCap = fields[4];
     percentChange = (_rng.nextDouble() * 20) - 10;
   }
+
+  String symbol;
+  String name;
+  double lastSale;
+  String marketCap;
+  double percentChange;
 }
 
 class StockData extends ChangeNotifier {

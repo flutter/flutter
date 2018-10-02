@@ -792,14 +792,14 @@ void main() {
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-  ImageStreamCompleter _streamCompleter;
-  ImageConfiguration _lastResolvedConfiguration;
-
   TestImageProvider({ImageStreamCompleter streamCompleter}) {
     _streamCompleter = streamCompleter
       ?? OneFrameImageStreamCompleter(_completer.future);
   }
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+  ImageStreamCompleter _streamCompleter;
+  ImageConfiguration _lastResolvedConfiguration;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {

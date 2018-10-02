@@ -97,28 +97,6 @@ enum Brightness {
 ///
 /// Used by [SystemChrome.setSystemUIOverlayStyle].
 class SystemUiOverlayStyle {
-  /// System overlays should be drawn with a light color. Intended for
-  /// applications with a dark background.
-  static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
-    systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-  );
-
-  /// System overlays should be drawn with a dark color. Intended for
-  /// applications with a light background.
-  static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
-    systemNavigationBarColor: Color(0xFF000000),
-    systemNavigationBarDividerColor: null,
-    statusBarColor: null,
-    systemNavigationBarIconBrightness: Brightness.light,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  );
-
   /// Creates a new [SystemUiOverlayStyle].
   const SystemUiOverlayStyle({
     this.systemNavigationBarColor,
@@ -158,6 +136,28 @@ class SystemUiOverlayStyle {
   ///
   /// Only honored in Android version M and greater.
   final Brightness statusBarIconBrightness;
+
+  /// System overlays should be drawn with a light color. Intended for
+  /// applications with a dark background.
+  static const SystemUiOverlayStyle light = SystemUiOverlayStyle(
+    systemNavigationBarColor: Color(0xFF000000),
+    systemNavigationBarDividerColor: null,
+    statusBarColor: null,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+  );
+
+  /// System overlays should be drawn with a dark color. Intended for
+  /// applications with a light background.
+  static const SystemUiOverlayStyle dark = SystemUiOverlayStyle(
+    systemNavigationBarColor: Color(0xFF000000),
+    systemNavigationBarDividerColor: null,
+    statusBarColor: null,
+    systemNavigationBarIconBrightness: Brightness.light,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+  );
 
   /// Convert this event to a map for serialization.
   Map<String, dynamic> _toMap() {
