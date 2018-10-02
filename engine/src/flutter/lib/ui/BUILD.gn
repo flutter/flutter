@@ -23,8 +23,6 @@ source_set("ui") {
     "painting/canvas.h",
     "painting/codec.cc",
     "painting/codec.h",
-    "painting/engine_layer.h",
-    "painting/engine_layer.cc",
     "painting/frame_info.cc",
     "painting/frame_info.h",
     "painting/gradient.cc",

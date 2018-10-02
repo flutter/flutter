@@ -10,7 +10,7 @@ ContainerLayer::ContainerLayer() {}
 
 ContainerLayer::~ContainerLayer() = default;
 
-void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
+void ContainerLayer::Add(std::unique_ptr<Layer> layer) {
   layer->set_parent(this);
   layers_.push_back(std::move(layer));
 }

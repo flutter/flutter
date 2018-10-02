@@ -24,7 +24,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
 
  public:
   ~Scene() override;
-  static fml::RefPtr<Scene> create(std::shared_ptr<flow::Layer> rootLayer,
+  static fml::RefPtr<Scene> create(std::unique_ptr<flow::Layer> rootLayer,
                                    uint32_t rasterizerTracingThreshold,
                                    bool checkerboardRasterCacheImages,
                                    bool checkerboardOffscreenLayers);
@@ -40,7 +40,7 @@ class Scene : public RefCountedDartWrappable<Scene> {
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  explicit Scene(std::shared_ptr<flow::Layer> rootLayer,
+  explicit Scene(std::unique_ptr<flow::Layer> rootLayer,
                  uint32_t rasterizerTracingThreshold,
                  bool checkerboardRasterCacheImages,
                  bool checkerboardOffscreenLayers);
