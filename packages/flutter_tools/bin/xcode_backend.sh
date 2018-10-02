@@ -146,7 +146,7 @@ BuildApp() {
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
     StreamOutput " ├─Generating dSYM file..."
-    # Placing dSYMs in a folder ending with ".noindex" so xcode cannot find them
+    # Placing dSYMs in a folder ending with ".noindex" so Xcode cannot find them
     # via Spotlight and get confused when uploading an App to the App Store.
     mkdir "${build_dir}/dSYMs.noindex"
     RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
